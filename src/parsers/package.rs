@@ -12,9 +12,10 @@ pub fn parse_package(p:String)->Result<GlobalPackage>{
 
     let mut text=String::new();
     File::open(&p)?.read_to_string(&mut text)?;
-    let pkg=toml::from_str(&text)?;
+    let pkg_res=toml::from_str(&text);
+    if pkg_res.is_err() {
+        return Err(anyhow!("Error:Can't validate package.toml at {} : {}",p,pkg_res.err().unwrap()));
+    }
 
-    //TODO:校验 schema 
-
-    Ok(pkg)
+    Ok(pkg_res.unwrap())
 }
