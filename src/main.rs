@@ -1,3 +1,8 @@
+mod parsers;
+mod types;
+use parsers::{parse_package};
+
 fn main() {
-    println!("Hello, world!");
+    let pkg=parse_package(String::from("./examples/VSCode/package.toml"));
+    println!("{:?}",pkg);
 }

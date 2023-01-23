@@ -4,8 +4,8 @@ nep = "0.1"
 [package]
 # 包名
 name = "VSCode"
-# 类型 仅可取 "Software"
-type = "Software"
+# 包模板 仅可取 "Software"
+template = "Software"
 # 版本号
 version = "1.46.0.0"
 # 打包者/作者

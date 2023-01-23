@@ -1,16 +1,16 @@
-[setup_flow.create_shortcut]
+[create_shortcut]
 name = "Create shortcut"
 type = "Link"
 source_file = "./VSCode/VSCode.exe"
 target_name = "Visual Studio Code"
 
-[setup_flow.add_path]
+[add_path]
 name = "Add PATH"
 type = "Path"
 record = "./VSCode"
 operation = "Add"
 
-[setup_flow.log_status]
+[log_status]
 name = "Log status"
 type = "Log"
 level = "Info"
