@@ -1,9 +1,9 @@
+mod executor;
 mod parsers;
 mod types;
-mod executor;
 mod utils;
 // use parsers::{parse_package,parse_workflow};
-use executor::{execute};
+use executor::execute;
 use types::StepExecute;
 
 fn main() {
@@ -13,9 +13,9 @@ fn main() {
     // let flows=parse_workflow(String::from("./examples/VSCode/workflows/setup.toml")).unwrap();
     // println!("{:?}",flows);
 
-    let res=execute(StepExecute{
-        command:String::from("echo hello world"),
-        pwd:None
+    let res = execute(StepExecute {
+        command: String::from("echo hello world"),
+        pwd: None,
     });
-    println!("{:?}",res)
+    println!("{:?}", res)
 }

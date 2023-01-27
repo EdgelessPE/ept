@@ -1,12 +1,6 @@
 mod package;
 mod workflow;
-pub use self::package::{GlobalPackage,Package,Software};
+pub use self::package::{GlobalPackage, Package, Software};
 pub use self::workflow::{
-    WorkflowHeader,
-    WorkflowNode,
-    Step,
-    StepLink,
-    StepExecute,
-    StepPath,
-    StepLog,
+    Step, StepExecute, StepLink, StepLog, StepPath, WorkflowHeader, WorkflowNode,
 };
