@@ -45,7 +45,7 @@ pub fn execute(step:StepExecute)->Result<i32>{
             if val==0 {
                 log(format!("Info(Execute):Command '{}' output : \n{}",&step.command,&read_console(output.stdout)));
             }else{
-                log(format!("Info(Execute):Command '{}' error output : \n{}",&step.command,&read_console(output.stderr)));
+                log(format!("Error(Execute):Command '{}' failed, output : \n{}",&step.command,&read_console(output.stderr)));
             }
                 Ok(val)
         },
