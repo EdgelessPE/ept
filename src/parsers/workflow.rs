@@ -39,7 +39,11 @@ pub fn parse_workflow(p:String)->Result<Vec<WorkflowNode>> {
     let text_ready=cmd_converter(text)?;
 
     // 转换文本为平工作流
-    let plain_flow:Value=toml::from_str(&text_ready)?;
+    let plain_flow_res=toml::from_str(&text_ready);
+    if plain_flow_res.is_err() {
+        return Err(anyhow!("Error:Can't parse '{}' as legal toml file : {}",&p,plain_flow_res.unwrap_err()));
+    }
+    let plain_flow:Value=plain_flow_res.unwrap();
 
     // 通过正则表达式获取工作流顺序
     let reg=Regex::new(r"\s*\[(\w+)\]")?;
