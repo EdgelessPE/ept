@@ -91,10 +91,12 @@ pub fn parse_workflow(p:String)->Result<Vec<WorkflowNode>> {
             return Err(anyhow!("Error:Illegal workflow node at key '{}' : {}",key,header_res.unwrap_err()));
         }
 
-        // 根据步骤名称解析步骤体
-        let body;
+        // 读取步骤名称
         let step_opt=val["step"].as_str();
         let step=step_opt.unwrap();
+
+        // 根据步骤名称解析步骤体
+        let body;
         match step {
             "Link"=>{
                 body=Step::StepLink(toml_try_into(kv)?);
