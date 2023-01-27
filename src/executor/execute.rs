@@ -55,3 +55,21 @@ pub fn execute(step:StepExecute)->Result<i32>{
     }
 
 }
+
+#[test]
+fn test_execute(){
+    execute(StepExecute{
+        command:"echo hello nep !".to_string(),
+        pwd:None
+    }).unwrap();
+    execute(StepExecute{
+        command:"ls".to_string(),
+        pwd:Some("./src".to_string())
+    }).unwrap();
+
+    let res=execute(StepExecute{
+        command:"exit 2".to_string(),
+        pwd:None
+    }).unwrap();
+    assert_eq!(res,2);
+}
