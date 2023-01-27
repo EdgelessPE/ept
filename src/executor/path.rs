@@ -53,13 +53,16 @@ pub fn step_path(step:StepPath)->Result<i32>{
         }
     }
 
-    // 写回注册表
+    // 生成新字符串
     let new_arr:Vec<&str>=origin_arr
     .into_iter()
     .filter(|x|{x.to_owned()!=""})
     .collect();
     let new_text=new_arr.join(";");
     log(format!("Debug(Path):Save register with '{}'",&new_text));
+
+    // 写回注册表
+    let (table,_)=hkcu.create_subkey("Environment")?;
     let w_res=table.set_value("Path", &new_text);
     if w_res.is_err() {
         return Err(anyhow!("Error(Path):Can't write to register : {}",w_res.unwrap_err().to_string()));
