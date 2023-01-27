@@ -4,5 +4,9 @@ pub use self::package::{GlobalPackage,Package,Software};
 pub use self::workflow::{
     WorkflowHeader,
     WorkflowNode,
-    Step
+    Step,
+    StepLink,
+    StepExecute,
+    StepPath,
+    StepLog,
 };
