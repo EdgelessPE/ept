@@ -2,10 +2,7 @@ use crate::{types::StepLog, utils::log};
 use anyhow::Result;
 
 pub fn step_log(step: StepLog) -> Result<i32> {
-    let mut msg = String::from(&step.level);
-    msg += ":";
-    msg += &step.msg;
-    log(msg);
+    log(format!("{}(Log):{}",&step.level,&step.msg));
     Ok(0)
 }
 
