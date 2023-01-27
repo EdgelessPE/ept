@@ -59,7 +59,7 @@ pub fn execute(step:StepExecute)->Result<i32>{
 #[test]
 fn test_execute(){
     execute(StepExecute{
-        command:"echo hello nep !".to_string(),
+        command:"echo hello nep ! && echo 你好，尼普！".to_string(),
         pwd:None
     }).unwrap();
     execute(StepExecute{
