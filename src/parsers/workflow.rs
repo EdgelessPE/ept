@@ -6,7 +6,7 @@ use regex::Regex;
 
 use crate::types::{Step, WorkflowNode};
 
-pub fn cmd_converter(origin:String)->Result<String> {
+fn cmd_converter(origin:String)->Result<String> {
     // 需要增加 c_ 前缀的字段
     let list=["if"];
 
@@ -68,12 +68,8 @@ pub fn parse_workflow(p:String)->Result<Vec<WorkflowNode>> {
                 parsed_opt=Some(Step::StepLog(val.try_into()?))
             },
             _=>{
-                return Err(anyhow!("Error:Illegal step name : {}",&step));
+                return Err(anyhow!("Error:Illegal step name '{}' at {}",&step,&val["name"].as_str().unwrap_or("unknown step")));
             }
-        }
-        
-        if parsed_opt.is_none() {
-            return Err(anyhow!("Error:Fatal:Can't parse step"));
         }
 
         res.push(WorkflowNode{
