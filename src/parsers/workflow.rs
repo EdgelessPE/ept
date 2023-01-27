@@ -39,7 +39,7 @@ pub fn parse_workflow(p:String)->Result<Vec<WorkflowNode>> {
     // 通过正则表达式获取工作流顺序
     let reg=Regex::new(r"\s*\[(\w+)\]")?;
     let mut values:Vec<Value>=Vec::new();
-    for cap in reg.captures_iter(&text_ready) {
+    for cap in reg.captures_iter(&plain_flow.to_string()) {
         let key=&cap[1];
         values.push(plain_flow[key].to_owned());
     }
