@@ -6,6 +6,11 @@ use regex::Regex;
 
 use crate::types::{Step, WorkflowNode};
 
+struct KV {
+    key:String,
+    value:Value
+}
+
 fn cmd_converter(origin:String)->Result<String> {
     // 需要增加 c_ 前缀的字段
     let list=["if"];
@@ -38,43 +43,55 @@ pub fn parse_workflow(p:String)->Result<Vec<WorkflowNode>> {
 
     // 通过正则表达式获取工作流顺序
     let reg=Regex::new(r"\s*\[(\w+)\]")?;
-    let mut values:Vec<Value>=Vec::new();
+    let mut kvs:Vec<KV>=Vec::new();
     for cap in reg.captures_iter(&plain_flow.to_string()) {
         let key=&cap[1];
-        values.push(plain_flow[key].to_owned());
+        let value=plain_flow[key].to_owned();
+        kvs.push(KV{
+            key:key.to_string(),
+            value
+        })
     }
     // println!("{:?}",values);
 
     // 解析工作流步骤，生成已解析数组
     let mut res=Vec::new();
-    for val in values {
+    for kv_node in kvs {
+        // 结构键值对
+        let key=kv_node.key;
+        let val=kv_node.value;
+
         // 解析步骤头
-        let header=val.to_owned().try_into()?;
+        let header_res=val.to_owned().try_into();
+        if header_res.is_err() {
+            return Err(anyhow!("Error:Illegal workflow node at key '{}' : {}",key,header_res.unwrap_err()));
+        }
+
         // 根据步骤名称解析步骤体
-        let parsed_opt:Option<Step>;
+        let body_opt:Option<Step>;
         let step_opt=val["step"].as_str();
         let step=step_opt.unwrap();
         match step {
             "Link"=>{
-                parsed_opt=Some(Step::StepLink(val.try_into()?))
+                body_opt=Some(Step::StepLink(val.try_into()?))
             },
             "Execute"=>{
-                parsed_opt=Some(Step::StepExecute(val.try_into()?))
+                body_opt=Some(Step::StepExecute(val.try_into()?))
             },
             "Path"=>{
-                parsed_opt=Some(Step::StepPath(val.try_into()?))
+                body_opt=Some(Step::StepPath(val.try_into()?))
             },
             "Log"=>{
-                parsed_opt=Some(Step::StepLog(val.try_into()?))
+                body_opt=Some(Step::StepLog(val.try_into()?))
             },
             _=>{
-                return Err(anyhow!("Error:Illegal step name '{}' at {}",&step,&val["name"].as_str().unwrap_or("unknown step")));
+                return Err(anyhow!("Error:Illegal step name '{}' at ‘{}’({})",&step,&val["name"].as_str().unwrap_or("unknown step"),&key));
             }
         }
 
         res.push(WorkflowNode{
-            header,
-            body:parsed_opt.unwrap()
+            header:header_res.unwrap(),
+            body:body_opt.unwrap()
         })
     }
 
