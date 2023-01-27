@@ -1,11 +1,13 @@
 use std::{fs::File, io::Read};
 use std::path::Path;
 use anyhow::{anyhow,Result};
+use serde::de;
 use toml::{Value};
 use regex::Regex;
 
 use crate::types::{Step, WorkflowNode};
 
+#[derive(Clone,Debug)]
 struct KV {
     key:String,
     value:Value
@@ -24,6 +26,23 @@ fn cmd_converter(origin:String)->Result<String> {
     }
     Ok(text)
 }
+
+fn toml_try_into<'de, T>(kv:KV) -> Result<T>
+where
+    T: de::Deserialize<'de>,
+    {
+        let val=kv.value;
+        let res=val.to_owned().try_into();
+        if res.is_err() {
+            let key=kv.key;
+            let name_brw=val["name"].to_owned();
+            let name=name_brw.as_str().unwrap_or("unknown name");
+            let step=val["step"].as_str().unwrap_or("unknown step");
+            return Err(anyhow!("Error:Can't parse workflow node '{}'({}) into step '{}' : {}",&name,&key,&step,&res.err().unwrap().to_string()));
+        }else{
+            Ok(res.unwrap())
+        }
+    }
 
 pub fn parse_workflow(p:String)->Result<Vec<WorkflowNode>> {
     let workflow_path=Path::new(&p);
@@ -62,6 +81,7 @@ pub fn parse_workflow(p:String)->Result<Vec<WorkflowNode>> {
     let mut res=Vec::new();
     for kv_node in kvs {
         // 结构键值对
+        let kv=kv_node.clone();
         let key=kv_node.key;
         let val=kv_node.value;
 
@@ -77,16 +97,16 @@ pub fn parse_workflow(p:String)->Result<Vec<WorkflowNode>> {
         let step=step_opt.unwrap();
         match step {
             "Link"=>{
-                body_opt=Some(Step::StepLink(val.try_into()?))
+                body_opt=Some(Step::StepLink(toml_try_into(kv)?))
             },
             "Execute"=>{
-                body_opt=Some(Step::StepExecute(val.try_into()?))
+                body_opt=Some(Step::StepExecute(toml_try_into(kv)?))
             },
             "Path"=>{
-                body_opt=Some(Step::StepPath(val.try_into()?))
+                body_opt=Some(Step::StepPath(toml_try_into(kv)?))
             },
             "Log"=>{
-                body_opt=Some(Step::StepLog(val.try_into()?))
+                body_opt=Some(Step::StepLog(toml_try_into(kv)?))
             },
             _=>{
                 return Err(anyhow!("Error:Illegal step name '{}' at ‘{}’({})",&step,&val["name"].as_str().unwrap_or("unknown step"),&key));
