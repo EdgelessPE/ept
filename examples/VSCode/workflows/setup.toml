@@ -1,17 +1,18 @@
 [create_shortcut]
 name = "Create shortcut"
-type = "Link"
+step = "Link"
 source_file = "./VSCode/VSCode.exe"
 target_name = "Visual Studio Code"
 
 [add_path]
 name = "Add PATH"
-type = "Path"
+step = "Path"
 record = "./VSCode"
 operation = "Add"
 
 [log_status]
 name = "Log status"
-type = "Log"
+step = "Log"
+if = "${ExitCode}==0"
 level = "Info"
 msg = "VSCode installed successfully"
