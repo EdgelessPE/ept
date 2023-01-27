@@ -96,24 +96,23 @@ pub fn parse_workflow(p:String)->Result<Vec<WorkflowNode>> {
         let step=step_opt.unwrap();
 
         // 根据步骤名称解析步骤体
-        let body;
-        match step {
+        let body=match step {
             "Link"=>{
-                body=Step::StepLink(toml_try_into(kv)?);
+                Step::StepLink(toml_try_into(kv)?)
             },
             "Execute"=>{
-                body=Step::StepExecute(toml_try_into(kv)?);
+                Step::StepExecute(toml_try_into(kv)?)
             },
             "Path"=>{
-                body=Step::StepPath(toml_try_into(kv)?);
+                Step::StepPath(toml_try_into(kv)?)
             },
             "Log"=>{
-                body=Step::StepLog(toml_try_into(kv)?);
+                Step::StepLog(toml_try_into(kv)?)
             },
             _=>{
                 return Err(anyhow!("Error:Illegal step name '{}' at ‘{}’({})",&step,&val["name"].as_str().unwrap_or("unknown step"),&key));
             }
-        }
+        };
 
         res.push(WorkflowNode{
             header:header_res.unwrap(),
