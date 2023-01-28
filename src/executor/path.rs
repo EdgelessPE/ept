@@ -1,6 +1,5 @@
-use crate::types::{StepPath,StepLink};
+use crate::types::{StepPath};
 use crate::utils::log;
-use super::link;
 use winreg::{enums::*,RegKey};
 use anyhow::{anyhow,Result};
 use std::path::Path;
