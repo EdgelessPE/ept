@@ -26,8 +26,7 @@ pub fn step_path(step:StepPath)->Result<i32>{
     let is_exist=origin_arr.contains(&step.record.as_str());
     
     // 增删 Path 变量
-    let n=format!("\"{}\"",&step.record);
-    let ns=n.as_str();
+    let ns=&step.record.as_str();
     match step.operation.as_str() {
         "Add"=>{
             if is_exist {
