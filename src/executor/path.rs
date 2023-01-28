@@ -5,7 +5,7 @@ use winreg::{enums::*,RegKey};
 use anyhow::{anyhow,Result};
 use std::path::Path;
 use std::env::current_dir;
-use std::fs::{create_dir};
+use std::fs::{create_dir,remove_file};
 use mslnk::ShellLink;
 
 // 配置系统 PATH 变量，但是需要注销并重新登录以生效
@@ -37,7 +37,7 @@ fn set_system_path(step:StepPath)->Result<bool>{
     match step.operation.as_str() {
         "Add"=>{
             if is_exist {
-                log(format!("Warning(Path):Record '{}' already existed in PATH",&step.record));
+                // log(format!("Warning(Path):Record '{}' already existed in PATH",&step.record));
                 return Ok(false);
             }else{
                 origin_arr.push(ns);
@@ -103,20 +103,35 @@ pub fn step_path(step:StepPath)->Result<i32>{
         return Err(anyhow!("Error(Path):'{}' is not a file",&step.record));
     }
     let stem=f_path.file_stem().unwrap().to_string_lossy().to_string();
+    let target = format!("{}/{}.lnk", &bin_abs, &stem);
+
+    // 处理删除快捷方式
+    if &step.operation=="Remove" {
+        let target_path=Path::new(&target);
+        if !target_path.exists() {
+            log(format!("Warning(Path):'{}' not exist, skip removal",&target));
+            return Ok(0);
+        }else{
+            let rm_res=remove_file(target_path);
+            if rm_res.is_err() {
+                return Err(anyhow!("Error(Path):Can't remove '{}' : {}",&target,rm_res.unwrap_err().to_string()));
+            }
+            return Ok(0);
+        }
+    }
     
     // 生成快捷方式
     let sl_res = ShellLink::new(&step.record);
     if sl_res.is_err() {
         return Err(anyhow!(
-            "Error(Link):Can't find source file '{}'",
+            "Error(Path):Can't find source file '{}'",
             &step.record
         ));
     }
-    let target = format!("{}/{}.lnk", &bin_abs, &stem);
     let c_res = sl_res.unwrap().create_lnk(&target);
     if c_res.is_err() {
         return Err(anyhow!(
-            "Error(Link):Can't create link {}->{} : {}",
+            "Error(Path):Can't create link {}->{} : {}",
             &step.record,
             &target,
             c_res.unwrap_err().to_string()
