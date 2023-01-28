@@ -1,9 +1,16 @@
-use crate::types::{StepPath};
+use crate::types::{StepPath,StepLink};
 use crate::utils::log;
+use super::link;
 use winreg::{enums::*,RegKey};
 use anyhow::{anyhow,Result};
+use std::path::Path;
+use std::env::current_dir;
+use std::fs::{create_dir};
+use mslnk::ShellLink;
 
-pub fn step_path(step:StepPath)->Result<i32>{
+// 配置系统 PATH 变量，但是需要注销并重新登录以生效
+// 返回的 bool 表示是否执行了操作
+fn set_system_path(step:StepPath)->Result<bool>{
     // 打开 HKEY_CURRENT_USER\Environment
     let hkcu=RegKey::predef(HKEY_CURRENT_USER);
     let table_res=hkcu.open_subkey("Environment");
@@ -31,7 +38,7 @@ pub fn step_path(step:StepPath)->Result<i32>{
         "Add"=>{
             if is_exist {
                 log(format!("Warning(Path):Record '{}' already existed in PATH",&step.record));
-                return Ok(0);
+                return Ok(false);
             }else{
                 origin_arr.push(ns);
             }
@@ -44,7 +51,7 @@ pub fn step_path(step:StepPath)->Result<i32>{
                 .collect();
             }else{
                 log(format!("Warning(Path):Record '{}' not exist in PATH",&step.record));
-                return Ok(0);
+                return Ok(false);
             }
         },
         _=>{
@@ -67,13 +74,61 @@ pub fn step_path(step:StepPath)->Result<i32>{
         return Err(anyhow!("Error(Path):Can't write to register : {}",w_res.unwrap_err().to_string()));
     }
 
+    Ok(true)
+}
+
+// 实现：在当前目录创建 bin 文件夹并放置快捷方式，随后将 bin 添加到系统 PATH 变量
+pub fn step_path(step:StepPath)->Result<i32>{
+    // 解析 bin 绝对路径
+    let cur_dir=current_dir()?.to_string_lossy().to_string();
+    let bin_abs=cur_dir+"\\bin";
+    let bin_path=Path::new(&bin_abs);
+
+    // 创建 bin 目录
+    if !bin_path.exists() {
+        create_dir(bin_path.to_owned())?;
+    }
+
+    // 添加系统 PATH 变量
+    let add_res=set_system_path(StepPath { record: bin_abs.clone(), operation: "Add".to_string() });
+    if add_res.is_err() {
+        log(format!("Warning(Path):Failed to add system PATH for '{}', manually add later to enable bin function of nep",&bin_abs));
+    }else if add_res.unwrap() {
+        log(format!("Warning(Path):Added system PATH for '{}', restart to enable bin function of nep",&bin_abs));
+    }
+
+    // 提取文件茎
+    let f_path=Path::new(&step.record);
+    if f_path.is_dir() {
+        return Err(anyhow!("Error(Path):'{}' is not a file",&step.record));
+    }
+    let stem=f_path.file_stem().unwrap().to_string_lossy().to_string();
+    
+    // 生成快捷方式
+    let sl_res = ShellLink::new(&step.record);
+    if sl_res.is_err() {
+        return Err(anyhow!(
+            "Error(Link):Can't find source file '{}'",
+            &step.record
+        ));
+    }
+    let target = format!("{}/{}.lnk", &bin_abs, &stem);
+    let c_res = sl_res.unwrap().create_lnk(&target);
+    if c_res.is_err() {
+        return Err(anyhow!(
+            "Error(Link):Can't create link {}->{} : {}",
+            &step.record,
+            &target,
+            c_res.unwrap_err().to_string()
+        ));
+    }
     Ok(0)
 }
 
 #[test]
 fn test_path(){
     step_path(StepPath{
-        record:String::from(r"D:\CnoRPS\2345Pic"),
+        record:String::from(r"D:\CnoRPS\2345Pic\2345Pic.exe"),
         operation:"Add".to_string()
     }).unwrap();
 }
