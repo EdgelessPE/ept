@@ -7,7 +7,7 @@ target_name = "Visual Studio Code"
 [add_path]
 name = "Add PATH"
 step = "Path"
-record = "./VSCode"
+record = "./VSCode/VSCode.exe"
 operation = "Add"
 
 [log_status]

@@ -96,7 +96,7 @@ pub fn step_path(step:StepPath)->Result<i32>{
         log(format!("Warning(Path):Added system PATH for '{}', restart to enable bin function of nep",&bin_abs));
     }
 
-    // 提取文件茎
+    // 生成快捷方式绝对路径
     let f_path=Path::new(&step.record);
     if f_path.is_dir() {
         return Err(anyhow!("Error(Path):'{}' is not a file",&step.record));
