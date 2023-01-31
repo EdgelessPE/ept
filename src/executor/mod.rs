@@ -11,86 +11,65 @@ use anyhow::{Result,anyhow};
 use eval::{Expr, to_value};
 use std::{path::Path};
 
-use crate::{types::Step, utils::log};
-#[macro_use]
-extern crate lazy_static;
+use crate::{types::{Step, WorkflowNode}, utils::log};
 
 // 配置部分内置变量的值
 lazy_static! {
-    static ref SYSTEM_DRIVE="C:";
-    static ref DEFAULT_LOCATION="./apps";
+    static ref SYSTEM_DRIVE:String="C:".to_string();
+    static ref DEFAULT_LOCATION:String="./apps".to_string();
 }
 
 // 执行条件以判断是否成立
 fn condition_eval(condition:String,exit_code:i32)->Result<bool>{
-    // 解释变量
-    let interpreted=condition_val_interpreter(condition,exit_code)?;
     // 执行 eval
-    let eval_res=Expr::new(&interpreted)
+    let eval_res=Expr::new(&condition)
+    .value("${ExitCode}", exit_code)
+    .value("${SystemDrive}", eval::Value::String(SYSTEM_DRIVE.to_string()))
+    .value("${DefaultLocation}", DEFAULT_LOCATION.to_string())
     .function("Exist", |val|{
         // 参数校验
-        if val.len()!=1 {
-            return Err(anyhow!("Error:Internal function 'Exist' only accept 1 arg"));
+        if val.len()>1 {
+            return Err(eval::Error::ArgumentsGreater(1));
+        }
+        if val.len()==0 {
+            return Err(eval::Error::ArgumentsLess(1));
         }
         let str_opt=val[0].as_str();
         if str_opt.is_none(){
-            return Err(anyhow!("Error:Internal function 'Exist' should accept a string"));
+            return Err(eval::Error::Custom("Error:Internal function 'Exist' should accept a string".to_string()));
         }
         let p=Path::new(str_opt.unwrap());
         
-        Ok(p.exists())
+        Ok(eval::Value::Bool(p.exists()))
     })
     .function("IsDirectory", |val|{
         // 参数校验
-        if val.len()!=1 {
-            return Err(anyhow!("Error:Internal function 'IsDirectory' only accept 1 arg"));
+        if val.len()>1 {
+            return Err(eval::Error::ArgumentsGreater(1));
+        }
+        if val.len()==0 {
+            return Err(eval::Error::ArgumentsLess(1));
         }
         let str_opt=val[0].as_str();
         if str_opt.is_none(){
-            return Err(anyhow!("Error:Internal function 'IsDirectory' should accept a string"));
+            return Err(eval::Error::Custom("Error:Internal function 'IsDirectory' should accept a string".to_string()));
         }
         let p=Path::new(str_opt.unwrap());
         
-        Ok(p.is_dir())
+        Ok(eval::Value::Bool(p.is_dir()))
     })
     .exec();
 
     // 检查执行结果
     if eval_res.is_err() {
-        return Err(anyhow!("Error:Can't eval statement '{}' : {}",&interpreted,eval_res.unwrap_err()));
+        return Err(anyhow!("Error:Can't eval statement '{}' : {}",&condition,eval_res.unwrap_err()));
     }
     let result=eval_res.unwrap().as_bool();
     if result.is_none() {
-        return Err(anyhow!("Error:Can't eval statement '{}' into bool result",&interpreted));
+        return Err(anyhow!("Error:Can't eval statement '{}' into bool result",&condition));
     }
 
     Ok(result.unwrap())
-}
-
-// 内置变量解释器
-fn condition_val_interpreter(condition:String,exit_code:i32)->Result<String>{
-    let replace_arr=vec![
-        {
-            key:"ExitCode",
-            value:exit_code.to_string(),
-        },
-        {
-            key:"SystemDrive",
-            value:SYSTEM_DRIVE,
-        },
-        {
-            key:"DefaultLocation",
-            value:DEFAULT_LOCATION
-        }
-    ];
-
-    let mut text=condition;
-    for node in replace_arr {
-        let find_with=format!("$\{{}\}",node.key);
-        text=text.replace(&find_with, &format!("\"{}\"",node.value));
-    }
-
-    Ok(text)
 }
 
 // 执行工作流
@@ -121,7 +100,7 @@ pub fn workflow_executor(flow:Vec<WorkflowNode>)->Result<i32>{
         };
         // 处理执行结果
         if exec_res.is_err() {
-            log(format!("Warning:Workflow step {} failed to execute : {}, check your workflow syntax again",&step_node.header.name,exec_res.unwrap_err()));
+            log(format!("Warning:Workflow step {} failed to execute : {}, check your workflow syntax again",&flow_node.header.name,exec_res.unwrap_err()));
             exit_code=1;
         }else{
             exit_code=exec_res.unwrap();
@@ -132,7 +111,22 @@ pub fn workflow_executor(flow:Vec<WorkflowNode>)->Result<i32>{
 }
 
 #[test]
-fn test_condition_val_interpreter(){
-    assert_eq!(&condition_val_interpreter("${ExitCode}==514".to_string(), 114),"114==514");
-    assert_eq!(&condition_val_interpreter("${SystemDrive}==$${DefaultLocation}".to_string(), 0),"\"C:\"==$\"./apps\"");
+fn test_condition_eval(){
+    let r1=condition_eval(String::from("${ExitCode}==114"), 114).unwrap();
+    assert!(r1);
+
+    let r2=condition_eval(String::from("${ExitCode}==514"), 114).unwrap();
+    assert_eq!(r2,false);
+
+    let r3=condition_eval(String::from("${SystemDrive}==\"C:\""), 0).unwrap();
+    assert!(r3);
+
+    let r4=condition_eval(String::from("${DefaultLocation}==\"./apps\""), 0).unwrap();
+    assert!(r4);
+
+    let r5=condition_eval(String::from("Exist(\"./src/main.rs\")==IsDirectory(\"./bin\")"), 0).unwrap();
+    assert!(r5);
+
+    let r6=condition_eval(String::from("Exist(\"./src/main.ts\")"), 0).unwrap();
+    assert_eq!(r6,false);
 }

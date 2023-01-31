@@ -2,6 +2,10 @@ mod executor;
 mod parsers;
 mod types;
 mod utils;
+
+#[macro_use]
+extern crate lazy_static;
+
 // use parsers::{parse_package,parse_workflow};
 use executor::step_execute;
 use types::StepExecute;
