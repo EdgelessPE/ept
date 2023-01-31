@@ -14,7 +14,7 @@ fn read_console(v: Vec<u8>) -> String {
     }
 }
 
-pub fn execute(step: StepExecute) -> Result<i32> {
+pub fn step_execute(step: StepExecute) -> Result<i32> {
     // 配置终端
     let launch_terminal = if cfg!(target_os = "windows") {
         ("cmd", "/c")
@@ -70,18 +70,18 @@ pub fn execute(step: StepExecute) -> Result<i32> {
 
 #[test]
 fn test_execute() {
-    execute(StepExecute {
+    step_execute(StepExecute {
         command: "echo hello nep ! && echo 你好，尼普！".to_string(),
         pwd: None,
     })
     .unwrap();
-    execute(StepExecute {
+    step_execute(StepExecute {
         command: "ls".to_string(),
         pwd: Some("./src".to_string()),
     })
     .unwrap();
 
-    let res = execute(StepExecute {
+    let res = step_execute(StepExecute {
         command: "exit 2".to_string(),
         pwd: None,
     })
