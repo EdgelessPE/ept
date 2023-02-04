@@ -2,14 +2,15 @@ use crate::types::{StepPath};
 use crate::utils::log;
 use winreg::{enums::*,RegKey};
 use anyhow::{anyhow,Result};
+use std::io::Write;
 use std::path::Path;
 use std::env::current_dir;
-use std::fs::{create_dir,remove_file};
+use std::fs::{create_dir,remove_file,File};
 use mslnk::ShellLink;
 
 // 配置系统 PATH 变量，但是需要注销并重新登录以生效
 // 返回的 bool 表示是否执行了操作
-fn set_system_path(step:StepPath)->Result<bool>{
+fn set_system_path(step:StepPath,is_add:bool)->Result<bool>{
     // 打开 HKEY_CURRENT_USER\Environment
     let hkcu=RegKey::predef(HKEY_CURRENT_USER);
     let table_res=hkcu.open_subkey("Environment");
@@ -33,16 +34,14 @@ fn set_system_path(step:StepPath)->Result<bool>{
     
     // 增删 Path 变量
     let ns=&step.record.as_str();
-    match step.operation.as_str() {
-        "Add"=>{
+    if is_add{
             if is_exist {
                 // log(format!("Warning(Path):Record '{}' already existed in PATH",&step.record));
                 return Ok(false);
             }else{
                 origin_arr.push(ns);
             }
-        },
-        "Remove"=>{
+        }else{
             if is_exist {
                 origin_arr=origin_arr
                 .into_iter()
@@ -52,11 +51,8 @@ fn set_system_path(step:StepPath)->Result<bool>{
                 log(format!("Warning(Path):Record '{}' not exist in PATH",&step.record));
                 return Ok(false);
             }
-        },
-        _=>{
-            return Err(anyhow!("Error(Path):Unknown operation : {}",&step.operation));
         }
-    }
+    
 
     // 生成新字符串
     let new_arr:Vec<&str>=origin_arr
@@ -89,60 +85,40 @@ pub fn step_path(step:StepPath,located:String)->Result<i32>{
     }
 
     // 添加系统 PATH 变量
-    let add_res=set_system_path(StepPath { record: bin_abs.clone(), operation: "Add".to_string() });
+    let add_res=set_system_path(StepPath { record: bin_abs.clone() },true);
     if add_res.is_err() {
         log(format!("Warning(Path):Failed to add system PATH for '{}', manually add later to enable bin function of nep",&bin_abs));
     }else if add_res.unwrap() {
         log(format!("Warning(Path):Added system PATH for '{}', restart to enable bin function of nep",&bin_abs));
     }
 
-    // 生成快捷方式绝对路径
+    // 解析批处理路径
     let f_path=Path::new(&step.record);
     if f_path.is_dir() {
         return Err(anyhow!("Error(Path):'{}' is not a file",&step.record));
     }
     let stem=f_path.file_stem().unwrap().to_string_lossy().to_string();
-    let target = format!("{}/{}.lnk", &bin_abs, &stem);
+    let cmd_target_str = format!("{}/{}.cmd", &bin_abs, &stem);
 
-    // 处理删除快捷方式
-    if &step.operation=="Remove" {
-        let target_path=Path::new(&target);
-        if !target_path.exists() {
-            log(format!("Warning(Path):'{}' not exist, skip removal",&target));
-            return Ok(0);
-        }else{
-            let rm_res=remove_file(target_path);
-            if rm_res.is_err() {
-                return Err(anyhow!("Error(Path):Can't remove '{}' : {}",&target,rm_res.unwrap_err().to_string()));
-            }
-            return Ok(0);
-        }
+    // 解析二进制绝对路径
+    let clear_record=step.record.replace("./", "");
+    let abs_target_path=Path::new(&located).join(&clear_record);
+    let abs_target_str=abs_target_path.to_string_lossy().to_string().replace("/", "\\");
+    if !abs_target_path.exists(){
+        return Err(anyhow!("Error(Path):Failed to add path : final target '{}' not exist",&abs_target_str));
     }
+
+    // 写批处理
+    let cmd_content=format!("@\"{}\" %*",&abs_target_str);
+    let mut file=File::create(&cmd_target_str)?;
+    file.write_all(cmd_content.as_bytes())?;
     
-    // 生成快捷方式
-    let sl_res = ShellLink::new(&step.record);
-    if sl_res.is_err() {
-        return Err(anyhow!(
-            "Error(Path):Can't find source file '{}'",
-            &step.record
-        ));
-    }
-    let c_res = sl_res.unwrap().create_lnk(&target);
-    if c_res.is_err() {
-        return Err(anyhow!(
-            "Error(Path):Can't create link {}->{} : {}",
-            &step.record,
-            &target,
-            c_res.unwrap_err().to_string()
-        ));
-    }
     Ok(0)
 }
 
 #[test]
 fn test_path(){
     step_path(StepPath{
-        record:String::from(r"D:\CnoRPS\2345Pic\2345Pic.exe"),
-        operation:"Add".to_string()
-    },String::from("D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode")).unwrap();
+        record:String::from("./2345Pic.exe")
+    },String::from("D:/CnoRPS/2345Pic")).unwrap();
 }

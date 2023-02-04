@@ -203,8 +203,7 @@ fn test_workflow_executor() {
                 c_if: None,
             },
             body: Step::StepPath(StepPath {
-                record:"D:/CnoRPS/chfsgui.exe".to_string(),
-                operation:"Add".to_string()
+                record:"D:/CnoRPS/chfsgui.exe".to_string()
             }),
         },
     ];

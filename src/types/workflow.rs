@@ -36,7 +36,6 @@ pub struct StepExecute {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct StepPath {
     pub record: String,
-    pub operation: String,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
