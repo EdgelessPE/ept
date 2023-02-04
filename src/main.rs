@@ -2,7 +2,9 @@ mod executor;
 mod parsers;
 mod types;
 mod utils;
+mod compression;
 
+extern crate tar;
 #[macro_use]
 extern crate lazy_static;
 
