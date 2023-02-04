@@ -76,8 +76,8 @@ fn set_system_path(step:StepPath)->Result<bool>{
     Ok(true)
 }
 
-// 实现：在当前目录创建 bin 文件夹并放置快捷方式，随后将 bin 添加到系统 PATH 变量
-pub fn step_path(step:StepPath)->Result<i32>{
+// 实现：在当前目录创建 bin 文件夹并放置批处理，随后将 bin 添加到系统 PATH 变量
+pub fn step_path(step:StepPath,located:String)->Result<i32>{
     // 解析 bin 绝对路径
     let cur_dir=current_dir()?.to_string_lossy().to_string();
     let bin_abs=cur_dir+"\\bin";
@@ -144,5 +144,5 @@ fn test_path(){
     step_path(StepPath{
         record:String::from(r"D:\CnoRPS\2345Pic\2345Pic.exe"),
         operation:"Add".to_string()
-    }).unwrap();
+    },String::from("D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode")).unwrap();
 }

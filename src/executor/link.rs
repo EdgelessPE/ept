@@ -3,7 +3,7 @@ use anyhow::{anyhow, Result};
 use dirs::desktop_dir;
 use mslnk::ShellLink;
 
-pub fn step_link(step: StepLink) -> Result<i32> {
+pub fn step_link(step: StepLink,located:String) -> Result<i32> {
     // 获取用户桌面位置
     let desktop_opt = desktop_dir();
     if desktop_opt.is_none() {
@@ -40,6 +40,6 @@ fn test_link() {
     step_link(StepLink {
         source_file: String::from(r"D:\CnoRPS\Beyond Compare 4\BCompare.exe"),
         target_name: String::from("Beyond Compare 4"),
-    })
+    },String::from("D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode"))
     .unwrap();
 }

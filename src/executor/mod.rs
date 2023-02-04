@@ -90,7 +90,7 @@ fn condition_eval(condition: String, exit_code: i32) -> Result<bool> {
 }
 
 // 执行工作流
-pub fn workflow_executor(flow: Vec<WorkflowNode>) -> Result<i32> {
+pub fn workflow_executor(flow: Vec<WorkflowNode>,located:String) -> Result<i32> {
     let mut exit_code = 0;
 
     // 遍历流节点
@@ -101,11 +101,12 @@ pub fn workflow_executor(flow: Vec<WorkflowNode>) -> Result<i32> {
             continue;
         }
         // 匹配步骤类型以调用步骤解释器
+        let located_cp=located.clone();
         let exec_res = match flow_node.body {
-            Step::StepLink(step) => step_link(step),
-            Step::StepExecute(step) => step_execute(step),
-            Step::StepPath(step) => step_path(step),
-            Step::StepLog(step) => step_log(step),
+            Step::StepLink(step) => step_link(step,located_cp),
+            Step::StepExecute(step) => step_execute(step,located_cp),
+            Step::StepPath(step) => step_path(step,located_cp),
+            Step::StepLog(step) => step_log(step,located_cp),
         };
         // 处理执行结果
         if exec_res.is_err() {
@@ -207,6 +208,6 @@ fn test_workflow_executor() {
             }),
         },
     ];
-    let r1 = workflow_executor(wf1);
+    let r1 = workflow_executor(wf1,String::from("D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode"));
     println!("{:?}", r1);
 }
