@@ -1,1 +1,2 @@
 mod tar;
+mod zstd;
