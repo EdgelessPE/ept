@@ -5,8 +5,7 @@ use anyhow::{anyhow,Result};
 use std::io::Write;
 use std::path::Path;
 use std::env::current_dir;
-use std::fs::{create_dir,remove_file,File};
-use mslnk::ShellLink;
+use std::fs::{create_dir,File};
 
 // 配置系统 PATH 变量，但是需要注销并重新登录以生效
 // 返回的 bool 表示是否执行了操作

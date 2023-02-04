@@ -8,11 +8,11 @@ pub use log::step_log;
 pub use path::step_path;
 
 use anyhow::{anyhow, Result};
-use eval::{to_value, Expr};
+use eval::{Expr};
 use std::path::Path;
 
 use crate::{
-    types::{Step, StepExecute, StepLog, WorkflowHeader, WorkflowNode, StepLink, StepPath},
+    types::{Step, StepExecute, StepLog, StepLink, StepPath, WorkflowHeader, WorkflowNode},
     utils::log,
 };
 
