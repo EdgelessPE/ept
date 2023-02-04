@@ -28,9 +28,12 @@ pub fn step_execute(step: StepExecute,located:String) -> Result<i32> {
 
     // 指定工作目录
     let pwd_opt = step.pwd;
-    if pwd_opt.is_some() {
-        cmd.current_dir(pwd_opt.unwrap());
-    }
+    let workshop=if pwd_opt.is_some() {
+        pwd_opt.unwrap()
+    }else{
+       located
+    };
+    cmd.current_dir(&workshop);
 
     // 执行并收集结果
     let output_res = cmd.output();

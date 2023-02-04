@@ -1,7 +1,7 @@
 use crate::{types::StepLog, utils::log};
 use anyhow::Result;
 
-pub fn step_log(step: StepLog,located:String) -> Result<i32> {
+pub fn step_log(step: StepLog,_:String) -> Result<i32> {
     log(format!("{}(Log):{}", &step.level, &step.msg));
     Ok(0)
 }
