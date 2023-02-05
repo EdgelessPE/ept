@@ -5,6 +5,7 @@ mod utils;
 mod compression;
 mod entrances;
 mod signature;
+mod ca;
 
 extern crate tar;
 #[macro_use]
