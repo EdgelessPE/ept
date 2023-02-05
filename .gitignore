@@ -3,3 +3,5 @@
 /temp
 /apps
 /logs
+*.tar
+*.zst
