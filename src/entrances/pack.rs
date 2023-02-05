@@ -8,7 +8,6 @@ use std::path::Path;
 pub fn pack(
     source_dir: String,
     into_file: String,
-    file_stem: String,
     packager: String,
     need_sign: bool,
 ) -> Result<()> {
@@ -26,6 +25,7 @@ pub fn pack(
     }
 
     // 创建临时目录
+    let file_stem=Path::new(&into_file).file_stem().unwrap().to_string_lossy().to_string();
     let temp_dir_path = Path::new("./temp").join(&file_stem);
     if temp_dir_path.exists() {
         remove_dir_all(&temp_dir_path)?;
@@ -65,7 +65,6 @@ fn test_pack() {
     let res = pack(
         "./examples/VSCode".to_string(),
         "./examples/VSCode_1.0.0.0_Cno.nep".to_string(),
-        "VSCode_1.0.0.0_Cno".to_string(),
         "test@edgeless.top".to_string(),
         true,
     );
