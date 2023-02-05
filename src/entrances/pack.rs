@@ -1,9 +1,11 @@
 use crate::compression::{compress, pack_tar};
-use crate::signature::{sign, verify};
+use crate::signature::{sign};
 use crate::types::Signature;
-use anyhow::{anyhow, Result};
+use anyhow::{Result};
 use std::fs::{create_dir_all, remove_dir_all, write};
 use std::path::Path;
+
+use super::validator::inner_validator;
 
 pub fn pack(
     source_dir: String,
@@ -12,17 +14,7 @@ pub fn pack(
     need_sign: bool,
 ) -> Result<()> {
     // 打包检查
-    let manifest = vec!["package.toml", "workflows"];
-    for file_name in manifest {
-        let p = Path::new(&source_dir).join(file_name);
-        if !p.exists() {
-            return Err(anyhow!(
-                "Error:Missing '{}' in '{}', can't pack to nep",
-                &file_name,
-                &source_dir
-            ));
-        }
-    }
+    inner_validator(source_dir.clone())?;
 
     // 创建临时目录
     let file_stem=Path::new(&into_file).file_stem().unwrap().to_string_lossy().to_string();

@@ -6,7 +6,7 @@ use std::{fs::File, io::Read};
 pub fn parse_package(p: String) -> Result<GlobalPackage> {
     let package_path = Path::new(&p);
     if !package_path.exists() {
-        return Err(anyhow!("Error:Fatal:Can't find package path : {}", p));
+        return Err(anyhow!("Error:Fatal:Can't find package.toml path : {}", p));
     }
 
     let mut text = String::new();
