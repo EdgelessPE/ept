@@ -14,7 +14,7 @@ fn read_console(v: Vec<u8>) -> String {
     }
 }
 
-pub fn step_execute(step: StepExecute,located:String) -> Result<i32> {
+pub fn step_execute(step: StepExecute, located: String) -> Result<i32> {
     // 配置终端
     let launch_terminal = if cfg!(target_os = "windows") {
         ("cmd", "/c")
@@ -28,10 +28,10 @@ pub fn step_execute(step: StepExecute,located:String) -> Result<i32> {
 
     // 指定工作目录
     let pwd_opt = step.pwd;
-    let workshop=if pwd_opt.is_some() {
+    let workshop = if pwd_opt.is_some() {
         pwd_opt.unwrap()
-    }else{
-       located
+    } else {
+        located
     };
     cmd.current_dir(&workshop);
 
@@ -73,21 +73,30 @@ pub fn step_execute(step: StepExecute,located:String) -> Result<i32> {
 
 #[test]
 fn test_execute() {
-    step_execute(StepExecute {
-        command: "echo hello nep ! && echo 你好，尼普！".to_string(),
-        pwd: None,
-    },String::from("D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode"))
+    step_execute(
+        StepExecute {
+            command: "echo hello nep ! && echo 你好，尼普！".to_string(),
+            pwd: None,
+        },
+        String::from("D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode"),
+    )
     .unwrap();
-    step_execute(StepExecute {
-        command: "ls".to_string(),
-        pwd: Some("./src".to_string()),
-    },String::from("D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode"))
+    step_execute(
+        StepExecute {
+            command: "ls".to_string(),
+            pwd: Some("./src".to_string()),
+        },
+        String::from("D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode"),
+    )
     .unwrap();
 
-    let res = step_execute(StepExecute {
-        command: "exit 2".to_string(),
-        pwd: None,
-    },String::from("D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode"))
+    let res = step_execute(
+        StepExecute {
+            command: "exit 2".to_string(),
+            pwd: None,
+        },
+        String::from("D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode"),
+    )
     .unwrap();
     assert_eq!(res, 2);
 }

@@ -1,11 +1,11 @@
-mod executor;
-mod parsers;
-mod types;
-mod utils;
+mod ca;
 mod compression;
 mod entrances;
+mod executor;
+mod parsers;
 mod signature;
-mod ca;
+mod types;
+mod utils;
 
 extern crate tar;
 #[macro_use]

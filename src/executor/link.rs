@@ -4,7 +4,7 @@ use dirs::desktop_dir;
 use mslnk::ShellLink;
 use std::path::Path;
 
-pub fn step_link(step: StepLink,located:String) -> Result<i32> {
+pub fn step_link(step: StepLink, located: String) -> Result<i32> {
     // 获取用户桌面位置
     let desktop_opt = desktop_dir();
     if desktop_opt.is_none() {
@@ -14,8 +14,8 @@ pub fn step_link(step: StepLink,located:String) -> Result<i32> {
     let desktop = d.to_str().unwrap_or(r"C:\Users\Public\Desktop");
 
     // 解析源文件绝对路径
-    let abs_clear_source_path=Path::new(&located).join(&step.source_file.replace("./", ""));
-    let abs_clear_source=abs_clear_source_path.to_string_lossy().to_string();
+    let abs_clear_source_path = Path::new(&located).join(&step.source_file.replace("./", ""));
+    let abs_clear_source = abs_clear_source_path.to_string_lossy().to_string();
 
     // 创建实例
     let sl_res = ShellLink::new(&abs_clear_source);
@@ -42,9 +42,12 @@ pub fn step_link(step: StepLink,located:String) -> Result<i32> {
 
 #[test]
 fn test_link() {
-    step_link(StepLink {
-        source_file: String::from("./BCompare.exe"),
-        target_name: String::from("Beyond Compare 4"),
-    },String::from("D:/CnoRPS/Beyond Compare 4"))
+    step_link(
+        StepLink {
+            source_file: String::from("./BCompare.exe"),
+            target_name: String::from("Beyond Compare 4"),
+        },
+        String::from("D:/CnoRPS/Beyond Compare 4"),
+    )
     .unwrap();
 }

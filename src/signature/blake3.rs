@@ -1,17 +1,17 @@
-use blake3::{Hasher};
+use anyhow::Result;
+use blake3::Hasher;
 use std::fs::File;
-use anyhow::{Result};
 use std::io;
 
-pub fn compute_hash_blake3(from_file:String)->Result<String>{
-    let file=File::open(&from_file)?;
-    let mut hasher=Hasher::new();
-    if let Some(mmap)=try_into_memmap_file(&file)?{
+pub fn compute_hash_blake3(from_file: String) -> Result<String> {
+    let file = File::open(&from_file)?;
+    let mut hasher = Hasher::new();
+    if let Some(mmap) = try_into_memmap_file(&file)? {
         hasher.update_rayon(mmap.get_ref());
-    }else{
+    } else {
         copy_wide(file, &mut hasher)?;
     }
-    let hash=hasher.finalize();
+    let hash = hasher.finalize();
     Ok(hash.to_hex().to_string())
 }
 
@@ -55,7 +55,9 @@ fn copy_wide(mut reader: impl io::Read, hasher: &mut blake3::Hasher) -> io::Resu
 }
 
 #[test]
-fn test_compute_hash_blake3(){
-    let res=compute_hash_blake3(r"D:\Desktop\Projects\EdgelessPE\ept\examples\VSCode_1.0.0.0_Cno.tar.zst".to_string());
-    println!("{:?}",res);
+fn test_compute_hash_blake3() {
+    let res = compute_hash_blake3(
+        r"D:\Desktop\Projects\EdgelessPE\ept\examples\VSCode_1.0.0.0_Cno.tar.zst".to_string(),
+    );
+    println!("{:?}", res);
 }

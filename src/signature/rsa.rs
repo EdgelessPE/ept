@@ -1,32 +1,31 @@
-use anyhow::{Result};
+use anyhow::Result;
+use base64::{engine::general_purpose, Engine as _};
+use openssl::hash::MessageDigest;
 use openssl::pkey::PKey;
 use openssl::sign::{Signer, Verifier};
-use openssl::hash::MessageDigest;
-use base64::{Engine as _, engine::{general_purpose}};
 
-pub fn sign_with_rsa(private_key:String,digest:String)->Result<String>{
-    let private=PKey::private_key_from_pem(private_key.as_bytes())?;
-    let mut signer=Signer::new(MessageDigest::sha256(),&private)?;
+pub fn sign_with_rsa(private_key: String, digest: String) -> Result<String> {
+    let private = PKey::private_key_from_pem(private_key.as_bytes())?;
+    let mut signer = Signer::new(MessageDigest::sha256(), &private)?;
     signer.update(digest.as_bytes())?;
-    let signature=signer.sign_to_vec()?;
+    let signature = signer.sign_to_vec()?;
     let signature_base64 = general_purpose::STANDARD.encode(&signature);
 
     Ok(signature_base64)
 }
 
-pub fn verify_with_rsa(public_key:String,digest:String,signature:String)->Result<bool>{
-    let public=PKey::public_key_from_pem(public_key.as_bytes())?;
+pub fn verify_with_rsa(public_key: String, digest: String, signature: String) -> Result<bool> {
+    let public = PKey::public_key_from_pem(public_key.as_bytes())?;
     let mut verifier = Verifier::new(MessageDigest::sha256(), &public).unwrap();
     verifier.update(digest.as_bytes())?;
-    let signature_decoded=general_purpose::STANDARD.decode(&signature)?;
-    let v_res=verifier.verify(&signature_decoded)?;
+    let signature_decoded = general_purpose::STANDARD.decode(&signature)?;
+    let v_res = verifier.verify(&signature_decoded)?;
     Ok(v_res)
 }
 
 #[test]
-fn test_sign_with_rsa(){
-let private_key=
-"-----BEGIN RSA PRIVATE KEY-----
+fn test_sign_with_rsa() {
+    let private_key = "-----BEGIN RSA PRIVATE KEY-----
 MIIEpAIBAAKCAQEAkpG8ZaqMf55BxmGFzZ2g7e1S6hr5Ns275N8Usi8OtpvbqR5U9Gp4+DYy
 CLgS1IX23LFFFSNjfYpKXyVr885YVdZOJjuhtxdXwzLtQ4vd9g8g1lJKwF9yIoGgsZyaX9lC
 9cjHezntBOKumgQWsMdzCbXK2j6DkG7yB3NTSVd63PH/HFikVhiW05F3E963B94h0XyY5nfC
@@ -52,8 +51,7 @@ cP5wONFiB16hX1KCrcMzxWwkBOHHJv/jjBoSDRKSdne6f8M66Kv5s/wXtUK8Gv13wtaSwYZg
 ktIqgQ==
 -----END RSA PRIVATE KEY-----
 ";
-let public_key=
-"-----BEGIN RSA PUBLIC KEY-----
+    let public_key = "-----BEGIN RSA PUBLIC KEY-----
 MIIBCgKCAQEAkpG8ZaqMf55BxmGFzZ2g7e1S6hr5Ns275N8Usi8OtpvbqR5U9Gp4+DYyCLgS
 1IX23LFFFSNjfYpKXyVr885YVdZOJjuhtxdXwzLtQ4vd9g8g1lJKwF9yIoGgsZyaX9lC9cjH
 ezntBOKumgQWsMdzCbXK2j6DkG7yB3NTSVd63PH/HFikVhiW05F3E963B94h0XyY5nfCm+ct
@@ -61,9 +59,10 @@ tV5BBDRDdpCxfCqpbx5aj24FzyqM4WHDzLVhKuXKBEB5pfD9VZhlxdZn9SnsRLli6FO2gNd/
 yhEPJ6nFL7SLBzM5M8nnoVokWwjL+p54zf7hu2EuNyJjgb9ZqfwNUXILc1LSEGE7qQIDAQAB
 -----END RSA PUBLIC KEY-----
 ";
-    let signature=sign_with_rsa(private_key.to_string(), "digest".to_string()).unwrap();
+    let signature = sign_with_rsa(private_key.to_string(), "digest".to_string()).unwrap();
     assert_eq!(signature,String::from("Jhr/pWdzd5jze829bsWF1lUDd8baA5WszKOFjqhq2mT+dkJ7e+k3oV6v/Zx4AtcJ5eorXAfJaSvjIZ65ZmAo3fIcL0+NWLAAGVu3x13lmp9MiUOKpybEqAEkdFXaaMQZjsDvTSMxGt+4PVWDfP0wvwYPCsoKlQf17LPUPLVlgMhtpiA3XO12n0M7TOZGAehg1JrL1zxiYvgBsllbWRtbsU/Dzef34jx1Qx1gfThM+t6eIEEzWnGcnxMk9EilxVAlkgy0qv2GNWTEHb52B8BHcxW9ZkJ2y+u5bHCO6pSTFtv1i1nZPYbHYgSuJ3YYkof+YlsWqNAGcJDUconqVvZU3g=="));
-    let validation=verify_with_rsa(public_key.to_string(), "digest".to_string(), signature).unwrap();
-    println!("{}",validation);
+    let validation =
+        verify_with_rsa(public_key.to_string(), "digest".to_string(), signature).unwrap();
+    println!("{}", validation);
     assert!(validation);
 }

@@ -8,11 +8,11 @@ pub use log::step_log;
 pub use path::step_path;
 
 use anyhow::{anyhow, Result};
-use eval::{Expr};
+use eval::Expr;
 use std::path::Path;
 
 use crate::{
-    types::{Step, StepExecute, StepLog, StepLink, StepPath, WorkflowHeader, WorkflowNode},
+    types::{Step, StepExecute, StepLink, StepLog, StepPath, WorkflowHeader, WorkflowNode},
     utils::log,
 };
 
@@ -90,7 +90,7 @@ fn condition_eval(condition: String, exit_code: i32) -> Result<bool> {
 }
 
 // 执行工作流
-pub fn workflow_executor(flow: Vec<WorkflowNode>,located:String) -> Result<i32> {
+pub fn workflow_executor(flow: Vec<WorkflowNode>, located: String) -> Result<i32> {
     let mut exit_code = 0;
 
     // 遍历流节点
@@ -101,12 +101,12 @@ pub fn workflow_executor(flow: Vec<WorkflowNode>,located:String) -> Result<i32> 
             continue;
         }
         // 匹配步骤类型以调用步骤解释器
-        let located_cp=located.clone();
+        let located_cp = located.clone();
         let exec_res = match flow_node.body {
-            Step::StepLink(step) => step_link(step,located_cp),
-            Step::StepExecute(step) => step_execute(step,located_cp),
-            Step::StepPath(step) => step_path(step,located_cp),
-            Step::StepLog(step) => step_log(step,located_cp),
+            Step::StepLink(step) => step_link(step, located_cp),
+            Step::StepExecute(step) => step_execute(step, located_cp),
+            Step::StepPath(step) => step_path(step, located_cp),
+            Step::StepLog(step) => step_log(step, located_cp),
         };
         // 处理执行结果
         if exec_res.is_err() {
@@ -180,9 +180,9 @@ fn test_workflow_executor() {
                 step: "Try fix".to_string(),
                 c_if: Some(String::from("${ExitCode}==3")),
             },
-            body: Step::StepLink(StepLink{
-                source_file:"D:/CnoRPS/Edgeless Hub/edgeless-hub.exe".to_string(),
-                target_name:"Old hub".to_string()
+            body: Step::StepLink(StepLink {
+                source_file: "D:/CnoRPS/Edgeless Hub/edgeless-hub.exe".to_string(),
+                target_name: "Old hub".to_string(),
             }),
         },
         WorkflowNode {
@@ -203,10 +203,13 @@ fn test_workflow_executor() {
                 c_if: None,
             },
             body: Step::StepPath(StepPath {
-                record:"D:/CnoRPS/chfsgui.exe".to_string()
+                record: "D:/CnoRPS/chfsgui.exe".to_string(),
             }),
         },
     ];
-    let r1 = workflow_executor(wf1,String::from("D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode"));
+    let r1 = workflow_executor(
+        wf1,
+        String::from("D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode"),
+    );
     println!("{:?}", r1);
 }
