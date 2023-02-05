@@ -63,7 +63,7 @@ pub fn decompress(source_file:String,into_dir:String)->Result<()>{
 fn test_compress(){
     let res=compress(
         r"D:\Desktop\Projects\EdgelessPE\ept\examples\VSCode".to_string(),
-       r"./VSCode_1.0.0.0_Cno.tar.zst".to_string(),
+       r"./examples/VSCode_1.0.0.0_Cno.tar.zst".to_string(),
        );
    println!("{:?}",res);
 }

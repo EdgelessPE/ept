@@ -3,6 +3,8 @@ mod parsers;
 mod types;
 mod utils;
 mod compression;
+mod entrances;
+mod signature;
 
 extern crate tar;
 #[macro_use]
