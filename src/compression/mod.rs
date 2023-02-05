@@ -1,7 +1,7 @@
 mod tar;
 mod zstd;
 
-use self::tar::{pack_tar,release_tar};
+pub use self::tar::{pack_tar,release_tar};
 use self::zstd::{compress_zstd,decompress_zstd};
 use anyhow::{Result, anyhow};
 use std::fs::{remove_file};
