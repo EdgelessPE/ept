@@ -44,6 +44,11 @@ pub fn install_using_package(source_file:String)->Result<()>{
     let setup_file_path=temp_dir_inner_path.join("workflows/setup.toml");
     let setup_workflow=parse_workflow(setup_file_path.to_string_lossy().to_string())?;
 
+    // 创建 apps 文件夹
+    if !Path::new("./apps").exists(){
+        create_dir_all("./apps")?;
+    }
+
     // 检查对应包名有没有被安装过
     let try_get_info_res=info_local(package_struct.package.name.clone());
     if try_get_info_res.is_ok() {
