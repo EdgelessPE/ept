@@ -18,3 +18,4 @@ licence = "MIT"
 upstream = "https://code.visualstudio.com/"
 # 软件分类
 category = "办公编辑"
+main_program = "./VSCode.exe"

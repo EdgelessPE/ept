@@ -19,7 +19,7 @@ pub fn inner_validator(dir:String)->Result<()>{
 // 返回内包路径
 pub fn outer_validator(dir:String,stem:String)->Result<String>{
     let inner_pkg_name=stem+".tar.zst";
-    let manifest = vec!["package.toml", &inner_pkg_name];
+    let manifest = vec!["signature.toml", &inner_pkg_name];
     for file_name in manifest {
         let p = Path::new(&dir).join(file_name);
         if !p.exists() {

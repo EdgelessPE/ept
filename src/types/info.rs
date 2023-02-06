@@ -5,7 +5,7 @@ use super::Software;
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Info {
     pub name:String,
-    pub template:Sting,
+    pub template:String,
     pub licence:Option<String>,
     pub local:Option<InfoDiff>,
     pub online:Option<InfoDiff>,

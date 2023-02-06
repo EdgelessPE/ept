@@ -17,3 +17,9 @@ pub fn list()->Result<Vec<Info>>{
 
     Ok(res)
 }
+
+#[test]
+fn test_list(){
+    let res=list();
+    println!("{:?}",res);
+}

@@ -17,8 +17,8 @@ pub fn uninstall(package_name:String)->Result<()>{
     installed_validator(app_str.clone())?;
 
     // 读入包信息和卸载工作流
-    let global=parse_package(app_path.join(".nep_context/package.toml"))?;
-    let remove_flow=parse_workflow(app_path.join(".nep_context/workflows/remove.toml"))?;
+    let global=parse_package(app_path.join(".nep_context/package.toml").to_string_lossy().to_string())?;
+    let remove_flow=parse_workflow(app_path.join(".nep_context/workflows/remove.toml").to_string_lossy().to_string())?;
 
     // 执行卸载工作流
     workflow_executor(remove_flow, app_str.clone())?;
