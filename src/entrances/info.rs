@@ -46,7 +46,12 @@ pub fn info(package_name:String)->Result<Info>{
         info.software=global.software;
     }
 
-    Ok(info)
+    // 检查到底有没有这个包
+    if info.local.is_some()||info.online.is_some(){
+        Ok(info)
+    }else{
+        Err(anyhow!("Error:Unknown package '{}'",&package_name))
+    }
 }
 
 #[test]

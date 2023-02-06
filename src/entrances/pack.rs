@@ -1,4 +1,5 @@
 use crate::compression::{compress, pack_tar};
+use crate::parsers::parse_package;
 use crate::signature::{sign};
 use crate::types::Signature;
 use anyhow::{Result};
@@ -9,15 +10,20 @@ use super::validator::inner_validator;
 
 pub fn pack(
     source_dir: String,
-    into_file: String,
+    into_file:Option<String>,
     packager: String,
     need_sign: bool,
-) -> Result<()> {
+) -> Result<String> {
     // 打包检查
     inner_validator(source_dir.clone())?;
 
+    // 读取包信息
+    let pkg_path=Path::new(&source_dir).join("package.toml");
+    let global=parse_package(pkg_path.to_string_lossy().to_string())?;
+    let file_stem=format!("{}_{}_{}",&global.package.name,&global.package.version,&packager);
+    let into_file=into_file.unwrap_or(String::from("./")+&file_stem+".nep");
+
     // 创建临时目录
-    let file_stem=Path::new(&into_file).file_stem().unwrap().to_string_lossy().to_string();
     let temp_dir_path = Path::new("./temp").join(&file_stem);
     if temp_dir_path.exists() {
         remove_dir_all(&temp_dir_path)?;
@@ -47,18 +53,17 @@ pub fn pack(
     write(sign_file_path, &text)?;
 
     // 生成外包
-    pack_tar(temp_dir_path.to_string_lossy().to_string(), into_file)?;
+    pack_tar(temp_dir_path.to_string_lossy().to_string(), into_file.clone())?;
 
-    Ok(())
+    Ok(into_file)
 }
 
 #[test]
 fn test_pack() {
-    let res = pack(
+    pack(
         r"D:\Download\VSCode-win32-x64-1.75.0".to_string(),
-        "./examples/VSCode_1.75.0.0_Cno.nep".to_string(),
+        Some("./examples/VSCode_1.75.0.0_Cno.nep".to_string()),
         "test@edgeless.top".to_string(),
         true,
-    );
-    println!("{:?}", res);
+    ).unwrap();
 }

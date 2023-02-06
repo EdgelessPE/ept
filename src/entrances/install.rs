@@ -5,7 +5,7 @@ use std::fs::{create_dir_all, remove_dir_all,rename};
 use super::{validator::{inner_validator, outer_validator, installed_validator}, info_local};
 use crate::{compression::{release_tar, decompress}, signature::verify, parsers::{parse_signature, parse_package, parse_workflow}, utils::log, executor::workflow_executor};
 
-pub fn install_using_package(source_file:String,into_dir:String)->Result<()>{
+pub fn install_using_package(source_file:String)->Result<()>{
     // 创建临时目录
     let file_stem=Path::new(&source_file).file_stem().unwrap().to_string_lossy().to_string();
     let temp_dir_path = Path::new("./temp").join(&file_stem);
@@ -50,6 +50,9 @@ pub fn install_using_package(source_file:String,into_dir:String)->Result<()>{
         return Err(anyhow!("Error:Package '{}' has been installed({}), current ept doesn't support upgrade",&package_struct.package.name,diff.version));
     }
 
+    // 解析最终安装位置
+    let into_dir=Path::new("./apps").join(&package_struct.package.name).to_string_lossy().to_string();
+
     // 移动程序至 apps 目录
     let app_path=temp_dir_inner_path.join(&package_struct.package.name);
     if !app_path.exists(){
@@ -72,5 +75,5 @@ pub fn install_using_package(source_file:String,into_dir:String)->Result<()>{
 
 #[test]
 fn test_install(){
-    install_using_package(r"D:\Desktop\Projects\EdgelessPE\ept\examples\VSCode_1.75.0.0_Cno.nep".to_string(), "./apps/VSCode".to_string()).unwrap();
+    install_using_package(r"D:\Desktop\Projects\EdgelessPE\ept\examples\VSCode_1.75.0.0_Cno.nep".to_string()).unwrap();
 }
