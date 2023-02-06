@@ -15,7 +15,7 @@ pub fn step_link(step: StepLink, located: String) -> Result<i32> {
 
     // 解析源文件绝对路径
     let abs_clear_source_path=current_dir()?.join(&located.replace("./", "")).join(&step.source_file.replace("./", ""));
-    println!("{:?}",&abs_clear_source_path);
+    // println!("{:?}",&abs_clear_source_path);
     let abs_clear_source = abs_clear_source_path.to_string_lossy().to_string();
 
     // 创建实例

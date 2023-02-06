@@ -19,7 +19,8 @@ pub fn install_using_package(source_file:String)->Result<()>{
 
     // 解压外包
     let temp_dir_outer_str=temp_dir_outer_path.to_string_lossy().to_string();
-    release_tar(source_file, temp_dir_outer_str.clone())?;
+    release_tar(source_file, temp_dir_outer_str.clone())
+    .map_err(|e|{anyhow!("Error:Invaild nep package : {}",e.to_string())})?;
     let inner_pkg_str=outer_validator(temp_dir_outer_str.clone(), file_stem.clone())?;
     let signature_path=temp_dir_outer_path.join("signature.toml");
 
@@ -33,7 +34,8 @@ pub fn install_using_package(source_file:String)->Result<()>{
 
     // 解压内包
     let temp_dir_inner_str=temp_dir_inner_path.to_string_lossy().to_string();
-    decompress(inner_pkg_str.clone(), temp_dir_inner_str.clone())?;
+    decompress(inner_pkg_str.clone(), temp_dir_inner_str.clone())
+    .map_err(|e|{anyhow!("Error:Invaild nep package : {}",e.to_string())})?;
     inner_validator(temp_dir_inner_str.clone())?;
 
     // 读入包信息和安装工作流
