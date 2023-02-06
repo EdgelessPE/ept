@@ -11,27 +11,43 @@ mod signature;
 mod types;
 mod utils;
 
-use executor::step_execute;
-use types::StepExecute;
-use clap::Parser;
+use clap::{Parser,Subcommand};
 
-/// Simple program to greet a person
-#[derive(Parser, Debug)]
-#[command(author, version, about, long_about = None)]
+/// Edgeless Package Tool (ept) for Edgeless Next-Generation Packages (nep) [Alpha test]
+#[derive(Parser,Debug)]
+#[command(version)]
 struct Args {
-   #[arg(short, long)]
-   /// Name of the person to greet
-   name: String,
+   #[command(subcommand)]
+   action: Action,
+}
 
-   /// Number of times to greet
-   #[arg(short, long, default_value_t = 1)]
-   count: u8,
+#[derive(Subcommand,Debug)]
+enum Action {
+    /// Install a package with path (locally in current version)
+   Install {
+    /// Package path (or package name in future versions)
+    package: String,
+   },
+   /// Uninstall a package with package name
+   Uninstall {
+    /// Package name
+    package_name:String,
+   },
+   /// Query package information (locally in current version)
+   Info {
+    /// Package name
+    package_name:String,
+   },
+   /// List informations of installed packages
+   List,
+   /// Pack a directory content into nep
+   Pack {
+    /// Source directory ready to be packed
+    source_dir:String
+   },
 }
 
 fn main() {
     let args = Args::parse();
-
-   for _ in 0..args.count {
-       println!("Hello {}!", args.name)
-   }
+    println!("{:?}",args);
 }

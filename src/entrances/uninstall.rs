@@ -1,5 +1,5 @@
 use anyhow::{Result,anyhow};
-use std::{fs::{read_dir,remove_dir_all}, path::Path};
+use std::{fs::{remove_dir_all}, path::Path};
 
 use crate::{parsers::{parse_package, parse_workflow}, executor::workflow_executor};
 
@@ -17,7 +17,7 @@ pub fn uninstall(package_name:String)->Result<()>{
     installed_validator(app_str.clone())?;
 
     // 读入包信息和卸载工作流
-    let global=parse_package(app_path.join(".nep_context/package.toml").to_string_lossy().to_string())?;
+    // let global=parse_package(app_path.join(".nep_context/package.toml").to_string_lossy().to_string())?;
     let remove_flow=parse_workflow(app_path.join(".nep_context/workflows/remove.toml").to_string_lossy().to_string())?;
 
     // 执行卸载工作流
