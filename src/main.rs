@@ -1,3 +1,7 @@
+#[macro_use]
+extern crate lazy_static;
+extern crate tar;
+
 mod ca;
 mod compression;
 mod entrances;
@@ -7,24 +11,27 @@ mod signature;
 mod types;
 mod utils;
 
-extern crate tar;
-#[macro_use]
-extern crate lazy_static;
-
-// use parsers::{parse_package,parse_workflow};
 use executor::step_execute;
 use types::StepExecute;
+use clap::Parser;
+
+/// Simple program to greet a person
+#[derive(Parser, Debug)]
+#[command(author, version, about, long_about = None)]
+struct Args {
+   #[arg(short, long)]
+   /// Name of the person to greet
+   name: String,
+
+   /// Number of times to greet
+   #[arg(short, long, default_value_t = 1)]
+   count: u8,
+}
 
 fn main() {
-    // let pkg=parse_package(String::from("./examples/VSCode/package.toml"));
-    // println!("{:?}",pkg);
+    let args = Args::parse();
 
-    // let flows=parse_workflow(String::from("./examples/VSCode/workflows/setup.toml")).unwrap();
-    // println!("{:?}",flows);
-
-    // let res = step_execute(StepExecute {
-    //     command: String::from("echo hello world"),
-    //     pwd: None,
-    // });
-    // println!("{:?}", res)
+   for _ in 0..args.count {
+       println!("Hello {}!", args.name)
+   }
 }
