@@ -2,7 +2,7 @@ use std::path::Path;
 use anyhow::{Result, anyhow};
 use std::fs::{create_dir_all, remove_dir_all,rename};
 
-use super::validator::{inner_validator, outer_validator};
+use super::validator::{inner_validator, outer_validator, installed_validator};
 use crate::{compression::{release_tar, decompress}, signature::verify, parsers::{parse_signature, parse_package, parse_workflow}, utils::log, executor::workflow_executor};
 
 pub fn install(source_file:String,into_dir:String)->Result<()>{
@@ -56,6 +56,9 @@ pub fn install(source_file:String,into_dir:String)->Result<()>{
     // 保存上下文
     let ctx_path=Path::new(&into_dir).join(".nep_context");
     rename(temp_dir_inner_path, ctx_path)?;
+
+    // 检查安装是否完整
+    installed_validator(into_dir)?;
 
     Ok(())
 }
