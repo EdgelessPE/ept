@@ -34,3 +34,15 @@ pub fn outer_validator(dir:String,stem:String)->Result<String>{
     let inner_path=Path::new(&dir).join(&inner_pkg_name);
     Ok(inner_path.to_string_lossy().to_string())
 }
+
+// 返回上下文目录路径
+pub fn installed_validator(dir:String)->Result<String>{
+    let ctx_path=Path::new(&dir).join(".nep_context");
+    if !ctx_path.exists()||ctx_path.is_file(){
+        return Err(anyhow!("Error:Invalid nep app folder : missing '.nep_context' folder in '{}'",&dir));
+    }
+
+    let ctx_str=ctx_path.to_string_lossy().to_string();
+    inner_validator(ctx_str.clone())?;
+    Ok(ctx_str)
+}

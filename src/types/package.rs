@@ -6,18 +6,19 @@ pub struct Package {
     pub template: String,
     pub version: String,
     pub authors: Vec<String>,
-    pub licence: String,
+    pub licence: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Software {
     pub upstream: String,
     pub category: String,
+    pub main_program:String,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct GlobalPackage {
     pub nep: String,
     pub package: Package,
-    pub software: Software,
+    pub software: Option<Software>,
 }
