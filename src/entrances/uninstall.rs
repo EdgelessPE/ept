@@ -28,3 +28,8 @@ pub fn uninstall(package_name:String)->Result<()>{
 
     Ok(())
 }
+
+#[test]
+fn test_uninstall(){
+    uninstall("VSCode".to_string()).unwrap();
+}

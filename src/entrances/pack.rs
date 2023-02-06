@@ -55,8 +55,8 @@ pub fn pack(
 #[test]
 fn test_pack() {
     let res = pack(
-        "./examples/VSCode".to_string(),
-        "./examples/VSCode_1.0.0.0_Cno.nep".to_string(),
+        r"D:\Download\VSCode-win32-x64-1.75.0".to_string(),
+        "./examples/VSCode_1.75.0.0_Cno.nep".to_string(),
         "test@edgeless.top".to_string(),
         true,
     );

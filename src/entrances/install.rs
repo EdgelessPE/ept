@@ -72,5 +72,5 @@ pub fn install_using_package(source_file:String,into_dir:String)->Result<()>{
 
 #[test]
 fn test_install(){
-    install_using_package(r"D:\Desktop\Projects\EdgelessPE\ept\examples\VSCode_1.0.0.0_Cno.nep".to_string(), "./apps/VSCode".to_string()).unwrap();
+    install_using_package(r"D:\Desktop\Projects\EdgelessPE\ept\examples\VSCode_1.75.0.0_Cno.nep".to_string(), "./apps/VSCode".to_string()).unwrap();
 }
