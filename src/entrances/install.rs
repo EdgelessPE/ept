@@ -3,9 +3,12 @@ use anyhow::{Result, anyhow};
 use std::fs::{create_dir_all, remove_dir_all,rename};
 
 use super::{validator::{inner_validator, outer_validator, installed_validator}, info_local};
-use crate::{compression::{release_tar, decompress}, signature::verify, parsers::{parse_signature, parse_package, parse_workflow}, utils::log, executor::workflow_executor};
+use crate::{compression::{release_tar, decompress}, signature::verify, parsers::{parse_signature, parse_package, parse_workflow}, utils::{log}, executor::workflow_executor};
 
 pub fn install_using_package(source_file:String)->Result<()>{
+
+    log(format!("Info:Preparing to install '{}'",&source_file));
+
     // 创建临时目录
     let file_stem=Path::new(&source_file).file_stem().unwrap().to_string_lossy().to_string();
     let temp_dir_path = Path::new("./temp").join(&file_stem);
@@ -18,11 +21,13 @@ pub fn install_using_package(source_file:String)->Result<()>{
     create_dir_all(&temp_dir_inner_path)?;
 
     // 解压外包
+    log(format!("Info:Decompressing outer package..."));
     let temp_dir_outer_str=temp_dir_outer_path.to_string_lossy().to_string();
     release_tar(source_file, temp_dir_outer_str.clone())
     .map_err(|e|{anyhow!("Error:Invaild nep package : {}",e.to_string())})?;
     let inner_pkg_str=outer_validator(temp_dir_outer_str.clone(), file_stem.clone())?;
     let signature_path=temp_dir_outer_path.join("signature.toml");
+    // log_success_last();
 
     // 签名文件加载与校验
     let signature_struct=parse_signature(signature_path.to_string_lossy().to_string())?;

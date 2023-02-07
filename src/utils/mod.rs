@@ -9,13 +9,13 @@ lazy_static! {
     static ref TERM:Term=Term::stdout();
 }
 
-fn gen_log(msg: String)->Option<String> {
+fn gen_log(msg: String,replace_head:Option<String>)->Option<String> {
     for cap in RE.captures_iter(&msg){
         if cap.len()!=4{
             break;
         }
         
-        let head=cap[1].to_string();
+        let head=replace_head.unwrap_or(cap[1].to_string());
         let head=head.as_str();
         let c_head=match head {
             "Debug"=>{
@@ -51,20 +51,30 @@ fn gen_log(msg: String)->Option<String> {
 }
 
 pub fn log(msg:String){
-    let g=gen_log(msg);
+    let g=gen_log(msg,None);
     if g.is_some(){
         TERM.write_line(&g.unwrap()).unwrap();
     }
 }
 
 pub fn log_overwrite(msg:String){
-    let g=gen_log(msg);
+    let g=gen_log(msg,None);
     if g.is_some(){
         TERM.move_cursor_up(1).unwrap();
         TERM.clear_line().unwrap();
         TERM.write_line(&g.unwrap()).unwrap();
     }
 }
+
+pub fn log_ok_last(msg: String){
+    let g=gen_log(format!("{}   {}",msg,"ok".green()),None);
+    if g.is_some(){
+        TERM.move_cursor_up(1).unwrap();
+        TERM.clear_line().unwrap();
+        TERM.write_line(&g.unwrap()).unwrap();
+    }
+}
+
 
 pub fn is_debug_mode()->bool{
     envmnt::get_or("DEBUG", "false")==String::from("true")
@@ -95,5 +105,13 @@ fn test_log_overwrite(){
     log("Info:Working...".to_string());
     std::thread::sleep(std::time::Duration::from_secs(1));
     log_overwrite("Success:Done!".to_string());
+    std::thread::sleep(std::time::Duration::from_secs(1));
+}
+
+#[test]
+fn test_log_success_last(){
+    log("Info:Working...".to_string());
+    std::thread::sleep(std::time::Duration::from_secs(1));
+    log_ok_last("Info:Working...".to_string());
     std::thread::sleep(std::time::Duration::from_secs(1));
 }
