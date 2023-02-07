@@ -2,7 +2,7 @@ use regex::Regex;
 use colored::Colorize;
 
 lazy_static! {
-    static ref RE: Regex = Regex::new(r"(Debug|Info|Warning|Error)(\(\w+\))?:(.+)").unwrap();
+    static ref RE: Regex = Regex::new(r"(Debug|Info|Warning|Error|Success)(\(\w+\))?:(.+)").unwrap();
 }
 
 pub fn log(msg: String) {
@@ -29,6 +29,9 @@ pub fn log(msg: String) {
             "Error"=>{
                 head.bright_red()
             },
+            "Success"=>{
+                head.bright_green()
+            },
             _=>{
                 head.white()
             },
@@ -50,12 +53,13 @@ pub fn is_debug_mode()->bool{
 
 #[test]
 fn test_log(){
-    envmnt::set("DEBUG","true");
+    // envmnt::set("DEBUG","true");
 
     log("Debug:This is a debug".to_string());
     log("Info:This is a info".to_string());
     log("Warning:This is a warning".to_string());
     log("Error:This is an error".to_string());
+    log("Success:This is a success".to_string());
     log("Unknown:This is an unknown".to_string());
     log("This is a plain text".to_string());
     
@@ -63,5 +67,6 @@ fn test_log(){
     log("Info(Path):This is a info".to_string());
     log("Warning(Execute):This is a warning".to_string());
     log("Error(Link):This is an error".to_string());
+    log("Success(Main):This is a success".to_string());
     log("Unknown(unknown):This is an unknown".to_string());
 }
