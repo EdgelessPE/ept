@@ -15,12 +15,15 @@ use clap::{Parser,Subcommand};
 
 use crate::{entrances::{install_using_package, uninstall, info, pack, list}, utils::log};
 
-/// Edgeless Package Tool (ept) for Edgeless Next-Generation Packages (nep) [Alpha test]
+/// [Alpha] Edgeless Package Tool (ept) for Edgeless Next-Generation Packages (nep)
 #[derive(Parser,Debug)]
 #[command(version)]
 struct Args {
    #[command(subcommand)]
    action: Action,
+   /// Run commands in debug mode
+   #[arg(short, long)]
+    debug: bool,
 }
 
 #[derive(Subcommand,Debug)]
@@ -54,6 +57,12 @@ enum Action {
 fn main() {
     let args = Args::parse();
 
+    // 配置调试模式
+    if args.debug {
+        envmnt::set("DEBUG","true");
+    }
+
+    // 匹配入口
     match args.action {
         Action::Install { package }=>{
             let res=install_using_package(package.clone());
