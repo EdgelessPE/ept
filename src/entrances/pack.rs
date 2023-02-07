@@ -1,9 +1,9 @@
 use crate::compression::{compress, pack_tar};
 use crate::parsers::parse_package;
-use crate::signature::{sign};
+use crate::signature::sign;
 use crate::types::Signature;
 use crate::utils::{log, log_ok_last};
-use anyhow::{Result};
+use anyhow::Result;
 use std::fs::{create_dir_all, remove_dir_all, write};
 use std::path::Path;
 
@@ -11,12 +11,11 @@ use super::validator::inner_validator;
 
 pub fn pack(
     source_dir: String,
-    into_file:Option<String>,
+    into_file: Option<String>,
     packager: String,
     need_sign: bool,
 ) -> Result<String> {
-
-    log(format!("Info:Preparing to pack '{}'",&source_dir));
+    log(format!("Info:Preparing to pack '{}'", &source_dir));
 
     // 打包检查
     log(format!("Info:Validating source directory..."));
@@ -25,10 +24,13 @@ pub fn pack(
 
     // 读取包信息
     log(format!("Info:Resolving data..."));
-    let pkg_path=Path::new(&source_dir).join("package.toml");
-    let global=parse_package(pkg_path.to_string_lossy().to_string())?;
-    let file_stem=format!("{}_{}_{}",&global.package.name,&global.package.version,&packager);
-    let into_file=into_file.unwrap_or(String::from("./")+&file_stem+".nep");
+    let pkg_path = Path::new(&source_dir).join("package.toml");
+    let global = parse_package(pkg_path.to_string_lossy().to_string())?;
+    let file_stem = format!(
+        "{}_{}_{}",
+        &global.package.name, &global.package.version, &packager
+    );
+    let into_file = into_file.unwrap_or(String::from("./") + &file_stem + ".nep");
     log_ok_last(format!("Info:Resolving data..."));
 
     // 创建临时目录
@@ -66,7 +68,10 @@ pub fn pack(
 
     // 生成外包
     log(format!("Info:Generating outer package..."));
-    pack_tar(temp_dir_path.to_string_lossy().to_string(), into_file.clone())?;
+    pack_tar(
+        temp_dir_path.to_string_lossy().to_string(),
+        into_file.clone(),
+    )?;
     log_ok_last(format!("Info:Generating outer package..."));
 
     Ok(into_file)
@@ -79,5 +84,6 @@ fn test_pack() {
         Some("./examples/VSCode_1.75.0.0_Cno.nep".to_string()),
         "test@edgeless.top".to_string(),
         true,
-    ).unwrap();
+    )
+    .unwrap();
 }

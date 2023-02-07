@@ -1,4 +1,4 @@
-use anyhow::{anyhow,Result};
+use anyhow::{anyhow, Result};
 use std::{fs::read_to_string, path::Path};
 
 // 返回：（公钥，私钥）
@@ -15,7 +15,7 @@ pub fn query_others_public(email: String) -> Result<String> {
     Ok(public_file)
 }
 
-fn check()->Result<()>{
+fn check() -> Result<()> {
     let manifest = vec!["./keys/public.pem", "./keys/private.key"];
     for file_name in manifest {
         let p = Path::new(&file_name);

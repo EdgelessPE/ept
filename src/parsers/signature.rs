@@ -6,7 +6,10 @@ use std::{fs::File, io::Read};
 pub fn parse_signature(p: String) -> Result<Signature> {
     let signature_path = Path::new(&p);
     if !signature_path.exists() {
-        return Err(anyhow!("Error:Fatal:Can't find signature.toml path : {}", p));
+        return Err(anyhow!(
+            "Error:Fatal:Can't find signature.toml path : {}",
+            p
+        ));
     }
 
     let mut text = String::new();
