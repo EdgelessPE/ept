@@ -1,11 +1,15 @@
 use regex::Regex;
 use colored::Colorize;
+use console::Term;
+
+const BACKSPACE: char = 8u8 as char;
 
 lazy_static! {
     static ref RE: Regex = Regex::new(r"(Debug|Info|Warning|Error|Success)(\(\w+\))?:(.+)").unwrap();
+    static ref TERM:Term=Term::stdout();
 }
 
-pub fn log(msg: String) {
+fn gen_log(msg: String)->Option<String> {
     for cap in RE.captures_iter(&msg){
         if cap.len()!=4{
             break;
@@ -16,7 +20,7 @@ pub fn log(msg: String) {
         let c_head=match head {
             "Debug"=>{
                 if is_debug_mode(){
-                    return;
+                    return None;
                 }
                 head.bright_white()
             },
@@ -38,13 +42,28 @@ pub fn log(msg: String) {
         };
 
         if cap.get(2).is_some() {
-            println!("  {}{} {}",c_head,&cap[2].truecolor(100,100,100),&cap[3]);
+            return Some(format!("  {}{} {}",c_head,&cap[2].truecolor(100,100,100),&cap[3]));
         }else{
-            println!("{} {}",c_head,&cap[3]);
+            return Some(format!("{} {}",c_head,&cap[3]));
         }
-        return;
     }
-    println!("{}", msg);
+    return Some(format!("{}", msg));
+}
+
+pub fn log(msg:String){
+    let g=gen_log(msg);
+    if g.is_some(){
+        TERM.write_line(&g.unwrap()).unwrap();
+    }
+}
+
+pub fn log_overwrite(msg:String){
+    let g=gen_log(msg);
+    if g.is_some(){
+        TERM.move_cursor_up(1).unwrap();
+        TERM.clear_line().unwrap();
+        TERM.write_line(&g.unwrap()).unwrap();
+    }
 }
 
 pub fn is_debug_mode()->bool{
@@ -69,4 +88,12 @@ fn test_log(){
     log("Error(Link):This is an error".to_string());
     log("Success(Main):This is a success".to_string());
     log("Unknown(unknown):This is an unknown".to_string());
+}
+
+#[test]
+fn test_log_overwrite(){
+    log("Info:Working...".to_string());
+    std::thread::sleep(std::time::Duration::from_secs(1));
+    log_overwrite("Success:Done!".to_string());
+    std::thread::sleep(std::time::Duration::from_secs(1));
 }
