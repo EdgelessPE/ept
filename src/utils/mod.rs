@@ -35,7 +35,7 @@ pub fn log(msg: String) {
         };
 
         if cap.get(2).is_some() {
-            println!("{}{} {}",c_head,&cap[2].truecolor(100,100,100),&cap[3]);
+            println!("  {}{} {}",c_head,&cap[2].truecolor(100,100,100),&cap[3]);
         }else{
             println!("{} {}",c_head,&cap[3]);
         }
