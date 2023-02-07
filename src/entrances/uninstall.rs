@@ -1,15 +1,19 @@
 use anyhow::{Result,anyhow};
 use std::{fs::{remove_dir_all}, path::Path};
+use colored::Colorize;
 
-use crate::{parsers::{parse_package, parse_workflow}, executor::workflow_executor};
+use crate::{parsers::{parse_package, parse_workflow}, executor::workflow_executor, utils::{log_ok_last, log}};
 
 use super::validator::installed_validator;
 
 pub fn uninstall(package_name:String)->Result<()>{
+
+    log(format!("Info:Preparing to uninstall '{}'",&package_name));
+
     // 解析安装路径
     let app_path=Path::new("./apps").join(&package_name);
     if !app_path.exists(){
-        return Err(anyhow!("Error:Can't find app '{}'",&package_name));
+        return Err(anyhow!("Error:Can't find package '{}'",&package_name));
     }
     let app_str=app_path.to_string_lossy().to_string();
 
@@ -21,10 +25,14 @@ pub fn uninstall(package_name:String)->Result<()>{
     let remove_flow=parse_workflow(app_path.join(".nep_context/workflows/remove.toml").to_string_lossy().to_string())?;
 
     // 执行卸载工作流
+    log(format!("Info:Running remove workflow..."));
     workflow_executor(remove_flow, app_str.clone())?;
+    log(format!("Info:Running remove workflow...   {}","ok".green()));
 
     // 删除 app 目录
+    log(format!("Info:Cleaning..."));
     remove_dir_all(&app_str)?;
+    log_ok_last(format!("Info:Cleaning..."));
 
     Ok(())
 }

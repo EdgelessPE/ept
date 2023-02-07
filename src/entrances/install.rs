@@ -1,9 +1,10 @@
 use std::path::Path;
 use anyhow::{Result, anyhow};
+use colored::Colorize;
 use std::fs::{create_dir_all, remove_dir_all,rename};
 
 use super::{validator::{inner_validator, outer_validator, installed_validator}, info_local};
-use crate::{compression::{release_tar, decompress}, signature::verify, parsers::{parse_signature, parse_package, parse_workflow}, utils::{log}, executor::workflow_executor};
+use crate::{compression::{release_tar, decompress}, signature::verify, parsers::{parse_signature, parse_package, parse_workflow}, utils::{log, log_ok_last}, executor::workflow_executor};
 
 pub fn install_using_package(source_file:String)->Result<()>{
 
@@ -27,23 +28,28 @@ pub fn install_using_package(source_file:String)->Result<()>{
     .map_err(|e|{anyhow!("Error:Invaild nep package : {}",e.to_string())})?;
     let inner_pkg_str=outer_validator(temp_dir_outer_str.clone(), file_stem.clone())?;
     let signature_path=temp_dir_outer_path.join("signature.toml");
-    // log_success_last();
+    log_ok_last(format!("Info:Decompressing outer package..."));
 
     // 签名文件加载与校验
+    log(format!("Info:Verifying package signature..."));
     let signature_struct=parse_signature(signature_path.to_string_lossy().to_string())?;
     if signature_struct.signature.is_some(){
         verify(inner_pkg_str.clone(), signature_struct.packager.clone(), signature_struct.signature.unwrap())?;
+        log_ok_last(format!("Info:Verifying package signature..."));
     }else{
         log(format!("Warning:This package wasn't signed by declared packager '{}', take care while installing!",&signature_struct.packager));
     }
 
     // 解压内包
+    log(format!("Info:Decompressing inner package..."));
     let temp_dir_inner_str=temp_dir_inner_path.to_string_lossy().to_string();
     decompress(inner_pkg_str.clone(), temp_dir_inner_str.clone())
     .map_err(|e|{anyhow!("Error:Invaild nep package : {}",e.to_string())})?;
     inner_validator(temp_dir_inner_str.clone())?;
+    log_ok_last(format!("Info:Decompressing inner package..."));
 
     // 读入包信息和安装工作流
+    log(format!("Info:Resolving package..."));
     let pkg_file_path=temp_dir_inner_path.join("package.toml");
     let package_struct=parse_package(pkg_file_path.to_string_lossy().to_string())?;
     let setup_file_path=temp_dir_inner_path.join("workflows/setup.toml");
@@ -72,15 +78,21 @@ pub fn install_using_package(source_file:String)->Result<()>{
     }
     rename(app_path, into_dir.clone())?;
 
+    log_ok_last(format!("Info:Resolving package..."));
+
     // 执行安装工作流
+    log(format!("Info:Running setup workflow..."));
     workflow_executor(setup_workflow, into_dir.clone())?;
+    log(format!("Info:Running setup workflow...   {}","ok".green()));
 
     // 保存上下文
     let ctx_path=Path::new(&into_dir).join(".nep_context");
     rename(temp_dir_inner_path, ctx_path)?;
 
     // 检查安装是否完整
+    log(format!("Info:Validating setup..."));
     installed_validator(into_dir)?;
+    log_ok_last(format!("Info:Validating setup..."));
 
     Ok(())
 }

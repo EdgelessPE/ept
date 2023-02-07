@@ -9,7 +9,7 @@ use super::validator::installed_validator;
 pub fn info_local(package_name:String)->Result<(GlobalPackage,InfoDiff)>{
     let local_path=Path::new("./apps").join(&package_name);
     if !local_path.exists(){
-        return Err(anyhow!("Error:Can't find app '{}' locally",package_name));
+        return Err(anyhow!("Error:Can't find package '{}' locally",package_name));
     }
     let local_str=local_path.to_string_lossy().to_string();
     // 检查是否为标准的已安装目录

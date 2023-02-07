@@ -57,15 +57,6 @@ pub fn log(msg:String){
     }
 }
 
-pub fn log_overwrite(msg:String){
-    let g=gen_log(msg,None);
-    if g.is_some(){
-        TERM.move_cursor_up(1).unwrap();
-        TERM.clear_line().unwrap();
-        TERM.write_line(&g.unwrap()).unwrap();
-    }
-}
-
 pub fn log_ok_last(msg: String){
     let g=gen_log(format!("{}   {}",msg,"ok".green()),None);
     if g.is_some(){
@@ -101,17 +92,14 @@ fn test_log(){
 }
 
 #[test]
-fn test_log_overwrite(){
-    log("Info:Working...".to_string());
-    std::thread::sleep(std::time::Duration::from_secs(1));
-    log_overwrite("Success:Done!".to_string());
-    std::thread::sleep(std::time::Duration::from_secs(1));
-}
-
-#[test]
 fn test_log_success_last(){
-    log("Info:Working...".to_string());
+    log("Info:Preparing...".to_string());
+    
+    log(format!("Info:Running remove workflow..."));
     std::thread::sleep(std::time::Duration::from_secs(1));
-    log_ok_last("Info:Working...".to_string());
+    log_ok_last(format!("Info:Running remove workflow..."));
+
+    log(format!("Info:Cleaning..."));
     std::thread::sleep(std::time::Duration::from_secs(1));
+    log_ok_last(format!("Info:Cleaning..."));
 }
