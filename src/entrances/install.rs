@@ -6,7 +6,7 @@ use super::{
     info_local,
     validator::{inner_validator, installed_validator, outer_validator},
 };
-use crate::utils::{is_debug_mode, get_path_apps};
+use crate::utils::{is_debug_mode, get_path_apps, get_path_temp};
 use crate::{
     compression::{decompress, release_tar},
     executor::workflow_executor,
@@ -24,7 +24,7 @@ pub fn install_using_package(source_file: String, verify_signature: bool) -> Res
         .unwrap()
         .to_string_lossy()
         .to_string();
-    let temp_dir_path = Path::new("./temp").join(&file_stem);
+    let temp_dir_path = get_path_temp().join(&file_stem);
     let temp_dir_outer_path = temp_dir_path.join("Outer");
     let temp_dir_inner_path = temp_dir_path.join("Inner");
     if temp_dir_path.exists() {

@@ -2,7 +2,7 @@ use crate::compression::{compress, pack_tar};
 use crate::parsers::parse_package;
 use crate::signature::sign;
 use crate::types::{Signature, SignatureNode};
-use crate::utils::{is_debug_mode, log, log_ok_last};
+use crate::utils::{is_debug_mode, log, log_ok_last, get_path_temp};
 use anyhow::Result;
 use std::fs::{create_dir_all, remove_dir_all, write};
 use std::path::Path;
@@ -34,7 +34,7 @@ pub fn pack(
     log_ok_last(format!("Info:Resolving data..."));
 
     // 创建临时目录
-    let temp_dir_path = Path::new("./temp").join(&file_stem);
+    let temp_dir_path = get_path_temp().join(&file_stem);
     if temp_dir_path.exists() {
         remove_dir_all(&temp_dir_path)?;
     }
