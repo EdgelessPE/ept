@@ -1,6 +1,7 @@
 use anyhow::{anyhow, Error, Result};
 use semver::{BuildMetadata, Prerelease};
 use std::cmp::Ordering::{Equal, Greater, Less};
+use std::fmt;
 use std::{cmp::Ordering, str::FromStr};
 
 #[derive(Clone, Debug, Eq)]
@@ -132,6 +133,12 @@ impl Ord for ExSemVer {
         } else {
             self
         }
+    }
+}
+
+impl fmt::Display for ExSemVer {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}.{}.{}.{}",self.major,self.minor,self.patch,self.reserved)
     }
 }
 
