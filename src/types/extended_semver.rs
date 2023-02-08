@@ -5,7 +5,7 @@ use std::fmt;
 use std::{cmp::Ordering, str::FromStr};
 
 #[derive(Clone, Debug, Eq)]
-struct ExSemVer {
+pub struct ExSemVer {
     pub major: u64,
     pub minor: u64,
     pub patch: u64,

@@ -1,4 +1,5 @@
 use crate::types::GlobalPackage;
+use crate::utils::get_exe_version;
 use anyhow::{anyhow, Result};
 use std::path::Path;
 use std::{fs::File, io::Read};
@@ -19,6 +20,9 @@ pub fn parse_package(p: String) -> Result<GlobalPackage> {
             pkg_res.err().unwrap()
         ));
     }
+
+    // 根据主程序更新版本号
+    // let mp_version=get_exe_version(file_path)
 
     Ok(pkg_res.unwrap())
 }
