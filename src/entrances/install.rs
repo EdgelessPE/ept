@@ -7,6 +7,7 @@ use super::{
     info_local,
     validator::{inner_validator, installed_validator, outer_validator},
 };
+use crate::utils::is_debug_mode;
 use crate::{
     compression::{decompress, release_tar},
     executor::workflow_executor,
@@ -87,6 +88,7 @@ pub fn install_using_package(source_file: String,verify_signature:bool) -> Resul
     }
 
     // 创建 apps 文件夹
+    log(format!("Info:Deploying files..."));
     if !Path::new("./apps").exists() {
         create_dir_all("./apps")?;
     }
@@ -118,6 +120,7 @@ pub fn install_using_package(source_file: String,verify_signature:bool) -> Resul
         ));
     }
     rename(app_path, into_dir.clone())?;
+    log_ok_last(format!("Info:Deploying files..."));
 
     // 执行安装工作流
     log(format!("Info:Running setup workflow..."));
@@ -132,6 +135,19 @@ pub fn install_using_package(source_file: String,verify_signature:bool) -> Resul
     log(format!("Info:Validating setup..."));
     installed_validator(into_dir)?;
     log_ok_last(format!("Info:Validating setup..."));
+
+    // 清理临时文件夹
+    if !is_debug_mode() {
+        log(format!("Info:Cleaning..."));
+        let clean_res=remove_dir_all(&temp_dir_path);
+        if clean_res.is_ok(){
+            log_ok_last(format!("Info:Cleaning..."));
+        }else{
+            log(format!("Warning:Failed to remove temporary directory '{}'",temp_dir_path));
+        }
+    }else{
+        log(format!("Debug:Leaving temporary directory '{}'",temp_dir_path));
+    }
 
     Ok(())
 }

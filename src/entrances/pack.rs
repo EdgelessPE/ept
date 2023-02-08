@@ -2,7 +2,7 @@ use crate::compression::{compress, pack_tar};
 use crate::parsers::parse_package;
 use crate::signature::sign;
 use crate::types::Signature;
-use crate::utils::{log, log_ok_last};
+use crate::utils::{log, log_ok_last,is_debug_mode};
 use anyhow::Result;
 use std::fs::{create_dir_all, remove_dir_all, write};
 use std::path::Path;
@@ -77,6 +77,19 @@ pub fn pack(
         into_file.clone(),
     )?;
     log_ok_last(format!("Info:Packing outer package..."));
+
+    // 清理临时文件夹
+    if !is_debug_mode() {
+        log(format!("Info:Cleaning..."));
+        let clean_res=remove_dir_all(&temp_dir_path);
+        if clean_res.is_ok(){
+            log_ok_last(format!("Info:Cleaning..."));
+        }else{
+            log(format!("Warning:Failed to remove temporary directory '{}'",temp_dir_path));
+        }
+    }else{
+        log(format!("Debug:Leaving temporary directory '{}'",temp_dir_path));
+    }
 
     Ok(into_file)
 }
