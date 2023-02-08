@@ -20,6 +20,8 @@ memmap2 = "0.5.8"
 mslnk = "0.1.8"
 openssl = "0.10.45"
 regex = "1.7.1"
+rustyline = "10.1.1"
+semver = "1.0.16"
 serde = { version = "1.0.152", features = ["derive"] }
 serde_json = "1.0.91"
 tar = "0.4.38"
