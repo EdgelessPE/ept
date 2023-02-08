@@ -49,16 +49,21 @@ fn gen_log(msg: String, replace_head: Option<String>) -> Option<String> {
 pub fn log(msg: String) {
     let g = gen_log(msg, None);
     if g.is_some() {
-        TERM.write_line(&g.unwrap()).unwrap();
+        let content=g.unwrap();
+        envmnt::set("LAST_LOG", &content);
+        TERM.write_line(&content).unwrap();
     }
 }
 
 pub fn log_ok_last(msg: String) {
     let g = gen_log(format!("{}   {}", msg, "ok".green()), None);
     if g.is_some() {
-        TERM.move_cursor_up(1).unwrap();
-        TERM.clear_line().unwrap();
-        TERM.write_line(&g.unwrap()).unwrap();
+        let content=g.unwrap();
+        if envmnt::get_or("LAST_LOG","")==content{
+            TERM.move_cursor_up(1).unwrap();
+            TERM.clear_line().unwrap();
+        }
+        TERM.write_line(&content).unwrap();
     }
 }
 
@@ -93,4 +98,10 @@ fn test_log_success_last() {
     log(format!("Info:Cleaning..."));
     std::thread::sleep(std::time::Duration::from_secs(1));
     log_ok_last(format!("Info:Cleaning..."));
+
+    log(format!("Info:Running setup workflow..."));
+    std::thread::sleep(std::time::Duration::from_secs(1));
+    log(format!("Warning:Notice this!"));
+    std::thread::sleep(std::time::Duration::from_secs(1));
+    log_ok_last(format!("Info:Running setup workflow..."));
 }
