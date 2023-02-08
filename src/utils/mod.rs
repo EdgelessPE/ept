@@ -33,11 +33,11 @@ pub fn parse_relative_path(relative: String) -> Result<PathBuf> {
 }
 
 pub fn get_path_apps()->PathBuf{
-    parse_relative_path("./apps".to_string()).unwrap()
+    parse_relative_path("apps".to_string()).unwrap()
 }
 
 pub fn get_path_temp()->PathBuf{
-    parse_relative_path("./temp".to_string()).unwrap()
+    parse_relative_path("temp".to_string()).unwrap()
 }
 
 #[test]
