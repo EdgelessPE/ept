@@ -102,21 +102,33 @@ pub fn step_path(step: StepPath, located: String) -> Result<i32> {
         ));
     }
 
-    // 解析批处理路径
-    let f_path = Path::new(&step.record);
-    if f_path.is_dir() {
-        return Err(anyhow!("Error(Path):'{}' is not a file", &step.record));
-    }
-    let stem = f_path.file_stem().unwrap().to_string_lossy().to_string();
-    let cmd_target_str = format!("{}/{}.cmd", &bin_abs, &stem);
-
-    // 解析二进制绝对路径
-    let clear_record = step.record.replace("./", "");
-    let abs_target_path = Path::new(&located).join(&clear_record);
+    // 解析目标绝对路径
+    let abs_target_path = parse_relative_path(Path::new(&located).join(&step.record).to_string_lossy().to_string())?;
     let abs_target_str = abs_target_path
         .to_string_lossy()
         .to_string()
         .replace("/", "\\");
+
+    // 处理为目录的情况
+    if abs_target_path.is_dir(){
+        let add_res=set_system_path(StepPath {
+            record: abs_target_str,
+        },
+        true);
+        if add_res.is_err() {
+            log(format!("Warning(Path):Failed to add system PATH for '{}', manually add later",&bin_abs));
+        } else if add_res.unwrap() {
+            log(format!(
+                "Warning(Path):Added system PATH for '{}', restart to enable",
+                &bin_abs
+            ));
+        }
+        return Ok(0);
+    }
+
+    // 解析批处理路径
+    let stem = Path::new(&step.record).file_stem().unwrap().to_string_lossy().to_string();
+    let cmd_target_str = format!("{}/{}.cmd", &bin_abs, &stem);
     if !abs_target_path.exists() {
         return Err(anyhow!(
             "Error(Path):Failed to add path : final target '{}' not exist",
@@ -134,6 +146,13 @@ pub fn step_path(step: StepPath, located: String) -> Result<i32> {
 
 #[test]
 fn test_path() {
+    step_path(
+        StepPath {
+            record: String::from("./bin"),
+        },
+        String::from("./apps/VSCode"),
+    )
+    .unwrap();
     step_path(
         StepPath {
             record: String::from("./Code.exe"),
