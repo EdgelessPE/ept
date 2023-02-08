@@ -9,8 +9,8 @@ pub fn get_exe_version(file_path:String)->Result<String>{
 	if let Ok(map) = FileMap::open(path) {
 		let file = PeFile::from_bytes(&map).map_err(|e|{anyhow!("Error:Can't read pe information of '{}' : {}",&file_path,e.to_string())})?;
 
-		let resources=file.resources()?;
-        let version_info=resources.version_info()?;
+		let resources=file.resources().map_err(|e|{anyhow!("Error:Can't read resources of '{}' : {}",&file_path,e.to_string())})?;
+        let version_info=resources.version_info().map_err(|e|{anyhow!("Error:Can't read version information of '{}' : {}",&file_path,e.to_string())})?;
         let fix_opt=version_info.fixed();
         if fix_opt.is_none(){
             return Err(anyhow!("Error:Can't get version info of '{}'",&file_path));
