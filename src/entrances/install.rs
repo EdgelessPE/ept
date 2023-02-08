@@ -44,18 +44,18 @@ pub fn install_using_package(source_file: String,verify_signature:bool) -> Resul
     log_ok_last(format!("Info:Unpacking outer package..."));
 
     // 签名文件加载与校验
-    let signature_struct = parse_signature(signature_path.to_string_lossy().to_string())?;
+    let signature_struct = parse_signature(signature_path.to_string_lossy().to_string())?.package;
     if verify_signature {
         log(format!("Info:Verifying package signature..."));
         if signature_struct.signature.is_some() {
             verify(
                 inner_pkg_str.clone(),
-                signature_struct.packager.clone(),
+                signature_struct.signer.clone(),
                 signature_struct.signature.unwrap(),
             )?;
             log_ok_last(format!("Info:Verifying package signature..."));
         } else {
-            return Err(anyhow!("Error:This package doesn't contain signature, use offline mode to install",&signature_struct.packager));
+            return Err(anyhow!("Error:This package doesn't contain signature, use offline mode to install",&signature_struct.signer));
         }
     }else{
         log("Warning:Signature verification has been disabled!".to_string());
@@ -77,11 +77,11 @@ pub fn install_using_package(source_file: String,verify_signature:bool) -> Resul
     let setup_workflow = parse_workflow(setup_file_path.to_string_lossy().to_string())?;
 
     // 检查签名者与第一作者是否一致
-    if signature_struct.packager!=package_struct.package.authors[0]{
+    if signature_struct.signer!=package_struct.package.authors[0]{
         if verify_signature{
-            return Err(anyhow!("Error:Invalid package : expect first author '{}' to be the packager '{}'",&package_struct.package.authors[0],&signature_struct.packager));
+            return Err(anyhow!("Error:Invalid package : expect first author '{}' to be the package signer '{}'",&package_struct.package.authors[0],&signature_struct.signer));
         }else{
-            log(format!("Warning:Invalid package : expect first author '{}' to be the packager '{}', ignoring this error due to signature verification has been disabled",&package_struct.package.authors[0],&signature_struct.packager));
+            log(format!("Warning:Invalid package : expect first author '{}' to be the package signer '{}', ignoring this error due to signature verification has been disabled",&package_struct.package.authors[0],&signature_struct.signer));
         }
     }else{
         log_ok_last(format!("Info:Resolving package..."));

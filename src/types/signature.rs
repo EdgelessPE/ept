@@ -2,6 +2,12 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Signature {
-    pub packager: String,
+    pub package: SignatureNode,
+}
+
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct SignatureNode {
+    pub signer: String,
     pub signature: Option<String>,
 }

@@ -12,7 +12,7 @@ use super::validator::inner_validator;
 pub fn pack(
     source_dir: String,
     into_file: Option<String>,
-    packager: String,
+    package_signer: String,
     need_sign: bool,
 ) -> Result<String> {
     log(format!("Info:Preparing to pack '{}'", &source_dir));
@@ -28,7 +28,7 @@ pub fn pack(
     let global = parse_package(pkg_path.to_string_lossy().to_string())?;
     let file_stem = format!(
         "{}_{}_{}",
-        &global.package.name, &global.package.version, &packager
+        &global.package.name, &global.package.version, &package_signer
     );
     let into_file = into_file.unwrap_or(String::from("./") + &file_stem + ".nep");
     log_ok_last(format!("Info:Resolving data..."));
@@ -59,8 +59,7 @@ pub fn pack(
     };
     let sign_file_path = temp_dir_path.join("signature.toml");
     let signature_struct = Signature {
-        packager,
-        signature,
+        package:SignatureNode { signer: package_signer, signature }
     };
     let text = toml::to_string_pretty(&signature_struct)?;
     write(sign_file_path, &text)?;

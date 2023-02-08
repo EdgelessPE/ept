@@ -15,9 +15,9 @@ pub fn sign(target_file: String) -> Result<String> {
     sign_with_rsa(private, digest)
 }
 
-pub fn verify(target_file: String, packager: String, signature: String) -> Result<bool> {
+pub fn verify(target_file: String, package_signer: String, signature: String) -> Result<bool> {
     // 查询公钥
-    let public = query_others_public(packager)?;
+    let public = query_others_public(package_signer)?;
     // 计算 blake3 摘要值
     let digest = compute_hash_blake3(target_file)?;
     // 验证签名
