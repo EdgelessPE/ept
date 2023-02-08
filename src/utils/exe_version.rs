@@ -4,7 +4,7 @@ use pelite::FileMap;
 use std::path::Path;
 
 pub fn get_exe_version<P: AsRef<Path>>(file_path: P) -> Result<String> {
-    let path=file_path.as_ref();
+    let path = file_path.as_ref();
     if let Ok(map) = FileMap::open(path) {
         let file = PeFile::from_bytes(&map).map_err(|e| {
             anyhow!(

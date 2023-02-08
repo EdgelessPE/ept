@@ -1,5 +1,4 @@
 use anyhow::{anyhow, Result};
-use colored::Colorize;
 use std::fs::{create_dir_all, remove_dir_all, rename};
 use std::path::Path;
 
@@ -74,7 +73,7 @@ pub fn install_using_package(source_file: String, verify_signature: bool) -> Res
     // 读入包信息和安装工作流
     log(format!("Info:Resolving package..."));
     let pkg_file_path = temp_dir_inner_path.join("package.toml");
-    let package_struct = parse_package(pkg_file_path.to_string_lossy().to_string(),None)?;
+    let package_struct = parse_package(pkg_file_path.to_string_lossy().to_string(), None)?;
     let setup_file_path = temp_dir_inner_path.join("workflows/setup.toml");
     let setup_workflow = parse_workflow(setup_file_path.to_string_lossy().to_string())?;
 

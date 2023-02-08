@@ -54,11 +54,17 @@ impl ExSemVer {
             semver_instance,
         })
     }
-    pub fn from(sv:semver::Version)->Self{
-        Self { major: sv.major, minor: sv.minor, patch: sv.patch, reserved: 0, semver_instance: sv }
+    pub fn from(sv: semver::Version) -> Self {
+        Self {
+            major: sv.major,
+            minor: sv.minor,
+            patch: sv.patch,
+            reserved: 0,
+            semver_instance: sv,
+        }
     }
-    pub fn set_reserved(&mut self,reserved:u64){
-        self.reserved=reserved;
+    pub fn set_reserved(&mut self, reserved: u64) {
+        self.reserved = reserved;
     }
 }
 
@@ -144,7 +150,11 @@ impl Ord for ExSemVer {
 
 impl fmt::Display for ExSemVer {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}.{}.{}.{}",self.major,self.minor,self.patch,self.reserved)
+        write!(
+            f,
+            "{}.{}.{}.{}",
+            self.major, self.minor, self.patch, self.reserved
+        )
     }
 }
 
@@ -153,7 +163,7 @@ fn test_ex_semver() {
     let v1 = ExSemVer::new(1, 2, 3, 4);
     let v2 = ExSemVer::from_str("1.2.3.4").unwrap();
     assert_eq!(v1, v2);
-    assert_eq!(v1.to_string(),String::from("1.2.3.4"));
+    assert_eq!(v1.to_string(), String::from("1.2.3.4"));
 
     let v1 = ExSemVer::parse("1.2.3.4".to_string()).unwrap();
     let v2 = ExSemVer::parse("1.3.3.1".to_string()).unwrap();
@@ -171,11 +181,11 @@ fn test_ex_semver() {
     let v2 = ExSemVer::parse("1.2.3.2".to_string()).unwrap();
     assert!(v1 >= v2);
 
-    let sv=semver::Version::from_str("114.514.19").unwrap();
-    let v1=ExSemVer::from(sv);
-    let mut v2=ExSemVer::from_str("114.514.19.0").unwrap();
-    assert_eq!(v1,v2);
+    let sv = semver::Version::from_str("114.514.19").unwrap();
+    let v1 = ExSemVer::from(sv);
+    let mut v2 = ExSemVer::from_str("114.514.19.0").unwrap();
+    assert_eq!(v1, v2);
     v2.set_reserved(810);
-    let v3=ExSemVer::from_str("114.514.19.810").unwrap();
-    assert_eq!(v2,v3);
+    let v3 = ExSemVer::from_str("114.514.19.810").unwrap();
+    assert_eq!(v2, v3);
 }

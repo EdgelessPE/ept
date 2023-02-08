@@ -1,7 +1,6 @@
 use crate::types::StepPath;
 use crate::utils::{log, parse_relative_path};
 use anyhow::{anyhow, Result};
-use std::env::current_dir;
 use std::fs::{create_dir, File};
 use std::io::Write;
 use std::path::Path;
@@ -80,7 +79,7 @@ fn set_system_path(step: StepPath, is_add: bool) -> Result<bool> {
 pub fn step_path(step: StepPath, located: String) -> Result<i32> {
     // 解析 bin 绝对路径
     let bin_path = parse_relative_path("./bin".to_string())?;
-    let bin_abs=bin_path.to_string_lossy().to_string();
+    let bin_abs = bin_path.to_string_lossy().to_string();
 
     // 创建 bin 目录
     if !bin_path.exists() {
