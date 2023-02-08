@@ -41,13 +41,13 @@ pub fn pack(
     create_dir_all(&temp_dir_path)?;
 
     // 生成内包
-    log(format!("Info:Generating inner package..."));
+    log(format!("Info:Compressing inner package..."));
     let inner_path_str = temp_dir_path
         .join(&(file_stem.clone() + ".tar.zst"))
         .to_string_lossy()
         .to_string();
     compress(source_dir, inner_path_str.clone())?;
-    log_ok_last(format!("Info:Generating inner package..."));
+    log_ok_last(format!("Info:Compressing inner package..."));
 
     // 对内包进行签名
     log(format!("Info:Signing inner package..."));
@@ -67,12 +67,12 @@ pub fn pack(
     log_ok_last(format!("Info:Signing inner package..."));
 
     // 生成外包
-    log(format!("Info:Generating outer package..."));
+    log(format!("Info:Packing outer package..."));
     pack_tar(
         temp_dir_path.to_string_lossy().to_string(),
         into_file.clone(),
     )?;
-    log_ok_last(format!("Info:Generating outer package..."));
+    log_ok_last(format!("Info:Packing outer package..."));
 
     Ok(into_file)
 }

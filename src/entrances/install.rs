@@ -34,13 +34,13 @@ pub fn install_using_package(source_file: String) -> Result<()> {
     create_dir_all(&temp_dir_inner_path)?;
 
     // 解压外包
-    log(format!("Info:Decompressing outer package..."));
+    log(format!("Info:Unpacking outer package..."));
     let temp_dir_outer_str = temp_dir_outer_path.to_string_lossy().to_string();
     release_tar(source_file, temp_dir_outer_str.clone())
         .map_err(|e| anyhow!("Error:Invaild nep package : {}", e.to_string()))?;
     let inner_pkg_str = outer_validator(temp_dir_outer_str.clone(), file_stem.clone())?;
     let signature_path = temp_dir_outer_path.join("signature.toml");
-    log_ok_last(format!("Info:Decompressing outer package..."));
+    log_ok_last(format!("Info:Unpacking outer package..."));
 
     // 签名文件加载与校验
     log(format!("Info:Verifying package signature..."));
