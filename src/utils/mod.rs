@@ -1,3 +1,5 @@
+mod exe_version;
+
 use colored::Colorize;
 use console::Term;
 use regex::Regex;
