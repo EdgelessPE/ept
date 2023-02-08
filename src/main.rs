@@ -63,15 +63,22 @@ enum Action {
 fn main() {
     let args = Args::parse();
 
-    // 配置调试模式
+    // 配置环境变量
     if args.debug {
         envmnt::set("DEBUG", "true");
     }
+    if args.offline {
+        envmnt::set("OFFLINE", "true")
+    }
+
 
     // 匹配入口
     match args.action {
         Action::Install { package } => {
-            let res = install_using_package(package.clone());
+            let res = install_using_package(
+                package.clone(),
+            envmnt::get_or("OFFLINE", "false")==String::from("false")
+        );
             if res.is_err() {
                 log(res.unwrap_err().to_string());
             } else {
@@ -115,7 +122,12 @@ fn main() {
             source_dir,
             into_file,
         } => {
-            let res = pack(source_dir, into_file, "test.edgeless.top".to_string(), true);
+            let res = pack(
+                source_dir, 
+                into_file,
+                 "test.edgeless.top".to_string(),
+                  envmnt::get_or("OFFLINE", "false")==String::from("false")
+                );
             if res.is_err() {
                 log(res.unwrap_err().to_string());
             } else {

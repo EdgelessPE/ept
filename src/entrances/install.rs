@@ -15,7 +15,7 @@ use crate::{
     utils::{log, log_ok_last},
 };
 
-pub fn install_using_package(source_file: String) -> Result<()> {
+pub fn install_using_package(source_file: String,verify_signature:bool) -> Result<()> {
     log(format!("Info:Preparing to install '{}'", &source_file));
 
     // 创建临时目录
@@ -43,17 +43,21 @@ pub fn install_using_package(source_file: String) -> Result<()> {
     log_ok_last(format!("Info:Unpacking outer package..."));
 
     // 签名文件加载与校验
-    log(format!("Info:Verifying package signature..."));
     let signature_struct = parse_signature(signature_path.to_string_lossy().to_string())?;
-    if signature_struct.signature.is_some() {
-        verify(
-            inner_pkg_str.clone(),
-            signature_struct.packager.clone(),
-            signature_struct.signature.unwrap(),
-        )?;
-        log_ok_last(format!("Info:Verifying package signature..."));
-    } else {
-        log(format!("Warning:This package wasn't signed by declared packager '{}', take care while installing!",&signature_struct.packager));
+    if verify_signature {
+        log(format!("Info:Verifying package signature..."));
+        if signature_struct.signature.is_some() {
+            verify(
+                inner_pkg_str.clone(),
+                signature_struct.packager.clone(),
+                signature_struct.signature.unwrap(),
+            )?;
+            log_ok_last(format!("Info:Verifying package signature..."));
+        } else {
+            return Err(anyhow!("Error:This package doesn't contain signature, use offline mode to install",&signature_struct.packager));
+        }
+    }else{
+        log("Warning:Signature verification has been disabled!".to_string());
     }
 
     // 解压内包
@@ -70,6 +74,15 @@ pub fn install_using_package(source_file: String) -> Result<()> {
     let package_struct = parse_package(pkg_file_path.to_string_lossy().to_string())?;
     let setup_file_path = temp_dir_inner_path.join("workflows/setup.toml");
     let setup_workflow = parse_workflow(setup_file_path.to_string_lossy().to_string())?;
+
+    // 检查签名者与第一作者是否一致
+    if signature_struct.packager!=package_struct.package.authors[0]{
+        if verify_signature{
+            return Err(anyhow!("Error:Invalid package : expect first author '{}' to be the packager '{}'",&package_struct.package.authors[0],&signature_struct.packager));
+        }else{
+            log(format!("Warning:Invalid package : expect first author '{}' to be the packager '{}', ignoring this error due to signature verification has been disabled",&package_struct.package.authors[0],&signature_struct.packager));
+        }
+    }
 
     // 创建 apps 文件夹
     if !Path::new("./apps").exists() {
@@ -127,6 +140,7 @@ pub fn install_using_package(source_file: String) -> Result<()> {
 fn test_install() {
     install_using_package(
         r"D:\Desktop\Projects\EdgelessPE\ept\examples\VSCode_1.75.0.0_Cno.nep".to_string(),
+        false
     )
     .unwrap();
 }

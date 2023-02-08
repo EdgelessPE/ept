@@ -50,8 +50,8 @@ pub fn pack(
     log_ok_last(format!("Info:Compressing inner package..."));
 
     // 对内包进行签名
-    log(format!("Info:Signing inner package..."));
     let signature = if need_sign {
+        log(format!("Info:Signing inner package..."));
         let signature = sign(inner_path_str.clone())?;
         Some(signature)
     } else {
@@ -64,7 +64,11 @@ pub fn pack(
     };
     let text = toml::to_string_pretty(&signature_struct)?;
     write(sign_file_path, &text)?;
-    log_ok_last(format!("Info:Signing inner package..."));
+    if need_sign {
+        log_ok_last(format!("Info:Signing inner package..."));
+    }else{
+        log("Warning:Signing has been disabled!".to_string())
+    }
 
     // 生成外包
     log(format!("Info:Packing outer package..."));
