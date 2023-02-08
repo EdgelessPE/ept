@@ -6,7 +6,7 @@ use super::{
     info_local,
     validator::{inner_validator, installed_validator, outer_validator},
 };
-use crate::utils::is_debug_mode;
+use crate::utils::{is_debug_mode, get_path_apps};
 use crate::{
     compression::{decompress, release_tar},
     executor::workflow_executor,
@@ -94,8 +94,9 @@ pub fn install_using_package(source_file: String, verify_signature: bool) -> Res
 
     // 创建 apps 文件夹
     log(format!("Info:Deploying files..."));
-    if !Path::new("./apps").exists() {
-        create_dir_all("./apps")?;
+    let apps_path=get_path_apps();
+    if !apps_path.exists() {
+        create_dir_all(apps_path)?;
     }
 
     // 检查对应包名有没有被安装过
@@ -111,7 +112,7 @@ pub fn install_using_package(source_file: String, verify_signature: bool) -> Res
     }
 
     // 解析最终安装位置
-    let into_dir = Path::new("./apps")
+    let into_dir = get_path_apps()
         .join(&package_struct.package.name)
         .to_string_lossy()
         .to_string();

@@ -1,10 +1,10 @@
 use anyhow::{anyhow, Result};
-use std::{fs::remove_dir_all, path::Path};
+use std::{fs::remove_dir_all};
 
 use crate::{
     executor::workflow_executor,
     parsers::parse_workflow,
-    utils::{log, log_ok_last},
+    utils::{log, log_ok_last, get_path_apps},
 };
 
 use super::validator::installed_validator;
@@ -13,7 +13,7 @@ pub fn uninstall(package_name: String) -> Result<()> {
     log(format!("Info:Preparing to uninstall '{}'", &package_name));
 
     // 解析安装路径
-    let app_path = Path::new("./apps").join(&package_name);
+    let app_path = get_path_apps().join(&package_name);
     if !app_path.exists() {
         return Err(anyhow!("Error:Can't find package '{}'", &package_name));
     }

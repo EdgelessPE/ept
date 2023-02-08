@@ -32,6 +32,10 @@ pub fn parse_relative_path(relative: String) -> Result<PathBuf> {
     Ok(absolute_path)
 }
 
+pub fn get_path_apps()->PathBuf{
+    parse_relative_path("./apps".to_string()).unwrap()
+}
+
 #[test]
 fn test_parse_relative_path() {
     let p1 = String::from("./VSCode/VSCode.exe");

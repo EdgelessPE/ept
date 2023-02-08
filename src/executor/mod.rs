@@ -13,13 +13,13 @@ use std::path::Path;
 
 use crate::{
     types::{Step, StepExecute, StepLink, StepLog, StepPath, WorkflowHeader, WorkflowNode},
-    utils::log,
+    utils::{log, get_path_apps},
 };
 
 // 配置部分内置变量的值
 lazy_static! {
     static ref SYSTEM_DRIVE: String = "C:".to_string();
-    static ref DEFAULT_LOCATION: String = "./apps".to_string();
+    static ref DEFAULT_LOCATION: String = get_path_apps().to_string_lossy().to_string();
 }
 
 // 执行条件以判断是否成立

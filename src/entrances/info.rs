@@ -4,13 +4,13 @@ use anyhow::{anyhow, Result};
 
 use crate::{
     parsers::parse_package,
-    types::{GlobalPackage, Info, InfoDiff},
+    types::{GlobalPackage, Info, InfoDiff}, utils::get_path_apps,
 };
 
 use super::validator::installed_validator;
 
 pub fn info_local(package_name: String) -> Result<(GlobalPackage, InfoDiff)> {
-    let local_path = Path::new("./apps").join(&package_name);
+    let local_path = get_path_apps().join(&package_name);
     if !local_path.exists() {
         return Err(anyhow!(
             "Error:Can't find package '{}' locally",
@@ -47,7 +47,7 @@ pub fn info(package_name: String) -> Result<Info> {
     };
 
     // 扫描本地安装目录
-    let local_path = Path::new("./apps").join(&package_name);
+    let local_path = get_path_apps().join(&package_name);
     if local_path.exists() {
         let (global, local) = info_local(package_name.clone())?;
         info.license = global.package.license;
