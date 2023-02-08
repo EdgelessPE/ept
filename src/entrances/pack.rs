@@ -1,8 +1,8 @@
 use crate::compression::{compress, pack_tar};
 use crate::parsers::parse_package;
 use crate::signature::sign;
-use crate::types::{Signature,SignatureNode};
-use crate::utils::{log, log_ok_last,is_debug_mode};
+use crate::types::{Signature, SignatureNode};
+use crate::utils::{is_debug_mode, log, log_ok_last};
 use anyhow::Result;
 use std::fs::{create_dir_all, remove_dir_all, write};
 use std::path::Path;
@@ -59,13 +59,16 @@ pub fn pack(
     };
     let sign_file_path = temp_dir_path.join("signature.toml");
     let signature_struct = Signature {
-        package:SignatureNode { signer: package_signer, signature }
+        package: SignatureNode {
+            signer: package_signer,
+            signature,
+        },
     };
     let text = toml::to_string_pretty(&signature_struct)?;
     write(sign_file_path, &text)?;
     if need_sign {
         log_ok_last(format!("Info:Signing inner package..."));
-    }else{
+    } else {
         log("Warning:Signing has been disabled!".to_string())
     }
 
@@ -80,14 +83,20 @@ pub fn pack(
     // 清理临时文件夹
     if !is_debug_mode() {
         log(format!("Info:Cleaning..."));
-        let clean_res=remove_dir_all(&temp_dir_path);
-        if clean_res.is_ok(){
+        let clean_res = remove_dir_all(&temp_dir_path);
+        if clean_res.is_ok() {
             log_ok_last(format!("Info:Cleaning..."));
-        }else{
-            log(format!("Warning:Failed to remove temporary directory '{}'",temp_dir_path.to_string_lossy().to_string()));
+        } else {
+            log(format!(
+                "Warning:Failed to remove temporary directory '{}'",
+                temp_dir_path.to_string_lossy().to_string()
+            ));
         }
-    }else{
-        log(format!("Debug:Leaving temporary directory '{}'",temp_dir_path.to_string_lossy().to_string()));
+    } else {
+        log(format!(
+            "Debug:Leaving temporary directory '{}'",
+            temp_dir_path.to_string_lossy().to_string()
+        ));
     }
 
     Ok(into_file)

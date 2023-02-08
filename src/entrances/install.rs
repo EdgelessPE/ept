@@ -16,7 +16,7 @@ use crate::{
     utils::{log, log_ok_last},
 };
 
-pub fn install_using_package(source_file: String,verify_signature:bool) -> Result<()> {
+pub fn install_using_package(source_file: String, verify_signature: bool) -> Result<()> {
     log(format!("Info:Preparing to install '{}'", &source_file));
 
     // 创建临时目录
@@ -55,9 +55,11 @@ pub fn install_using_package(source_file: String,verify_signature:bool) -> Resul
             )?;
             log_ok_last(format!("Info:Verifying package signature..."));
         } else {
-            return Err(anyhow!("Error:This package doesn't contain signature, use offline mode to install"));
+            return Err(anyhow!(
+                "Error:This package doesn't contain signature, use offline mode to install"
+            ));
         }
-    }else{
+    } else {
         log("Warning:Signature verification has been disabled!".to_string());
     }
 
@@ -77,13 +79,17 @@ pub fn install_using_package(source_file: String,verify_signature:bool) -> Resul
     let setup_workflow = parse_workflow(setup_file_path.to_string_lossy().to_string())?;
 
     // 检查签名者与第一作者是否一致
-    if signature_struct.signer!=package_struct.package.authors[0]{
-        if verify_signature{
-            return Err(anyhow!("Error:Invalid package : expect first author '{}' to be the package signer '{}'",&package_struct.package.authors[0],&signature_struct.signer));
-        }else{
+    if signature_struct.signer != package_struct.package.authors[0] {
+        if verify_signature {
+            return Err(anyhow!(
+                "Error:Invalid package : expect first author '{}' to be the package signer '{}'",
+                &package_struct.package.authors[0],
+                &signature_struct.signer
+            ));
+        } else {
             log(format!("Warning:Invalid package : expect first author '{}' to be the package signer '{}', ignoring this error due to signature verification has been disabled",&package_struct.package.authors[0],&signature_struct.signer));
         }
-    }else{
+    } else {
         log_ok_last(format!("Info:Resolving package..."));
     }
 
@@ -139,14 +145,20 @@ pub fn install_using_package(source_file: String,verify_signature:bool) -> Resul
     // 清理临时文件夹
     if !is_debug_mode() {
         log(format!("Info:Cleaning..."));
-        let clean_res=remove_dir_all(&temp_dir_path);
-        if clean_res.is_ok(){
+        let clean_res = remove_dir_all(&temp_dir_path);
+        if clean_res.is_ok() {
             log_ok_last(format!("Info:Cleaning..."));
-        }else{
-            log(format!("Warning:Failed to remove temporary directory '{}'",temp_dir_path.to_string_lossy().to_string()));
+        } else {
+            log(format!(
+                "Warning:Failed to remove temporary directory '{}'",
+                temp_dir_path.to_string_lossy().to_string()
+            ));
         }
-    }else{
-        log(format!("Debug:Leaving temporary directory '{}'",temp_dir_path.to_string_lossy().to_string()));
+    } else {
+        log(format!(
+            "Debug:Leaving temporary directory '{}'",
+            temp_dir_path.to_string_lossy().to_string()
+        ));
     }
 
     Ok(())
@@ -156,7 +168,7 @@ pub fn install_using_package(source_file: String,verify_signature:bool) -> Resul
 fn test_install() {
     install_using_package(
         r"D:\Desktop\Projects\EdgelessPE\ept\examples\VSCode_1.75.0.0_Cno.nep".to_string(),
-        false
+        false,
     )
     .unwrap();
 }

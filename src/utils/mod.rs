@@ -1,9 +1,9 @@
 mod exe_version;
 
+pub use self::exe_version::get_exe_version;
 use colored::Colorize;
 use console::Term;
 use regex::Regex;
-pub use self::exe_version::get_exe_version;
 
 lazy_static! {
     static ref RE: Regex =

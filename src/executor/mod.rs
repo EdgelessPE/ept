@@ -118,8 +118,11 @@ pub fn workflow_executor(flow: Vec<WorkflowNode>, located: String) -> Result<i32
             exit_code = 1;
         } else {
             exit_code = exec_res.unwrap();
-            if exit_code!=0 {
-                log(format!("Warning(Main):Workflow step '{}' finished with exit code '{}'",&flow_node.header.name,exit_code));
+            if exit_code != 0 {
+                log(format!(
+                    "Warning(Main):Workflow step '{}' finished with exit code '{}'",
+                    &flow_node.header.name, exit_code
+                ));
             }
         }
     }
