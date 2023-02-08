@@ -1,7 +1,7 @@
 use crate::compression::{compress, pack_tar};
 use crate::parsers::parse_package;
 use crate::signature::sign;
-use crate::types::Signature;
+use crate::types::{Signature,SignatureNode};
 use crate::utils::{log, log_ok_last,is_debug_mode};
 use anyhow::Result;
 use std::fs::{create_dir_all, remove_dir_all, write};
@@ -84,10 +84,10 @@ pub fn pack(
         if clean_res.is_ok(){
             log_ok_last(format!("Info:Cleaning..."));
         }else{
-            log(format!("Warning:Failed to remove temporary directory '{}'",temp_dir_path));
+            log(format!("Warning:Failed to remove temporary directory '{}'",temp_dir_path.to_string_lossy().to_string()));
         }
     }else{
-        log(format!("Debug:Leaving temporary directory '{}'",temp_dir_path));
+        log(format!("Debug:Leaving temporary directory '{}'",temp_dir_path.to_string_lossy().to_string()));
     }
 
     Ok(into_file)

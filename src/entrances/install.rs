@@ -55,7 +55,7 @@ pub fn install_using_package(source_file: String,verify_signature:bool) -> Resul
             )?;
             log_ok_last(format!("Info:Verifying package signature..."));
         } else {
-            return Err(anyhow!("Error:This package doesn't contain signature, use offline mode to install",&signature_struct.signer));
+            return Err(anyhow!("Error:This package doesn't contain signature, use offline mode to install"));
         }
     }else{
         log("Warning:Signature verification has been disabled!".to_string());
@@ -143,10 +143,10 @@ pub fn install_using_package(source_file: String,verify_signature:bool) -> Resul
         if clean_res.is_ok(){
             log_ok_last(format!("Info:Cleaning..."));
         }else{
-            log(format!("Warning:Failed to remove temporary directory '{}'",temp_dir_path));
+            log(format!("Warning:Failed to remove temporary directory '{}'",temp_dir_path.to_string_lossy().to_string()));
         }
     }else{
-        log(format!("Debug:Leaving temporary directory '{}'",temp_dir_path));
+        log(format!("Debug:Leaving temporary directory '{}'",temp_dir_path.to_string_lossy().to_string()));
     }
 
     Ok(())
