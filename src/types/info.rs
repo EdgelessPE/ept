@@ -6,7 +6,7 @@ use super::Software;
 pub struct Info {
     pub name: String,
     pub template: String,
-    pub licence: Option<String>,
+    pub license: Option<String>,
     pub local: Option<InfoDiff>,
     pub online: Option<InfoDiff>,
     pub software: Option<Software>,

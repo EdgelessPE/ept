@@ -27,6 +27,9 @@ struct Args {
     /// Run commands in debug mode
     #[arg(short, long)]
     debug: bool,
+    /// Disable online Edgeless CA to skip signature signing or verifying
+    #[arg(long)]
+    offline: bool,
 }
 
 #[derive(Subcommand, Debug)]
@@ -46,7 +49,7 @@ enum Action {
         /// Package name
         package_name: String,
     },
-    /// List informations of installed packages
+    /// List information of installed packages
     List,
     /// Pack a directory content into nep
     Pack {

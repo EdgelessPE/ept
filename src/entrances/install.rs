@@ -37,7 +37,7 @@ pub fn install_using_package(source_file: String) -> Result<()> {
     log(format!("Info:Unpacking outer package..."));
     let temp_dir_outer_str = temp_dir_outer_path.to_string_lossy().to_string();
     release_tar(source_file, temp_dir_outer_str.clone())
-        .map_err(|e| anyhow!("Error:Invaild nep package : {}", e.to_string()))?;
+        .map_err(|e| anyhow!("Error:Invalid nep package : {}", e.to_string()))?;
     let inner_pkg_str = outer_validator(temp_dir_outer_str.clone(), file_stem.clone())?;
     let signature_path = temp_dir_outer_path.join("signature.toml");
     log_ok_last(format!("Info:Unpacking outer package..."));
@@ -60,7 +60,7 @@ pub fn install_using_package(source_file: String) -> Result<()> {
     log(format!("Info:Decompressing inner package..."));
     let temp_dir_inner_str = temp_dir_inner_path.to_string_lossy().to_string();
     decompress(inner_pkg_str.clone(), temp_dir_inner_str.clone())
-        .map_err(|e| anyhow!("Error:Invaild nep package : {}", e.to_string()))?;
+        .map_err(|e| anyhow!("Error:Invalid nep package : {}", e.to_string()))?;
     inner_validator(temp_dir_inner_str.clone())?;
     log_ok_last(format!("Info:Decompressing inner package..."));
 

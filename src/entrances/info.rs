@@ -37,7 +37,7 @@ pub fn info(package_name: String) -> Result<Info> {
     let mut info = Info {
         name: package_name.clone(),
         template: String::from("Software"),
-        licence: None,
+        license: None,
         local: None,
         online: None,
         software: None,
@@ -47,7 +47,7 @@ pub fn info(package_name: String) -> Result<Info> {
     let local_path = Path::new("./apps").join(&package_name);
     if local_path.exists() {
         let (global, local) = info_local(package_name.clone())?;
-        info.licence = global.package.licence;
+        info.license = global.package.license;
         info.local = Some(local);
         info.software = global.software;
     }

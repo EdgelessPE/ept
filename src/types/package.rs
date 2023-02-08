@@ -6,7 +6,7 @@ pub struct Package {
     pub template: String,
     pub version: String,
     pub authors: Vec<String>,
-    pub licence: Option<String>,
+    pub license: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
