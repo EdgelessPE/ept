@@ -4,7 +4,7 @@ mod log;
 pub use self::exe_version::get_exe_version;
 pub use self::log::{log,log_ok_last};
 
-use std::env::{self, current_dir};
+use std::env::{current_dir};
 use std::path::{Path, PathBuf};
 use anyhow::{Result};
 use path_clean::PathClean;
@@ -20,9 +20,10 @@ pub fn parse_relative_path(relative:String)->Result<PathBuf>{
     let absolute_path = if path.is_absolute() {
         path.to_path_buf()
     } else {
-        env::current_dir()?.join(path)
+        current_dir()?.join(path)
     }.clean();
 
+    log(format!("Debug:Parse relative path '{}' into '{}'",&relative,&absolute_path.display()));
     Ok(absolute_path)
 }
 

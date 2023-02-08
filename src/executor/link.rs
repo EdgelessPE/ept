@@ -1,8 +1,8 @@
-use crate::types::StepLink;
+use crate::{types::StepLink, utils::parse_relative_path};
 use anyhow::{anyhow, Result};
 use dirs::desktop_dir;
 use mslnk::ShellLink;
-use std::env::current_dir;
+use std::{path::Path};
 
 pub fn step_link(step: StepLink, located: String) -> Result<i32> {
     // 获取用户桌面位置
@@ -14,9 +14,7 @@ pub fn step_link(step: StepLink, located: String) -> Result<i32> {
     let desktop = d.to_str().unwrap_or(r"C:\Users\Public\Desktop");
 
     // 解析源文件绝对路径
-    let abs_clear_source_path = current_dir()?
-        .join(&located.replace("./", ""))
-        .join(&step.source_file.replace("./", ""));
+    let abs_clear_source_path =parse_relative_path(Path::new(&located).join(&step.source_file).to_string_lossy().to_string())?;
     // println!("{:?}",&abs_clear_source_path);
     let abs_clear_source = abs_clear_source_path.to_string_lossy().to_string();
 

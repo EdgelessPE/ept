@@ -1,5 +1,5 @@
 use crate::types::StepPath;
-use crate::utils::log;
+use crate::utils::{log, parse_relative_path};
 use anyhow::{anyhow, Result};
 use std::env::current_dir;
 use std::fs::{create_dir, File};
@@ -79,9 +79,8 @@ fn set_system_path(step: StepPath, is_add: bool) -> Result<bool> {
 // 实现：在当前目录创建 bin 文件夹并放置批处理，随后将 bin 添加到系统 PATH 变量
 pub fn step_path(step: StepPath, located: String) -> Result<i32> {
     // 解析 bin 绝对路径
-    let cur_dir = current_dir()?.to_string_lossy().to_string();
-    let bin_abs = cur_dir + "\\bin";
-    let bin_path = Path::new(&bin_abs);
+    let bin_path = parse_relative_path("./bin".to_string())?;
+    let bin_abs=bin_path.to_string_lossy().to_string();
 
     // 创建 bin 目录
     if !bin_path.exists() {
@@ -138,9 +137,9 @@ pub fn step_path(step: StepPath, located: String) -> Result<i32> {
 fn test_path() {
     step_path(
         StepPath {
-            record: String::from("./2345Pic.exe"),
+            record: String::from("./Code.exe"),
         },
-        String::from("D:/CnoRPS/2345Pic"),
+        String::from("./apps/VSCode"),
     )
     .unwrap();
 }
