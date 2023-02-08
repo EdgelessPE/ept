@@ -147,6 +147,7 @@ fn test_ex_semver() {
     let v1 = ExSemVer::new(1, 2, 3, 4);
     let v2 = ExSemVer::from_str("1.2.3.4").unwrap();
     assert_eq!(v1, v2);
+    assert_eq!(v1.to_string(),String::from("1.2.3.4"));
 
     let v1 = ExSemVer::parse("1.2.3.4".to_string()).unwrap();
     let v2 = ExSemVer::parse("1.3.3.1".to_string()).unwrap();
