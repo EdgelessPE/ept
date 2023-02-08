@@ -82,6 +82,8 @@ pub fn install_using_package(source_file: String,verify_signature:bool) -> Resul
         }else{
             log(format!("Warning:Invalid package : expect first author '{}' to be the packager '{}', ignoring this error due to signature verification has been disabled",&package_struct.package.authors[0],&signature_struct.packager));
         }
+    }else{
+        log_ok_last(format!("Info:Resolving package..."));
     }
 
     // 创建 apps 文件夹
@@ -116,8 +118,6 @@ pub fn install_using_package(source_file: String,verify_signature:bool) -> Resul
         ));
     }
     rename(app_path, into_dir.clone())?;
-
-    log_ok_last(format!("Info:Resolving package..."));
 
     // 执行安装工作流
     log(format!("Info:Running setup workflow..."));

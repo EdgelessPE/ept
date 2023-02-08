@@ -111,7 +111,7 @@ pub fn workflow_executor(flow: Vec<WorkflowNode>, located: String) -> Result<i32
         // 处理执行结果
         if exec_res.is_err() {
             log(format!(
-                "Warning:Workflow step {} failed to execute : {}, check your workflow syntax again",
+                "Warning(Main):Workflow step {} failed to execute : {}, check your workflow syntax again",
                 &flow_node.header.name,
                 exec_res.unwrap_err()
             ));
