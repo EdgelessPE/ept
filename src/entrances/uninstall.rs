@@ -1,5 +1,4 @@
 use anyhow::{anyhow, Result};
-use colored::Colorize;
 use std::{fs::remove_dir_all, path::Path};
 
 use crate::{
@@ -35,10 +34,7 @@ pub fn uninstall(package_name: String) -> Result<()> {
     // 执行卸载工作流
     log(format!("Info:Running remove workflow..."));
     workflow_executor(remove_flow, app_str.clone())?;
-    log(format!(
-        "Info:Running remove workflow...   {}",
-        "ok".green()
-    ));
+    log_ok_last(format!("Info:Running remove workflow..."));
 
     // 删除 app 目录
     log(format!("Info:Cleaning..."));

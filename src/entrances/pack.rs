@@ -25,7 +25,7 @@ pub fn pack(
     // 读取包信息
     log(format!("Info:Resolving data..."));
     let pkg_path = Path::new(&source_dir).join("package.toml");
-    let global = parse_package(pkg_path.to_string_lossy().to_string())?;
+    let global = parse_package(pkg_path.to_string_lossy().to_string(),None)?;
     let file_stem = format!(
         "{}_{}_{}",
         &global.package.name, &global.package.version, &package_signer

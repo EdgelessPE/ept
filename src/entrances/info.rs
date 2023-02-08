@@ -23,7 +23,7 @@ pub fn info_local(package_name: String) -> Result<(GlobalPackage, InfoDiff)> {
     let ctx_path = Path::new(&ctx_str);
     // 读入包信息
     let pkg_path = ctx_path.join("package.toml");
-    let global = parse_package(pkg_path.to_string_lossy().to_string())?;
+    let global = parse_package(pkg_path.to_string_lossy().to_string(),Some(local_str.clone()))?;
     // 写本地信息
     let local = InfoDiff {
         version: global.package.version.clone(),

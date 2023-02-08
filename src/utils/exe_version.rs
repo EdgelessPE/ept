@@ -3,34 +3,34 @@ use pelite::pe64::{Pe, PeFile};
 use pelite::FileMap;
 use std::path::Path;
 
-pub fn get_exe_version(file_path: String) -> Result<String> {
-    let path = Path::new(&file_path);
+pub fn get_exe_version<P: AsRef<Path>>(file_path: P) -> Result<String> {
+    let path=file_path.as_ref();
     if let Ok(map) = FileMap::open(path) {
         let file = PeFile::from_bytes(&map).map_err(|e| {
             anyhow!(
-                "Error:Can't read pe information of '{}' : {}",
-                &file_path,
+                "Error:Can't read pe information of '{:?}' : {}",
+                &path,
                 e.to_string()
             )
         })?;
 
         let resources = file.resources().map_err(|e| {
             anyhow!(
-                "Error:Can't read resources of '{}' : {}",
-                &file_path,
+                "Error:Can't read resources of '{:?}' : {}",
+                &path,
                 e.to_string()
             )
         })?;
         let version_info = resources.version_info().map_err(|e| {
             anyhow!(
-                "Error:Can't read version information of '{}' : {}",
-                &file_path,
+                "Error:Can't read version information of '{:?}' : {}",
+                &path,
                 e.to_string()
             )
         })?;
         let fix_opt = version_info.fixed();
         if fix_opt.is_none() {
-            return Err(anyhow!("Error:Can't get version info of '{}'", &file_path));
+            return Err(anyhow!("Error:Can't get version info of '{:?}'", &path));
         }
         let file_version = fix_opt.unwrap().dwFileVersion;
 
@@ -39,7 +39,7 @@ pub fn get_exe_version(file_path: String) -> Result<String> {
             file_version.Major, file_version.Minor, file_version.Patch, file_version.Build
         ))
     } else {
-        Err(anyhow!("Error:Can't read version of '{}'", &file_path))
+        Err(anyhow!("Error:Can't read version of '{:?}'", &path))
     }
 }
 
