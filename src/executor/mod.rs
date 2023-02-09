@@ -16,6 +16,8 @@ use crate::{
     utils::{log, get_path_apps},
 };
 
+use self::{link::reverse_link, path::reverse_path};
+
 // 配置部分内置变量的值
 lazy_static! {
     static ref SYSTEM_DRIVE: String = "C:".to_string();
@@ -128,6 +130,33 @@ pub fn workflow_executor(flow: Vec<WorkflowNode>, located: String) -> Result<i32
     }
 
     Ok(exit_code)
+}
+
+// 宽容地逆向执行 setup 工作流
+pub fn workflow_reverse_executor(flow:Vec<WorkflowNode>,located: String)->Result<()>{
+    // 遍历流节点
+    for flow_node in flow {
+        // 忽略步骤执行条件
+
+        // 匹配步骤类型以调用逆向步骤解释器
+        let located_cp=located.clone();
+        let exec_res=match flow_node.body {
+            Step::StepLink(step)=>reverse_link(step, located_cp),
+            Step::StepPath(step)=>reverse_path(step, located_cp),
+            _=>Ok(())
+        };
+
+        // 对错误进行警告
+        if exec_res.is_err() {
+            log(format!(
+                "Warning(Main):Reverse workflow step '{}' failed to execute : {}",
+                &flow_node.header.name,
+                exec_res.unwrap_err()
+            ));
+        }
+    }
+
+    Ok(())
 }
 
 #[test]
