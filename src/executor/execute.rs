@@ -36,6 +36,7 @@ pub fn step_execute(step: StepExecute, located: String) -> Result<i32> {
     cmd.current_dir(&workshop);
 
     // 执行并收集结果
+    log(format!("Info(Execute):Running command '{}' in '{}'",&step.command,&workshop));
     let output_res = cmd.output();
     if output_res.is_err() {
         return Err(anyhow!(

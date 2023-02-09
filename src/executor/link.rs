@@ -2,16 +2,21 @@ use crate::{types::StepLink, utils::parse_relative_path};
 use anyhow::{anyhow, Result};
 use dirs::desktop_dir;
 use mslnk::ShellLink;
-use std::path::Path;
+use std::{path::Path, fs::remove_file};
 
-pub fn step_link(step: StepLink, located: String) -> Result<i32> {
-    // 获取用户桌面位置
+fn get_desktop()->Result<String>{
     let desktop_opt = desktop_dir();
     if desktop_opt.is_none() {
         return Err(anyhow!("Error(Link):Can't get desktop location"));
     }
     let d = desktop_opt.unwrap();
     let desktop = d.to_str().unwrap_or(r"C:\Users\Public\Desktop");
+    Ok(String::from(desktop))
+}
+
+pub fn step_link(step: StepLink, located: String) -> Result<i32> {
+    // 获取用户桌面位置
+    let desktop = get_desktop()?;
 
     // 解析源文件绝对路径
     let abs_clear_source_path = parse_relative_path(
@@ -43,7 +48,24 @@ pub fn step_link(step: StepLink, located: String) -> Result<i32> {
             c_res.unwrap_err().to_string()
         ));
     }
+    log(format!("Info(Link):Added shortcut '{}'",target));
     Ok(0)
+}
+
+pub fn reverse_link(step:StepLink,_: String)->Result<()>{
+    // 获取用户桌面位置
+    let desktop = get_desktop()?;
+
+    // 解析快捷方式路径
+    let target = format!("{}/{}.lnk", desktop, &step.target_name);
+
+    // 尝试删除
+    let target_path=Path::new(&target);
+    if target_path.exists(){
+        remove_file(target_path)?;
+        log(format!("Info(Link):Removed shortcut '{}'",target));
+    }
+    Ok(())
 }
 
 #[test]
