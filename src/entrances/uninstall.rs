@@ -2,7 +2,7 @@ use anyhow::{anyhow, Result};
 use std::{fs::remove_dir_all};
 
 use crate::{
-    executor::workflow_executor,
+    executor::{workflow_executor, workflow_reverse_executor},
     parsers::parse_workflow,
     utils::{log, log_ok_last, get_path_apps},
 };
@@ -22,19 +22,35 @@ pub fn uninstall(package_name: String) -> Result<()> {
     // 判断安装路径是否完整
     installed_validator(app_str.clone())?;
 
-    // 读入包信息和卸载工作流
+    // 读入卸载工作流
     // let global=parse_package(app_path.join(".nep_context/package.toml").to_string_lossy().to_string())?;
-    let remove_flow = parse_workflow(
-        app_path
-            .join(".nep_context/workflows/remove.toml")
+    let remove_flow_path=app_path.join(".nep_context/workflows/remove.toml");
+    if remove_flow_path.exists(){
+        let remove_flow = parse_workflow(
+            remove_flow_path
+                .to_string_lossy()
+                .to_string(),
+        )?;
+    
+        // 执行卸载工作流
+        log(format!("Info:Running remove workflow..."));
+        workflow_executor(remove_flow, app_str.clone())?;
+        log_ok_last(format!("Info:Running remove workflow..."));
+    }
+
+    // 读入安装工作流
+    let setup_flow_path=app_path.join(".nep_context/workflows/setup.toml");
+    let setup_flow=parse_workflow(
+        setup_flow_path
             .to_string_lossy()
             .to_string(),
     )?;
 
-    // 执行卸载工作流
-    log(format!("Info:Running remove workflow..."));
-    workflow_executor(remove_flow, app_str.clone())?;
-    log_ok_last(format!("Info:Running remove workflow..."));
+    // 逆向执行安装工作流
+    log(format!("Info:Running reverse setup workflow..."));
+    workflow_reverse_executor(setup_flow, app_str.clone())?;
+    log(format!("Info:Running reverse setup workflow..."));
+
 
     // 删除 app 目录
     log(format!("Info:Cleaning..."));

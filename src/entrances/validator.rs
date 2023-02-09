@@ -5,7 +5,6 @@ pub fn inner_validator(dir: String) -> Result<()> {
     let manifest = vec![
         "package.toml",
         "workflows/setup.toml",
-        "workflows/remove.toml",
     ];
     for file_name in manifest {
         let p = Path::new(&dir).join(file_name);
