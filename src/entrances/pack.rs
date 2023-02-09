@@ -7,7 +7,7 @@ use anyhow::Result;
 use std::fs::{create_dir_all, remove_dir_all, write};
 use std::path::Path;
 
-use super::validator::inner_validator;
+use super::utils::inner_validator;
 
 pub fn pack(
     source_dir: String,

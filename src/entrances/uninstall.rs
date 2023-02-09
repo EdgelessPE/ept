@@ -7,7 +7,7 @@ use crate::{
     utils::{log, log_ok_last, get_path_apps},
 };
 
-use super::validator::installed_validator;
+use super::utils::installed_validator;
 
 pub fn uninstall(package_name: String) -> Result<()> {
     log(format!("Info:Preparing to uninstall '{}'", &package_name));
@@ -23,7 +23,6 @@ pub fn uninstall(package_name: String) -> Result<()> {
     installed_validator(app_str.clone())?;
 
     // 读入卸载工作流
-    // let global=parse_package(app_path.join(".nep_context/package.toml").to_string_lossy().to_string())?;
     let remove_flow_path=app_path.join(".nep_context/workflows/remove.toml");
     if remove_flow_path.exists(){
         let remove_flow = parse_workflow(

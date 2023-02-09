@@ -2,9 +2,10 @@ use anyhow::{anyhow, Result};
 use std::fs::{create_dir_all, remove_dir_all, rename};
 use std::path::Path;
 
+use super::utils::clean_temp;
 use super::{
     info_local,
-    validator::{inner_validator, installed_validator, outer_validator},
+    utils::{inner_validator, installed_validator, outer_validator,unpack_nep},
 };
 use crate::utils::{is_debug_mode, get_path_apps, get_path_temp};
 use crate::{
@@ -16,59 +17,10 @@ use crate::{
 };
 
 pub fn install_using_package(source_file: String, verify_signature: bool) -> Result<()> {
-    log(format!("Info:Preparing to install '{}'", &source_file));
+    log(format!("Info:Preparing to install with package '{}'", &source_file));
 
-    // 创建临时目录
-    let file_stem = Path::new(&source_file)
-        .file_stem()
-        .unwrap()
-        .to_string_lossy()
-        .to_string();
-    let temp_dir_path = get_path_temp().join(&file_stem);
-    let temp_dir_outer_path = temp_dir_path.join("Outer");
-    let temp_dir_inner_path = temp_dir_path.join("Inner");
-    if temp_dir_path.exists() {
-        remove_dir_all(&temp_dir_path)?;
-    }
-    create_dir_all(&temp_dir_outer_path)?;
-    create_dir_all(&temp_dir_inner_path)?;
-
-    // 解压外包
-    log(format!("Info:Unpacking outer package..."));
-    let temp_dir_outer_str = temp_dir_outer_path.to_string_lossy().to_string();
-    release_tar(source_file, temp_dir_outer_str.clone())
-        .map_err(|e| anyhow!("Error:Invalid nep package : {}", e.to_string()))?;
-    let inner_pkg_str = outer_validator(temp_dir_outer_str.clone(), file_stem.clone())?;
-    let signature_path = temp_dir_outer_path.join("signature.toml");
-    log_ok_last(format!("Info:Unpacking outer package..."));
-
-    // 签名文件加载与校验
-    let signature_struct = parse_signature(signature_path.to_string_lossy().to_string())?.package;
-    if verify_signature {
-        log(format!("Info:Verifying package signature..."));
-        if signature_struct.signature.is_some() {
-            verify(
-                inner_pkg_str.clone(),
-                signature_struct.signer.clone(),
-                signature_struct.signature.unwrap(),
-            )?;
-            log_ok_last(format!("Info:Verifying package signature..."));
-        } else {
-            return Err(anyhow!(
-                "Error:This package doesn't contain signature, use offline mode to install"
-            ));
-        }
-    } else {
-        log("Warning:Signature verification has been disabled!".to_string());
-    }
-
-    // 解压内包
-    log(format!("Info:Decompressing inner package..."));
-    let temp_dir_inner_str = temp_dir_inner_path.to_string_lossy().to_string();
-    decompress(inner_pkg_str.clone(), temp_dir_inner_str.clone())
-        .map_err(|e| anyhow!("Error:Invalid nep package : {}", e.to_string()))?;
-    inner_validator(temp_dir_inner_str.clone())?;
-    log_ok_last(format!("Info:Decompressing inner package..."));
+    // 解包
+    let temp_dir_inner_path=unpack_nep(source_file, verify_signature)?;
 
     // 读入包信息和安装工作流
     log(format!("Info:Resolving package..."));
@@ -143,23 +95,7 @@ pub fn install_using_package(source_file: String, verify_signature: bool) -> Res
     log_ok_last(format!("Info:Validating setup..."));
 
     // 清理临时文件夹
-    if !is_debug_mode() {
-        log(format!("Info:Cleaning..."));
-        let clean_res = remove_dir_all(&temp_dir_path);
-        if clean_res.is_ok() {
-            log_ok_last(format!("Info:Cleaning..."));
-        } else {
-            log(format!(
-                "Warning:Failed to remove temporary directory '{}'",
-                temp_dir_path.to_string_lossy().to_string()
-            ));
-        }
-    } else {
-        log(format!(
-            "Debug:Leaving temporary directory '{}'",
-            temp_dir_path.to_string_lossy().to_string()
-        ));
-    }
+    clean_temp(source_file)?;
 
     Ok(())
 }

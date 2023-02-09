@@ -7,7 +7,7 @@ use crate::{
     types::{GlobalPackage, Info, InfoDiff}, utils::get_path_apps,
 };
 
-use super::validator::installed_validator;
+use super::utils::installed_validator;
 
 pub fn info_local(package_name: String) -> Result<(GlobalPackage, InfoDiff)> {
     let local_path = get_path_apps().join(&package_name);

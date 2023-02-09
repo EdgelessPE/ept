@@ -3,7 +3,8 @@ mod install;
 mod list;
 mod pack;
 mod uninstall;
-mod validator;
+mod update;
+mod utils;
 
 pub use self::info::{info, info_local};
 pub use self::install::install_using_package;
