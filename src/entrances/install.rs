@@ -20,7 +20,7 @@ pub fn install_using_package(source_file: String, verify_signature: bool) -> Res
     log(format!("Info:Preparing to install with package '{}'", &source_file));
 
     // 解包
-    let temp_dir_inner_path=unpack_nep(source_file, verify_signature)?;
+    let (temp_dir_inner_path,package_struct)=unpack_nep(source_file, verify_signature)?;
 
     // 读入包信息和安装工作流
     log(format!("Info:Resolving package..."));

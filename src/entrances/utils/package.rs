@@ -2,6 +2,8 @@ use std::path::PathBuf;
 
 use anyhow::{Result,anyhow};
 
+use crate::types::GlobalPackage;
+
 /// 根据源文件路径创建并返回临时目录
 fn get_temp_dir_path(source_file:String,keep_clear:bool)->Result<PathBuf>{
     let file_stem = Path::new(&source_file)
@@ -49,8 +51,8 @@ pub fn clean_temp(source_file:String)->Result<()>{
     Ok(())
 }
 
-/// 返回 Inner 临时目录
-pub fn unpack_nep(source_file:String,verify_signature: bool)->Result<PathBuf>{
+/// 返回 (Inner 临时目录,package 结构体)
+pub fn unpack_nep(source_file:String,verify_signature: bool)->Result<(PathBuf,GlobalPackage)>{
     // 创建临时目录
     let temp_dir_path = get_temp_dir_path(source_file, true)?;
     let temp_dir_outer_path = temp_dir_path.join("Outer");
@@ -93,5 +95,21 @@ pub fn unpack_nep(source_file:String,verify_signature: bool)->Result<PathBuf>{
     inner_validator(temp_dir_inner_str.clone())?;
     log_ok_last(format!("Info:Decompressing inner package..."));
 
-    Ok(temp_dir_inner_path)
+    // 读取 package.toml
+    let package_struct=parse_package(temp_dir_inner_path.join("package.toml").to_string_lossy().to_string(), None)?;
+
+    // 检查签名者与第一作者是否一致
+    if signature_struct.signer != package_struct.package.authors[0] {
+        if verify_signature {
+            return Err(anyhow!(
+                "Error:Invalid package : expect first author '{}' to be the package signer '{}'",
+                &package_struct.package.authors[0],
+                &signature_struct.signer
+            ));
+        } else {
+            log(format!("Warning:Invalid package : expect first author '{}' to be the package signer '{}', ignoring this error due to signature verification has been disabled",&package_struct.package.authors[0],&signature_struct.signer));
+        }
+    }
+
+    Ok((temp_dir_inner_path,package_struct))
 }
