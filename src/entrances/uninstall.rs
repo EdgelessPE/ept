@@ -48,7 +48,7 @@ pub fn uninstall(package_name: String) -> Result<()> {
     // 逆向执行安装工作流
     log(format!("Info:Running reverse setup workflow..."));
     workflow_reverse_executor(setup_flow, app_str.clone())?;
-    log(format!("Info:Running reverse setup workflow..."));
+    log_ok_last(format!("Info:Running reverse setup workflow..."));
 
 
     // 删除 app 目录

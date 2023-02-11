@@ -50,6 +50,7 @@ pub fn parse_package(p: String, located: Option<String>) -> Result<GlobalPackage
         let ex_sv_declared = ExSemVer::parse(pkg_version)?;
 
         // 读取主程序版本号
+        let exe_file_str=file_path.to_string_lossy().to_string();
         let mp_version = get_exe_version(file_path)?;
         let mut ex_sv_latest = ExSemVer::parse(mp_version)?;
         ex_sv_latest.set_reserved(0);
@@ -57,8 +58,8 @@ pub fn parse_package(p: String, located: Option<String>) -> Result<GlobalPackage
         // 判断是否更新
         if ex_sv_declared.semver_instance != ex_sv_latest.semver_instance {
             log(format!(
-                "Warning:Updated package version from '{}' to '{}'",
-                ex_sv_declared, ex_sv_latest
+                "Warning:Updated '{}' version from '{}' to '{}' according to '{}'",
+                &pkg.package.name,ex_sv_declared, ex_sv_latest,exe_file_str
             ));
             pkg.package.version = ex_sv_latest.to_string();
             let new_pkg_text = toml::to_string_pretty(&pkg)?;

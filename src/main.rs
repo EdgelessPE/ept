@@ -12,6 +12,7 @@ mod types;
 mod utils;
 
 use clap::{Parser, Subcommand};
+use entrances::update_using_package;
 
 use crate::{
     entrances::{info, install_using_package, list, pack, uninstall},
@@ -36,6 +37,11 @@ struct Args {
 enum Action {
     /// Install a package with path (locally in current version)
     Install {
+        /// Package path (or package name in future versions)
+        package: String,
+    },
+    /// Update a package with path (locally in current version)
+    Update {
         /// Package path (or package name in future versions)
         package: String,
     },
@@ -85,6 +91,20 @@ fn main() {
             } else {
                 log(format!(
                     "Success:Package '{}' installed successfully",
+                    &package
+                ));
+            }
+        }
+        Action::Update { package }=>{
+            let res = update_using_package(
+                package.clone(),
+                envmnt::get_or("OFFLINE", "false") == String::from("false"),
+            );
+            if res.is_err() {
+                log(res.unwrap_err().to_string());
+            } else {
+                log(format!(
+                    "Success:Package '{}' updated successfully",
                     &package
                 ));
             }

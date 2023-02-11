@@ -33,7 +33,7 @@ impl ExSemVer {
         // 使用小数点分割
         let s: Vec<&str> = text.split(".").collect();
         if s.len() != 4 {
-            return Err(anyhow!("Error:Can't parse '{}' as extended semver", text));
+            return Err(anyhow!("Error:Can't parse '{}' as extended semver : expected 4 fields, got {} ", text,s.len()));
         }
 
         // 生成标准 semver

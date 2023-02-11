@@ -38,13 +38,13 @@ pub fn update_using_package(source_file: String, verify_signature: bool)->Result
     // 确认是否允许升级
     let (local_package,local_diff)=try_get_info_res.unwrap();
     let local_version=ExSemVer::from_str(&local_diff.version)?;
-    let fresh_version=ExSemVer::from_str(&fresh_package.package.name)?;
+    let fresh_version=ExSemVer::from_str(&fresh_package.package.version)?;
     if local_version>=fresh_version{
         return Err(anyhow!("Error:Package '{}' has been up to date ({}), can't update to the version of given package ({})",&fresh_package.package.name,local_version,fresh_version));
     }
 
     // 确认作者是否一致
-    if same_authors(&local_package.package.authors, &fresh_package.package.authors){
+    if !same_authors(&local_package.package.authors, &fresh_package.package.authors){
         // 需要卸载然后重新安装
         log(format!("Warning:The given package is not the same as the author of the installed package (local:{}, given:{}), uninstall the installed package first? (y/n)",local_package.package.authors.join(","),fresh_package.package.authors.join(",")));
         if !ask_yn(){
@@ -113,4 +113,9 @@ pub fn update_using_package(source_file: String, verify_signature: bool)->Result
     clean_temp(source_file)?;
 
     Ok(())
+}
+
+#[test]
+fn test_update_using_package(){
+    update_using_package("./VSCode_1.75.0.0_Cno.nep".to_string(), true).unwrap();
 }

@@ -2,7 +2,7 @@ use std::{path::{PathBuf, Path}, fs::{remove_dir_all, create_dir_all}};
 
 use anyhow::{Result,anyhow};
 
-use crate::{types::GlobalPackage, utils::{get_path_temp, is_debug_mode, log, log_ok_last}, compression::{release_tar, decompress}, parsers::{parse_signature, parse_package}, signature::verify};
+use crate::{types::GlobalPackage, utils::{get_path_temp, is_debug_mode, log, log_ok_last}, compression::{release_tar, decompress}, parsers::{parse_signature, parse_package, parse_author}, signature::verify};
 
 use super::{outer_validator, inner_validator};
 
@@ -101,7 +101,8 @@ pub fn unpack_nep(source_file:String,verify_signature: bool)->Result<(PathBuf,Gl
     let package_struct=parse_package(temp_dir_inner_path.join("package.toml").to_string_lossy().to_string(), None)?;
 
     // 检查签名者与第一作者是否一致
-    if signature_struct.signer != package_struct.package.authors[0] {
+    let author=parse_author(package_struct.package.authors[0].clone())?;
+    if signature_struct.signer != author.email.unwrap() {
         if verify_signature {
             return Err(anyhow!(
                 "Error:Invalid package : expect first author '{}' to be the package signer '{}'",
