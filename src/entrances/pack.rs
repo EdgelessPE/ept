@@ -28,7 +28,7 @@ pub fn pack(
     let global = parse_package(pkg_path.to_string_lossy().to_string(), None)?;
     let file_stem = format!(
         "{}_{}_{}",
-        &global.package.name, &global.package.version, &package_signer
+        &global.package.name, &global.package.version, &global.package.authors[0]
     );
     let into_file = into_file.unwrap_or(String::from("./") + &file_stem + ".nep");
     log_ok_last(format!("Info:Resolving data..."));
