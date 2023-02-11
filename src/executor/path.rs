@@ -1,7 +1,7 @@
 use crate::types::StepPath;
-use crate::utils::{log, parse_relative_path, get_path_bin};
+use crate::utils::{get_path_bin, log, parse_relative_path};
 use anyhow::{anyhow, Result};
-use std::fs::{create_dir, File, remove_file};
+use std::fs::{create_dir, remove_file, File};
 use std::io::Write;
 use std::path::Path;
 use winreg::{enums::*, RegKey};
@@ -104,20 +104,30 @@ pub fn step_path(step: StepPath, located: String) -> Result<i32> {
     }
 
     // 解析目标绝对路径
-    let abs_target_path = parse_relative_path(Path::new(&located).join(&step.record).to_string_lossy().to_string())?;
+    let abs_target_path = parse_relative_path(
+        Path::new(&located)
+            .join(&step.record)
+            .to_string_lossy()
+            .to_string(),
+    )?;
     let abs_target_str = abs_target_path
         .to_string_lossy()
         .to_string()
         .replace("/", "\\");
 
     // 处理为目录的情况
-    if abs_target_path.is_dir(){
-        let add_res=set_system_path(StepPath {
-            record: abs_target_str,
-        },
-        true);
+    if abs_target_path.is_dir() {
+        let add_res = set_system_path(
+            StepPath {
+                record: abs_target_str,
+            },
+            true,
+        );
         if add_res.is_err() {
-            log(format!("Warning(Path):Failed to add system PATH '{}', manually add later",&bin_abs));
+            log(format!(
+                "Warning(Path):Failed to add system PATH '{}', manually add later",
+                &bin_abs
+            ));
         } else if add_res.unwrap() {
             log(format!(
                 "Warning(Path):Added system PATH '{}', restart to enable",
@@ -128,7 +138,11 @@ pub fn step_path(step: StepPath, located: String) -> Result<i32> {
     }
 
     // 解析批处理路径
-    let stem = Path::new(&step.record).file_stem().unwrap().to_string_lossy().to_string();
+    let stem = Path::new(&step.record)
+        .file_stem()
+        .unwrap()
+        .to_string_lossy()
+        .to_string();
     let cmd_target_str = format!("{}/{}.cmd", &bin_abs, &stem);
     if !abs_target_path.exists() {
         return Err(anyhow!(
@@ -141,12 +155,15 @@ pub fn step_path(step: StepPath, located: String) -> Result<i32> {
     let cmd_content = format!("@\"{}\" %*", &abs_target_str);
     let mut file = File::create(&cmd_target_str)?;
     file.write_all(cmd_content.as_bytes())?;
-    log(format!("Info(Path):Added path entrance '{}'",cmd_target_str));
+    log(format!(
+        "Info(Path):Added path entrance '{}'",
+        cmd_target_str
+    ));
 
     Ok(0)
 }
 
-pub fn reverse_path(step:StepPath,located: String)->Result<()>{
+pub fn reverse_path(step: StepPath, located: String) -> Result<()> {
     // 解析 bin 绝对路径
     let bin_path = get_path_bin();
     let bin_abs = bin_path.to_string_lossy().to_string();
@@ -157,7 +174,12 @@ pub fn reverse_path(step:StepPath,located: String)->Result<()>{
     }
 
     // 解析目标绝对路径
-    let abs_target_path = parse_relative_path(Path::new(&located).join(&step.record).to_string_lossy().to_string())?;
+    let abs_target_path = parse_relative_path(
+        Path::new(&located)
+            .join(&step.record)
+            .to_string_lossy()
+            .to_string(),
+    )?;
     let abs_target_str = abs_target_path
         .to_string_lossy()
         .to_string()
@@ -165,30 +187,39 @@ pub fn reverse_path(step:StepPath,located: String)->Result<()>{
 
     // 处理为目录的情况
     if abs_target_path.is_dir() {
-        let add_res=set_system_path(StepPath {
-            record: abs_target_str,
-        },
-        false);
+        let add_res = set_system_path(
+            StepPath {
+                record: abs_target_str,
+            },
+            false,
+        );
         if add_res.is_err() {
-            log(format!("Warning(Path):Failed to remove system PATH for '{}', manually remove later",&bin_abs));
-        } else if add_res.unwrap() {
             log(format!(
-                "Info(Path):Removed system PATH '{}'",
+                "Warning(Path):Failed to remove system PATH for '{}', manually remove later",
                 &bin_abs
             ));
+        } else if add_res.unwrap() {
+            log(format!("Info(Path):Removed system PATH '{}'", &bin_abs));
         }
         return Ok(());
     }
 
     // 解析批处理路径
-    let stem = Path::new(&step.record).file_stem().unwrap().to_string_lossy().to_string();
+    let stem = Path::new(&step.record)
+        .file_stem()
+        .unwrap()
+        .to_string_lossy()
+        .to_string();
     let cmd_target_str = format!("{}/{}.cmd", &bin_abs, &stem);
-    let cmd_target_path=Path::new(&cmd_target_str);
+    let cmd_target_path = Path::new(&cmd_target_str);
 
     // 删除批处理
-    if cmd_target_path.exists(){
+    if cmd_target_path.exists() {
         remove_file(cmd_target_path)?;
-        log(format!("Info(Path):Removed path entrance '{}'",cmd_target_str));
+        log(format!(
+            "Info(Path):Removed path entrance '{}'",
+            cmd_target_str
+        ));
     }
 
     Ok(())

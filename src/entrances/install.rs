@@ -7,18 +7,21 @@ use super::{
     info_local,
     utils::{installed_validator, unpack_nep},
 };
-use crate::utils::{get_path_apps};
+use crate::utils::get_path_apps;
 use crate::{
     executor::workflow_executor,
-    parsers::{parse_workflow},
+    parsers::parse_workflow,
     utils::{log, log_ok_last},
 };
 
 pub fn install_using_package(source_file: String, verify_signature: bool) -> Result<()> {
-    log(format!("Info:Preparing to install with package '{}'", &source_file));
+    log(format!(
+        "Info:Preparing to install with package '{}'",
+        &source_file
+    ));
 
     // 解包
-    let (temp_dir_inner_path,package_struct)=unpack_nep(source_file.clone(), verify_signature)?;
+    let (temp_dir_inner_path, package_struct) = unpack_nep(source_file.clone(), verify_signature)?;
 
     // 读入安装工作流
     log(format!("Info:Resolving package..."));
@@ -28,7 +31,7 @@ pub fn install_using_package(source_file: String, verify_signature: bool) -> Res
 
     // 创建 apps 文件夹
     log(format!("Info:Deploying files..."));
-    let apps_path=get_path_apps();
+    let apps_path = get_path_apps();
     if !apps_path.exists() {
         create_dir_all(apps_path)?;
     }
@@ -87,7 +90,8 @@ pub fn install_using_package(source_file: String, verify_signature: bool) -> Res
 fn test_install() {
     // envmnt::set("OFFLINE", "true");
     install_using_package(
-        r"D:\Desktop\Projects\EdgelessPE\ept\examples\VSCode_1.75.0.0_Cno\VSCode_1.75.0.0_Cno.tar".to_string(),
+        r"D:\Desktop\Projects\EdgelessPE\ept\examples\VSCode_1.75.0.0_Cno\VSCode_1.75.0.0_Cno.tar"
+            .to_string(),
         true,
     )
     .unwrap();

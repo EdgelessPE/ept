@@ -25,15 +25,15 @@ use crate::{
 struct Args {
     #[command(subcommand)]
     action: Action,
-    /// Run commands in debug mode
-    #[arg(short, long)]
-    debug: bool,
     /// (Dangerous) Disable online Edgeless CA to skip signature signing or verifying
     #[arg(long)]
     offline: bool,
     /// (Dangerous) Confirm each "Yes or No" question
     #[arg(long)]
     yes: bool,
+    /// Run commands in debug mode
+    #[arg(short, long)]
+    debug: bool,
 }
 
 #[derive(Subcommand, Debug)]
@@ -53,13 +53,6 @@ enum Action {
         /// Package name
         package_name: String,
     },
-    /// Query package information (locally in current version)
-    Info {
-        /// Package name
-        package_name: String,
-    },
-    /// List information of installed packages
-    List,
     /// Pack a directory content into nep
     Pack {
         /// Source directory ready to be packed
@@ -67,6 +60,13 @@ enum Action {
         /// (Optional) Store packed nep at
         into_file: Option<String>,
     },
+    /// Query package information (locally in current version)
+    Info {
+        /// Package name
+        package_name: String,
+    },
+    /// List information of installed packages
+    List,
 }
 
 fn main() {
@@ -87,13 +87,10 @@ fn main() {
     }
 
     // 匹配入口
-    let verify_signature=envmnt::get_or("OFFLINE", "false") == String::from("false");
+    let verify_signature = envmnt::get_or("OFFLINE", "false") == String::from("false");
     match args.action {
         Action::Install { package } => {
-            let res = install_using_package(
-                package.clone(),
-                verify_signature,
-            );
+            let res = install_using_package(package.clone(), verify_signature);
             if res.is_err() {
                 log(res.unwrap_err().to_string());
             } else {
@@ -103,11 +100,8 @@ fn main() {
                 ));
             }
         }
-        Action::Update { package }=>{
-            let res = update_using_package(
-                package.clone(),
-                verify_signature,
-            );
+        Action::Update { package } => {
+            let res = update_using_package(package.clone(), verify_signature);
             if res.is_err() {
                 log(res.unwrap_err().to_string());
             } else {
@@ -151,11 +145,7 @@ fn main() {
             source_dir,
             into_file,
         } => {
-            let res = pack(
-                source_dir,
-                into_file,
-                verify_signature,
-            );
+            let res = pack(source_dir, into_file, verify_signature);
             if res.is_err() {
                 log(res.unwrap_err().to_string());
             } else {

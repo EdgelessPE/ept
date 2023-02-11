@@ -13,7 +13,7 @@ use std::path::Path;
 
 use crate::{
     types::{Step, StepExecute, StepLink, StepLog, StepPath, WorkflowHeader, WorkflowNode},
-    utils::{log, get_path_apps},
+    utils::{get_path_apps, log},
 };
 
 use self::{link::reverse_link, path::reverse_path};
@@ -133,17 +133,17 @@ pub fn workflow_executor(flow: Vec<WorkflowNode>, located: String) -> Result<i32
 }
 
 // 宽容地逆向执行 setup 工作流
-pub fn workflow_reverse_executor(flow:Vec<WorkflowNode>,located: String)->Result<()>{
+pub fn workflow_reverse_executor(flow: Vec<WorkflowNode>, located: String) -> Result<()> {
     // 遍历流节点
     for flow_node in flow {
         // 忽略步骤执行条件
 
         // 匹配步骤类型以调用逆向步骤解释器
-        let located_cp=located.clone();
-        let exec_res=match flow_node.body {
-            Step::StepLink(step)=>reverse_link(step, located_cp),
-            Step::StepPath(step)=>reverse_path(step, located_cp),
-            _=>Ok(())
+        let located_cp = located.clone();
+        let exec_res = match flow_node.body {
+            Step::StepLink(step) => reverse_link(step, located_cp),
+            Step::StepPath(step) => reverse_path(step, located_cp),
+            _ => Ok(()),
         };
 
         // 对错误进行警告

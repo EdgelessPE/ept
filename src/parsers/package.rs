@@ -29,10 +29,10 @@ pub fn parse_package(p: String, located: Option<String>) -> Result<GlobalPackage
     let mut pkg: GlobalPackage = pkg_res.unwrap();
 
     // 逐一解析作者
-    for (i,raw) in pkg.package.authors.clone().into_iter().enumerate() {
-        let author=parse_author(raw)?;
+    for (i, raw) in pkg.package.authors.clone().into_iter().enumerate() {
+        let author = parse_author(raw)?;
         // 第一作者必须提供邮箱
-        if i==0 &&author.email==None{
+        if i == 0 && author.email == None {
             return Err(anyhow!("Error:Can't validate package.toml : first author in field 'package.authors' should have email (e.g. \"Cno <cno@edgeless.top>\")"));
         }
     }
@@ -50,7 +50,7 @@ pub fn parse_package(p: String, located: Option<String>) -> Result<GlobalPackage
         let ex_sv_declared = ExSemVer::parse(pkg_version)?;
 
         // 读取主程序版本号
-        let exe_file_str=file_path.to_string_lossy().to_string();
+        let exe_file_str = file_path.to_string_lossy().to_string();
         let mp_version = get_exe_version(file_path)?;
         let mut ex_sv_latest = ExSemVer::parse(mp_version)?;
         ex_sv_latest.set_reserved(0);
@@ -59,7 +59,7 @@ pub fn parse_package(p: String, located: Option<String>) -> Result<GlobalPackage
         if ex_sv_declared.semver_instance != ex_sv_latest.semver_instance {
             log(format!(
                 "Warning:Updated '{}' version from '{}' to '{}' according to '{}'",
-                &pkg.package.name,ex_sv_declared, ex_sv_latest,exe_file_str
+                &pkg.package.name, ex_sv_declared, ex_sv_latest, exe_file_str
             ));
             pkg.package.version = ex_sv_latest.to_string();
             let new_pkg_text = toml::to_string_pretty(&pkg)?;

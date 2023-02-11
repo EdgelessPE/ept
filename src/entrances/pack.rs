@@ -1,19 +1,15 @@
 use crate::compression::{compress, pack_tar};
-use crate::parsers::{parse_package, parse_author};
+use crate::parsers::{parse_author, parse_package};
 use crate::signature::sign;
 use crate::types::{Signature, SignatureNode};
-use crate::utils::{is_debug_mode, log, log_ok_last, get_path_temp, ask_yn};
-use anyhow::{Result, anyhow};
+use crate::utils::{ask_yn, get_path_temp, is_debug_mode, log, log_ok_last};
+use anyhow::{anyhow, Result};
 use std::fs::{create_dir_all, remove_dir_all, write};
 use std::path::Path;
 
 use super::utils::inner_validator;
 
-pub fn pack(
-    source_dir: String,
-    into_file: Option<String>,
-    need_sign: bool,
-) -> Result<String> {
+pub fn pack(source_dir: String, into_file: Option<String>, need_sign: bool) -> Result<String> {
     log(format!("Info:Preparing to pack '{}'", &source_dir));
 
     // 打包检查
@@ -25,7 +21,7 @@ pub fn pack(
     log(format!("Info:Resolving data..."));
     let pkg_path = Path::new(&source_dir).join("package.toml");
     let global = parse_package(pkg_path.to_string_lossy().to_string(), None)?;
-    let first_author=parse_author(global.package.authors[0].to_owned())?;
+    let first_author = parse_author(global.package.authors[0].to_owned())?;
     let file_stem = format!(
         "{}_{}_{}",
         &global.package.name, &global.package.version, &first_author.name
@@ -33,15 +29,20 @@ pub fn pack(
     let into_file = into_file.unwrap_or(String::from("./") + &file_stem + ".nep");
     log_ok_last(format!("Info:Resolving data..."));
 
-
     // 校验 into_file 是否存在
-    let into_file_path=Path::new(&into_file);
+    let into_file_path = Path::new(&into_file);
     if into_file_path.exists() {
         if into_file_path.is_dir() {
-            return Err(anyhow!("Error:Target '{}' is a existing directory",&into_file));
-        }else{
-            log(format!("Warning:Overwrite the existing file '{}'? (y/n)",&into_file));
-            if !ask_yn(){
+            return Err(anyhow!(
+                "Error:Target '{}' is a existing directory",
+                &into_file
+            ));
+        } else {
+            log(format!(
+                "Warning:Overwrite the existing file '{}'? (y/n)",
+                &into_file
+            ));
+            if !ask_yn() {
                 return Err(anyhow!("Error:Pack canceled by user"));
             }
         }

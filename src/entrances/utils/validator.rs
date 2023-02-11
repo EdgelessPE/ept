@@ -2,10 +2,7 @@ use anyhow::{anyhow, Result};
 use std::path::Path;
 
 pub fn inner_validator(dir: String) -> Result<()> {
-    let manifest = vec![
-        "package.toml",
-        "workflows/setup.toml",
-    ];
+    let manifest = vec!["package.toml", "workflows/setup.toml"];
     for file_name in manifest {
         let p = Path::new(&dir).join(file_name);
         if !p.exists() {

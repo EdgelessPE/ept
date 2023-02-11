@@ -4,7 +4,7 @@ mod term;
 
 pub use self::exe_version::get_exe_version;
 pub use self::log::{log, log_ok_last};
-pub use self::term::{ask_yn};
+pub use self::term::ask_yn;
 
 use anyhow::Result;
 use path_clean::PathClean;
@@ -38,15 +38,15 @@ pub fn parse_relative_path(relative: String) -> Result<PathBuf> {
     Ok(absolute_path)
 }
 
-pub fn get_path_apps()->PathBuf{
+pub fn get_path_apps() -> PathBuf {
     parse_relative_path("apps".to_string()).unwrap()
 }
 
-pub fn get_path_temp()->PathBuf{
+pub fn get_path_temp() -> PathBuf {
     parse_relative_path("temp".to_string()).unwrap()
 }
 
-pub fn get_path_bin()->PathBuf{
+pub fn get_path_bin() -> PathBuf {
     parse_relative_path("bin".to_string()).unwrap()
 }
 
