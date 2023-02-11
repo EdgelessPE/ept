@@ -4,6 +4,8 @@ use dirs::desktop_dir;
 use mslnk::ShellLink;
 use std::{path::Path, fs::remove_file};
 
+use super::log;
+
 fn get_desktop()->Result<String>{
     let desktop_opt = desktop_dir();
     if desktop_opt.is_none() {

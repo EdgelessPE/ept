@@ -1,8 +1,10 @@
 mod exe_version;
 mod log;
+mod term;
 
 pub use self::exe_version::get_exe_version;
 pub use self::log::{log, log_ok_last};
+pub use self::term::{ask_yn};
 
 use anyhow::Result;
 use path_clean::PathClean;

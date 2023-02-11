@@ -1,18 +1,16 @@
 use anyhow::{anyhow, Result};
-use std::fs::{create_dir_all, remove_dir_all, rename};
+use std::fs::{create_dir_all, rename};
 use std::path::Path;
 
 use super::utils::clean_temp;
 use super::{
     info_local,
-    utils::{inner_validator, installed_validator, outer_validator,unpack_nep},
+    utils::{installed_validator, unpack_nep},
 };
-use crate::utils::{is_debug_mode, get_path_apps, get_path_temp};
+use crate::utils::{get_path_apps};
 use crate::{
-    compression::{decompress, release_tar},
     executor::workflow_executor,
-    parsers::{parse_package, parse_signature, parse_workflow},
-    signature::verify,
+    parsers::{parse_workflow},
     utils::{log, log_ok_last},
 };
 
@@ -20,29 +18,13 @@ pub fn install_using_package(source_file: String, verify_signature: bool) -> Res
     log(format!("Info:Preparing to install with package '{}'", &source_file));
 
     // 解包
-    let (temp_dir_inner_path,package_struct)=unpack_nep(source_file, verify_signature)?;
+    let (temp_dir_inner_path,package_struct)=unpack_nep(source_file.clone(), verify_signature)?;
 
-    // 读入包信息和安装工作流
+    // 读入安装工作流
     log(format!("Info:Resolving package..."));
-    let pkg_file_path = temp_dir_inner_path.join("package.toml");
-    let package_struct = parse_package(pkg_file_path.to_string_lossy().to_string(), None)?;
     let setup_file_path = temp_dir_inner_path.join("workflows/setup.toml");
     let setup_workflow = parse_workflow(setup_file_path.to_string_lossy().to_string())?;
-
-    // 检查签名者与第一作者是否一致
-    if signature_struct.signer != package_struct.package.authors[0] {
-        if verify_signature {
-            return Err(anyhow!(
-                "Error:Invalid package : expect first author '{}' to be the package signer '{}'",
-                &package_struct.package.authors[0],
-                &signature_struct.signer
-            ));
-        } else {
-            log(format!("Warning:Invalid package : expect first author '{}' to be the package signer '{}', ignoring this error due to signature verification has been disabled",&package_struct.package.authors[0],&signature_struct.signer));
-        }
-    } else {
-        log_ok_last(format!("Info:Resolving package..."));
-    }
+    log_ok_last(format!("Info:Resolving package..."));
 
     // 创建 apps 文件夹
     log(format!("Info:Deploying files..."));
@@ -57,9 +39,10 @@ pub fn install_using_package(source_file: String, verify_signature: bool) -> Res
         // TODO:支持升级后此处进行升级
         let (_, diff) = try_get_info_res.unwrap();
         return Err(anyhow!(
-            "Error:Package '{}' has been installed({}), current ept doesn't support upgrade",
+            "Error:Package '{}' has been installed({}), use 'ept update \"{}\"' instead",
             &package_struct.package.name,
-            diff.version
+            diff.version,
+            &source_file
         ));
     }
 

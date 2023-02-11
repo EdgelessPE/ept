@@ -1,18 +1,20 @@
-use std::path::PathBuf;
+use std::{path::{PathBuf, Path}, fs::{remove_dir_all, create_dir_all}};
 
 use anyhow::{Result,anyhow};
 
-use crate::types::GlobalPackage;
+use crate::{types::GlobalPackage, utils::{get_path_temp, is_debug_mode, log, log_ok_last}, compression::{release_tar, decompress}, parsers::{parse_signature, parse_package}, signature::verify};
 
-/// 根据源文件路径创建并返回临时目录
-fn get_temp_dir_path(source_file:String,keep_clear:bool)->Result<PathBuf>{
+use super::{outer_validator, inner_validator};
+
+/// 根据源文件路径创建并返回(临时目录,文件茎)
+fn get_temp_dir_path(source_file:String,keep_clear:bool)->Result<(PathBuf,String)>{
     let file_stem = Path::new(&source_file)
-    .file_stem()?
+    .file_stem().unwrap()
     .to_string_lossy()
     .to_string();
     let temp_dir_path = get_path_temp().join(&file_stem);
     if !keep_clear{
-        return Ok(temp_dir_path);
+        return Ok((temp_dir_path,file_stem));
     }
 
     let temp_dir_outer_path = temp_dir_path.join("Outer");
@@ -24,12 +26,12 @@ fn get_temp_dir_path(source_file:String,keep_clear:bool)->Result<PathBuf>{
     create_dir_all(&temp_dir_outer_path)?;
     create_dir_all(&temp_dir_inner_path)?;
 
-    Ok(temp_dir_path)
+    Ok((temp_dir_path,file_stem))
 }
 
 /// 清理临时目录（会判断 debug）
 pub fn clean_temp(source_file:String)->Result<()>{
-    let temp_dir_path=get_temp_dir_path(source_file, false)?;
+    let (temp_dir_path,_)=get_temp_dir_path(source_file, false)?;
     if !is_debug_mode() {
         log(format!("Info:Cleaning..."));
         let clean_res = remove_dir_all(&temp_dir_path);
@@ -54,7 +56,7 @@ pub fn clean_temp(source_file:String)->Result<()>{
 /// 返回 (Inner 临时目录,package 结构体)
 pub fn unpack_nep(source_file:String,verify_signature: bool)->Result<(PathBuf,GlobalPackage)>{
     // 创建临时目录
-    let temp_dir_path = get_temp_dir_path(source_file, true)?;
+    let (temp_dir_path,file_stem) = get_temp_dir_path(source_file.clone(), true)?;
     let temp_dir_outer_path = temp_dir_path.join("Outer");
     let temp_dir_inner_path = temp_dir_path.join("Inner");
 
