@@ -85,9 +85,10 @@ pub fn install_using_package(source_file: String, verify_signature: bool) -> Res
 
 #[test]
 fn test_install() {
+    // envmnt::set("OFFLINE", "true");
     install_using_package(
-        r"D:\Desktop\Projects\EdgelessPE\ept\examples\VSCode_1.75.0.0_Cno.nep".to_string(),
-        false,
+        r"D:\Desktop\Projects\EdgelessPE\ept\examples\VSCode_1.75.0.0_Cno\VSCode_1.75.0.0_Cno.tar".to_string(),
+        true,
     )
     .unwrap();
 }

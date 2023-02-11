@@ -2,8 +2,8 @@ use crate::compression::{compress, pack_tar};
 use crate::parsers::{parse_package, parse_author};
 use crate::signature::sign;
 use crate::types::{Signature, SignatureNode};
-use crate::utils::{is_debug_mode, log, log_ok_last, get_path_temp};
-use anyhow::Result;
+use crate::utils::{is_debug_mode, log, log_ok_last, get_path_temp, ask_yn};
+use anyhow::{Result, anyhow};
 use std::fs::{create_dir_all, remove_dir_all, write};
 use std::path::Path;
 
@@ -32,6 +32,20 @@ pub fn pack(
     );
     let into_file = into_file.unwrap_or(String::from("./") + &file_stem + ".nep");
     log_ok_last(format!("Info:Resolving data..."));
+
+
+    // 校验 into_file 是否存在
+    let into_file_path=Path::new(&into_file);
+    if into_file_path.exists() {
+        if into_file_path.is_dir() {
+            return Err(anyhow!("Error:Target '{}' is a existing directory",&into_file));
+        }else{
+            log(format!("Warning:Overwrite the existing file '{}'? (y/n)",&into_file));
+            if !ask_yn(){
+                return Err(anyhow!("Error:Pack canceled by user"));
+            }
+        }
+    }
 
     // 创建临时目录
     let temp_dir_path = get_path_temp().join(&file_stem);
@@ -104,9 +118,10 @@ pub fn pack(
 
 #[test]
 fn test_pack() {
+    envmnt::set("DEBUG", "true");
     pack(
-        r"D:\Download\VSCode-win32-x64-1.75.0".to_string(),
-        Some("./examples/VSCode_1.75.0.0_Cno.nep".to_string()),
+        r"D:\Desktop\VSCode_1.75.0.0_Cno".to_string(),
+        Some(r"D:\Desktop\VSCode_1.75.0.0_Cno.nep".to_string()),
         true,
     )
     .unwrap();

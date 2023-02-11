@@ -3,6 +3,8 @@ use blake3::Hasher;
 use std::fs::File;
 use std::io;
 
+use crate::utils::log;
+
 pub fn compute_hash_blake3(from_file: String) -> Result<String> {
     let file = File::open(&from_file)?;
     let mut hasher = Hasher::new();
@@ -12,7 +14,9 @@ pub fn compute_hash_blake3(from_file: String) -> Result<String> {
         copy_wide(file, &mut hasher)?;
     }
     let hash = hasher.finalize();
-    Ok(hash.to_hex().to_string())
+    let hash=hash.to_hex().to_string();
+    log(format!("Debug:Cacl hash for '{}' : '{}'",&from_file,&hash));
+    Ok(hash)
 }
 
 fn try_into_memmap_file(file: &File) -> anyhow::Result<Option<io::Cursor<memmap2::Mmap>>> {
@@ -57,7 +61,7 @@ fn copy_wide(mut reader: impl io::Read, hasher: &mut blake3::Hasher) -> io::Resu
 #[test]
 fn test_compute_hash_blake3() {
     let res = compute_hash_blake3(
-        r"D:\Desktop\Projects\EdgelessPE\ept\examples\VSCode_1.0.0.0_Cno.tar.zst".to_string(),
+        r"D:\Desktop\Projects\EdgelessPE\ept\VSCode_1.75.0.0_Cno.nep\c1\VSCode_1.75.0.0_Cno.nep".to_string(),
     );
     println!("{:?}", res);
 }

@@ -9,7 +9,7 @@ template = "Software"
 # 版本号
 version = "1.46.0.0"
 # 打包者/作者
-authors = ["Cno","Microsoft"]
+authors = ["Cno<dsyourshy@qq.com>","Microsoft"]
 # 许可证缩写或链接（可选）
 licence = "MIT"
 

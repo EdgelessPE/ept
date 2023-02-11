@@ -80,11 +80,12 @@ fn main() {
     }
 
     // 匹配入口
+    let verify_signature=envmnt::get_or("OFFLINE", "false") == String::from("false");
     match args.action {
         Action::Install { package } => {
             let res = install_using_package(
                 package.clone(),
-                envmnt::get_or("OFFLINE", "false") == String::from("false"),
+                verify_signature,
             );
             if res.is_err() {
                 log(res.unwrap_err().to_string());
@@ -98,7 +99,7 @@ fn main() {
         Action::Update { package }=>{
             let res = update_using_package(
                 package.clone(),
-                envmnt::get_or("OFFLINE", "false") == String::from("false"),
+                verify_signature,
             );
             if res.is_err() {
                 log(res.unwrap_err().to_string());
@@ -146,7 +147,7 @@ fn main() {
             let res = pack(
                 source_dir,
                 into_file,
-                envmnt::get_or("OFFLINE", "false") == String::from("false"),
+                verify_signature,
             );
             if res.is_err() {
                 log(res.unwrap_err().to_string());

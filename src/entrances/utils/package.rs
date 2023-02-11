@@ -74,11 +74,14 @@ pub fn unpack_nep(source_file:String,verify_signature: bool)->Result<(PathBuf,Gl
     if verify_signature {
         log(format!("Info:Verifying package signature..."));
         if signature_struct.signature.is_some() {
-            verify(
+            let check_res=verify(
                 inner_pkg_str.clone(),
                 signature_struct.signer.clone(),
                 signature_struct.signature.unwrap(),
             )?;
+            if !check_res{
+                return Err(anyhow!("Error:Failed to verify package signature, this package may have been hacked"));
+            }
             log_ok_last(format!("Info:Verifying package signature..."));
         } else {
             return Err(anyhow!(

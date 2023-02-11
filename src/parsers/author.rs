@@ -5,7 +5,7 @@ use anyhow::{anyhow,Result};
 
 lazy_static! {
     static ref RE: Regex =
-        Regex::new(r"([^<]+)\s*(<\s*([\w@\.]+)\s*>)?").unwrap();
+        Regex::new(r"([^<\s]+)\s*(<\s*([\w@\.]+)\s*>)?").unwrap();
 }
 
 pub fn parse_author(raw:String)->Result<Author>{
