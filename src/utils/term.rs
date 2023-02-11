@@ -1,20 +1,25 @@
 use std::io::stdin;
 
-use crate::utils::log;
+use crate::utils::{log, is_confirm_mode};
 
 pub fn ask_yn()->bool{
-    let mut input=String::new();
-    let term_in=stdin();
-    term_in.read_line(&mut input).unwrap();
-    if &input[0..1]=="y"{
-        true
+    if is_confirm_mode(){
+        return true;
     }else{
-        false
+        let mut input=String::new();
+        let term_in=stdin();
+        term_in.read_line(&mut input).unwrap();
+        if &input[0..1]=="y"{
+            true
+        }else{
+            false
+        }
     }
 }
 
 #[test]
 fn test_ask_yn(){
+    envmnt::set("CONFIRM", "true");
     log("Warning:Please select (y/n)?".to_string());
     let res=ask_yn();
     println!("{}",res);

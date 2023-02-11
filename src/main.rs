@@ -28,9 +28,12 @@ struct Args {
     /// Run commands in debug mode
     #[arg(short, long)]
     debug: bool,
-    /// Disable online Edgeless CA to skip signature signing or verifying
+    /// (Dangerous) Disable online Edgeless CA to skip signature signing or verifying
     #[arg(long)]
     offline: bool,
+    /// (Dangerous) Confirm each "Yes or No" question
+    #[arg(long)]
+    yes: bool,
 }
 
 #[derive(Subcommand, Debug)]
@@ -75,8 +78,12 @@ fn main() {
         envmnt::set("DEBUG", "true");
     }
     if args.offline {
-        log("Warning:Offline mode enabled".to_string());
+        log("Warning:Offline mode enabled, ept couldn't guarantee security or integrality of packages".to_string());
         envmnt::set("OFFLINE", "true")
+    }
+    if args.yes {
+        log("Warning:Confirmation mode enabled".to_string());
+        envmnt::set("CONFIRM", "true");
     }
 
     // 匹配入口

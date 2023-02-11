@@ -15,6 +15,10 @@ pub fn is_debug_mode() -> bool {
     envmnt::get_or("DEBUG", "false") == String::from("true")
 }
 
+pub fn is_confirm_mode() -> bool {
+    envmnt::get_or("CONFIRM", "false") == String::from("true")
+}
+
 pub fn parse_relative_path(relative: String) -> Result<PathBuf> {
     let cr = relative.replace("./", "");
     let path = Path::new(&cr);
