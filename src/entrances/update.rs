@@ -1,13 +1,24 @@
-use std::{str::FromStr, fs::{remove_dir_all, rename}, path::Path};
+use std::{str::FromStr, fs::{remove_dir_all, rename}};
 
 use anyhow::{Result,anyhow};
 
-use crate::{parsers::{parse_package, parse_workflow}, utils::{log, ask_yn, get_path_apps, log_ok_last}, types::ExSemVer, executor::workflow_executor};
+use crate::{parsers::{parse_workflow, parse_author}, utils::{log, ask_yn, get_path_apps, log_ok_last}, types::ExSemVer, executor::workflow_executor};
 
 use super::{utils::{unpack_nep, installed_validator, clean_temp}, info_local, uninstall, install_using_package};
 
 fn same_authors(a:&Vec<String>,b:&Vec<String>)->bool{
-    a.into_iter().eq(b.into_iter())
+    let ai=a.into_iter().map(
+        |raw|{
+            parse_author(raw.to_owned()).unwrap()
+        }
+    );
+    let bi=b.into_iter().map(
+        |raw|{
+            parse_author(raw.to_owned()).unwrap()
+        }
+    );
+
+    ai.eq(bi)
 }
 
 

@@ -65,9 +65,11 @@ fn main() {
 
     // 配置环境变量
     if args.debug {
+        log("Warning:Debug mode enabled".to_string());
         envmnt::set("DEBUG", "true");
     }
     if args.offline {
+        log("Warning:Offline mode enabled".to_string());
         envmnt::set("OFFLINE", "true")
     }
 
@@ -124,7 +126,6 @@ fn main() {
             let res = pack(
                 source_dir,
                 into_file,
-                "test.edgeless.top".to_string(),
                 envmnt::get_or("OFFLINE", "false") == String::from("false"),
             );
             if res.is_err() {

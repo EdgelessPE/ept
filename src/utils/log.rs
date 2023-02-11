@@ -18,13 +18,11 @@ fn gen_log(msg: String, replace_head: Option<String>) -> Option<String> {
 
         let head = replace_head.unwrap_or(cap[1].to_string());
         let head = head.as_str();
+        if head=="Debug"&&!is_debug_mode(){
+            return None;
+        }
         let c_head = match head {
-            "Debug" => {
-                if is_debug_mode() {
-                    return None;
-                }
-                head.bright_white()
-            }
+            "Debug" => head.bright_white(),
             "Info" => head.bright_blue(),
             "Warning" => head.bright_yellow(),
             "Error" => head.bright_red(),

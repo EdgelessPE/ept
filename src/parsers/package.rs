@@ -7,6 +7,8 @@ use std::{
     io::Read,
 };
 
+use super::parse_author;
+
 pub fn parse_package(p: String, located: Option<String>) -> Result<GlobalPackage> {
     let package_path = Path::new(&p);
     if !package_path.exists() {
@@ -25,6 +27,15 @@ pub fn parse_package(p: String, located: Option<String>) -> Result<GlobalPackage
     }
 
     let mut pkg: GlobalPackage = pkg_res.unwrap();
+
+    // 逐一解析作者
+    for (i,raw) in pkg.package.authors.clone().into_iter().enumerate() {
+        let author=parse_author(raw)?;
+        // 第一作者必须提供邮箱
+        if i==0 &&author.email==None{
+            return Err(anyhow!("Error:Can't validate package.toml : first author in field 'package.authors' should have email (e.g. \"Cno <cno@edgeless.top>\")"));
+        }
+    }
 
     // 跟随主程序 exe 文件版本号更新版本号
     if located.is_some() && pkg.software.is_some() {

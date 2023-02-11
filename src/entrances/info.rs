@@ -3,7 +3,7 @@ use std::path::Path;
 use anyhow::{anyhow, Result};
 
 use crate::{
-    parsers::parse_package,
+    parsers::{parse_package, parse_author},
     types::{GlobalPackage, Info, InfoDiff}, utils::get_path_apps,
 };
 
@@ -28,9 +28,11 @@ pub fn info_local(package_name: String) -> Result<(GlobalPackage, InfoDiff)> {
         Some(local_str.clone()),
     )?;
     // 写本地信息
+    let authors=global.package.authors
+    .clone();
     let local = InfoDiff {
         version: global.package.version.clone(),
-        authors: global.package.authors.clone(),
+        authors,
     };
     Ok((global.clone(), local))
 }

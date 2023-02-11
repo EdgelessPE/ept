@@ -1,5 +1,5 @@
 use crate::compression::{compress, pack_tar};
-use crate::parsers::parse_package;
+use crate::parsers::{parse_package, parse_author};
 use crate::signature::sign;
 use crate::types::{Signature, SignatureNode};
 use crate::utils::{is_debug_mode, log, log_ok_last, get_path_temp};
@@ -12,7 +12,6 @@ use super::utils::inner_validator;
 pub fn pack(
     source_dir: String,
     into_file: Option<String>,
-    package_signer: String,
     need_sign: bool,
 ) -> Result<String> {
     log(format!("Info:Preparing to pack '{}'", &source_dir));
@@ -26,9 +25,10 @@ pub fn pack(
     log(format!("Info:Resolving data..."));
     let pkg_path = Path::new(&source_dir).join("package.toml");
     let global = parse_package(pkg_path.to_string_lossy().to_string(), None)?;
+    let first_author=parse_author(global.package.authors[0].to_owned())?;
     let file_stem = format!(
         "{}_{}_{}",
-        &global.package.name, &global.package.version, &global.package.authors[0]
+        &global.package.name, &global.package.version, &first_author.name
     );
     let into_file = into_file.unwrap_or(String::from("./") + &file_stem + ".nep");
     log_ok_last(format!("Info:Resolving data..."));
@@ -60,7 +60,7 @@ pub fn pack(
     let sign_file_path = temp_dir_path.join("signature.toml");
     let signature_struct = Signature {
         package: SignatureNode {
-            signer: package_signer,
+            signer: first_author.email.unwrap(),
             signature,
         },
     };
@@ -107,7 +107,6 @@ fn test_pack() {
     pack(
         r"D:\Download\VSCode-win32-x64-1.75.0".to_string(),
         Some("./examples/VSCode_1.75.0.0_Cno.nep".to_string()),
-        "test@edgeless.top".to_string(),
         true,
     )
     .unwrap();

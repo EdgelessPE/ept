@@ -29,7 +29,7 @@ fn get_temp_dir_path(source_file:String,keep_clear:bool)->Result<(PathBuf,String
     Ok((temp_dir_path,file_stem))
 }
 
-/// 清理临时目录（会判断 debug）
+/// 清理临时目录(会判断 debug)
 pub fn clean_temp(source_file:String)->Result<()>{
     let (temp_dir_path,_)=get_temp_dir_path(source_file, false)?;
     if !is_debug_mode() {
