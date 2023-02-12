@@ -4,7 +4,7 @@ use crate::signature::sign;
 use crate::types::{Signature, SignatureNode};
 use crate::utils::{ask_yn, get_path_temp, is_debug_mode, log, log_ok_last};
 use anyhow::{anyhow, Result};
-use std::fs::{create_dir_all, remove_dir_all, write};
+use std::fs::{create_dir_all, remove_dir_all, write,read_dir};
 use std::path::Path;
 
 use super::utils::inner_validator;
@@ -14,6 +14,15 @@ pub fn pack(source_dir: String, into_file: Option<String>, need_sign: bool) -> R
 
     // 打包检查
     log(format!("Info:Validating source directory..."));
+    // 如果目录中文件数量超过 3 个则拒绝
+    let dir_list=read_dir(&source_dir)?;
+    let dir_count=dir_list.into_iter().fold(0, |acc,_|{
+        acc+1
+    });
+    if dir_count!=3{
+        return Err(anyhow!("Error:Expected 3 items in '{}', got {} items",&source_dir,dir_count));
+    }
+    // 运行内包检查器
     inner_validator(source_dir.clone())?;
     log_ok_last(format!("Info:Validating source directory..."));
 
