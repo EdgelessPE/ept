@@ -1,5 +1,0 @@
-[log_status]
-name = "Log status"
-step = "Log"
-level = "Info"
-msg = "VSCode uninstalled successfully"
