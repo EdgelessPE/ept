@@ -13,7 +13,7 @@ pub struct Package {
 pub struct Software {
     pub upstream: String,
     pub category: String,
-    pub main_program: String,
+    pub main_program: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
