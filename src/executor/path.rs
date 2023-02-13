@@ -225,6 +225,10 @@ pub fn reverse_path(step: StepPath, located: String) -> Result<()> {
     Ok(())
 }
 
+pub fn manifest_path(step: StepPath)->Vec<String>{
+    vec![step.record]
+}
+
 #[test]
 fn test_path() {
     step_path(

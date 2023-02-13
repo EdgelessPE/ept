@@ -70,6 +70,10 @@ pub fn reverse_link(step: StepLink, _: String) -> Result<()> {
     Ok(())
 }
 
+pub fn manifest_link(step: StepLink)->Vec<String>{
+    vec![step.source_file]
+}
+
 #[test]
 fn test_link() {
     step_link(

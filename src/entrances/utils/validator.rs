@@ -7,7 +7,21 @@ pub fn inner_validator(dir: String) -> Result<()> {
         let p = Path::new(&dir).join(file_name);
         if !p.exists() {
             return Err(anyhow!(
-                "Error:Missing '{}' in '{}', can't pack to nep",
+                "Error:Invalid nep inner package : missing '{}' in '{}'",
+                &file_name,
+                &dir
+            ));
+        }
+    }
+    Ok(())
+}
+
+pub fn manifest_validator(dir: String,manifest:Vec<String>) -> Result<()> {
+    for file_name in manifest {
+        let p = Path::new(&dir).join(&file_name);
+        if !p.exists() {
+            return Err(anyhow!(
+                "Error:Invalid nep inner package : missing flow item '{}' in '{}'",
                 &file_name,
                 &dir
             ));
@@ -24,7 +38,7 @@ pub fn outer_validator(dir: String, stem: String) -> Result<String> {
         let p = Path::new(&dir).join(file_name);
         if !p.exists() {
             return Err(anyhow!(
-                "Error:Invalid nep package : missing '{}' in '{}'",
+                "Error:Invalid nep outer package : missing '{}' in '{}'",
                 &file_name,
                 &dir
             ));
