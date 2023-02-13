@@ -16,7 +16,7 @@ pub fn inner_validator(dir: String) -> Result<()> {
     Ok(())
 }
 
-pub fn manifest_validator(dir: String,manifest:Vec<String>) -> Result<()> {
+pub fn manifest_validator(dir: String, manifest: Vec<String>) -> Result<()> {
     for file_name in manifest {
         let p = Path::new(&dir).join(&file_name);
         if !p.exists() {

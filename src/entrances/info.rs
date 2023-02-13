@@ -3,7 +3,7 @@ use std::path::Path;
 use anyhow::{anyhow, Result};
 
 use crate::{
-    parsers::{parse_author, parse_package},
+    parsers::parse_package,
     types::{GlobalPackage, Info, InfoDiff},
     utils::get_path_apps,
 };

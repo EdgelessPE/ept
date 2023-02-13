@@ -38,7 +38,7 @@ pub fn parse_package(p: String, located: Option<String>) -> Result<GlobalPackage
     }
 
     // 跟随主程序 exe 文件版本号更新版本号
-        let software = pkg.software.clone().unwrap();
+    let software = pkg.software.clone().unwrap();
     if located.is_some() && pkg.software.is_some() && software.main_program.is_some() {
         let located = located.unwrap();
         // 获取主程序相对路径

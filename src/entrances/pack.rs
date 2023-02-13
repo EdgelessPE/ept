@@ -2,25 +2,25 @@ use crate::compression::{compress, pack_tar};
 use crate::executor::{manifest_link, manifest_path};
 use crate::parsers::{parse_author, parse_package, parse_workflow};
 use crate::signature::sign;
-use crate::types::{Signature, SignatureNode, WorkflowNode, Step};
+use crate::types::{Signature, SignatureNode, Step, WorkflowNode};
 use crate::utils::{ask_yn, get_path_temp, is_debug_mode, log, log_ok_last};
 use anyhow::{anyhow, Result};
-use std::fs::{create_dir_all, remove_dir_all, write,read_dir};
+use std::fs::{create_dir_all, read_dir, remove_dir_all, write};
 use std::path::Path;
 
 use super::utils::{inner_validator, manifest_validator};
 
-fn get_manifest(flow:Vec<WorkflowNode>)->Vec<String>{
-    let mut manifest=Vec::new();
+fn get_manifest(flow: Vec<WorkflowNode>) -> Vec<String> {
+    let mut manifest = Vec::new();
     for node in flow {
         match node.body {
-            Step::StepLink(step)=>{
+            Step::StepLink(step) => {
                 manifest.append(&mut manifest_link(step));
-            },
-            Step::StepPath(step)=>{
+            }
+            Step::StepPath(step) => {
                 manifest.append(&mut manifest_path(step));
-            },
-            _=>{}
+            }
+            _ => {}
         }
     }
     manifest
@@ -32,12 +32,14 @@ pub fn pack(source_dir: String, into_file: Option<String>, need_sign: bool) -> R
     // 打包检查
     log(format!("Info:Validating source directory..."));
     // 如果目录中文件数量超过 3 个则拒绝
-    let dir_list=read_dir(&source_dir)?;
-    let dir_count=dir_list.into_iter().fold(0, |acc,_|{
-        acc+1
-    });
-    if dir_count!=3{
-        return Err(anyhow!("Error:Expected 3 items in '{}', got {} items",&source_dir,dir_count));
+    let dir_list = read_dir(&source_dir)?;
+    let dir_count = dir_list.into_iter().fold(0, |acc, _| acc + 1);
+    if dir_count != 3 {
+        return Err(anyhow!(
+            "Error:Expected 3 items in '{}', got {} items",
+            &source_dir,
+            dir_count
+        ));
     }
     // 运行内包检查器
     inner_validator(source_dir.clone())?;
@@ -58,10 +60,13 @@ pub fn pack(source_dir: String, into_file: Option<String>, need_sign: bool) -> R
     // 校验 setup 流装箱单
     log(format!("Info:Checking manifest..."));
     let setup_path = Path::new(&source_dir).join("workflows").join("setup.toml");
-    let setup_flow=parse_workflow(setup_path.to_string_lossy().to_string())?;
-    let setup_manifest=get_manifest(setup_flow);
-    let pkg_content_path=Path::new(&source_dir).join(&global.package.name);
-    manifest_validator(pkg_content_path.to_string_lossy().to_string(), setup_manifest)?;
+    let setup_flow = parse_workflow(setup_path.to_string_lossy().to_string())?;
+    let setup_manifest = get_manifest(setup_flow);
+    let pkg_content_path = Path::new(&source_dir).join(&global.package.name);
+    manifest_validator(
+        pkg_content_path.to_string_lossy().to_string(),
+        setup_manifest,
+    )?;
     log_ok_last(format!("Info:Checking manifest..."));
 
     // 校验 into_file 是否存在

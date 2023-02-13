@@ -1,6 +1,6 @@
 use anyhow::{anyhow, Result};
-use pelite::{pe64,pe32};
 use pelite::FileMap;
+use pelite::{pe32, pe64};
 use std::path::Path;
 
 fn get_64_version<P: AsRef<Path>>(file_path: P) -> Result<String> {
@@ -85,11 +85,11 @@ fn get_32_version<P: AsRef<Path>>(file_path: P) -> Result<String> {
     }
 }
 
-pub fn get_exe_version<P: AsRef<Path>>(file_path: P)->Result<String>{
-    let try_get=get_32_version(&file_path);
-    let res=if try_get.is_ok(){
+pub fn get_exe_version<P: AsRef<Path>>(file_path: P) -> Result<String> {
+    let try_get = get_32_version(&file_path);
+    let res = if try_get.is_ok() {
         try_get.unwrap()
-    }else{
+    } else {
         get_64_version(file_path)?
     };
     Ok(res)

@@ -2,10 +2,10 @@ mod execute;
 mod link;
 mod log;
 mod path;
-pub use execute::{step_execute};
-pub use link::{step_link,manifest_link};
-pub use log::{step_log};
-pub use path::{step_path,manifest_path};
+pub use execute::step_execute;
+pub use link::{manifest_link, step_link};
+pub use log::step_log;
+pub use path::{manifest_path, step_path};
 
 use anyhow::{anyhow, Result};
 use eval::Expr;
