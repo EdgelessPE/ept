@@ -13,7 +13,7 @@ use std::path::Path;
 
 use crate::{
     types::{Step, StepExecute, StepLink, StepLog, StepPath, WorkflowHeader, WorkflowNode},
-    utils::{get_path_apps, log},
+    utils::{get_path_apps, log, is_strict_mode},
 };
 
 use self::{link::reverse_link, path::reverse_path};
@@ -94,6 +94,7 @@ fn condition_eval(condition: String, exit_code: i32) -> Result<bool> {
 // 执行工作流
 pub fn workflow_executor(flow: Vec<WorkflowNode>, located: String) -> Result<i32> {
     let mut exit_code = 0;
+    let strict_mode=is_strict_mode();
 
     // 遍历流节点
     for flow_node in flow {
@@ -126,6 +127,11 @@ pub fn workflow_executor(flow: Vec<WorkflowNode>, located: String) -> Result<i32
                     &flow_node.header.name, exit_code
                 ));
             }
+        }
+
+        // 在严格模式下立即返回错误
+        if exit_code!=0 && strict_mode {
+            return Err(anyhow!("Error:Throw due to strict mode"));
         }
     }
 

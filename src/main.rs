@@ -25,12 +25,15 @@ use crate::{
 struct Args {
     #[command(subcommand)]
     action: Action,
+    /// Confirm each "Yes or No" question
+    #[arg(short, long)]
+    yes: bool,
+    /// Strict mode, throw immediately when a workflow step goes wrong
+    #[arg(short, long)]
+    strict: bool,
     /// (Dangerous) Disable online Edgeless CA to skip signature signing or verifying
     #[arg(long)]
     offline: bool,
-    /// (Dangerous) Confirm each "Yes or No" question
-    #[arg(long)]
-    yes: bool,
     /// Run commands in debug mode
     #[arg(short, long)]
     debug: bool,
@@ -84,6 +87,10 @@ fn main() {
     if args.yes {
         log("Warning:Confirmation mode enabled".to_string());
         envmnt::set("CONFIRM", "true");
+    }
+    if args.strict {
+        log("Warning:Strict mode enabled".to_string());
+        envmnt::set("STRICT", "true");
     }
 
     // 匹配入口

@@ -19,6 +19,10 @@ pub fn is_confirm_mode() -> bool {
     envmnt::get_or("CONFIRM", "false") == String::from("true")
 }
 
+pub fn is_strict_mode() -> bool {
+    envmnt::get_or("STRICT", "false") == String::from("true")
+}
+
 pub fn parse_relative_path(relative: String) -> Result<PathBuf> {
     let cr = relative.replace("./", "");
     let path = Path::new(&cr);
