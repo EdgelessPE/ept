@@ -3,7 +3,7 @@ use eval::Expr;
 use std::path::Path;
 
 use crate::{
-    types::{Step, TStep, WorkflowNode},
+    types::{WorkflowNode},
     utils::{get_path_apps, is_strict_mode, log},
 };
 
@@ -100,12 +100,7 @@ pub fn workflow_executor(flow: Vec<WorkflowNode>, located: String) -> Result<i32
         };
 
         // 匹配步骤类型以调用步骤解释器
-        let exec_res = match flow_node.body {
-            Step::StepLink(step) => step.interpret(interpreter).run(&located),
-            Step::StepExecute(step) => step.interpret(interpreter).run(&located),
-            Step::StepPath(step) => step.interpret(interpreter).run(&located),
-            Step::StepLog(step) => step.interpret(interpreter).run(&located),
-        };
+        let exec_res = flow_node.body.run(&located,interpreter);
         // 处理执行结果
         if exec_res.is_err() {
             log(format!(
@@ -137,15 +132,15 @@ pub fn workflow_executor(flow: Vec<WorkflowNode>, located: String) -> Result<i32
 pub fn workflow_reverse_executor(flow: Vec<WorkflowNode>, located: String) -> Result<()> {
     // 遍历流节点
     for flow_node in flow {
-        // 忽略步骤执行条件
+        // 创建变量解释器
+        // TODO:如何处理宽松逆向 setup 时的 ExitCode 变量
+        let interpreter=|raw:String|{
+            raw
+            .replace("${ExitCode}","0")
+        };
 
         // 匹配步骤类型以调用逆向步骤解释器
-        let exec_res = match flow_node.body {
-            Step::StepLink(step) => step.reverse_run(&located),
-            Step::StepExecute(step) => step.reverse_run(&located),
-            Step::StepPath(step) => step.reverse_run(&located),
-            Step::StepLog(step) => step.reverse_run(&located),
-        };
+        let exec_res = flow_node.body.reverse_run(&located, interpreter);
 
         // 对错误进行警告
         if exec_res.is_err() {
