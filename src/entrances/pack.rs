@@ -1,7 +1,7 @@
 use crate::compression::{compress, pack_tar};
 use crate::parsers::{parse_author, parse_package, parse_workflow};
 use crate::signature::sign;
-use crate::types::{Signature, SignatureNode, TStep, WorkflowNode};
+use crate::types::{Signature, SignatureNode, Step, TStep, WorkflowNode};
 use crate::utils::{ask_yn, get_path_temp, is_debug_mode, log, log_ok_last};
 use anyhow::{anyhow, Result};
 use std::fs::{create_dir_all, read_dir, remove_dir_all, write};
@@ -12,7 +12,12 @@ use super::utils::{inner_validator, manifest_validator};
 fn get_manifest(flow: Vec<WorkflowNode>) -> Vec<String> {
     let mut manifest = Vec::new();
     for node in flow {
-        let mut part=node.body.get_manifest();
+        let mut part = match node.body {
+            Step::StepLink(step) => step.get_manifest(),
+            Step::StepExecute(step) => step.get_manifest(),
+            Step::StepPath(step) => step.get_manifest(),
+            Step::StepLog(step) => step.get_manifest(),
+        };
         manifest.append(&mut part);
     }
     manifest

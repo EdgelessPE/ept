@@ -3,8 +3,8 @@ use eval::Expr;
 use std::path::Path;
 
 use crate::{
-    types::{TStep, WorkflowNode},
-    utils::{get_path_apps, log, is_strict_mode},
+    types::{Step, TStep, WorkflowNode},
+    utils::{get_path_apps, is_strict_mode, log},
 };
 
 // 配置部分内置变量的值
@@ -83,7 +83,7 @@ fn condition_eval(condition: String, exit_code: i32) -> Result<bool> {
 // 执行工作流
 pub fn workflow_executor(flow: Vec<WorkflowNode>, located: String) -> Result<i32> {
     let mut exit_code = 0;
-    let strict_mode=is_strict_mode();
+    let strict_mode = is_strict_mode();
 
     // 遍历流节点
     for flow_node in flow {
@@ -93,7 +93,12 @@ pub fn workflow_executor(flow: Vec<WorkflowNode>, located: String) -> Result<i32
             continue;
         }
         // 匹配步骤类型以调用步骤解释器
-        let exec_res = flow_node.body.run(&located);
+        let exec_res = match flow_node.body {
+            Step::StepLink(step) => step.run(&located),
+            Step::StepExecute(step) => step.run(&located),
+            Step::StepPath(step) => step.run(&located),
+            Step::StepLog(step) => step.run(&located),
+        };
         // 处理执行结果
         if exec_res.is_err() {
             log(format!(
@@ -113,7 +118,7 @@ pub fn workflow_executor(flow: Vec<WorkflowNode>, located: String) -> Result<i32
         }
 
         // 在严格模式下立即返回错误
-        if exit_code!=0 && strict_mode {
+        if exit_code != 0 && strict_mode {
             return Err(anyhow!("Error:Throw due to strict mode"));
         }
     }
@@ -128,7 +133,12 @@ pub fn workflow_reverse_executor(flow: Vec<WorkflowNode>, located: String) -> Re
         // 忽略步骤执行条件
 
         // 匹配步骤类型以调用逆向步骤解释器
-        let exec_res = flow_node.body.reverse_run(&located);
+        let exec_res = match flow_node.body {
+            Step::StepLink(step) => step.reverse_run(&located),
+            Step::StepExecute(step) => step.reverse_run(&located),
+            Step::StepPath(step) => step.reverse_run(&located),
+            Step::StepLog(step) => step.reverse_run(&located),
+        };
 
         // 对错误进行警告
         if exec_res.is_err() {
@@ -170,7 +180,7 @@ fn test_condition_eval() {
 
 #[test]
 fn test_workflow_executor() {
-    use crate::types::{Step,StepExecute,StepLink,StepLog,StepPath,WorkflowHeader};
+    use crate::types::{Step, StepExecute, StepLink, StepLog, StepPath, WorkflowHeader};
     let wf1 = vec![
         WorkflowNode {
             header: WorkflowHeader {

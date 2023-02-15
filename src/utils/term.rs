@@ -1,6 +1,6 @@
 use std::io::stdin;
 
-use crate::utils::{is_confirm_mode};
+use crate::utils::is_confirm_mode;
 
 pub fn ask_yn() -> bool {
     if is_confirm_mode() {

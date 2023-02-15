@@ -89,11 +89,12 @@ impl TStep for StepLink {
     }
 }
 
-
 #[test]
 fn test_link() {
-StepLink {
-    source_file: String::from("./Code.exe"),
-    target_name: String::from("VSC"),
-}.run(&String::from("./apps/VSCode")).unwrap();
+    StepLink {
+        source_file: String::from("./Code.exe"),
+        target_name: String::from("VSC"),
+    }
+    .run(&String::from("./apps/VSCode"))
+    .unwrap();
 }

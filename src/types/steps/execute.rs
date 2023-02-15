@@ -1,5 +1,5 @@
 use super::TStep;
-use crate::utils::{log};
+use crate::utils::log;
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
 use std::process::Command;
