@@ -84,7 +84,7 @@ impl TStep for StepLink {
     {
         Self {
             source_file: interpreter(self.source_file),
-            target_name: self.target_name,
+            target_name: interpreter(self.target_name),
         }
     }
 }

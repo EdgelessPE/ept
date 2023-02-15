@@ -21,11 +21,11 @@ impl TStep for StepLog {
     fn get_manifest(&self) -> Vec<String> {
         Vec::new()
     }
-    fn interpret<F>(self, _: F) -> Self
+    fn interpret<F>(self, interpreter: F) -> Self
     where
         F: Fn(String) -> String,
     {
-        self
+        Self { level: self.level, msg: interpreter(self.msg) }
     }
 }
 

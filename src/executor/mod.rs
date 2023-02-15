@@ -92,12 +92,19 @@ pub fn workflow_executor(flow: Vec<WorkflowNode>, located: String) -> Result<i32
         if c_if.is_some() && !condition_eval(c_if.unwrap(), exit_code)? {
             continue;
         }
+
+        // 创建变量解释器
+        let interpreter=|raw:String|{
+            raw
+            .replace("${ExitCode}",&exit_code.to_string())
+        };
+
         // 匹配步骤类型以调用步骤解释器
         let exec_res = match flow_node.body {
-            Step::StepLink(step) => step.run(&located),
-            Step::StepExecute(step) => step.run(&located),
-            Step::StepPath(step) => step.run(&located),
-            Step::StepLog(step) => step.run(&located),
+            Step::StepLink(step) => step.interpret(interpreter).run(&located),
+            Step::StepExecute(step) => step.interpret(interpreter).run(&located),
+            Step::StepPath(step) => step.interpret(interpreter).run(&located),
+            Step::StepLog(step) => step.interpret(interpreter).run(&located),
         };
         // 处理执行结果
         if exec_res.is_err() {
@@ -243,3 +250,33 @@ fn test_workflow_executor() {
     );
     println!("{:?}", r1);
 }
+
+#[test]
+fn test_workflow_executor_interpreter(){
+    use crate::types::{Step, StepExecute, StepLog, WorkflowHeader};
+    let flow=vec![
+        WorkflowNode {
+            header: WorkflowHeader {
+                name: "Throw".to_string(),
+                step: "Try throw".to_string(),
+                c_if: Some(String::from("${ExitCode}==0")),
+            },
+            body: Step::StepExecute(StepExecute {
+                command: "exit 3".to_string(),
+                pwd: None,
+            }),
+        },
+        WorkflowNode {
+            header: WorkflowHeader {
+                name: "Log".to_string(),
+                step: "Step log".to_string(),
+                c_if: None,
+            },
+            body: Step::StepLog(StepLog {
+                level: "Info".to_string(),
+                msg: "exit : ${ExitCode}".to_string(),
+            }),
+        },
+    ];
+    workflow_executor(flow, String::from("D:/Desktop/Projects/EdgelessPE/ept")).unwrap();
+} 
