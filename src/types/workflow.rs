@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+use super::{steps::{StepExecute,StepLink,StepLog,StepPath}, TStep};
+
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct WorkflowHeader {
     pub name: String,
@@ -21,25 +23,18 @@ pub enum Step {
     StepPath(StepPath),
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct StepLink {
-    pub source_file: String,
-    pub target_name: String,
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct StepExecute {
-    pub command: String,
-    pub pwd: Option<String>,
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct StepPath {
-    pub record: String,
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct StepLog {
-    pub level: String,
-    pub msg: String,
+impl TStep for Step {
+    fn run(self,located:&String)->anyhow::Result<i32> {
+        self.run(located)
+    }
+    fn reverse_run(self,located:&String)->anyhow::Result<()> {
+        self.reverse_run(located)
+    }
+    fn get_manifest(&self)->Vec<String> {
+        self.get_manifest()
+    }
+    fn interpret<F>(self,interpreter:F)->Self
+        where F:Fn(String)->String {
+        self.interpret(interpreter)
+    }
 }

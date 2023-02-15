@@ -1,22 +1,11 @@
-mod execute;
-mod link;
-mod log;
-mod path;
-pub use execute::step_execute;
-pub use link::{manifest_link, step_link};
-pub use log::step_log;
-pub use path::{manifest_path, step_path};
-
 use anyhow::{anyhow, Result};
 use eval::Expr;
 use std::path::Path;
 
 use crate::{
-    types::{Step, StepExecute, StepLink, StepLog, StepPath, WorkflowHeader, WorkflowNode},
+    types::{TStep, WorkflowNode},
     utils::{get_path_apps, log, is_strict_mode},
 };
-
-use self::{link::reverse_link, path::reverse_path};
 
 // 配置部分内置变量的值
 lazy_static! {
@@ -104,13 +93,7 @@ pub fn workflow_executor(flow: Vec<WorkflowNode>, located: String) -> Result<i32
             continue;
         }
         // 匹配步骤类型以调用步骤解释器
-        let located_cp = located.clone();
-        let exec_res = match flow_node.body {
-            Step::StepLink(step) => step_link(step, located_cp),
-            Step::StepExecute(step) => step_execute(step, located_cp),
-            Step::StepPath(step) => step_path(step, located_cp),
-            Step::StepLog(step) => step_log(step, located_cp),
-        };
+        let exec_res = flow_node.body.run(&located);
         // 处理执行结果
         if exec_res.is_err() {
             log(format!(
@@ -145,12 +128,7 @@ pub fn workflow_reverse_executor(flow: Vec<WorkflowNode>, located: String) -> Re
         // 忽略步骤执行条件
 
         // 匹配步骤类型以调用逆向步骤解释器
-        let located_cp = located.clone();
-        let exec_res = match flow_node.body {
-            Step::StepLink(step) => reverse_link(step, located_cp),
-            Step::StepPath(step) => reverse_path(step, located_cp),
-            _ => Ok(()),
-        };
+        let exec_res = flow_node.body.reverse_run(&located);
 
         // 对错误进行警告
         if exec_res.is_err() {
@@ -192,6 +170,7 @@ fn test_condition_eval() {
 
 #[test]
 fn test_workflow_executor() {
+    use crate::types::{Step,StepExecute,StepLink,StepLog,StepPath,WorkflowHeader};
     let wf1 = vec![
         WorkflowNode {
             header: WorkflowHeader {

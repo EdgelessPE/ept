@@ -1,6 +1,6 @@
 use std::io::stdin;
 
-use crate::utils::{is_confirm_mode, log};
+use crate::utils::{is_confirm_mode};
 
 pub fn ask_yn() -> bool {
     if is_confirm_mode() {
@@ -19,6 +19,7 @@ pub fn ask_yn() -> bool {
 
 #[test]
 fn test_ask_yn() {
+    use crate::utils::log;
     envmnt::set("CONFIRM", "true");
     log("Warning:Please select (y/n)?".to_string());
     let res = ask_yn();
