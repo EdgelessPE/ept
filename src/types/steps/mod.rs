@@ -30,7 +30,8 @@ pub trait TStep {
 impl Step {
     pub fn run<F>(self, located: &String, interpreter: F) -> Result<i32>
     where
-        F: Fn(String) -> String{
+        F: Fn(String) -> String,
+    {
         match self {
             Step::StepLink(step) => step.interpret(interpreter).run(&located),
             Step::StepExecute(step) => step.interpret(interpreter).run(&located),
@@ -40,7 +41,8 @@ impl Step {
     }
     pub fn reverse_run<F>(self, located: &String, interpreter: F) -> Result<()>
     where
-    F: Fn(String) -> String{
+        F: Fn(String) -> String,
+    {
         match self {
             Step::StepLink(step) => step.interpret(interpreter).reverse_run(&located),
             Step::StepExecute(step) => step.interpret(interpreter).reverse_run(&located),

@@ -3,7 +3,7 @@ use eval::Expr;
 use std::path::Path;
 
 use crate::{
-    types::{WorkflowNode},
+    types::WorkflowNode,
     utils::{get_path_apps, is_strict_mode, log},
 };
 
@@ -94,13 +94,10 @@ pub fn workflow_executor(flow: Vec<WorkflowNode>, located: String) -> Result<i32
         }
 
         // 创建变量解释器
-        let interpreter=|raw:String|{
-            raw
-            .replace("${ExitCode}",&exit_code.to_string())
-        };
+        let interpreter = |raw: String| raw.replace("${ExitCode}", &exit_code.to_string());
 
         // 匹配步骤类型以调用步骤解释器
-        let exec_res = flow_node.body.run(&located,interpreter);
+        let exec_res = flow_node.body.run(&located, interpreter);
         // 处理执行结果
         if exec_res.is_err() {
             log(format!(
@@ -134,10 +131,7 @@ pub fn workflow_reverse_executor(flow: Vec<WorkflowNode>, located: String) -> Re
     for flow_node in flow {
         // 创建变量解释器
         // TODO:如何处理宽松逆向 setup 时的 ExitCode 变量
-        let interpreter=|raw:String|{
-            raw
-            .replace("${ExitCode}","0")
-        };
+        let interpreter = |raw: String| raw.replace("${ExitCode}", "0");
 
         // 匹配步骤类型以调用逆向步骤解释器
         let exec_res = flow_node.body.reverse_run(&located, interpreter);
@@ -247,9 +241,9 @@ fn test_workflow_executor() {
 }
 
 #[test]
-fn test_workflow_executor_interpreter(){
+fn test_workflow_executor_interpreter() {
     use crate::types::{Step, StepExecute, StepLog, WorkflowHeader};
-    let flow=vec![
+    let flow = vec![
         WorkflowNode {
             header: WorkflowHeader {
                 name: "Throw".to_string(),
@@ -274,4 +268,4 @@ fn test_workflow_executor_interpreter(){
         },
     ];
     workflow_executor(flow, String::from("D:/Desktop/Projects/EdgelessPE/ept")).unwrap();
-} 
+}

@@ -25,7 +25,10 @@ impl TStep for StepLog {
     where
         F: Fn(String) -> String,
     {
-        Self { level: self.level, msg: interpreter(self.msg) }
+        Self {
+            level: self.level,
+            msg: interpreter(self.msg),
+        }
     }
 }
 
