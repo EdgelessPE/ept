@@ -1,13 +1,12 @@
-use anyhow::{Result,anyhow};
-use serde::{Deserialize, Serialize};
 use crate::types::KV;
+use anyhow::{anyhow, Result};
 use serde::de;
+use serde::{Deserialize, Serialize};
 
 mod execute;
 mod link;
 mod log;
 mod path;
-
 
 pub trait TStep {
     /// Run this step
@@ -52,7 +51,7 @@ macro_rules! def_enum_step {
         pub enum Step {
             $( $x($x) ),*
         }
-        
+
         impl Step {
             pub fn run<F>(self, located: &String, interpreter: F) -> Result<i32>
             where
@@ -98,7 +97,7 @@ macro_rules! def_enum_step {
     };
 }
 
-def_enum_step!(StepLink,StepExecute,StepPath,StepLog);
+def_enum_step!(StepLink, StepExecute, StepPath, StepLog);
 
 pub use self::execute::StepExecute;
 pub use self::link::StepLink;

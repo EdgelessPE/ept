@@ -6,7 +6,6 @@ use toml::Value;
 
 use crate::types::{WorkflowNode, KV};
 
-
 fn cmd_converter(origin: String) -> Result<String> {
     // 需要增加 c_ 前缀的字段
     let list = ["if"];
@@ -20,8 +19,6 @@ fn cmd_converter(origin: String) -> Result<String> {
     }
     Ok(text)
 }
-
-
 
 pub fn parse_workflow(p: String) -> Result<Vec<WorkflowNode>> {
     let workflow_path = Path::new(&p);
