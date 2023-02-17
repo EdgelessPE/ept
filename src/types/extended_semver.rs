@@ -58,7 +58,13 @@ impl ExSemVer {
             semver_instance,
         })
     }
-    pub fn from(sv: semver::Version) -> Self {
+    pub fn set_reserved(&mut self, reserved: u64) {
+        self.reserved = reserved;
+    }
+}
+
+impl From<semver::Version> for ExSemVer {
+    fn from(sv: semver::Version) -> Self {
         Self {
             major: sv.major,
             minor: sv.minor,
@@ -66,9 +72,6 @@ impl ExSemVer {
             reserved: 0,
             semver_instance: sv,
         }
-    }
-    pub fn set_reserved(&mut self, reserved: u64) {
-        self.reserved = reserved;
     }
 }
 
