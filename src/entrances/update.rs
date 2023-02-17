@@ -7,6 +7,7 @@ use anyhow::{anyhow, Result};
 
 use crate::{
     executor::workflow_executor,
+    p2s,
     parsers::{parse_author, parse_workflow},
     types::ExSemVer,
     utils::{ask_yn, get_path_apps},
@@ -79,8 +80,8 @@ pub fn update_using_package(source_file: String, verify_signature: bool) -> Resu
         .join("remove.toml");
     let run_remove = if remove_path.exists() {
         log!("Info:Running remove workflow...");
-        let remove_workflow = parse_workflow(remove_path.to_string_lossy().to_string())?;
-        workflow_executor(remove_workflow, located.to_string_lossy().to_string())?;
+        let remove_workflow = parse_workflow(p2s!(remove_path))?;
+        workflow_executor(remove_workflow, p2s!(located))?;
         log_ok_last!("Info:Running remove workflow...");
         true
     } else {
@@ -106,8 +107,8 @@ pub fn update_using_package(source_file: String, verify_signature: bool) -> Resu
     if update_path.exists() {
         // 执行 update 工作流
         log!("Info:Running update workflow...");
-        let update_workflow = parse_workflow(update_path.to_string_lossy().to_string())?;
-        workflow_executor(update_workflow, located.to_string_lossy().to_string())?;
+        let update_workflow = parse_workflow(p2s!(update_path))?;
+        workflow_executor(update_workflow, p2s!(located))?;
         log_ok_last!("Info:Running update workflow...");
     } else {
         if run_remove {
@@ -119,7 +120,7 @@ pub fn update_using_package(source_file: String, verify_signature: bool) -> Resu
                     .to_string_lossy()
                     .to_string(),
             )?;
-            workflow_executor(setup_workflow, located.to_string_lossy().to_string())?;
+            workflow_executor(setup_workflow, p2s!(located))?;
             log_ok_last!("Info:Running setup workflow...");
         }
     }
@@ -130,7 +131,7 @@ pub fn update_using_package(source_file: String, verify_signature: bool) -> Resu
 
     // 检查更新是否完整
     log!("Info:Validating update...");
-    installed_validator(located.to_string_lossy().to_string())?;
+    installed_validator(p2s!(located))?;
     log_ok_last!("Info:Validating update...");
 
     // 清理临时文件夹

@@ -1,6 +1,6 @@
-use crate::log;
 use crate::types::{ExSemVer, GlobalPackage};
 use crate::utils::{get_exe_version, parse_relative_path};
+use crate::{log, p2s};
 use anyhow::{anyhow, Result};
 use std::path::Path;
 use std::{
@@ -36,14 +36,14 @@ pub fn parse_package(p: String, located: Option<String>) -> Result<GlobalPackage
         let located = located.unwrap();
         // 获取主程序相对路径
         let mp_relative_path = Path::new(&located).join(&software.main_program.unwrap());
-        let file_path = parse_relative_path(mp_relative_path.to_string_lossy().to_string())?;
+        let file_path = parse_relative_path(p2s!(mp_relative_path))?;
 
         // 读取包申明版本号
         let pkg_version = pkg.package.version.clone();
         let ex_sv_declared = ExSemVer::parse(pkg_version)?;
 
         // 读取主程序版本号
-        let exe_file_str = file_path.to_string_lossy().to_string();
+        let exe_file_str = p2s!(file_path);
         let mp_version = get_exe_version(file_path)?;
         let mut ex_sv_latest = ExSemVer::parse(mp_version)?;
         ex_sv_latest.set_reserved(0);

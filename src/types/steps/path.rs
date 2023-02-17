@@ -1,6 +1,6 @@
 use super::TStep;
-use crate::log;
 use crate::utils::{get_path_bin, parse_relative_path};
+use crate::{log, p2s};
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
 use std::fs::{create_dir, remove_file, File};
@@ -75,7 +75,7 @@ impl TStep for StepPath {
     fn run(self, located: &String) -> Result<i32> {
         // 解析 bin 绝对路径
         let bin_path = get_path_bin();
-        let bin_abs = bin_path.to_string_lossy().to_string();
+        let bin_abs = p2s!(bin_path);
 
         // 创建 bin 目录
         if !bin_path.exists() {
@@ -157,7 +157,7 @@ impl TStep for StepPath {
     fn reverse_run(self, located: &String) -> Result<()> {
         // 解析 bin 绝对路径
         let bin_path = get_path_bin();
-        let bin_abs = bin_path.to_string_lossy().to_string();
+        let bin_abs = p2s!(bin_path);
 
         // 创建 bin 目录
         if !bin_path.exists() {

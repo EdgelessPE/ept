@@ -8,7 +8,7 @@ use super::{
     utils::{installed_validator, unpack_nep},
 };
 use crate::{executor::workflow_executor, parsers::parse_workflow, utils::get_path_apps};
-use crate::{log, log_ok_last};
+use crate::{log, log_ok_last, p2s};
 
 pub fn install_using_package(source_file: String, verify_signature: bool) -> Result<()> {
     log!("Info:Preparing to install with package '{}'", &source_file);
@@ -19,7 +19,7 @@ pub fn install_using_package(source_file: String, verify_signature: bool) -> Res
     // 读入安装工作流
     log!("Info:Resolving package...");
     let setup_file_path = temp_dir_inner_path.join("workflows/setup.toml");
-    let setup_workflow = parse_workflow(setup_file_path.to_string_lossy().to_string())?;
+    let setup_workflow = parse_workflow(p2s!(setup_file_path))?;
     log_ok_last!("Info:Resolving package...");
 
     // 创建 apps 文件夹

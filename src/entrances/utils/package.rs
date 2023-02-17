@@ -7,6 +7,7 @@ use anyhow::{anyhow, Result};
 
 use crate::{
     compression::{decompress, release_tar},
+    p2s,
     parsers::{parse_author, parse_package, parse_signature},
     signature::verify,
     types::GlobalPackage,
@@ -70,7 +71,7 @@ pub fn unpack_nep(source_file: String, verify_signature: bool) -> Result<(PathBu
 
     // 解压外包
     log!("Info:Unpacking outer package...");
-    let temp_dir_outer_str = temp_dir_outer_path.to_string_lossy().to_string();
+    let temp_dir_outer_str = p2s!(temp_dir_outer_path);
     release_tar(source_file, temp_dir_outer_str.clone())
         .map_err(|e| anyhow!("Error:Invalid nep package : {}", e.to_string()))?;
     let inner_pkg_str = outer_validator(temp_dir_outer_str.clone(), file_stem.clone())?;
@@ -78,7 +79,7 @@ pub fn unpack_nep(source_file: String, verify_signature: bool) -> Result<(PathBu
     log_ok_last!("Info:Unpacking outer package...");
 
     // 签名文件加载与校验
-    let signature_struct = parse_signature(signature_path.to_string_lossy().to_string())?.package;
+    let signature_struct = parse_signature(p2s!(signature_path))?.package;
     if verify_signature {
         log!("Info:Verifying package signature...");
         if signature_struct.signature.is_some() {
@@ -104,7 +105,7 @@ pub fn unpack_nep(source_file: String, verify_signature: bool) -> Result<(PathBu
 
     // 解压内包
     log!("Info:Decompressing inner package...");
-    let temp_dir_inner_str = temp_dir_inner_path.to_string_lossy().to_string();
+    let temp_dir_inner_str = p2s!(temp_dir_inner_path);
     decompress(inner_pkg_str.clone(), temp_dir_inner_str.clone())
         .map_err(|e| anyhow!("Error:Invalid nep package : {}", e.to_string()))?;
     inner_validator(temp_dir_inner_str.clone())?;

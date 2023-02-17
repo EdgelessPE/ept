@@ -55,6 +55,13 @@ pub fn get_path_bin() -> PathBuf {
     parse_relative_path("bin".to_string()).unwrap()
 }
 
+#[macro_export]
+macro_rules! p2s {
+    ($x:expr) => {
+        $x.to_string_lossy().to_string()
+    };
+}
+
 #[test]
 fn test_parse_relative_path() {
     let p1 = String::from("./VSCode/VSCode.exe");

@@ -1,5 +1,5 @@
 use super::TStep;
-use crate::{log, utils::parse_relative_path};
+use crate::{log, p2s, utils::parse_relative_path};
 use anyhow::{anyhow, Result};
 use dirs::desktop_dir;
 use mslnk::ShellLink;
@@ -35,7 +35,7 @@ impl TStep for StepLink {
                 .to_string(),
         )?;
         // println!("{:?}",&abs_clear_source_path);
-        let abs_clear_source = abs_clear_source_path.to_string_lossy().to_string();
+        let abs_clear_source = p2s!(abs_clear_source_path);
 
         // 创建实例
         let sl = ShellLink::new(&abs_clear_source)

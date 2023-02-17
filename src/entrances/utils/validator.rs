@@ -1,6 +1,8 @@
 use anyhow::{anyhow, Result};
 use std::path::Path;
 
+use crate::p2s;
+
 pub fn inner_validator(dir: String) -> Result<()> {
     let manifest = vec!["package.toml", "workflows/setup.toml"];
     for file_name in manifest {
@@ -46,7 +48,7 @@ pub fn outer_validator(dir: String, stem: String) -> Result<String> {
     }
 
     let inner_path = Path::new(&dir).join(&inner_pkg_name);
-    Ok(inner_path.to_string_lossy().to_string())
+    Ok(p2s!(inner_path))
 }
 
 // 返回上下文目录路径
@@ -59,7 +61,7 @@ pub fn installed_validator(dir: String) -> Result<String> {
         ));
     }
 
-    let ctx_str = ctx_path.to_string_lossy().to_string();
+    let ctx_str = p2s!(ctx_path);
     inner_validator(ctx_str.clone())?;
     Ok(ctx_str)
 }

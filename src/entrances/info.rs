@@ -3,6 +3,7 @@ use std::path::Path;
 use anyhow::{anyhow, Result};
 
 use crate::{
+    p2s,
     parsers::parse_package,
     types::{GlobalPackage, Info, InfoDiff},
     utils::get_path_apps,
@@ -18,16 +19,13 @@ pub fn info_local(package_name: String) -> Result<(GlobalPackage, InfoDiff)> {
             package_name
         ));
     }
-    let local_str = local_path.to_string_lossy().to_string();
+    let local_str = p2s!(local_path);
     // 检查是否为标准的已安装目录
     let ctx_str = installed_validator(local_str.clone())?;
     let ctx_path = Path::new(&ctx_str);
     // 读入包信息
     let pkg_path = ctx_path.join("package.toml");
-    let global = parse_package(
-        pkg_path.to_string_lossy().to_string(),
-        Some(local_str.clone()),
-    )?;
+    let global = parse_package(p2s!(pkg_path), Some(local_str.clone()))?;
     // 写本地信息
     let authors = global.package.authors.clone();
     let local = InfoDiff {

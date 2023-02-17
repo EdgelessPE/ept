@@ -3,7 +3,7 @@ use crate::parsers::{parse_author, parse_package, parse_workflow};
 use crate::signature::sign;
 use crate::types::{Signature, SignatureNode, WorkflowNode};
 use crate::utils::{ask_yn, get_path_temp, is_debug_mode};
-use crate::{log, log_ok_last};
+use crate::{log, log_ok_last, p2s};
 use anyhow::{anyhow, Result};
 use std::fs::{create_dir_all, read_dir, remove_dir_all, write};
 use std::path::Path;
@@ -40,7 +40,7 @@ pub fn pack(source_dir: String, into_file: Option<String>, need_sign: bool) -> R
     // 读取包信息
     log!("Info:Resolving data...");
     let pkg_path = Path::new(&source_dir).join("package.toml");
-    let global = parse_package(pkg_path.to_string_lossy().to_string(), None)?;
+    let global = parse_package(p2s!(pkg_path), None)?;
     let first_author = parse_author(global.package.authors[0].to_owned())?;
     let file_stem = format!(
         "{}_{}_{}",
@@ -52,13 +52,10 @@ pub fn pack(source_dir: String, into_file: Option<String>, need_sign: bool) -> R
     // 校验 setup 流装箱单
     log!("Info:Checking manifest...");
     let setup_path = Path::new(&source_dir).join("workflows").join("setup.toml");
-    let setup_flow = parse_workflow(setup_path.to_string_lossy().to_string())?;
+    let setup_flow = parse_workflow(p2s!(setup_path))?;
     let setup_manifest = get_manifest(setup_flow);
     let pkg_content_path = Path::new(&source_dir).join(&global.package.name);
-    manifest_validator(
-        pkg_content_path.to_string_lossy().to_string(),
-        setup_manifest,
-    )?;
+    manifest_validator(p2s!(pkg_content_path), setup_manifest)?;
     log_ok_last!("Info:Checking manifest...");
 
     // 校验 into_file 是否存在
@@ -121,10 +118,7 @@ pub fn pack(source_dir: String, into_file: Option<String>, need_sign: bool) -> R
 
     // 生成外包
     log!("Info:Packing outer package...");
-    pack_tar(
-        temp_dir_path.to_string_lossy().to_string(),
-        into_file.clone(),
-    )?;
+    pack_tar(p2s!(temp_dir_path), into_file.clone())?;
     log_ok_last!("Info:Packing outer package...");
 
     // 清理临时文件夹
@@ -136,13 +130,13 @@ pub fn pack(source_dir: String, into_file: Option<String>, need_sign: bool) -> R
         } else {
             log!(
                 "Warning:Failed to remove temporary directory '{}'",
-                temp_dir_path.to_string_lossy().to_string()
+                p2s!(temp_dir_path)
             );
         }
     } else {
         log!(
             "Debug:Leaving temporary directory '{}'",
-            temp_dir_path.to_string_lossy().to_string()
+            p2s!(temp_dir_path)
         );
     }
 
