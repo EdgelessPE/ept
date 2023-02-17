@@ -1,5 +1,7 @@
-use anyhow::Result;
+use anyhow::{Result,anyhow};
 use serde::{Deserialize, Serialize};
+use crate::types::KV;
+use serde::de;
 
 mod execute;
 mod link;
@@ -18,6 +20,29 @@ pub trait TStep {
     fn interpret<F>(self, interpreter: F) -> Self
     where
         F: Fn(String) -> String;
+}
+
+fn toml_try_into<'de, T>(kv: KV) -> Result<T>
+where
+    T: de::Deserialize<'de>,
+{
+    let val = kv.value;
+    let res = val.to_owned().try_into();
+    if res.is_err() {
+        let key = kv.key;
+        let name_brw = val["name"].to_owned();
+        let name = name_brw.as_str().unwrap_or("unknown name");
+        let step = val["step"].as_str().unwrap_or("unknown step");
+        return Err(anyhow!(
+            "Error:Can't parse workflow node '{}'({}) into step '{}' : {}",
+            &name,
+            &key,
+            &step,
+            &res.err().unwrap().to_string()
+        ));
+    } else {
+        Ok(res.unwrap())
+    }
 }
 
 macro_rules! def_enum_step {
@@ -49,6 +74,24 @@ macro_rules! def_enum_step {
                 match self {
                     $( Step::$x(step) => step.get_manifest() ),*
                 }
+            }
+        }
+
+        impl TryFrom<KV> for Step {
+            type Error=anyhow::Error;
+            fn try_from(kv:KV)->Result<Step>{
+                // 读取步骤名称
+                let val=kv.value.clone();
+                let step=&(String::from("Step")+val["step"].as_str().unwrap());
+
+                // 根据步骤名称解析步骤体
+                let res=match step.as_str() {
+                    $( stringify!($x) => Step::$x(toml_try_into(kv)?) ),* ,
+                    _ => {
+                        return Err(anyhow!("Error:Unknown step '{}'",step));
+                    },
+                };
+                Ok(res)
             }
         }
 

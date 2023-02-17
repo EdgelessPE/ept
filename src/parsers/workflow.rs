@@ -1,17 +1,11 @@
 use anyhow::{anyhow, Result};
 use regex::Regex;
-use serde::de;
 use std::path::Path;
 use std::{fs::File, io::Read};
 use toml::Value;
 
-use crate::types::{Step, WorkflowNode};
+use crate::types::{WorkflowNode, KV};
 
-#[derive(Clone, Debug)]
-struct KV {
-    key: String,
-    value: Value,
-}
 
 fn cmd_converter(origin: String) -> Result<String> {
     // 需要增加 c_ 前缀的字段
@@ -27,28 +21,7 @@ fn cmd_converter(origin: String) -> Result<String> {
     Ok(text)
 }
 
-fn toml_try_into<'de, T>(kv: KV) -> Result<T>
-where
-    T: de::Deserialize<'de>,
-{
-    let val = kv.value;
-    let res = val.to_owned().try_into();
-    if res.is_err() {
-        let key = kv.key;
-        let name_brw = val["name"].to_owned();
-        let name = name_brw.as_str().unwrap_or("unknown name");
-        let step = val["step"].as_str().unwrap_or("unknown step");
-        return Err(anyhow!(
-            "Error:Can't parse workflow node '{}'({}) into step '{}' : {}",
-            &name,
-            &key,
-            &step,
-            &res.err().unwrap().to_string()
-        ));
-    } else {
-        Ok(res.unwrap())
-    }
-}
+
 
 pub fn parse_workflow(p: String) -> Result<Vec<WorkflowNode>> {
     let workflow_path = Path::new(&p);
@@ -105,25 +78,8 @@ pub fn parse_workflow(p: String) -> Result<Vec<WorkflowNode>> {
             ));
         }
 
-        // 读取步骤名称
-        let step_opt = val["step"].as_str();
-        let step = step_opt.unwrap();
-
         // 根据步骤名称解析步骤体
-        let body = match step {
-            "Link" => Step::StepLink(toml_try_into(kv)?),
-            "Execute" => Step::StepExecute(toml_try_into(kv)?),
-            "Path" => Step::StepPath(toml_try_into(kv)?),
-            "Log" => Step::StepLog(toml_try_into(kv)?),
-            _ => {
-                return Err(anyhow!(
-                    "Error:Illegal step name '{}' at ‘{}’({})",
-                    &step,
-                    &val["name"].as_str().unwrap_or("unknown step"),
-                    &key
-                ));
-            }
-        };
+        let body = kv.try_into()?;
 
         res.push(WorkflowNode {
             header: header_res.unwrap(),
