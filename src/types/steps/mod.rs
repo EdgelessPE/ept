@@ -81,7 +81,7 @@ macro_rules! def_enum_step {
             fn try_from(kv:KV)->Result<Step>{
                 // 读取步骤名称
                 let val=kv.value.clone();
-                let step=&(String::from("Step")+val["step"].as_str().unwrap());
+                let step=String::from("Step")+val["step"].as_str().unwrap();
 
                 // 根据步骤名称解析步骤体
                 let res=match step.as_str() {
@@ -97,6 +97,7 @@ macro_rules! def_enum_step {
     };
 }
 
+// 注册步骤
 def_enum_step!(StepLink, StepExecute, StepPath, StepLog);
 
 pub use self::execute::StepExecute;
