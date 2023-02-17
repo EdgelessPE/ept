@@ -6,13 +6,6 @@ mod link;
 mod log;
 mod path;
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
-pub enum Step {
-    StepExecute(StepExecute),
-    StepLink(StepLink),
-    StepLog(StepLog),
-    StepPath(StepPath),
-}
 
 pub trait TStep {
     /// Run this step
@@ -27,38 +20,42 @@ pub trait TStep {
         F: Fn(String) -> String;
 }
 
-impl Step {
-    pub fn run<F>(self, located: &String, interpreter: F) -> Result<i32>
-    where
-        F: Fn(String) -> String,
-    {
-        match self {
-            Step::StepLink(step) => step.interpret(interpreter).run(&located),
-            Step::StepExecute(step) => step.interpret(interpreter).run(&located),
-            Step::StepPath(step) => step.interpret(interpreter).run(&located),
-            Step::StepLog(step) => step.interpret(interpreter).run(&located),
+macro_rules! def_enum_step {
+    ($($x:ident),*) => {
+
+        #[derive(Serialize, Deserialize, Clone, Debug)]
+        pub enum Step {
+            $( $x($x) ),*
         }
-    }
-    pub fn reverse_run<F>(self, located: &String, interpreter: F) -> Result<()>
-    where
-        F: Fn(String) -> String,
-    {
-        match self {
-            Step::StepLink(step) => step.interpret(interpreter).reverse_run(&located),
-            Step::StepExecute(step) => step.interpret(interpreter).reverse_run(&located),
-            Step::StepPath(step) => step.interpret(interpreter).reverse_run(&located),
-            Step::StepLog(step) => step.interpret(interpreter).reverse_run(&located),
+        
+        impl Step {
+            pub fn run<F>(self, located: &String, interpreter: F) -> Result<i32>
+            where
+                F: Fn(String) -> String,
+            {
+                match self {
+                    $( Step::$x(step) => step.interpret(interpreter).run(&located) ),*
+                }
+            }
+            pub fn reverse_run<F>(self, located: &String, interpreter: F) -> Result<()>
+            where
+                F: Fn(String) -> String,
+            {
+                match self {
+                    $( Step::$x(step) => step.interpret(interpreter).reverse_run(&located) ),*
+                }
+            }
+            pub fn get_manifest(&self) -> Vec<String> {
+                match self {
+                    $( Step::$x(step) => step.get_manifest() ),*
+                }
+            }
         }
-    }
-    pub fn get_manifest(&self) -> Vec<String> {
-        match self {
-            Step::StepLink(step) => step.get_manifest(),
-            Step::StepExecute(step) => step.get_manifest(),
-            Step::StepPath(step) => step.get_manifest(),
-            Step::StepLog(step) => step.get_manifest(),
-        }
-    }
+
+    };
 }
+
+def_enum_step!(StepLink,StepExecute,StepPath,StepLog);
 
 pub use self::execute::StepExecute;
 pub use self::link::StepLink;
