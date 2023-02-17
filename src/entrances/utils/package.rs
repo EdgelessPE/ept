@@ -12,7 +12,7 @@ use crate::{
     types::GlobalPackage,
     utils::{get_path_temp, is_debug_mode},
 };
-use crate::{log,log_ok_last};
+use crate::{log, log_ok_last};
 
 use super::{inner_validator, outer_validator};
 
@@ -55,10 +55,7 @@ pub fn clean_temp(source_file: String) -> Result<()> {
             );
         }
     } else {
-        log!(
-            "Debug:Leaving temporary directory '{:?}'",
-            temp_dir_path
-        );
+        log!("Debug:Leaving temporary directory '{:?}'", temp_dir_path);
     }
 
     Ok(())

@@ -26,8 +26,7 @@ where
     T: de::Deserialize<'de>,
 {
     let val = kv.value;
-    val.to_owned().try_into()
-    .map_err(|err|{
+    val.to_owned().try_into().map_err(|err| {
         let key = kv.key;
         let name_brw = val["name"].to_owned();
         let name = name_brw.as_str().unwrap_or("unknown name");

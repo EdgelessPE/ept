@@ -15,10 +15,7 @@ pub fn compute_hash_blake3(from_file: String) -> Result<String> {
     }
     let hash = hasher.finalize();
     let hash = hash.to_hex().to_string();
-    log!(
-        "Debug:Cacl hash for '{}' : '{}'",
-        &from_file, &hash
-    );
+    log!("Debug:Cacl hash for '{}' : '{}'", &from_file, &hash);
     Ok(hash)
 }
 

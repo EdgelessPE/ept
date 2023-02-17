@@ -11,7 +11,7 @@ use crate::{
     types::ExSemVer,
     utils::{ask_yn, get_path_apps},
 };
-use crate::{log,log_ok_last};
+use crate::{log, log_ok_last};
 
 use super::{
     info_local, install_using_package, uninstall,
@@ -30,10 +30,7 @@ fn same_authors(a: &Vec<String>, b: &Vec<String>) -> bool {
 }
 
 pub fn update_using_package(source_file: String, verify_signature: bool) -> Result<()> {
-    log!(
-        "Info:Preparing to update with package '{}'",
-        &source_file
-    );
+    log!("Info:Preparing to update with package '{}'", &source_file);
 
     // 解包
     let (temp_dir_inner_path, fresh_package) = unpack_nep(source_file.clone(), verify_signature)?;

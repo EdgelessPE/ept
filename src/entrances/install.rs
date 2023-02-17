@@ -7,18 +7,11 @@ use super::{
     info_local,
     utils::{installed_validator, unpack_nep},
 };
-use crate::{log,log_ok_last};
-use crate::{
-    executor::workflow_executor,
-    parsers::parse_workflow,
-    utils::{get_path_apps},
-};
+use crate::{executor::workflow_executor, parsers::parse_workflow, utils::get_path_apps};
+use crate::{log, log_ok_last};
 
 pub fn install_using_package(source_file: String, verify_signature: bool) -> Result<()> {
-    log!(
-        "Info:Preparing to install with package '{}'",
-        &source_file
-    );
+    log!("Info:Preparing to install with package '{}'", &source_file);
 
     // 解包
     let (temp_dir_inner_path, package_struct) = unpack_nep(source_file.clone(), verify_signature)?;

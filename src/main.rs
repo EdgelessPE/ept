@@ -9,16 +9,15 @@ mod executor;
 mod parsers;
 mod signature;
 mod types;
-#[macro_use] mod utils;
+#[macro_use]
+mod utils;
 
-use anyhow::{Result};
+pub use self::utils::{fn_log, fn_log_ok_last};
+use anyhow::Result;
 use clap::{Parser, Subcommand};
 use entrances::update_using_package;
-pub use self::utils::{fn_log,fn_log_ok_last};
 
-use crate::{
-    entrances::{info, install_using_package, list, pack, uninstall},
-};
+use crate::entrances::{info, install_using_package, list, pack, uninstall};
 
 /// [Alpha] Edgeless Package Tool (ept) for Edgeless Next-Generation Packages (nep)
 #[derive(Parser, Debug)]
@@ -129,8 +128,8 @@ fn main() {
     // 使用路由器匹配入口
     let res = router(args.action);
     if res.is_ok() {
-        log!("{}",res.unwrap());
+        log!("{}", res.unwrap());
     } else {
-        log!("{}",res.unwrap_err().to_string())
+        log!("{}", res.unwrap_err().to_string())
     }
 }

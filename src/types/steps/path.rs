@@ -49,10 +49,7 @@ fn set_system_path(step: StepPath, is_add: bool) -> Result<bool> {
                 .filter(|x| x != &step.record)
                 .collect();
         } else {
-            log!(
-                "Warning(Path):Record '{}' not exist in PATH",
-                &step.record
-            );
+            log!("Warning(Path):Record '{}' not exist in PATH", &step.record);
             return Ok(false);
         }
     }
@@ -67,13 +64,9 @@ fn set_system_path(step: StepPath, is_add: bool) -> Result<bool> {
 
     // 写回注册表
     let (table, _) = hkcu.create_subkey("Environment")?;
-    table.set_value("Path", &new_text)
-    .map_err(|err|{
-        anyhow!(
-            "Error(Path):Can't write to register : {}",
-            err.to_string()
-        )
-    })?;
+    table
+        .set_value("Path", &new_text)
+        .map_err(|err| anyhow!("Error(Path):Can't write to register : {}", err.to_string()))?;
 
     Ok(true)
 }
@@ -157,10 +150,7 @@ impl TStep for StepPath {
         let cmd_content = format!("@\"{}\" %*", &abs_target_str);
         let mut file = File::create(&cmd_target_str)?;
         file.write_all(cmd_content.as_bytes())?;
-        log!(
-            "Info(Path):Added path entrance '{}'",
-            cmd_target_str
-        );
+        log!("Info(Path):Added path entrance '{}'", cmd_target_str);
 
         Ok(0)
     }
@@ -217,10 +207,7 @@ impl TStep for StepPath {
         // 删除批处理
         if cmd_target_path.exists() {
             remove_file(cmd_target_path)?;
-            log!(
-                "Info(Path):Removed path entrance '{}'",
-                cmd_target_str
-            );
+            log!("Info(Path):Removed path entrance '{}'", cmd_target_str);
         }
 
         Ok(())

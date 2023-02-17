@@ -15,7 +15,8 @@ pub fn sign_with_rsa(private_key: String, digest: String) -> Result<String> {
 
     log!(
         "Debug:Got signature '{}' for digest '{}'",
-        &signature_base64, &digest
+        &signature_base64,
+        &digest
     );
     Ok(signature_base64)
 }

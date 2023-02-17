@@ -28,8 +28,7 @@ fn test_get_temp_tar() {
 
 pub fn compress(source_dir: String, into_file: String) -> Result<()> {
     let temp_tar = get_temp_tar(into_file.clone());
-    pack_tar(source_dir.clone(), temp_tar.clone())
-    .map_err(|res|{
+    pack_tar(source_dir.clone(), temp_tar.clone()).map_err(|res| {
         anyhow!(
             "Error:Can't archive '{}' into '{}' : {}",
             &source_dir,
@@ -38,8 +37,7 @@ pub fn compress(source_dir: String, into_file: String) -> Result<()> {
         )
     })?;
 
-    compress_zstd(temp_tar.clone(), into_file.clone())
-    .map_err(|res|{
+    compress_zstd(temp_tar.clone(), into_file.clone()).map_err(|res| {
         anyhow!(
             "Error:Can't compress '{}' into '{}' : {}",
             &temp_tar,
@@ -62,8 +60,7 @@ pub fn compress(source_dir: String, into_file: String) -> Result<()> {
 
 pub fn decompress(source_file: String, into_dir: String) -> Result<()> {
     let temp_tar = get_temp_tar(source_file.clone());
-    decompress_zstd(source_file.clone(), temp_tar.clone())
-    .map_err(|res|{
+    decompress_zstd(source_file.clone(), temp_tar.clone()).map_err(|res| {
         anyhow!(
             "Error:Can't decompress '{}' into '{}' : {}",
             &source_file,
@@ -72,8 +69,7 @@ pub fn decompress(source_file: String, into_dir: String) -> Result<()> {
         )
     })?;
 
-    release_tar(temp_tar.clone(), into_dir.clone())
-    .map_err(|res|{
+    release_tar(temp_tar.clone(), into_dir.clone()).map_err(|res| {
         anyhow!(
             "Error:Can't release '{}' into '{}' : {}",
             &temp_tar,

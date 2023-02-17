@@ -42,10 +42,10 @@ impl TStep for StepExecute {
         // 执行并收集结果
         log!(
             "Info(Execute):Running command '{}' in '{}'",
-            &self.command, &workshop
+            &self.command,
+            &workshop
         );
-        let output = cmd.output()
-        .map_err(|err|{
+        let output = cmd.output().map_err(|err| {
             anyhow!(
                 "Error(Execute):Command '{}' spawned failed : {}",
                 &self.command,

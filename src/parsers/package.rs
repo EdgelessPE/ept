@@ -1,6 +1,6 @@
 use crate::log;
 use crate::types::{ExSemVer, GlobalPackage};
-use crate::utils::{get_exe_version,parse_relative_path};
+use crate::utils::{get_exe_version, parse_relative_path};
 use anyhow::{anyhow, Result};
 use std::path::Path;
 use std::{
@@ -52,7 +52,10 @@ pub fn parse_package(p: String, located: Option<String>) -> Result<GlobalPackage
         if ex_sv_declared.semver_instance != ex_sv_latest.semver_instance {
             log!(
                 "Warning:Updated '{}' version from '{}' to '{}' according to '{}'",
-                &pkg.package.name, ex_sv_declared, ex_sv_latest, exe_file_str
+                &pkg.package.name,
+                ex_sv_declared,
+                ex_sv_latest,
+                exe_file_str
             );
             pkg.package.version = ex_sv_latest.to_string();
             let new_pkg_text = toml::to_string_pretty(&pkg)?;

@@ -3,8 +3,9 @@ use std::fs::remove_dir_all;
 
 use crate::{
     executor::{workflow_executor, workflow_reverse_executor},
+    log, log_ok_last,
     parsers::parse_workflow,
-    utils::{get_path_apps}, log, log_ok_last,
+    utils::get_path_apps,
 };
 
 use super::utils::installed_validator;

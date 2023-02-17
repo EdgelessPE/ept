@@ -3,7 +3,7 @@ use crate::parsers::{parse_author, parse_package, parse_workflow};
 use crate::signature::sign;
 use crate::types::{Signature, SignatureNode, WorkflowNode};
 use crate::utils::{ask_yn, get_path_temp, is_debug_mode};
-use crate::{log,log_ok_last};
+use crate::{log, log_ok_last};
 use anyhow::{anyhow, Result};
 use std::fs::{create_dir_all, read_dir, remove_dir_all, write};
 use std::path::Path;

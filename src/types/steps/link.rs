@@ -1,5 +1,5 @@
 use super::TStep;
-use crate::{utils::{parse_relative_path}, log};
+use crate::{log, utils::parse_relative_path};
 use anyhow::{anyhow, Result};
 use dirs::desktop_dir;
 use mslnk::ShellLink;
@@ -39,17 +39,11 @@ impl TStep for StepLink {
 
         // 创建实例
         let sl = ShellLink::new(&abs_clear_source)
-        .map_err(|_|{
-            anyhow!(
-                "Error(Link):Can't find source file '{}'",
-                &abs_clear_source
-            )
-        })?;
+            .map_err(|_| anyhow!("Error(Link):Can't find source file '{}'", &abs_clear_source))?;
 
         // 创建快捷方式
         let target = format!("{}/{}.lnk", desktop, &self.target_name);
-        sl.create_lnk(&target)
-        .map_err(|err|{
+        sl.create_lnk(&target).map_err(|err| {
             anyhow!(
                 "Error(Link):Can't create link {}->{} : {}",
                 &abs_clear_source,

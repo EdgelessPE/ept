@@ -3,8 +3,9 @@ use eval::Expr;
 use std::path::Path;
 
 use crate::{
+    log,
     types::WorkflowNode,
-    utils::{get_path_apps, is_strict_mode}, log,
+    utils::{get_path_apps, is_strict_mode},
 };
 
 // 配置部分内置变量的值
@@ -61,13 +62,7 @@ fn condition_eval(condition: String, exit_code: i32) -> Result<bool> {
             Ok(eval::Value::Bool(p.is_dir()))
         })
         .exec()
-        .map_err(|res|{
-            anyhow!(
-            "Error:Can't eval statement '{}' : {}",
-            &condition,
-            res
-        )
-        })?;
+        .map_err(|res| anyhow!("Error:Can't eval statement '{}' : {}", &condition, res))?;
 
     // 检查执行结果
     let result = eval_res.as_bool();
@@ -112,7 +107,8 @@ pub fn workflow_executor(flow: Vec<WorkflowNode>, located: String) -> Result<i32
             if exit_code != 0 {
                 log!(
                     "Warning(Main):Workflow step '{}' finished with exit code '{}'",
-                    &flow_node.header.name, exit_code
+                    &flow_node.header.name,
+                    exit_code
                 );
             }
         }
