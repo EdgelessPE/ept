@@ -66,7 +66,7 @@ pub fn parse_workflow(p: String) -> Result<Vec<WorkflowNode>> {
         let val = kv_node.value;
 
         // 解析步骤头
-        let header_res = val.to_owned().try_into();
+        let header_res = val.try_into();
         if header_res.is_err() {
             return Err(anyhow!(
                 "Error:Illegal workflow node at key '{}' : {}",
