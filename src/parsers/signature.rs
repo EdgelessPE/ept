@@ -14,14 +14,14 @@ pub fn parse_signature(p: String) -> Result<Signature> {
 
     let mut text = String::new();
     File::open(&p)?.read_to_string(&mut text)?;
-    let sign_res = toml::from_str(&text);
-    if sign_res.is_err() {
-        return Err(anyhow!(
+    let sign = toml::from_str(&text)
+    .map_err(|err|{
+        anyhow!(
             "Error:Can't parse signature.toml at {} : {}",
             p,
-            sign_res.err().unwrap()
-        ));
-    }
+            err
+        )
+    })?;
 
-    Ok(sign_res.unwrap())
+    Ok(sign)
 }

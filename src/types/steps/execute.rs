@@ -43,15 +43,14 @@ impl TStep for StepExecute {
             "Info(Execute):Running command '{}' in '{}'",
             &self.command, &workshop
         ));
-        let output_res = cmd.output();
-        if output_res.is_err() {
-            return Err(anyhow!(
+        let output = cmd.output()
+        .map_err(|err|{
+            anyhow!(
                 "Error(Execute):Command '{}' spawned failed : {}",
                 &self.command,
-                output_res.unwrap_err()
-            ));
-        }
-        let output = output_res.unwrap();
+                err
+            )
+        })?;
 
         // 处理退出码
         match output.status.code() {

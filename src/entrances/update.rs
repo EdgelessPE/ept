@@ -39,17 +39,16 @@ pub fn update_using_package(source_file: String, verify_signature: bool) -> Resu
 
     // 确认包是否已安装
     log(format!("Info:Resolving package..."));
-    let try_get_info_res = info_local(fresh_package.package.name.clone());
-    if try_get_info_res.is_err() {
-        return Err(anyhow!(
-            "Error:Package '{}' hasn't been installed, use 'ept install \"{}\"' instead",
-            &fresh_package.package.name,
-            &source_file
-        ));
-    }
+    let (local_package, local_diff) =
+        info_local(fresh_package.package.name.clone()).map_err(|_| {
+            anyhow!(
+                "Error:Package '{}' hasn't been installed, use 'ept install \"{}\"' instead",
+                &fresh_package.package.name,
+                &source_file
+            )
+        })?;
 
     // 确认是否允许升级
-    let (local_package, local_diff) = try_get_info_res.unwrap();
     let local_version = ExSemVer::from_str(&local_diff.version)?;
     let fresh_version = ExSemVer::from_str(&fresh_package.package.version)?;
     if local_version >= fresh_version {

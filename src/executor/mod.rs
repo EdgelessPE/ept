@@ -14,6 +14,7 @@ lazy_static! {
 }
 
 // 执行条件以判断是否成立
+// TODO:传入前使用解释器解释
 fn condition_eval(condition: String, exit_code: i32) -> Result<bool> {
     // 执行 eval
     let eval_res = Expr::new(&condition)
@@ -59,17 +60,17 @@ fn condition_eval(condition: String, exit_code: i32) -> Result<bool> {
 
             Ok(eval::Value::Bool(p.is_dir()))
         })
-        .exec();
-
-    // 检查执行结果
-    if eval_res.is_err() {
-        return Err(anyhow!(
+        .exec()
+        .map_err(|res|{
+            anyhow!(
             "Error:Can't eval statement '{}' : {}",
             &condition,
-            eval_res.unwrap_err()
-        ));
-    }
-    let result = eval_res.unwrap().as_bool();
+            res
+        )
+        })?;
+
+    // 检查执行结果
+    let result = eval_res.as_bool();
     if result.is_none() {
         return Err(anyhow!(
             "Error:Can't eval statement '{}' into bool result",

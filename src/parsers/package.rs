@@ -17,16 +17,8 @@ pub fn parse_package(p: String, located: Option<String>) -> Result<GlobalPackage
 
     let mut text = String::new();
     File::open(&p)?.read_to_string(&mut text)?;
-    let pkg_res = toml::from_str(&text);
-    if pkg_res.is_err() {
-        return Err(anyhow!(
-            "Error:Can't validate package.toml at {} : {}",
-            p,
-            pkg_res.err().unwrap()
-        ));
-    }
-
-    let mut pkg: GlobalPackage = pkg_res.unwrap();
+    let mut pkg: GlobalPackage = toml::from_str(&text)
+        .map_err(|res| anyhow!("Error:Can't validate package.toml at {} : {}", p, res))?;
 
     // 逐一解析作者
     for (i, raw) in pkg.package.authors.clone().into_iter().enumerate() {

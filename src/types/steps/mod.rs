@@ -26,22 +26,20 @@ where
     T: de::Deserialize<'de>,
 {
     let val = kv.value;
-    let res = val.to_owned().try_into();
-    if res.is_err() {
+    val.to_owned().try_into()
+    .map_err(|err|{
         let key = kv.key;
         let name_brw = val["name"].to_owned();
         let name = name_brw.as_str().unwrap_or("unknown name");
         let step = val["step"].as_str().unwrap_or("unknown step");
-        return Err(anyhow!(
+        anyhow!(
             "Error:Can't parse workflow node '{}'({}) into step '{}' : {}",
             &name,
             &key,
             &step,
-            &res.err().unwrap().to_string()
-        ));
-    } else {
-        Ok(res.unwrap())
-    }
+            &err.to_string()
+        )
+    })
 }
 
 macro_rules! def_enum_step {

@@ -11,6 +11,7 @@ mod signature;
 mod types;
 mod utils;
 
+use anyhow::{Result};
 use clap::{Parser, Subcommand};
 use entrances::update_using_package;
 
@@ -72,6 +73,38 @@ enum Action {
     List,
 }
 
+fn router(action: Action) -> Result<String> {
+    // 环境变量读取
+    let verify_signature = envmnt::get_or("OFFLINE", "false") == String::from("false");
+
+    // 匹配入口
+    match action {
+        Action::Install { package } => install_using_package(package.clone(), verify_signature)
+            .map(|_| format!("Success:Package '{}' installed successfully", &package)),
+        Action::Update { package } => update_using_package(package.clone(), verify_signature)
+            .map(|_| format!("Success:Package '{}' updated successfully", &package)),
+        Action::Uninstall { package_name } => uninstall(package_name.clone()).map(|_| {
+            format!(
+                "Success:Package '{}' uninstalled successfully",
+                &package_name
+            )
+        }),
+        Action::Info { package_name } => info(package_name).map(|res| format!("{:#?}", res)),
+        Action::List => list().map(|list| {
+            let mut res_str = String::from("Installed packages:");
+            for node in list {
+                res_str += &format!("  {}    {}", &node.name, &node.local.unwrap().version);
+            }
+            res_str
+        }),
+        Action::Pack {
+            source_dir,
+            into_file,
+        } => pack(source_dir, into_file, verify_signature)
+            .map(|location| format!("Success:Package has been stored at '{}'", &location)),
+    }
+}
+
 fn main() {
     let args = Args::parse();
 
@@ -93,76 +126,11 @@ fn main() {
         envmnt::set("STRICT", "true");
     }
 
-    // 匹配入口
-    let verify_signature = envmnt::get_or("OFFLINE", "false") == String::from("false");
-    match args.action {
-        Action::Install { package } => {
-            let res = install_using_package(package.clone(), verify_signature);
-            if res.is_err() {
-                log(res.unwrap_err().to_string());
-            } else {
-                log(format!(
-                    "Success:Package '{}' installed successfully",
-                    &package
-                ));
-            }
-        }
-        Action::Update { package } => {
-            let res = update_using_package(package.clone(), verify_signature);
-            if res.is_err() {
-                log(res.unwrap_err().to_string());
-            } else {
-                log(format!(
-                    "Success:Package '{}' updated successfully",
-                    &package
-                ));
-            }
-        }
-        Action::Uninstall { package_name } => {
-            let res = uninstall(package_name.clone());
-            if res.is_err() {
-                log(res.unwrap_err().to_string());
-            } else {
-                log(format!(
-                    "Success:Package '{}' uninstalled successfully",
-                    &package_name
-                ));
-            }
-        }
-        Action::Info { package_name } => {
-            let res = info(package_name);
-            if res.is_err() {
-                log(res.unwrap_err().to_string());
-            } else {
-                println!("{:#?}", res.unwrap());
-            }
-        }
-        Action::List => {
-            let res = list();
-            if res.is_err() {
-                log(res.unwrap_err().to_string());
-            } else {
-                println!("Installed packages:");
-                for node in res.unwrap() {
-                    println!("  {}    {}", &node.name, &node.local.unwrap().version);
-                }
-            }
-        }
-        Action::Pack {
-            source_dir,
-            into_file,
-        } => {
-            let res = pack(source_dir, into_file, verify_signature);
-            if res.is_err() {
-                log(res.unwrap_err().to_string());
-            } else {
-                log(format!(
-                    "Success:Package has been stored at '{}'",
-                    &res.unwrap()
-                ));
-            }
-        }
-    };
-
-    ()
+    // 使用路由器匹配入口
+    let res = router(args.action);
+    if res.is_ok() {
+        log(res.unwrap());
+    } else {
+        log(res.unwrap_err().to_string())
+    }
 }

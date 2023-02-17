@@ -1,6 +1,8 @@
 mod tar;
 mod zstd;
 
+use crate::utils::log;
+
 pub use self::tar::{pack_tar, release_tar};
 use self::zstd::{compress_zstd, decompress_zstd};
 use anyhow::{anyhow, Result};
@@ -26,29 +28,29 @@ fn test_get_temp_tar() {
 
 pub fn compress(source_dir: String, into_file: String) -> Result<()> {
     let temp_tar = get_temp_tar(into_file.clone());
-    let tar_res = pack_tar(source_dir.clone(), temp_tar.clone());
-    if tar_res.is_err() {
-        return Err(anyhow!(
+    pack_tar(source_dir.clone(), temp_tar.clone())
+    .map_err(|res|{
+        anyhow!(
             "Error:Can't archive '{}' into '{}' : {}",
             &source_dir,
             &temp_tar,
-            tar_res.unwrap_err()
-        ));
-    }
+            res
+        )
+    })?;
 
-    let zst_res = compress_zstd(temp_tar.clone(), into_file.clone());
-    if zst_res.is_err() {
-        return Err(anyhow!(
+    compress_zstd(temp_tar.clone(), into_file.clone())
+    .map_err(|res|{
+        anyhow!(
             "Error:Can't compress '{}' into '{}' : {}",
             &temp_tar,
             &into_file,
-            zst_res.unwrap_err()
-        ));
-    }
+            res
+        )
+    })?;
 
     let rm_res = remove_file(&temp_tar);
     if rm_res.is_err() {
-        return Err(anyhow!(
+        log(format!(
             "Warning:Can't remove temp tar '{}' : {}",
             &temp_tar,
             rm_res.unwrap_err()
@@ -60,29 +62,29 @@ pub fn compress(source_dir: String, into_file: String) -> Result<()> {
 
 pub fn decompress(source_file: String, into_dir: String) -> Result<()> {
     let temp_tar = get_temp_tar(source_file.clone());
-    let zst_res = decompress_zstd(source_file.clone(), temp_tar.clone());
-    if zst_res.is_err() {
-        return Err(anyhow!(
+    decompress_zstd(source_file.clone(), temp_tar.clone())
+    .map_err(|res|{
+        anyhow!(
             "Error:Can't decompress '{}' into '{}' : {}",
             &source_file,
             &temp_tar,
-            zst_res.unwrap_err()
-        ));
-    }
+            res
+        )
+    })?;
 
-    let tar_res = release_tar(temp_tar.clone(), into_dir.clone());
-    if tar_res.is_err() {
-        return Err(anyhow!(
+    release_tar(temp_tar.clone(), into_dir.clone())
+    .map_err(|res|{
+        anyhow!(
             "Error:Can't release '{}' into '{}' : {}",
             &temp_tar,
             &into_dir,
-            tar_res.unwrap_err()
-        ));
-    }
+            res
+        )
+    })?;
 
     let rm_res = remove_file(&temp_tar);
     if rm_res.is_err() {
-        return Err(anyhow!(
+        log(format!(
             "Warning:Can't remove temp tar '{}' : {}",
             &temp_tar,
             rm_res.unwrap_err()

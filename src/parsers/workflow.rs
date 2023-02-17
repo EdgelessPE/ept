@@ -34,15 +34,14 @@ pub fn parse_workflow(p: String) -> Result<Vec<WorkflowNode>> {
     let text_ready = cmd_converter(text)?;
 
     // 转换文本为平工作流
-    let plain_flow_res = toml::from_str(&text_ready);
-    if plain_flow_res.is_err() {
-        return Err(anyhow!(
+    let plain_flow: Value = toml::from_str(&text_ready)
+    .map_err(|err|{
+        anyhow!(
             "Error:Can't parse '{}' as legal toml file : {}",
             &p,
-            plain_flow_res.unwrap_err()
-        ));
-    }
-    let plain_flow: Value = plain_flow_res.unwrap();
+            err
+        )
+    })?;
 
     // 通过正则表达式获取工作流顺序
     let reg = Regex::new(r"\s*\[(\w+)\]")?;
@@ -66,20 +65,21 @@ pub fn parse_workflow(p: String) -> Result<Vec<WorkflowNode>> {
         let val = kv_node.value;
 
         // 解析步骤头
-        let header_res = val.try_into();
-        if header_res.is_err() {
-            return Err(anyhow!(
+        let header = val
+        .try_into()
+        .map_err(|e|{
+            anyhow!(
                 "Error:Illegal workflow node at key '{}' : {}",
                 key,
-                header_res.unwrap_err()
-            ));
-        }
+                e
+            )
+        })?;
 
         // 根据步骤名称解析步骤体
         let body = kv.try_into()?;
 
         res.push(WorkflowNode {
-            header: header_res.unwrap(),
+            header,
             body,
         })
     }

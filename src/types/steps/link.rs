@@ -38,25 +38,25 @@ impl TStep for StepLink {
         let abs_clear_source = abs_clear_source_path.to_string_lossy().to_string();
 
         // 创建实例
-        let sl_res = ShellLink::new(&abs_clear_source);
-        if sl_res.is_err() {
-            return Err(anyhow!(
+        let sl = ShellLink::new(&abs_clear_source)
+        .map_err(|_|{
+            anyhow!(
                 "Error(Link):Can't find source file '{}'",
                 &abs_clear_source
-            ));
-        }
+            )
+        })?;
 
         // 创建快捷方式
         let target = format!("{}/{}.lnk", desktop, &self.target_name);
-        let c_res = sl_res.unwrap().create_lnk(&target);
-        if c_res.is_err() {
-            return Err(anyhow!(
+        sl.create_lnk(&target)
+        .map_err(|err|{
+            anyhow!(
                 "Error(Link):Can't create link {}->{} : {}",
                 &abs_clear_source,
                 &target,
-                c_res.unwrap_err().to_string()
-            ));
-        }
+                err.to_string()
+            )
+        })?;
         log(format!("Info(Link):Added shortcut '{}'", target));
         Ok(0)
     }

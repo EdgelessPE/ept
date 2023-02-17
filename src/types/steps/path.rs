@@ -17,20 +17,16 @@ pub struct StepPath {
 fn set_system_path(step: StepPath, is_add: bool) -> Result<bool> {
     // 打开 HKEY_CURRENT_USER\Environment
     let hkcu = RegKey::predef(HKEY_CURRENT_USER);
-    let table_res = hkcu.open_subkey("Environment");
-    if table_res.is_err() {
-        return Err(anyhow!("Error(Path):Can't open user register"));
-    }
-    let table = table_res.unwrap();
+    let table = hkcu
+        .open_subkey("Environment")
+        .map_err(|_| anyhow!("Error(Path):Can't open user register"))?;
 
     // 读取 Path 键值
-    let p_res = table.get_value("Path");
-    if p_res.is_err() {
-        return Err(anyhow!("Error(Path):Can't get 'Path' in register"));
-    }
+    let origin_text: String = table
+        .get_value("Path")
+        .map_err(|_| anyhow!("Error(Path):Can't get 'Path' in register"))?;
 
     // 拆分 Path 为数组
-    let origin_text: String = p_res.unwrap();
     let mut origin_arr: Vec<&str> = origin_text.split(";").collect();
 
     // 检查给定的值是否已经存在
@@ -70,13 +66,13 @@ fn set_system_path(step: StepPath, is_add: bool) -> Result<bool> {
 
     // 写回注册表
     let (table, _) = hkcu.create_subkey("Environment")?;
-    let w_res = table.set_value("Path", &new_text);
-    if w_res.is_err() {
-        return Err(anyhow!(
+    table.set_value("Path", &new_text)
+    .map_err(|err|{
+        anyhow!(
             "Error(Path):Can't write to register : {}",
-            w_res.unwrap_err().to_string()
-        ));
-    }
+            err.to_string()
+        )
+    })?;
 
     Ok(true)
 }
