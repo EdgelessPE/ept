@@ -19,9 +19,8 @@ pub fn ask_yn() -> bool {
 
 #[test]
 fn test_ask_yn() {
-    use crate::utils::log;
     envmnt::set("CONFIRM", "true");
-    log("Warning:Please select (y/n)?".to_string());
+    log!("Warning:Please select (y/n)?");
     let res = ask_yn();
     println!("{}", res);
 }

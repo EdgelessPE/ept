@@ -9,8 +9,9 @@ use crate::{
     executor::workflow_executor,
     parsers::{parse_author, parse_workflow},
     types::ExSemVer,
-    utils::{ask_yn, get_path_apps, log, log_ok_last},
+    utils::{ask_yn, get_path_apps},
 };
+use crate::{log,log_ok_last};
 
 use super::{
     info_local, install_using_package, uninstall,
@@ -29,16 +30,16 @@ fn same_authors(a: &Vec<String>, b: &Vec<String>) -> bool {
 }
 
 pub fn update_using_package(source_file: String, verify_signature: bool) -> Result<()> {
-    log(format!(
+    log!(
         "Info:Preparing to update with package '{}'",
         &source_file
-    ));
+    );
 
     // 解包
     let (temp_dir_inner_path, fresh_package) = unpack_nep(source_file.clone(), verify_signature)?;
 
     // 确认包是否已安装
-    log(format!("Info:Resolving package..."));
+    log!("Info:Resolving package...");
     let (local_package, local_diff) =
         info_local(fresh_package.package.name.clone()).map_err(|_| {
             anyhow!(
@@ -61,7 +62,7 @@ pub fn update_using_package(source_file: String, verify_signature: bool) -> Resu
         &fresh_package.package.authors,
     ) {
         // 需要卸载然后重新安装
-        log(format!("Warning:The given package is not the same as the author of the installed package (local:{}, given:{}), uninstall the installed package first? (y/n)",local_package.package.authors.join(","),fresh_package.package.authors.join(",")));
+        log!("Warning:The given package is not the same as the author of the installed package (local:{}, given:{}), uninstall the installed package first? (y/n)",local_package.package.authors.join(","),fresh_package.package.authors.join(","));
         if !ask_yn() {
             return Err(anyhow!("Error:Update canceled by user"));
         }
@@ -72,7 +73,7 @@ pub fn update_using_package(source_file: String, verify_signature: bool) -> Resu
     }
 
     let located = get_path_apps().join(&local_package.package.name);
-    log_ok_last(format!("Info:Resolving package..."));
+    log_ok_last!("Info:Resolving package...");
 
     // 执行旧的 remove 工作流
     let remove_path = located
@@ -80,10 +81,10 @@ pub fn update_using_package(source_file: String, verify_signature: bool) -> Resu
         .join("workflows")
         .join("remove.toml");
     let run_remove = if remove_path.exists() {
-        log(format!("Info:Running remove workflow..."));
+        log!("Info:Running remove workflow...");
         let remove_workflow = parse_workflow(remove_path.to_string_lossy().to_string())?;
         workflow_executor(remove_workflow, located.to_string_lossy().to_string())?;
-        log_ok_last(format!("Info:Running remove workflow..."));
+        log_ok_last!("Info:Running remove workflow...");
         true
     } else {
         false
@@ -91,30 +92,30 @@ pub fn update_using_package(source_file: String, verify_signature: bool) -> Resu
 
     // 移除旧的 app 目录
     // TODO:尽可能提前检查占用，避免无法删除
-    log(format!("Info:Removing old package..."));
+    log!("Info:Removing old package...");
     remove_dir_all(&located)?;
-    log_ok_last(format!("Info:Removing old package..."));
+    log_ok_last!("Info:Removing old package...");
 
     // 移动程序至 apps 目录
-    log(format!("Info:Deploying files..."));
+    log!("Info:Deploying files...");
     rename(
         temp_dir_inner_path.join(&fresh_package.package.name),
         &located,
     )?;
-    log_ok_last(format!("Info:Deploying files..."));
+    log_ok_last!("Info:Deploying files...");
 
     // 检查有无 update 工作流
     let update_path = temp_dir_inner_path.join("workflows").join("update.toml");
     if update_path.exists() {
         // 执行 update 工作流
-        log(format!("Info:Running update workflow..."));
+        log!("Info:Running update workflow...");
         let update_workflow = parse_workflow(update_path.to_string_lossy().to_string())?;
         workflow_executor(update_workflow, located.to_string_lossy().to_string())?;
-        log_ok_last(format!("Info:Running update workflow..."));
+        log_ok_last!("Info:Running update workflow...");
     } else {
         if run_remove {
             // 没有升级但是跑了一遍卸载，需要重新跑一遍 setup
-            log(format!("Info:Running setup workflow..."));
+            log!("Info:Running setup workflow...");
             let setup_workflow = parse_workflow(
                 update_path
                     .with_file_name("setup.toml")
@@ -122,7 +123,7 @@ pub fn update_using_package(source_file: String, verify_signature: bool) -> Resu
                     .to_string(),
             )?;
             workflow_executor(setup_workflow, located.to_string_lossy().to_string())?;
-            log_ok_last(format!("Info:Running setup workflow..."));
+            log_ok_last!("Info:Running setup workflow...");
         }
     }
 
@@ -131,9 +132,9 @@ pub fn update_using_package(source_file: String, verify_signature: bool) -> Resu
     rename(temp_dir_inner_path, ctx_path)?;
 
     // 检查更新是否完整
-    log(format!("Info:Validating update..."));
+    log!("Info:Validating update...");
     installed_validator(located.to_string_lossy().to_string())?;
-    log_ok_last(format!("Info:Validating update..."));
+    log_ok_last!("Info:Validating update...");
 
     // 清理临时文件夹
     clean_temp(source_file)?;

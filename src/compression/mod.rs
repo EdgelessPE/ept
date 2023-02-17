@@ -1,7 +1,7 @@
 mod tar;
 mod zstd;
 
-use crate::utils::log;
+use crate::log;
 
 pub use self::tar::{pack_tar, release_tar};
 use self::zstd::{compress_zstd, decompress_zstd};
@@ -50,11 +50,11 @@ pub fn compress(source_dir: String, into_file: String) -> Result<()> {
 
     let rm_res = remove_file(&temp_tar);
     if rm_res.is_err() {
-        log(format!(
+        log!(
             "Warning:Can't remove temp tar '{}' : {}",
             &temp_tar,
             rm_res.unwrap_err()
-        ));
+        );
     }
 
     Ok(())
@@ -84,11 +84,11 @@ pub fn decompress(source_file: String, into_dir: String) -> Result<()> {
 
     let rm_res = remove_file(&temp_tar);
     if rm_res.is_err() {
-        log(format!(
+        log!(
             "Warning:Can't remove temp tar '{}' : {}",
             &temp_tar,
             rm_res.unwrap_err()
-        ));
+        );
     }
 
     Ok(())

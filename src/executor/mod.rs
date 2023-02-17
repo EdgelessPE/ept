@@ -4,7 +4,7 @@ use std::path::Path;
 
 use crate::{
     types::WorkflowNode,
-    utils::{get_path_apps, is_strict_mode, log},
+    utils::{get_path_apps, is_strict_mode}, log,
 };
 
 // 配置部分内置变量的值
@@ -101,19 +101,19 @@ pub fn workflow_executor(flow: Vec<WorkflowNode>, located: String) -> Result<i32
         let exec_res = flow_node.body.run(&located, interpreter);
         // 处理执行结果
         if exec_res.is_err() {
-            log(format!(
+            log!(
                 "Warning(Main):Workflow step '{}' failed to execute : {}, check your workflow syntax again",
                 &flow_node.header.name,
                 exec_res.unwrap_err()
-            ));
+            );
             exit_code = 1;
         } else {
             exit_code = exec_res.unwrap();
             if exit_code != 0 {
-                log(format!(
+                log!(
                     "Warning(Main):Workflow step '{}' finished with exit code '{}'",
                     &flow_node.header.name, exit_code
-                ));
+                );
             }
         }
 
@@ -139,11 +139,11 @@ pub fn workflow_reverse_executor(flow: Vec<WorkflowNode>, located: String) -> Re
 
         // 对错误进行警告
         if exec_res.is_err() {
-            log(format!(
+            log!(
                 "Warning(Main):Reverse workflow step '{}' failed to execute : {}",
                 &flow_node.header.name,
                 exec_res.unwrap_err()
-            ));
+            );
         }
     }
 

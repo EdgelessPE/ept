@@ -1,5 +1,6 @@
+use crate::log;
+
 use super::TStep;
-use crate::utils::log;
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
 use std::process::Command;
@@ -14,7 +15,7 @@ pub struct StepExecute {
 fn read_console(v: Vec<u8>) -> String {
     let msg_res = from_utf8(&v);
     if msg_res.is_err() {
-        log("Warning(Execute):Console output can't be parsed with utf8".to_string());
+        log!("Warning(Execute):Console output can't be parsed with utf8");
         String::new()
     } else {
         msg_res.unwrap().to_string()
@@ -39,10 +40,10 @@ impl TStep for StepExecute {
         cmd.current_dir(&workshop);
 
         // 执行并收集结果
-        log(format!(
+        log!(
             "Info(Execute):Running command '{}' in '{}'",
             &self.command, &workshop
-        ));
+        );
         let output = cmd.output()
         .map_err(|err|{
             anyhow!(
@@ -56,17 +57,17 @@ impl TStep for StepExecute {
         match output.status.code() {
             Some(val) => {
                 if val == 0 {
-                    log(format!(
+                    log!(
                         "Info(Execute):Command '{}' output : \n{}",
                         &self.command,
                         &read_console(output.stdout)
-                    ));
+                    );
                 } else {
-                    log(format!(
+                    log!(
                         "Error(Execute):Command '{}' failed, output : \n{}",
                         &self.command,
                         &read_console(output.stderr)
-                    ));
+                    );
                 }
                 Ok(val)
             }

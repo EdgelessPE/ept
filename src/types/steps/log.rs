@@ -1,6 +1,7 @@
-use crate::utils::log;
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
+
+use crate::log;
 
 use super::TStep;
 
@@ -12,7 +13,7 @@ pub struct StepLog {
 
 impl TStep for StepLog {
     fn run(self, _: &String) -> Result<i32> {
-        log(format!("{}(Log):{}", &self.level, &self.msg));
+        log!("{}(Log):{}", &self.level, &self.msg);
         Ok(0)
     }
     fn reverse_run(self, _: &String) -> Result<()> {

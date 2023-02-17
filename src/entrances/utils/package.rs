@@ -10,8 +10,9 @@ use crate::{
     parsers::{parse_author, parse_package, parse_signature},
     signature::verify,
     types::GlobalPackage,
-    utils::{get_path_temp, is_debug_mode, log, log_ok_last},
+    utils::{get_path_temp, is_debug_mode},
 };
+use crate::{log,log_ok_last};
 
 use super::{inner_validator, outer_validator};
 
@@ -43,21 +44,21 @@ fn get_temp_dir_path(source_file: String, keep_clear: bool) -> Result<(PathBuf, 
 pub fn clean_temp(source_file: String) -> Result<()> {
     let (temp_dir_path, _) = get_temp_dir_path(source_file, false)?;
     if !is_debug_mode() {
-        log(format!("Info:Cleaning..."));
+        log!("Info:Cleaning...");
         let clean_res = remove_dir_all(&temp_dir_path);
         if clean_res.is_ok() {
-            log_ok_last(format!("Info:Cleaning..."));
+            log_ok_last!("Info:Cleaning...");
         } else {
-            log(format!(
+            log!(
                 "Warning:Failed to remove temporary directory '{:?}'",
                 temp_dir_path
-            ));
+            );
         }
     } else {
-        log(format!(
+        log!(
             "Debug:Leaving temporary directory '{:?}'",
             temp_dir_path
-        ));
+        );
     }
 
     Ok(())
@@ -71,18 +72,18 @@ pub fn unpack_nep(source_file: String, verify_signature: bool) -> Result<(PathBu
     let temp_dir_inner_path = temp_dir_path.join("Inner");
 
     // 解压外包
-    log(format!("Info:Unpacking outer package..."));
+    log!("Info:Unpacking outer package...");
     let temp_dir_outer_str = temp_dir_outer_path.to_string_lossy().to_string();
     release_tar(source_file, temp_dir_outer_str.clone())
         .map_err(|e| anyhow!("Error:Invalid nep package : {}", e.to_string()))?;
     let inner_pkg_str = outer_validator(temp_dir_outer_str.clone(), file_stem.clone())?;
     let signature_path = temp_dir_outer_path.join("signature.toml");
-    log_ok_last(format!("Info:Unpacking outer package..."));
+    log_ok_last!("Info:Unpacking outer package...");
 
     // 签名文件加载与校验
     let signature_struct = parse_signature(signature_path.to_string_lossy().to_string())?.package;
     if verify_signature {
-        log(format!("Info:Verifying package signature..."));
+        log!("Info:Verifying package signature...");
         if signature_struct.signature.is_some() {
             let check_res = verify(
                 inner_pkg_str.clone(),
@@ -94,23 +95,23 @@ pub fn unpack_nep(source_file: String, verify_signature: bool) -> Result<(PathBu
                     "Error:Failed to verify package signature, this package may have been hacked"
                 ));
             }
-            log_ok_last(format!("Info:Verifying package signature..."));
+            log_ok_last!("Info:Verifying package signature...");
         } else {
             return Err(anyhow!(
                 "Error:This package doesn't contain signature, use offline mode to install"
             ));
         }
     } else {
-        log("Warning:Signature verification has been disabled!".to_string());
+        log!("Warning:Signature verification has been disabled!");
     }
 
     // 解压内包
-    log(format!("Info:Decompressing inner package..."));
+    log!("Info:Decompressing inner package...");
     let temp_dir_inner_str = temp_dir_inner_path.to_string_lossy().to_string();
     decompress(inner_pkg_str.clone(), temp_dir_inner_str.clone())
         .map_err(|e| anyhow!("Error:Invalid nep package : {}", e.to_string()))?;
     inner_validator(temp_dir_inner_str.clone())?;
-    log_ok_last(format!("Info:Decompressing inner package..."));
+    log_ok_last!("Info:Decompressing inner package...");
 
     // 读取 package.toml
     let package_struct = parse_package(
@@ -131,7 +132,7 @@ pub fn unpack_nep(source_file: String, verify_signature: bool) -> Result<(PathBu
                 &signature_struct.signer
             ));
         } else {
-            log(format!("Warning:Invalid package : expect first author '{}' to be the package signer '{}', ignoring this error due to signature verification has been disabled",&package_struct.package.authors[0],&signature_struct.signer));
+            log!("Warning:Invalid package : expect first author '{}' to be the package signer '{}', ignoring this error due to signature verification has been disabled",&package_struct.package.authors[0],&signature_struct.signer);
         }
     }
 

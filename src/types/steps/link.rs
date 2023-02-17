@@ -1,5 +1,5 @@
 use super::TStep;
-use crate::utils::{log, parse_relative_path};
+use crate::{utils::{parse_relative_path}, log};
 use anyhow::{anyhow, Result};
 use dirs::desktop_dir;
 use mslnk::ShellLink;
@@ -57,7 +57,7 @@ impl TStep for StepLink {
                 err.to_string()
             )
         })?;
-        log(format!("Info(Link):Added shortcut '{}'", target));
+        log!("Info(Link):Added shortcut '{}'", target);
         Ok(0)
     }
     fn reverse_run(self, _: &String) -> Result<()> {
@@ -71,7 +71,7 @@ impl TStep for StepLink {
         let target_path = Path::new(&target);
         if target_path.exists() {
             remove_file(target_path)?;
-            log(format!("Info(Link):Removed shortcut '{}'", target));
+            log!("Info(Link):Removed shortcut '{}'", target);
         }
         Ok(())
     }

@@ -7,30 +7,30 @@ use super::{
     info_local,
     utils::{installed_validator, unpack_nep},
 };
-use crate::utils::get_path_apps;
+use crate::{log,log_ok_last};
 use crate::{
     executor::workflow_executor,
     parsers::parse_workflow,
-    utils::{log, log_ok_last},
+    utils::{get_path_apps},
 };
 
 pub fn install_using_package(source_file: String, verify_signature: bool) -> Result<()> {
-    log(format!(
+    log!(
         "Info:Preparing to install with package '{}'",
         &source_file
-    ));
+    );
 
     // 解包
     let (temp_dir_inner_path, package_struct) = unpack_nep(source_file.clone(), verify_signature)?;
 
     // 读入安装工作流
-    log(format!("Info:Resolving package..."));
+    log!("Info:Resolving package...");
     let setup_file_path = temp_dir_inner_path.join("workflows/setup.toml");
     let setup_workflow = parse_workflow(setup_file_path.to_string_lossy().to_string())?;
-    log_ok_last(format!("Info:Resolving package..."));
+    log_ok_last!("Info:Resolving package...");
 
     // 创建 apps 文件夹
-    log(format!("Info:Deploying files..."));
+    log!("Info:Deploying files...");
     let apps_path = get_path_apps();
     if !apps_path.exists() {
         create_dir_all(apps_path)?;
@@ -64,21 +64,21 @@ pub fn install_using_package(source_file: String, verify_signature: bool) -> Res
         ));
     }
     rename(app_path, into_dir.clone())?;
-    log_ok_last(format!("Info:Deploying files..."));
+    log_ok_last!("Info:Deploying files...");
 
     // 执行安装工作流
-    log(format!("Info:Running setup workflow..."));
+    log!("Info:Running setup workflow...");
     workflow_executor(setup_workflow, into_dir.clone())?;
-    log_ok_last(format!("Info:Running setup workflow..."));
+    log_ok_last!("Info:Running setup workflow...");
 
     // 保存上下文
     let ctx_path = Path::new(&into_dir).join(".nep_context");
     rename(temp_dir_inner_path, ctx_path)?;
 
     // 检查安装是否完整
-    log(format!("Info:Validating setup..."));
+    log!("Info:Validating setup...");
     installed_validator(into_dir)?;
-    log_ok_last(format!("Info:Validating setup..."));
+    log_ok_last!("Info:Validating setup...");
 
     // 清理临时文件夹
     clean_temp(source_file)?;

@@ -4,13 +4,13 @@ use std::fs::remove_dir_all;
 use crate::{
     executor::{workflow_executor, workflow_reverse_executor},
     parsers::parse_workflow,
-    utils::{get_path_apps, log, log_ok_last},
+    utils::{get_path_apps}, log, log_ok_last,
 };
 
 use super::utils::installed_validator;
 
 pub fn uninstall(package_name: String) -> Result<()> {
-    log(format!("Info:Preparing to uninstall '{}'", &package_name));
+    log!("Info:Preparing to uninstall '{}'", &package_name);
 
     // 解析安装路径
     let app_path = get_path_apps().join(&package_name);
@@ -28,9 +28,9 @@ pub fn uninstall(package_name: String) -> Result<()> {
         let remove_flow = parse_workflow(remove_flow_path.to_string_lossy().to_string())?;
 
         // 执行卸载工作流
-        log(format!("Info:Running remove workflow..."));
+        log!("Info:Running remove workflow...");
         workflow_executor(remove_flow, app_str.clone())?;
-        log_ok_last(format!("Info:Running remove workflow..."));
+        log_ok_last!("Info:Running remove workflow...");
     }
 
     // 读入安装工作流
@@ -38,14 +38,14 @@ pub fn uninstall(package_name: String) -> Result<()> {
     let setup_flow = parse_workflow(setup_flow_path.to_string_lossy().to_string())?;
 
     // 逆向执行安装工作流
-    log(format!("Info:Running reverse setup workflow..."));
+    log!("Info:Running reverse setup workflow...");
     workflow_reverse_executor(setup_flow, app_str.clone())?;
-    log_ok_last(format!("Info:Running reverse setup workflow..."));
+    log_ok_last!("Info:Running reverse setup workflow...");
 
     // 删除 app 目录
-    log(format!("Info:Cleaning..."));
+    log!("Info:Cleaning...");
     remove_dir_all(&app_str)?;
-    log_ok_last(format!("Info:Cleaning..."));
+    log_ok_last!("Info:Cleaning...");
 
     Ok(())
 }

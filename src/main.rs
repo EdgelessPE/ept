@@ -9,15 +9,15 @@ mod executor;
 mod parsers;
 mod signature;
 mod types;
-mod utils;
+#[macro_use] mod utils;
 
 use anyhow::{Result};
 use clap::{Parser, Subcommand};
 use entrances::update_using_package;
+pub use self::utils::{fn_log,fn_log_ok_last};
 
 use crate::{
     entrances::{info, install_using_package, list, pack, uninstall},
-    utils::log,
 };
 
 /// [Alpha] Edgeless Package Tool (ept) for Edgeless Next-Generation Packages (nep)
@@ -110,27 +110,27 @@ fn main() {
 
     // 配置环境变量
     if args.debug {
-        log("Warning:Debug mode enabled".to_string());
+        log!("Warning:Debug mode enabled");
         envmnt::set("DEBUG", "true");
     }
     if args.offline {
-        log("Warning:Offline mode enabled, ept couldn't guarantee security or integrality of packages".to_string());
+        log!("Warning:Offline mode enabled, ept couldn't guarantee security or integrality of packages");
         envmnt::set("OFFLINE", "true")
     }
     if args.yes {
-        log("Warning:Confirmation mode enabled".to_string());
+        log!("Warning:Confirmation mode enabled");
         envmnt::set("CONFIRM", "true");
     }
     if args.strict {
-        log("Warning:Strict mode enabled".to_string());
+        log!("Warning:Strict mode enabled");
         envmnt::set("STRICT", "true");
     }
 
     // 使用路由器匹配入口
     let res = router(args.action);
     if res.is_ok() {
-        log(res.unwrap());
+        log!("{}",res.unwrap());
     } else {
-        log(res.unwrap_err().to_string())
+        log!("{}",res.unwrap_err().to_string())
     }
 }

@@ -3,7 +3,7 @@ use blake3::Hasher;
 use std::fs::File;
 use std::io;
 
-use crate::utils::log;
+use crate::log;
 
 pub fn compute_hash_blake3(from_file: String) -> Result<String> {
     let file = File::open(&from_file)?;
@@ -15,10 +15,10 @@ pub fn compute_hash_blake3(from_file: String) -> Result<String> {
     }
     let hash = hasher.finalize();
     let hash = hash.to_hex().to_string();
-    log(format!(
+    log!(
         "Debug:Cacl hash for '{}' : '{}'",
         &from_file, &hash
-    ));
+    );
     Ok(hash)
 }
 

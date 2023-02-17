@@ -44,7 +44,7 @@ fn gen_log(msg: String, replace_head: Option<String>) -> Option<String> {
     return Some(format!("{}", msg));
 }
 
-pub fn log(msg: String) {
+pub fn fn_log(msg: String) {
     let g = gen_log(msg.clone(), None);
     if g.is_some() {
         let content = g.unwrap();
@@ -53,7 +53,7 @@ pub fn log(msg: String) {
     }
 }
 
-pub fn log_ok_last(msg: String) {
+pub fn fn_log_ok_last(msg: String) {
     let g = gen_log(format!("{}   {}", msg, "ok".green()), None);
     if g.is_some() {
         let content = g.unwrap();
@@ -66,41 +66,55 @@ pub fn log_ok_last(msg: String) {
     }
 }
 
+#[macro_export]
+macro_rules! log {
+    ($($x:expr),*) => {
+        $crate::fn_log(format!($($x),*))
+    };
+}
+
+#[macro_export]
+macro_rules! log_ok_last {
+    ($($x:expr),*) => {
+        $crate::fn_log_ok_last(format!($($x),*))
+    };
+}
+
 #[test]
 fn test_log() {
     // envmnt::set("DEBUG","true");
 
-    log("Debug:This is a debug".to_string());
-    log("Info:This is a info".to_string());
-    log("Warning:This is a warning".to_string());
-    log("Error:This is an error".to_string());
-    log("Success:This is a success".to_string());
-    log("Unknown:This is an unknown".to_string());
-    log("This is a plain text".to_string());
+    fn_log("Debug:This is a debug".to_string());
+    fn_log("Info:This is a info".to_string());
+    fn_log("Warning:This is a warning".to_string());
+    fn_log("Error:This is an error".to_string());
+    fn_log("Success:This is a success".to_string());
+    fn_log("Unknown:This is an unknown".to_string());
+    fn_log("This is a plain text".to_string());
 
-    log("Debug(Log):This is a debug".to_string());
-    log("Info(Path):This is a info".to_string());
-    log("Warning(Execute):This is a warning".to_string());
-    log("Error(Link):This is an error".to_string());
-    log("Success(Main):This is a success".to_string());
-    log("Unknown(unknown):This is an unknown".to_string());
+    fn_log("Debug(Log):This is a debug".to_string());
+    fn_log("Info(Path):This is a info".to_string());
+    fn_log("Warning(Execute):This is a warning".to_string());
+    fn_log("Error(Link):This is an error".to_string());
+    fn_log("Success(Main):This is a success".to_string());
+    fn_log("Unknown(unknown):This is an unknown".to_string());
 }
 
 #[test]
 fn test_log_success_last() {
-    log("Info:Preparing...".to_string());
+    fn_log("Info:Preparing...".to_string());
 
-    log(format!("Info:Running remove workflow..."));
+    fn_log("Info:Running remove workflow...".to_string());
     std::thread::sleep(std::time::Duration::from_secs(1));
-    log_ok_last(format!("Info:Running remove workflow..."));
+    fn_log_ok_last("Info:Running remove workflow...".to_string());
 
-    log(format!("Info:Cleaning..."));
+    fn_log("Info:Cleaning...".to_string());
     std::thread::sleep(std::time::Duration::from_secs(1));
-    log_ok_last(format!("Info:Cleaning..."));
+    fn_log_ok_last("Info:Cleaning...".to_string());
 
-    log(format!("Info:Running setup workflow..."));
+    fn_log("Info:Running setup workflow...".to_string());
     std::thread::sleep(std::time::Duration::from_secs(1));
-    log(format!("Warning:Notice this!"));
+    fn_log("Warning:Notice this!".to_string());
     std::thread::sleep(std::time::Duration::from_secs(1));
-    log_ok_last(format!("Info:Running setup workflow..."));
+    fn_log_ok_last("Info:Running setup workflow...".to_string());
 }

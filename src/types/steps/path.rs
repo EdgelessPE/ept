@@ -1,5 +1,6 @@
 use super::TStep;
-use crate::utils::{get_path_bin, log, parse_relative_path};
+use crate::log;
+use crate::utils::{get_path_bin, parse_relative_path};
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
 use std::fs::{create_dir, remove_file, File};
@@ -36,7 +37,7 @@ fn set_system_path(step: StepPath, is_add: bool) -> Result<bool> {
     let ns = &step.record.as_str();
     if is_add {
         if is_exist {
-            // log(format!("Warning(Path):Record '{}' already existed in PATH",&step.record));
+            // log!("Warning(Path):Record '{}' already existed in PATH",&step.record);
             return Ok(false);
         } else {
             origin_arr.push(ns);
@@ -48,10 +49,10 @@ fn set_system_path(step: StepPath, is_add: bool) -> Result<bool> {
                 .filter(|x| x != &step.record)
                 .collect();
         } else {
-            log(format!(
+            log!(
                 "Warning(Path):Record '{}' not exist in PATH",
                 &step.record
-            ));
+            );
             return Ok(false);
         }
     }
@@ -62,7 +63,7 @@ fn set_system_path(step: StepPath, is_add: bool) -> Result<bool> {
         .filter(|x| x.to_owned() != "")
         .collect();
     let new_text = new_arr.join(";");
-    log(format!("Debug(Path):Save register with '{}'", &new_text));
+    log!("Debug(Path):Save register with '{}'", &new_text);
 
     // 写回注册表
     let (table, _) = hkcu.create_subkey("Environment")?;
@@ -96,12 +97,12 @@ impl TStep for StepPath {
             true,
         );
         if add_res.is_err() {
-            log(format!("Warning(Path):Failed to add system PATH for '{}', manually add later to enable bin function of nep",&bin_abs));
+            log!("Warning(Path):Failed to add system PATH for '{}', manually add later to enable bin function of nep",&bin_abs);
         } else if add_res.unwrap() {
-            log(format!(
+            log!(
                 "Warning(Path):Added system PATH for '{}', restart to enable bin function of nep",
                 &bin_abs
-            ));
+            );
         }
 
         // 解析目标绝对路径
@@ -125,15 +126,15 @@ impl TStep for StepPath {
                 true,
             );
             if add_res.is_err() {
-                log(format!(
+                log!(
                     "Warning(Path):Failed to add system PATH '{}', manually add later",
                     &bin_abs
-                ));
+                );
             } else if add_res.unwrap() {
-                log(format!(
+                log!(
                     "Warning(Path):Added system PATH '{}', restart to enable",
                     &bin_abs
-                ));
+                );
             }
             return Ok(0);
         }
@@ -156,10 +157,10 @@ impl TStep for StepPath {
         let cmd_content = format!("@\"{}\" %*", &abs_target_str);
         let mut file = File::create(&cmd_target_str)?;
         file.write_all(cmd_content.as_bytes())?;
-        log(format!(
+        log!(
             "Info(Path):Added path entrance '{}'",
             cmd_target_str
-        ));
+        );
 
         Ok(0)
     }
@@ -194,12 +195,12 @@ impl TStep for StepPath {
                 false,
             );
             if add_res.is_err() {
-                log(format!(
+                log!(
                     "Warning(Path):Failed to remove system PATH for '{}', manually remove later",
                     &bin_abs
-                ));
+                );
             } else if add_res.unwrap() {
-                log(format!("Info(Path):Removed system PATH '{}'", &bin_abs));
+                log!("Info(Path):Removed system PATH '{}'", &bin_abs);
             }
             return Ok(());
         }
@@ -216,10 +217,10 @@ impl TStep for StepPath {
         // 删除批处理
         if cmd_target_path.exists() {
             remove_file(cmd_target_path)?;
-            log(format!(
+            log!(
                 "Info(Path):Removed path entrance '{}'",
                 cmd_target_str
-            ));
+            );
         }
 
         Ok(())
