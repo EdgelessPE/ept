@@ -22,7 +22,7 @@ fn gen_log(msg: String, replace_head: Option<String>) -> Option<String> {
             return None;
         }
         let c_head = match head {
-            "Debug" => head.bright_white(),
+            "Debug" => head.truecolor(50, 50, 50),
             "Info" => head.bright_blue(),
             "Warning" => head.bright_yellow(),
             "Error" => head.bright_red(),

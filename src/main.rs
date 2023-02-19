@@ -108,7 +108,7 @@ fn main() {
     let args = Args::parse();
 
     // 配置环境变量
-    if args.debug {
+    if args.debug || cfg!(debug_assertions) {
         log!("Warning:Debug mode enabled");
         envmnt::set("DEBUG", "true");
     }

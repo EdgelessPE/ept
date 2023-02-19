@@ -248,6 +248,20 @@ fn fast_unpack_nep(
 }
 
 #[test]
+fn test_unpack_nep() {
+    if cfg!(debug_assertions) {
+        log!("Warning:Debug mode enabled");
+        envmnt::set("DEBUG", "true");
+    }
+    let res = unpack_nep(
+        r"D:\Desktop\Projects\EdgelessPE\ept\VSCode_1.75.0.0_Cno.nep".to_string(),
+        true,
+    )
+    .unwrap();
+    println!("{:?}", res);
+}
+
+#[test]
 fn test_fast_unpack_nep() {
     let res = fast_unpack_nep(
         r"D:\Desktop\Projects\EdgelessPE\ept\VSCode_1.75.0.0_Cno.nep".to_string(),
