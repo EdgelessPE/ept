@@ -90,6 +90,9 @@ fn router(action: Action) -> Result<String> {
         }),
         Action::Info { package_name } => info(package_name).map(|res| format!("{:#?}", res)),
         Action::List => list().map(|list| {
+            if list.len() == 0 {
+                return "No installed package".to_string();
+            }
             let mut res_str = String::from("Installed packages:");
             for node in list {
                 res_str += &format!("  {}    {}", &node.name, &node.local.unwrap().version);

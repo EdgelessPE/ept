@@ -1,14 +1,14 @@
 use std::{
+    cmp::min,
     collections::HashMap,
     fs::{create_dir_all, remove_dir_all, File},
     io::{Cursor, Read},
-    path::{Path, PathBuf}, 
-    cmp::min,
+    path::{Path, PathBuf},
 };
 
 use anyhow::{anyhow, Result};
-use tar::Archive;
 use sysinfo::{System, SystemExt};
+use tar::Archive;
 
 use crate::{
     compression::{decompress, fast_decompress_zstd, release_tar},
@@ -69,25 +69,37 @@ pub fn clean_temp(source_file: String) -> Result<()> {
 }
 
 /// 返回 (Inner 临时目录,package 结构体)
-pub fn unpack_nep(source_file: String,verify_signature: bool)->Result<(PathBuf, GlobalPackage)>{
+pub fn unpack_nep(source_file: String, verify_signature: bool) -> Result<(PathBuf, GlobalPackage)> {
     // 检查文件大小
-    let file=File::open(&source_file).map_err(|e|{anyhow!("Error:Can't open file '{}' : {}",source_file,e.to_string())})?;
-    let meta=file.metadata()?;
-    let size=meta.len();
+    let file = File::open(&source_file).map_err(|e| {
+        anyhow!(
+            "Error:Can't open file '{}' : {}",
+            source_file,
+            e.to_string()
+        )
+    })?;
+    let meta = file.metadata()?;
+    let size = meta.len();
     // 获取 fast 处理方法的文件大小上限
-    let s=System::new_all();
-    let size_limit=envmnt::get_u64("FAST_UNPACK_LIMIT", min(s.available_memory()/10,500*1024*1024));
+    let s = System::new_all();
+    let size_limit = envmnt::get_u64(
+        "FAST_UNPACK_LIMIT",
+        min(s.available_memory() / 10, 500 * 1024 * 1024),
+    );
 
-    if size<=size_limit{
-        log!("Debug:Use fast unpack method ({}/{})",size,size_limit);
+    if size <= size_limit {
+        log!("Debug:Use fast unpack method ({}/{})", size, size_limit);
         fast_unpack_nep(source_file, verify_signature)
-    }else{
-        log!("Debug:Use normal unpack method ({}/{})",size,size_limit);
+    } else {
+        log!("Debug:Use normal unpack method ({}/{})", size, size_limit);
         normal_unpack_nep(source_file, verify_signature)
     }
 }
 
-fn normal_unpack_nep(source_file: String, verify_signature: bool) -> Result<(PathBuf, GlobalPackage)> {
+fn normal_unpack_nep(
+    source_file: String,
+    verify_signature: bool,
+) -> Result<(PathBuf, GlobalPackage)> {
     // 创建临时目录
     let (temp_dir_path, file_stem) = get_temp_dir_path(source_file.clone(), true)?;
     let temp_dir_outer_path = temp_dir_path.join("Outer");
@@ -274,21 +286,23 @@ fn test_fast_unpack_nep() {
 #[test]
 fn benchmark_fast_unpack_nep() {
     use std::time::Instant;
-    let normal=Instant::now();
+    let normal = Instant::now();
     for _ in 0..10 {
         unpack_nep(
             r"D:\Desktop\Projects\EdgelessPE\ept\VSCode_1.75.0.0_Cno.nep".to_string(),
-        true,
-        ).unwrap();
+            true,
+        )
+        .unwrap();
     }
     println!("Normal unpack cost {}s", normal.elapsed().as_secs()); // 42s
 
-    let fast=Instant::now();
+    let fast = Instant::now();
     for _ in 0..10 {
         fast_unpack_nep(
             r"D:\Desktop\Projects\EdgelessPE\ept\VSCode_1.75.0.0_Cno.nep".to_string(),
-        true,
-        ).unwrap();
+            true,
+        )
+        .unwrap();
     }
     println!("Fast unpack cost {}s", fast.elapsed().as_secs()); // 34s
 }
