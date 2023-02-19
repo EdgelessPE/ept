@@ -18,7 +18,7 @@ pub fn decompress_zstd(source: String, into: String) -> Result<()> {
 }
 
 pub fn fast_decompress_zstd(raw: &Vec<u8>) -> Result<Vec<u8>> {
-    zstd::bulk::decompress(raw, max(raw.capacity() * 5, 50 * 1024 * 1024))
+    zstd::bulk::decompress(raw, max(raw.capacity() * 5, 1024 * 1024))
         .map_err(|e| anyhow!("Error:Failed to fast decompress : {}", e.to_string()))
 }
 

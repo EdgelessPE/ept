@@ -2,7 +2,7 @@ use std::{
     collections::HashMap,
     fs::{create_dir_all, remove_dir_all, File},
     io::{Cursor, Read},
-    path::{Path, PathBuf},
+    path::{Path, PathBuf}, time::Instant,
 };
 
 use anyhow::{anyhow, Result};
@@ -235,4 +235,25 @@ fn test_fast_unpack_nep() {
     )
     .unwrap();
     println!("{:?}", res);
+}
+
+#[test]
+fn benchmark_fast_unpack_nep() {
+    let normal=Instant::now();
+    for _ in 0..10 {
+        unpack_nep(
+            r"D:\Desktop\Projects\EdgelessPE\ept\VSCode_1.75.0.0_Cno.nep".to_string(),
+        true,
+        ).unwrap();
+    }
+    println!("Normal unpack cost {}s", normal.elapsed().as_secs()); // 42s
+
+    let fast=Instant::now();
+    for _ in 0..10 {
+        fast_unpack_nep(
+            r"D:\Desktop\Projects\EdgelessPE\ept\VSCode_1.75.0.0_Cno.nep".to_string(),
+        true,
+        ).unwrap();
+    }
+    println!("Fast unpack cost {}s", fast.elapsed().as_secs()); // 34s
 }
