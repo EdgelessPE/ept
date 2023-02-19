@@ -1,17 +1,20 @@
 use std::{
-    fs::{create_dir_all, remove_dir_all},
+    collections::HashMap,
+    fs::{create_dir_all, remove_dir_all, File},
+    io::{Read},
     path::{Path, PathBuf},
 };
 
 use anyhow::{anyhow, Result};
+use tar::{Archive};
 
 use crate::{
     compression::{decompress, release_tar},
     p2s,
-    parsers::{parse_author, parse_package, parse_signature},
+    parsers::{parse_author, parse_package, parse_signature, fast_parse_signature},
     signature::verify,
     types::GlobalPackage,
-    utils::{get_path_temp, is_debug_mode},
+    utils::{get_path_temp, is_debug_mode}, entrances::utils::outer_hashmap_validator,
 };
 use crate::{log, log_ok_last};
 
@@ -135,4 +138,63 @@ pub fn unpack_nep(source_file: String, verify_signature: bool) -> Result<(PathBu
     }
 
     Ok((temp_dir_inner_path, package_struct))
+}
+pub fn fast_unpack_nep(source_file: String, verify_signature: bool) -> Result<()> {
+    // 创建临时目录
+    let (temp_dir_path, file_stem) = get_temp_dir_path(source_file.clone(), true)?;
+    let temp_dir_inner_path = temp_dir_path.join("Inner");
+
+    // 读取外包，生成 hashmap
+    log!("Info:Reading outer package...");
+    let outer_file = File::open(&source_file)
+        .map_err(|e| anyhow!("Error:Can't open '{}' : {}", &source_file, e.to_string()))?;
+    let mut outer_tar = Archive::new(outer_file);
+    let mut outer_map = HashMap::new();
+    for entry in outer_tar.entries()? {
+        let mut entry = entry?;
+        let name = p2s!(entry.path()?);
+        let mut buffer = Vec::with_capacity(entry.header().size()? as usize);
+        entry.read_to_end(&mut buffer)?;
+        outer_map.insert(name, buffer);
+    }
+    outer_hashmap_validator(&outer_map, file_stem.clone())?;
+    log_ok_last!("Info:Reading outer package...");
+
+    // 签名文件加载与校验
+    let signature_raw = outer_map.get_mut("signature.toml").unwrap();
+    let signature_struct = fast_parse_signature(signature_raw)?.package;
+    if verify_signature {
+        log!("Info:Verifying package signature...");
+        if signature_struct.signature.is_some() {
+            let check_res = verify(
+                inner_pkg_str.clone(),
+                signature_struct.signer.clone(),
+                signature_struct.signature.unwrap(),
+            )?;
+            if !check_res {
+                return Err(anyhow!(
+                    "Error:Failed to verify package signature, this package may have been hacked"
+                ));
+            }
+            log_ok_last!("Info:Verifying package signature...");
+        } else {
+            return Err(anyhow!(
+                "Error:This package doesn't contain signature, use offline mode to install"
+            ));
+        }
+    } else {
+        log!("Warning:Signature verification has been disabled!");
+    }
+
+
+    Ok(())
+}
+
+#[test]
+fn test_fast_unpack_nep() {
+    fast_unpack_nep(
+        r"D:\Desktop\Projects\EdgelessPE\ept\VSCode_1.75.0.0_Cno.nep".to_string(),
+        true,
+    )
+    .unwrap();
 }

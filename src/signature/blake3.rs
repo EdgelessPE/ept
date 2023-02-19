@@ -19,6 +19,20 @@ pub fn compute_hash_blake3(from_file: String) -> Result<String> {
     Ok(hash)
 }
 
+pub fn fast_compute_hash_blake3(raw:&mut Vec<u8>) -> Result<String> {
+    let file=File::from(raw);
+    let mut hasher = Hasher::new();
+    if let Some(mmap) = try_into_memmap_file(&file)? {
+        hasher.update_rayon(mmap.get_ref());
+    } else {
+        copy_wide(file, &mut hasher)?;
+    }
+    let hash = hasher.finalize();
+    let hash = hash.to_hex().to_string();
+    log!("Debug:Got hash : '{}'", &hash);
+    Ok(hash)
+}
+
 fn try_into_memmap_file(file: &File) -> anyhow::Result<Option<io::Cursor<memmap2::Mmap>>> {
     let metadata = file.metadata()?;
     let file_size = metadata.len();

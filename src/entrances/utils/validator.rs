@@ -1,5 +1,5 @@
 use anyhow::{anyhow, Result};
-use std::path::Path;
+use std::{collections::HashMap, path::Path};
 
 use crate::p2s;
 
@@ -32,10 +32,17 @@ pub fn manifest_validator(dir: String, manifest: Vec<String>) -> Result<()> {
     Ok(())
 }
 
+// 定义外包的装箱单（内包名称需要传入）
+macro_rules! def_outer_manifest {
+    ($inner_pkg_name:expr) => {{
+        vec!["signature.toml", &$inner_pkg_name]
+    }};
+}
+
 // 返回内包路径
 pub fn outer_validator(dir: String, stem: String) -> Result<String> {
     let inner_pkg_name = stem + ".tar.zst";
-    let manifest = vec!["signature.toml", &inner_pkg_name];
+    let manifest = def_outer_manifest!(inner_pkg_name);
     for file_name in manifest {
         let p = Path::new(&dir).join(file_name);
         if !p.exists() {
@@ -49,6 +56,22 @@ pub fn outer_validator(dir: String, stem: String) -> Result<String> {
 
     let inner_path = Path::new(&dir).join(&inner_pkg_name);
     Ok(p2s!(inner_path))
+}
+
+pub fn outer_hashmap_validator(map: &HashMap<String, Vec<u8>>, stem: String) -> Result<()> {
+    let inner_pkg_name = stem + ".tar.zst";
+    let manifest = def_outer_manifest!(inner_pkg_name);
+    for file_name in manifest {
+        let entry = map.get(file_name);
+        if entry.is_none() {
+            return Err(anyhow!(
+                "Error:Invalid nep outer package : missing '{}'",
+                &file_name,
+            ));
+        }
+    }
+
+    Ok(())
 }
 
 // 返回上下文目录路径
