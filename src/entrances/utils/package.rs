@@ -1,20 +1,21 @@
 use std::{
-    collections::{HashMap},
+    collections::HashMap,
     fs::{create_dir_all, remove_dir_all, File},
-    io::{Read, Cursor},
+    io::{Cursor, Read},
     path::{Path, PathBuf},
 };
 
 use anyhow::{anyhow, Result};
-use tar::{Archive};
+use tar::Archive;
 
 use crate::{
-    compression::{decompress, release_tar, fast_decompress_zstd},
+    compression::{decompress, fast_decompress_zstd, release_tar},
+    entrances::utils::outer_hashmap_validator,
     p2s,
-    parsers::{parse_author, parse_package, parse_signature, fast_parse_signature},
-    signature::{verify, fast_verify},
+    parsers::{fast_parse_signature, parse_author, parse_package, parse_signature},
+    signature::{fast_verify, verify},
     types::GlobalPackage,
-    utils::{get_path_temp, is_debug_mode}, entrances::utils::outer_hashmap_validator,
+    utils::{get_path_temp, is_debug_mode},
 };
 use crate::{log, log_ok_last};
 
@@ -139,7 +140,10 @@ pub fn unpack_nep(source_file: String, verify_signature: bool) -> Result<(PathBu
 
     Ok((temp_dir_inner_path, package_struct))
 }
-pub fn fast_unpack_nep(source_file: String, verify_signature: bool) -> Result<(PathBuf, GlobalPackage)> {
+pub fn fast_unpack_nep(
+    source_file: String,
+    verify_signature: bool,
+) -> Result<(PathBuf, GlobalPackage)> {
     // 创建临时目录
     let (temp_dir_path, file_stem) = get_temp_dir_path(source_file.clone(), true)?;
     let temp_dir_inner_path = temp_dir_path.join("Inner");
@@ -163,7 +167,7 @@ pub fn fast_unpack_nep(source_file: String, verify_signature: bool) -> Result<(P
     // 签名文件加载与校验
     let signature_raw = outer_map.get_mut("signature.toml").unwrap();
     let signature_struct = fast_parse_signature(signature_raw)?.package;
-    let inner_pkg_raw = outer_map.get(&(file_stem+".tar.zst")).unwrap();
+    let inner_pkg_raw = outer_map.get(&(file_stem + ".tar.zst")).unwrap();
     if verify_signature {
         log!("Info:Verifying package signature...");
         if signature_struct.signature.is_some() {
@@ -189,10 +193,10 @@ pub fn fast_unpack_nep(source_file: String, verify_signature: bool) -> Result<(P
 
     // 解压内包到临时目录
     log!("Info:Decompressing inner package...");
-    let temp_dir_inner_str=p2s!(temp_dir_inner_path);
-    let inner_tar_raw=fast_decompress_zstd(inner_pkg_raw)?;
-    let inner_tar_file=Cursor::new(inner_tar_raw);
-    let mut inner_archive=Archive::new(inner_tar_file);
+    let temp_dir_inner_str = p2s!(temp_dir_inner_path);
+    let inner_tar_raw = fast_decompress_zstd(inner_pkg_raw)?;
+    let inner_tar_file = Cursor::new(inner_tar_raw);
+    let mut inner_archive = Archive::new(inner_tar_file);
     inner_archive.unpack(temp_dir_inner_str.clone())?;
     inner_validator(temp_dir_inner_str)?;
     log_ok_last!("Info:Decompressing inner package...");
@@ -225,9 +229,10 @@ pub fn fast_unpack_nep(source_file: String, verify_signature: bool) -> Result<(P
 
 #[test]
 fn test_fast_unpack_nep() {
-    fast_unpack_nep(
+    let res = fast_unpack_nep(
         r"D:\Desktop\Projects\EdgelessPE\ept\VSCode_1.75.0.0_Cno.nep".to_string(),
         true,
     )
     .unwrap();
+    println!("{:?}", res);
 }

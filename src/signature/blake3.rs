@@ -1,5 +1,5 @@
 use anyhow::Result;
-use blake3::{Hasher,hash};
+use blake3::{hash, Hasher};
 use std::fs::File;
 use std::io;
 
@@ -15,12 +15,16 @@ pub fn compute_hash_blake3(from_file: String) -> Result<String> {
     }
     let hash = hasher.finalize();
     let hash = hash.to_hex().to_string();
-    log!("Debug:Calculated blake3 hash for '{}' : '{}'", &from_file, &hash);
+    log!(
+        "Debug:Calculated blake3 hash for '{}' : '{}'",
+        &from_file,
+        &hash
+    );
     Ok(hash)
 }
 
-pub fn fast_compute_hash_blake3(raw:&Vec<u8>) -> Result<String> {
-    let hash=hash(raw);
+pub fn fast_compute_hash_blake3(raw: &Vec<u8>) -> Result<String> {
+    let hash = hash(raw);
     let hash = hash.to_hex().to_string();
     log!("Debug:Got blake3 hash : '{}'", &hash);
     Ok(hash)

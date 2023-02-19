@@ -20,7 +20,7 @@ pub fn parse_signature(p: String) -> Result<Signature> {
     Ok(sign)
 }
 
-pub fn fast_parse_signature(raw:&mut Vec<u8>)->Result<Signature> {
+pub fn fast_parse_signature(raw: &mut Vec<u8>) -> Result<Signature> {
     let sign = toml::from_str(std::str::from_utf8(raw)?)
         .map_err(|err| anyhow!("Error:Can't parse signature.toml : {}", err))?;
 
