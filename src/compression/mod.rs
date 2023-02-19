@@ -4,6 +4,7 @@ mod zstd;
 use crate::log;
 
 pub use self::tar::{pack_tar, release_tar};
+pub use self::zstd::{fast_decompress_zstd};
 use self::zstd::{compress_zstd, decompress_zstd};
 use anyhow::{anyhow, Result};
 use std::fs::remove_file;

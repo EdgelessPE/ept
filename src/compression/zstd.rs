@@ -1,6 +1,6 @@
-use std::fs::File;
+use std::{fs::File, cmp::max};
 
-use anyhow::Result;
+use anyhow::{Result, anyhow};
 use zstd::stream::{copy_decode, copy_encode};
 
 pub fn compress_zstd(source: String, into: String) -> Result<()> {
@@ -15,6 +15,10 @@ pub fn decompress_zstd(source: String, into: String) -> Result<()> {
     let into_file = File::create(&into)?;
     copy_decode(source_file, into_file)?;
     Ok(())
+}
+
+pub fn fast_decompress_zstd(raw:&Vec<u8>)->Result<Vec<u8>>{
+    zstd::bulk::decompress(raw, max(raw.capacity()*5,50*1024*1024)).map_err(|e|{anyhow!("Error:Failed to fast decompress : {}",e.to_string())})
 }
 
 #[test]

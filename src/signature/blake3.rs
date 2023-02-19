@@ -1,5 +1,5 @@
 use anyhow::Result;
-use blake3::Hasher;
+use blake3::{Hasher,hash};
 use std::fs::File;
 use std::io;
 
@@ -15,21 +15,14 @@ pub fn compute_hash_blake3(from_file: String) -> Result<String> {
     }
     let hash = hasher.finalize();
     let hash = hash.to_hex().to_string();
-    log!("Debug:Cacl hash for '{}' : '{}'", &from_file, &hash);
+    log!("Debug:Calculated blake3 hash for '{}' : '{}'", &from_file, &hash);
     Ok(hash)
 }
 
-pub fn fast_compute_hash_blake3(raw:&mut Vec<u8>) -> Result<String> {
-    let file=File::from(raw);
-    let mut hasher = Hasher::new();
-    if let Some(mmap) = try_into_memmap_file(&file)? {
-        hasher.update_rayon(mmap.get_ref());
-    } else {
-        copy_wide(file, &mut hasher)?;
-    }
-    let hash = hasher.finalize();
+pub fn fast_compute_hash_blake3(raw:&Vec<u8>) -> Result<String> {
+    let hash=hash(raw);
     let hash = hash.to_hex().to_string();
-    log!("Debug:Got hash : '{}'", &hash);
+    log!("Debug:Got blake3 hash : '{}'", &hash);
     Ok(hash)
 }
 

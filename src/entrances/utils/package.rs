@@ -1,7 +1,7 @@
 use std::{
-    collections::HashMap,
+    collections::{HashMap},
     fs::{create_dir_all, remove_dir_all, File},
-    io::{Read},
+    io::{Read, Cursor},
     path::{Path, PathBuf},
 };
 
@@ -9,10 +9,10 @@ use anyhow::{anyhow, Result};
 use tar::{Archive};
 
 use crate::{
-    compression::{decompress, release_tar},
+    compression::{decompress, release_tar, fast_decompress_zstd},
     p2s,
     parsers::{parse_author, parse_package, parse_signature, fast_parse_signature},
-    signature::verify,
+    signature::{verify, fast_verify},
     types::GlobalPackage,
     utils::{get_path_temp, is_debug_mode}, entrances::utils::outer_hashmap_validator,
 };
@@ -139,7 +139,7 @@ pub fn unpack_nep(source_file: String, verify_signature: bool) -> Result<(PathBu
 
     Ok((temp_dir_inner_path, package_struct))
 }
-pub fn fast_unpack_nep(source_file: String, verify_signature: bool) -> Result<()> {
+pub fn fast_unpack_nep(source_file: String, verify_signature: bool) -> Result<(PathBuf, GlobalPackage)> {
     // 创建临时目录
     let (temp_dir_path, file_stem) = get_temp_dir_path(source_file.clone(), true)?;
     let temp_dir_inner_path = temp_dir_path.join("Inner");
@@ -163,11 +163,12 @@ pub fn fast_unpack_nep(source_file: String, verify_signature: bool) -> Result<()
     // 签名文件加载与校验
     let signature_raw = outer_map.get_mut("signature.toml").unwrap();
     let signature_struct = fast_parse_signature(signature_raw)?.package;
+    let inner_pkg_raw = outer_map.get(&(file_stem+".tar.zst")).unwrap();
     if verify_signature {
         log!("Info:Verifying package signature...");
         if signature_struct.signature.is_some() {
-            let check_res = verify(
-                inner_pkg_str.clone(),
+            let check_res = fast_verify(
+                inner_pkg_raw,
                 signature_struct.signer.clone(),
                 signature_struct.signature.unwrap(),
             )?;
@@ -186,8 +187,40 @@ pub fn fast_unpack_nep(source_file: String, verify_signature: bool) -> Result<()
         log!("Warning:Signature verification has been disabled!");
     }
 
+    // 解压内包到临时目录
+    log!("Info:Decompressing inner package...");
+    let temp_dir_inner_str=p2s!(temp_dir_inner_path);
+    let inner_tar_raw=fast_decompress_zstd(inner_pkg_raw)?;
+    let inner_tar_file=Cursor::new(inner_tar_raw);
+    let mut inner_archive=Archive::new(inner_tar_file);
+    inner_archive.unpack(temp_dir_inner_str.clone())?;
+    inner_validator(temp_dir_inner_str)?;
+    log_ok_last!("Info:Decompressing inner package...");
 
-    Ok(())
+    // 读取 package.toml
+    let package_struct = parse_package(
+        temp_dir_inner_path
+            .join("package.toml")
+            .to_string_lossy()
+            .to_string(),
+        None,
+    )?;
+
+    // 检查签名者与第一作者是否一致
+    let author = parse_author(package_struct.package.authors[0].clone())?;
+    if signature_struct.signer != author.email.unwrap() {
+        if verify_signature {
+            return Err(anyhow!(
+                "Error:Invalid package : expect first author '{}' to be the package signer '{}'",
+                &package_struct.package.authors[0],
+                &signature_struct.signer
+            ));
+        } else {
+            log!("Warning:Invalid package : expect first author '{}' to be the package signer '{}', ignoring this error due to signature verification has been disabled",&package_struct.package.authors[0],&signature_struct.signer);
+        }
+    }
+
+    Ok((temp_dir_inner_path, package_struct))
 }
 
 #[test]
