@@ -20,7 +20,7 @@ pub fn ask_yn() -> bool {
 #[test]
 fn test_ask_yn() {
     envmnt::set("CONFIRM", "true");
-    log!("Warning:Please select (y/n)?");
+    log!("Warning:Please select? (y/n)");
     let res = ask_yn();
     println!("{}", res);
 }

@@ -10,6 +10,7 @@ use std::{
 
 use super::parse_author;
 
+/// p 输入 package.toml 所在位置，如需自动更新主程序版本号则传入 located 为包安装后的所在路径
 pub fn parse_package(p: String, located: Option<String>) -> Result<GlobalPackage> {
     let package_path = Path::new(&p);
     if !package_path.exists() {

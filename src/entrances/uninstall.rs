@@ -4,11 +4,19 @@ use std::fs::remove_dir_all;
 use crate::{
     executor::{workflow_executor, workflow_reverse_executor},
     log, log_ok_last, p2s,
-    parsers::parse_workflow,
-    utils::get_path_apps,
+    parsers::{parse_workflow, parse_package},
+    utils::{get_path_apps, ask_yn, kill_with_name}, types::WorkflowNode,
 };
 
 use super::utils::installed_validator;
+
+fn get_manifest(flow: Vec<WorkflowNode>) -> Vec<String> {
+    let mut manifest = Vec::new();
+    for node in flow {
+        manifest.append(&mut node.body.get_manifest());
+    }
+    manifest
+}
 
 pub fn uninstall(package_name: String) -> Result<()> {
     log!("Info:Preparing to uninstall '{}'", &package_name);
@@ -22,6 +30,9 @@ pub fn uninstall(package_name: String) -> Result<()> {
 
     // 判断安装路径是否完整
     installed_validator(app_str.clone())?;
+
+    // 读入 package.toml
+    let global=parse_package(p2s!(app_path.join(".nep_context/package.toml")), None)?;
 
     // 读入卸载工作流
     let remove_flow_path = app_path.join(".nep_context/workflows/remove.toml");
@@ -40,12 +51,42 @@ pub fn uninstall(package_name: String) -> Result<()> {
 
     // 逆向执行安装工作流
     log!("Info:Running reverse setup workflow...");
-    workflow_reverse_executor(setup_flow, app_str.clone())?;
+    workflow_reverse_executor(setup_flow.clone(), app_str.clone())?;
     log_ok_last!("Info:Running reverse setup workflow...");
 
     // 删除 app 目录
     log!("Info:Cleaning...");
-    remove_dir_all(&app_str)?;
+    let try_rm_res=remove_dir_all(&app_str);
+    if try_rm_res.is_err(){
+        log!("Warning:Can't clean the directory completely, try killing the related processes? (y/n)");
+        if ask_yn(){
+            // 拿到装箱单
+            let mut setup_manifest = get_manifest(setup_flow);
+
+            // 加入主程序
+            let mp_opt=global.software.unwrap().main_program;
+            if mp_opt.is_some(){
+                setup_manifest.push(mp_opt.unwrap());
+            }
+
+            // 杀死其中列出的 exe 程序
+            for name in setup_manifest {
+                if name.ends_with(".exe"){
+                    if kill_with_name(name.clone()){
+                        log!("Warning:Killed process '{}'",&name);
+                    }else{
+                        log!("Warning:Failed to kill process '{}'",&name);
+                    }
+                }
+            }
+            // 再次尝试删除
+            let try_rm_res=remove_dir_all(&app_str);
+            if try_rm_res.is_err() {
+                log!("Warning:Can't clean the directory still, please delete '{}' manually later",&app_str);
+            }
+        }
+    }
+
     log_ok_last!("Info:Cleaning...");
 
     Ok(())
