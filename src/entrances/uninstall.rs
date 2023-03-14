@@ -1,5 +1,5 @@
 use anyhow::{anyhow, Result};
-use std::fs::remove_dir_all;
+use std::{fs::remove_dir_all, collections::HashSet};
 
 use crate::{
     executor::{workflow_executor, workflow_reverse_executor},
@@ -60,17 +60,18 @@ pub fn uninstall(package_name: String) -> Result<()> {
     if try_rm_res.is_err(){
         log!("Warning:Can't clean the directory completely, try killing the related processes? (y/n)");
         if ask_yn(){
-            // 拿到装箱单
-            let mut setup_manifest = get_manifest(setup_flow);
+            // 拿到装箱单，生成基础暗杀名单
+            let setup_manifest = get_manifest(setup_flow);
+            let mut hit_list:HashSet<String>=HashSet::from(setup_manifest);
 
             // 加入主程序
             let mp_opt=global.software.unwrap().main_program;
             if mp_opt.is_some(){
-                setup_manifest.push(mp_opt.unwrap());
+                hit_list.insert(mp_opt.unwrap());
             }
 
             // 杀死其中列出的 exe 程序
-            for name in setup_manifest {
+            for name in hit_list {
                 if name.ends_with(".exe"){
                     if kill_with_name(name.clone()){
                         log!("Warning:Killed process '{}'",&name);
