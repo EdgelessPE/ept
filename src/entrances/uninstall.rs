@@ -1,5 +1,5 @@
 use anyhow::{anyhow, Result};
-use std::{fs::remove_dir_all, collections::HashSet};
+use std::{fs::remove_dir_all, collections::HashSet,thread::sleep, time::Duration};
 
 use crate::{
     executor::{workflow_executor, workflow_reverse_executor},
@@ -62,7 +62,7 @@ pub fn uninstall(package_name: String) -> Result<()> {
         if ask_yn(){
             // 拿到装箱单，生成基础暗杀名单
             let setup_manifest = get_manifest(setup_flow);
-            let mut hit_list:HashSet<String>=HashSet::from(setup_manifest);
+            let mut hit_list:HashSet<String>=HashSet::from_iter(setup_manifest);
 
             // 加入主程序
             let mp_opt=global.software.unwrap().main_program;
@@ -80,6 +80,10 @@ pub fn uninstall(package_name: String) -> Result<()> {
                     }
                 }
             }
+            
+            // 延时 
+            sleep(Duration::from_secs(3));
+
             // 再次尝试删除
             let try_rm_res=remove_dir_all(&app_str);
             if try_rm_res.is_err() {
