@@ -1,13 +1,13 @@
 mod exe_version;
 #[macro_use]
 mod log;
-mod term;
 mod process;
+mod term;
 
 pub use self::exe_version::get_exe_version;
 pub use self::log::{fn_log, fn_log_ok_last};
-pub use self::term::ask_yn;
 pub use self::process::kill_with_name;
+pub use self::term::ask_yn;
 
 use anyhow::Result;
 use path_clean::PathClean;

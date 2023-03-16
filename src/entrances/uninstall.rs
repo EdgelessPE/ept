@@ -1,11 +1,12 @@
 use anyhow::{anyhow, Result};
-use std::{fs::remove_dir_all, collections::HashSet,thread::sleep, time::Duration};
+use std::{collections::HashSet, fs::remove_dir_all, thread::sleep, time::Duration};
 
 use crate::{
     executor::{workflow_executor, workflow_reverse_executor},
     log, log_ok_last, p2s,
-    parsers::{parse_workflow, parse_package},
-    utils::{get_path_apps, ask_yn, kill_with_name}, types::WorkflowNode,
+    parsers::{parse_package, parse_workflow},
+    types::WorkflowNode,
+    utils::{ask_yn, get_path_apps, kill_with_name},
 };
 
 use super::utils::installed_validator;
@@ -32,7 +33,7 @@ pub fn uninstall(package_name: String) -> Result<()> {
     installed_validator(app_str.clone())?;
 
     // 读入 package.toml
-    let global=parse_package(p2s!(app_path.join(".nep_context/package.toml")), None)?;
+    let global = parse_package(p2s!(app_path.join(".nep_context/package.toml")), None)?;
 
     // 读入卸载工作流
     let remove_flow_path = app_path.join(".nep_context/workflows/remove.toml");
@@ -56,38 +57,41 @@ pub fn uninstall(package_name: String) -> Result<()> {
 
     // 删除 app 目录
     log!("Info:Cleaning...");
-    let try_rm_res=remove_dir_all(&app_str);
-    if try_rm_res.is_err(){
+    let try_rm_res = remove_dir_all(&app_str);
+    if try_rm_res.is_err() {
         log!("Warning:Can't clean the directory completely, try killing the related processes? (y/n)");
-        if ask_yn(){
+        if ask_yn() {
             // 拿到装箱单，生成基础暗杀名单
             let setup_manifest = get_manifest(setup_flow);
-            let mut hit_list:HashSet<String>=HashSet::from_iter(setup_manifest);
+            let mut hit_list: HashSet<String> = HashSet::from_iter(setup_manifest);
 
             // 加入主程序
-            let mp_opt=global.software.unwrap().main_program;
-            if mp_opt.is_some(){
+            let mp_opt = global.software.unwrap().main_program;
+            if mp_opt.is_some() {
                 hit_list.insert(mp_opt.unwrap());
             }
 
             // 杀死其中列出的 exe 程序
             for name in hit_list {
-                if name.ends_with(".exe"){
-                    if kill_with_name(name.clone()){
-                        log!("Warning:Killed process '{}'",&name);
-                    }else{
-                        log!("Warning:Failed to kill process '{}'",&name);
+                if name.ends_with(".exe") {
+                    if kill_with_name(name.clone()) {
+                        log!("Warning:Killed process '{}'", &name);
+                    } else {
+                        log!("Warning:Failed to kill process '{}'", &name);
                     }
                 }
             }
-            
-            // 延时 
+
+            // 延时
             sleep(Duration::from_secs(3));
 
             // 再次尝试删除
-            let try_rm_res=remove_dir_all(&app_str);
+            let try_rm_res = remove_dir_all(&app_str);
             if try_rm_res.is_err() {
-                log!("Warning:Can't clean the directory still, please delete '{}' manually later",&app_str);
+                log!(
+                    "Warning:Can't clean the directory still, please delete '{}' manually later",
+                    &app_str
+                );
             }
         }
     }
