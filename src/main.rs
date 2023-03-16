@@ -12,6 +12,8 @@ mod types;
 #[macro_use]
 mod utils;
 
+use std::process::exit;
+
 pub use self::utils::{fn_log, fn_log_ok_last};
 use anyhow::Result;
 use clap::{Parser, Subcommand};
@@ -133,6 +135,7 @@ fn main() {
     if res.is_ok() {
         log!("{}", res.unwrap());
     } else {
-        log!("{}", res.unwrap_err().to_string())
+        log!("{}", res.unwrap_err().to_string());
+        exit(1);
     }
 }
