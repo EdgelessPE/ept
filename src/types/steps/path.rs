@@ -3,10 +3,13 @@ use crate::utils::{get_path_bin, parse_relative_path};
 use crate::{log, p2s};
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
+use winapi::shared::minwindef::{WPARAM,LPARAM};
 use std::fs::{create_dir, remove_file, File};
 use std::io::Write;
 use std::path::Path;
+use std::ptr::null_mut;
 use winreg::{enums::*, RegKey};
+use winapi::um::winuser::{SendMessageTimeoutA,HWND_BROADCAST,WM_SETTINGCHANGE, SMTO_ABORTIFHUNG};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct StepPath {
@@ -68,6 +71,11 @@ fn set_system_path(step: StepPath, is_add: bool) -> Result<bool> {
         .set_value("Path", &new_text)
         .map_err(|err| anyhow!("Error(Path):Can't write to register : {}", err.to_string()))?;
 
+    // 发送全局广播
+    unsafe{
+        SendMessageTimeoutA(HWND_BROADCAST, WM_SETTINGCHANGE, 0 as WPARAM, "Environment\0".as_ptr() as LPARAM, SMTO_ABORTIFHUNG, 3000, null_mut());
+    };
+
     Ok(true)
 }
 
@@ -93,7 +101,7 @@ impl TStep for StepPath {
             log!("Warning(Path):Failed to add system PATH for '{}', manually add later to enable bin function of nep",&bin_abs);
         } else if add_res.unwrap() {
             log!(
-                "Warning(Path):Added system PATH for '{}', restart to enable bin function of nep",
+                "Warning(Path):Added system PATH for '{}'",
                 &bin_abs
             );
         }
@@ -223,6 +231,14 @@ impl TStep for StepPath {
             record: interpreter(self.record),
         }
     }
+}
+
+#[test]
+fn test_set_system_path(){
+    set_system_path(StepPath {
+        record: "D:/CnoRPS/aria2".to_string(),
+    },
+    false,).unwrap();
 }
 
 #[test]
