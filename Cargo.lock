@@ -384,6 +384,7 @@ dependencies = [
  "sysinfo",
  "tar",
  "toml",
+ "vc-ltl",
  "winreg",
  "zstd",
 ]
@@ -1049,6 +1050,12 @@ name = "utf8parse"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "936e4b492acfd135421d8dca4b1aa80a7bfc26e702ef3af710e0752684df5372"
+
+[[package]]
+name = "vc-ltl"
+version = "5.0.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a598ed2ecab95d080d2d55110bb484572145f36793f15a25447189a86752ada4"
 
 [[package]]
 name = "version_check"
