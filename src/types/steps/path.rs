@@ -96,7 +96,7 @@ fn set_system_path(step: StepPath, is_add: bool) -> Result<bool> {
 impl TStep for StepPath {
     fn run(self, located: &String) -> Result<i32> {
         // 解析 bin 绝对路径
-        let bin_path = get_path_bin();
+        let bin_path = get_path_bin()?;
         let bin_abs = p2s!(bin_path);
 
         // 创建 bin 目录
@@ -163,7 +163,7 @@ impl TStep for StepPath {
     }
     fn reverse_run(self, located: &String) -> Result<()> {
         // 解析 bin 绝对路径
-        let bin_path = get_path_bin();
+        let bin_path = get_path_bin()?;
         let bin_abs = p2s!(bin_path);
 
         // 创建 bin 目录

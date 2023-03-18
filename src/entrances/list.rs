@@ -8,7 +8,7 @@ use crate::{
 use super::info::info;
 
 pub fn list() -> Result<Vec<Info>> {
-    let app_dir = get_bare_apps();
+    let app_dir = get_bare_apps()?;
     let mut res = vec![];
     // 扫描本地 apps 目录
     for scope in read_sub_dir(app_dir.clone())? {

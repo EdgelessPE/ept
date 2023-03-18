@@ -1,7 +1,7 @@
 use std::{
     cmp::min,
     collections::HashMap,
-    fs::{create_dir_all, remove_dir_all, File},
+    fs::{remove_dir_all, File},
     io::{Cursor, Read},
     path::{Path, PathBuf},
 };
@@ -26,19 +26,7 @@ use super::{inner_validator, outer_validator};
 /// 根据源文件路径创建并返回(临时目录,文件茎)
 fn get_temp_dir_path(source_file: String, keep_clear: bool) -> Result<(PathBuf, String)> {
     let file_stem = p2s!(Path::new(&source_file).file_stem().unwrap());
-    let temp_dir_path = get_path_temp(&file_stem);
-    if !keep_clear {
-        return Ok((temp_dir_path, file_stem));
-    }
-
-    let temp_dir_outer_path = temp_dir_path.join("Outer");
-    let temp_dir_inner_path = temp_dir_path.join("Inner");
-
-    if temp_dir_path.exists() {
-        remove_dir_all(&temp_dir_path)?;
-    }
-    create_dir_all(&temp_dir_outer_path)?;
-    create_dir_all(&temp_dir_inner_path)?;
+    let temp_dir_path = get_path_temp(&file_stem,keep_clear,true)?;
 
     Ok((temp_dir_path, file_stem))
 }

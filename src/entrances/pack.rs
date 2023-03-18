@@ -5,7 +5,7 @@ use crate::types::{Signature, SignatureNode, WorkflowNode};
 use crate::utils::{ask_yn, get_path_temp, is_debug_mode};
 use crate::{log, log_ok_last, p2s};
 use anyhow::{anyhow, Result};
-use std::fs::{create_dir_all, read_dir, remove_dir_all, write};
+use std::fs::{read_dir, remove_dir_all, write};
 use std::path::Path;
 
 use super::utils::{inner_validator, manifest_validator};
@@ -78,11 +78,7 @@ pub fn pack(source_dir: String, into_file: Option<String>, need_sign: bool) -> R
     }
 
     // 创建临时目录
-    let temp_dir_path = get_path_temp(&file_stem);
-    if temp_dir_path.exists() {
-        remove_dir_all(&temp_dir_path)?;
-    }
-    create_dir_all(&temp_dir_path)?;
+    let temp_dir_path = get_path_temp(&file_stem,true,false)?;
 
     // 生成内包
     log!("Info:Compressing inner package...");
@@ -144,8 +140,8 @@ pub fn pack(source_dir: String, into_file: Option<String>, need_sign: bool) -> R
 fn test_pack() {
     envmnt::set("DEBUG", "true");
     pack(
-        r"D:\Desktop\VSCode_1.75.0.0_Cno".to_string(),
-        Some(r"D:\Desktop\VSCode_1.75.0.0_Cno.nep".to_string()),
+        r"D:\Download\VSCode_1.75.0.0_Cno".to_string(),
+        Some(r"D:\Download\VSCode_1.75.0.0_Cno.nep".to_string()),
         true,
     )
     .unwrap();

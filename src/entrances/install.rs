@@ -1,5 +1,5 @@
 use anyhow::{anyhow, Result};
-use std::fs::{create_dir_all, rename};
+use std::fs::{rename};
 use std::path::Path;
 
 use super::utils::clean_temp;
@@ -7,7 +7,6 @@ use super::{
     info_local,
     utils::{installed_validator, unpack_nep},
 };
-use crate::utils::get_bare_apps;
 use crate::{executor::workflow_executor, parsers::parse_workflow, utils::get_path_apps};
 use crate::{log, log_ok_last, p2s};
 
@@ -27,10 +26,6 @@ pub fn install_using_package(source_file: String, verify_signature: bool) -> Res
 
     // 创建 apps 文件夹
     log!("Info:Deploying files...");
-    let apps_path = get_bare_apps();
-    if !apps_path.exists() {
-        create_dir_all(apps_path)?;
-    }
 
     // 检查对应包名有没有被安装过
     let try_get_info_res = info_local(&software.scope, &package.name);
@@ -45,7 +40,7 @@ pub fn install_using_package(source_file: String, verify_signature: bool) -> Res
     }
 
     // 解析最终安装位置
-    let into_dir = p2s!(get_path_apps(&software.scope, &package.name));
+    let into_dir = p2s!(get_path_apps(&software.scope, &package.name)?);
 
     // 移动程序至 apps 目录
     let app_path = temp_dir_inner_path.join(&package.name);
@@ -79,7 +74,7 @@ pub fn install_using_package(source_file: String, verify_signature: bool) -> Res
 fn test_install() {
     // envmnt::set("OFFLINE", "true");
     install_using_package(
-        r"D:\Desktop\Projects\EdgelessPE\ept\examples\VSCode_1.75.0.0_Cno\VSCode_1.75.0.0_Cno.tar"
+        r"D:\Download\VSCode_1.75.0.0_Cno.nep"
             .to_string(),
         true,
     )

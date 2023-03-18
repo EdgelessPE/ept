@@ -62,7 +62,7 @@ where
 }
 
 pub fn find_scope_with_name_locally(name: &String) -> Result<String> {
-    let app_dir = get_bare_apps();
+    let app_dir = get_bare_apps()?;
     for scope in read_sub_dir(app_dir.clone())? {
         for dir_name in read_sub_dir(app_dir.join(&scope))? {
             if &dir_name == name {

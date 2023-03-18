@@ -26,7 +26,7 @@ pub fn uninstall(package_name: String) -> Result<()> {
     let scope = find_scope_with_name_locally(&package_name)?;
 
     // 解析安装路径
-    let app_path = get_path_apps(&scope, &package_name);
+    let app_path = get_path_apps(&scope, &package_name)?;
     if !app_path.exists() {
         return Err(anyhow!("Error:Can't find package '{}'", &package_name));
     }

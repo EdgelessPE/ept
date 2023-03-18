@@ -12,7 +12,7 @@ use crate::{
 use super::utils::installed_validator;
 
 pub fn info_local(scope: &String, package_name: &String) -> Result<(GlobalPackage, InfoDiff)> {
-    let local_path = get_path_apps(scope, package_name);
+    let local_path = get_path_apps(scope, package_name)?;
     if !local_path.exists() {
         return Err(anyhow!(
             "Error:Can't find package '{}' locally",
@@ -50,7 +50,7 @@ pub fn info(scope: Option<String>, package_name: String) -> Result<Info> {
     };
 
     // 扫描本地安装目录
-    let local_path = get_path_apps(&scope, &package_name);
+    let local_path = get_path_apps(&scope, &package_name)?;
     if local_path.exists() {
         let (global, local) = info_local(&scope, &package_name)?;
         info.license = global.package.license;

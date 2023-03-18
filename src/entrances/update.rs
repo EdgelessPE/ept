@@ -76,7 +76,7 @@ pub fn update_using_package(source_file: String, verify_signature: bool) -> Resu
     let located = get_path_apps(
         &local_package.software.unwrap().scope,
         &local_package.package.name,
-    );
+    )?;
     log_ok_last!("Info:Resolving package...");
 
     // 执行旧的 remove 工作流
