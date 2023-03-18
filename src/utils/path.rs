@@ -61,11 +61,12 @@ where
     Ok(res)
 }
 
+/// name 大小写不敏感
 pub fn find_scope_with_name_locally(name: &String) -> Result<String> {
     let app_dir = get_bare_apps()?;
     for scope in read_sub_dir(app_dir.clone())? {
         for dir_name in read_sub_dir(app_dir.join(&scope))? {
-            if &dir_name == name {
+            if dir_name.to_ascii_lowercase() == name.to_ascii_lowercase() {
                 return Ok(scope);
             }
         }

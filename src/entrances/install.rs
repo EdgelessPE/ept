@@ -1,5 +1,5 @@
 use anyhow::{anyhow, Result};
-use std::fs::{rename};
+use std::fs::{rename, remove_dir_all};
 use std::path::Path;
 
 use super::utils::clean_temp;
@@ -7,7 +7,7 @@ use super::{
     info_local,
     utils::{installed_validator, unpack_nep},
 };
-use crate::{executor::workflow_executor, parsers::parse_workflow, utils::get_path_apps};
+use crate::{executor::workflow_executor, parsers::parse_workflow, utils::parse_path_apps};
 use crate::{log, log_ok_last, p2s};
 
 pub fn install_using_package(source_file: String, verify_signature: bool) -> Result<()> {
@@ -40,7 +40,15 @@ pub fn install_using_package(source_file: String, verify_signature: bool) -> Res
     }
 
     // 解析最终安装位置
-    let into_dir = p2s!(get_path_apps(&software.scope, &package.name)?);
+    let into_dir=parse_path_apps(&software.scope, &package.name)?;
+    if into_dir.exists(){
+        remove_dir_all(into_dir.clone())
+        .map_err(|_|anyhow!(
+            "Error:Can't keep target directory '{}' clear, manually delete it then try again",
+            p2s!(into_dir.as_os_str())
+        ))?;
+    }
+    let into_dir = p2s!(into_dir);
 
     // 移动程序至 apps 目录
     let app_path = temp_dir_inner_path.join(&package.name);

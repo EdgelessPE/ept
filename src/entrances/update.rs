@@ -10,7 +10,7 @@ use crate::{
     p2s,
     parsers::{parse_author, parse_workflow},
     types::ExSemVer,
-    utils::{ask_yn, get_path_apps},
+    utils::{ask_yn, parse_path_apps},
 };
 use crate::{log, log_ok_last};
 
@@ -73,7 +73,7 @@ pub fn update_using_package(source_file: String, verify_signature: bool) -> Resu
         return install_using_package(source_file, verify_signature);
     }
 
-    let located = get_path_apps(
+    let located = parse_path_apps(
         &local_package.software.unwrap().scope,
         &local_package.package.name,
     )?;
@@ -143,5 +143,5 @@ pub fn update_using_package(source_file: String, verify_signature: bool) -> Resu
 
 #[test]
 fn test_update_using_package() {
-    update_using_package("./VSCode_1.75.0.0_Cno.nep".to_string(), true).unwrap();
+    update_using_package(r"D:\Desktop\Projects\EdgelessPE\edgeless-bot\builds\集成开发\VSCode_1.76.2.0_Bot.nep".to_string(), true).unwrap();
 }

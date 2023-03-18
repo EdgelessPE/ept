@@ -5,7 +5,7 @@ mod path;
 mod process;
 mod term;
 
-use anyhow::{anyhow,Result};
+use anyhow::{anyhow, Result};
 
 pub use self::exe_version::get_exe_version;
 pub use self::log::{fn_log, fn_log_ok_last};
@@ -47,21 +47,24 @@ pub fn get_bare_apps() -> Result<PathBuf> {
     ensure_exist(parse_relative_path("apps".to_string())?)
 }
 
-pub fn get_path_apps(scope: &String, name: &String) -> Result<PathBuf> {
-    ensure_exist(
-        parse_relative_path("apps".to_string())?
-            .join(scope)
-            .join(name),
-    )
+pub fn parse_path_apps(
+    scope: &String,
+    name: &String,
+) -> Result<PathBuf> {
+    Ok(parse_relative_path("apps".to_string())?.join(scope).join(name))
 }
 
-pub fn get_path_temp(name: &String,keep_clear:bool,sub_dir:bool) -> Result<PathBuf> {
-    let p=parse_relative_path("temp".to_string())?.join(name);
-    if keep_clear&&p.exists() {
-        remove_dir_all(p.clone())
-        .map_err(|_|anyhow!("Error:Can't keep temp directory '{}' clear, manually delete it then try again",p2s!(p.as_os_str())))?;
+pub fn get_path_temp(name: &String, keep_clear: bool, sub_dir: bool) -> Result<PathBuf> {
+    let p = parse_relative_path("temp".to_string())?.join(name);
+    if keep_clear && p.exists() {
+        remove_dir_all(p.clone()).map_err(|_| {
+            anyhow!(
+                "Error:Can't keep temp directory '{}' clear, manually delete it then try again",
+                p2s!(p.as_os_str())
+            )
+        })?;
     }
-    if sub_dir{
+    if sub_dir {
         ensure_exist(p.join("Outer"))?;
         ensure_exist(p.join("Inner"))?;
     }
