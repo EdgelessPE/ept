@@ -47,11 +47,15 @@ pub fn get_bare_apps() -> Result<PathBuf> {
     ensure_exist(parse_relative_path("apps".to_string())?)
 }
 
-pub fn parse_path_apps(
-    scope: &String,
-    name: &String,
-) -> Result<PathBuf> {
-    Ok(parse_relative_path("apps".to_string())?.join(scope).join(name))
+/// 不确保目录存在，可选确保 scope 目录存在
+pub fn get_path_apps(scope: &String, name: &String, ensure_scope: bool) -> Result<PathBuf> {
+    let scope_p = parse_relative_path("apps".to_string())?.join(scope);
+    Ok(if ensure_scope {
+        ensure_exist(scope_p)?
+    } else {
+        scope_p
+    }
+    .join(name))
 }
 
 pub fn get_path_temp(name: &String, keep_clear: bool, sub_dir: bool) -> Result<PathBuf> {

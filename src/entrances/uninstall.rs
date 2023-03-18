@@ -6,7 +6,7 @@ use crate::{
     log, log_ok_last, p2s,
     parsers::{parse_package, parse_workflow},
     types::WorkflowNode,
-    utils::{ask_yn, find_scope_with_name_locally, parse_path_apps, kill_with_name},
+    utils::{ask_yn, find_scope_with_name_locally, get_path_apps, kill_with_name},
 };
 
 use super::utils::installed_validator;
@@ -26,7 +26,7 @@ pub fn uninstall(package_name: String) -> Result<()> {
     let scope = find_scope_with_name_locally(&package_name)?;
 
     // 解析安装路径
-    let app_path = parse_path_apps(&scope, &package_name)?;
+    let app_path = get_path_apps(&scope, &package_name, false)?;
     if !app_path.exists() {
         return Err(anyhow!("Error:Can't find package '{}'", &package_name));
     }

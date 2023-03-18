@@ -78,7 +78,7 @@ pub fn pack(source_dir: String, into_file: Option<String>, need_sign: bool) -> R
     }
 
     // 创建临时目录
-    let temp_dir_path = get_path_temp(&file_stem,true,false)?;
+    let temp_dir_path = get_path_temp(&file_stem, true, false)?;
 
     // 生成内包
     log!("Info:Compressing inner package...");
