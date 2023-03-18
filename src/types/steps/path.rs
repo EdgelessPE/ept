@@ -3,13 +3,15 @@ use crate::utils::{get_path_bin, parse_relative_path};
 use crate::{log, p2s};
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
-use winapi::shared::minwindef::{WPARAM,LPARAM};
 use std::fs::{create_dir, remove_file, File};
 use std::io::Write;
 use std::path::Path;
 use std::ptr::null_mut;
+use winapi::shared::minwindef::{LPARAM, WPARAM};
+use winapi::um::winuser::{
+    SendMessageTimeoutA, HWND_BROADCAST, SMTO_ABORTIFHUNG, WM_SETTINGCHANGE,
+};
 use winreg::{enums::*, RegKey};
-use winapi::um::winuser::{SendMessageTimeoutA,HWND_BROADCAST,WM_SETTINGCHANGE, SMTO_ABORTIFHUNG};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct StepPath {
@@ -19,6 +21,10 @@ pub struct StepPath {
 // 配置系统 PATH 变量，但是需要注销并重新登录以生效
 // 返回的 bool 表示是否执行了操作
 fn set_system_path(step: StepPath, is_add: bool) -> Result<bool> {
+    // 转换 record 为反斜杠
+    let record = step.record.replace("/", "\\");
+    let record_str = record.as_str();
+
     // 打开 HKEY_CURRENT_USER\Environment
     let hkcu = RegKey::predef(HKEY_CURRENT_USER);
     let table = hkcu
@@ -34,25 +40,24 @@ fn set_system_path(step: StepPath, is_add: bool) -> Result<bool> {
     let mut origin_arr: Vec<&str> = origin_text.split(";").collect();
 
     // 检查给定的值是否已经存在
-    let is_exist = origin_arr.contains(&step.record.as_str());
+    let is_exist = origin_arr.contains(&record_str);
 
     // 增删 Path 变量
-    let ns = &step.record.as_str();
     if is_add {
         if is_exist {
-            // log!("Warning(Path):Record '{}' already existed in PATH",&step.record);
+            // log!("Warning(Path):Record '{}' already existed in PATH",record_str);
             return Ok(false);
         } else {
-            origin_arr.push(ns);
+            origin_arr.push(record_str);
         }
     } else {
         if is_exist {
             origin_arr = origin_arr
                 .into_iter()
-                .filter(|x| x != &step.record)
+                .filter(|x| x != &record_str)
                 .collect();
         } else {
-            log!("Warning(Path):Record '{}' not exist in PATH", &step.record);
+            log!("Warning(Path):Record '{}' not exist in PATH", record_str);
             return Ok(false);
         }
     }
@@ -72,9 +77,20 @@ fn set_system_path(step: StepPath, is_add: bool) -> Result<bool> {
         .map_err(|err| anyhow!("Error(Path):Can't write to register : {}", err.to_string()))?;
 
     // 发送全局广播
-    unsafe{
-        SendMessageTimeoutA(HWND_BROADCAST, WM_SETTINGCHANGE, 0 as WPARAM, "Environment\0".as_ptr() as LPARAM, SMTO_ABORTIFHUNG, 3000, null_mut());
+    let result = unsafe {
+        SendMessageTimeoutA(
+            HWND_BROADCAST,
+            WM_SETTINGCHANGE,
+            0 as WPARAM,
+            "Environment\0".as_ptr() as LPARAM,
+            SMTO_ABORTIFHUNG,
+            3000,
+            null_mut(),
+        )
     };
+    if result == 0 {
+        log!("Warning(Path):Failed to apply PATH change, restart is required")
+    }
 
     Ok(true)
 }
@@ -100,10 +116,7 @@ impl TStep for StepPath {
         if add_res.is_err() {
             log!("Warning(Path):Failed to add system PATH for '{}', manually add later to enable bin function of nep",&bin_abs);
         } else if add_res.unwrap() {
-            log!(
-                "Warning(Path):Added system PATH for '{}'",
-                &bin_abs
-            );
+            log!("Warning(Path):Added system PATH for '{}'", &bin_abs);
         }
 
         // 解析目标绝对路径
@@ -234,11 +247,14 @@ impl TStep for StepPath {
 }
 
 #[test]
-fn test_set_system_path(){
-    set_system_path(StepPath {
-        record: "D:/CnoRPS/aria2".to_string(),
-    },
-    false,).unwrap();
+fn test_set_system_path() {
+    set_system_path(
+        StepPath {
+            record: "D:/CnoRPS/aria2".to_string(),
+        },
+        false,
+    )
+    .unwrap();
 }
 
 #[test]

@@ -119,7 +119,7 @@ fn main() {
     }
     if args.offline {
         log!("Warning:Offline mode enabled, ept couldn't guarantee security or integrality of packages");
-        envmnt::set("OFFLINE", "true")
+        envmnt::set("OFFLINE", "true");
     }
     if args.yes {
         log!("Warning:Confirmation mode enabled");
