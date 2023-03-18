@@ -1,7 +1,7 @@
 use anyhow::Result;
 use std::fs::read_dir;
 
-use crate::{types::Info, utils::get_path_apps};
+use crate::{p2s, types::Info, utils::get_path_apps};
 
 use super::info::info;
 
@@ -10,7 +10,7 @@ pub fn list() -> Result<Vec<Info>> {
     let mut res = vec![];
     for entry in read_dir(get_path_apps())? {
         let entry = entry?;
-        let package_name = entry.file_name().to_string_lossy().to_string();
+        let package_name = p2s!(entry.file_name());
         let i = info(package_name)?;
         res.push(i);
     }

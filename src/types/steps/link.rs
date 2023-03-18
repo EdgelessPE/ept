@@ -28,12 +28,8 @@ impl TStep for StepLink {
         let desktop = get_desktop()?;
 
         // 解析源文件绝对路径
-        let abs_clear_source_path = parse_relative_path(
-            Path::new(&located)
-                .join(&self.source_file)
-                .to_string_lossy()
-                .to_string(),
-        )?;
+        let abs_clear_source_path =
+            parse_relative_path(p2s!(Path::new(&located).join(&self.source_file)))?;
         // println!("{:?}",&abs_clear_source_path);
         let abs_clear_source = p2s!(abs_clear_source_path);
 

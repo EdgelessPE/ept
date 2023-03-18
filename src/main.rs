@@ -95,11 +95,13 @@ fn router(action: Action) -> Result<String> {
             if list.len() == 0 {
                 return "No installed package".to_string();
             }
-            let mut res_str = String::from("Installed packages:");
-            for node in list {
-                res_str += &format!("  {}    {}", &node.name, &node.local.unwrap().version);
-            }
-            res_str
+            let res: String =
+                list.into_iter()
+                    .fold(String::from("\nInstalled packages:\n"), |acc, node| {
+                        return acc
+                            + &format!("  {}    {}\n", &node.name, &node.local.unwrap().version);
+                    });
+            res
         }),
         Action::Pack {
             source_dir,

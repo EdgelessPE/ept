@@ -3,7 +3,7 @@ use eval::Expr;
 use std::path::Path;
 
 use crate::{
-    log,
+    log, p2s,
     types::WorkflowNode,
     utils::{get_path_apps, is_strict_mode},
 };
@@ -11,7 +11,7 @@ use crate::{
 // 配置部分内置变量的值
 lazy_static! {
     static ref SYSTEM_DRIVE: String = "C:".to_string();
-    static ref DEFAULT_LOCATION: String = get_path_apps().to_string_lossy().to_string();
+    static ref DEFAULT_LOCATION: String = p2s!(get_path_apps());
 }
 
 // 执行条件以判断是否成立

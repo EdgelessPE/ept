@@ -1,7 +1,7 @@
 mod tar;
 mod zstd;
 
-use crate::log;
+use crate::{log, p2s};
 
 pub use self::tar::{pack_tar, release_tar};
 pub use self::zstd::fast_decompress_zstd;
@@ -12,8 +12,8 @@ use std::path::Path;
 
 fn get_temp_tar(zstd_file: String) -> String {
     let p = Path::new(&zstd_file);
-    let stem = p.file_stem().unwrap().to_string_lossy().to_string();
-    return p.with_file_name(&stem).to_string_lossy().to_string();
+    let stem = p2s!(p.file_stem().unwrap());
+    return p2s!(p.with_file_name(&stem));
 }
 
 #[test]

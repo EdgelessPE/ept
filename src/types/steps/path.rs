@@ -32,9 +32,7 @@ fn set_system_path(step: StepPath, is_add: bool) -> Result<bool> {
         .map_err(|_| anyhow!("Error(Path):Can't open user register"))?;
 
     // 读取 Path 键值
-    let origin_text: String = table
-        .get_value("Path")
-        .unwrap_or(String::new());
+    let origin_text: String = table.get_value("Path").unwrap_or(String::new());
 
     // 拆分 Path 为数组
     let mut origin_arr: Vec<&str> = origin_text.split(";").collect();
@@ -120,16 +118,8 @@ impl TStep for StepPath {
         }
 
         // 解析目标绝对路径
-        let abs_target_path = parse_relative_path(
-            Path::new(&located)
-                .join(&self.record)
-                .to_string_lossy()
-                .to_string(),
-        )?;
-        let abs_target_str = abs_target_path
-            .to_string_lossy()
-            .to_string()
-            .replace("/", "\\");
+        let abs_target_path = parse_relative_path(p2s!(Path::new(&located).join(&self.record)))?;
+        let abs_target_str = p2s!(abs_target_path).replace("/", "\\");
 
         // 处理为目录的情况
         if abs_target_path.is_dir() {
@@ -154,11 +144,7 @@ impl TStep for StepPath {
         }
 
         // 解析批处理路径
-        let stem = Path::new(&self.record)
-            .file_stem()
-            .unwrap()
-            .to_string_lossy()
-            .to_string();
+        let stem = p2s!(Path::new(&self.record).file_stem().unwrap());
         let cmd_target_str = format!("{}/{}.cmd", &bin_abs, &stem);
         if !abs_target_path.exists() {
             return Err(anyhow!(
@@ -186,16 +172,8 @@ impl TStep for StepPath {
         }
 
         // 解析目标绝对路径
-        let abs_target_path = parse_relative_path(
-            Path::new(&located)
-                .join(&self.record)
-                .to_string_lossy()
-                .to_string(),
-        )?;
-        let abs_target_str = abs_target_path
-            .to_string_lossy()
-            .to_string()
-            .replace("/", "\\");
+        let abs_target_path = parse_relative_path(p2s!(Path::new(&located).join(&self.record)))?;
+        let abs_target_str = p2s!(abs_target_path).replace("/", "\\");
 
         // 处理为目录的情况
         if abs_target_path.is_dir() {
@@ -217,11 +195,7 @@ impl TStep for StepPath {
         }
 
         // 解析批处理路径
-        let stem = Path::new(&self.record)
-            .file_stem()
-            .unwrap()
-            .to_string_lossy()
-            .to_string();
+        let stem = p2s!(Path::new(&self.record).file_stem().unwrap());
         let cmd_target_str = format!("{}/{}.cmd", &bin_abs, &stem);
         let cmd_target_path = Path::new(&cmd_target_str);
 

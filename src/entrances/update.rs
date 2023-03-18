@@ -114,12 +114,7 @@ pub fn update_using_package(source_file: String, verify_signature: bool) -> Resu
         if run_remove {
             // 没有升级但是跑了一遍卸载，需要重新跑一遍 setup
             log!("Info:Running setup workflow...");
-            let setup_workflow = parse_workflow(
-                update_path
-                    .with_file_name("setup.toml")
-                    .to_string_lossy()
-                    .to_string(),
-            )?;
+            let setup_workflow = parse_workflow(p2s!(update_path.with_file_name("setup.toml")))?;
             workflow_executor(setup_workflow, p2s!(located))?;
             log_ok_last!("Info:Running setup workflow...");
         }

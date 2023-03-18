@@ -68,11 +68,7 @@ macro_rules! p2s {
 fn test_parse_relative_path() {
     let p1 = String::from("./VSCode/VSCode.exe");
     let p2 = String::from(r"D:\Desktop\Projects\") + "./code.exe";
-    let p3 = current_dir()
-        .unwrap()
-        .join("./code.exe")
-        .to_string_lossy()
-        .to_string();
+    let p3 = p2s!(current_dir().unwrap().join("./code.exe"));
 
     println!("{:?}", parse_relative_path(p1));
     println!("{:?}", parse_relative_path(p2));

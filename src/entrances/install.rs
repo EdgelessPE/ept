@@ -43,18 +43,12 @@ pub fn install_using_package(source_file: String, verify_signature: bool) -> Res
     }
 
     // 解析最终安装位置
-    let into_dir = get_path_apps()
-        .join(&package_struct.package.name)
-        .to_string_lossy()
-        .to_string();
+    let into_dir = p2s!(get_path_apps().join(&package_struct.package.name));
 
     // 移动程序至 apps 目录
     let app_path = temp_dir_inner_path.join(&package_struct.package.name);
     if !app_path.exists() {
-        return Err(anyhow!(
-            "Error:App folder not found : {}",
-            app_path.to_string_lossy()
-        ));
+        return Err(anyhow!("Error:App folder not found : {}", p2s!(app_path)));
     }
     rename(app_path, into_dir.clone())?;
     log_ok_last!("Info:Deploying files...");

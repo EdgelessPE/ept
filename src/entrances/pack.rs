@@ -86,10 +86,7 @@ pub fn pack(source_dir: String, into_file: Option<String>, need_sign: bool) -> R
 
     // 生成内包
     log!("Info:Compressing inner package...");
-    let inner_path_str = temp_dir_path
-        .join(&(file_stem.clone() + ".tar.zst"))
-        .to_string_lossy()
-        .to_string();
+    let inner_path_str = p2s!(temp_dir_path.join(&(file_stem.clone() + ".tar.zst")));
     compress(source_dir, inner_path_str.clone())?;
     log_ok_last!("Info:Compressing inner package...");
 

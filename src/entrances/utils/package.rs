@@ -25,11 +25,7 @@ use super::{inner_validator, outer_validator};
 
 /// 根据源文件路径创建并返回(临时目录,文件茎)
 fn get_temp_dir_path(source_file: String, keep_clear: bool) -> Result<(PathBuf, String)> {
-    let file_stem = Path::new(&source_file)
-        .file_stem()
-        .unwrap()
-        .to_string_lossy()
-        .to_string();
+    let file_stem = p2s!(Path::new(&source_file).file_stem().unwrap());
     let temp_dir_path = get_path_temp().join(&file_stem);
     if !keep_clear {
         return Ok((temp_dir_path, file_stem));
@@ -148,13 +144,7 @@ fn normal_unpack_nep(
     log_ok_last!("Info:Decompressing inner package...");
 
     // 读取 package.toml
-    let package_struct = parse_package(
-        temp_dir_inner_path
-            .join("package.toml")
-            .to_string_lossy()
-            .to_string(),
-        None,
-    )?;
+    let package_struct = parse_package(p2s!(temp_dir_inner_path.join("package.toml")), None)?;
 
     // 检查签名者与第一作者是否一致
     let author = parse_author(package_struct.package.authors[0].clone())?;
@@ -234,13 +224,7 @@ fn fast_unpack_nep(
     log_ok_last!("Info:Decompressing inner package...");
 
     // 读取 package.toml
-    let package_struct = parse_package(
-        temp_dir_inner_path
-            .join("package.toml")
-            .to_string_lossy()
-            .to_string(),
-        None,
-    )?;
+    let package_struct = parse_package(p2s!(temp_dir_inner_path.join("package.toml")), None)?;
 
     // 检查签名者与第一作者是否一致
     let author = parse_author(package_struct.package.authors[0].clone())?;
