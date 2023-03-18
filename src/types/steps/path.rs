@@ -34,7 +34,7 @@ fn set_system_path(step: StepPath, is_add: bool) -> Result<bool> {
     // 读取 Path 键值
     let origin_text: String = table
         .get_value("Path")
-        .map_err(|_| anyhow!("Error(Path):Can't get 'Path' in register"))?;
+        .unwrap_or(String::new());
 
     // 拆分 Path 为数组
     let mut origin_arr: Vec<&str> = origin_text.split(";").collect();
