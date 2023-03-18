@@ -1,4 +1,4 @@
-use crate::types::{ExSemVer, GlobalPackage};
+use crate::types::{ExSemVer, GlobalPackage, Software};
 use crate::utils::{get_exe_version, parse_relative_path};
 use crate::{log, p2s};
 use anyhow::{anyhow, Result};
@@ -9,6 +9,44 @@ use std::{
 };
 
 use super::parse_author;
+
+fn update_main_program(
+    pkg: &mut GlobalPackage,
+    software: Software,
+    located: Option<String>,
+    package_path: &Path,
+) -> Result<()> {
+    let located = located.unwrap();
+    // 获取主程序相对路径
+    let mp_relative_path = Path::new(&located).join(&software.main_program.unwrap());
+    let file_path = parse_relative_path(p2s!(mp_relative_path))?;
+
+    // 读取包申明版本号
+    let pkg_version = pkg.package.version.clone();
+    let ex_sv_declared = ExSemVer::parse(pkg_version)?;
+
+    // 读取主程序版本号
+    let exe_file_str = p2s!(file_path);
+    let mp_version = get_exe_version(file_path)?;
+    let mut ex_sv_latest = ExSemVer::parse(mp_version)?;
+    ex_sv_latest.set_reserved(0);
+
+    // 判断是否更新
+    if ex_sv_declared.semver_instance != ex_sv_latest.semver_instance {
+        log!(
+            "Warning:Updated '{}' version from '{}' to '{}' according to '{}'",
+            &pkg.package.name,
+            ex_sv_declared,
+            ex_sv_latest,
+            exe_file_str
+        );
+        pkg.package.version = ex_sv_latest.to_string();
+        let new_pkg_text = toml::to_string_pretty(&pkg)?;
+        write(package_path, new_pkg_text)?;
+    };
+
+    Ok(())
+}
 
 /// p 输入 package.toml 所在位置，如需自动更新主程序版本号则传入 located 为包安装后的所在路径
 pub fn parse_package(p: String, located: Option<String>) -> Result<GlobalPackage> {
@@ -34,33 +72,13 @@ pub fn parse_package(p: String, located: Option<String>) -> Result<GlobalPackage
     // 跟随主程序 exe 文件版本号更新版本号
     let software = pkg.software.clone().unwrap();
     if located.is_some() && pkg.software.is_some() && software.main_program.is_some() {
-        let located = located.unwrap();
-        // 获取主程序相对路径
-        let mp_relative_path = Path::new(&located).join(&software.main_program.unwrap());
-        let file_path = parse_relative_path(p2s!(mp_relative_path))?;
-
-        // 读取包申明版本号
-        let pkg_version = pkg.package.version.clone();
-        let ex_sv_declared = ExSemVer::parse(pkg_version)?;
-
-        // 读取主程序版本号
-        let exe_file_str = p2s!(file_path);
-        let mp_version = get_exe_version(file_path)?;
-        let mut ex_sv_latest = ExSemVer::parse(mp_version)?;
-        ex_sv_latest.set_reserved(0);
-
-        // 判断是否更新
-        if ex_sv_declared.semver_instance != ex_sv_latest.semver_instance {
+        let u_res = update_main_program(&mut pkg, software, located, package_path);
+        if u_res.is_err() {
             log!(
-                "Warning:Updated '{}' version from '{}' to '{}' according to '{}'",
+                "Warning:Failed to update main program version for {} : {}",
                 &pkg.package.name,
-                ex_sv_declared,
-                ex_sv_latest,
-                exe_file_str
+                u_res.unwrap_err()
             );
-            pkg.package.version = ex_sv_latest.to_string();
-            let new_pkg_text = toml::to_string_pretty(&pkg)?;
-            write(package_path, new_pkg_text)?;
         }
     }
 
