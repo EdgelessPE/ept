@@ -26,7 +26,7 @@ use super::{inner_validator, outer_validator};
 /// 根据源文件路径创建并返回(临时目录,文件茎)
 fn get_temp_dir_path(source_file: String, keep_clear: bool) -> Result<(PathBuf, String)> {
     let file_stem = p2s!(Path::new(&source_file).file_stem().unwrap());
-    let temp_dir_path = get_path_temp().join(&file_stem);
+    let temp_dir_path = get_path_temp(&file_stem);
     if !keep_clear {
         return Ok((temp_dir_path, file_stem));
     }

@@ -7,6 +7,7 @@ use super::{
     info_local,
     utils::{installed_validator, unpack_nep},
 };
+use crate::utils::get_bare_apps;
 use crate::{executor::workflow_executor, parsers::parse_workflow, utils::get_path_apps};
 use crate::{log, log_ok_last, p2s};
 
@@ -20,33 +21,34 @@ pub fn install_using_package(source_file: String, verify_signature: bool) -> Res
     log!("Info:Resolving package...");
     let setup_file_path = temp_dir_inner_path.join("workflows/setup.toml");
     let setup_workflow = parse_workflow(p2s!(setup_file_path))?;
+    let package = package_struct.package;
+    let software = package_struct.software.unwrap();
     log_ok_last!("Info:Resolving package...");
 
     // 创建 apps 文件夹
     log!("Info:Deploying files...");
-    let apps_path = get_path_apps();
+    let apps_path = get_bare_apps();
     if !apps_path.exists() {
         create_dir_all(apps_path)?;
     }
 
     // 检查对应包名有没有被安装过
-    let try_get_info_res = info_local(package_struct.package.name.clone());
+    let try_get_info_res = info_local(&software.scope, &package.name);
     if try_get_info_res.is_ok() {
-        // TODO:支持升级后此处进行升级
         let (_, diff) = try_get_info_res.unwrap();
         return Err(anyhow!(
             "Error:Package '{}' has been installed({}), use 'ept update \"{}\"' instead",
-            &package_struct.package.name,
+            &package.name,
             diff.version,
             &source_file
         ));
     }
 
     // 解析最终安装位置
-    let into_dir = p2s!(get_path_apps().join(&package_struct.package.name));
+    let into_dir = p2s!(get_path_apps(&software.scope, &package.name));
 
     // 移动程序至 apps 目录
-    let app_path = temp_dir_inner_path.join(&package_struct.package.name);
+    let app_path = temp_dir_inner_path.join(&package.name);
     if !app_path.exists() {
         return Err(anyhow!("Error:App folder not found : {}", p2s!(app_path)));
     }

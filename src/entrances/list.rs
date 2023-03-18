@@ -1,18 +1,21 @@
 use anyhow::Result;
-use std::fs::read_dir;
 
-use crate::{p2s, types::Info, utils::get_path_apps};
+use crate::{
+    types::Info,
+    utils::{get_bare_apps, read_sub_dir},
+};
 
 use super::info::info;
 
 pub fn list() -> Result<Vec<Info>> {
-    // 扫描本地 apps 目录
+    let app_dir = get_bare_apps();
     let mut res = vec![];
-    for entry in read_dir(get_path_apps())? {
-        let entry = entry?;
-        let package_name = p2s!(entry.file_name());
-        let i = info(package_name)?;
-        res.push(i);
+    // 扫描本地 apps 目录
+    for scope in read_sub_dir(app_dir.clone())? {
+        // 扫描 scope 目录
+        for name in read_sub_dir(app_dir.join(&scope))? {
+            res.push(info(Some(scope.clone()), name)?);
+        }
     }
 
     Ok(res)
@@ -20,6 +23,6 @@ pub fn list() -> Result<Vec<Info>> {
 
 #[test]
 fn test_list() {
-    let res = list();
+    let res = list().unwrap();
     println!("{:?}", res);
 }

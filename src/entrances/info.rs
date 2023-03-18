@@ -6,13 +6,13 @@ use crate::{
     p2s,
     parsers::parse_package,
     types::{GlobalPackage, Info, InfoDiff},
-    utils::get_path_apps,
+    utils::{find_scope_with_name_locally, get_path_apps},
 };
 
 use super::utils::installed_validator;
 
-pub fn info_local(package_name: String) -> Result<(GlobalPackage, InfoDiff)> {
-    let local_path = get_path_apps().join(&package_name);
+pub fn info_local(scope: &String, package_name: &String) -> Result<(GlobalPackage, InfoDiff)> {
+    let local_path = get_path_apps(scope, package_name);
     if !local_path.exists() {
         return Err(anyhow!(
             "Error:Can't find package '{}' locally",
@@ -35,7 +35,10 @@ pub fn info_local(package_name: String) -> Result<(GlobalPackage, InfoDiff)> {
     Ok((global.clone(), local))
 }
 
-pub fn info(package_name: String) -> Result<Info> {
+pub fn info(scope: Option<String>, package_name: String) -> Result<Info> {
+    // 查找 scope
+    let scope = scope.unwrap_or(find_scope_with_name_locally(&package_name)?);
+
     // 创建结果结构体
     let mut info = Info {
         name: package_name.clone(),
@@ -47,9 +50,9 @@ pub fn info(package_name: String) -> Result<Info> {
     };
 
     // 扫描本地安装目录
-    let local_path = get_path_apps().join(&package_name);
+    let local_path = get_path_apps(&scope, &package_name);
     if local_path.exists() {
-        let (global, local) = info_local(package_name.clone())?;
+        let (global, local) = info_local(&scope, &package_name)?;
         info.license = global.package.license;
         info.local = Some(local);
         info.software = global.software;
@@ -65,6 +68,6 @@ pub fn info(package_name: String) -> Result<Info> {
 
 #[test]
 fn test_info() {
-    let res = info("vscode".to_string());
+    let res = info(None, "vscode".to_string());
     println!("{:?}", res);
 }

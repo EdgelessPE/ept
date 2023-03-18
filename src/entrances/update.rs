@@ -38,14 +38,17 @@ pub fn update_using_package(source_file: String, verify_signature: bool) -> Resu
 
     // 确认包是否已安装
     log!("Info:Resolving package...");
-    let (local_package, local_diff) =
-        info_local(fresh_package.package.name.clone()).map_err(|_| {
-            anyhow!(
-                "Error:Package '{}' hasn't been installed, use 'ept install \"{}\"' instead",
-                &fresh_package.package.name,
-                &source_file
-            )
-        })?;
+    let (local_package, local_diff) = info_local(
+        &fresh_package.software.unwrap().scope,
+        &fresh_package.package.name,
+    )
+    .map_err(|_| {
+        anyhow!(
+            "Error:Package '{}' hasn't been installed, use 'ept install \"{}\"' instead",
+            &fresh_package.package.name,
+            &source_file
+        )
+    })?;
 
     // 确认是否允许升级
     let local_version = ExSemVer::from_str(&local_diff.version)?;
@@ -70,7 +73,10 @@ pub fn update_using_package(source_file: String, verify_signature: bool) -> Resu
         return install_using_package(source_file, verify_signature);
     }
 
-    let located = get_path_apps().join(&local_package.package.name);
+    let located = get_path_apps(
+        &local_package.software.unwrap().scope,
+        &local_package.package.name,
+    );
     log_ok_last!("Info:Resolving package...");
 
     // 执行旧的 remove 工作流

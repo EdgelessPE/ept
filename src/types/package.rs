@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+use super::Software;
+
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Package {
     pub name: String,
@@ -7,13 +9,6 @@ pub struct Package {
     pub version: String,
     pub authors: Vec<String>,
     pub license: Option<String>,
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct Software {
-    pub upstream: String,
-    pub category: String,
-    pub main_program: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]

@@ -78,7 +78,7 @@ pub fn pack(source_dir: String, into_file: Option<String>, need_sign: bool) -> R
     }
 
     // 创建临时目录
-    let temp_dir_path = get_path_temp().join(&file_stem);
+    let temp_dir_path = get_path_temp(&file_stem);
     if temp_dir_path.exists() {
         remove_dir_all(&temp_dir_path)?;
     }

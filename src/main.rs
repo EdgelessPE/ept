@@ -90,7 +90,7 @@ fn router(action: Action) -> Result<String> {
                 &package_name
             )
         }),
-        Action::Info { package_name } => info(package_name).map(|res| format!("{:#?}", res)),
+        Action::Info { package_name } => info(None, package_name).map(|res| format!("{:#?}", res)),
         Action::List => list().map(|list| {
             if list.len() == 0 {
                 return "No installed package".to_string();
