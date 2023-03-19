@@ -17,9 +17,10 @@ use std::process::exit;
 pub use self::utils::{fn_log, fn_log_ok_last};
 use anyhow::Result;
 use clap::{Parser, Subcommand};
-use entrances::update_using_package;
 
-use crate::entrances::{info, install_using_package, list, pack, uninstall};
+use crate::entrances::{
+    clean, info, install_using_package, list, pack, uninstall, update_using_package,
+};
 
 /// [Alpha] Edgeless Package Tool (ept) for Edgeless Next-Generation Packages (nep)
 #[derive(Parser, Debug)]
@@ -72,6 +73,8 @@ enum Action {
     },
     /// List information of installed packages
     List,
+    /// Clean temporary or illegal files
+    Clean,
 }
 
 fn router(action: Action) -> Result<String> {
@@ -108,6 +111,7 @@ fn router(action: Action) -> Result<String> {
             into_file,
         } => pack(source_dir, into_file, verify_signature)
             .map(|location| format!("Success:Package has been stored at '{}'", &location)),
+        Action::Clean => clean().map(|_| format!("Success:Cleaned")),
     }
 }
 

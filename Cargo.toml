@@ -32,6 +32,7 @@ serde_json = "1.0.91"
 sysinfo = "0.28.0"
 tar = "0.4.38"
 toml = { version = "0.5.11", features = ["preserve_order"] }
+trash = "3.0.1"
 vc-ltl = "5.0.5"
 winapi = "0.3.9"
 winreg = "0.10.1"

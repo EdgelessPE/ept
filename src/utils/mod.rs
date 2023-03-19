@@ -58,6 +58,10 @@ pub fn get_path_apps(scope: &String, name: &String, ensure_scope: bool) -> Resul
     .join(name))
 }
 
+pub fn parse_bare_temp() -> Result<PathBuf> {
+    parse_relative_path("temp".to_string())
+}
+
 pub fn get_path_temp(name: &String, keep_clear: bool, sub_dir: bool) -> Result<PathBuf> {
     let p = parse_relative_path("temp".to_string())?.join(name);
     if keep_clear && p.exists() {
