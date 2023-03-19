@@ -1,12 +1,12 @@
 use anyhow::{anyhow, Result};
-use std::{collections::HashSet, fs::remove_dir_all, thread::sleep, time::Duration};
+use std::{collections::HashSet, fs::{remove_dir_all, read_dir, remove_dir}, thread::sleep, time::Duration};
 
 use crate::{
     executor::{workflow_executor, workflow_reverse_executor},
     log, log_ok_last, p2s,
     parsers::{parse_package, parse_workflow},
     types::WorkflowNode,
-    utils::{ask_yn, find_scope_with_name_locally, get_path_apps, kill_with_name},
+    utils::{ask_yn, find_scope_with_name_locally, get_path_apps, kill_with_name, get_bare_apps},
 };
 
 use super::utils::installed_validator;
@@ -97,6 +97,12 @@ pub fn uninstall(package_name: String) -> Result<()> {
                 );
             }
         }
+    }
+
+    // 删除空的 scope
+    let scope_dir=get_bare_apps()?.join(&scope);
+    if read_dir(scope_dir.clone())?.next().is_none() {
+        let _=remove_dir(scope_dir);
     }
 
     log_ok_last!("Info:Cleaning...");
