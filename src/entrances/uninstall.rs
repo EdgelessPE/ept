@@ -77,7 +77,7 @@ pub fn uninstall(package_name: String) -> Result<()> {
             // 杀死其中列出的 exe 程序
             for name in hit_list {
                 if name.ends_with(".exe") {
-                    if kill_with_name(name.clone()) {
+                    if kill_with_name(&name) {
                         log!("Warning:Killed process '{}'", &name);
                     } else {
                         log!("Warning:Failed to kill process '{}'", &name);
