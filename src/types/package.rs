@@ -5,6 +5,7 @@ use super::Software;
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Package {
     pub name: String,
+    pub description: String,
     pub template: String,
     pub version: String,
     pub authors: Vec<String>,
