@@ -15,7 +15,6 @@ mod utils;
 
 use std::process::exit;
 
-pub use self::utils::{fn_log, fn_log_ok_last};
 use anyhow::Result;
 use clap::{Parser, Subcommand};
 

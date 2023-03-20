@@ -1,4 +1,4 @@
-use anyhow::{Result};
+use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
 use crate::{log, types::Verifiable, verify_enum};
@@ -34,15 +34,19 @@ impl TStep for StepLog {
 }
 
 impl Verifiable for StepLog {
-    fn verify_self(&self)->Result<()> {
-        verify_enum!("Log","level",self.level,"Debug"|"Info"|"Warning"|"Error"|"Success")
+    fn verify_self(&self) -> Result<()> {
+        verify_enum!(
+            "Log",
+            "level",
+            self.level,
+            "Debug" | "Info" | "Warning" | "Error" | "Success"
+        )
     }
 }
 
 #[test]
 fn test_log() {
-    let step=
-    StepLog {
+    let step = StepLog {
         level: String::from("Info"),
         msg: String::from("Hello nep!"),
     };

@@ -69,14 +69,14 @@ pub fn fn_log_ok_last(msg: String) {
 #[macro_export]
 macro_rules! log {
     ($($x:expr),*) => {
-        $crate::fn_log(format!($($x),*))
+        $crate::utils::fn_log(format!($($x),*))
     };
 }
 
 #[macro_export]
 macro_rules! log_ok_last {
     ($($x:expr),*) => {
-        $crate::fn_log_ok_last(format!($($x),*))
+        $crate::utils::fn_log_ok_last(format!($($x),*))
     };
 }
 

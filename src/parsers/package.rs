@@ -57,23 +57,28 @@ pub fn parse_package(p: String, located: Option<String>) -> Result<GlobalPackage
 
     let mut text = String::new();
     File::open(&p)?.read_to_string(&mut text)?;
-    let dirty_toml:toml::Value = toml::from_str(&text)
-    .map_err(|res| anyhow!("Error:Invalid toml file '{}' : {}", p, res))?;
+    let dirty_toml: toml::Value = toml::from_str(&text)
+        .map_err(|res| anyhow!("Error:Invalid toml file '{}' : {}", p, res))?;
 
     // 检查 nep 版本号是否符合
-    let ver_opt=dirty_toml.get("nep");
-    if let Some(val)=ver_opt  {
-        let ver=val.as_str().unwrap_or("0.0");
-        let s_ver=&env!("CARGO_PKG_VERSION")[0..ver.len()];
-        if ver!=s_ver{
-            return Err(anyhow!("Error:Can't parse nep version with '{}', current ept only accept version '{}'",ver,s_ver));
+    let ver_opt = dirty_toml.get("nep");
+    if let Some(val) = ver_opt {
+        let ver = val.as_str().unwrap_or("0.0");
+        let s_ver = &env!("CARGO_PKG_VERSION")[0..ver.len()];
+        if ver != s_ver {
+            return Err(anyhow!(
+                "Error:Can't parse nep version with '{}', current ept only accept version '{}'",
+                ver,
+                s_ver
+            ));
         }
-    }else{
-        return Err(anyhow!("Error:Field 'nep' undefined in '{}'",p));
+    } else {
+        return Err(anyhow!("Error:Field 'nep' undefined in '{}'", p));
     }
 
     // 序列化
-    let mut pkg: GlobalPackage = dirty_toml.try_into()
+    let mut pkg: GlobalPackage = dirty_toml
+        .try_into()
         .map_err(|res| anyhow!("Error:Can't validate package.toml at '{}' : {}", p, res))?;
 
     // 逐一解析作者

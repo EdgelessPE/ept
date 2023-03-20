@@ -82,5 +82,10 @@ pub fn install_using_package(source_file: String, verify_signature: bool) -> Res
 #[test]
 fn test_install() {
     // envmnt::set("OFFLINE", "true");
-    install_using_package(r"D:\Desktop\Projects\EdgelessPE\edgeless-bot\builds\集成开发\VSCode_1.76.2.0_Bot.nep".to_string(), true).unwrap();
+    install_using_package(
+        r"D:\Desktop\Projects\EdgelessPE\edgeless-bot\builds\集成开发\VSCode_1.76.2.0_Bot.nep"
+            .to_string(),
+        true,
+    )
+    .unwrap();
 }
