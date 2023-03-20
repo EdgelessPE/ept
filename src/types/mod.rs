@@ -6,6 +6,8 @@ mod signature;
 mod software;
 mod steps;
 mod workflow;
+mod verifiable;
+
 use toml::Value;
 
 pub use self::author::Author;
@@ -16,6 +18,7 @@ pub use self::signature::{Signature, SignatureNode};
 pub use self::software::Software;
 pub use self::steps::{Step, StepExecute, StepLink, StepLog, StepPath, TStep};
 pub use self::workflow::{WorkflowHeader, WorkflowNode};
+pub use self::verifiable::{Verifiable};
 
 #[derive(Clone, Debug)]
 pub struct KV {

@@ -8,6 +8,7 @@ mod entrances;
 mod executor;
 mod parsers;
 mod signature;
+#[macro_use]
 mod types;
 #[macro_use]
 mod utils;
