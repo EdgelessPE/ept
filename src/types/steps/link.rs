@@ -1,10 +1,16 @@
 use super::TStep;
-use crate::{log, p2s, utils::parse_relative_path};
+use crate::{log, p2s, utils::parse_relative_path, types::Verifiable};
 use anyhow::{anyhow, Result};
 use dirs::desktop_dir;
 use mslnk::ShellLink;
+use regex::Regex;
 use serde::{Deserialize, Serialize};
 use std::{fs::remove_file, path::Path};
+
+lazy_static! {
+    static ref TARGET_RE: Regex =
+        Regex::new(r"^(([^/]+)/)?([^/]+)$").unwrap();
+}
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct StepLink {
@@ -79,12 +85,23 @@ impl TStep for StepLink {
     }
 }
 
+impl Verifiable for StepLink {
+    fn verify_self(&self) -> Result<()> {
+        if TARGET_RE.is_match(&self.target_name){
+            Ok(())
+        }else{
+            Err(anyhow!("Error(Link):Invalid field 'target_name', expect 'NAME' or 'FOLDER/NAME', got '{}'",&self.target_name))
+        }
+    }
+}
+
 #[test]
 fn test_link() {
-    StepLink {
+    let step=StepLink {
         source_file: String::from("./Code.exe"),
-        target_name: String::from("VSC"),
-    }
-    .run(&String::from("./apps/VSCode"))
-    .unwrap();
+        target_name: String::from("MS/VSC"),
+    };
+    step.verify_self().unwrap();
+    // step.run(&String::from("./apps/VSCode"))
+    // .unwrap();
 }

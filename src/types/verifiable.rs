@@ -10,10 +10,11 @@ macro_rules! verify_enum {
         if matches!($val.as_str(),$($enum)|+){
             Ok(())
         }else{
-            Err(anyhow::anyhow!("Error({}):Illegal enumeration value at field '{}' : expected to be one of [{}]",
+            Err(anyhow::anyhow!("Error({}):Illegal enumeration value at field '{}' : expected to be one of [{}], got '{}'",
             $step,
             $field,
-            stringify!($($enum),+)
+            stringify!($($enum),+),
+            $val,
         ))
         }
     };

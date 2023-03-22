@@ -1,4 +1,5 @@
 use crate::log;
+use crate::types::Verifiable;
 
 use super::TStep;
 use anyhow::{anyhow, Result};
@@ -91,6 +92,12 @@ impl TStep for StepExecute {
             command: interpreter(self.command),
             pwd: self.pwd.map(interpreter),
         }
+    }
+}
+
+impl Verifiable for StepExecute {
+    fn verify_self(&self) -> Result<()> {
+        Ok(())
     }
 }
 

@@ -1,4 +1,5 @@
 use super::TStep;
+use crate::types::Verifiable;
 use crate::utils::{get_path_bin, parse_relative_path};
 use crate::{log, p2s};
 use anyhow::{anyhow, Result};
@@ -217,6 +218,12 @@ impl TStep for StepPath {
         Self {
             record: interpreter(self.record),
         }
+    }
+}
+
+impl Verifiable for StepPath {
+    fn verify_self(&self) -> Result<()> {
+        Ok(())
     }
 }
 
