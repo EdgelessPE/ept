@@ -4,6 +4,7 @@ mod log;
 mod path;
 mod process;
 mod term;
+mod cfg;
 
 use anyhow::{anyhow, Result};
 
@@ -12,6 +13,7 @@ pub use self::log::{fn_log, fn_log_ok_last};
 pub use self::path::{find_scope_with_name_locally, parse_relative_path, read_sub_dir};
 pub use self::process::kill_with_name;
 pub use self::term::ask_yn;
+pub use self::cfg::{get_config,set_config,Cfg,Local};
 
 use std::fs::{create_dir_all, remove_dir_all};
 use std::path::PathBuf;
