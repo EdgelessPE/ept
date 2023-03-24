@@ -7,3 +7,5 @@
 *.zst
 *.nep
 .vscode
+/config.toml
+/test

@@ -1,14 +1,13 @@
 use anyhow::{anyhow, Result};
 use path_clean::PathClean;
 use std::{
-    env::current_dir,
     fs::read_dir,
     path::{Path, PathBuf},
 };
 
 use crate::p2s;
 
-use super::get_bare_apps;
+use super::{get_bare_apps,get_config};
 
 pub fn parse_relative_path(relative: &String) -> Result<PathBuf> {
     let cr = relative.replace("./", "");
@@ -17,7 +16,8 @@ pub fn parse_relative_path(relative: &String) -> Result<PathBuf> {
     let absolute_path = if path.is_absolute() {
         path.to_path_buf()
     } else {
-        current_dir()?.join(path)
+        let cfg=get_config();
+        Path::new(&cfg.local.base).join(path)
     }
     .clean();
 
@@ -78,7 +78,7 @@ pub fn find_scope_with_name_locally(name: &String) -> Result<String> {
 fn test_parse_relative_path() {
     let p1 = String::from("./VSCode/VSCode.exe");
     let p2 = String::from(r"D:\Desktop\Projects\") + "./code.exe";
-    let p3 = p2s!(current_dir().unwrap().join("./code.exe"));
+    let p3 = p2s!(std::env::current_dir().unwrap().join("./code.exe"));
 
     println!("{:?}", parse_relative_path(&p1));
     println!("{:?}", parse_relative_path(&p2));

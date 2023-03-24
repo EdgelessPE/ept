@@ -23,7 +23,7 @@ pub struct StepPath {
 // 返回的 bool 表示是否执行了操作
 fn set_system_path(step: StepPath, is_add: bool) -> Result<bool> {
     // 转换 record 为反斜杠
-    let record = step.record.replace("/", "\\");
+    let record = step.record.replace("/", r"\");
     let record_str = record.as_str();
 
     // 打开 HKEY_CURRENT_USER\Environment
@@ -120,7 +120,7 @@ impl TStep for StepPath {
 
         // 解析目标绝对路径
         let abs_target_path = parse_relative_path(&p2s!(Path::new(&located).join(&self.record)))?;
-        let abs_target_str = p2s!(abs_target_path).replace("/", "\\");
+        let abs_target_str = p2s!(abs_target_path).replace("/", r"\");
 
         // 处理为目录的情况
         if abs_target_path.is_dir() {
@@ -174,7 +174,7 @@ impl TStep for StepPath {
 
         // 解析目标绝对路径
         let abs_target_path = parse_relative_path(&p2s!(Path::new(&located).join(&self.record)))?;
-        let abs_target_str = p2s!(abs_target_path).replace("/", "\\");
+        let abs_target_str = p2s!(abs_target_path).replace("/", r"\");
 
         // 处理为目录的情况
         if abs_target_path.is_dir() {
