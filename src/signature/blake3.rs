@@ -5,8 +5,8 @@ use std::io;
 
 use crate::log;
 
-pub fn compute_hash_blake3(from_file: String) -> Result<String> {
-    let file = File::open(&from_file)?;
+pub fn compute_hash_blake3(from_file: &String) -> Result<String> {
+    let file = File::open(from_file)?;
     let mut hasher = Hasher::new();
     if let Some(mmap) = try_into_memmap_file(&file)? {
         hasher.update_rayon(mmap.get_ref());
@@ -17,7 +17,7 @@ pub fn compute_hash_blake3(from_file: String) -> Result<String> {
     let hash = hash.to_hex().to_string();
     log!(
         "Debug:Calculated blake3 hash for '{}' : '{}'",
-        &from_file,
+        from_file,
         &hash
     );
     Ok(hash)
@@ -72,7 +72,7 @@ fn copy_wide(mut reader: impl io::Read, hasher: &mut blake3::Hasher) -> io::Resu
 #[test]
 fn test_compute_hash_blake3() {
     let res = compute_hash_blake3(
-        r"D:\Desktop\Projects\EdgelessPE\ept\VSCode_1.75.0.0_Cno.nep\c1\VSCode_1.75.0.0_Cno.nep"
+        &r"D:\Desktop\Projects\EdgelessPE\ept\VSCode_1.75.0.0_Cno.nep\c1\VSCode_1.75.0.0_Cno.nep"
             .to_string(),
     );
     println!("{:?}", res);

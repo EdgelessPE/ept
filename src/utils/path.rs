@@ -10,7 +10,7 @@ use crate::p2s;
 
 use super::get_bare_apps;
 
-pub fn parse_relative_path(relative: String) -> Result<PathBuf> {
+pub fn parse_relative_path(relative: &String) -> Result<PathBuf> {
     let cr = relative.replace("./", "");
     let path = Path::new(&cr);
 
@@ -23,7 +23,7 @@ pub fn parse_relative_path(relative: String) -> Result<PathBuf> {
 
     log!(
         "Debug:Parse relative path '{}' into '{}'",
-        &relative,
+        relative,
         &absolute_path.display()
     );
     Ok(absolute_path)
@@ -80,7 +80,7 @@ fn test_parse_relative_path() {
     let p2 = String::from(r"D:\Desktop\Projects\") + "./code.exe";
     let p3 = p2s!(current_dir().unwrap().join("./code.exe"));
 
-    println!("{:?}", parse_relative_path(p1));
-    println!("{:?}", parse_relative_path(p2));
-    println!("{:?}", parse_relative_path(p3));
+    println!("{:?}", parse_relative_path(&p1));
+    println!("{:?}", parse_relative_path(&p2));
+    println!("{:?}", parse_relative_path(&p3));
 }

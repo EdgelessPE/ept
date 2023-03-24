@@ -83,17 +83,17 @@ fn router(action: Action) -> Result<String> {
 
     // 匹配入口
     match action {
-        Action::Install { package } => install_using_package(package.clone(), verify_signature)
+        Action::Install { package } => install_using_package(&package, verify_signature)
             .map(|_| format!("Success:Package '{}' installed successfully", &package)),
-        Action::Update { package } => update_using_package(package.clone(), verify_signature)
+        Action::Update { package } => update_using_package(&package, verify_signature)
             .map(|_| format!("Success:Package '{}' updated successfully", &package)),
-        Action::Uninstall { package_name } => uninstall(package_name.clone()).map(|_| {
+        Action::Uninstall { package_name } => uninstall(&package_name).map(|_| {
             format!(
                 "Success:Package '{}' uninstalled successfully",
                 &package_name
             )
         }),
-        Action::Info { package_name } => info(None, package_name).map(|res| format!("{:#?}", res)),
+        Action::Info { package_name } => info(None, &package_name).map(|res| format!("{:#?}", res)),
         Action::List => list().map(|list| {
             if list.len() == 0 {
                 return "No installed package".to_string();
@@ -109,7 +109,7 @@ fn router(action: Action) -> Result<String> {
         Action::Pack {
             source_dir,
             into_file,
-        } => pack(source_dir, into_file, verify_signature)
+        } => pack(&source_dir, into_file, verify_signature)
             .map(|location| format!("Success:Package has been stored at '{}'", &location)),
         Action::Clean => clean().map(|_| format!("Success:Cleaned")),
     }

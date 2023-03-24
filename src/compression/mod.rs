@@ -10,39 +10,38 @@ use anyhow::{anyhow, Result};
 use std::fs::remove_file;
 use std::path::Path;
 
-fn get_temp_tar(zstd_file: String) -> String {
-    let p = Path::new(&zstd_file);
-    let stem = p2s!(p.file_stem().unwrap());
-    return p2s!(p.with_file_name(&stem));
+fn get_temp_tar(zstd_file: &Path) -> String {
+    let stem = p2s!(zstd_file.file_stem().unwrap());
+    return p2s!(zstd_file.with_file_name(&stem));
 }
 
 #[test]
 fn test_get_temp_tar() {
-    let res = get_temp_tar(
-        r"D:\Desktop\Projects\EdgelessPE\ept\examples\VSCode\Pack.tar.zst".to_string(),
-    );
+    let res = get_temp_tar(Path::new(
+        r"D:\Desktop\Projects\EdgelessPE\ept\examples\VSCode\Pack.tar.zst",
+    ));
     assert_eq!(
         res,
         r"D:\Desktop\Projects\EdgelessPE\ept\examples\VSCode\Pack.tar".to_string()
     );
 }
 
-pub fn compress(source_dir: String, into_file: String) -> Result<()> {
-    let temp_tar = get_temp_tar(into_file.clone());
-    pack_tar(source_dir.clone(), temp_tar.clone()).map_err(|res| {
+pub fn compress(source_dir: &String, into_file: &String) -> Result<()> {
+    let temp_tar = get_temp_tar(Path::new(into_file));
+    pack_tar(source_dir, &temp_tar).map_err(|res| {
         anyhow!(
             "Error:Can't archive '{}' into '{}' : {}",
-            &source_dir,
+            source_dir,
             &temp_tar,
             res
         )
     })?;
 
-    compress_zstd(temp_tar.clone(), into_file.clone()).map_err(|res| {
+    compress_zstd(&temp_tar, into_file).map_err(|res| {
         anyhow!(
             "Error:Can't compress '{}' into '{}' : {}",
             &temp_tar,
-            &into_file,
+            into_file,
             res
         )
     })?;
@@ -59,22 +58,22 @@ pub fn compress(source_dir: String, into_file: String) -> Result<()> {
     Ok(())
 }
 
-pub fn decompress(source_file: String, into_dir: String) -> Result<()> {
-    let temp_tar = get_temp_tar(source_file.clone());
-    decompress_zstd(source_file.clone(), temp_tar.clone()).map_err(|res| {
+pub fn decompress(source_file: &String, into_dir: &String) -> Result<()> {
+    let temp_tar = get_temp_tar(Path::new(source_file));
+    decompress_zstd(source_file, &temp_tar).map_err(|res| {
         anyhow!(
             "Error:Can't decompress '{}' into '{}' : {}",
-            &source_file,
+            source_file,
             &temp_tar,
             res
         )
     })?;
 
-    release_tar(temp_tar.clone(), into_dir.clone()).map_err(|res| {
+    release_tar(&temp_tar, into_dir).map_err(|res| {
         anyhow!(
             "Error:Can't release '{}' into '{}' : {}",
             &temp_tar,
-            &into_dir,
+            into_dir,
             res
         )
     })?;
@@ -94,8 +93,8 @@ pub fn decompress(source_file: String, into_dir: String) -> Result<()> {
 #[test]
 fn test_compress() {
     let res = compress(
-        r"D:\Desktop\Projects\EdgelessPE\ept\examples\VSCode".to_string(),
-        r"./examples/VSCode_1.0.0.0_Cno.tar.zst".to_string(),
+        &r"D:\Desktop\Projects\EdgelessPE\ept\examples\VSCode".to_string(),
+        &r"./examples/VSCode_1.0.0.0_Cno.tar.zst".to_string(),
     );
     println!("{:?}", res);
 }
@@ -103,8 +102,8 @@ fn test_compress() {
 #[test]
 fn test_decompress() {
     let res = decompress(
-        r"./VSCode_1.0.0.0_Cno.tar.zst".to_string(),
-        r"./VSCode_1.0.0.0_Cno".to_string(),
+        &r"./VSCode_1.0.0.0_Cno.tar.zst".to_string(),
+        &r"./VSCode_1.0.0.0_Cno".to_string(),
     );
     println!("{:?}", res);
 }

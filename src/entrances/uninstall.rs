@@ -24,43 +24,43 @@ fn get_manifest(flow: Vec<WorkflowNode>) -> Vec<String> {
     manifest
 }
 
-pub fn uninstall(package_name: String) -> Result<()> {
-    log!("Info:Preparing to uninstall '{}'", &package_name);
+pub fn uninstall(package_name: &String) -> Result<()> {
+    log!("Info:Preparing to uninstall '{}'", package_name);
 
     // 解析 scope
-    let scope = find_scope_with_name_locally(&package_name)?;
+    let scope = find_scope_with_name_locally(package_name)?;
 
     // 解析安装路径
-    let app_path = get_path_apps(&scope, &package_name, false)?;
+    let app_path = get_path_apps(&scope, package_name, false)?;
     if !app_path.exists() {
-        return Err(anyhow!("Error:Can't find package '{}'", &package_name));
+        return Err(anyhow!("Error:Can't find package '{}'", package_name));
     }
     let app_str = p2s!(app_path);
 
     // 判断安装路径是否完整
-    installed_validator(app_str.clone())?;
+    installed_validator(&app_str)?;
 
     // 读入 package.toml
-    let global = parse_package(p2s!(app_path.join(".nep_context/package.toml")), None)?;
+    let global = parse_package(&p2s!(app_path.join(".nep_context/package.toml")), None)?;
 
     // 读入卸载工作流
     let remove_flow_path = app_path.join(".nep_context/workflows/remove.toml");
     if remove_flow_path.exists() {
-        let remove_flow = parse_workflow(p2s!(remove_flow_path))?;
+        let remove_flow = parse_workflow(&p2s!(remove_flow_path))?;
 
         // 执行卸载工作流
         log!("Info:Running remove workflow...");
-        workflow_executor(remove_flow, app_str.clone())?;
+        workflow_executor(remove_flow, &app_str)?;
         log_ok_last!("Info:Running remove workflow...");
     }
 
     // 读入安装工作流
     let setup_flow_path = app_path.join(".nep_context/workflows/setup.toml");
-    let setup_flow = parse_workflow(p2s!(setup_flow_path))?;
+    let setup_flow = parse_workflow(&p2s!(setup_flow_path))?;
 
     // 逆向执行安装工作流
     log!("Info:Running reverse setup workflow...");
-    workflow_reverse_executor(setup_flow.clone(), app_str.clone())?;
+    workflow_reverse_executor(setup_flow.clone(), &app_str)?;
     log_ok_last!("Info:Running reverse setup workflow...");
 
     // 删除 app 目录
@@ -117,5 +117,5 @@ pub fn uninstall(package_name: String) -> Result<()> {
 
 #[test]
 fn test_uninstall() {
-    uninstall("vscode".to_string()).unwrap();
+    uninstall(&"vscode".to_string()).unwrap();
 }

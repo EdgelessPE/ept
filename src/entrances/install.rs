@@ -10,16 +10,16 @@ use super::{
 use crate::{executor::workflow_executor, parsers::parse_workflow, utils::get_path_apps};
 use crate::{log, log_ok_last, p2s};
 
-pub fn install_using_package(source_file: String, verify_signature: bool) -> Result<()> {
-    log!("Info:Preparing to install with package '{}'", &source_file);
+pub fn install_using_package(source_file: &String, verify_signature: bool) -> Result<()> {
+    log!("Info:Preparing to install with package '{}'", source_file);
 
     // 解包
-    let (temp_dir_inner_path, package_struct) = unpack_nep(source_file.clone(), verify_signature)?;
+    let (temp_dir_inner_path, package_struct) = unpack_nep(source_file, verify_signature)?;
 
     // 读入安装工作流
     log!("Info:Resolving package...");
     let setup_file_path = temp_dir_inner_path.join("workflows/setup.toml");
-    let setup_workflow = parse_workflow(p2s!(setup_file_path))?;
+    let setup_workflow = parse_workflow(&p2s!(setup_file_path))?;
     let package = package_struct.package;
     let software = package_struct.software.unwrap();
     log_ok_last!("Info:Resolving package...");
@@ -35,7 +35,7 @@ pub fn install_using_package(source_file: String, verify_signature: bool) -> Res
             "Error:Package '{}' has been installed({}), use 'ept update \"{}\"' instead",
             &package.name,
             diff.version,
-            &source_file
+            source_file
         ));
     }
 
@@ -61,7 +61,7 @@ pub fn install_using_package(source_file: String, verify_signature: bool) -> Res
 
     // 执行安装工作流
     log!("Info:Running setup workflow...");
-    workflow_executor(setup_workflow, into_dir.clone())?;
+    workflow_executor(setup_workflow, &into_dir)?;
     log_ok_last!("Info:Running setup workflow...");
 
     // 保存上下文
@@ -70,7 +70,7 @@ pub fn install_using_package(source_file: String, verify_signature: bool) -> Res
 
     // 检查安装是否完整
     log!("Info:Validating setup...");
-    installed_validator(into_dir)?;
+    installed_validator(&into_dir)?;
     log_ok_last!("Info:Validating setup...");
 
     // 清理临时文件夹
@@ -83,7 +83,7 @@ pub fn install_using_package(source_file: String, verify_signature: bool) -> Res
 fn test_install() {
     // envmnt::set("OFFLINE", "true");
     install_using_package(
-        r"D:\Desktop\Projects\EdgelessPE\edgeless-bot\builds\集成开发\VSCode_1.76.2.0_Bot.nep"
+        &r"D:\Desktop\Projects\EdgelessPE\edgeless-bot\builds\集成开发\VSCode_1.76.2.0_Bot.nep"
             .to_string(),
         true,
     )

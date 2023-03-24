@@ -64,7 +64,7 @@ pub fn clean() -> Result<()> {
                         // 读取工作流
                         let setup_path = p2s!(get_path_apps(&scope_name, &app_name, false)?
                             .join(".nep_context/workflows/setup.toml"));
-                        let setup = parse_workflow(setup_path)?;
+                        let setup = parse_workflow(&setup_path)?;
 
                         // 解析有效的入口名称
                         get_valid_entrances(setup).into_iter().for_each(|name| {

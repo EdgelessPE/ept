@@ -19,16 +19,15 @@ fn update_main_program(
     let located = located.unwrap();
     // 获取主程序相对路径
     let mp_relative_path = Path::new(&located).join(&software.main_program.unwrap());
-    let file_path = parse_relative_path(p2s!(mp_relative_path))?;
+    let file_path = parse_relative_path(&p2s!(mp_relative_path))?;
 
     // 读取包申明版本号
-    let pkg_version = pkg.package.version.clone();
-    let ex_sv_declared = ExSemVer::parse(pkg_version)?;
+    let ex_sv_declared = ExSemVer::parse(&pkg.package.version)?;
 
     // 读取主程序版本号
     let exe_file_str = p2s!(file_path);
     let mp_version = get_exe_version(file_path)?;
-    let mut ex_sv_latest = ExSemVer::parse(mp_version)?;
+    let mut ex_sv_latest = ExSemVer::parse(&mp_version)?;
     ex_sv_latest.set_reserved(0);
 
     // 判断是否更新
@@ -49,14 +48,14 @@ fn update_main_program(
 }
 
 /// p 输入 package.toml 所在位置，如需自动更新主程序版本号则传入 located 为包安装后的所在路径
-pub fn parse_package(p: String, located: Option<String>) -> Result<GlobalPackage> {
-    let package_path = Path::new(&p);
+pub fn parse_package(p: &String, located: Option<String>) -> Result<GlobalPackage> {
+    let package_path = Path::new(p);
     if !package_path.exists() {
         return Err(anyhow!("Error:Fatal:Can't find package.toml path : {}", p));
     }
 
     let mut text = String::new();
-    File::open(&p)?.read_to_string(&mut text)?;
+    File::open(p)?.read_to_string(&mut text)?;
     let dirty_toml: toml::Value = toml::from_str(&text)
         .map_err(|res| anyhow!("Error:Invalid toml file '{}' : {}", p, res))?;
 
@@ -83,7 +82,7 @@ pub fn parse_package(p: String, located: Option<String>) -> Result<GlobalPackage
 
     // 逐一解析作者
     for (i, raw) in pkg.package.authors.clone().into_iter().enumerate() {
-        let author = parse_author(raw)?;
+        let author = parse_author(&raw)?;
         // 第一作者必须提供邮箱
         if i == 0 && author.email == None {
             return Err(anyhow!("Error:Can't validate package.toml : first author in field 'package.authors' should have email (e.g. \"Cno <cno@edgeless.top>\")"));

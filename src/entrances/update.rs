@@ -20,21 +20,17 @@ use super::{
 };
 
 fn same_authors(a: &Vec<String>, b: &Vec<String>) -> bool {
-    let ai = a
-        .into_iter()
-        .map(|raw| parse_author(raw.to_owned()).unwrap());
-    let bi = b
-        .into_iter()
-        .map(|raw| parse_author(raw.to_owned()).unwrap());
+    let ai = a.into_iter().map(|raw| parse_author(raw).unwrap());
+    let bi = b.into_iter().map(|raw| parse_author(raw).unwrap());
 
     ai.eq(bi)
 }
 
-pub fn update_using_package(source_file: String, verify_signature: bool) -> Result<()> {
-    log!("Info:Preparing to update with package '{}'", &source_file);
+pub fn update_using_package(source_file: &String, verify_signature: bool) -> Result<()> {
+    log!("Info:Preparing to update with package '{}'", source_file);
 
     // 解包
-    let (temp_dir_inner_path, fresh_package) = unpack_nep(source_file.clone(), verify_signature)?;
+    let (temp_dir_inner_path, fresh_package) = unpack_nep(source_file, verify_signature)?;
 
     // 确认包是否已安装
     log!("Info:Resolving package...");
@@ -46,7 +42,7 @@ pub fn update_using_package(source_file: String, verify_signature: bool) -> Resu
         anyhow!(
             "Error:Package '{}' hasn't been installed, use 'ept install \"{}\"' instead",
             &fresh_package.package.name,
-            &source_file
+            source_file
         )
     })?;
 
@@ -68,7 +64,7 @@ pub fn update_using_package(source_file: String, verify_signature: bool) -> Resu
             return Err(anyhow!("Error:Update canceled by user"));
         }
         // 卸载
-        uninstall(local_package.package.name.clone())?;
+        uninstall(&local_package.package.name)?;
         // 安装
         return install_using_package(source_file, verify_signature);
     }
@@ -87,8 +83,8 @@ pub fn update_using_package(source_file: String, verify_signature: bool) -> Resu
         .join("remove.toml");
     let run_remove = if remove_path.exists() {
         log!("Info:Running remove workflow...");
-        let remove_workflow = parse_workflow(p2s!(remove_path))?;
-        workflow_executor(remove_workflow, p2s!(located))?;
+        let remove_workflow = parse_workflow(&p2s!(remove_path))?;
+        workflow_executor(remove_workflow, &p2s!(located))?;
         log_ok_last!("Info:Running remove workflow...");
         true
     } else {
@@ -114,15 +110,15 @@ pub fn update_using_package(source_file: String, verify_signature: bool) -> Resu
     if update_path.exists() {
         // 执行 update 工作流
         log!("Info:Running update workflow...");
-        let update_workflow = parse_workflow(p2s!(update_path))?;
-        workflow_executor(update_workflow, p2s!(located))?;
+        let update_workflow = parse_workflow(&p2s!(update_path))?;
+        workflow_executor(update_workflow, &p2s!(located))?;
         log_ok_last!("Info:Running update workflow...");
     } else {
         if run_remove {
             // 没有升级但是跑了一遍卸载，需要重新跑一遍 setup
             log!("Info:Running setup workflow...");
-            let setup_workflow = parse_workflow(p2s!(update_path.with_file_name("setup.toml")))?;
-            workflow_executor(setup_workflow, p2s!(located))?;
+            let setup_workflow = parse_workflow(&p2s!(update_path.with_file_name("setup.toml")))?;
+            workflow_executor(setup_workflow, &p2s!(located))?;
             log_ok_last!("Info:Running setup workflow...");
         }
     }
@@ -133,7 +129,7 @@ pub fn update_using_package(source_file: String, verify_signature: bool) -> Resu
 
     // 检查更新是否完整
     log!("Info:Validating update...");
-    installed_validator(p2s!(located))?;
+    installed_validator(&p2s!(located))?;
     log_ok_last!("Info:Validating update...");
 
     // 清理临时文件夹
@@ -145,7 +141,7 @@ pub fn update_using_package(source_file: String, verify_signature: bool) -> Resu
 #[test]
 fn test_update_using_package() {
     update_using_package(
-        r"D:\Desktop\Projects\EdgelessPE\edgeless-bot\builds\集成开发\VSCode_1.76.2.0_Bot.nep"
+        &r"D:\Desktop\Projects\EdgelessPE\edgeless-bot\builds\集成开发\VSCode_1.76.2.0_Bot.nep"
             .to_string(),
         true,
     )

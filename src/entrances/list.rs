@@ -14,7 +14,7 @@ pub fn list() -> Result<Vec<Info>> {
     for scope in read_sub_dir(app_dir.clone())? {
         // 扫描 scope 目录
         for name in read_sub_dir(app_dir.join(&scope))? {
-            res.push(info(Some(scope.clone()), name)?);
+            res.push(info(Some(scope.clone()), &name)?);
         }
     }
 
