@@ -1,5 +1,5 @@
 use super::TStep;
-use crate::{log, p2s, utils::parse_relative_path, types::Verifiable};
+use crate::{log, p2s, types::Verifiable, utils::parse_relative_path};
 use anyhow::{anyhow, Result};
 use dirs::desktop_dir;
 use mslnk::ShellLink;
@@ -8,8 +8,7 @@ use serde::{Deserialize, Serialize};
 use std::{fs::remove_file, path::Path};
 
 lazy_static! {
-    static ref TARGET_RE: Regex =
-        Regex::new(r"^(([^/]+)/)?([^/]+)$").unwrap();
+    static ref TARGET_RE: Regex = Regex::new(r"^(([^/]+)/)?([^/]+)$").unwrap();
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -35,7 +34,7 @@ impl TStep for StepLink {
 
         // 解析源文件绝对路径
         let abs_clear_source_path =
-            parse_relative_path(p2s!(Path::new(&located).join(&self.source_file)))?;
+            parse_relative_path(&p2s!(Path::new(located).join(&self.source_file)))?;
         // println!("{:?}",&abs_clear_source_path);
         let abs_clear_source = p2s!(abs_clear_source_path);
 
@@ -87,17 +86,20 @@ impl TStep for StepLink {
 
 impl Verifiable for StepLink {
     fn verify_self(&self) -> Result<()> {
-        if TARGET_RE.is_match(&self.target_name){
+        if TARGET_RE.is_match(&self.target_name) {
             Ok(())
-        }else{
-            Err(anyhow!("Error(Link):Invalid field 'target_name', expect 'NAME' or 'FOLDER/NAME', got '{}'",&self.target_name))
+        } else {
+            Err(anyhow!(
+                "Error(Link):Invalid field 'target_name', expect 'NAME' or 'FOLDER/NAME', got '{}'",
+                &self.target_name
+            ))
         }
     }
 }
 
 #[test]
 fn test_link() {
-    let step=StepLink {
+    let step = StepLink {
         source_file: String::from("./Code.exe"),
         target_name: String::from("MS/VSC"),
     };

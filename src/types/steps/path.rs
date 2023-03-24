@@ -119,7 +119,7 @@ impl TStep for StepPath {
         }
 
         // 解析目标绝对路径
-        let abs_target_path = parse_relative_path(p2s!(Path::new(&located).join(&self.record)))?;
+        let abs_target_path = parse_relative_path(&p2s!(Path::new(&located).join(&self.record)))?;
         let abs_target_str = p2s!(abs_target_path).replace("/", "\\");
 
         // 处理为目录的情况
@@ -173,7 +173,7 @@ impl TStep for StepPath {
         }
 
         // 解析目标绝对路径
-        let abs_target_path = parse_relative_path(p2s!(Path::new(&located).join(&self.record)))?;
+        let abs_target_path = parse_relative_path(&p2s!(Path::new(&located).join(&self.record)))?;
         let abs_target_str = p2s!(abs_target_path).replace("/", "\\");
 
         // 处理为目录的情况

@@ -18,30 +18,30 @@ fn get_manifest(flow: Vec<WorkflowNode>) -> Vec<String> {
     manifest
 }
 
-pub fn pack(source_dir: String, into_file: Option<String>, need_sign: bool) -> Result<String> {
-    log!("Info:Preparing to pack '{}'", &source_dir);
+pub fn pack(source_dir: &String, into_file: Option<String>, need_sign: bool) -> Result<String> {
+    log!("Info:Preparing to pack '{}'", source_dir);
 
     // 打包检查
     log!("Info:Validating source directory...");
     // 如果目录中文件数量超过 3 个则拒绝
-    let dir_list = read_dir(&source_dir)?;
+    let dir_list = read_dir(source_dir)?;
     let dir_count = dir_list.into_iter().fold(0, |acc, _| acc + 1);
     if dir_count != 3 {
         return Err(anyhow!(
             "Error:Expected 3 items in '{}', got {} items",
-            &source_dir,
+            source_dir,
             dir_count
         ));
     }
     // 运行内包检查器
-    inner_validator(source_dir.clone())?;
+    inner_validator(source_dir)?;
     log_ok_last!("Info:Validating source directory...");
 
     // 读取包信息
     log!("Info:Resolving data...");
-    let pkg_path = Path::new(&source_dir).join("package.toml");
-    let global = parse_package(p2s!(pkg_path), None)?;
-    let first_author = parse_author(global.package.authors[0].to_owned())?;
+    let pkg_path = Path::new(source_dir).join("package.toml");
+    let global = parse_package(&p2s!(pkg_path), None)?;
+    let first_author = parse_author(&global.package.authors[0])?;
     let file_stem = format!(
         "{}_{}_{}",
         &global.package.name, &global.package.version, &first_author.name
@@ -51,11 +51,11 @@ pub fn pack(source_dir: String, into_file: Option<String>, need_sign: bool) -> R
 
     // 校验 setup 流装箱单
     log!("Info:Checking manifest...");
-    let setup_path = Path::new(&source_dir).join("workflows").join("setup.toml");
-    let setup_flow = parse_workflow(p2s!(setup_path))?;
+    let setup_path = Path::new(source_dir).join("workflows").join("setup.toml");
+    let setup_flow = parse_workflow(&p2s!(setup_path))?;
     let setup_manifest = get_manifest(setup_flow);
-    let pkg_content_path = Path::new(&source_dir).join(&global.package.name);
-    manifest_validator(p2s!(pkg_content_path), setup_manifest)?;
+    let pkg_content_path = Path::new(source_dir).join(&global.package.name);
+    manifest_validator(&p2s!(pkg_content_path), setup_manifest)?;
     log_ok_last!("Info:Checking manifest...");
 
     // 校验 into_file 是否存在
@@ -82,14 +82,14 @@ pub fn pack(source_dir: String, into_file: Option<String>, need_sign: bool) -> R
 
     // 生成内包
     log!("Info:Compressing inner package...");
-    let inner_path_str = p2s!(temp_dir_path.join(&(file_stem.clone() + ".tar.zst")));
-    compress(source_dir, inner_path_str.clone())?;
+    let inner_path_str = p2s!(temp_dir_path.join(&(file_stem + ".tar.zst")));
+    compress(source_dir, &inner_path_str)?;
     log_ok_last!("Info:Compressing inner package...");
 
     // 对内包进行签名
     let signature = if need_sign {
         log!("Info:Signing inner package...");
-        let signature = sign(inner_path_str.clone())?;
+        let signature = sign(&inner_path_str)?;
         Some(signature)
     } else {
         None
@@ -111,7 +111,7 @@ pub fn pack(source_dir: String, into_file: Option<String>, need_sign: bool) -> R
 
     // 生成外包
     log!("Info:Packing outer package...");
-    pack_tar(p2s!(temp_dir_path), into_file.clone())?;
+    pack_tar(&p2s!(temp_dir_path), &into_file)?;
     log_ok_last!("Info:Packing outer package...");
 
     // 清理临时文件夹
@@ -140,7 +140,7 @@ pub fn pack(source_dir: String, into_file: Option<String>, need_sign: bool) -> R
 fn test_pack() {
     envmnt::set("DEBUG", "true");
     pack(
-        r"D:\Download\VSCode_1.75.0.0_Cno".to_string(),
+        &r"D:\Download\VSCode_1.75.0.0_Cno".to_string(),
         Some(r"D:\Download\VSCode_1.75.0.0_Cno.nep".to_string()),
         true,
     )

@@ -14,7 +14,7 @@ pub struct ExSemVer {
 }
 
 impl ExSemVer {
-    pub fn new(major: u64, minor: u64, patch: u64, reserved: u64) -> Self {
+    pub fn _new(major: u64, minor: u64, patch: u64, reserved: u64) -> Self {
         ExSemVer {
             major,
             minor,
@@ -29,7 +29,7 @@ impl ExSemVer {
             },
         }
     }
-    pub fn parse(text: String) -> Result<Self> {
+    pub fn parse(text: &String) -> Result<Self> {
         // 使用小数点分割
         let s: Vec<&str> = text.split(".").collect();
         if s.len() != 4 {
@@ -78,7 +78,7 @@ impl From<semver::Version> for ExSemVer {
 impl FromStr for ExSemVer {
     type Err = Error;
     fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
-        return ExSemVer::parse(String::from(s));
+        return ExSemVer::parse(&String::from(s));
     }
 }
 
@@ -167,25 +167,25 @@ impl fmt::Display for ExSemVer {
 
 #[test]
 fn test_ex_semver() {
-    let v1 = ExSemVer::new(1, 2, 3, 4);
+    let v1 = ExSemVer::_new(1, 2, 3, 4);
     let v2 = ExSemVer::from_str("1.2.3.4").unwrap();
     assert_eq!(v1, v2);
     assert_eq!(v1.to_string(), String::from("1.2.3.4"));
 
-    let v1 = ExSemVer::parse("1.2.3.4".to_string()).unwrap();
-    let v2 = ExSemVer::parse("1.3.3.1".to_string()).unwrap();
+    let v1 = ExSemVer::parse(&"1.2.3.4".to_string()).unwrap();
+    let v2 = ExSemVer::parse(&"1.3.3.1".to_string()).unwrap();
     assert!(v1 < v2);
 
-    let v1 = ExSemVer::parse("9.114.2.1".to_string()).unwrap();
-    let v2 = ExSemVer::parse("10.0.0.0".to_string()).unwrap();
+    let v1 = ExSemVer::parse(&"9.114.2.1".to_string()).unwrap();
+    let v2 = ExSemVer::parse(&"10.0.0.0".to_string()).unwrap();
     assert!(v1 < v2);
 
-    let v1 = ExSemVer::parse("114.514.1919.810".to_string()).unwrap();
-    let v2 = ExSemVer::parse("114.514.1919.810".to_string()).unwrap();
+    let v1 = ExSemVer::parse(&"114.514.1919.810".to_string()).unwrap();
+    let v2 = ExSemVer::parse(&"114.514.1919.810".to_string()).unwrap();
     assert!(v1 == v2);
 
-    let v1 = ExSemVer::parse("1.2.3.10".to_string()).unwrap();
-    let v2 = ExSemVer::parse("1.2.3.2".to_string()).unwrap();
+    let v1 = ExSemVer::parse(&"1.2.3.10".to_string()).unwrap();
+    let v2 = ExSemVer::parse(&"1.2.3.2".to_string()).unwrap();
     assert!(v1 >= v2);
 
     let sv = semver::Version::from_str("114.514.19").unwrap();

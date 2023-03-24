@@ -6,12 +6,12 @@ use toml::Value;
 
 use crate::types::{WorkflowNode, KV};
 
-fn cmd_converter(origin: String) -> Result<String> {
+fn cmd_converter(origin: &String) -> Result<String> {
     // 需要增加 c_ 前缀的字段
     let list = ["if"];
 
     // 转换器
-    let mut text = origin;
+    let mut text = origin.to_owned();
     for cmd in list {
         let reg_str = String::from("(");
         let rep = Regex::new(&(reg_str + cmd + r"\s?=.+)"))?;
@@ -20,22 +20,22 @@ fn cmd_converter(origin: String) -> Result<String> {
     Ok(text)
 }
 
-pub fn parse_workflow(p: String) -> Result<Vec<WorkflowNode>> {
-    let workflow_path = Path::new(&p);
+pub fn parse_workflow(p: &String) -> Result<Vec<WorkflowNode>> {
+    let workflow_path = Path::new(p);
     if !workflow_path.exists() {
         return Err(anyhow!("Error:Fatal:Can't find workflow path : {}", p));
     }
 
     // 读取文件
     let mut text = String::new();
-    File::open(&p)?.read_to_string(&mut text)?;
+    File::open(p)?.read_to_string(&mut text)?;
 
     // 替换条件命令字段
-    let text_ready = cmd_converter(text)?;
+    let text_ready = cmd_converter(&text)?;
 
     // 转换文本为平工作流
     let plain_flow: Value = toml::from_str(&text_ready)
-        .map_err(|err| anyhow!("Error:Can't parse '{}' as legal toml file : {}", &p, err))?;
+        .map_err(|err| anyhow!("Error:Can't parse '{}' as legal toml file : {}", p, err))?;
 
     // 通过正则表达式获取工作流顺序
     let reg = Regex::new(r"\s*\[(\w+)\]")?;

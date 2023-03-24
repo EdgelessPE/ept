@@ -9,6 +9,8 @@ use dirs::home_dir;
 use serde::{Deserialize, Serialize};
 use toml::{from_str, to_string_pretty, Value};
 
+use crate::p2s;
+
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Local {
     pub base: String,
@@ -35,7 +37,7 @@ impl Cfg {
         }
     }
     fn use_which() -> Result<PathBuf> {
-        let from=if CUR_DIR.join(FILE_NAME).exists() {
+        let from = if CUR_DIR.join(FILE_NAME).exists() {
             CUR_DIR.join(FILE_NAME)
         } else {
             let from = USER_DIR.join(FILE_NAME);
@@ -63,14 +65,20 @@ impl Cfg {
     pub fn init() -> Result<Self> {
         let from = Self::use_which()?;
         let text = read_to_string(from.clone())?;
-        from_str(&text).map_err(|e| anyhow!("Error:Invalid config content, try delete '{}' : {}",p2s!(from), e.to_string()))
+        from_str(&text).map_err(|e| {
+            anyhow!(
+                "Error:Invalid config content, try delete '{}' : {}",
+                p2s!(from),
+                e.to_string()
+            )
+        })
     }
     pub fn overwrite(&mut self, other: Self) -> Result<()> {
         self.local = other.local.clone();
 
-        let from=Self::use_which()?;
-        let value=Value::try_from(other)?;
-        let text=to_string_pretty(&value)?;
+        let from = Self::use_which()?;
+        let value = Value::try_from(other)?;
+        let text = to_string_pretty(&value)?;
         write(from, &text)?;
         Ok(())
     }
@@ -89,15 +97,15 @@ pub fn get_config() -> Cfg {
     CFG.read().unwrap().clone()
 }
 
-pub fn set_config(next: Cfg)->Result<()> {
+pub fn set_config(next: Cfg) -> Result<()> {
     CFG.write().unwrap().overwrite(next)
 }
 
 #[test]
 fn test_config() {
-    let mut cfg=get_config();
+    let mut cfg = get_config();
     println!("{:#?}", cfg);
-    cfg.local.base="2333".to_string();
+    cfg.local.base = "2333".to_string();
     println!("{:#?}", cfg);
     set_config(cfg).unwrap();
 }

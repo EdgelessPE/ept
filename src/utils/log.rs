@@ -10,8 +10,8 @@ lazy_static! {
     static ref TERM: Term = Term::stdout();
 }
 
-fn gen_log(msg: String, replace_head: Option<String>) -> Option<String> {
-    for cap in RE.captures_iter(&msg) {
+fn gen_log(msg: &String, replace_head: Option<String>) -> Option<String> {
+    for cap in RE.captures_iter(msg) {
         if cap.len() != 4 {
             break;
         }
@@ -45,7 +45,7 @@ fn gen_log(msg: String, replace_head: Option<String>) -> Option<String> {
 }
 
 pub fn fn_log(msg: String) {
-    let g = gen_log(msg.clone(), None);
+    let g = gen_log(&msg, None);
     if g.is_some() {
         let content = g.unwrap();
         envmnt::set("LAST_LOG", &msg);
@@ -54,7 +54,7 @@ pub fn fn_log(msg: String) {
 }
 
 pub fn fn_log_ok_last(msg: String) {
-    let g = gen_log(format!("{}   {}", msg, "ok".green()), None);
+    let g = gen_log(&format!("{}   {}", msg, "ok".green()), None);
     if g.is_some() {
         let content = g.unwrap();
         let last_log = envmnt::get_or("LAST_LOG", "");

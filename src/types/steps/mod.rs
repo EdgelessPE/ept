@@ -8,7 +8,7 @@ mod link;
 mod log;
 mod path;
 
-pub trait TStep:Verifiable {
+pub trait TStep: Verifiable {
     /// Run this step
     fn run(self, located: &String) -> Result<i32>;
     /// Run reversed step

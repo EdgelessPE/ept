@@ -16,9 +16,9 @@ lazy_static! {
 
 // 执行条件以判断是否成立
 // TODO:传入前使用解释器解释
-fn condition_eval(condition: String, exit_code: i32) -> Result<bool> {
+fn condition_eval(condition: &String, exit_code: i32) -> Result<bool> {
     // 执行 eval
-    let eval_res = Expr::new(&condition)
+    let eval_res = Expr::new(condition)
         .value("${ExitCode}", exit_code)
         .value(
             "${SystemDrive}",
@@ -62,14 +62,14 @@ fn condition_eval(condition: String, exit_code: i32) -> Result<bool> {
             Ok(eval::Value::Bool(p.is_dir()))
         })
         .exec()
-        .map_err(|res| anyhow!("Error:Can't eval statement '{}' : {}", &condition, res))?;
+        .map_err(|res| anyhow!("Error:Can't eval statement '{}' : {}", condition, res))?;
 
     // 检查执行结果
     let result = eval_res.as_bool();
     if result.is_none() {
         return Err(anyhow!(
             "Error:Can't eval statement '{}' into bool result",
-            &condition
+            condition
         ));
     }
 
@@ -77,7 +77,7 @@ fn condition_eval(condition: String, exit_code: i32) -> Result<bool> {
 }
 
 // 执行工作流
-pub fn workflow_executor(flow: Vec<WorkflowNode>, located: String) -> Result<i32> {
+pub fn workflow_executor(flow: Vec<WorkflowNode>, located: &String) -> Result<i32> {
     let mut exit_code = 0;
     let strict_mode = is_strict_mode();
 
@@ -85,7 +85,7 @@ pub fn workflow_executor(flow: Vec<WorkflowNode>, located: String) -> Result<i32
     for flow_node in flow {
         // 解释节点条件，判断是否需要跳过执行
         let c_if = flow_node.header.c_if;
-        if c_if.is_some() && !condition_eval(c_if.unwrap(), exit_code)? {
+        if c_if.is_some() && !condition_eval(&c_if.unwrap(), exit_code)? {
             continue;
         }
 
@@ -93,7 +93,7 @@ pub fn workflow_executor(flow: Vec<WorkflowNode>, located: String) -> Result<i32
         let interpreter = |raw: String| raw.replace("${ExitCode}", &exit_code.to_string());
 
         // 匹配步骤类型以调用步骤解释器
-        let exec_res = flow_node.body.run(&located, interpreter);
+        let exec_res = flow_node.body.run(located, interpreter);
         // 处理执行结果
         if exec_res.is_err() {
             log!(
@@ -123,7 +123,7 @@ pub fn workflow_executor(flow: Vec<WorkflowNode>, located: String) -> Result<i32
 }
 
 // 宽容地逆向执行 setup 工作流
-pub fn workflow_reverse_executor(flow: Vec<WorkflowNode>, located: String) -> Result<()> {
+pub fn workflow_reverse_executor(flow: Vec<WorkflowNode>, located: &String) -> Result<()> {
     // 遍历流节点
     for flow_node in flow {
         // 创建变量解释器
@@ -131,7 +131,7 @@ pub fn workflow_reverse_executor(flow: Vec<WorkflowNode>, located: String) -> Re
         let interpreter = |raw: String| raw.replace("${ExitCode}", "0");
 
         // 匹配步骤类型以调用逆向步骤解释器
-        let exec_res = flow_node.body.reverse_run(&located, interpreter);
+        let exec_res = flow_node.body.reverse_run(located, interpreter);
 
         // 对错误进行警告
         if exec_res.is_err() {
@@ -148,26 +148,26 @@ pub fn workflow_reverse_executor(flow: Vec<WorkflowNode>, located: String) -> Re
 
 #[test]
 fn test_condition_eval() {
-    let r1 = condition_eval(String::from("${ExitCode}==114"), 114).unwrap();
+    let r1 = condition_eval(&String::from("${ExitCode}==114"), 114).unwrap();
     assert!(r1);
 
-    let r2 = condition_eval(String::from("${ExitCode}==514"), 114).unwrap();
+    let r2 = condition_eval(&String::from("${ExitCode}==514"), 114).unwrap();
     assert_eq!(r2, false);
 
-    let r3 = condition_eval(String::from("${SystemDrive}==\"C:\""), 0).unwrap();
+    let r3 = condition_eval(&String::from("${SystemDrive}==\"C:\""), 0).unwrap();
     assert!(r3);
 
-    let r4 = condition_eval(String::from("${DefaultLocation}==\"./apps\""), 0).unwrap();
+    let r4 = condition_eval(&String::from("${DefaultLocation}==\"./apps\""), 0).unwrap();
     assert!(r4);
 
     let r5 = condition_eval(
-        String::from("Exist(\"./src/main.rs\")==IsDirectory(\"./bin\")"),
+        &String::from("Exist(\"./src/main.rs\")==IsDirectory(\"./bin\")"),
         0,
     )
     .unwrap();
     assert!(r5);
 
-    let r6 = condition_eval(String::from("Exist(\"./src/main.ts\")"), 0).unwrap();
+    let r6 = condition_eval(&String::from("Exist(\"./src/main.ts\")"), 0).unwrap();
     assert_eq!(r6, false);
 }
 
@@ -232,7 +232,7 @@ fn test_workflow_executor() {
     ];
     let r1 = workflow_executor(
         wf1,
-        String::from("D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode"),
+        &String::from("D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode"),
     );
     println!("{:?}", r1);
 }
@@ -264,5 +264,5 @@ fn test_workflow_executor_interpreter() {
             }),
         },
     ];
-    workflow_executor(flow, String::from("D:/Desktop/Projects/EdgelessPE/ept")).unwrap();
+    workflow_executor(flow, &String::from("D:/Desktop/Projects/EdgelessPE/ept")).unwrap();
 }
