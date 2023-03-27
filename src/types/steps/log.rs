@@ -2,6 +2,7 @@ use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
 use crate::{log, types::Verifiable, verify_enum};
+use crate::types::permissions::{Generalizable, Permission};
 
 use super::TStep;
 
@@ -41,6 +42,12 @@ impl Verifiable for StepLog {
             self.level,
             "Debug" | "Info" | "Warning" | "Error" | "Success"
         )
+    }
+}
+
+impl Generalizable for StepLog {
+    fn generalize_permissions(&self)->Result<Vec<Permission>> {
+        Ok(vec![])
     }
 }
 

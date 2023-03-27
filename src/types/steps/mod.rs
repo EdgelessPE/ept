@@ -8,7 +8,7 @@ mod link;
 mod log;
 mod path;
 
-pub trait TStep: Verifiable {
+pub trait TStep: Verifiable + Generalizable {
     /// Run this step
     fn run(self, located: &String) -> Result<i32>;
     /// Run reversed step
@@ -103,3 +103,4 @@ pub use self::log::StepLog;
 pub use self::path::StepPath;
 
 use super::Verifiable;
+use super::permissions::Generalizable;

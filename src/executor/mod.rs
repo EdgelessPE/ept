@@ -195,6 +195,7 @@ fn test_workflow_executor() {
             body: Step::StepExecute(StepExecute {
                 command: "exit 3".to_string(),
                 pwd: None,
+                call_installer:None,
             }),
         },
         WorkflowNode {
@@ -250,6 +251,7 @@ fn test_workflow_executor_interpreter() {
             body: Step::StepExecute(StepExecute {
                 command: "exit 3".to_string(),
                 pwd: None,
+                call_installer:None,
             }),
         },
         WorkflowNode {

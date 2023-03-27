@@ -1,5 +1,6 @@
 use super::TStep;
 use crate::{log, p2s, types::Verifiable, utils::parse_relative_path};
+use crate::types::permissions::{Generalizable, Permission, PermissionLevel};
 use anyhow::{anyhow, Result};
 use dirs::desktop_dir;
 use mslnk::ShellLink;
@@ -94,6 +95,16 @@ impl Verifiable for StepLink {
                 &self.target_name
             ))
         }
+    }
+}
+
+impl Generalizable for StepLink {
+    fn generalize_permissions(&self)->Result<Vec<Permission>> {
+        Ok(vec![Permission{
+            key:"link_desktop".to_string(),
+            level:PermissionLevel::Normal,
+            targets:vec![self.target_name.to_owned()],
+        }])
     }
 }
 

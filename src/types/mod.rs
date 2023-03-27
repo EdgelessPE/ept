@@ -7,6 +7,7 @@ mod software;
 mod steps;
 mod verifiable;
 mod workflow;
+mod permissions;
 
 use toml::Value;
 
