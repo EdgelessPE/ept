@@ -2,6 +2,8 @@ use crate::types::KV;
 use anyhow::{anyhow, Result};
 use serde::de;
 use serde::{Deserialize, Serialize};
+use crate::types::Verifiable;
+use crate::types::permissions::{Generalizable, Permission};
 
 mod execute;
 mod link;
@@ -91,6 +93,21 @@ macro_rules! def_enum_step {
             }
         }
 
+        impl Verifiable for Step {
+            fn verify_self(&self) -> Result<()> {
+                match self {
+                    $( Step::$x(step) => step.verify_self() ),*
+                }
+            }
+        }
+
+        impl Generalizable for Step {
+            fn generalize_permissions(&self)->Result<Vec<Permission>> {
+                match self {
+                    $( Step::$x(step) => step.generalize_permissions() ),*
+                }
+            }
+        }
     };
 }
 
@@ -101,6 +118,3 @@ pub use self::execute::StepExecute;
 pub use self::link::StepLink;
 pub use self::log::StepLog;
 pub use self::path::StepPath;
-
-use super::Verifiable;
-use super::permissions::Generalizable;
