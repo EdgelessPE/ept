@@ -9,14 +9,15 @@ use crate::{
     executor::workflow_executor,
     p2s,
     parsers::{parse_author, parse_workflow},
-    types::ExSemVer,
+    types::extended_semver::ExSemVer,
     utils::{ask_yn, get_path_apps},
 };
 use crate::{log, log_ok_last};
 
 use super::{
     info_local, install_using_package, uninstall,
-    utils::{clean_temp, installed_validator, unpack_nep},
+    utils::package::{clean_temp, unpack_nep},
+    utils::validator::installed_validator,
 };
 
 fn same_authors(a: &Vec<String>, b: &Vec<String>) -> bool {

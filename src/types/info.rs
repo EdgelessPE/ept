@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use super::Software;
+use crate::types::software::Software;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Info {

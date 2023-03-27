@@ -4,7 +4,7 @@ use std::path::Path;
 
 use crate::{
     log, p2s,
-    types::WorkflowNode,
+    types::workflow::WorkflowNode,
     utils::{get_bare_apps, is_strict_mode},
 };
 
@@ -173,7 +173,8 @@ fn test_condition_eval() {
 
 #[test]
 fn test_workflow_executor() {
-    use crate::types::{Step, StepExecute, StepLink, StepLog, StepPath, WorkflowHeader};
+    use crate::types::steps::{Step, StepExecute, StepLink, StepLog, StepPath};
+    use crate::types::workflow::{WorkflowHeader, WorkflowNode};
     let wf1 = vec![
         WorkflowNode {
             header: WorkflowHeader {
@@ -195,7 +196,7 @@ fn test_workflow_executor() {
             body: Step::StepExecute(StepExecute {
                 command: "exit 3".to_string(),
                 pwd: None,
-                call_installer:None,
+                call_installer: None,
             }),
         },
         WorkflowNode {
@@ -240,7 +241,11 @@ fn test_workflow_executor() {
 
 #[test]
 fn test_workflow_executor_interpreter() {
-    use crate::types::{Step, StepExecute, StepLog, WorkflowHeader};
+    use crate::types::{
+        steps::{Step, StepExecute, StepLog},
+        workflow::{WorkflowHeader, WorkflowNode},
+    };
+
     let flow = vec![
         WorkflowNode {
             header: WorkflowHeader {
@@ -251,7 +256,7 @@ fn test_workflow_executor_interpreter() {
             body: Step::StepExecute(StepExecute {
                 command: "exit 3".to_string(),
                 pwd: None,
-                call_installer:None,
+                call_installer: None,
             }),
         },
         WorkflowNode {

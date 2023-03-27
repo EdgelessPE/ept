@@ -7,7 +7,7 @@ use std::{
 
 use crate::p2s;
 
-use super::{get_bare_apps,get_config};
+use super::{get_bare_apps, get_config};
 
 pub fn parse_relative_path(relative: &String) -> Result<PathBuf> {
     let cr = relative.replace("./", "");
@@ -16,7 +16,7 @@ pub fn parse_relative_path(relative: &String) -> Result<PathBuf> {
     let absolute_path = if path.is_absolute() {
         path.to_path_buf()
     } else {
-        let cfg=get_config();
+        let cfg = get_config();
         Path::new(&cfg.local.base).join(path)
     }
     .clean();

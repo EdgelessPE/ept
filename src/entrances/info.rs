@@ -5,11 +5,14 @@ use anyhow::{anyhow, Result};
 use crate::{
     p2s,
     parsers::parse_package,
-    types::{GlobalPackage, Info, InfoDiff},
+    types::{
+        info::{Info, InfoDiff},
+        package::GlobalPackage,
+    },
     utils::{find_scope_with_name_locally, get_path_apps},
 };
 
-use super::utils::installed_validator;
+use super::utils::validator::installed_validator;
 
 pub fn info_local(scope: &String, package_name: &String) -> Result<(GlobalPackage, InfoDiff)> {
     let local_path = get_path_apps(scope, package_name, false)?;

@@ -9,7 +9,7 @@ use trash;
 use crate::{
     log, log_ok_last, p2s,
     parsers::parse_workflow,
-    types::{Step, WorkflowNode},
+    types::{steps::Step, workflow::WorkflowNode},
     utils::{ask_yn, get_bare_apps, get_path_apps, get_path_bin, parse_bare_temp},
 };
 

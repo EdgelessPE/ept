@@ -10,11 +10,11 @@ use crate::{
     executor::{workflow_executor, workflow_reverse_executor},
     log, log_ok_last, p2s,
     parsers::{parse_package, parse_workflow},
-    types::WorkflowNode,
+    types::workflow::WorkflowNode,
     utils::{ask_yn, find_scope_with_name_locally, get_bare_apps, get_path_apps, kill_with_name},
 };
 
-use super::utils::installed_validator;
+use super::utils::validator::installed_validator;
 
 fn get_manifest(flow: Vec<WorkflowNode>) -> Vec<String> {
     let mut manifest = Vec::new();

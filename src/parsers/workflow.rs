@@ -4,7 +4,7 @@ use std::path::Path;
 use std::{fs::File, io::Read};
 use toml::Value;
 
-use crate::types::{WorkflowNode, KV};
+use crate::types::{workflow::WorkflowNode, KV};
 
 fn cmd_converter(origin: &String) -> Result<String> {
     // 需要增加 c_ 前缀的字段

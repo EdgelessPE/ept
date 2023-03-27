@@ -1,4 +1,4 @@
-use crate::types::{ExSemVer, GlobalPackage, Software};
+use crate::types::{extended_semver::ExSemVer, package::GlobalPackage, software::Software};
 use crate::utils::{get_exe_version, parse_relative_path};
 use crate::{log, p2s};
 use anyhow::{anyhow, Result};

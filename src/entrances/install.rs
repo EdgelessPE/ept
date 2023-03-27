@@ -2,10 +2,10 @@ use anyhow::{anyhow, Result};
 use std::fs::{remove_dir_all, rename};
 use std::path::Path;
 
-use super::utils::clean_temp;
 use super::{
     info_local,
-    utils::{installed_validator, unpack_nep},
+    utils::package::{clean_temp, unpack_nep},
+    utils::validator::installed_validator,
 };
 use crate::{executor::workflow_executor, parsers::parse_workflow, utils::get_path_apps};
 use crate::{log, log_ok_last, p2s};

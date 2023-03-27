@@ -1,7 +1,7 @@
 use anyhow::Result;
 
 use crate::{
-    types::Info,
+    types::info::Info,
     utils::{get_bare_apps, read_sub_dir},
 };
 

@@ -1,4 +1,4 @@
-use crate::types::Signature;
+use crate::types::signature::Signature;
 use anyhow::{anyhow, Result};
 use std::path::Path;
 use std::{fs::File, io::Read};

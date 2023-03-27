@@ -12,16 +12,14 @@ use tar::Archive;
 
 use crate::{
     compression::{decompress, fast_decompress_zstd, release_tar},
-    entrances::utils::outer_hashmap_validator,
+    entrances::utils::validator::{inner_validator, outer_hashmap_validator, outer_validator},
     p2s,
     parsers::{fast_parse_signature, parse_author, parse_package, parse_signature},
     signature::{fast_verify, verify},
-    types::GlobalPackage,
+    types::package::GlobalPackage,
     utils::{get_path_temp, is_debug_mode},
 };
 use crate::{log, log_ok_last};
-
-use super::{inner_validator, outer_validator};
 
 /// 根据源文件路径创建并返回(临时目录,文件茎)
 fn get_temp_dir_path(source_file: &String, keep_clear: bool) -> Result<(PathBuf, String)> {

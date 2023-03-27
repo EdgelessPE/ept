@@ -1,4 +1,4 @@
-use crate::types::Author;
+use crate::types::author::Author;
 use anyhow::{anyhow, Result};
 use lazy_static::lazy_static;
 use regex::Regex;

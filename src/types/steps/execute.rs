@@ -1,6 +1,6 @@
 use crate::log;
-use crate::types::Verifiable;
 use crate::types::permissions::{Generalizable, Permission, PermissionLevel};
+use crate::types::verifiable::Verifiable;
 
 use super::TStep;
 use anyhow::{anyhow, Result};
@@ -93,7 +93,7 @@ impl TStep for StepExecute {
         Self {
             command: interpreter(self.command),
             pwd: self.pwd.map(interpreter),
-            call_installer:self.call_installer,
+            call_installer: self.call_installer,
         }
     }
 }
@@ -105,18 +105,18 @@ impl Verifiable for StepExecute {
 }
 
 impl Generalizable for StepExecute {
-    fn generalize_permissions(&self)->Result<Vec<Permission>> {
-        let node=if self.call_installer.unwrap_or(false) {
-            Permission{
-                key:"execute_installer".to_string(),
-                level:PermissionLevel::Important,
-                targets:vec![self.command.to_owned()]
+    fn generalize_permissions(&self) -> Result<Vec<Permission>> {
+        let node = if self.call_installer.unwrap_or(false) {
+            Permission {
+                key: "execute_installer".to_string(),
+                level: PermissionLevel::Important,
+                targets: vec![self.command.to_owned()],
             }
-        }else{
-            Permission{
-                key:"execute_custom".to_string(),
-                level:PermissionLevel::Sensitive,
-                targets:vec![self.command.to_owned()]
+        } else {
+            Permission {
+                key: "execute_custom".to_string(),
+                level: PermissionLevel::Sensitive,
+                targets: vec![self.command.to_owned()],
             }
         };
         Ok(vec![node])
@@ -128,7 +128,7 @@ fn test_execute() {
     StepExecute {
         command: "echo hello nep ! && echo 你好，尼普！".to_string(),
         pwd: None,
-        call_installer:None,
+        call_installer: None,
     }
     .run(&String::from(
         "D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode",
@@ -137,7 +137,7 @@ fn test_execute() {
     StepExecute {
         command: "ls".to_string(),
         pwd: Some("./src".to_string()),
-        call_installer:None,
+        call_installer: None,
     }
     .run(&String::from(
         "D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode",
@@ -147,7 +147,7 @@ fn test_execute() {
     let res = StepExecute {
         command: "exit 2".to_string(),
         pwd: None,
-        call_installer:None,
+        call_installer: None,
     }
     .run(&String::from(
         "D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode",

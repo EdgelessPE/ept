@@ -1,6 +1,6 @@
 use super::TStep;
-use crate::types::Verifiable;
 use crate::types::permissions::{Generalizable, Permission, PermissionLevel};
+use crate::types::verifiable::Verifiable;
 use crate::utils::{get_path_bin, parse_relative_path};
 use crate::{log, p2s};
 use anyhow::{anyhow, Result};
@@ -229,20 +229,20 @@ impl Verifiable for StepPath {
 }
 
 impl Generalizable for StepPath {
-    fn generalize_permissions(&self)->Result<Vec<Permission>> {
+    fn generalize_permissions(&self) -> Result<Vec<Permission>> {
         // 检查是否有拓展名，以此判断添加的是目录还是单文件
-        let p=Path::new(&self.record);
-        let node=if p.extension().is_some() {
-            Permission{
-                key:"path_entrances".to_string(),
-                level:PermissionLevel::Normal,
-                targets:vec![self.record.to_owned()],
+        let p = Path::new(&self.record);
+        let node = if p.extension().is_some() {
+            Permission {
+                key: "path_entrances".to_string(),
+                level: PermissionLevel::Normal,
+                targets: vec![self.record.to_owned()],
             }
-        }else{
-            Permission{
-                key:"path_dirs".to_string(),
-                level:PermissionLevel::Important,
-                targets:vec![self.record.to_owned()],
+        } else {
+            Permission {
+                key: "path_dirs".to_string(),
+                level: PermissionLevel::Important,
+                targets: vec![self.record.to_owned()],
             }
         };
         Ok(vec![node])

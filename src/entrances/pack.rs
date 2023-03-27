@@ -1,14 +1,14 @@
 use crate::compression::{compress, pack_tar};
 use crate::parsers::{parse_author, parse_package, parse_workflow};
 use crate::signature::sign;
-use crate::types::{Signature, SignatureNode, WorkflowNode};
+use crate::types::{signature::Signature, signature::SignatureNode, workflow::WorkflowNode};
 use crate::utils::{ask_yn, get_path_temp, is_debug_mode};
 use crate::{log, log_ok_last, p2s};
 use anyhow::{anyhow, Result};
 use std::fs::{read_dir, remove_dir_all, write};
 use std::path::Path;
 
-use super::utils::{inner_validator, manifest_validator};
+use super::utils::validator::{inner_validator, manifest_validator};
 
 fn get_manifest(flow: Vec<WorkflowNode>) -> Vec<String> {
     let mut manifest = Vec::new();
