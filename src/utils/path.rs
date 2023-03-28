@@ -5,12 +5,12 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use crate::p2s;
+use crate::{p2s, utils::format_path};
 
 use super::{get_bare_apps, get_config};
 
 pub fn parse_relative_path(relative: &String) -> Result<PathBuf> {
-    let cr = relative.replace("./", "");
+    let cr = format_path(relative);
     let path = Path::new(&cr);
 
     let absolute_path = if path.is_absolute() {

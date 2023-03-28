@@ -1,8 +1,8 @@
 use super::TStep;
 use crate::types::permissions::{Generalizable, Permission, PermissionLevel};
+use crate::utils::env::env_desktop;
 use crate::{log, p2s, types::verifiable::Verifiable, utils::parse_relative_path};
 use anyhow::{anyhow, Result};
-use dirs::desktop_dir;
 use mslnk::ShellLink;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
@@ -12,26 +12,37 @@ lazy_static! {
     static ref TARGET_RE: Regex = Regex::new(r"^(([^/]+)/)?([^/]+)$").unwrap();
 }
 
+fn parse_target_name(name:&String)->Result<(Option<String>,String)>{
+    let sp:Vec<&str>=name.split("/").collect();
+    let length=sp.len();
+    if length>2{
+        Err(anyhow!("Error:Invalid filed 'target_name' : '{}'",name))
+    }else if length==2{
+        Ok((Some(sp.get(0).unwrap().to_string()),sp.get(1).unwrap().to_string()))
+    }else{
+        Ok((None,sp.get(0).unwrap().to_string()))
+    }
+}
+
+#[test]
+fn test_parse_target_name(){
+    let r1=parse_target_name(&"Microsoft/Visual Studio Code".to_string()).unwrap();
+    assert_eq!(r1,(Some("Microsoft".to_string()),"Visual Studio Code".to_string()));
+    
+    let r2=parse_target_name(&"尼..普".to_string()).unwrap();
+    assert_eq!(r2,(None,"尼..普".to_string()));
+}
+
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct StepLink {
     pub source_file: String,
     pub target_name: String,
 }
 
-fn get_desktop() -> Result<String> {
-    let desktop_opt = desktop_dir();
-    if desktop_opt.is_none() {
-        return Err(anyhow!("Error(Link):Can't get desktop location"));
-    }
-    let d = desktop_opt.unwrap();
-    let desktop = d.to_str().unwrap_or(r"C:\Users\Public\Desktop");
-    Ok(String::from(desktop))
-}
-
 impl TStep for StepLink {
     fn run(self, located: &String) -> anyhow::Result<i32> {
         // 获取用户桌面位置
-        let desktop = get_desktop()?;
+        let desktop = env_desktop();
 
         // 解析源文件绝对路径
         let abs_clear_source_path =
@@ -58,7 +69,7 @@ impl TStep for StepLink {
     }
     fn reverse_run(self, _: &String) -> Result<()> {
         // 获取用户桌面位置
-        let desktop = get_desktop()?;
+        let desktop = env_desktop();
 
         // 解析快捷方式路径
         let target = format!("{}/{}.lnk", desktop, &self.target_name);
@@ -87,14 +98,16 @@ impl TStep for StepLink {
 
 impl Verifiable for StepLink {
     fn verify_self(&self) -> Result<()> {
-        if TARGET_RE.is_match(&self.target_name) {
-            Ok(())
-        } else {
-            Err(anyhow!(
+        if !TARGET_RE.is_match(&self.target_name) {
+            return Err(anyhow!(
                 "Error(Link):Invalid field 'target_name', expect 'NAME' or 'FOLDER/NAME', got '{}'",
                 &self.target_name
-            ))
+            ));
         }
+        if self.target_name.contains(".."){
+            return Err(anyhow!("Error(Link):Invalid field 'target_name' : shouldn't contain '..'"));
+        }
+        Ok(())
     }
 }
 

@@ -5,6 +5,7 @@ mod cfg;
 mod path;
 mod process;
 mod term;
+pub mod env;
 
 use anyhow::{anyhow, Result};
 
@@ -21,7 +22,7 @@ use std::path::PathBuf;
 #[macro_export]
 macro_rules! p2s {
     ($x:expr) => {
-        $x.to_string_lossy().to_string()
+        crate::utils::format_path(&$x.to_string_lossy().to_string())
     };
 }
 
@@ -43,6 +44,15 @@ pub fn is_confirm_mode() -> bool {
 
 pub fn is_strict_mode() -> bool {
     envmnt::get_or("STRICT", "false") == String::from("true")
+}
+
+pub fn format_path(raw: &String) -> String {
+    let tmp=raw.replace(r"\", "/");
+    if tmp.starts_with("./"){
+        tmp[2..].to_string()
+    }else{
+        tmp
+    }
 }
 
 pub fn get_bare_apps() -> Result<PathBuf> {
