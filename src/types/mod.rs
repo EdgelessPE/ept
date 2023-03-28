@@ -8,6 +8,7 @@ pub mod software;
 pub mod steps;
 pub mod verifiable;
 pub mod workflow;
+pub mod mixed_fs;
 
 use toml::Value;
 
