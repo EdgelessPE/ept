@@ -2,10 +2,10 @@ mod exe_version;
 #[macro_use]
 mod log;
 mod cfg;
+pub mod env;
 mod path;
 mod process;
 mod term;
-pub mod env;
 
 use anyhow::{anyhow, Result};
 
@@ -47,10 +47,10 @@ pub fn is_strict_mode() -> bool {
 }
 
 pub fn format_path(raw: &String) -> String {
-    let tmp=raw.replace(r"\", "/");
-    if tmp.starts_with("./"){
+    let tmp = raw.replace(r"\", "/");
+    if tmp.starts_with("./") {
         tmp[2..].to_string()
-    }else{
+    } else {
         tmp
     }
 }

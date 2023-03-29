@@ -34,7 +34,7 @@ impl MixedFS {
             return false;
         }
         // 此处不关心内置变量是否合法
-        if path.starts_with("${"){
+        if path.starts_with("${") {
             return true;
         }
         Path::new(base).join(path).exists()
@@ -52,5 +52,8 @@ fn test_mixed_fs() {
     mfs.remove(&"config.toml".to_string());
 
     assert!(mfs.exists(&"1.txt".to_string(), &"./".to_string()));
-    assert_eq!(mfs.exists(&"config.toml".to_string(), &"./".to_string()), false);
+    assert_eq!(
+        mfs.exists(&"config.toml".to_string(), &"./".to_string()),
+        false
+    );
 }

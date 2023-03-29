@@ -54,7 +54,7 @@ pub fn pack(source_dir: &String, into_file: Option<String>, need_sign: bool) -> 
     log!("Info:Checking manifest...");
     let setup_path = Path::new(source_dir).join("workflows").join("setup.toml");
     let setup_flow = parse_workflow(&p2s!(setup_path))?;
-    let mut fs=MixedFS::new();
+    let mut fs = MixedFS::new();
     let setup_manifest = get_manifest(setup_flow, &mut fs);
     let pkg_content_path = Path::new(source_dir).join(&global.package.name);
     manifest_validator(&p2s!(pkg_content_path), setup_manifest, &mut fs)?;

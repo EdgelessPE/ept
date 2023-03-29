@@ -2,9 +2,8 @@ use std::path::Path;
 
 use eval::Expr;
 
-pub fn functions_decorator(expr:Expr)->Expr{
-    expr
-    .function("Exist", |val| {
+pub fn functions_decorator(expr: Expr) -> Expr {
+    expr.function("Exist", |val| {
         // 参数校验
         if val.len() > 1 {
             return Err(eval::Error::ArgumentsGreater(1));

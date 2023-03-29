@@ -1,4 +1,5 @@
 use super::TStep;
+use crate::types::mixed_fs::MixedFS;
 use crate::types::permissions::{Generalizable, Permission, PermissionLevel};
 use crate::utils::env::env_desktop;
 use crate::{log, p2s, types::verifiable::Verifiable, utils::parse_relative_path};
@@ -12,25 +13,34 @@ lazy_static! {
     static ref TARGET_RE: Regex = Regex::new(r"^(([^/]+)/)?([^/]+)$").unwrap();
 }
 
-fn parse_target_name(name:&String)->Result<(Option<String>,String)>{
-    let sp:Vec<&str>=name.split("/").collect();
-    let length=sp.len();
-    if length>2{
-        Err(anyhow!("Error:Invalid filed 'target_name' : '{}'",name))
-    }else if length==2{
-        Ok((Some(sp.get(0).unwrap().to_string()),sp.get(1).unwrap().to_string()))
-    }else{
-        Ok((None,sp.get(0).unwrap().to_string()))
+fn parse_target_name(name: &String) -> Result<(Option<String>, String)> {
+    let sp: Vec<&str> = name.split("/").collect();
+    let length = sp.len();
+    if length > 2 {
+        Err(anyhow!("Error:Invalid filed 'target_name' : '{}'", name))
+    } else if length == 2 {
+        Ok((
+            Some(sp.get(0).unwrap().to_string()),
+            sp.get(1).unwrap().to_string(),
+        ))
+    } else {
+        Ok((None, sp.get(0).unwrap().to_string()))
     }
 }
 
 #[test]
-fn test_parse_target_name(){
-    let r1=parse_target_name(&"Microsoft/Visual Studio Code".to_string()).unwrap();
-    assert_eq!(r1,(Some("Microsoft".to_string()),"Visual Studio Code".to_string()));
-    
-    let r2=parse_target_name(&"尼..普".to_string()).unwrap();
-    assert_eq!(r2,(None,"尼..普".to_string()));
+fn test_parse_target_name() {
+    let r1 = parse_target_name(&"Microsoft/Visual Studio Code".to_string()).unwrap();
+    assert_eq!(
+        r1,
+        (
+            Some("Microsoft".to_string()),
+            "Visual Studio Code".to_string()
+        )
+    );
+
+    let r2 = parse_target_name(&"尼..普".to_string()).unwrap();
+    assert_eq!(r2, (None, "尼..普".to_string()));
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -82,7 +92,7 @@ impl TStep for StepLink {
         }
         Ok(())
     }
-    fn get_manifest(&self) -> Vec<String> {
+    fn get_manifest(&self, _fs: &mut MixedFS) -> Vec<String> {
         vec![self.source_file.to_owned()]
     }
     fn interpret<F>(self, interpreter: F) -> Self
@@ -104,8 +114,10 @@ impl Verifiable for StepLink {
                 &self.target_name
             ));
         }
-        if self.target_name.contains(".."){
-            return Err(anyhow!("Error(Link):Invalid field 'target_name' : shouldn't contain '..'"));
+        if self.target_name.contains("..") {
+            return Err(anyhow!(
+                "Error(Link):Invalid field 'target_name' : shouldn't contain '..'"
+            ));
         }
         Ok(())
     }

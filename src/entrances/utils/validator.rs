@@ -1,7 +1,10 @@
 use anyhow::{anyhow, Result};
-use std::{collections::{HashMap, HashSet}, path::Path};
+use std::{
+    collections::{HashMap, HashSet},
+    path::Path,
+};
 
-use crate::{p2s, types::mixed_fs::MixedFS};
+use crate::{executor::values_validator_path, p2s, types::mixed_fs::MixedFS};
 
 pub fn inner_validator(dir: &String) -> Result<()> {
     let manifest = vec!["package.toml", "workflows/setup.toml"];
@@ -19,19 +22,19 @@ pub fn inner_validator(dir: &String) -> Result<()> {
 }
 
 pub fn manifest_validator(base: &String, manifest: Vec<String>, fs: &mut MixedFS) -> Result<()> {
-    let mut missing_list=HashSet::new();
+    let mut missing_list = HashSet::new();
     for path in manifest {
         values_validator_path(&path)?;
         if !fs.exists(&path, base) {
             missing_list.insert(path);
         }
     }
-    if !missing_list.is_empty(){
-        let items:Vec<String>=missing_list.into_iter().collect();
+    if !missing_list.is_empty() {
+        let items: Vec<String> = missing_list.into_iter().collect();
         return Err(anyhow!(
             "Error:Invalid nep inner package : missing flow item '{:?}' in '{}'",
             items,
-            dir
+            base
         ));
     }
 

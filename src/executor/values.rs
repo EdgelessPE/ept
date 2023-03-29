@@ -1,18 +1,48 @@
+use crate::log;
+use crate::utils::env::{
+    env_appdata, env_desktop, env_home, env_program_files_x64, env_program_files_x86,
+    env_system_drive,
+};
+use anyhow::{anyhow, Result};
 use eval::Expr;
-use anyhow::{anyhow,Result};
-use crate::utils::env::{env_system_drive, env_home, env_appdata, env_program_files_x64, env_desktop, env_program_files_x86};
+use lazy_static::lazy_static;
+use regex::Regex;
+use std::collections::HashSet;
+use std::path::Path;
 
-// TODO:使用正则表达式实现内置变量收集器，支持过滤 "${ExitCode}", "${DefaultLocation}"
+lazy_static! {
+    static ref RE: Regex = Regex::new(r"\$\{(\w+)\}").unwrap();
+}
 
 macro_rules! define_values {
     ($({$key:expr,$val:expr}),*) => {
+        // 收集合法的内置变量
+        pub fn collect_values(raw:&String)->Result<Vec<String>>{
+            let valid_values:HashSet<&str>=HashSet::from_iter(vec!["${ExitCode}", "${DefaultLocation}", $($key),*]);
+
+            let collection:Vec<String>= RE
+            .captures_iter(raw)
+            .filter_map(|cap|{
+                let str=cap.get(0).unwrap().as_str();
+                if valid_values.contains(str){
+                    Some(str.to_string())
+                }else{
+                    log!("Warning:Unknown value '{str}' in '{raw}', check if it's a spelling mistake");
+                    None
+                }
+            })
+            .collect();
+
+            Ok(collection)
+        }
+
         pub fn values_decorator(expr:Expr, exit_code: i32, located: &String)->Expr{
             expr
             .value("${ExitCode}",exit_code)
             .value("${DefaultLocation}",located.to_owned())
             $(.value($key,$val))*
         }
-        
+
         pub fn values_replacer(raw:String, exit_code: i32, located: &String)->String{
             raw
             .replace("${ExitCode}",&exit_code.to_string())
@@ -20,37 +50,64 @@ macro_rules! define_values {
             $(.replace($key,&$val))*
         }
 
-        /// 仅适用于路径的内置变量校验器
-        pub fn values_validator_path(raw:&String)->Result<()>{
-            // "${ExitCode}", "${DefaultLocation}" 不是合法的路径开头内置变量，对于 "${DefaultLocation}" 应该使用相对路径
-            let valid_start=HashSet::from_iter(vec![$($key),*]);
-            if raw.starts_with("${DefaultLocation}"){
-                return Err(anyhow!("Error:'${DefaultLocation}' is not allowed in '{}', use './' instead",raw));
-            }
-            // 内置变量开头
-            if raw.starts_with("${"){
-                //TODO:正则表达式匹配开头，阻止非法的开头
-                return Err(anyhow!("Error:Unknown inner value '{}' in '{}'",&start,raw));
-            }
-            // 阻止绝对路径
-            if Path::new(raw).is_absolute(){
-                return Err(anyhow!("Error:Absolute path is not allowed in '{}'",raw));
-            }
-            // 阻止 ..
-            if raw.contains(".."){
-                return Err(anyhow!("Error:Double dot '..' is not allowed in '{}'",raw));
-            }
-            
-            Ok(())
-        }
     };
 }
 
-define_values!{
+define_values! {
     {"${SystemDrive}",env_system_drive()},
     {"${Home}",env_home()},
     {"${AppData}",env_appdata()},
     {"${ProgramFiles_X64}",env_program_files_x64()},
     {"${ProgramFiles_X86}",env_program_files_x86()},
     {"${Desktop}",env_desktop()}
+}
+
+/// 仅适用于路径的内置变量校验器
+pub fn values_validator_path(raw: &String) -> Result<()> {
+    // "${DefaultLocation}" 不是合法的路径开头内置变量，对于 "${DefaultLocation}" 应该使用相对路径
+    if raw.starts_with("${DefaultLocation}") {
+        return Err(anyhow!(
+            "Error:'Start with ${DefaultLocation}' is not allowed in '{raw}', use './' instead",
+            DefaultLocation = "DefaultLocation"
+        ));
+    }
+    // 阻止绝对路径
+    if Path::new(raw).is_absolute() {
+        return Err(anyhow!(
+            "Error:Absolute path '{raw}' is not allowed, use proper inner values instead"
+        ));
+    }
+    // 阻止 ..
+    if raw.contains("..") {
+        return Err(anyhow!("Error:Double dot '..' is not allowed in '{}'", raw));
+    }
+
+    // 收集合法的内置变量
+    let collection = collect_values(raw)?;
+
+    // 如果以一个近似内置变量的名称打头，但是又不存在这个内置变量则阻止
+    if raw.starts_with("${") && !raw.starts_with(&collection[0]) {
+        return Err(anyhow!(
+            "Error:Shouldn't start with an unknown inner value in '{raw}'"
+        ));
+    }
+
+    Ok(())
+}
+
+#[test]
+fn test_collect_values() {
+    values_validator_path(&"${AppData}${ExitCode}.${SystemData}/".to_string()).unwrap();
+
+    let err_res = values_validator_path(&"${SystemData}${AppData}${ExitCode}./".to_string());
+    assert!(err_res.is_err());
+
+    let err_res = values_validator_path(&"C:/system".to_string());
+    assert!(err_res.is_err());
+
+    let err_res = values_validator_path(&"${Appdata}/../nep".to_string());
+    assert!(err_res.is_err());
+
+    let err_res = values_validator_path(&"${DefaultLocation}/vscode".to_string());
+    assert!(err_res.is_err());
 }

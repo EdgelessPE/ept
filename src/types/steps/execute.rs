@@ -1,4 +1,5 @@
 use crate::log;
+use crate::types::mixed_fs::MixedFS;
 use crate::types::permissions::{Generalizable, Permission, PermissionLevel};
 use crate::types::verifiable::Verifiable;
 
@@ -83,7 +84,7 @@ impl TStep for StepExecute {
     fn reverse_run(self, _: &String) -> Result<()> {
         Ok(())
     }
-    fn get_manifest(&self) -> Vec<String> {
+    fn get_manifest(&self, _fs: &mut MixedFS) -> Vec<String> {
         Vec::new()
     }
     fn interpret<F>(self, interpreter: F) -> Self

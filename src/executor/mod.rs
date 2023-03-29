@@ -10,7 +10,12 @@ use crate::{
     utils::{get_bare_apps, is_strict_mode},
 };
 
-use self::{functions::functions_decorator, values::{values_decorator, values_replacer}};
+use self::{
+    functions::functions_decorator,
+    values::{values_decorator, values_replacer},
+};
+
+pub use self::values::values_validator_path;
 
 // 配置部分内置变量的值
 lazy_static! {
@@ -19,7 +24,6 @@ lazy_static! {
 }
 
 // 执行条件以判断是否成立
-// TODO:传入前使用解释器解释
 fn condition_eval(condition: &String, exit_code: i32, located: &String) -> Result<bool> {
     // 装饰变量与函数
     let expr = Expr::new(condition);
@@ -57,7 +61,7 @@ pub fn workflow_executor(flow: Vec<WorkflowNode>, located: &String) -> Result<i3
         }
 
         // 创建变量解释器
-        let interpreter = |raw: String| values_replacer(raw,exit_code,located);
+        let interpreter = |raw: String| values_replacer(raw, exit_code, located);
 
         // 匹配步骤类型以调用步骤解释器
         let exec_res = flow_node.body.run(located, interpreter);
@@ -94,7 +98,7 @@ pub fn workflow_reverse_executor(flow: Vec<WorkflowNode>, located: &String) -> R
     // 遍历流节点
     for flow_node in flow {
         // 创建变量解释器，ExitCode 始终置 0
-        let interpreter = |raw: String| values_replacer(raw,0,located);
+        let interpreter = |raw: String| values_replacer(raw, 0, located);
         // 匹配步骤类型以调用逆向步骤解释器
         let exec_res = flow_node.body.reverse_run(located, interpreter);
 
@@ -172,7 +176,13 @@ fn test_condition_eval() {
 
 #[test]
 fn test_workflow_executor() {
-    use crate::types::steps::{Step, StepExecute, StepLink, StepLog, StepPath};
+    use crate::types::steps::{
+        Step,
+        // StepExecute,
+        // StepLink,
+        StepLog,
+        // StepPath,
+    };
     use crate::types::workflow::{WorkflowHeader, WorkflowNode};
     let wf1 = vec![
         // WorkflowNode {

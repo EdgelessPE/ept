@@ -1,6 +1,7 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
+use crate::types::mixed_fs::MixedFS;
 use crate::types::permissions::{Generalizable, Permission};
 use crate::{log, types::verifiable::Verifiable, verify_enum};
 
@@ -20,7 +21,7 @@ impl TStep for StepLog {
     fn reverse_run(self, _: &String) -> Result<()> {
         Ok(())
     }
-    fn get_manifest(&self) -> Vec<String> {
+    fn get_manifest(&self, _fs: &mut MixedFS) -> Vec<String> {
         Vec::new()
     }
     fn interpret<F>(self, interpreter: F) -> Self

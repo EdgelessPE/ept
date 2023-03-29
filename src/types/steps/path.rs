@@ -1,4 +1,5 @@
 use super::TStep;
+use crate::types::mixed_fs::MixedFS;
 use crate::types::permissions::{Generalizable, Permission, PermissionLevel};
 use crate::types::verifiable::Verifiable;
 use crate::utils::{get_path_bin, parse_relative_path};
@@ -209,7 +210,7 @@ impl TStep for StepPath {
 
         Ok(())
     }
-    fn get_manifest(&self) -> Vec<String> {
+    fn get_manifest(&self, _fs: &mut MixedFS) -> Vec<String> {
         vec![self.record.to_owned()]
     }
     fn interpret<F>(self, interpreter: F) -> Self

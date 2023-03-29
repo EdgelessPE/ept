@@ -10,7 +10,7 @@ use crate::{
     executor::{workflow_executor, workflow_reverse_executor},
     log, log_ok_last, p2s,
     parsers::{parse_package, parse_workflow},
-    types::workflow::WorkflowNode,
+    types::{mixed_fs::MixedFS, workflow::WorkflowNode},
     utils::{ask_yn, find_scope_with_name_locally, get_bare_apps, get_path_apps, kill_with_name},
 };
 
@@ -18,8 +18,9 @@ use super::utils::validator::installed_validator;
 
 fn get_manifest(flow: Vec<WorkflowNode>) -> Vec<String> {
     let mut manifest = Vec::new();
+    let mut fs = MixedFS::new();
     for node in flow {
-        manifest.append(&mut node.body.get_manifest());
+        manifest.append(&mut node.body.get_manifest(&mut fs));
     }
     manifest
 }
