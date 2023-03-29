@@ -76,8 +76,8 @@ pub fn values_validator_manifest_path(raw: &String) -> Result<()> {
     // "${DefaultLocation}" 不是合法的路径开头内置变量，对于 "${DefaultLocation}" 应该使用相对路径
     if raw.contains("${DefaultLocation}") {
         return Err(anyhow!(
-            "Error:'${DefaultLocation}' is not allowed in '{raw}', use './' instead",
-            DefaultLocation = "DefaultLocation"
+            "Error:'${}' is not allowed in '{raw}', use './' instead",
+            "{DefaultLocation}"
         ));
     }
     // 阻止绝对路径
@@ -101,7 +101,7 @@ pub fn values_validator_manifest_path(raw: &String) -> Result<()> {
         ));
     }
 
-    // TODO:阻止使用一个以上的 env 变量
+    // TODO:阻止使用一个以上的 env 变量，且只能在开头使用
 
     Ok(())
 }
