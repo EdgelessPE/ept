@@ -25,7 +25,7 @@ impl MixedFS {
         self.to_remove.insert(path);
     }
 
-    pub fn exists(&self, path: &String) -> bool {
+    pub fn exists(&self, path: &String, base: &String) -> bool {
         let path = format_path(path);
         if self.to_add.contains(&path) {
             return true;
@@ -33,7 +33,11 @@ impl MixedFS {
         if self.to_remove.contains(&path) {
             return false;
         }
-        Path::new(&path).exists()
+        // 此处不关心内置变量是否合法
+        if path.starts_with("${"){
+            return true;
+        }
+        Path::new(base).join(path).exists()
     }
 }
 
@@ -41,12 +45,12 @@ impl MixedFS {
 fn test_mixed_fs() {
     let mut mfs = MixedFS::new();
 
-    assert_eq!(mfs.exists(&"./1.txt".to_string()), false);
-    assert!(mfs.exists(&"config.toml".to_string()));
+    assert_eq!(mfs.exists(&"./1.txt".to_string(), &"./".to_string()), false);
+    assert!(mfs.exists(&"config.toml".to_string(), &"./".to_string()));
 
     mfs.add(&"./1.txt".to_string());
     mfs.remove(&"config.toml".to_string());
 
-    assert!(mfs.exists(&"1.txt".to_string()));
-    assert_eq!(mfs.exists(&"config.toml".to_string()), false);
+    assert!(mfs.exists(&"1.txt".to_string(), &"./".to_string()));
+    assert_eq!(mfs.exists(&"config.toml".to_string(), &"./".to_string()), false);
 }

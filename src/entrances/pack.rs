@@ -1,6 +1,7 @@
 use crate::compression::{compress, pack_tar};
 use crate::parsers::{parse_author, parse_package, parse_workflow};
 use crate::signature::sign;
+use crate::types::mixed_fs::MixedFS;
 use crate::types::{signature::Signature, signature::SignatureNode, workflow::WorkflowNode};
 use crate::utils::{ask_yn, get_path_temp, is_debug_mode};
 use crate::{log, log_ok_last, p2s};
@@ -10,10 +11,10 @@ use std::path::Path;
 
 use super::utils::validator::{inner_validator, manifest_validator};
 
-fn get_manifest(flow: Vec<WorkflowNode>) -> Vec<String> {
+fn get_manifest(flow: Vec<WorkflowNode>, fs: &mut MixedFS) -> Vec<String> {
     let mut manifest = Vec::new();
     for node in flow {
-        manifest.append(&mut node.body.get_manifest());
+        manifest.append(&mut node.body.get_manifest(fs));
     }
     manifest
 }
@@ -53,9 +54,10 @@ pub fn pack(source_dir: &String, into_file: Option<String>, need_sign: bool) -> 
     log!("Info:Checking manifest...");
     let setup_path = Path::new(source_dir).join("workflows").join("setup.toml");
     let setup_flow = parse_workflow(&p2s!(setup_path))?;
-    let setup_manifest = get_manifest(setup_flow);
+    let mut fs=MixedFS::new();
+    let setup_manifest = get_manifest(setup_flow, &mut fs);
     let pkg_content_path = Path::new(source_dir).join(&global.package.name);
-    manifest_validator(&p2s!(pkg_content_path), setup_manifest)?;
+    manifest_validator(&p2s!(pkg_content_path), setup_manifest, &mut fs)?;
     log_ok_last!("Info:Checking manifest...");
 
     // 校验 into_file 是否存在

@@ -16,7 +16,7 @@ pub trait TStep: Verifiable + Generalizable {
     /// Run reversed step
     fn reverse_run(self, located: &String) -> Result<()>;
     /// Get manifest
-    fn get_manifest(&self) -> Vec<String>;
+    fn get_manifest(&self, fs: &mut MixedFS) -> Vec<String>;
     /// Get interpreted step
     fn interpret<F>(self, interpreter: F) -> Self
     where
@@ -68,9 +68,9 @@ macro_rules! def_enum_step {
                     $( Step::$x(step) => step.interpret(interpreter).reverse_run(&located) ),*
                 }
             }
-            pub fn get_manifest(&self) -> Vec<String> {
+            pub fn get_manifest(&self, fs: &mut MixedFS) -> Vec<String> {
                 match self {
-                    $( Step::$x(step) => step.get_manifest() ),*
+                    $( Step::$x(step) => step.get_manifest(fs) ),*
                 }
             }
         }
@@ -118,3 +118,5 @@ pub use self::execute::StepExecute;
 pub use self::link::StepLink;
 pub use self::log::StepLog;
 pub use self::path::StepPath;
+
+use super::mixed_fs::MixedFS;
