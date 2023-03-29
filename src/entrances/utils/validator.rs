@@ -4,7 +4,7 @@ use std::{
     path::Path,
 };
 
-use crate::{executor::values_validator_path, p2s, types::mixed_fs::MixedFS};
+use crate::{executor::values_validator_manifest_path, p2s, types::mixed_fs::MixedFS};
 
 pub fn inner_validator(dir: &String) -> Result<()> {
     let manifest = vec!["package.toml", "workflows/setup.toml"];
@@ -24,7 +24,7 @@ pub fn inner_validator(dir: &String) -> Result<()> {
 pub fn manifest_validator(base: &String, manifest: Vec<String>, fs: &mut MixedFS) -> Result<()> {
     let mut missing_list = HashSet::new();
     for path in manifest {
-        values_validator_path(&path)?;
+        values_validator_manifest_path(&path)?;
         if !fs.exists(&path, base) {
             missing_list.insert(path);
         }

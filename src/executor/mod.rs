@@ -15,7 +15,7 @@ use self::{
     values::{values_decorator, values_replacer},
 };
 
-pub use self::values::values_validator_path;
+pub use self::values::values_validator_manifest_path;
 
 // 配置部分内置变量的值
 lazy_static! {

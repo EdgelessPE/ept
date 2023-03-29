@@ -63,7 +63,7 @@ define_values! {
 }
 
 /// 仅适用于路径的内置变量校验器
-pub fn values_validator_path(raw: &String) -> Result<()> {
+pub fn values_validator_manifest_path(raw: &String) -> Result<()> {
     // "${DefaultLocation}" 不是合法的路径开头内置变量，对于 "${DefaultLocation}" 应该使用相对路径
     if raw.starts_with("${DefaultLocation}") {
         return Err(anyhow!(
@@ -79,7 +79,7 @@ pub fn values_validator_path(raw: &String) -> Result<()> {
     }
     // 阻止 ..
     if raw.contains("..") {
-        return Err(anyhow!("Error:Double dot '..' is not allowed in '{}'", raw));
+        return Err(anyhow!("Error:Double dot '..' is not allowed in '{raw}'"));
     }
 
     // 收集合法的内置变量
@@ -97,17 +97,17 @@ pub fn values_validator_path(raw: &String) -> Result<()> {
 
 #[test]
 fn test_collect_values() {
-    values_validator_path(&"${AppData}${ExitCode}.${SystemData}/".to_string()).unwrap();
+    values_validator_manifest_path(&"${AppData}${ExitCode}.${SystemData}/".to_string()).unwrap();
 
-    let err_res = values_validator_path(&"${SystemData}${AppData}${ExitCode}./".to_string());
+    let err_res = values_validator_manifest_path(&"${SystemData}${AppData}${ExitCode}./".to_string());
     assert!(err_res.is_err());
 
-    let err_res = values_validator_path(&"C:/system".to_string());
+    let err_res = values_validator_manifest_path(&"C:/system".to_string());
     assert!(err_res.is_err());
 
-    let err_res = values_validator_path(&"${Appdata}/../nep".to_string());
+    let err_res = values_validator_manifest_path(&"${Appdata}/../nep".to_string());
     assert!(err_res.is_err());
 
-    let err_res = values_validator_path(&"${DefaultLocation}/vscode".to_string());
+    let err_res = values_validator_manifest_path(&"${DefaultLocation}/vscode".to_string());
     assert!(err_res.is_err());
 }
