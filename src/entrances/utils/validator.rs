@@ -21,7 +21,7 @@ pub fn inner_validator(dir: &String) -> Result<()> {
 pub fn manifest_validator(base: &String, manifest: Vec<String>, fs: &mut MixedFS) -> Result<()> {
     let mut missing_list=HashSet::new();
     for path in manifest {
-        values_validator(&path)?;
+        values_validator_path(&path)?;
         if !fs.exists(&path, base) {
             missing_list.insert(path);
         }
