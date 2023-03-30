@@ -102,7 +102,7 @@ pub fn values_validator_manifest_path(raw: &String) -> Result<()> {
     }
 
     // 阻止使用一个以上的 env 变量
-    let first_elem=collection.get(0).unwrap_or("").to_string();
+    let first_elem=collection.get(0).map(|s|s.to_owned()).unwrap_or("".to_string());
     let env_hash_set:HashSet<String>=HashSet::from_iter(get_arr(false));
     let env_count=collection
     .into_iter()
@@ -132,25 +132,25 @@ fn test_collect_values() {
     let err_res =
         values_validator_manifest_path(&"${SystemData}${AppData}${ExitCode}./".to_string());
     assert!(err_res.is_err());
-    println!("{}",err_res.unwrap_err());
+    log!("{}",err_res.unwrap_err());
 
     let err_res = values_validator_manifest_path(&"C:/system".to_string());
     assert!(err_res.is_err());
-    println!("{}",err_res.unwrap_err());
+    log!("{}",err_res.unwrap_err());
 
     let err_res = values_validator_manifest_path(&"${AppData}/../nep".to_string());
     assert!(err_res.is_err());
-    println!("{}",err_res.unwrap_err());
+    log!("{}",err_res.unwrap_err());
 
-    let err_res = values_validator_manifest_path(&"${DefaultLocation}/vscode".to_string());
+    let err_res = values_validator_manifest_path(&"114${DefaultLocation}/vscode".to_string());
     assert!(err_res.is_err());
-    println!("{}",err_res.unwrap_err());
+    log!("{}",err_res.unwrap_err());
 
-    let err_res = values_validator_manifest_path(&"${AppData}/../${ExitCode}${Home}/nep".to_string());
+    let err_res = values_validator_manifest_path(&"${AppData}/./${ExitCode}${Home}/nep".to_string());
     assert!(err_res.is_err());
-    println!("{}",err_res.unwrap_err());
+    log!("{}",err_res.unwrap_err());
 
-    let err_res = values_validator_manifest_path(&"${${Desktop}/vscode".to_string());
+    let err_res = values_validator_manifest_path(&"$/{${Desktop}/vscode".to_string());
     assert!(err_res.is_err());
-    println!("{}",err_res.unwrap_err());
+    log!("{}",err_res.unwrap_err());
 }

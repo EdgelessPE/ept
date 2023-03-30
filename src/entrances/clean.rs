@@ -21,7 +21,7 @@ fn get_valid_entrances(setup: Vec<WorkflowNode>) -> Vec<String> {
         .filter_map(|node| {
             if let Step::StepPath(step) = node.body {
                 let alias=step.alias.unwrap_or_else(||p2s!(Path::new(&step.record).file_stem().unwrap()));
-                Some(stem + ".cmd")
+                Some(alias + ".cmd")
             } else {
                 None
             }
@@ -69,9 +69,10 @@ pub fn clean() -> Result<()> {
                         let setup = parse_workflow(&setup_path)?;
 
                         // 解析有效的入口名称
+                        let scope=global.software.unwrap().scope;
                         get_valid_entrances(setup).into_iter().for_each(|entrance_full_name| {
                             valid_entrances.insert("nep-".to_string()+&entrance_full_name);
-                            valid_entrances.insert(global.software.unwrap().scope+"-"+&entrance_full_name);
+                            valid_entrances.insert(scope.clone()+"-"+&entrance_full_name);
                             valid_entrances.insert(entrance_full_name);
                         });
                     } else {

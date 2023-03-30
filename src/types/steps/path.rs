@@ -147,7 +147,7 @@ impl TStep for StepPath {
         }
 
         // 解析批处理路径
-        let stem = p2s!(Path::new(&self.record).file_stem().unwrap());
+        let stem = self.alias.unwrap_or_else(||p2s!(Path::new(&self.record).file_stem().unwrap()));
         let cmd_target_str = format!("{}/{}.cmd", &bin_abs, &stem);
         if !abs_target_path.exists() {
             return Err(anyhow!(
@@ -252,10 +252,7 @@ impl Generalizable for StepPath {
 #[test]
 fn test_set_system_path() {
     set_system_path(
-        StepPath {
-            record: "D:/CnoRPS/aria2".to_string(),
-            alias:Some("aria".to_string()),
-        },
+        &"D:/CnoRPS/aria2".to_string(),
         false,
     )
     .unwrap();
@@ -264,8 +261,8 @@ fn test_set_system_path() {
 #[test]
 fn test_path() {
     StepPath {
-        record: String::from("./bin"),
-        alias:None,
+        record: String::from(r"D:\CnoRPS\aria2\aria2c.exe"),
+        alias:Some("aria".to_string()),
     }
     .run(&String::from("./apps/VSCode"))
     .unwrap();
