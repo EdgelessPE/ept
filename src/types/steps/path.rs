@@ -19,13 +19,14 @@ use winreg::{enums::*, RegKey};
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct StepPath {
     pub record: String,
+    pub alias: Option<String>,
 }
 
 // 配置系统 PATH 变量，但是需要注销并重新登录以生效
 // 返回的 bool 表示是否执行了操作
-fn set_system_path(step: StepPath, is_add: bool) -> Result<bool> {
+fn set_system_path(record: &String, is_add: bool) -> Result<bool> {
     // 转换 record 为反斜杠
-    let record = step.record.replace("/", r"\");
+    let record = record.replace("/", r"\");
     let record_str = record.as_str();
 
     // 打开 HKEY_CURRENT_USER\Environment
@@ -109,9 +110,7 @@ impl TStep for StepPath {
 
         // 添加系统 PATH 变量
         let add_res = set_system_path(
-            StepPath {
-                record: bin_abs.clone(),
-            },
+            &bin_abs,
             true,
         );
         if add_res.is_err() {
@@ -126,10 +125,11 @@ impl TStep for StepPath {
 
         // 处理为目录的情况
         if abs_target_path.is_dir() {
+            if self.alias.is_some(){
+                log!("Warning(Path):Ignoring alias '{}', since record refers to a dictionary",self.alias.unwrap());
+            }
             let add_res = set_system_path(
-                StepPath {
-                    record: abs_target_str,
-                },
+                &abs_target_str,
                 true,
             );
             if add_res.is_err() {
@@ -181,9 +181,7 @@ impl TStep for StepPath {
         // 处理为目录的情况
         if abs_target_path.is_dir() {
             let add_res = set_system_path(
-                StepPath {
-                    record: abs_target_str,
-                },
+                &abs_target_str,
                 false,
             );
             if add_res.is_err() {
@@ -219,6 +217,7 @@ impl TStep for StepPath {
     {
         Self {
             record: interpreter(self.record),
+            alias: self.alias,
         }
     }
 }
@@ -255,6 +254,7 @@ fn test_set_system_path() {
     set_system_path(
         StepPath {
             record: "D:/CnoRPS/aria2".to_string(),
+            alias:Some("aria".to_string()),
         },
         false,
     )
@@ -265,6 +265,7 @@ fn test_set_system_path() {
 fn test_path() {
     StepPath {
         record: String::from("./bin"),
+        alias:None,
     }
     .run(&String::from("./apps/VSCode"))
     .unwrap();

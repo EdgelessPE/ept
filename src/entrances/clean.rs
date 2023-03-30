@@ -20,8 +20,7 @@ fn get_valid_entrances(setup: Vec<WorkflowNode>) -> Vec<String> {
         .into_iter()
         .filter_map(|node| {
             if let Step::StepPath(step) = node.body {
-                // TODO:支持 alias
-                let stem = p2s!(Path::new(&step.record).file_stem().unwrap());
+                let alias=step.alias.unwrap_or_else(||p2s!(Path::new(&step.record).file_stem().unwrap()));
                 Some(stem + ".cmd")
             } else {
                 None
@@ -61,14 +60,19 @@ pub fn clean() -> Result<()> {
                         // 有效应用计数
                         valid_apps_count += 1;
 
+                        // 读取 package
+                        let (global,_)=info_res.unwrap();
+
                         // 读取工作流
                         let setup_path = p2s!(get_path_apps(&scope_name, &app_name, false)?
                             .join(".nep_context/workflows/setup.toml"));
                         let setup = parse_workflow(&setup_path)?;
 
                         // 解析有效的入口名称
-                        get_valid_entrances(setup).into_iter().for_each(|name| {
-                            valid_entrances.insert(name);
+                        get_valid_entrances(setup).into_iter().for_each(|entrance_full_name| {
+                            valid_entrances.insert("nep-".to_string()+&entrance_full_name);
+                            valid_entrances.insert(global.software.unwrap().scope+"-"+&entrance_full_name);
+                            valid_entrances.insert(entrance_full_name);
                         });
                     } else {
                         // 清理读取失败的
