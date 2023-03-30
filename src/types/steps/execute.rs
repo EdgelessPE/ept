@@ -127,7 +127,7 @@ impl Generalizable for StepExecute {
 
 #[test]
 fn test_execute() {
-    let pkg = GlobalPackage::new();
+    let pkg = GlobalPackage::_demo();
     StepExecute {
         command: "echo hello nep ! && echo 你好，尼普！".to_string(),
         pwd: None,

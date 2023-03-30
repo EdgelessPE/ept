@@ -20,7 +20,7 @@ pub struct GlobalPackage {
 }
 
 impl GlobalPackage {
-    pub fn new() -> Self {
+    pub fn _demo() -> Self {
         GlobalPackage {
             nep: "0.2".to_string(),
             package: Package {

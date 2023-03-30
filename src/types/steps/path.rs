@@ -295,7 +295,7 @@ fn test_set_system_path() {
 #[test]
 fn test_path() {
     envmnt::set("DEBUG", "true");
-    let pkg = GlobalPackage::new();
+    let pkg = GlobalPackage::_demo();
     StepPath {
         record: String::from(r"C:\Users\dsyou\scoop\shims\rclone.exe"),
         // alias: Some("aria".to_string()),

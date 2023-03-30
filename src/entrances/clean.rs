@@ -99,6 +99,7 @@ pub fn clean() -> Result<()> {
     }
 
     // bin 目录，删除名称非法的文件
+    // TODO:考虑检查指向的绝对路径是否存在
     for entry in read_dir(get_path_bin()?)? {
         let entry = entry?;
         let name = p2s!(entry.file_name());

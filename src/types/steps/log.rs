@@ -55,7 +55,7 @@ impl Generalizable for StepLog {
 
 #[test]
 fn test_log() {
-    let pkg = GlobalPackage::new();
+    let pkg = GlobalPackage::_demo();
     let step = StepLog {
         level: String::from("Info"),
         msg: String::from("Hello nep!"),

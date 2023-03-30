@@ -192,7 +192,7 @@ fn test_workflow_executor() {
         // StepPath,
     };
     use crate::types::workflow::{WorkflowHeader, WorkflowNode};
-    let pkg = GlobalPackage::new();
+    let pkg = GlobalPackage::_demo();
     let wf1 = vec![
         // WorkflowNode {
         //     header: WorkflowHeader {
@@ -290,7 +290,7 @@ fn test_workflow_executor_interpreter() {
             }),
         },
     ];
-    let pkg = GlobalPackage::new();
+    let pkg = GlobalPackage::_demo();
     workflow_executor(
         flow,
         &String::from("D:/Desktop/Projects/EdgelessPE/ept"),
