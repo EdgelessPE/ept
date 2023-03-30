@@ -1,15 +1,18 @@
 use super::TStep;
 use crate::types::mixed_fs::MixedFS;
+use crate::types::package::GlobalPackage;
 use crate::types::permissions::{Generalizable, Permission, PermissionLevel};
 use crate::types::verifiable::Verifiable;
-use crate::utils::{get_path_bin, parse_relative_path};
+use crate::utils::{ask_yn, get_path_bin, parse_relative_path};
 use crate::{log, p2s};
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
 use std::fs::{create_dir, remove_file, File};
 use std::io::Write;
 use std::path::Path;
+use std::process::Command;
 use std::ptr::null_mut;
+use std::str::from_utf8;
 use winapi::shared::minwindef::{LPARAM, WPARAM};
 use winapi::um::winuser::{
     SendMessageTimeoutA, HWND_BROADCAST, SMTO_ABORTIFHUNG, WM_SETTINGCHANGE,
@@ -20,6 +23,52 @@ use winreg::{enums::*, RegKey};
 pub struct StepPath {
     pub record: String,
     pub alias: Option<String>,
+}
+
+fn read_console(v: Vec<u8>) -> String {
+    let msg_res = from_utf8(&v);
+    if msg_res.is_err() {
+        log!("Warning(Execute):Console output can't be parsed with utf8");
+        String::new()
+    } else {
+        msg_res.unwrap().to_string()
+    }
+}
+
+fn conflict_resolver(bin_abs: &String, stem: &String, scope: &String) -> String {
+    let origin = format!("{bin_abs}/{stem}.cmd");
+    let scoped = format!("{bin_abs}/{scope}-{stem}.cmd");
+
+    // 检查入口文件冲突
+    if Path::new(&origin).exists() {
+        log!("Warning(Path):Entrance '{stem}.cmd' already exists in '{bin_abs}', overwrite? (y/n)");
+        if ask_yn() {
+            return origin;
+        } else {
+            log!("Warning(Path):Renamed entrance to '{scope}-{stem}.cmd, use '{scope}-{stem}' instead to call this program later");
+            return scoped;
+        }
+    }
+
+    // 运行 where 命令检查系统全局 PATH 冲突
+    let mut c = Command::new("cmd");
+    let cmd = c.args(["/c", &format!("where \"{stem}\"")]);
+    if let Ok(output) = cmd.output() {
+        let output = read_console(output.stdout);
+        if output.len() > 0 {
+            log!("Warning(Path):Command '{stem}' already exists at '{output}', rename to '{scope}-{stem}'? (y/n)");
+            if ask_yn() {
+                log!("Warning(Path):Renamed entrance to '{scope}-{stem}.cmd, use '{scope}-{stem}' instead to call this program later");
+                return scoped;
+            } else {
+                return origin;
+            }
+        }
+    } else {
+        log!("Warning:Failed to check global PATH conflict for '{stem}'")
+    }
+
+    origin
 }
 
 // 配置系统 PATH 变量，但是需要注销并重新登录以生效
@@ -98,7 +147,7 @@ fn set_system_path(record: &String, is_add: bool) -> Result<bool> {
 }
 
 impl TStep for StepPath {
-    fn run(self, located: &String) -> Result<i32> {
+    fn run(self, located: &String, pkg: &GlobalPackage) -> Result<i32> {
         // 解析 bin 绝对路径
         let bin_path = get_path_bin()?;
         let bin_abs = p2s!(bin_path);
@@ -109,10 +158,7 @@ impl TStep for StepPath {
         }
 
         // 添加系统 PATH 变量
-        let add_res = set_system_path(
-            &bin_abs,
-            true,
-        );
+        let add_res = set_system_path(&bin_abs, true);
         if add_res.is_err() {
             log!("Warning(Path):Failed to add system PATH for '{}', manually add later to enable bin function of nep",&bin_abs);
         } else if add_res.unwrap() {
@@ -125,13 +171,13 @@ impl TStep for StepPath {
 
         // 处理为目录的情况
         if abs_target_path.is_dir() {
-            if self.alias.is_some(){
-                log!("Warning(Path):Ignoring alias '{}', since record refers to a dictionary",self.alias.unwrap());
+            if self.alias.is_some() {
+                log!(
+                    "Warning(Path):Ignoring alias '{}', since record refers to a dictionary",
+                    self.alias.unwrap()
+                );
             }
-            let add_res = set_system_path(
-                &abs_target_str,
-                true,
-            );
+            let add_res = set_system_path(&abs_target_str, true);
             if add_res.is_err() {
                 log!(
                     "Warning(Path):Failed to add system PATH '{}', manually add later",
@@ -147,12 +193,14 @@ impl TStep for StepPath {
         }
 
         // 解析批处理路径
-        let stem = self.alias.unwrap_or_else(||p2s!(Path::new(&self.record).file_stem().unwrap()));
-        let cmd_target_str = format!("{}/{}.cmd", &bin_abs, &stem);
+        let stem = self
+            .alias
+            .unwrap_or_else(|| p2s!(Path::new(&self.record).file_stem().unwrap()));
+        let cmd_target_str =
+            conflict_resolver(&bin_abs, &stem, &pkg.software.clone().unwrap().scope);
         if !abs_target_path.exists() {
             return Err(anyhow!(
-                "Error(Path):Failed to add path : final target '{}' not exist",
-                &abs_target_str
+                "Error(Path):Failed to add path : final target '{abs_target_str}' not exist"
             ));
         }
 
@@ -164,7 +212,7 @@ impl TStep for StepPath {
 
         Ok(0)
     }
-    fn reverse_run(self, located: &String) -> Result<()> {
+    fn reverse_run(self, located: &String, pkg: &GlobalPackage) -> Result<()> {
         // 解析 bin 绝对路径
         let bin_path = get_path_bin()?;
         let bin_abs = p2s!(bin_path);
@@ -180,10 +228,7 @@ impl TStep for StepPath {
 
         // 处理为目录的情况
         if abs_target_path.is_dir() {
-            let add_res = set_system_path(
-                &abs_target_str,
-                false,
-            );
+            let add_res = set_system_path(&abs_target_str, false);
             if add_res.is_err() {
                 log!(
                     "Warning(Path):Failed to remove system PATH for '{}', manually remove later",
@@ -195,15 +240,23 @@ impl TStep for StepPath {
             return Ok(());
         }
 
-        // 解析批处理路径
-        let stem = p2s!(Path::new(&self.record).file_stem().unwrap());
-        let cmd_target_str = format!("{}/{}.cmd", &bin_abs, &stem);
-        let cmd_target_path = Path::new(&cmd_target_str);
-
-        // 删除批处理
-        if cmd_target_path.exists() {
-            remove_file(cmd_target_path)?;
-            log!("Info(Path):Removed path entrance '{}'", cmd_target_str);
+        // 解析入口路径，根据优先级选择删除一个
+        let stem = self
+            .alias
+            .unwrap_or_else(|| p2s!(Path::new(&self.record).file_stem().unwrap()));
+        let scope = pkg.software.clone().unwrap().scope;
+        let delete_list = vec![
+            format!("{bin_abs}/{scope}-{stem}.cmd"),
+            format!("{bin_abs}/{stem}.cmd"),
+        ];
+        for cmd_target_str in delete_list {
+            let cmd_target_path = Path::new(&cmd_target_str);
+            // 删除入口
+            if cmd_target_path.exists() {
+                remove_file(cmd_target_path)?;
+                log!("Info(Path):Removed path entrance '{}'", cmd_target_str);
+                break;
+            }
         }
 
         Ok(())
@@ -251,19 +304,16 @@ impl Generalizable for StepPath {
 
 #[test]
 fn test_set_system_path() {
-    set_system_path(
-        &"D:/CnoRPS/aria2".to_string(),
-        false,
-    )
-    .unwrap();
+    set_system_path(&"D:/CnoRPS/aria2".to_string(), false).unwrap();
 }
 
 #[test]
 fn test_path() {
+    let pkg = GlobalPackage::new();
     StepPath {
         record: String::from(r"D:\CnoRPS\aria2\aria2c.exe"),
-        alias:Some("aria".to_string()),
+        alias: Some("aria".to_string()),
     }
-    .run(&String::from("./apps/VSCode"))
+    .reverse_run(&String::from("./apps/VSCode"), &pkg)
     .unwrap();
 }

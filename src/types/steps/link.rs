@@ -1,5 +1,6 @@
 use super::TStep;
 use crate::types::mixed_fs::MixedFS;
+use crate::types::package::GlobalPackage;
 use crate::types::permissions::{Generalizable, Permission, PermissionLevel};
 use crate::utils::env::env_desktop;
 use crate::{log, p2s, types::verifiable::Verifiable, utils::parse_relative_path};
@@ -50,7 +51,7 @@ pub struct StepLink {
 }
 
 impl TStep for StepLink {
-    fn run(self, located: &String) -> anyhow::Result<i32> {
+    fn run(self, located: &String, _: &GlobalPackage) -> anyhow::Result<i32> {
         // 获取用户桌面位置
         let desktop = env_desktop();
 
@@ -77,7 +78,7 @@ impl TStep for StepLink {
         log!("Info(Link):Added shortcut '{}'", target);
         Ok(0)
     }
-    fn reverse_run(self, _: &String) -> Result<()> {
+    fn reverse_run(self, _: &String, _: &GlobalPackage) -> Result<()> {
         // 获取用户桌面位置
         let desktop = env_desktop();
 
@@ -140,6 +141,6 @@ fn test_link() {
         target_name: String::from("MS/VSC"),
     };
     step.verify_self().unwrap();
-    // step.run(&String::from("./apps/VSCode"))
+    // step.run(&String::from("./apps/VSCode"),&pkg)
     // .unwrap();
 }

@@ -1,5 +1,6 @@
 use crate::log;
 use crate::types::mixed_fs::MixedFS;
+use crate::types::package::GlobalPackage;
 use crate::types::permissions::{Generalizable, Permission, PermissionLevel};
 use crate::types::verifiable::Verifiable;
 
@@ -27,7 +28,7 @@ fn read_console(v: Vec<u8>) -> String {
 }
 
 impl TStep for StepExecute {
-    fn run(self, located: &String) -> Result<i32> {
+    fn run(self, located: &String, _: &GlobalPackage) -> Result<i32> {
         // 配置终端
         let launch_terminal = if cfg!(target_os = "windows") {
             ("cmd", "/c")
@@ -81,7 +82,7 @@ impl TStep for StepExecute {
             )),
         }
     }
-    fn reverse_run(self, _: &String) -> Result<()> {
+    fn reverse_run(self, _: &String, _: &GlobalPackage) -> Result<()> {
         Ok(())
     }
     fn get_manifest(&self, _fs: &mut MixedFS) -> Vec<String> {
@@ -126,23 +127,26 @@ impl Generalizable for StepExecute {
 
 #[test]
 fn test_execute() {
+    let pkg = GlobalPackage::new();
     StepExecute {
         command: "echo hello nep ! && echo 你好，尼普！".to_string(),
         pwd: None,
         call_installer: None,
     }
-    .run(&String::from(
-        "D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode",
-    ))
+    .run(
+        &String::from("D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode"),
+        &pkg,
+    )
     .unwrap();
     StepExecute {
         command: "ls".to_string(),
         pwd: Some("./src".to_string()),
         call_installer: None,
     }
-    .run(&String::from(
-        "D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode",
-    ))
+    .run(
+        &String::from("D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode"),
+        &pkg,
+    )
     .unwrap();
 
     let res = StepExecute {
@@ -150,9 +154,10 @@ fn test_execute() {
         pwd: None,
         call_installer: None,
     }
-    .run(&String::from(
-        "D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode",
-    ))
+    .run(
+        &String::from("D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode"),
+        &pkg,
+    )
     .unwrap();
     assert_eq!(res, 2);
 }

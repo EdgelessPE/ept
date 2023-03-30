@@ -20,8 +20,8 @@ pub fn install_using_package(source_file: &String, verify_signature: bool) -> Re
     log!("Info:Resolving package...");
     let setup_file_path = temp_dir_inner_path.join("workflows/setup.toml");
     let setup_workflow = parse_workflow(&p2s!(setup_file_path))?;
-    let package = package_struct.package;
-    let software = package_struct.software.unwrap();
+    let package = package_struct.package.clone();
+    let software = package_struct.software.clone().unwrap();
     log_ok_last!("Info:Resolving package...");
 
     // 创建 apps 文件夹
@@ -61,7 +61,7 @@ pub fn install_using_package(source_file: &String, verify_signature: bool) -> Re
 
     // 执行安装工作流
     log!("Info:Running setup workflow...");
-    workflow_executor(setup_workflow, &into_dir)?;
+    workflow_executor(setup_workflow, &into_dir, &package_struct)?;
     log_ok_last!("Info:Running setup workflow...");
 
     // 保存上下文

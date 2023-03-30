@@ -6,7 +6,7 @@ use eval::Expr;
 
 use crate::{
     log, p2s,
-    types::workflow::WorkflowNode,
+    types::{package::GlobalPackage, workflow::WorkflowNode},
     utils::{get_bare_apps, is_strict_mode},
 };
 
@@ -48,7 +48,11 @@ fn condition_eval(condition: &String, exit_code: i32, located: &String) -> Resul
 }
 
 // 执行工作流
-pub fn workflow_executor(flow: Vec<WorkflowNode>, located: &String) -> Result<i32> {
+pub fn workflow_executor(
+    flow: Vec<WorkflowNode>,
+    located: &String,
+    pkg: &GlobalPackage,
+) -> Result<i32> {
     let mut exit_code = 0;
     let strict_mode = is_strict_mode();
 
@@ -64,7 +68,7 @@ pub fn workflow_executor(flow: Vec<WorkflowNode>, located: &String) -> Result<i3
         let interpreter = |raw: String| values_replacer(raw, exit_code, located);
 
         // 匹配步骤类型以调用步骤解释器
-        let exec_res = flow_node.body.run(located, interpreter);
+        let exec_res = flow_node.body.run(located, pkg, interpreter);
         // 处理执行结果
         if exec_res.is_err() {
             log!(
@@ -94,13 +98,17 @@ pub fn workflow_executor(flow: Vec<WorkflowNode>, located: &String) -> Result<i3
 }
 
 // 宽容地逆向执行 setup 工作流
-pub fn workflow_reverse_executor(flow: Vec<WorkflowNode>, located: &String) -> Result<()> {
+pub fn workflow_reverse_executor(
+    flow: Vec<WorkflowNode>,
+    located: &String,
+    pkg: &GlobalPackage,
+) -> Result<()> {
     // 遍历流节点
     for flow_node in flow {
         // 创建变量解释器，ExitCode 始终置 0
         let interpreter = |raw: String| values_replacer(raw, 0, located);
         // 匹配步骤类型以调用逆向步骤解释器
-        let exec_res = flow_node.body.reverse_run(located, interpreter);
+        let exec_res = flow_node.body.reverse_run(located, pkg, interpreter);
 
         // 对错误进行警告
         if exec_res.is_err() {
@@ -184,6 +192,7 @@ fn test_workflow_executor() {
         // StepPath,
     };
     use crate::types::workflow::{WorkflowHeader, WorkflowNode};
+    let pkg = GlobalPackage::new();
     let wf1 = vec![
         // WorkflowNode {
         //     header: WorkflowHeader {
@@ -244,6 +253,7 @@ fn test_workflow_executor() {
     let r1 = workflow_executor(
         wf1,
         &String::from("D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode"),
+        &pkg,
     );
     println!("{:?}", r1);
 }
@@ -280,5 +290,11 @@ fn test_workflow_executor_interpreter() {
             }),
         },
     ];
-    workflow_executor(flow, &String::from("D:/Desktop/Projects/EdgelessPE/ept")).unwrap();
+    let pkg = GlobalPackage::new();
+    workflow_executor(
+        flow,
+        &String::from("D:/Desktop/Projects/EdgelessPE/ept"),
+        &pkg,
+    )
+    .unwrap();
 }

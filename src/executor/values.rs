@@ -102,24 +102,29 @@ pub fn values_validator_manifest_path(raw: &String) -> Result<()> {
     }
 
     // 阻止使用一个以上的 env 变量
-    let first_elem=collection.get(0).map(|s|s.to_owned()).unwrap_or("".to_string());
-    let env_hash_set:HashSet<String>=HashSet::from_iter(get_arr(false));
-    let env_count=collection
-    .into_iter()
-    .fold(0, |acc,x|{
-        if env_hash_set.contains(&x){
-            acc+1
-        }else{
+    let first_elem = collection
+        .get(0)
+        .map(|s| s.to_owned())
+        .unwrap_or("".to_string());
+    let env_hash_set: HashSet<String> = HashSet::from_iter(get_arr(false));
+    let env_count = collection.into_iter().fold(0, |acc, x| {
+        if env_hash_set.contains(&x) {
+            acc + 1
+        } else {
             acc
         }
     });
-    if env_count>1{
-        return Err(anyhow!("Error:Illegal usage of env inner values in '{raw}' : 1 at most, got {env_count}"));
+    if env_count > 1 {
+        return Err(anyhow!(
+            "Error:Illegal usage of env inner values in '{raw}' : 1 at most, got {env_count}"
+        ));
     }
 
     // 只能在开头使用
-    if env_count==1&&!raw.starts_with(&first_elem){
-        return Err(anyhow!("Error:Illegal usage of '{first_elem}' in '{raw}' : can only appear at the beginning"));
+    if env_count == 1 && !raw.starts_with(&first_elem) {
+        return Err(anyhow!(
+            "Error:Illegal usage of '{first_elem}' in '{raw}' : can only appear at the beginning"
+        ));
     }
 
     Ok(())
@@ -132,25 +137,26 @@ fn test_collect_values() {
     let err_res =
         values_validator_manifest_path(&"${SystemData}${AppData}${ExitCode}./".to_string());
     assert!(err_res.is_err());
-    log!("{}",err_res.unwrap_err());
+    log!("{}", err_res.unwrap_err());
 
     let err_res = values_validator_manifest_path(&"C:/system".to_string());
     assert!(err_res.is_err());
-    log!("{}",err_res.unwrap_err());
+    log!("{}", err_res.unwrap_err());
 
     let err_res = values_validator_manifest_path(&"${AppData}/../nep".to_string());
     assert!(err_res.is_err());
-    log!("{}",err_res.unwrap_err());
+    log!("{}", err_res.unwrap_err());
 
     let err_res = values_validator_manifest_path(&"114${DefaultLocation}/vscode".to_string());
     assert!(err_res.is_err());
-    log!("{}",err_res.unwrap_err());
+    log!("{}", err_res.unwrap_err());
 
-    let err_res = values_validator_manifest_path(&"${AppData}/./${ExitCode}${Home}/nep".to_string());
+    let err_res =
+        values_validator_manifest_path(&"${AppData}/./${ExitCode}${Home}/nep".to_string());
     assert!(err_res.is_err());
-    log!("{}",err_res.unwrap_err());
+    log!("{}", err_res.unwrap_err());
 
     let err_res = values_validator_manifest_path(&"$/{${Desktop}/vscode".to_string());
     assert!(err_res.is_err());
-    log!("{}",err_res.unwrap_err());
+    log!("{}", err_res.unwrap_err());
 }

@@ -2,6 +2,7 @@ use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
 use crate::types::mixed_fs::MixedFS;
+use crate::types::package::GlobalPackage;
 use crate::types::permissions::{Generalizable, Permission};
 use crate::{log, types::verifiable::Verifiable, verify_enum};
 
@@ -14,11 +15,11 @@ pub struct StepLog {
 }
 
 impl TStep for StepLog {
-    fn run(self, _: &String) -> Result<i32> {
+    fn run(self, _: &String, _: &GlobalPackage) -> Result<i32> {
         log!("{}(Log):{}", &self.level, &self.msg);
         Ok(0)
     }
-    fn reverse_run(self, _: &String) -> Result<()> {
+    fn reverse_run(self, _: &String, _: &GlobalPackage) -> Result<()> {
         Ok(())
     }
     fn get_manifest(&self, _fs: &mut MixedFS) -> Vec<String> {
@@ -54,13 +55,15 @@ impl Generalizable for StepLog {
 
 #[test]
 fn test_log() {
+    let pkg = GlobalPackage::new();
     let step = StepLog {
         level: String::from("Info"),
         msg: String::from("Hello nep!"),
     };
     step.verify_self().unwrap();
-    step.run(&String::from(
-        "D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode",
-    ))
+    step.run(
+        &String::from("D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode"),
+        &pkg,
+    )
     .unwrap();
 }

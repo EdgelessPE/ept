@@ -20,7 +20,9 @@ fn get_valid_entrances(setup: Vec<WorkflowNode>) -> Vec<String> {
         .into_iter()
         .filter_map(|node| {
             if let Step::StepPath(step) = node.body {
-                let alias=step.alias.unwrap_or_else(||p2s!(Path::new(&step.record).file_stem().unwrap()));
+                let alias = step
+                    .alias
+                    .unwrap_or_else(|| p2s!(Path::new(&step.record).file_stem().unwrap()));
                 Some(alias + ".cmd")
             } else {
                 None
@@ -61,7 +63,7 @@ pub fn clean() -> Result<()> {
                         valid_apps_count += 1;
 
                         // 读取 package
-                        let (global,_)=info_res.unwrap();
+                        let (global, _) = info_res.unwrap();
 
                         // 读取工作流
                         let setup_path = p2s!(get_path_apps(&scope_name, &app_name, false)?
@@ -69,12 +71,14 @@ pub fn clean() -> Result<()> {
                         let setup = parse_workflow(&setup_path)?;
 
                         // 解析有效的入口名称
-                        let scope=global.software.unwrap().scope;
-                        get_valid_entrances(setup).into_iter().for_each(|entrance_full_name| {
-                            valid_entrances.insert("nep-".to_string()+&entrance_full_name);
-                            valid_entrances.insert(scope.clone()+"-"+&entrance_full_name);
-                            valid_entrances.insert(entrance_full_name);
-                        });
+                        let scope = global.software.unwrap().scope;
+                        get_valid_entrances(setup)
+                            .into_iter()
+                            .for_each(|entrance_full_name| {
+                                // valid_entrances.insert("nep-".to_string()+&entrance_full_name);
+                                valid_entrances.insert(scope.clone() + "-" + &entrance_full_name);
+                                valid_entrances.insert(entrance_full_name);
+                            });
                     } else {
                         // 清理读取失败的
                         clean_list.push(app_path)

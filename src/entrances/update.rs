@@ -32,20 +32,19 @@ pub fn update_using_package(source_file: &String, verify_signature: bool) -> Res
 
     // 解包
     let (temp_dir_inner_path, fresh_package) = unpack_nep(source_file, verify_signature)?;
+    let fresh_software = fresh_package.software.clone().unwrap();
 
     // 确认包是否已安装
     log!("Info:Resolving package...");
-    let (local_package, local_diff) = info_local(
-        &fresh_package.software.unwrap().scope,
-        &fresh_package.package.name,
-    )
-    .map_err(|_| {
-        anyhow!(
-            "Error:Package '{}' hasn't been installed, use 'ept install \"{}\"' instead",
-            &fresh_package.package.name,
-            source_file
-        )
-    })?;
+    let (local_package, local_diff) =
+        info_local(&fresh_software.scope, &fresh_package.package.name).map_err(|_| {
+            anyhow!(
+                "Error:Package '{}' hasn't been installed, use 'ept install \"{}\"' instead",
+                &fresh_package.package.name,
+                source_file
+            )
+        })?;
+    let local_software = local_package.software.clone().unwrap();
 
     // 确认是否允许升级
     let local_version = ExSemVer::from_str(&local_diff.version)?;
@@ -70,11 +69,7 @@ pub fn update_using_package(source_file: &String, verify_signature: bool) -> Res
         return install_using_package(source_file, verify_signature);
     }
 
-    let located = get_path_apps(
-        &local_package.software.unwrap().scope,
-        &local_package.package.name,
-        true,
-    )?;
+    let located = get_path_apps(&local_software.scope, &local_package.package.name, true)?;
     log_ok_last!("Info:Resolving package...");
 
     // 执行旧的 remove 工作流
@@ -85,7 +80,7 @@ pub fn update_using_package(source_file: &String, verify_signature: bool) -> Res
     let run_remove = if remove_path.exists() {
         log!("Info:Running remove workflow...");
         let remove_workflow = parse_workflow(&p2s!(remove_path))?;
-        workflow_executor(remove_workflow, &p2s!(located))?;
+        workflow_executor(remove_workflow, &p2s!(located), &local_package)?;
         log_ok_last!("Info:Running remove workflow...");
         true
     } else {
@@ -112,14 +107,14 @@ pub fn update_using_package(source_file: &String, verify_signature: bool) -> Res
         // 执行 update 工作流
         log!("Info:Running update workflow...");
         let update_workflow = parse_workflow(&p2s!(update_path))?;
-        workflow_executor(update_workflow, &p2s!(located))?;
+        workflow_executor(update_workflow, &p2s!(located), &fresh_package)?;
         log_ok_last!("Info:Running update workflow...");
     } else {
         if run_remove {
             // 没有升级但是跑了一遍卸载，需要重新跑一遍 setup
             log!("Info:Running setup workflow...");
             let setup_workflow = parse_workflow(&p2s!(update_path.with_file_name("setup.toml")))?;
-            workflow_executor(setup_workflow, &p2s!(located))?;
+            workflow_executor(setup_workflow, &p2s!(located), &fresh_package)?;
             log_ok_last!("Info:Running setup workflow...");
         }
     }
