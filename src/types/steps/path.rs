@@ -10,9 +10,8 @@ use serde::{Deserialize, Serialize};
 use std::fs::{create_dir, remove_file, File};
 use std::io::Write;
 use std::path::Path;
-use std::process::Command;
 use std::ptr::null_mut;
-use std::str::from_utf8;
+use which::which;
 use winapi::shared::minwindef::{LPARAM, WPARAM};
 use winapi::um::winuser::{
     SendMessageTimeoutA, HWND_BROADCAST, SMTO_ABORTIFHUNG, WM_SETTINGCHANGE,
@@ -23,16 +22,6 @@ use winreg::{enums::*, RegKey};
 pub struct StepPath {
     pub record: String,
     pub alias: Option<String>,
-}
-
-fn read_console(v: Vec<u8>) -> String {
-    let msg_res = from_utf8(&v);
-    if msg_res.is_err() {
-        log!("Warning(Execute):Console output can't be parsed with utf8");
-        String::new()
-    } else {
-        msg_res.unwrap().to_string()
-    }
 }
 
 fn conflict_resolver(bin_abs: &String, stem: &String, scope: &String) -> String {
@@ -50,22 +39,18 @@ fn conflict_resolver(bin_abs: &String, stem: &String, scope: &String) -> String 
         }
     }
 
-    // 运行 where 命令检查系统全局 PATH 冲突
-    let mut c = Command::new("cmd");
-    let cmd = c.args(["/c", &format!("where \"{stem}\"")]);
-    if let Ok(output) = cmd.output() {
-        let output = read_console(output.stdout);
-        if output.len() > 0 {
-            log!("Warning(Path):Command '{stem}' already exists at '{output}', rename to '{scope}-{stem}'? (y/n)");
-            if ask_yn() {
-                log!("Warning(Path):Renamed entrance to '{scope}-{stem}.cmd, use '{scope}-{stem}' instead to call this program later");
-                return scoped;
-            } else {
-                return origin;
-            }
+    // 检查系统全局 PATH 冲突
+    let which_res = which(stem);
+    if let Ok(res) = which_res {
+        let output = p2s!(res);
+        log!("Warning(Path):Command '{stem}' already exists at '{output}', rename to '{scope}-{stem}'? (y/n)");
+        if ask_yn() {
+            log!("Warning(Path):Renamed entrance to '{scope}-{stem}.cmd, use '{scope}-{stem}' instead to call this program later");
+            return scoped;
+        } else {
+            log!("Warning(Path):You may need to rename '{origin}' to access the newly installed program. If do so, don't run 'ept clean' since the renamed entrance would be cleaned");
+            return origin;
         }
-    } else {
-        log!("Warning:Failed to check global PATH conflict for '{stem}'")
     }
 
     origin
@@ -309,11 +294,13 @@ fn test_set_system_path() {
 
 #[test]
 fn test_path() {
+    envmnt::set("DEBUG", "true");
     let pkg = GlobalPackage::new();
     StepPath {
-        record: String::from(r"D:\CnoRPS\aria2\aria2c.exe"),
-        alias: Some("aria".to_string()),
+        record: String::from(r"C:\Users\dsyou\scoop\shims\rclone.exe"),
+        // alias: Some("aria".to_string()),
+        alias: None,
     }
-    .reverse_run(&String::from("./apps/VSCode"), &pkg)
+    .run(&String::from("./apps/VSCode"), &pkg)
     .unwrap();
 }

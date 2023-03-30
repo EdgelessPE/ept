@@ -1,23 +1,24 @@
 use anyhow::{anyhow, Result};
 use path_clean::PathClean;
 use std::{
-    fs::read_dir,
+    fs::{canonicalize, read_dir},
     path::{Path, PathBuf},
 };
 
-use crate::{p2s, utils::format_path};
+use crate::p2s;
 
 use super::{get_bare_apps, get_config};
 
 pub fn parse_relative_path(relative: &String) -> Result<PathBuf> {
-    let cr = format_path(relative);
-    let path = Path::new(&cr);
+    let path = Path::new(&relative);
 
     let absolute_path = if path.is_absolute() {
         path.to_path_buf()
     } else {
         let cfg = get_config();
-        Path::new(&cfg.local.base).join(path)
+        let relative = Path::new(&cfg.local.base).join(path);
+        let dirty_abs = p2s!(canonicalize(relative)?);
+        Path::new(&dirty_abs[4..]).to_path_buf()
     }
     .clean();
 
