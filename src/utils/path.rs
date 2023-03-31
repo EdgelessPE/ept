@@ -1,13 +1,13 @@
 use anyhow::{anyhow, Result};
 use path_clean::PathClean;
 use std::{
-    fs::{canonicalize, read_dir},
+    fs::{canonicalize},
     path::{Path, PathBuf},
 };
 
 use crate::p2s;
 
-use super::{get_bare_apps, get_config};
+use super::{get_bare_apps, get_config, read_sub_dir};
 
 pub fn parse_relative_path(relative: &String) -> Result<PathBuf> {
     let path = Path::new(&relative);
@@ -27,40 +27,6 @@ pub fn parse_relative_path(relative: &String) -> Result<PathBuf> {
         p = p2s!(absolute_path)
     );
     Ok(absolute_path)
-}
-
-pub fn read_sub_dir<P>(path: P) -> Result<Vec<String>>
-where
-    P: AsRef<Path>,
-{
-    let res = read_dir(path.as_ref())
-        .map_err(|e| {
-            anyhow!(
-                "Error:Can't read '{p}' as directory : {e}",
-                p = p2s!(path.as_ref().as_os_str())
-            )
-        })?
-        .into_iter()
-        .filter_map(|entry_res| {
-            if let Ok(entry) = entry_res {
-                if !entry.path().is_dir() {
-                    log!(
-                        "Debug:Ignoring {f} due to not a directory",
-                        f = p2s!(entry.file_name())
-                    );
-                    return None;
-                }
-                Some(p2s!(entry.file_name()))
-            } else {
-                log!(
-                    "Debug:Failed to get entry : {e}",
-                    e = entry_res.unwrap_err()
-                );
-                None
-            }
-        })
-        .collect();
-    Ok(res)
 }
 
 /// name 大小写不敏感

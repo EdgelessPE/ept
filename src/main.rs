@@ -141,7 +141,7 @@ fn main() {
     if res.is_ok() {
         log!("{msg}", msg = res.unwrap());
     } else {
-        log!("{msg}", msg = res.unwrap_err().to_string());
+        log!("{msg}", msg = res.unwrap_err());
         exit(1);
     }
 }

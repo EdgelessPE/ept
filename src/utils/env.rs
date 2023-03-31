@@ -1,6 +1,10 @@
+use std::path::Path;
+
 use dirs::{data_dir, desktop_dir, home_dir};
 
 use crate::p2s;
+
+use super::ensure_exist;
 
 pub fn env_system_drive() -> String {
     p2s!(data_dir().unwrap())[0..2].to_string()
@@ -26,6 +30,12 @@ pub fn env_desktop() -> String {
     p2s!(desktop_dir().unwrap())
 }
 
+pub fn env_start_menu()->String{
+    let str=env_appdata()+"/Roaming/Microsoft/Windows/Start Menu/Programs/Nep Apps";
+    ensure_exist(Path::new(&str).to_path_buf()).unwrap();
+    str
+}
+
 #[test]
 fn test_env() {
     assert_eq!(env_system_drive(), "C:".to_string());
@@ -37,4 +47,5 @@ fn test_env() {
         "C:/Program Files (x86)".to_string()
     );
     assert_eq!(env_desktop(), "D:/Desktop".to_string());
+    assert_eq!(env_start_menu(), "C:/Users/dsyou/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Nep Apps".to_string());
 }
