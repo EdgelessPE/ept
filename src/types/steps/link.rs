@@ -96,8 +96,16 @@ impl TStep for StepLink {
         let abs_clear_source = p2s!(abs_clear_source_path);
 
         // 创建实例
-        let sl = ShellLink::new(&abs_clear_source)
+        let mut sl = ShellLink::new(&abs_clear_source)
             .map_err(|_| anyhow!("Error(Link):Can't find source file '{abs_clear_source}'"))?;
+
+        // 填充额外参数
+        if self.target_icon.is_some(){
+            sl.set_icon_location(self.target_icon);
+        }
+        if self.target_args.is_some(){
+            sl.set_arguments(self.target_args);
+        }
 
         // 分流
         let set: HashSet<String> =
@@ -201,10 +209,10 @@ fn test_link() {
     let pkg = GlobalPackage::_demo();
     let step = StepLink {
         source_file: String::from("Code.exe"),
-        target_name: String::from("MC/VSC"),
-        target_args: None,
-        target_icon: None,
-        at: Some(vec!["Desktop".to_string(), "StartMenu".to_string()]),
+        target_name: String::from("VSC"),
+        target_args: Some("--debug".to_string()),
+        target_icon: Some(r"D:\Download\favicon.ico".to_string()),
+        at: Some(vec!["Desktop".to_string()]),
     };
     step.verify_self().unwrap();
     step.run(&String::from("./apps/Microsoft/VSCode"), &pkg)
