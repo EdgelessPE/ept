@@ -28,7 +28,7 @@ fn same_authors(a: &Vec<String>, b: &Vec<String>) -> bool {
 }
 
 pub fn update_using_package(source_file: &String, verify_signature: bool) -> Result<()> {
-    log!("Info:Preparing to update with package '{}'", source_file);
+    log!("Info:Preparing to update with package '{source_file}'");
 
     // 解包
     let (temp_dir_inner_path, fresh_package) = unpack_nep(source_file, verify_signature)?;
@@ -39,9 +39,8 @@ pub fn update_using_package(source_file: &String, verify_signature: bool) -> Res
     let (local_package, local_diff) =
         info_local(&fresh_software.scope, &fresh_package.package.name).map_err(|_| {
             anyhow!(
-                "Error:Package '{}' hasn't been installed, use 'ept install \"{}\"' instead",
-                &fresh_package.package.name,
-                source_file
+                "Error:Package '{name}' hasn't been installed, use 'ept install \"{source_file}\"' instead",
+                name = &fresh_package.package.name,
             )
         })?;
     let local_software = local_package.software.clone().unwrap();
@@ -50,7 +49,7 @@ pub fn update_using_package(source_file: &String, verify_signature: bool) -> Res
     let local_version = ExSemVer::from_str(&local_diff.version)?;
     let fresh_version = ExSemVer::from_str(&fresh_package.package.version)?;
     if local_version >= fresh_version {
-        return Err(anyhow!("Error:Package '{}' has been up to date ({}), can't update to the version of given package ({})",&fresh_package.package.name,local_version,fresh_version));
+        return Err(anyhow!("Error:Package '{name}' has been up to date ({local_version}), can't update to the version of given package ({fresh_version})",name=fresh_package.package.name));
     }
 
     // 确认作者是否一致
@@ -59,7 +58,7 @@ pub fn update_using_package(source_file: &String, verify_signature: bool) -> Res
         &fresh_package.package.authors,
     ) {
         // 需要卸载然后重新安装
-        log!("Warning:The given package is not the same as the author of the installed package (local:{}, given:{}), uninstall the installed package first? (y/n)",local_package.package.authors.join(","),fresh_package.package.authors.join(","));
+        log!("Warning:The given package is not the same as the author of the installed package (local:{la:?}, given:{fa:?}), uninstall the installed package first? (y/n)",la=local_package.package.authors,fa=fresh_package.package.authors);
         if !ask_yn() {
             return Err(anyhow!("Error:Update canceled by user"));
         }

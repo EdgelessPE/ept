@@ -22,5 +22,5 @@ fn test_ask_yn() {
     envmnt::set("CONFIRM", "true");
     log!("Warning:Please select? (y/n)");
     let res = ask_yn();
-    println!("{}", res);
+    println!("{res}");
 }

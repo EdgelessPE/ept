@@ -32,16 +32,15 @@ fn gen_log(msg: &String, replace_head: Option<String>) -> Option<String> {
 
         if cap.get(2).is_some() {
             return Some(format!(
-                "  {}{} {}",
-                c_head,
-                &cap[2].truecolor(100, 100, 100),
-                &cap[3]
+                "  {c_head}{s} {m}",
+                s = cap[2].truecolor(100, 100, 100),
+                m = cap[3]
             ));
         } else {
-            return Some(format!("{} {}", c_head, &cap[3]));
+            return Some(format!("{c_head} {m}", m = &cap[3]));
         }
     }
-    return Some(format!("{}", msg));
+    return Some(format!("{msg}"));
 }
 
 pub fn fn_log(msg: String) {
@@ -54,7 +53,7 @@ pub fn fn_log(msg: String) {
 }
 
 pub fn fn_log_ok_last(msg: String) {
-    let g = gen_log(&format!("{}   {}", msg, "ok".green()), None);
+    let g = gen_log(&format!("{msg}   {ok}", ok = "ok".green()), None);
     if g.is_some() {
         let content = g.unwrap();
         let last_log = envmnt::get_or("LAST_LOG", "");

@@ -33,11 +33,7 @@ fn update_main_program(
     // 判断是否更新
     if ex_sv_declared.semver_instance != ex_sv_latest.semver_instance {
         log!(
-            "Warning:Updated '{}' version from '{}' to '{}' according to '{}'",
-            &pkg.package.name,
-            ex_sv_declared,
-            ex_sv_latest,
-            exe_file_str
+            "Warning:Updated '{name}' version from '{ex_sv_declared}' to '{ex_sv_latest}' according to '{exe_file_str}'"
         );
         pkg.package.version = ex_sv_latest.to_string();
         let new_pkg_text = toml::to_string_pretty(&pkg)?;
@@ -51,13 +47,13 @@ fn update_main_program(
 pub fn parse_package(p: &String, located: Option<String>) -> Result<GlobalPackage> {
     let package_path = Path::new(p);
     if !package_path.exists() {
-        return Err(anyhow!("Error:Fatal:Can't find package.toml path : {}", p));
+        return Err(anyhow!("Error:Fatal:Can't find package.toml path : {p}"));
     }
 
     let mut text = String::new();
     File::open(p)?.read_to_string(&mut text)?;
-    let dirty_toml: toml::Value = toml::from_str(&text)
-        .map_err(|res| anyhow!("Error:Invalid toml file '{}' : {}", p, res))?;
+    let dirty_toml: toml::Value =
+        toml::from_str(&text).map_err(|res| anyhow!("Error:Invalid toml file '{p}' : {res}"))?;
 
     // 检查 nep 版本号是否符合
     let ver_opt = dirty_toml.get("nep");
@@ -66,19 +62,17 @@ pub fn parse_package(p: &String, located: Option<String>) -> Result<GlobalPackag
         let s_ver = &env!("CARGO_PKG_VERSION")[0..ver.len()];
         if ver != s_ver {
             return Err(anyhow!(
-                "Error:Can't parse nep version with '{}', current ept only accept version '{}'",
-                ver,
-                s_ver
+                "Error:Can't parse nep version with '{ver}', current ept only accept version '{s_ver}'"
             ));
         }
     } else {
-        return Err(anyhow!("Error:Field 'nep' undefined in '{}'", p));
+        return Err(anyhow!("Error:Field 'nep' undefined in '{p}'"));
     }
 
     // 序列化
     let mut pkg: GlobalPackage = dirty_toml
         .try_into()
-        .map_err(|res| anyhow!("Error:Can't validate package.toml at '{}' : {}", p, res))?;
+        .map_err(|res| anyhow!("Error:Can't validate package.toml at '{p}' : {res}"))?;
 
     // 逐一解析作者
     for (i, raw) in pkg.package.authors.clone().into_iter().enumerate() {
@@ -93,11 +87,10 @@ pub fn parse_package(p: &String, located: Option<String>) -> Result<GlobalPackag
     let software = pkg.software.clone().unwrap();
     if located.is_some() && pkg.software.is_some() && software.main_program.is_some() {
         let u_res = update_main_program(&mut pkg, software, located, package_path);
-        if u_res.is_err() {
+        if let Err(e) = u_res {
             log!(
-                "Warning:Failed to update main program version for {} : {}",
-                &pkg.package.name,
-                u_res.unwrap_err()
+                "Warning:Failed to update main program version for {name} : {e}",
+                name = pkg.package.name,
             );
         }
     }

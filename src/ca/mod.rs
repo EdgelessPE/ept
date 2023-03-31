@@ -21,8 +21,7 @@ fn check() -> Result<()> {
         let p = Path::new(&file_name);
         if !p.exists() {
             return Err(anyhow!(
-                "Error:Missing '{}', please place 'keys' folder in current dir",
-                &file_name,
+                "Error:Missing '{file_name}', please place 'keys' folder in current dir"
             ));
         }
     }

@@ -19,7 +19,7 @@ pub fn decompress_zstd(source: &String, into: &String) -> Result<()> {
 
 pub fn fast_decompress_zstd(raw: &Vec<u8>) -> Result<Vec<u8>> {
     zstd::bulk::decompress(raw, max(raw.capacity() * 5, 1024 * 1024))
-        .map_err(|e| anyhow!("Error:Failed to fast decompress : {}", e.to_string()))
+        .map_err(|e| anyhow!("Error:Failed to fast decompress : {e}"))
 }
 
 #[test]
@@ -28,7 +28,7 @@ fn test_compress_zstd() {
         &r"D:\Desktop\Projects\EdgelessPE\ept\examples\VSCode\Pack.tar".to_string(),
         &r"D:\Desktop\Projects\EdgelessPE\ept\examples\VSCode\Pack.tar.zst".to_string(),
     );
-    println!("{:?}", res);
+    println!("{res:?}");
 }
 
 #[test]
@@ -37,5 +37,5 @@ fn test_decompress_zstd() {
         &r"D:\Desktop\Projects\EdgelessPE\ept\examples\VSCode\Pack.tar.zst".to_string(),
         &r"D:\Desktop\Projects\EdgelessPE\ept\examples\VSCode\Pack.tar".to_string(),
     );
-    println!("{:?}", res);
+    println!("{res:?}");
 }

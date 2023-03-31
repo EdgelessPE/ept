@@ -34,9 +34,8 @@ impl ExSemVer {
         let s: Vec<&str> = text.split(".").collect();
         if s.len() != 4 {
             return Err(anyhow!(
-                "Error:Can't parse '{}' as extended semver : expected 4 fields, got {} ",
-                text,
-                s.len()
+                "Error:Can't parse '{text}' as extended semver : expected 4 fields, got {len} ",
+                len = s.len()
             ));
         }
 

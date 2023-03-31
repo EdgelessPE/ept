@@ -111,14 +111,14 @@ pub fn clean() -> Result<()> {
     // 尝试移动到回收站
     if clean_list.len() > 0 {
         log!("Info:Trash list :");
-        println!("{:#?}", &clean_list);
-        let tip = format!("Info:Moving {} trashes to recycle bin...", clean_list.len());
-        log!("{}", tip);
+        println!("{clean_list:#?}");
+        let tip = format!(
+            "Info:Moving {num} trashes to recycle bin...",
+            num = clean_list.len()
+        );
+        log!("{tip}");
         if let Err(e) = trash::delete_all(clean_list.clone()) {
-            log!(
-                "Warning:Failed to move some files to recycle bin : {}, force delete all? (y/n)",
-                e.to_string()
-            );
+            log!("Warning:Failed to move some files to recycle bin : {e}, force delete all? (y/n)");
             if ask_yn() {
                 clean_list.into_iter().for_each(|p| {
                     let name = p2s!(p);
@@ -128,12 +128,12 @@ pub fn clean() -> Result<()> {
                         remove_file(p)
                     };
                     if let Err(e) = res {
-                        log!("Warning:Failed to delete '{}' : {}", name, e.to_string());
+                        log!("Warning:Failed to delete '{name}' : {e}");
                     }
                 })
             }
         } else {
-            log_ok_last!("{}", tip);
+            log_ok_last!("{tip}");
         }
     } else {
         log!("Info:No trash found");

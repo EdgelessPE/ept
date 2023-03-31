@@ -84,16 +84,12 @@ fn router(action: Action) -> Result<String> {
     // 匹配入口
     match action {
         Action::Install { package } => install_using_package(&package, verify_signature)
-            .map(|_| format!("Success:Package '{}' installed successfully", &package)),
+            .map(|_| format!("Success:Package '{package}' installed successfully")),
         Action::Update { package } => update_using_package(&package, verify_signature)
-            .map(|_| format!("Success:Package '{}' updated successfully", &package)),
-        Action::Uninstall { package_name } => uninstall(&package_name).map(|_| {
-            format!(
-                "Success:Package '{}' uninstalled successfully",
-                &package_name
-            )
-        }),
-        Action::Info { package_name } => info(None, &package_name).map(|res| format!("{:#?}", res)),
+            .map(|_| format!("Success:Package '{package}' updated successfully")),
+        Action::Uninstall { package_name } => uninstall(&package_name)
+            .map(|_| format!("Success:Package '{package_name}' uninstalled successfully")),
+        Action::Info { package_name } => info(None, &package_name).map(|res| format!("{res:#?}")),
         Action::List => list().map(|list| {
             if list.len() == 0 {
                 return "No installed package".to_string();
@@ -102,7 +98,11 @@ fn router(action: Action) -> Result<String> {
                 list.into_iter()
                     .fold(String::from("\nInstalled packages:\n"), |acc, node| {
                         return acc
-                            + &format!("  {}    {}\n", &node.name, &node.local.unwrap().version);
+                            + &format!(
+                                "  {name}    {version}\n",
+                                name = node.name,
+                                version = node.local.unwrap().version
+                            );
                     });
             res
         }),
@@ -110,7 +110,7 @@ fn router(action: Action) -> Result<String> {
             source_dir,
             into_file,
         } => pack(&source_dir, into_file, verify_signature)
-            .map(|location| format!("Success:Package has been stored at '{}'", &location)),
+            .map(|location| format!("Success:Package has been stored at '{location}'")),
         Action::Clean => clean().map(|_| format!("Success:Cleaned")),
     }
 }
@@ -139,9 +139,9 @@ fn main() {
     // 使用路由器匹配入口
     let res = router(args.action);
     if res.is_ok() {
-        log!("{}", res.unwrap());
+        log!("{msg}", msg = res.unwrap());
     } else {
-        log!("{}", res.unwrap_err().to_string());
+        log!("{msg}", msg = res.unwrap_err().to_string());
         exit(1);
     }
 }

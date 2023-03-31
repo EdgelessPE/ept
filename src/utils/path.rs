@@ -23,9 +23,8 @@ pub fn parse_relative_path(relative: &String) -> Result<PathBuf> {
     .clean();
 
     log!(
-        "Debug:Parse relative path '{}' into '{}'",
-        relative,
-        &absolute_path.display()
+        "Debug:Parse relative path '{relative}' into '{p}'",
+        p = p2s!(absolute_path)
     );
     Ok(absolute_path)
 }
@@ -37,9 +36,8 @@ where
     let res = read_dir(path.as_ref())
         .map_err(|e| {
             anyhow!(
-                "Error:Can't read '{}' as directory : {}",
-                p2s!(path.as_ref().as_os_str()),
-                e.to_string()
+                "Error:Can't read '{p}' as directory : {e}",
+                p = p2s!(path.as_ref().as_os_str())
             )
         })?
         .into_iter()
@@ -47,14 +45,17 @@ where
             if let Ok(entry) = entry_res {
                 if !entry.path().is_dir() {
                     log!(
-                        "Debug:Ignoring {} due to not a directory",
-                        p2s!(entry.file_name())
+                        "Debug:Ignoring {f} due to not a directory",
+                        f = p2s!(entry.file_name())
                     );
                     return None;
                 }
                 Some(p2s!(entry.file_name()))
             } else {
-                log!("Debug:Failed to get entry : {}", entry_res.unwrap_err());
+                log!(
+                    "Debug:Failed to get entry : {e}",
+                    e = entry_res.unwrap_err()
+                );
                 None
             }
         })
@@ -72,7 +73,7 @@ pub fn find_scope_with_name_locally(name: &String) -> Result<String> {
             }
         }
     }
-    Err(anyhow!("Error:Can't find scope for '{}'", name))
+    Err(anyhow!("Error:Can't find scope for '{name}'"))
 }
 
 #[test]

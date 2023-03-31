@@ -20,7 +20,7 @@ fn get_manifest(flow: Vec<WorkflowNode>, fs: &mut MixedFS) -> Vec<String> {
 }
 
 pub fn pack(source_dir: &String, into_file: Option<String>, need_sign: bool) -> Result<String> {
-    log!("Info:Preparing to pack '{}'", source_dir);
+    log!("Info:Preparing to pack '{source_dir}'");
 
     // 打包检查
     log!("Info:Validating source directory...");
@@ -29,9 +29,7 @@ pub fn pack(source_dir: &String, into_file: Option<String>, need_sign: bool) -> 
     let dir_count = dir_list.into_iter().fold(0, |acc, _| acc + 1);
     if dir_count != 3 {
         return Err(anyhow!(
-            "Error:Expected 3 items in '{}', got {} items",
-            source_dir,
-            dir_count
+            "Error:Expected 3 items in '{source_dir}', got {dir_count} items"
         ));
     }
     // 运行内包检查器
@@ -44,8 +42,10 @@ pub fn pack(source_dir: &String, into_file: Option<String>, need_sign: bool) -> 
     let global = parse_package(&p2s!(pkg_path), None)?;
     let first_author = parse_author(&global.package.authors[0])?;
     let file_stem = format!(
-        "{}_{}_{}",
-        &global.package.name, &global.package.version, &first_author.name
+        "{pn}_{pv}_{fa}",
+        pn = global.package.name,
+        pv = global.package.version,
+        fa = first_author.name
     );
     let into_file = into_file.unwrap_or(String::from("./") + &file_stem + ".nep");
     log_ok_last!("Info:Resolving data...");
@@ -65,14 +65,10 @@ pub fn pack(source_dir: &String, into_file: Option<String>, need_sign: bool) -> 
     if into_file_path.exists() {
         if into_file_path.is_dir() {
             return Err(anyhow!(
-                "Error:Target '{}' is a existing directory",
-                &into_file
+                "Error:Target '{into_file}' is a existing directory"
             ));
         } else {
-            log!(
-                "Warning:Overwrite the existing file '{}'? (y/n)",
-                &into_file
-            );
+            log!("Warning:Overwrite the existing file '{into_file}'? (y/n)");
             if !ask_yn() {
                 return Err(anyhow!("Error:Pack canceled by user"));
             }
@@ -124,14 +120,14 @@ pub fn pack(source_dir: &String, into_file: Option<String>, need_sign: bool) -> 
             log_ok_last!("Info:Cleaning...");
         } else {
             log!(
-                "Warning:Failed to remove temporary directory '{}'",
-                p2s!(temp_dir_path)
+                "Warning:Failed to remove temporary directory '{dir}'",
+                dir = p2s!(temp_dir_path)
             );
         }
     } else {
         log!(
-            "Debug:Leaving temporary directory '{}'",
-            p2s!(temp_dir_path)
+            "Debug:Leaving temporary directory '{dir}'",
+            dir = p2s!(temp_dir_path)
         );
     }
 

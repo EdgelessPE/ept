@@ -28,31 +28,15 @@ fn test_get_temp_tar() {
 
 pub fn compress(source_dir: &String, into_file: &String) -> Result<()> {
     let temp_tar = get_temp_tar(Path::new(into_file));
-    pack_tar(source_dir, &temp_tar).map_err(|res| {
-        anyhow!(
-            "Error:Can't archive '{}' into '{}' : {}",
-            source_dir,
-            &temp_tar,
-            res
-        )
-    })?;
+    pack_tar(source_dir, &temp_tar)
+        .map_err(|res| anyhow!("Error:Can't archive '{source_dir}' into '{temp_tar}' : {res}"))?;
 
-    compress_zstd(&temp_tar, into_file).map_err(|res| {
-        anyhow!(
-            "Error:Can't compress '{}' into '{}' : {}",
-            &temp_tar,
-            into_file,
-            res
-        )
-    })?;
+    compress_zstd(&temp_tar, into_file)
+        .map_err(|res| anyhow!("Error:Can't compress '{temp_tar}' into '{into_file}' : {res}"))?;
 
     let rm_res = remove_file(&temp_tar);
-    if rm_res.is_err() {
-        log!(
-            "Warning:Can't remove temp tar '{}' : {}",
-            &temp_tar,
-            rm_res.unwrap_err()
-        );
+    if let Err(e) = rm_res {
+        log!("Warning:Can't remove temp tar '{temp_tar}' : {e}");
     }
 
     Ok(())
@@ -61,30 +45,15 @@ pub fn compress(source_dir: &String, into_file: &String) -> Result<()> {
 pub fn decompress(source_file: &String, into_dir: &String) -> Result<()> {
     let temp_tar = get_temp_tar(Path::new(source_file));
     decompress_zstd(source_file, &temp_tar).map_err(|res| {
-        anyhow!(
-            "Error:Can't decompress '{}' into '{}' : {}",
-            source_file,
-            &temp_tar,
-            res
-        )
+        anyhow!("Error:Can't decompress '{source_file}' into '{temp_tar}' : {res}")
     })?;
 
-    release_tar(&temp_tar, into_dir).map_err(|res| {
-        anyhow!(
-            "Error:Can't release '{}' into '{}' : {}",
-            &temp_tar,
-            into_dir,
-            res
-        )
-    })?;
+    release_tar(&temp_tar, into_dir)
+        .map_err(|res| anyhow!("Error:Can't release '{temp_tar}' into '{into_dir}' : {res}"))?;
 
     let rm_res = remove_file(&temp_tar);
-    if rm_res.is_err() {
-        log!(
-            "Warning:Can't remove temp tar '{}' : {}",
-            &temp_tar,
-            rm_res.unwrap_err()
-        );
+    if let Err(e) = rm_res {
+        log!("Warning:Can't remove temp tar '{temp_tar}' : {e}");
     }
 
     Ok(())
@@ -96,7 +65,7 @@ fn test_compress() {
         &r"D:\Desktop\Projects\EdgelessPE\ept\examples\VSCode".to_string(),
         &r"./examples/VSCode_1.0.0.0_Cno.tar.zst".to_string(),
     );
-    println!("{:?}", res);
+    println!("{res:?}");
 }
 
 #[test]
@@ -105,5 +74,5 @@ fn test_decompress() {
         &r"./VSCode_1.0.0.0_Cno.tar.zst".to_string(),
         &r"./VSCode_1.0.0.0_Cno".to_string(),
     );
-    println!("{:?}", res);
+    println!("{res:?}");
 }

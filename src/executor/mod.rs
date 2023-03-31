@@ -33,14 +33,13 @@ fn condition_eval(condition: &String, exit_code: i32, located: &String) -> Resul
     // 执行 eval
     let eval_res = expr
         .exec()
-        .map_err(|res| anyhow!("Error:Can't eval statement '{}' : {}", condition, res))?;
+        .map_err(|res| anyhow!("Error:Can't eval statement '{condition}' : {res}"))?;
 
     // 检查执行结果
     let result = eval_res.as_bool();
     if result.is_none() {
         return Err(anyhow!(
-            "Error:Can't eval statement '{}' into bool result",
-            condition
+            "Error:Can't eval statement '{condition}' into bool result"
         ));
     }
 
@@ -70,20 +69,18 @@ pub fn workflow_executor(
         // 匹配步骤类型以调用步骤解释器
         let exec_res = flow_node.body.run(located, pkg, interpreter);
         // 处理执行结果
-        if exec_res.is_err() {
+        if let Err(e) = exec_res {
             log!(
-                "Warning(Main):Workflow step '{}' failed to execute : {}, check your workflow syntax again",
-                &flow_node.header.name,
-                exec_res.unwrap_err()
+                "Warning(Main):Workflow step '{name}' failed to execute : {e}, check your workflow syntax again",
+                name=flow_node.header.name,
             );
             exit_code = 1;
         } else {
             exit_code = exec_res.unwrap();
             if exit_code != 0 {
                 log!(
-                    "Warning(Main):Workflow step '{}' finished with exit code '{}'",
-                    &flow_node.header.name,
-                    exit_code
+                    "Warning(Main):Workflow step '{name}' finished with exit code '{exit_code}'",
+                    name = flow_node.header.name,
                 );
             }
         }
@@ -111,11 +108,10 @@ pub fn workflow_reverse_executor(
         let exec_res = flow_node.body.reverse_run(located, pkg, interpreter);
 
         // 对错误进行警告
-        if exec_res.is_err() {
+        if let Err(e) = exec_res {
             log!(
-                "Warning(Main):Reverse workflow step '{}' failed to execute : {}",
-                &flow_node.header.name,
-                exec_res.unwrap_err()
+                "Warning(Main):Reverse workflow step '{name}' failed to execute : {e}",
+                name = flow_node.header.name
             );
         }
     }
@@ -255,7 +251,7 @@ fn test_workflow_executor() {
         &String::from("D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode"),
         &pkg,
     );
-    println!("{:?}", r1);
+    println!("{r1:?}");
 }
 
 #[test]

@@ -12,9 +12,7 @@ pub fn inner_validator(dir: &String) -> Result<()> {
         let p = Path::new(dir).join(file_name);
         if !p.exists() {
             return Err(anyhow!(
-                "Error:Invalid nep inner package : missing '{}' in '{}'",
-                &file_name,
-                dir
+                "Error:Invalid nep inner package : missing '{file_name}' in '{dir}'"
             ));
         }
     }
@@ -32,9 +30,7 @@ pub fn manifest_validator(base: &String, manifest: Vec<String>, fs: &mut MixedFS
     if !missing_list.is_empty() {
         let items: Vec<String> = missing_list.into_iter().collect();
         return Err(anyhow!(
-            "Error:Invalid nep inner package : missing flow item '{:?}' in '{}'",
-            items,
-            base
+            "Error:Invalid nep inner package : missing flow item '{items:?}' in '{base}'"
         ));
     }
 
@@ -56,9 +52,7 @@ pub fn outer_validator(dir: &String, stem: &String) -> Result<String> {
         let p = Path::new(dir).join(file_name);
         if !p.exists() {
             return Err(anyhow!(
-                "Error:Invalid nep outer package : missing '{}' in '{}'",
-                &file_name,
-                dir
+                "Error:Invalid nep outer package : missing '{file_name}' in '{dir}'"
             ));
         }
     }
@@ -74,8 +68,7 @@ pub fn outer_hashmap_validator(map: &HashMap<String, Vec<u8>>, stem: &String) ->
         let entry = map.get(file_name);
         if entry.is_none() {
             return Err(anyhow!(
-                "Error:Invalid nep outer package : missing '{}'",
-                &file_name,
+                "Error:Invalid nep outer package : missing '{file_name}'"
             ));
         }
     }
@@ -88,8 +81,7 @@ pub fn installed_validator(dir: &String) -> Result<String> {
     let ctx_path = Path::new(dir).join(".nep_context");
     if !ctx_path.exists() || ctx_path.is_file() {
         return Err(anyhow!(
-            "Error:Invalid nep app folder : missing '.nep_context' folder in '{}'",
-            dir
+            "Error:Invalid nep app folder : missing '.nep_context' folder in '{dir}'"
         ));
     }
 

@@ -24,5 +24,5 @@ pub fn list() -> Result<Vec<Info>> {
 #[test]
 fn test_list() {
     let res = list().unwrap();
-    println!("{:#?}", res);
+    println!("{res:#?}");
 }

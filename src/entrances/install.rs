@@ -11,7 +11,7 @@ use crate::{executor::workflow_executor, parsers::parse_workflow, utils::get_pat
 use crate::{log, log_ok_last, p2s};
 
 pub fn install_using_package(source_file: &String, verify_signature: bool) -> Result<()> {
-    log!("Info:Preparing to install with package '{}'", source_file);
+    log!("Info:Preparing to install with package '{source_file}'");
 
     // 解包
     let (temp_dir_inner_path, package_struct) = unpack_nep(source_file, verify_signature)?;
@@ -32,10 +32,9 @@ pub fn install_using_package(source_file: &String, verify_signature: bool) -> Re
     if try_get_info_res.is_ok() {
         let (_, diff) = try_get_info_res.unwrap();
         return Err(anyhow!(
-            "Error:Package '{}' has been installed({}), use 'ept update \"{}\"' instead",
-            &package.name,
-            diff.version,
-            source_file
+            "Error:Package '{name}' has been installed({ver}), use 'ept update \"{source_file}\"' instead",
+            name = package.name,
+            ver = diff.version,
         ));
     }
 
@@ -44,8 +43,8 @@ pub fn install_using_package(source_file: &String, verify_signature: bool) -> Re
     if into_dir.exists() {
         remove_dir_all(into_dir.clone()).map_err(|_| {
             anyhow!(
-                "Error:Can't keep target directory '{}' clear, manually delete it then try again",
-                p2s!(into_dir.as_os_str())
+                "Error:Can't keep target directory '{dir}' clear, manually delete it then try again",
+                dir = p2s!(into_dir.as_os_str())
             )
         })?;
     }
@@ -54,7 +53,10 @@ pub fn install_using_package(source_file: &String, verify_signature: bool) -> Re
     // 移动程序至 apps 目录
     let app_path = temp_dir_inner_path.join(&package.name);
     if !app_path.exists() {
-        return Err(anyhow!("Error:App folder not found : {}", p2s!(app_path)));
+        return Err(anyhow!(
+            "Error:App folder not found : {dir}",
+            dir = p2s!(app_path)
+        ));
     }
     rename(app_path, into_dir.clone())?;
     log_ok_last!("Info:Deploying files...");

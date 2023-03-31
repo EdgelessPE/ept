@@ -16,7 +16,7 @@ pub struct StepLog {
 
 impl TStep for StepLog {
     fn run(self, _: &String, _: &GlobalPackage) -> Result<i32> {
-        log!("{}(Log):{}", &self.level, &self.msg);
+        log!("{l}(Log):{m}", l = self.level, m = self.msg);
         Ok(0)
     }
     fn reverse_run(self, _: &String, _: &GlobalPackage) -> Result<()> {

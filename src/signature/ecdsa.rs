@@ -40,7 +40,7 @@ MC4CAQAwBQYDK2VwBCIEIBiVVXXhLTr/EY/FROnl67TVJz/jGV1WWN9HgptLMNWO
         .to_string();
 
     let signature = sign_with_ecdsa(&private_key, &"114514".to_string()).unwrap();
-    println!("{}", signature);
+    println!("{signature}");
     let res = verify_with_ecdsa(&public_key, &"114514".to_string(), &signature).unwrap();
     assert!(res);
 

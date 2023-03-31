@@ -32,7 +32,7 @@ fn test_release_tar() {
         &r"D:\Desktop\Projects\EdgelessPE\ept\examples\VSCode\VSCode.tar".to_string(),
         &"./temp/VSCode_1.0.0.0_Cno/Inner".to_string(),
     );
-    println!("{:?}", res);
+    println!("{res:?}");
 }
 
 #[test]
@@ -41,5 +41,5 @@ fn test_pack_tar() {
         &"./temp/VSCode_1.0.0.0_Cno/Inner".to_string(),
         &r"D:\Desktop\Projects\EdgelessPE\ept\examples\VSCode\Pack.tar".to_string(),
     );
-    println!("{:?}", res);
+    println!("{res:?}");
 }

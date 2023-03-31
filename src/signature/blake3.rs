@@ -15,18 +15,14 @@ pub fn compute_hash_blake3(from_file: &String) -> Result<String> {
     }
     let hash = hasher.finalize();
     let hash = hash.to_hex().to_string();
-    log!(
-        "Debug:Calculated blake3 hash for '{}' : '{}'",
-        from_file,
-        &hash
-    );
+    log!("Debug:Calculated blake3 hash for '{from_file}' : '{hash}'");
     Ok(hash)
 }
 
 pub fn fast_compute_hash_blake3(raw: &Vec<u8>) -> Result<String> {
     let hash = hash(raw);
     let hash = hash.to_hex().to_string();
-    log!("Debug:Got blake3 hash : '{}'", &hash);
+    log!("Debug:Got blake3 hash : '{hash}'");
     Ok(hash)
 }
 
@@ -75,5 +71,5 @@ fn test_compute_hash_blake3() {
         &r"D:\Desktop\Projects\EdgelessPE\ept\VSCode_1.75.0.0_Cno.nep\c1\VSCode_1.75.0.0_Cno.nep"
             .to_string(),
     );
-    println!("{:?}", res);
+    println!("{res:?}");
 }

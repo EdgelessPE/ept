@@ -33,13 +33,7 @@ where
         let name_brw = val["name"].to_owned();
         let name = name_brw.as_str().unwrap_or("unknown name");
         let step = val["step"].as_str().unwrap_or("unknown step");
-        anyhow!(
-            "Error:Can't parse workflow node '{}'({}) into step '{}' : {}",
-            &name,
-            &key,
-            &step,
-            &err.to_string()
-        )
+        anyhow!("Error:Can't parse workflow node '{name}'({key}) into step '{step}' : {err}")
     })
 }
 
@@ -86,7 +80,7 @@ macro_rules! def_enum_step {
                 let res=match step.as_str() {
                     $( stringify!($x) => Step::$x(toml_try_into(kv)?) ),* ,
                     _ => {
-                        return Err(anyhow!("Error:Unknown step '{}'",step));
+                        return Err(anyhow!("Error:Unknown step '{step}'"));
                     },
                 };
                 Ok(res)

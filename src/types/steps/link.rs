@@ -18,7 +18,7 @@ fn parse_target_name(name: &String) -> Result<(Option<String>, String)> {
     let sp: Vec<&str> = name.split("/").collect();
     let length = sp.len();
     if length > 2 {
-        Err(anyhow!("Error:Invalid filed 'target_name' : '{}'", name))
+        Err(anyhow!("Error:Invalid filed 'target_name' : '{name}'"))
     } else if length == 2 {
         Ok((
             Some(sp.get(0).unwrap().to_string()),
@@ -58,24 +58,19 @@ impl TStep for StepLink {
         // 解析源文件绝对路径
         let abs_clear_source_path =
             parse_relative_path(&p2s!(Path::new(located).join(&self.source_file)))?;
-        // println!("{:?}",&abs_clear_source_path);
+        // println!("{abs_clear_source_path:?}");
         let abs_clear_source = p2s!(abs_clear_source_path);
 
         // 创建实例
         let sl = ShellLink::new(&abs_clear_source)
-            .map_err(|_| anyhow!("Error(Link):Can't find source file '{}'", &abs_clear_source))?;
+            .map_err(|_| anyhow!("Error(Link):Can't find source file '{abs_clear_source}'"))?;
 
         // 创建快捷方式
-        let target = format!("{}/{}.lnk", desktop, &self.target_name);
+        let target = format!("{desktop}/{name}.lnk", name = self.target_name);
         sl.create_lnk(&target).map_err(|err| {
-            anyhow!(
-                "Error(Link):Can't create link {}->{} : {}",
-                &abs_clear_source,
-                &target,
-                err.to_string()
-            )
+            anyhow!("Error(Link):Can't create link {abs_clear_source}->{target} : {err}")
         })?;
-        log!("Info(Link):Added shortcut '{}'", target);
+        log!("Info(Link):Added shortcut '{target}'");
         Ok(0)
     }
     fn reverse_run(self, _: &String, _: &GlobalPackage) -> Result<()> {
@@ -83,13 +78,13 @@ impl TStep for StepLink {
         let desktop = env_desktop();
 
         // 解析快捷方式路径
-        let target = format!("{}/{}.lnk", desktop, &self.target_name);
+        let target = format!("{desktop}/{name}.lnk", name = self.target_name);
 
         // 尝试删除
         let target_path = Path::new(&target);
         if target_path.exists() {
             remove_file(target_path)?;
-            log!("Info(Link):Removed shortcut '{}'", target);
+            log!("Info(Link):Removed shortcut '{target}'");
         }
         Ok(())
     }
@@ -111,8 +106,8 @@ impl Verifiable for StepLink {
     fn verify_self(&self) -> Result<()> {
         if !TARGET_RE.is_match(&self.target_name) {
             return Err(anyhow!(
-                "Error(Link):Invalid field 'target_name', expect 'NAME' or 'FOLDER/NAME', got '{}'",
-                &self.target_name
+                "Error(Link):Invalid field 'target_name', expect 'NAME' or 'FOLDER/NAME', got '{name}'",
+                name=self.target_name
             ));
         }
         if self.target_name.contains("..") {

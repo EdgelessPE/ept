@@ -38,13 +38,10 @@ pub fn clean_temp(source_file: &String) -> Result<()> {
         if clean_res.is_ok() {
             log_ok_last!("Info:Cleaning...");
         } else {
-            log!(
-                "Warning:Failed to remove temporary directory '{:?}'",
-                temp_dir_path
-            );
+            log!("Warning:Failed to remove temporary directory '{temp_dir_path:?}'");
         }
     } else {
-        log!("Debug:Leaving temporary directory '{:?}'", temp_dir_path);
+        log!("Debug:Leaving temporary directory '{temp_dir_path:?}'");
     }
 
     Ok(())
@@ -56,13 +53,8 @@ pub fn unpack_nep(
     verify_signature: bool,
 ) -> Result<(PathBuf, GlobalPackage)> {
     // 检查文件大小
-    let file = File::open(source_file).map_err(|e| {
-        anyhow!(
-            "Error:Can't open file '{}' : {}",
-            source_file,
-            e.to_string()
-        )
-    })?;
+    let file = File::open(source_file)
+        .map_err(|e| anyhow!("Error:Can't open file '{source_file}' : {e}"))?;
     let meta = file.metadata()?;
     let size = meta.len();
     // 获取 fast 处理方法的文件大小上限
@@ -73,10 +65,10 @@ pub fn unpack_nep(
     );
 
     if size <= size_limit {
-        log!("Debug:Use fast unpack method ({}/{})", size, size_limit);
+        log!("Debug:Use fast unpack method ({size}/{size_limit})");
         fast_unpack_nep(source_file, verify_signature)
     } else {
-        log!("Debug:Use normal unpack method ({}/{})", size, size_limit);
+        log!("Debug:Use normal unpack method ({size}/{size_limit})");
         normal_unpack_nep(source_file, verify_signature)
     }
 }
@@ -94,7 +86,7 @@ fn normal_unpack_nep(
     log!("Info:Unpacking outer package...");
     let temp_dir_outer_str = p2s!(temp_dir_outer_path);
     release_tar(source_file, &temp_dir_outer_str)
-        .map_err(|e| anyhow!("Error:Invalid nep package : {}", e.to_string()))?;
+        .map_err(|e| anyhow!("Error:Invalid nep package : {e}"))?;
     let inner_pkg_str = outer_validator(&temp_dir_outer_str, &file_stem)?;
     let signature_path = temp_dir_outer_path.join("signature.toml");
     log_ok_last!("Info:Unpacking outer package...");
@@ -128,7 +120,7 @@ fn normal_unpack_nep(
     log!("Info:Decompressing inner package...");
     let temp_dir_inner_str = p2s!(temp_dir_inner_path);
     decompress(&inner_pkg_str, &temp_dir_inner_str)
-        .map_err(|e| anyhow!("Error:Invalid nep package : {}", e.to_string()))?;
+        .map_err(|e| anyhow!("Error:Invalid nep package : {e}"))?;
     inner_validator(&temp_dir_inner_str)?;
     log_ok_last!("Info:Decompressing inner package...");
 
@@ -140,12 +132,12 @@ fn normal_unpack_nep(
     if signature_struct.signer != author.email.unwrap() {
         if verify_signature {
             return Err(anyhow!(
-                "Error:Invalid package : expect first author '{}' to be the package signer '{}'",
-                &package_struct.package.authors[0],
-                &signature_struct.signer
+                "Error:Invalid package : expect first author '{fa}' to be the package signer '{ps}'",
+                fa=package_struct.package.authors[0],
+                ps=signature_struct.signer
             ));
         } else {
-            log!("Warning:Invalid package : expect first author '{}' to be the package signer '{}', ignoring this error due to signature verification has been disabled",&package_struct.package.authors[0],&signature_struct.signer);
+            log!("Warning:Invalid package : expect first author '{fa}' to be the package signer '{ps}', ignoring this error due to signature verification has been disabled",fa=package_struct.package.authors[0],ps=signature_struct.signer);
         }
     }
 
@@ -161,8 +153,8 @@ fn fast_unpack_nep(
 
     // 读取外包，生成 hashmap
     log!("Info:Reading outer package...");
-    let outer_file = File::open(source_file)
-        .map_err(|e| anyhow!("Error:Can't open '{}' : {}", source_file, e.to_string()))?;
+    let outer_file =
+        File::open(source_file).map_err(|e| anyhow!("Error:Can't open '{source_file}' : {e}"))?;
     let mut outer_tar = Archive::new(outer_file);
     let mut outer_map = HashMap::new();
     for entry in outer_tar.entries()? {
@@ -220,12 +212,12 @@ fn fast_unpack_nep(
     if signature_struct.signer != author.email.unwrap() {
         if verify_signature {
             return Err(anyhow!(
-                "Error:Invalid package : expect first author '{}' to be the package signer '{}'",
-                &package_struct.package.authors[0],
-                &signature_struct.signer
+                "Error:Invalid package : expect first author '{fa}' to be the package signer '{ps}'",
+                fa=package_struct.package.authors[0],
+                ps=signature_struct.signer
             ));
         } else {
-            log!("Warning:Invalid package : expect first author '{}' to be the package signer '{}', ignoring this error due to signature verification has been disabled",&package_struct.package.authors[0],&signature_struct.signer);
+            log!("Warning:Invalid package : expect first author '{fa}' to be the package signer '{ps}', ignoring this error due to signature verification has been disabled",fa=package_struct.package.authors[0],ps=signature_struct.signer);
         }
     }
 
@@ -243,7 +235,7 @@ fn test_unpack_nep() {
         true,
     )
     .unwrap();
-    println!("{:?}", res);
+    println!("{res:?}");
 }
 
 #[test]
@@ -253,7 +245,7 @@ fn test_fast_unpack_nep() {
         true,
     )
     .unwrap();
-    println!("{:?}", res);
+    println!("{res:?}");
 }
 
 #[test]
@@ -267,7 +259,10 @@ fn benchmark_fast_unpack_nep() {
         )
         .unwrap();
     }
-    println!("Normal unpack cost {}s", normal.elapsed().as_secs()); // 42s
+    println!(
+        "Normal unpack cost {sec}s",
+        sec = normal.elapsed().as_secs()
+    ); // 42s
 
     let fast = Instant::now();
     for _ in 0..10 {
@@ -277,5 +272,5 @@ fn benchmark_fast_unpack_nep() {
         )
         .unwrap();
     }
-    println!("Fast unpack cost {}s", fast.elapsed().as_secs()); // 34s
+    println!("Fast unpack cost {sec}s", sec = fast.elapsed().as_secs()); // 34s
 }

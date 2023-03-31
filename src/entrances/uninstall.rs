@@ -26,7 +26,7 @@ fn get_manifest(flow: Vec<WorkflowNode>) -> Vec<String> {
 }
 
 pub fn uninstall(package_name: &String) -> Result<()> {
-    log!("Info:Preparing to uninstall '{}'", package_name);
+    log!("Info:Preparing to uninstall '{package_name}'");
 
     // 解析 scope
     let scope = find_scope_with_name_locally(package_name)?;
@@ -34,7 +34,7 @@ pub fn uninstall(package_name: &String) -> Result<()> {
     // 解析安装路径
     let app_path = get_path_apps(&scope, package_name, false)?;
     if !app_path.exists() {
-        return Err(anyhow!("Error:Can't find package '{}'", package_name));
+        return Err(anyhow!("Error:Can't find package '{package_name}'"));
     }
     let app_str = p2s!(app_path);
 
@@ -84,9 +84,9 @@ pub fn uninstall(package_name: &String) -> Result<()> {
             for name in hit_list {
                 if name.ends_with(".exe") {
                     if kill_with_name(&name) {
-                        log!("Warning:Killed process '{}'", &name);
+                        log!("Warning:Killed process '{name}'");
                     } else {
-                        log!("Warning:Failed to kill process '{}'", &name);
+                        log!("Warning:Failed to kill process '{name}'");
                     }
                 }
             }
@@ -98,8 +98,7 @@ pub fn uninstall(package_name: &String) -> Result<()> {
             let try_rm_res = remove_dir_all(&app_str);
             if try_rm_res.is_err() {
                 log!(
-                    "Warning:Can't clean the directory still, please delete '{}' manually later",
-                    &app_str
+                    "Warning:Can't clean the directory still, please delete '{app_str}' manually later"
                 );
             }
         }

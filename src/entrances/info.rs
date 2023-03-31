@@ -17,10 +17,7 @@ use super::utils::validator::installed_validator;
 pub fn info_local(scope: &String, package_name: &String) -> Result<(GlobalPackage, InfoDiff)> {
     let local_path = get_path_apps(scope, package_name, false)?;
     if !local_path.exists() {
-        return Err(anyhow!(
-            "Error:Can't find package '{}' locally",
-            package_name
-        ));
+        return Err(anyhow!("Error:Can't find package '{package_name}' locally"));
     }
     let local_str = p2s!(local_path);
     // 检查是否为标准的已安装目录
@@ -65,14 +62,14 @@ pub fn info(scope: Option<String>, package_name: &String) -> Result<Info> {
     if info.local.is_some() || info.online.is_some() {
         Ok(info)
     } else {
-        Err(anyhow!("Error:Unknown package '{}'", package_name))
+        Err(anyhow!("Error:Unknown package '{package_name}'"))
     }
 }
 
 #[test]
 fn test_info() {
     let res = info(Some("Microsoft".to_string()), &"VSCode".to_string()).unwrap();
-    println!("{:#?}", res);
+    println!("{res:#?}");
     let res = info(None, &"vscode".to_string()).unwrap();
-    println!("{:#?}", res);
+    println!("{res:#?}");
 }

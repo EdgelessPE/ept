@@ -46,15 +46,13 @@ impl TStep for StepExecute {
 
         // 执行并收集结果
         log!(
-            "Info(Execute):Running command '{}' in '{}'",
-            &self.command,
-            &workshop
+            "Info(Execute):Running command '{cmd}' in '{workshop}'",
+            cmd = self.command,
         );
         let output = cmd.output().map_err(|err| {
             anyhow!(
-                "Error(Execute):Command '{}' spawned failed : {}",
-                &self.command,
-                err
+                "Error(Execute):Command '{cmd}' spawned failed : {err}",
+                cmd = self.command,
             )
         })?;
 
@@ -63,22 +61,22 @@ impl TStep for StepExecute {
             Some(val) => {
                 if val == 0 {
                     log!(
-                        "Info(Execute):Command '{}' output : \n{}",
-                        &self.command,
-                        &read_console(output.stdout)
+                        "Info(Execute):Command '{cmd}' output : \n{o}",
+                        cmd = self.command,
+                        o = read_console(output.stdout)
                     );
                 } else {
                     log!(
-                        "Error(Execute):Command '{}' failed, output : \n{}",
-                        &self.command,
-                        &read_console(output.stderr)
+                        "Error(Execute):Command '{cmd}' failed, output : \n{o}",
+                        cmd = self.command,
+                        o = read_console(output.stderr)
                     );
                 }
                 Ok(val)
             }
             None => Err(anyhow!(
-                "Error(Execute):Command '{}' terminated by signal",
-                &self.command
+                "Error(Execute):Command '{cmd}' terminated by signal",
+                cmd = self.command
             )),
         }
     }

@@ -22,11 +22,14 @@ pub fn parse_author(raw: &String) -> Result<Author> {
         });
     }
 
-    Err(anyhow!("Error:Can't parse '{}' as valid author", raw))
+    Err(anyhow!("Error:Can't parse '{raw}' as valid author"))
 }
 
 #[test]
 fn test_parse_author() {
-    println!("{:?}", parse_author(&"Cno".to_string()));
-    println!("{:?}", parse_author(&"Cno <dsyourshy@qq.com>".to_string()));
+    println!("{r:?}", r = parse_author(&"Cno".to_string()));
+    println!(
+        "{r:?}",
+        r = parse_author(&"Cno <dsyourshy@qq.com>".to_string())
+    );
 }

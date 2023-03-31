@@ -81,7 +81,7 @@ fn set_system_path(record: &String, is_add: bool) -> Result<bool> {
     // 增删 Path 变量
     if is_add {
         if is_exist {
-            // log!("Warning(Path):Record '{}' already existed in PATH",record_str);
+            // log!("Warning(Path):Record '{record_str}' already existed in PATH");
             return Ok(false);
         } else {
             origin_arr.push(record_str);
@@ -93,7 +93,7 @@ fn set_system_path(record: &String, is_add: bool) -> Result<bool> {
                 .filter(|x| x != &record_str)
                 .collect();
         } else {
-            log!("Warning(Path):Record '{}' not exist in PATH", record_str);
+            log!("Warning(Path):Record '{record_str}' not exist in PATH");
             return Ok(false);
         }
     }
@@ -104,13 +104,13 @@ fn set_system_path(record: &String, is_add: bool) -> Result<bool> {
         .filter(|x| x.to_owned() != "")
         .collect();
     let new_text = new_arr.join(";");
-    log!("Debug(Path):Save register with '{}'", &new_text);
+    log!("Debug(Path):Save register with '{new_text}'");
 
     // 写回注册表
     let (table, _) = hkcu.create_subkey("Environment")?;
     table
         .set_value("Path", &new_text)
-        .map_err(|err| anyhow!("Error(Path):Can't write to register : {}", err.to_string()))?;
+        .map_err(|err| anyhow!("Error(Path):Can't write to register : {err}"))?;
 
     // 发送全局广播
     let result = unsafe {
@@ -145,9 +145,9 @@ impl TStep for StepPath {
         // 添加系统 PATH 变量
         let add_res = set_system_path(&bin_abs, true);
         if add_res.is_err() {
-            log!("Warning(Path):Failed to add system PATH for '{}', manually add later to enable bin function of nep",&bin_abs);
+            log!("Warning(Path):Failed to add system PATH for '{bin_abs}', manually add later to enable bin function of nep");
         } else if add_res.unwrap() {
-            log!("Warning(Path):Added system PATH for '{}'", &bin_abs);
+            log!("Warning(Path):Added system PATH for '{bin_abs}'");
         }
 
         // 解析目标绝对路径
@@ -158,21 +158,15 @@ impl TStep for StepPath {
         if abs_target_path.is_dir() {
             if self.alias.is_some() {
                 log!(
-                    "Warning(Path):Ignoring alias '{}', since record refers to a dictionary",
-                    self.alias.unwrap()
+                    "Warning(Path):Ignoring alias '{a}', since record refers to a dictionary",
+                    a = self.alias.unwrap()
                 );
             }
             let add_res = set_system_path(&abs_target_str, true);
             if add_res.is_err() {
-                log!(
-                    "Warning(Path):Failed to add system PATH '{}', manually add later",
-                    &bin_abs
-                );
+                log!("Warning(Path):Failed to add system PATH '{bin_abs}', manually add later");
             } else if add_res.unwrap() {
-                log!(
-                    "Warning(Path):Added system PATH '{}', restart to enable",
-                    &bin_abs
-                );
+                log!("Warning(Path):Added system PATH '{bin_abs}', restart to enable");
             }
             return Ok(0);
         }
@@ -190,10 +184,10 @@ impl TStep for StepPath {
         }
 
         // 写批处理
-        let cmd_content = format!("@\"{}\" %*", &abs_target_str);
+        let cmd_content = format!("@\"{abs_target_str}\" %*");
         let mut file = File::create(&cmd_target_str)?;
         file.write_all(cmd_content.as_bytes())?;
-        log!("Info(Path):Added path entrance '{}'", cmd_target_str);
+        log!("Info(Path):Added path entrance '{cmd_target_str}'");
 
         Ok(0)
     }
@@ -216,11 +210,10 @@ impl TStep for StepPath {
             let add_res = set_system_path(&abs_target_str, false);
             if add_res.is_err() {
                 log!(
-                    "Warning(Path):Failed to remove system PATH for '{}', manually remove later",
-                    &bin_abs
+                    "Warning(Path):Failed to remove system PATH for '{bin_abs}', manually remove later"
                 );
             } else if add_res.unwrap() {
-                log!("Info(Path):Removed system PATH '{}'", &bin_abs);
+                log!("Info(Path):Removed system PATH '{bin_abs}'");
             }
             return Ok(());
         }
@@ -239,7 +232,7 @@ impl TStep for StepPath {
             // 删除入口
             if cmd_target_path.exists() {
                 remove_file(cmd_target_path)?;
-                log!("Info(Path):Removed path entrance '{}'", cmd_target_str);
+                log!("Info(Path):Removed path entrance '{cmd_target_str}'");
                 break;
             }
         }

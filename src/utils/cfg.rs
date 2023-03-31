@@ -43,18 +43,13 @@ impl Cfg {
             let from = USER_DIR.join(FILE_NAME);
             if !from.exists() {
                 create_dir_all(USER_DIR.to_str().unwrap()).map_err(|e| {
-                    anyhow!(
-                        "Error:Can't create '{}' : {}",
-                        p2s!(USER_DIR),
-                        e.to_string()
-                    )
+                    anyhow!("Error:Can't create '{dir}' : {e}", dir = p2s!(USER_DIR),)
                 })?;
                 let default = Value::try_from(Self::default())?;
                 write(from.clone(), to_string_pretty(&default)?).map_err(|e| {
                     anyhow!(
-                        "Error:Can't write default config to '{}' : {}",
-                        p2s!(from),
-                        e.to_string()
+                        "Error:Can't write default config to '{f}' : {e}",
+                        f = p2s!(from),
                     )
                 })?;
             }
@@ -67,9 +62,8 @@ impl Cfg {
         let text = read_to_string(from.clone())?;
         from_str(&text).map_err(|e| {
             anyhow!(
-                "Error:Invalid config content, try delete '{}' : {}",
-                p2s!(from),
-                e.to_string()
+                "Error:Invalid config content, try delete '{f}' : {e}",
+                f = p2s!(from),
             )
         })
     }
@@ -90,7 +84,7 @@ fn test_init() {
     cfg.local = Local {
         base: "".to_string(),
     };
-    println!("{:#?}", cfg);
+    println!("{cfg:#?}");
 }
 
 pub fn get_config() -> Cfg {
@@ -104,8 +98,8 @@ pub fn set_config(next: Cfg) -> Result<()> {
 #[test]
 fn test_config() {
     let mut cfg = get_config();
-    println!("{:#?}", cfg);
+    println!("{cfg:#?}");
     cfg.local.base = "2333".to_string();
-    println!("{:#?}", cfg);
+    println!("{cfg:#?}");
     set_config(cfg).unwrap();
 }

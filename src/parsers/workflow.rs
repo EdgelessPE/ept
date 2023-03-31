@@ -23,7 +23,7 @@ fn cmd_converter(origin: &String) -> Result<String> {
 pub fn parse_workflow(p: &String) -> Result<Vec<WorkflowNode>> {
     let workflow_path = Path::new(p);
     if !workflow_path.exists() {
-        return Err(anyhow!("Error:Fatal:Can't find workflow path : {}", p));
+        return Err(anyhow!("Error:Fatal:Can't find workflow path : {p}"));
     }
 
     // 读取文件
@@ -35,7 +35,7 @@ pub fn parse_workflow(p: &String) -> Result<Vec<WorkflowNode>> {
 
     // 转换文本为平工作流
     let plain_flow: Value = toml::from_str(&text_ready)
-        .map_err(|err| anyhow!("Error:Can't parse '{}' as legal toml file : {}", p, err))?;
+        .map_err(|err| anyhow!("Error:Can't parse '{p}' as legal toml file : {err}"))?;
 
     // 通过正则表达式获取工作流顺序
     let reg = Regex::new(r"\s*\[(\w+)\]")?;
@@ -48,7 +48,7 @@ pub fn parse_workflow(p: &String) -> Result<Vec<WorkflowNode>> {
             value,
         })
     }
-    // println!("{:?}",values);
+    // println!("{values:?}");
 
     // 解析工作流步骤，生成已解析数组
     let mut res = Vec::new();
@@ -61,7 +61,7 @@ pub fn parse_workflow(p: &String) -> Result<Vec<WorkflowNode>> {
         // 解析步骤头
         let header = val
             .try_into()
-            .map_err(|e| anyhow!("Error:Illegal workflow node at key '{}' : {}", key, e))?;
+            .map_err(|e| anyhow!("Error:Illegal workflow node at key '{key}' : {e}"))?;
 
         // 根据步骤名称解析步骤体
         let body = kv.try_into()?;

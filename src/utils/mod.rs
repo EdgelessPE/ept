@@ -28,8 +28,7 @@ macro_rules! p2s {
 
 fn ensure_exist(p: PathBuf) -> Result<PathBuf> {
     if !p.exists() {
-        create_dir_all(p.clone())
-            .map_err(|e| anyhow!("Error:Failed to create directory : {}", e.to_string()))?;
+        create_dir_all(p.clone()).map_err(|e| anyhow!("Error:Failed to create directory : {e}"))?;
     }
     Ok(p)
 }
@@ -79,8 +78,8 @@ pub fn get_path_temp(name: &String, keep_clear: bool, sub_dir: bool) -> Result<P
     if keep_clear && p.exists() {
         remove_dir_all(p.clone()).map_err(|_| {
             anyhow!(
-                "Error:Can't keep temp directory '{}' clear, manually delete it then try again",
-                p2s!(p.as_os_str())
+                "Error:Can't keep temp directory '{dir}' clear, manually delete it then try again",
+                dir = p2s!(p.as_os_str())
             )
         })?;
     }

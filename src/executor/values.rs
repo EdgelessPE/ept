@@ -137,26 +137,26 @@ fn test_collect_values() {
     let err_res =
         values_validator_manifest_path(&"${SystemData}${AppData}${ExitCode}./".to_string());
     assert!(err_res.is_err());
-    log!("{}", err_res.unwrap_err());
+    log!("{e}", e = err_res.unwrap_err());
 
     let err_res = values_validator_manifest_path(&"C:/system".to_string());
     assert!(err_res.is_err());
-    log!("{}", err_res.unwrap_err());
+    log!("{e}", e = err_res.unwrap_err());
 
     let err_res = values_validator_manifest_path(&"${AppData}/../nep".to_string());
     assert!(err_res.is_err());
-    log!("{}", err_res.unwrap_err());
+    log!("{e}", e = err_res.unwrap_err());
 
     let err_res = values_validator_manifest_path(&"114${DefaultLocation}/vscode".to_string());
     assert!(err_res.is_err());
-    log!("{}", err_res.unwrap_err());
+    log!("{e}", e = err_res.unwrap_err());
 
     let err_res =
         values_validator_manifest_path(&"${AppData}/./${ExitCode}${Home}/nep".to_string());
     assert!(err_res.is_err());
-    log!("{}", err_res.unwrap_err());
+    log!("{e}", e = err_res.unwrap_err());
 
     let err_res = values_validator_manifest_path(&"$/{${Desktop}/vscode".to_string());
     assert!(err_res.is_err());
-    log!("{}", err_res.unwrap_err());
+    log!("{e}", e = err_res.unwrap_err());
 }
