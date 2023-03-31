@@ -33,7 +33,8 @@ fn update_main_program(
     // 判断是否更新
     if ex_sv_declared.semver_instance != ex_sv_latest.semver_instance {
         log!(
-            "Warning:Updated '{name}' version from '{ex_sv_declared}' to '{ex_sv_latest}' according to '{exe_file_str}'"
+            "Warning:Updated '{name}' version from '{ex_sv_declared}' to '{ex_sv_latest}' according to '{exe_file_str}'",
+            name = pkg.package.name
         );
         pkg.package.version = ex_sv_latest.to_string();
         let new_pkg_text = toml::to_string_pretty(&pkg)?;

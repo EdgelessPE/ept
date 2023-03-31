@@ -34,7 +34,7 @@ fn gen_log(msg: &String, replace_head: Option<String>) -> Option<String> {
             return Some(format!(
                 "  {c_head}{s} {m}",
                 s = cap[2].truecolor(100, 100, 100),
-                m = cap[3]
+                m = &cap[3]
             ));
         } else {
             return Some(format!("{c_head} {m}", m = &cap[3]));
@@ -67,8 +67,8 @@ pub fn fn_log_ok_last(msg: String) {
 
 #[macro_export]
 macro_rules! log {
-    ($($x:expr),*) => {
-        $crate::utils::fn_log(format!($($x),*))
+    ($($x:tt)*) => {
+        $crate::utils::fn_log(format!($($x)*))
     };
 }
 
