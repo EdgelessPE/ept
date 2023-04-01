@@ -30,8 +30,8 @@ pub fn env_desktop() -> String {
     p2s!(desktop_dir().unwrap())
 }
 
-pub fn env_start_menu()->String{
-    let str=env_appdata()+"/Roaming/Microsoft/Windows/Start Menu/Programs/Nep Apps";
+pub fn env_start_menu() -> String {
+    let str = env_appdata() + "/Roaming/Microsoft/Windows/Start Menu/Programs/Nep Apps";
     ensure_exist(Path::new(&str).to_path_buf()).unwrap();
     str
 }
@@ -47,5 +47,8 @@ fn test_env() {
         "C:/Program Files (x86)".to_string()
     );
     assert_eq!(env_desktop(), "D:/Desktop".to_string());
-    assert_eq!(env_start_menu(), "C:/Users/dsyou/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Nep Apps".to_string());
+    assert_eq!(
+        env_start_menu(),
+        "C:/Users/dsyou/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Nep Apps".to_string()
+    );
 }

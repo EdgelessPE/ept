@@ -4,7 +4,7 @@ use crate::types::package::GlobalPackage;
 use crate::types::permissions::{Generalizable, Permission, PermissionLevel};
 use crate::types::steps::log;
 use crate::utils::env::{env_desktop, env_start_menu};
-use crate::utils::{try_recycle, count_sub_files};
+use crate::utils::{count_sub_files, try_recycle};
 use crate::{log, p2s, types::verifiable::Verifiable, utils::parse_relative_path};
 use anyhow::{anyhow, Result};
 use mslnk::ShellLink;
@@ -24,7 +24,7 @@ lazy_static! {
 }
 
 // 返回的第二参数表示是否创建了父目录
-fn parse_target(name: &String, base: &String) -> Result<(String,bool)> {
+fn parse_target(name: &String, base: &String) -> Result<(String, bool)> {
     // 匹配 target_name 模式
     let sp: Vec<&str> = name.split("/").collect();
     let length = sp.len();
@@ -47,16 +47,16 @@ fn parse_target(name: &String, base: &String) -> Result<(String,bool)> {
                 anyhow!("Error(Link):Failed to create directory '{base}/{lnk_folder}' : {e}")
             })?;
         }
-        (format!("{base}/{lnk_folder}/{lnk_name}.lnk"),true)
+        (format!("{base}/{lnk_folder}/{lnk_name}.lnk"), true)
     } else {
-        (format!("{base}/{lnk_name}.lnk"),false)
+        (format!("{base}/{lnk_name}.lnk"), false)
     };
 
     Ok(target)
 }
 
 fn create_shortcut(sl: &ShellLink, name: &String, base: &String) -> Result<()> {
-    let (target,_) = parse_target(name, base)?;
+    let (target, _) = parse_target(name, base)?;
     sl.create_lnk(&target)
         .map_err(|err| anyhow!("Error(Link):Can't create shortcut {target} : {err}"))?;
     log!("Info(Link):Added shortcut '{target}'");
@@ -64,13 +64,19 @@ fn create_shortcut(sl: &ShellLink, name: &String, base: &String) -> Result<()> {
 }
 
 fn delete_shortcut(name: &String, base: &String) -> Result<()> {
-    let (target,parent) = parse_target(name, base)?;
+    let (target, parent) = parse_target(name, base)?;
     try_recycle(Path::new(&target).to_path_buf())?;
-    if parent{
-        let parent_path=Path::new(&target).parent().unwrap();
-        if count_sub_files(parent_path, |name|name.ends_with(".lnk")||name.ends_with(".LNK"))?==0{
-            if let Err(e)=try_recycle(parent_path.to_path_buf()){
-                log!("Warning(Link):Failed to delete empty shortcut directory '{p}' : {e}",p=p2s!(parent_path));
+    if parent {
+        let parent_path = Path::new(&target).parent().unwrap();
+        if count_sub_files(parent_path, |name| {
+            name.ends_with(".lnk") || name.ends_with(".LNK")
+        })? == 0
+        {
+            if let Err(e) = try_recycle(parent_path.to_path_buf()) {
+                log!(
+                    "Warning(Link):Failed to delete empty shortcut directory '{p}' : {e}",
+                    p = p2s!(parent_path)
+                );
             }
         }
     }
@@ -100,10 +106,10 @@ impl TStep for StepLink {
             .map_err(|_| anyhow!("Error(Link):Can't find source file '{abs_clear_source}'"))?;
 
         // 填充额外参数
-        if self.target_icon.is_some(){
+        if self.target_icon.is_some() {
             sl.set_icon_location(self.target_icon);
         }
-        if self.target_args.is_some(){
+        if self.target_args.is_some() {
             sl.set_arguments(self.target_args);
         }
 

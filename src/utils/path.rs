@@ -1,7 +1,7 @@
 use anyhow::{anyhow, Result};
 use path_clean::PathClean;
 use std::{
-    fs::{canonicalize},
+    fs::canonicalize,
     path::{Path, PathBuf},
 };
 

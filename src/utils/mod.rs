@@ -3,20 +3,20 @@ mod exe_version;
 mod log;
 mod cfg;
 pub mod env;
+mod fs;
 mod path;
 mod process;
 mod term;
-mod fs;
 
 use anyhow::{anyhow, Result};
 
 pub use self::cfg::{get_config, set_config, Cfg, Local};
 pub use self::exe_version::get_exe_version;
+pub use self::fs::{count_sub_files, read_sub_dir, try_recycle};
 pub use self::log::{fn_log, fn_log_ok_last};
 pub use self::path::{find_scope_with_name_locally, parse_relative_path};
 pub use self::process::kill_with_name;
 pub use self::term::ask_yn;
-pub use self::fs::{try_recycle, read_sub_dir, count_sub_files};
 
 use std::fs::{create_dir_all, remove_dir_all};
 use std::path::PathBuf;

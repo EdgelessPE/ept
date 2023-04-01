@@ -1,4 +1,5 @@
 use crate::log;
+use crate::types::permissions::PermissionLevel;
 use crate::utils::env::{
     env_appdata, env_desktop, env_home, env_program_files_x64, env_program_files_x86,
     env_system_drive,
@@ -15,7 +16,7 @@ lazy_static! {
 }
 
 macro_rules! define_values {
-    ($({$key:expr,$val:expr}),*) => {
+    ($({$key:expr, $val:expr, $perm:expr}),*) => {
         fn get_arr(extra:bool)->Vec<String>{
             let mut arr=vec![$($key.to_string()),*];
             if extra{
@@ -39,16 +40,23 @@ macro_rules! define_values {
             $(.replace($key,&$val))*
         }
 
+        pub fn match_value_permission(value:&String)->Result<PermissionLevel>{
+            let perm=match value.as_str() {
+                $($key=>$perm,)*
+                _=>PermissionLevel::Normal,
+            };
+            Ok(perm)
+        }
     };
 }
 
 define_values! {
-    {"${SystemDrive}",env_system_drive()},
-    {"${Home}",env_home()},
-    {"${AppData}",env_appdata()},
-    {"${ProgramFiles_X64}",env_program_files_x64()},
-    {"${ProgramFiles_X86}",env_program_files_x86()},
-    {"${Desktop}",env_desktop()}
+    {"${SystemDrive}",env_system_drive(),PermissionLevel::Sensitive},
+    {"${Home}",env_home(),PermissionLevel::Important},
+    {"${AppData}",env_appdata(),PermissionLevel::Sensitive},
+    {"${ProgramFiles_X64}",env_program_files_x64(),PermissionLevel::Sensitive},
+    {"${ProgramFiles_X86}",env_program_files_x86(),PermissionLevel::Sensitive},
+    {"${Desktop}",env_desktop(),PermissionLevel::Important}
 }
 
 // 收集合法的内置变量
