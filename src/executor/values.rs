@@ -80,7 +80,7 @@ pub fn collect_values(raw: &String) -> Result<Vec<String>> {
 }
 
 /// 仅适用于路径的内置变量校验器
-pub fn values_validator_manifest_path(raw: &String) -> Result<()> {
+pub fn values_validator_path(raw: &String) -> Result<()> {
     // "${DefaultLocation}" 不是合法的路径内置变量，应该使用相对路径
     if raw.contains("${DefaultLocation}") {
         return Err(anyhow!(
@@ -140,31 +140,31 @@ pub fn values_validator_manifest_path(raw: &String) -> Result<()> {
 
 #[test]
 fn test_collect_values() {
-    values_validator_manifest_path(&"${AppData}${ExitCode}.${SystemData}/".to_string()).unwrap();
+    values_validator_path(&"${AppData}${ExitCode}.${SystemData}/".to_string()).unwrap();
 
     let err_res =
-        values_validator_manifest_path(&"${SystemData}${AppData}${ExitCode}./".to_string());
+        values_validator_path(&"${SystemData}${AppData}${ExitCode}./".to_string());
     assert!(err_res.is_err());
     log!("{e}", e = err_res.unwrap_err());
 
-    let err_res = values_validator_manifest_path(&"C:/system".to_string());
+    let err_res = values_validator_path(&"C:/system".to_string());
     assert!(err_res.is_err());
     log!("{e}", e = err_res.unwrap_err());
 
-    let err_res = values_validator_manifest_path(&"${AppData}/../nep".to_string());
+    let err_res = values_validator_path(&"${AppData}/../nep".to_string());
     assert!(err_res.is_err());
     log!("{e}", e = err_res.unwrap_err());
 
-    let err_res = values_validator_manifest_path(&"114${DefaultLocation}/vscode".to_string());
+    let err_res = values_validator_path(&"114${DefaultLocation}/vscode".to_string());
     assert!(err_res.is_err());
     log!("{e}", e = err_res.unwrap_err());
 
     let err_res =
-        values_validator_manifest_path(&"${AppData}/./${ExitCode}${Home}/nep".to_string());
+        values_validator_path(&"${AppData}/./${ExitCode}${Home}/nep".to_string());
     assert!(err_res.is_err());
     log!("{e}", e = err_res.unwrap_err());
 
-    let err_res = values_validator_manifest_path(&"$/{${Desktop}/vscode".to_string());
+    let err_res = values_validator_path(&"$/{${Desktop}/vscode".to_string());
     assert!(err_res.is_err());
     log!("{e}", e = err_res.unwrap_err());
 }

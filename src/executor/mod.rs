@@ -15,7 +15,7 @@ use self::{
     values::{values_decorator, values_replacer},
 };
 
-pub use self::values::values_validator_manifest_path;
+pub use self::values::values_validator_path;
 
 // 配置部分内置变量的值
 lazy_static! {
@@ -228,7 +228,7 @@ fn test_workflow_executor() {
             header: WorkflowHeader {
                 name: "Exist".to_string(),
                 step: "If exist".to_string(),
-                c_if: Some("Exist(${ProgramFiles_X64})".to_string()),
+                c_if: Some("Exist(${ProgramFiles_X64}+\"/nodejs/node.exe\") && IsDirectory(${Desktop}+\"/Projects\") && Exist(\"./Cargo.lock\")".to_string()),
             },
             body: Step::StepLog(StepLog {
                 level: "Warning".to_string(),
@@ -248,7 +248,7 @@ fn test_workflow_executor() {
     ];
     let r1 = workflow_executor(
         wf1,
-        &String::from("D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode"),
+        &String::from("D:/Desktop/Projects/EdgelessPE/ept"),
         &pkg,
     );
     println!("{r1:?}");

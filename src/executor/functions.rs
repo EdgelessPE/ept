@@ -62,7 +62,7 @@ pub fn functions_decorator(expr: Expr, located: &String) -> Expr {
     let expr = expr.function("Exist", move |val| {
         let arg = get_arg(val)?;
         let p = parse_relative_path_with_located(&arg, &l);
-        // println!("exist {p:?} : {e}",e=p.exists());
+        println!("exist {p:?} : {e}",e=p.exists());
 
         Ok(eval::Value::Bool(p.exists()))
     });
@@ -71,7 +71,7 @@ pub fn functions_decorator(expr: Expr, located: &String) -> Expr {
     let expr = expr.function("IsDirectory", move |val| {
         let arg = get_arg(val)?;
         let p = parse_relative_path_with_located(&arg, &l);
-        // println!("is_dir {p:?} : {r}",r=p.exists());
+        println!("is_dir {p:?} : {r}",r=p.exists());
 
         Ok(eval::Value::Bool(p.is_dir()))
     });
@@ -115,7 +115,7 @@ fn test_header_perm() {
     let flow=WorkflowHeader{
         name: "Name".to_string(),
         step: "Step".to_string(),
-        c_if: Some("Exist(\"./mc/vsc.exe\") && IsDirectory(\"${SystemDrive}/Windows\") || Exist(\"${AppData}/Roaming/Edgeless/ept\")".to_string()),
+        c_if: Some("Exist(\"./mc/vsc.exe\") && IsDirectory(${SystemDrive}+\"/Windows\") || Exist(${AppData}+\"/Roaming/Edgeless/ept\")".to_string()),
     };
     println!("{res:#?}", res = flow.generalize_permissions().unwrap());
 }
