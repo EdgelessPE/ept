@@ -51,6 +51,7 @@ fn match_args(fn_name: String, cond: &String) -> Result<Vec<String>> {
     // 匹配结果
     let mut res = Vec::new();
     for cap in regex.captures_iter(cond) {
+        // TODO:在此处检查入参是否为单一字符串
         res.push(cap[1].to_string())
     }
 
@@ -62,7 +63,7 @@ pub fn functions_decorator(expr: Expr, located: &String) -> Expr {
     let expr = expr.function("Exist", move |val| {
         let arg = get_arg(val)?;
         let p = parse_relative_path_with_located(&arg, &l);
-        println!("exist {p:?} : {e}",e=p.exists());
+        // println!("exist {p:?} : {e}",e=p.exists());
 
         Ok(eval::Value::Bool(p.exists()))
     });
@@ -71,7 +72,7 @@ pub fn functions_decorator(expr: Expr, located: &String) -> Expr {
     let expr = expr.function("IsDirectory", move |val| {
         let arg = get_arg(val)?;
         let p = parse_relative_path_with_located(&arg, &l);
-        println!("is_dir {p:?} : {r}",r=p.exists());
+        // println!("is_dir {p:?} : {r}",r=p.exists());
 
         Ok(eval::Value::Bool(p.is_dir()))
     });

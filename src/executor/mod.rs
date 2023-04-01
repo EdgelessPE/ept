@@ -10,10 +10,7 @@ use crate::{
     utils::{get_bare_apps, is_strict_mode},
 };
 
-use self::{
-    functions::functions_decorator,
-    values::{values_decorator, values_replacer},
-};
+use self::{functions::functions_decorator, values::values_replacer};
 
 pub use self::values::values_validator_path;
 
@@ -26,8 +23,9 @@ lazy_static! {
 // 执行条件以判断是否成立
 fn condition_eval(condition: &String, exit_code: i32, located: &String) -> Result<bool> {
     // 装饰变量与函数
-    let expr = Expr::new(condition);
-    let expr = values_decorator(expr, exit_code, located);
+    let condition = values_replacer(condition.to_owned(), exit_code, located);
+    let expr = Expr::new(&condition);
+    // let expr = values_decorator(expr, exit_code, located);
     let expr = functions_decorator(expr, located);
 
     // 执行 eval
@@ -138,7 +136,7 @@ fn test_condition_eval() {
     assert_eq!(r2, false);
 
     let r3 = condition_eval(
-        &String::from("${SystemDrive}==\"C:\""),
+        &String::from("\"${SystemDrive}\"==\"C:\""),
         0,
         &String::from("D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode"),
     )
@@ -146,7 +144,7 @@ fn test_condition_eval() {
     assert!(r3);
 
     let r4 = condition_eval(
-        &String::from("${DefaultLocation}==\"D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode\""),
+        &String::from("\"${DefaultLocation}\"==\"D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode\""),
         0,
         &String::from("D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode"),
     )
@@ -170,7 +168,7 @@ fn test_condition_eval() {
     assert_eq!(r6, false);
 
     let r7 = condition_eval(
-        &String::from("Exist(${AppData}) && IsDirectory(${SystemDrive}+\"/Windows\")"),
+        &String::from("Exist(\"${AppData}\") && IsDirectory(\"${SystemDrive}/Windows\")"),
         0,
         &String::from("D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode"),
     )
@@ -228,7 +226,7 @@ fn test_workflow_executor() {
             header: WorkflowHeader {
                 name: "Exist".to_string(),
                 step: "If exist".to_string(),
-                c_if: Some("Exist(${ProgramFiles_X64}+\"/nodejs/node.exe\") && IsDirectory(${Desktop}+\"/Projects\") && Exist(\"./Cargo.lock\")".to_string()),
+                c_if: Some("Exist(\"${ProgramFiles_X64}/nodejs/node.exe\") && IsDirectory(\"${Desktop}/Projects\") && Exist(\"./Cargo.lock\")".to_string()),
             },
             body: Step::StepLog(StepLog {
                 level: "Warning".to_string(),

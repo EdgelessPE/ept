@@ -26,7 +26,9 @@ macro_rules! define_values {
             arr
         }
 
-        pub fn values_decorator(expr:Expr, exit_code: i32, located: &String)->Expr{
+        // 啥时候需要真正的内置变量了再启用
+        #[deprecated]
+        pub fn _values_decorator(expr:Expr, exit_code: i32, located: &String)->Expr{
             expr
             .value("${ExitCode}",exit_code)
             .value("${DefaultLocation}",located.to_owned())
@@ -142,8 +144,7 @@ pub fn values_validator_path(raw: &String) -> Result<()> {
 fn test_collect_values() {
     values_validator_path(&"${AppData}${ExitCode}.${SystemData}/".to_string()).unwrap();
 
-    let err_res =
-        values_validator_path(&"${SystemData}${AppData}${ExitCode}./".to_string());
+    let err_res = values_validator_path(&"${SystemData}${AppData}${ExitCode}./".to_string());
     assert!(err_res.is_err());
     log!("{e}", e = err_res.unwrap_err());
 
@@ -159,8 +160,7 @@ fn test_collect_values() {
     assert!(err_res.is_err());
     log!("{e}", e = err_res.unwrap_err());
 
-    let err_res =
-        values_validator_path(&"${AppData}/./${ExitCode}${Home}/nep".to_string());
+    let err_res = values_validator_path(&"${AppData}/./${ExitCode}${Home}/nep".to_string());
     assert!(err_res.is_err());
     log!("{e}", e = err_res.unwrap_err());
 
