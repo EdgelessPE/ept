@@ -28,7 +28,7 @@ fn condition_eval(condition: &String, exit_code: i32, located: &String) -> Resul
     // 装饰变量与函数
     let expr = Expr::new(condition);
     let expr = values_decorator(expr, exit_code, located);
-    let expr = functions_decorator(expr);
+    let expr = functions_decorator(expr, located);
 
     // 执行 eval
     let eval_res = expr
@@ -154,9 +154,9 @@ fn test_condition_eval() {
     assert!(r4);
 
     let r5 = condition_eval(
-        &String::from("Exist(\"./src/main.rs\")==IsDirectory(\"./bin\")"),
+        &String::from("Exist(\"src/main.rs\") && IsDirectory(\"bin\")"),
         0,
-        &String::from("D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode"),
+        &String::from("D:/Desktop/Projects/EdgelessPE/ept"),
     )
     .unwrap();
     assert!(r5);
@@ -164,13 +164,13 @@ fn test_condition_eval() {
     let r6 = condition_eval(
         &String::from("Exist(\"./src/main.ts\")"),
         0,
-        &String::from("D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode"),
+        &String::from("D:/Desktop/Projects/EdgelessPE/ept"),
     )
     .unwrap();
     assert_eq!(r6, false);
 
     let r7 = condition_eval(
-        &String::from("Exist(${Desktop})&&IsDirectory(${AppData})"),
+        &String::from("Exist(${AppData}) && IsDirectory(${SystemDrive}+\"/Windows\")"),
         0,
         &String::from("D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode"),
     )

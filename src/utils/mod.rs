@@ -14,7 +14,9 @@ pub use self::cfg::{get_config, set_config, Cfg, Local};
 pub use self::exe_version::get_exe_version;
 pub use self::fs::{count_sub_files, read_sub_dir, try_recycle};
 pub use self::log::{fn_log, fn_log_ok_last};
-pub use self::path::{find_scope_with_name_locally, parse_relative_path};
+pub use self::path::{
+    find_scope_with_name_locally, parse_relative_path, parse_relative_path_with_located,
+};
 pub use self::process::kill_with_name;
 pub use self::term::ask_yn;
 

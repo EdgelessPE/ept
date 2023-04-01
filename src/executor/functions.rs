@@ -1,8 +1,10 @@
-use crate::types::permissions::{Permission, PermissionLevel};
+use crate::{
+    types::permissions::{Permission, PermissionLevel},
+    utils::parse_relative_path_with_located,
+};
 use anyhow::Result;
 use eval::Expr;
 use regex::Regex;
-use std::path::Path;
 
 use crate::types::{permissions::Generalizable, workflow::WorkflowHeader};
 
@@ -19,7 +21,12 @@ fn get_arg(val: Vec<eval::Value>) -> std::result::Result<String, eval::Error> {
     if !arg.is_string() {
         return Err(eval::Error::Custom("Argument is not a string".to_string()));
     }
-    Ok(arg.to_string())
+
+    let mut arg = arg.to_string();
+    if arg.starts_with("\"") && arg.ends_with("\"") {
+        arg = arg[1..arg.len() - 1].to_string();
+    }
+    Ok(arg)
 }
 
 /// 给定内置函数访问的 fs 目标（包含内置变量），需要的权限级别
@@ -50,19 +57,26 @@ fn match_args(fn_name: String, cond: &String) -> Result<Vec<String>> {
     Ok(res)
 }
 
-pub fn functions_decorator(expr: Expr) -> Expr {
-    expr.function("Exist", |val| {
+pub fn functions_decorator(expr: Expr, located: &String) -> Expr {
+    let l = located.to_owned();
+    let expr = expr.function("Exist", move |val| {
         let arg = get_arg(val)?;
-        let p = Path::new(&arg);
+        let p = parse_relative_path_with_located(&arg, &l);
+        // println!("exist {p:?} : {e}",e=p.exists());
 
         Ok(eval::Value::Bool(p.exists()))
-    })
-    .function("IsDirectory", |val| {
+    });
+
+    let l = located.to_owned();
+    let expr = expr.function("IsDirectory", move |val| {
         let arg = get_arg(val)?;
-        let p = Path::new(&arg);
+        let p = parse_relative_path_with_located(&arg, &l);
+        // println!("is_dir {p:?} : {r}",r=p.exists());
 
         Ok(eval::Value::Bool(p.is_dir()))
-    })
+    });
+
+    expr
 }
 
 impl Generalizable for WorkflowHeader {

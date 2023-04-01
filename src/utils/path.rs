@@ -7,16 +7,17 @@ use std::{
 
 use crate::p2s;
 
-use super::{get_bare_apps, get_config, read_sub_dir};
+use super::{format_path, get_bare_apps, get_config, read_sub_dir};
 
+/// 使用配置文件中指定的 base 解析相对路径，不带路径格式化
 pub fn parse_relative_path(relative: &String) -> Result<PathBuf> {
-    let path = Path::new(&relative);
+    let path = Path::new(relative);
 
     let absolute_path = if path.is_absolute() {
         path.to_path_buf()
     } else {
         let cfg = get_config();
-        let relative = Path::new(&cfg.local.base).join(path);
+        let relative = Path::new(&cfg.local.base).join(relative);
         let dirty_abs = p2s!(canonicalize(relative)?);
         Path::new(&dirty_abs[4..]).to_path_buf()
     }
@@ -27,6 +28,17 @@ pub fn parse_relative_path(relative: &String) -> Result<PathBuf> {
         p = p2s!(absolute_path)
     );
     Ok(absolute_path)
+}
+
+/// 使用给定的 located 解析相对路径，带路径格式化
+pub fn parse_relative_path_with_located(relative: &String, located: &String) -> PathBuf {
+    let relative = format_path(relative);
+    let path = Path::new(&relative);
+    if path.is_absolute() {
+        path.to_path_buf()
+    } else {
+        Path::new(located).join(relative).to_path_buf()
+    }
 }
 
 /// name 大小写不敏感
