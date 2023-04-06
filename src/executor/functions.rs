@@ -1,10 +1,11 @@
+use std::sync::{Arc, Mutex};
+
 use crate::{
     types::permissions::{Permission, PermissionLevel},
     utils::parse_relative_path_with_located,
 };
 use anyhow::Result;
 use eval::Expr;
-use regex::Regex;
 
 use crate::types::{permissions::Generalizable, workflow::WorkflowHeader};
 
@@ -44,20 +45,6 @@ fn judge_perm_level(fs_target: &String) -> std::result::Result<PermissionLevel, 
     Ok(final_perm)
 }
 
-/// 给定条件语句，匹配指定函数使用到的参数
-fn match_args(fn_name: String, cond: &String) -> Result<Vec<String>> {
-    // 编译正则表达式
-    let regex = Regex::new(&(fn_name + r"\(([^)]+)\)"))?;
-    // 匹配结果
-    let mut res = Vec::new();
-    for cap in regex.captures_iter(cond) {
-        // TODO:在此处检查入参是否为单一字符串
-        res.push(cap[1].to_string())
-    }
-
-    Ok(res)
-}
-
 pub fn functions_decorator(expr: Expr, located: &String) -> Expr {
     let l = located.to_owned();
     let expr = expr.function("Exist", move |val| {
@@ -88,26 +75,42 @@ impl Generalizable for WorkflowHeader {
             conditions.push(cond);
         }
 
-        let mut permissions = Vec::new();
+        let permissions = Arc::new(Mutex::new(Vec::new()));
         for cond in conditions {
-            for arg in match_args("Exist".to_string(), cond)? {
-                permissions.push(Permission {
-                    key: "fs_read".to_string(),
-                    level: judge_perm_level(&arg)?,
-                    targets: vec![arg],
-                });
-            }
+            // 使用函数收集器收集函数执行参数
+            let expr = Expr::new(cond);
 
-            for arg in match_args("IsDirectory".to_string(), cond)? {
-                permissions.push(Permission {
+            let perms = permissions.clone();
+            let expr = expr.function("Exist", move |val| {
+                let arg = get_arg(val)?;
+                let mut perms = perms.lock().unwrap();
+                perms.push(Permission {
                     key: "fs_read".to_string(),
                     level: judge_perm_level(&arg)?,
                     targets: vec![arg],
                 });
-            }
+
+                Ok(eval::Value::Bool(true))
+            });
+
+            let perms = permissions.clone();
+            let expr = expr.function("IsDirectory", move |val| {
+                let arg = get_arg(val)?;
+                let mut perms = perms.lock().unwrap();
+                perms.push(Permission {
+                    key: "fs_read".to_string(),
+                    level: judge_perm_level(&arg)?,
+                    targets: vec![arg],
+                });
+
+                Ok(eval::Value::Bool(true))
+            });
+
+            // 执行
+            expr.exec()?;
         }
-
-        Ok(permissions)
+        let permissions = permissions.lock().unwrap();
+        Ok(permissions.clone())
     }
 }
 
@@ -116,7 +119,7 @@ fn test_header_perm() {
     let flow=WorkflowHeader{
         name: "Name".to_string(),
         step: "Step".to_string(),
-        c_if: Some("Exist(\"./mc/vsc.exe\") && IsDirectory(${SystemDrive}+\"/Windows\") || Exist(${AppData}+\"/Roaming/Edgeless/ept\")".to_string()),
+        c_if: Some("Exist(\"./mc/vsc.exe\") && IsDirectory(\"${SystemDrive}/Windows\") || Exist(\"${AppData}/Roaming/Edgeless/ept\")".to_string()),
     };
     println!("{res:#?}", res = flow.generalize_permissions().unwrap());
 }
