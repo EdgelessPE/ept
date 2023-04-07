@@ -6,6 +6,7 @@ mod pack;
 mod uninstall;
 mod update;
 mod utils;
+mod verify;
 
 pub use self::clean::clean;
 pub use self::info::{info, info_local};
