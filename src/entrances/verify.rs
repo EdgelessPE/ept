@@ -1,14 +1,11 @@
-use crate::compression::{compress, pack_tar};
-use crate::entrances::verify::verify;
-use crate::parsers::{parse_author, parse_package, parse_workflow};
-use crate::signature::sign;
+use crate::parsers::{parse_package, parse_workflow};
 use crate::types::mixed_fs::MixedFS;
+use crate::types::package::GlobalPackage;
 use crate::types::verifiable::Verifiable;
-use crate::types::{signature::Signature, signature::SignatureNode, workflow::WorkflowNode};
-use crate::utils::{ask_yn, get_path_temp, is_debug_mode};
+use crate::types::workflow::WorkflowNode;
 use crate::{log, log_ok_last, p2s};
 use anyhow::{anyhow, Result};
-use std::fs::{read_dir, remove_dir_all, write};
+use std::fs::{read_dir};
 use std::path::{Path, PathBuf};
 
 use super::utils::validator::{inner_validator, manifest_validator};
@@ -23,7 +20,7 @@ fn get_manifest(flow: Vec<WorkflowNode>, fs: &mut MixedFS) -> Vec<String> {
 }
 
 fn get_workflow_path(source_dir:&String,file_name:&str)->PathBuf{
-    Path::new(source_dir).join("workflows").join(name).to_path_buf()
+    Path::new(source_dir).join("workflows").join(file_name).to_path_buf()
 }
 
 fn verify_workflow(flow: Vec<WorkflowNode>)->Result<()>{
@@ -33,7 +30,7 @@ fn verify_workflow(flow: Vec<WorkflowNode>)->Result<()>{
     Ok(())
 }
 
-pub fn verify(source_dir:&String)->Result<()>{
+pub fn verify(source_dir:&String)->Result<GlobalPackage>{
     // 打包检查
     log!("Info:Validating source directory...");
     // 如果目录中文件数量超过 3 个则拒绝
@@ -52,13 +49,6 @@ pub fn verify(source_dir:&String)->Result<()>{
     log!("Info:Resolving data...");
     let pkg_path = Path::new(source_dir).join("package.toml");
     let global = parse_package(&p2s!(pkg_path), None)?;
-    let first_author = parse_author(&global.package.authors[0])?;
-    let file_stem = format!(
-        "{pn}_{pv}_{fa}",
-        pn = global.package.name,
-        pv = global.package.version,
-        fa = first_author.name
-    );
     log_ok_last!("Info:Resolving data...");
 
     // 校验 setup 工作流装箱单
@@ -72,6 +62,7 @@ pub fn verify(source_dir:&String)->Result<()>{
     log_ok_last!("Info:Checking manifest...");
 
     // 校验工作流
+    log!("Info:Verifying workflows...");
     verify_workflow(setup_flow)?;
     let optional_path:Vec<PathBuf>=vec!["update.toml","remove.toml"]
     .into_iter()
@@ -83,6 +74,13 @@ pub fn verify(source_dir:&String)->Result<()>{
             verify_workflow(flow)?;
         }
     }
+    log_ok_last!("Info:Verifying workflows...");
 
-    Ok(())
+    Ok(global)
+}
+
+#[test]
+fn test_verify() {
+    envmnt::set("DEBUG", "true");
+    verify(&r"D:\Desktop\Projects\EdgelessPE\edgeless-bot\workshop\VSCode\_ready".to_string()).unwrap();
 }

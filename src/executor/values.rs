@@ -139,7 +139,8 @@ pub fn values_validator_path(raw: &String) -> Result<()> {
 
     // 检查 env 变量的使用，后面必须加 "/"
     for env_val in get_arr(false){
-        let reg=Regex::new(&format!(r"\$\{{val}}\}[^\/]",val=env_val[2..env_val.len()-1]))?;
+        let str=&env_val[2..env_val.len()-1];
+        let reg=Regex::new(&format!(r"\${}{}{}[^/]",r"\{",str,r"\}"))?;
         if reg.is_match(raw){
             return Err(anyhow!("Error:Path value '{env_val}' must be followed by a slash in '{raw}' (e.g. ${}/Windows/system32)","{SystemDrive}"));
         }
@@ -150,7 +151,7 @@ pub fn values_validator_path(raw: &String) -> Result<()> {
 
 #[test]
 fn test_collect_values() {
-    values_validator_path(&"${AppData}${ExitCode}.${SystemData}/".to_string()).unwrap();
+    values_validator_path(&"${AppData}/${ExitCode}.${SystemData}/".to_string()).unwrap();
 
     let err_res = values_validator_path(&"${SystemData}${AppData}${ExitCode}./".to_string());
     assert!(err_res.is_err());

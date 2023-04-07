@@ -81,7 +81,7 @@ impl WorkflowHeader {
 
         // 收集全部的条件语句
         let mut conditions = Vec::new();
-        if let Some(cond) = self.c_if {
+        if let Some(cond) = &self.c_if {
             conditions.push(cond);
         }
 
@@ -89,16 +89,16 @@ impl WorkflowHeader {
         let res=Arc::new(Mutex::new(Vec::new()));
         for cond in conditions{
             // 初始化表达式
-            let expr = Expr::new(&cond);
+            let mut expr = Expr::new(cond);
 
             // 迭代函数信息，收集
-            for (name,is_fs) in info_arr{
+            for (name,is_fs) in info_arr.clone(){
                 let r = res.clone();
                 let c=cond.clone();
-                let expr = expr.function(name, move |val| {
+                expr = expr.function(name, move |val| {
                     let arg = get_arg(val)?;
                     let mut r = r.lock().unwrap();
-                    r.push((name.to_string(),arg,is_fs,c));
+                    r.push((name.to_string(),arg,is_fs,c.to_owned()));
 
                     Ok(eval::Value::Bool(true))
                 });

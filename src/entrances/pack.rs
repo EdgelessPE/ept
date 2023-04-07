@@ -1,22 +1,26 @@
 use crate::compression::{compress, pack_tar};
 use crate::entrances::verify::verify;
-use crate::parsers::{parse_author, parse_package, parse_workflow};
+use crate::parsers::{parse_author};
 use crate::signature::sign;
-use crate::types::mixed_fs::MixedFS;
-use crate::types::{signature::Signature, signature::SignatureNode, workflow::WorkflowNode};
+use crate::types::{signature::Signature, signature::SignatureNode};
 use crate::utils::{ask_yn, get_path_temp, is_debug_mode};
 use crate::{log, log_ok_last, p2s};
 use anyhow::{anyhow, Result};
-use std::fs::{read_dir, remove_dir_all, write};
+use std::fs::{remove_dir_all, write};
 use std::path::Path;
-
-use super::utils::validator::{inner_validator, manifest_validator};
 
 pub fn pack(source_dir: &String, into_file: Option<String>, need_sign: bool) -> Result<String> {
     log!("Info:Preparing to pack '{source_dir}'");
 
     // 通用校验
-    verify(source_dir)?;
+    let global=verify(source_dir)?;
+    let first_author = parse_author(&global.package.authors[0])?;
+    let file_stem = format!(
+        "{pn}_{pv}_{fa}",
+        pn = global.package.name,
+        pv = global.package.version,
+        fa = first_author.name
+    );
 
     // 校验 into_file 是否存在
     let into_file = into_file.unwrap_or(String::from("./") + &file_stem + ".nep");
