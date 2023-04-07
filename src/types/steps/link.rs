@@ -11,8 +11,8 @@ use regex::Regex;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::fs::create_dir_all;
+use std::path::Path;
 use std::ptr::null_mut;
-use std::{path::Path};
 use winapi::shared::minwindef::{LPARAM, WPARAM};
 use winapi::um::winuser::{
     SendMessageTimeoutA, HWND_BROADCAST, SMTO_ABORTIFHUNG, WM_SETTINGCHANGE,
@@ -183,7 +183,7 @@ impl TStep for StepLink {
 }
 
 impl Verifiable for StepLink {
-    fn verify_self(&self,_:&String) -> Result<()> {
+    fn verify_self(&self, _: &String) -> Result<()> {
         if !TARGET_RE.is_match(&self.target_name) {
             return Err(anyhow!(
                 "Error(Link):Invalid field 'target_name', expect 'NAME' or 'FOLDER/NAME', got '{name}'",
@@ -219,7 +219,8 @@ fn test_link() {
         target_icon: Some(r"D:\Download\favicon.ico".to_string()),
         at: Some(vec!["Desktop".to_string()]),
     };
-    step.verify_self(&String::from("./apps/Microsoft/VSCode")).unwrap();
+    step.verify_self(&String::from("./apps/Microsoft/VSCode"))
+        .unwrap();
     step.run(&String::from("./apps/Microsoft/VSCode"), &pkg)
         .unwrap();
 }

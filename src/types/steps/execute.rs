@@ -99,7 +99,7 @@ impl TStep for StepExecute {
 }
 
 impl Verifiable for StepExecute {
-    fn verify_self(&self,_:&String) -> Result<()> {
+    fn verify_self(&self, _: &String) -> Result<()> {
         Ok(())
     }
 }

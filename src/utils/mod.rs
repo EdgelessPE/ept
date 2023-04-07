@@ -103,6 +103,6 @@ pub fn get_path_bin() -> Result<PathBuf> {
     ensure_exist(parse_relative_path(&"bin".to_string())?)
 }
 
-pub fn is_url(text:&String)->bool{
+pub fn is_url(text: &String) -> bool {
     URL_RE.is_match(text)
 }

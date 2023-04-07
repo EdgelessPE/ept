@@ -85,8 +85,7 @@ pub fn install_using_package(source_file: &String, verify_signature: bool) -> Re
 fn test_install() {
     // envmnt::set("OFFLINE", "true");
     install_using_package(
-        &r"D:\Desktop\Projects\EdgelessPE\edgeless-bot\workshop\adb\_ready"
-            .to_string(),
+        &r"D:\Desktop\Projects\EdgelessPE\edgeless-bot\workshop\adb\_ready".to_string(),
         false,
     )
     .unwrap();

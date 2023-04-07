@@ -37,7 +37,7 @@ impl TStep for StepLog {
 }
 
 impl Verifiable for StepLog {
-    fn verify_self(&self,_:&String) -> Result<()> {
+    fn verify_self(&self, _: &String) -> Result<()> {
         verify_enum!(
             "Log",
             "level",
@@ -60,7 +60,10 @@ fn test_log() {
         level: String::from("Info"),
         msg: String::from("Hello nep!"),
     };
-    step.verify_self(&String::from("D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode")).unwrap();
+    step.verify_self(&String::from(
+        "D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode",
+    ))
+    .unwrap();
     step.run(
         &String::from("D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode"),
         &pkg,

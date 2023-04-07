@@ -1,8 +1,8 @@
-use serde::{Deserialize, Serialize};
-use anyhow::{Result, anyhow};
 use crate::types::software::Software;
+use anyhow::{anyhow, Result};
+use serde::{Deserialize, Serialize};
 
-use super::{verifiable::Verifiable, extended_semver::ExSemVer};
+use super::{extended_semver::ExSemVer, verifiable::Verifiable};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Package {
@@ -15,17 +15,23 @@ pub struct Package {
 }
 
 impl Verifiable for Package {
-    fn verify_self(&self,_:&String) -> Result<()> {
-        let err_wrapper=|e:anyhow::Error|anyhow!("Error:Failed to verify table 'package' in 'package.toml' : {err}",err=e.to_string());
+    fn verify_self(&self, _: &String) -> Result<()> {
+        let err_wrapper = |e: anyhow::Error| {
+            anyhow!(
+                "Error:Failed to verify table 'package' in 'package.toml' : {err}",
+                err = e.to_string()
+            )
+        };
 
         // 模板只能是 Software
-        if self.template!="Software".to_string(){
-            return Err(err_wrapper(anyhow!("field 'template' should be 'Software'")));
+        if self.template != "Software".to_string() {
+            return Err(err_wrapper(anyhow!(
+                "field 'template' should be 'Software'"
+            )));
         }
 
         // 版本号必须可以解析
-        let _=ExSemVer::parse(&self.version)?;
-
+        let _ = ExSemVer::parse(&self.version)?;
 
         Ok(())
     }
@@ -63,12 +69,12 @@ impl GlobalPackage {
 }
 
 impl Verifiable for GlobalPackage {
-    fn verify_self(&self,located:&String) -> Result<()> {
+    fn verify_self(&self, located: &String) -> Result<()> {
         self.package.verify_self(located)?;
-        if let Some(software)=&self.software{
+        if let Some(software) = &self.software {
             software.verify_self(located)?;
         }
-        
+
         Ok(())
     }
 }

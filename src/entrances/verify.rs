@@ -5,11 +5,10 @@ use crate::types::verifiable::Verifiable;
 use crate::types::workflow::WorkflowNode;
 use crate::{log, log_ok_last, p2s};
 use anyhow::{anyhow, Result};
-use std::fs::{read_dir};
+use std::fs::read_dir;
 use std::path::{Path, PathBuf};
 
 use super::utils::validator::{inner_validator, manifest_validator};
-
 
 fn get_manifest(flow: Vec<WorkflowNode>, fs: &mut MixedFS) -> Vec<String> {
     let mut manifest = Vec::new();
@@ -19,18 +18,21 @@ fn get_manifest(flow: Vec<WorkflowNode>, fs: &mut MixedFS) -> Vec<String> {
     manifest
 }
 
-fn get_workflow_path(source_dir:&String,file_name:&str)->PathBuf{
-    Path::new(source_dir).join("workflows").join(file_name).to_path_buf()
+fn get_workflow_path(source_dir: &String, file_name: &str) -> PathBuf {
+    Path::new(source_dir)
+        .join("workflows")
+        .join(file_name)
+        .to_path_buf()
 }
 
-fn verify_workflow(flow: Vec<WorkflowNode>,located:&String)->Result<()>{
-    for node in flow{
+fn verify_workflow(flow: Vec<WorkflowNode>, located: &String) -> Result<()> {
+    for node in flow {
         node.verify_self(located)?;
     }
     Ok(())
 }
 
-pub fn verify(source_dir:&String)->Result<GlobalPackage>{
+pub fn verify(source_dir: &String) -> Result<GlobalPackage> {
     // 打包检查
     log!("Info:Validating source directory...");
     // 如果目录中文件数量超过 3 个则拒绝
@@ -64,15 +66,15 @@ pub fn verify(source_dir:&String)->Result<GlobalPackage>{
 
     // 校验工作流
     log!("Info:Verifying workflows...");
-    verify_workflow(setup_flow,&pkg_content_path)?;
-    let optional_path:Vec<PathBuf>=vec!["update.toml","remove.toml"]
-    .into_iter()
-    .map(|name|get_workflow_path(source_dir, name))
-    .collect();
-    for opt_path in optional_path{
-        if opt_path.exists(){
-            let flow=parse_workflow(&p2s!(opt_path))?;
-            verify_workflow(flow,source_dir)?;
+    verify_workflow(setup_flow, &pkg_content_path)?;
+    let optional_path: Vec<PathBuf> = vec!["update.toml", "remove.toml"]
+        .into_iter()
+        .map(|name| get_workflow_path(source_dir, name))
+        .collect();
+    for opt_path in optional_path {
+        if opt_path.exists() {
+            let flow = parse_workflow(&p2s!(opt_path))?;
+            verify_workflow(flow, source_dir)?;
         }
     }
     log_ok_last!("Info:Verifying workflows...");
@@ -83,5 +85,6 @@ pub fn verify(source_dir:&String)->Result<GlobalPackage>{
 #[test]
 fn test_verify() {
     envmnt::set("DEBUG", "true");
-    verify(&r"D:\Desktop\Projects\EdgelessPE\edgeless-bot\workshop\adb\_ready".to_string()).unwrap();
+    verify(&r"D:\Desktop\Projects\EdgelessPE\edgeless-bot\workshop\adb\_ready".to_string())
+        .unwrap();
 }

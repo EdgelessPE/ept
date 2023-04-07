@@ -254,7 +254,7 @@ impl TStep for StepPath {
 }
 
 impl Verifiable for StepPath {
-    fn verify_self(&self,_:&String) -> Result<()> {
+    fn verify_self(&self, _: &String) -> Result<()> {
         Ok(())
     }
 }

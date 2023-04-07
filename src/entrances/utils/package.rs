@@ -12,8 +12,8 @@ use tar::Archive;
 
 use crate::{
     compression::{decompress, fast_decompress_zstd, release_tar},
-    entrances::utils::validator::{inner_validator, outer_hashmap_validator, outer_validator},
     entrances,
+    entrances::utils::validator::{inner_validator, outer_hashmap_validator, outer_validator},
     p2s,
     parsers::{fast_parse_signature, parse_author, parse_package, parse_signature},
     signature::{fast_verify, verify},
@@ -54,20 +54,20 @@ pub fn unpack_nep(
     verify_signature: bool,
 ) -> Result<(PathBuf, GlobalPackage)> {
     // 处理输入目录的情况
-    let source_path=Path::new(source_file);
-    if source_path.is_dir(){
-        if verify_signature{
+    let source_path = Path::new(source_file);
+    if source_path.is_dir() {
+        if verify_signature {
             return Err(anyhow!("Error:Given path refers to a directory, use '--offline' flag to process as develop directory"));
-        }else{
+        } else {
             // 检查是否为合法的输入目录
             inner_validator(source_file)?;
             // 校验
             entrances::verify::verify(source_file)?;
             // 读取 package.toml
-            let package_path=Path::new(source_file).join("package.toml");
-            let global=parse_package(&p2s!(package_path), None)?;
+            let package_path = Path::new(source_file).join("package.toml");
+            let global = parse_package(&p2s!(package_path), None)?;
 
-            return Ok((Path::new(source_file).to_path_buf(),global));
+            return Ok((Path::new(source_file).to_path_buf(), global));
         }
     }
 
