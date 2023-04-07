@@ -2,7 +2,6 @@ use super::TStep;
 use crate::types::mixed_fs::MixedFS;
 use crate::types::package::GlobalPackage;
 use crate::types::permissions::{Generalizable, Permission, PermissionLevel};
-use crate::types::steps::log;
 use crate::utils::env::{env_desktop, env_start_menu};
 use crate::utils::{count_sub_files, try_recycle};
 use crate::{log, p2s, types::verifiable::Verifiable, utils::parse_relative_path};
@@ -13,7 +12,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::fs::create_dir_all;
 use std::ptr::null_mut;
-use std::{fs::remove_file, path::Path};
+use std::{path::Path};
 use winapi::shared::minwindef::{LPARAM, WPARAM};
 use winapi::um::winuser::{
     SendMessageTimeoutA, HWND_BROADCAST, SMTO_ABORTIFHUNG, WM_SETTINGCHANGE,
@@ -184,7 +183,7 @@ impl TStep for StepLink {
 }
 
 impl Verifiable for StepLink {
-    fn verify_self(&self) -> Result<()> {
+    fn verify_self(&self,_:&String) -> Result<()> {
         if !TARGET_RE.is_match(&self.target_name) {
             return Err(anyhow!(
                 "Error(Link):Invalid field 'target_name', expect 'NAME' or 'FOLDER/NAME', got '{name}'",
@@ -220,7 +219,7 @@ fn test_link() {
         target_icon: Some(r"D:\Download\favicon.ico".to_string()),
         at: Some(vec!["Desktop".to_string()]),
     };
-    step.verify_self().unwrap();
+    step.verify_self(&String::from("./apps/Microsoft/VSCode")).unwrap();
     step.run(&String::from("./apps/Microsoft/VSCode"), &pkg)
         .unwrap();
 }

@@ -87,8 +87,7 @@ pub fn parse_package(p: &String, located: Option<String>) -> Result<GlobalPackag
     // 跟随主程序 exe 文件版本号更新版本号
     let software = pkg.software.clone().unwrap();
     if located.is_some() && pkg.software.is_some() && software.main_program.is_some() {
-        let u_res = update_main_program(&mut pkg, software, located, package_path);
-        if let Err(e) = u_res {
+        if let Err(e) = update_main_program(&mut pkg, software, located, package_path) {
             log!(
                 "Warning:Failed to update main program version for {name} : {e}",
                 name = pkg.package.name,

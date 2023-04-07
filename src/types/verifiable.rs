@@ -1,7 +1,7 @@
 use anyhow::Result;
 
 pub trait Verifiable {
-    fn verify_self(&self) -> Result<()>;
+    fn verify_self(&self,located:&String) -> Result<()>;
 }
 
 #[macro_export]

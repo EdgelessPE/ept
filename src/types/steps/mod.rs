@@ -88,9 +88,9 @@ macro_rules! def_enum_step {
         }
 
         impl Verifiable for Step {
-            fn verify_self(&self) -> Result<()> {
+            fn verify_self(&self,located:&String) -> Result<()> {
                 match self {
-                    $( Step::$x(step) => step.verify_self() ),*
+                    $( Step::$x(step) => step.verify_self(located) ),*
                 }
             }
         }

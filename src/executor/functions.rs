@@ -148,7 +148,7 @@ impl Generalizable for WorkflowHeader {
 }
 
 impl Verifiable for WorkflowHeader {
-    fn verify_self(&self) -> Result<()> {
+    fn verify_self(&self,_:&String) -> Result<()> {
         // 捕获函数执行信息
         let func_info=self.capture_function_info()?;
         
@@ -185,5 +185,5 @@ fn test_header_valid() {
         step: "Step".to_string(),
         c_if: Some("Exist(\"./mc/vsc.exe\") && IsDirectory(\"${SystemDrive}/Windows\") || Exist(\"${AppData}/Roaming/Edgeless/ept\")".to_string()),
     };
-    println!("{res:#?}", res = flow.verify_self().unwrap());
+    println!("{res:#?}", res = flow.verify_self(&String::from("D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode")).unwrap());
 }

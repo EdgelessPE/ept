@@ -23,9 +23,9 @@ fn get_workflow_path(source_dir:&String,file_name:&str)->PathBuf{
     Path::new(source_dir).join("workflows").join(file_name).to_path_buf()
 }
 
-fn verify_workflow(flow: Vec<WorkflowNode>)->Result<()>{
+fn verify_workflow(flow: Vec<WorkflowNode>,located:&String)->Result<()>{
     for node in flow{
-        node.verify_self()?;
+        node.verify_self(located)?;
     }
     Ok(())
 }
@@ -49,6 +49,8 @@ pub fn verify(source_dir:&String)->Result<GlobalPackage>{
     log!("Info:Resolving data...");
     let pkg_path = Path::new(source_dir).join("package.toml");
     let global = parse_package(&p2s!(pkg_path), None)?;
+    let pkg_content_path = p2s!(Path::new(source_dir).join(&global.package.name));
+    global.verify_self(&pkg_content_path)?;
     log_ok_last!("Info:Resolving data...");
 
     // 校验 setup 工作流装箱单
@@ -57,13 +59,12 @@ pub fn verify(source_dir:&String)->Result<GlobalPackage>{
     let setup_flow = parse_workflow(&p2s!(setup_path))?;
     let mut fs = MixedFS::new();
     let setup_manifest = get_manifest(setup_flow.clone(), &mut fs);
-    let pkg_content_path = Path::new(source_dir).join(&global.package.name);
-    manifest_validator(&p2s!(pkg_content_path), setup_manifest, &mut fs)?;
+    manifest_validator(&pkg_content_path, setup_manifest, &mut fs)?;
     log_ok_last!("Info:Checking manifest...");
 
     // 校验工作流
     log!("Info:Verifying workflows...");
-    verify_workflow(setup_flow)?;
+    verify_workflow(setup_flow,&pkg_content_path)?;
     let optional_path:Vec<PathBuf>=vec!["update.toml","remove.toml"]
     .into_iter()
     .map(|name|get_workflow_path(source_dir, name))
@@ -71,7 +72,7 @@ pub fn verify(source_dir:&String)->Result<GlobalPackage>{
     for opt_path in optional_path{
         if opt_path.exists(){
             let flow=parse_workflow(&p2s!(opt_path))?;
-            verify_workflow(flow)?;
+            verify_workflow(flow,source_dir)?;
         }
     }
     log_ok_last!("Info:Verifying workflows...");
@@ -82,5 +83,5 @@ pub fn verify(source_dir:&String)->Result<GlobalPackage>{
 #[test]
 fn test_verify() {
     envmnt::set("DEBUG", "true");
-    verify(&r"D:\Desktop\Projects\EdgelessPE\edgeless-bot\workshop\VSCode\_ready".to_string()).unwrap();
+    verify(&r"D:\Desktop\Projects\EdgelessPE\edgeless-bot\workshop\adb\_ready".to_string()).unwrap();
 }

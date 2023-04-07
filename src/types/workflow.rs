@@ -16,8 +16,8 @@ pub struct WorkflowNode {
 }
 
 impl Verifiable for WorkflowNode {
-    fn verify_self(&self) -> anyhow::Result<()> {
-        self.header.verify_self()?;
-        self.body.verify_self()
+    fn verify_self(&self,located:&String) -> anyhow::Result<()> {
+        self.header.verify_self(located)?;
+        self.body.verify_self(located)
     }
 }

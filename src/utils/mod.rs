@@ -9,6 +9,7 @@ mod process;
 mod term;
 
 use anyhow::{anyhow, Result};
+use regex::Regex;
 
 pub use self::cfg::{get_config, set_config, Cfg, Local};
 pub use self::exe_version::get_exe_version;
@@ -22,6 +23,10 @@ pub use self::term::ask_yn;
 
 use std::fs::{create_dir_all, remove_dir_all};
 use std::path::PathBuf;
+
+lazy_static! {
+    static ref URL_RE: Regex = Regex::new(r"^https?://").unwrap();
+}
 
 #[macro_export]
 macro_rules! p2s {
@@ -96,4 +101,8 @@ pub fn get_path_temp(name: &String, keep_clear: bool, sub_dir: bool) -> Result<P
 
 pub fn get_path_bin() -> Result<PathBuf> {
     ensure_exist(parse_relative_path(&"bin".to_string())?)
+}
+
+pub fn is_url(text:&String)->bool{
+    URL_RE.is_match(text)
 }
