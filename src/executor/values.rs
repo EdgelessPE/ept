@@ -26,7 +26,7 @@ macro_rules! define_values {
             arr
         }
 
-        // 啥时候需要真正的内置变量了再启用
+        // 目前使用的内置变量均为模板字符串模式，啥时候需要真正的内置变量了再启用
         #[deprecated]
         pub fn _values_decorator(expr:Expr, exit_code: i32, located: &String)->Expr{
             expr
@@ -81,7 +81,7 @@ pub fn collect_values(raw: &String) -> Result<Vec<String>> {
     Ok(collection)
 }
 
-/// 仅适用于路径的内置变量校验器
+/// 适用于路径入参的内置变量使用规范校验器
 pub fn values_validator_path(raw: &String) -> Result<()> {
     // "${DefaultLocation}" 不是合法的路径内置变量，应该使用相对路径
     if raw.contains("${DefaultLocation}") {
@@ -137,6 +137,14 @@ pub fn values_validator_path(raw: &String) -> Result<()> {
         ));
     }
 
+    // 检查 env 变量的使用，后面必须加 "/"
+    for env_val in get_arr(false){
+        let reg=Regex::new(&format!(r"\$\{{val}}\}[^\/]",val=env_val[2..env_val.len()-1]))?;
+        if reg.is_match(raw){
+            return Err(anyhow!("Error:Path value '{env_val}' must be followed by a slash in '{raw}' (e.g. ${}/Windows/system32)","{SystemDrive}"));
+        }
+    }
+
     Ok(())
 }
 
@@ -165,6 +173,10 @@ fn test_collect_values() {
     log!("{e}", e = err_res.unwrap_err());
 
     let err_res = values_validator_path(&"$/{${Desktop}/vscode".to_string());
+    assert!(err_res.is_err());
+    log!("{e}", e = err_res.unwrap_err());
+
+    let err_res = values_validator_path(&"${Desktop}vscode".to_string());
     assert!(err_res.is_err());
     log!("{e}", e = err_res.unwrap_err());
 }
