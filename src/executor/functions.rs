@@ -52,28 +52,6 @@ fn judge_perm_level(fs_target: &String) -> std::result::Result<PermissionLevel, 
     Ok(final_perm)
 }
 
-pub fn functions_decorator(expr: Expr, located: &String) -> Expr {
-    let l = located.to_owned();
-    let expr = expr.function("Exist", move |val| {
-        let arg = get_arg(val)?;
-        let p = parse_relative_path_with_located(&arg, &l);
-        // println!("exist {p:?} : {e}",e=p.exists());
-
-        Ok(eval::Value::Bool(p.exists()))
-    });
-
-    let l = located.to_owned();
-    let expr = expr.function("IsDirectory", move |val| {
-        let arg = get_arg(val)?;
-        let p = parse_relative_path_with_located(&arg, &l);
-        // println!("is_dir {p:?} : {r}",r=p.exists());
-
-        Ok(eval::Value::Bool(p.is_dir()))
-    });
-
-    expr
-}
-
 impl WorkflowHeader {
     /// 使用虚拟的函数定义捕获函数运行信息，返回（函数名，参数，参数是否为路径，所属表达式）
     fn capture_function_info(&self) -> Result<Vec<(String, String, bool, String)>> {
@@ -122,6 +100,28 @@ impl WorkflowHeader {
         let res = res.lock().unwrap();
         Ok(res.clone())
     }
+}
+
+pub fn functions_decorator(expr: Expr, located: &String) -> Expr {
+    let l = located.to_owned();
+    let expr = expr.function("Exist", move |val| {
+        let arg = get_arg(val)?;
+        let p = parse_relative_path_with_located(&arg, &l);
+        // println!("exist {p:?} : {e}",e=p.exists());
+
+        Ok(eval::Value::Bool(p.exists()))
+    });
+
+    let l = located.to_owned();
+    let expr = expr.function("IsDirectory", move |val| {
+        let arg = get_arg(val)?;
+        let p = parse_relative_path_with_located(&arg, &l);
+        // println!("is_dir {p:?} : {r}",r=p.exists());
+
+        Ok(eval::Value::Bool(p.is_dir()))
+    });
+
+    expr
 }
 
 impl Generalizable for WorkflowHeader {

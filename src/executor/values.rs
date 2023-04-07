@@ -52,15 +52,6 @@ macro_rules! define_values {
     };
 }
 
-define_values! {
-    {"${SystemDrive}",env_system_drive(),PermissionLevel::Sensitive},
-    {"${Home}",env_home(),PermissionLevel::Important},
-    {"${AppData}",env_appdata(),PermissionLevel::Sensitive},
-    {"${ProgramFiles_X64}",env_program_files_x64(),PermissionLevel::Sensitive},
-    {"${ProgramFiles_X86}",env_program_files_x86(),PermissionLevel::Sensitive},
-    {"${Desktop}",env_desktop(),PermissionLevel::Important}
-}
-
 // 收集合法的内置变量
 pub fn collect_values(raw: &String) -> Result<Vec<String>> {
     let valid_values: HashSet<String> = HashSet::from_iter(get_arr(true));
@@ -147,6 +138,15 @@ pub fn values_validator_path(raw: &String) -> Result<()> {
     }
 
     Ok(())
+}
+
+define_values! {
+    {"${SystemDrive}",env_system_drive(),PermissionLevel::Sensitive},
+    {"${Home}",env_home(),PermissionLevel::Important},
+    {"${AppData}",env_appdata(),PermissionLevel::Sensitive},
+    {"${ProgramFiles_X64}",env_program_files_x64(),PermissionLevel::Sensitive},
+    {"${ProgramFiles_X86}",env_program_files_x86(),PermissionLevel::Sensitive},
+    {"${Desktop}",env_desktop(),PermissionLevel::Important}
 }
 
 #[test]
