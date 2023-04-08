@@ -13,10 +13,11 @@ mod types;
 #[macro_use]
 mod utils;
 
-use std::process::exit;
-
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use clap::{Parser, Subcommand};
+use entrances::meta;
+use std::fs::write;
+use std::process::exit;
 
 use crate::entrances::{
     clean, info, install_using_package, list, pack, uninstall, update_using_package,
@@ -73,6 +74,13 @@ enum Action {
     },
     /// List information of installed packages
     List,
+    /// Get meta data of given package
+    Meta {
+        /// Source package
+        source_package: String,
+        /// (Optional) Save meta report at
+        save_at: Option<String>,
+    },
     /// Clean temporary or illegal files
     Clean,
 }
@@ -111,6 +119,30 @@ fn router(action: Action) -> Result<String> {
             into_file,
         } => pack(&source_dir, into_file, verify_signature)
             .map(|location| format!("Success:Package has been stored at '{location}'")),
+        Action::Meta {
+            source_package,
+            save_at,
+        } => {
+            let res = meta(&source_package, verify_signature)?;
+            let text = serde_json::to_string_pretty(&res).map_err(|e| {
+                anyhow!(
+                    "Error:Failed to deserialize result : {err}",
+                    err = e.to_string()
+                )
+            })?;
+            if let Some(into) = save_at {
+                write(&into, text).map_err(|e| {
+                    anyhow!(
+                        "Error:Failed to write to '{into}' : {err}",
+                        err = e.to_string()
+                    )
+                })?;
+                return Ok(format!("Success:Meta report saved at '{into}'"));
+            } else {
+                return Ok(text);
+            }
+        }
+
         Action::Clean => clean().map(|_| format!("Success:Cleaned")),
     }
 }

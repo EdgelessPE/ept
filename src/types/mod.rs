@@ -1,6 +1,7 @@
 pub mod author;
 pub mod extended_semver;
 pub mod info;
+pub mod meta;
 pub mod mixed_fs;
 pub mod package;
 pub mod permissions;

@@ -1,6 +1,7 @@
+use super::{permissions::Generalizable, steps::Step, verifiable::Verifiable};
+use crate::types::permissions::Permission;
+use anyhow::Result;
 use serde::{Deserialize, Serialize};
-
-use super::{steps::Step, verifiable::Verifiable};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct WorkflowHeader {
@@ -13,6 +14,16 @@ pub struct WorkflowHeader {
 pub struct WorkflowNode {
     pub header: WorkflowHeader,
     pub body: Step,
+}
+
+impl Generalizable for WorkflowNode {
+    fn generalize_permissions(&self) -> Result<Vec<Permission>> {
+        let mut perm = Vec::new();
+        perm.append(&mut self.header.generalize_permissions()?);
+        perm.append(&mut self.body.generalize_permissions()?);
+
+        Ok(perm)
+    }
 }
 
 impl Verifiable for WorkflowNode {
