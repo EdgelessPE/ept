@@ -61,7 +61,7 @@ fn judge_perm_level(fs_target: &String) -> std::result::Result<PermissionLevel, 
 impl WorkflowHeader {
     /// 使用虚拟的函数定义捕获函数运行信息，返回（函数名，参数，参数是否为路径，所属表达式）
     fn capture_function_info(&self) -> Result<Vec<(String, String, bool, String)>> {
-        // 定义已知函数信息
+        // 定义已知函数信息，（函数名，入参是否为路径）
         let info_arr = vec![
             ("Exist", true),
             ("IsDirectory", true),

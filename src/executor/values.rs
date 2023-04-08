@@ -140,6 +140,7 @@ pub fn values_validator_path(raw: &String) -> Result<()> {
     Ok(())
 }
 
+// {变量名称，值计算表达式，对应权限等级}
 define_values! {
     {"${SystemDrive}",env_system_drive(),PermissionLevel::Sensitive},
     {"${Home}",env_home(),PermissionLevel::Important},
