@@ -1,14 +1,16 @@
 use std::sync::{Arc, Mutex};
 
 use crate::{
+    entrances::info,
     types::{
         permissions::{Permission, PermissionLevel},
         verifiable::Verifiable,
     },
-    utils::parse_relative_path_with_located,
+    utils::{is_alive_with_name, parse_relative_path_with_located},
 };
 use anyhow::{anyhow, Result};
 use eval::Expr;
+use regex::Regex;
 
 use crate::types::{permissions::Generalizable, workflow::WorkflowHeader};
 
@@ -16,6 +18,10 @@ use super::{
     values::{collect_values, match_value_permission},
     values_validator_path,
 };
+
+lazy_static! {
+    static ref RESOURCE_REGEX: Regex = Regex::new(r"^[^/]+/[^/]+$").unwrap();
+}
 
 fn get_arg(val: Vec<eval::Value>) -> std::result::Result<String, eval::Error> {
     if val.len() > 1 {
@@ -107,7 +113,6 @@ pub fn functions_decorator(expr: Expr, located: &String) -> Expr {
     let expr = expr.function("Exist", move |val| {
         let arg = get_arg(val)?;
         let p = parse_relative_path_with_located(&arg, &l);
-        // println!("exist {p:?} : {e}",e=p.exists());
 
         Ok(eval::Value::Bool(p.exists()))
     });
@@ -116,9 +121,25 @@ pub fn functions_decorator(expr: Expr, located: &String) -> Expr {
     let expr = expr.function("IsDirectory", move |val| {
         let arg = get_arg(val)?;
         let p = parse_relative_path_with_located(&arg, &l);
-        // println!("is_dir {p:?} : {r}",r=p.exists());
 
         Ok(eval::Value::Bool(p.is_dir()))
+    });
+
+    let expr = expr.function("IsAlive", move |val| {
+        let arg = get_arg(val)?;
+
+        Ok(eval::Value::Bool(is_alive_with_name(&arg)))
+    });
+
+    let expr = expr.function("IsInstalled", move |val| {
+        let arg = get_arg(val)?;
+        let sp: Vec<&str> = arg.split("/").collect();
+        if sp.len() != 2 {
+            return Err(eval::Error::Custom(format!("Invalid argument '{arg}'")));
+        }
+        let info = info(Some(sp[0].to_string()), &sp[1].to_string());
+
+        Ok(eval::Value::Bool(info.is_ok()))
     });
 
     expr
@@ -147,6 +168,20 @@ impl Generalizable for WorkflowHeader {
                         targets: vec![arg],
                     });
                 }
+                "IsAlive" => {
+                    permissions.push(Permission {
+                        key: "process_query".to_string(),
+                        level: PermissionLevel::Normal,
+                        targets: vec![arg],
+                    });
+                }
+                "IsInstalled" => {
+                    permissions.push(Permission {
+                        key: "nep_installed".to_string(),
+                        level: PermissionLevel::Normal,
+                        targets: vec![arg],
+                    });
+                }
                 _ => {
                     // 理论上此处是不可到达的，因为会在 eval 执行的时候报错
                     return Err(anyhow!(
@@ -169,6 +204,18 @@ impl Verifiable for WorkflowHeader {
         for (name, arg, need_path_check, expr) in func_info {
             // 特定函数的预校验
             match name.as_str() {
+                "IsAlive" => {
+                    if !arg.to_ascii_lowercase().ends_with(".exe") {
+                        return Err(anyhow!(
+                            "Error:Argument of 'IsAlive' should ends with '.exe', got '{arg}'"
+                        ));
+                    }
+                }
+                "IsInstalled" => {
+                    if !RESOURCE_REGEX.is_match(&arg) {
+                        return Err(anyhow!("Error:Argument of 'IsAlive' should match pattern 'SCOPE/NAME' (e.g. Microsoft/VSCode)"));
+                    }
+                }
                 _ => {}
             }
             // 路径参数校验

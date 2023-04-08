@@ -18,7 +18,7 @@ pub use self::log::{fn_log, fn_log_ok_last};
 pub use self::path::{
     find_scope_with_name_locally, parse_relative_path, parse_relative_path_with_located,
 };
-pub use self::process::kill_with_name;
+pub use self::process::{is_alive_with_name, kill_with_name};
 pub use self::term::ask_yn;
 
 use std::fs::{create_dir_all, remove_dir_all};

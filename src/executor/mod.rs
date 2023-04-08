@@ -226,13 +226,26 @@ fn test_workflow_executor() {
             header: WorkflowHeader {
                 name: "Exist".to_string(),
                 step: "If exist".to_string(),
-                c_if: Some("Exist(\"${ProgramFiles_X64}/nodejs/node.exe\") && IsDirectory(\"${Desktop}/Projects\") && Exist(\"./Cargo.lock\")".to_string()),
+                c_if: Some(
+                    "IsAlive(\"code.exe\") && IsInstalled(\"Microsoft/VSCode\")".to_string(),
+                ),
             },
             body: Step::StepLog(StepLog {
                 level: "Warning".to_string(),
                 msg: "桌面路径：${Desktop}，应用路径：${DefaultLocation}".to_string(),
             }),
         },
+        // WorkflowNode {
+        //     header: WorkflowHeader {
+        //         name: "Exist".to_string(),
+        //         step: "If exist".to_string(),
+        //         c_if: Some("Exist(\"${ProgramFiles_X64}/nodejs/node.exe\") && IsDirectory(\"${Desktop}/Projects\") && Exist(\"./Cargo.lock\")".to_string()),
+        //     },
+        //     body: Step::StepLog(StepLog {
+        //         level: "Warning".to_string(),
+        //         msg: "桌面路径：${Desktop}，应用路径：${DefaultLocation}".to_string(),
+        //     }),
+        // },
         // WorkflowNode {
         //     header: WorkflowHeader {
         //         name: "Path".to_string(),
