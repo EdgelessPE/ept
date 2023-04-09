@@ -79,7 +79,7 @@ pub fn update_using_package(source_file: &String, verify_signature: bool) -> Res
     let run_remove = if remove_path.exists() {
         log!("Info:Running remove workflow...");
         let remove_workflow = parse_workflow(&p2s!(remove_path))?;
-        workflow_executor(remove_workflow, &p2s!(located), &local_package)?;
+        workflow_executor(remove_workflow, p2s!(located), local_package)?;
         log_ok_last!("Info:Running remove workflow...");
         true
     } else {
@@ -106,14 +106,14 @@ pub fn update_using_package(source_file: &String, verify_signature: bool) -> Res
         // 执行 update 工作流
         log!("Info:Running update workflow...");
         let update_workflow = parse_workflow(&p2s!(update_path))?;
-        workflow_executor(update_workflow, &p2s!(located), &fresh_package)?;
+        workflow_executor(update_workflow, p2s!(located), fresh_package)?;
         log_ok_last!("Info:Running update workflow...");
     } else {
         if run_remove {
             // 没有升级但是跑了一遍卸载，需要重新跑一遍 setup
             log!("Info:Running setup workflow...");
             let setup_workflow = parse_workflow(&p2s!(update_path.with_file_name("setup.toml")))?;
-            workflow_executor(setup_workflow, &p2s!(located), &fresh_package)?;
+            workflow_executor(setup_workflow, p2s!(located), fresh_package)?;
             log_ok_last!("Info:Running setup workflow...");
         }
     }

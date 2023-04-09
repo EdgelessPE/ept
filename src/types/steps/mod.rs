@@ -12,9 +12,9 @@ mod path;
 
 pub trait TStep: Verifiable + Generalizable {
     /// Run this step
-    fn run(self, located: &String, pkg: &GlobalPackage) -> Result<i32>;
+    fn run(self, cx: &mut WorkflowContext) -> Result<i32>;
     /// Run reversed step
-    fn reverse_run(self, located: &String, pkg: &GlobalPackage) -> Result<()>;
+    fn reverse_run(self, cx: &mut WorkflowContext) -> Result<()>;
     /// Get manifest
     fn get_manifest(&self, fs: &mut MixedFS) -> Vec<String>;
     /// Get interpreted step
@@ -46,20 +46,20 @@ macro_rules! def_enum_step {
         }
 
         impl Step {
-            pub fn run<F>(self, located: &String, pkg: &GlobalPackage, interpreter: F) -> Result<i32>
+            pub fn run<F>(self, cx: &mut WorkflowContext, interpreter: F) -> Result<i32>
             where
                 F: Fn(String) -> String,
             {
                 match self {
-                    $( Step::$x(step) => step.interpret(interpreter).run(&located,pkg) ),*
+                    $( Step::$x(step) => step.interpret(interpreter).run(cx) ),*
                 }
             }
-            pub fn reverse_run<F>(self, located: &String, pkg: &GlobalPackage, interpreter: F) -> Result<()>
+            pub fn reverse_run<F>(self, cx: &mut WorkflowContext, interpreter: F) -> Result<()>
             where
                 F: Fn(String) -> String,
             {
                 match self {
-                    $( Step::$x(step) => step.interpret(interpreter).reverse_run(&located,pkg) ),*
+                    $( Step::$x(step) => step.interpret(interpreter).reverse_run(cx) ),*
                 }
             }
             pub fn get_manifest(&self, fs: &mut MixedFS) -> Vec<String> {
@@ -114,4 +114,4 @@ pub use self::log::StepLog;
 pub use self::path::StepPath;
 
 use super::mixed_fs::MixedFS;
-use super::package::GlobalPackage;
+use super::workflow::WorkflowContext;

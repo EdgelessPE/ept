@@ -1,8 +1,8 @@
 use super::TStep;
 use crate::types::mixed_fs::MixedFS;
-use crate::types::package::GlobalPackage;
 use crate::types::permissions::{Generalizable, Permission, PermissionLevel};
 use crate::types::verifiable::Verifiable;
+use crate::types::workflow::WorkflowContext;
 use crate::utils::{ask_yn, get_path_bin, parse_relative_path};
 use crate::{log, p2s};
 use anyhow::{anyhow, Result};
@@ -132,7 +132,7 @@ fn set_system_path(record: &String, is_add: bool) -> Result<bool> {
 }
 
 impl TStep for StepPath {
-    fn run(self, located: &String, pkg: &GlobalPackage) -> Result<i32> {
+    fn run(self, cx: &mut WorkflowContext) -> Result<i32> {
         // 解析 bin 绝对路径
         let bin_path = get_path_bin()?;
         let bin_abs = p2s!(bin_path);
@@ -151,7 +151,8 @@ impl TStep for StepPath {
         }
 
         // 解析目标绝对路径
-        let abs_target_path = parse_relative_path(&p2s!(Path::new(&located).join(&self.record)))?;
+        let abs_target_path =
+            parse_relative_path(&p2s!(Path::new(&cx.located).join(&self.record)))?;
         let abs_target_str = p2s!(abs_target_path).replace("/", r"\");
 
         // 处理为目录的情况
@@ -176,7 +177,7 @@ impl TStep for StepPath {
             .alias
             .unwrap_or_else(|| p2s!(Path::new(&self.record).file_stem().unwrap()));
         let cmd_target_str =
-            conflict_resolver(&bin_abs, &stem, &pkg.software.clone().unwrap().scope);
+            conflict_resolver(&bin_abs, &stem, &cx.pkg.software.clone().unwrap().scope);
         if !abs_target_path.exists() {
             return Err(anyhow!(
                 "Error(Path):Failed to add path : final target '{abs_target_str}' not exist"
@@ -191,7 +192,7 @@ impl TStep for StepPath {
 
         Ok(0)
     }
-    fn reverse_run(self, located: &String, pkg: &GlobalPackage) -> Result<()> {
+    fn reverse_run(self, cx: &mut WorkflowContext) -> Result<()> {
         // 解析 bin 绝对路径
         let bin_path = get_path_bin()?;
         let bin_abs = p2s!(bin_path);
@@ -202,7 +203,8 @@ impl TStep for StepPath {
         }
 
         // 解析目标绝对路径
-        let abs_target_path = parse_relative_path(&p2s!(Path::new(&located).join(&self.record)))?;
+        let abs_target_path =
+            parse_relative_path(&p2s!(Path::new(&cx.located).join(&self.record)))?;
         let abs_target_str = p2s!(abs_target_path).replace("/", r"\");
 
         // 处理为目录的情况
@@ -222,7 +224,7 @@ impl TStep for StepPath {
         let stem = self
             .alias
             .unwrap_or_else(|| p2s!(Path::new(&self.record).file_stem().unwrap()));
-        let scope = pkg.software.clone().unwrap().scope;
+        let scope = cx.pkg.software.clone().unwrap().scope;
         let delete_list = vec![
             format!("{bin_abs}/{scope}-{stem}.cmd"),
             format!("{bin_abs}/{stem}.cmd"),
@@ -288,12 +290,16 @@ fn test_set_system_path() {
 #[test]
 fn test_path() {
     envmnt::set("DEBUG", "true");
-    let pkg = GlobalPackage::_demo();
+    use crate::types::package::GlobalPackage;
+    let mut cx = WorkflowContext {
+        pkg: GlobalPackage::_demo(),
+        located: String::from("./apps/VSCode"),
+    };
     StepPath {
         record: String::from(r"C:\Users\dsyou\scoop\shims\rclone.exe"),
         // alias: Some("aria".to_string()),
         alias: None,
     }
-    .run(&String::from("./apps/VSCode"), &pkg)
+    .run(&mut cx)
     .unwrap();
 }

@@ -1,8 +1,8 @@
 use crate::log;
 use crate::types::mixed_fs::MixedFS;
-use crate::types::package::GlobalPackage;
 use crate::types::permissions::{Generalizable, Permission, PermissionLevel};
 use crate::types::verifiable::Verifiable;
+use crate::types::workflow::WorkflowContext;
 
 use super::TStep;
 use anyhow::{anyhow, Result};
@@ -28,7 +28,7 @@ fn read_console(v: Vec<u8>) -> String {
 }
 
 impl TStep for StepExecute {
-    fn run(self, located: &String, _: &GlobalPackage) -> Result<i32> {
+    fn run(self, cx: &mut WorkflowContext) -> Result<i32> {
         // 配置终端
         let launch_terminal = if cfg!(target_os = "windows") {
             ("cmd", "/c")
@@ -41,7 +41,7 @@ impl TStep for StepExecute {
         let cmd = c.args([launch_terminal.1, &self.command]);
 
         // 指定工作目录
-        let workshop = self.pwd.unwrap_or(located.to_owned());
+        let workshop = self.pwd.unwrap_or(cx.located.to_owned());
         cmd.current_dir(&workshop);
 
         // 执行并收集结果
@@ -80,7 +80,7 @@ impl TStep for StepExecute {
             )),
         }
     }
-    fn reverse_run(self, _: &String, _: &GlobalPackage) -> Result<()> {
+    fn reverse_run(self, _: &mut WorkflowContext) -> Result<()> {
         Ok(())
     }
     fn get_manifest(&self, _fs: &mut MixedFS) -> Vec<String> {
@@ -125,26 +125,25 @@ impl Generalizable for StepExecute {
 
 #[test]
 fn test_execute() {
-    let pkg = GlobalPackage::_demo();
+    use crate::types::package::GlobalPackage;
+    let mut cx = WorkflowContext {
+        pkg: GlobalPackage::_demo(),
+        located: String::from("./apps/VSCode"),
+    };
+
     StepExecute {
         command: "echo hello nep ! && echo 你好，尼普！".to_string(),
         pwd: None,
         call_installer: None,
     }
-    .run(
-        &String::from("D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode"),
-        &pkg,
-    )
+    .run(&mut cx)
     .unwrap();
     StepExecute {
         command: "ls".to_string(),
         pwd: Some("./src".to_string()),
         call_installer: None,
     }
-    .run(
-        &String::from("D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode"),
-        &pkg,
-    )
+    .run(&mut cx)
     .unwrap();
 
     let res = StepExecute {
@@ -152,10 +151,7 @@ fn test_execute() {
         pwd: None,
         call_installer: None,
     }
-    .run(
-        &String::from("D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode"),
-        &pkg,
-    )
+    .run(&mut cx)
     .unwrap();
     assert_eq!(res, 2);
 }

@@ -51,7 +51,7 @@ pub fn uninstall(package_name: &String) -> Result<()> {
 
         // 执行卸载工作流
         log!("Info:Running remove workflow...");
-        workflow_executor(remove_flow, &app_str, &global)?;
+        workflow_executor(remove_flow, app_str.clone(), global.clone())?;
         log_ok_last!("Info:Running remove workflow...");
     }
 
@@ -61,7 +61,7 @@ pub fn uninstall(package_name: &String) -> Result<()> {
 
     // 逆向执行安装工作流
     log!("Info:Running reverse setup workflow...");
-    workflow_reverse_executor(setup_flow.clone(), &app_str, &global)?;
+    workflow_reverse_executor(setup_flow.clone(), app_str.clone(), global.clone())?;
     log_ok_last!("Info:Running reverse setup workflow...");
 
     // 删除 app 目录

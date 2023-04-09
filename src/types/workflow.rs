@@ -1,4 +1,6 @@
-use super::{permissions::Generalizable, steps::Step, verifiable::Verifiable};
+use super::{
+    package::GlobalPackage, permissions::Generalizable, steps::Step, verifiable::Verifiable,
+};
 use crate::types::permissions::Permission;
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
@@ -31,4 +33,9 @@ impl Verifiable for WorkflowNode {
         self.header.verify_self(located)?;
         self.body.verify_self(located)
     }
+}
+
+pub struct WorkflowContext {
+    pub located: String,
+    pub pkg: GlobalPackage,
 }

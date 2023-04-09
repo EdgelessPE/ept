@@ -63,7 +63,7 @@ pub fn install_using_package(source_file: &String, verify_signature: bool) -> Re
 
     // 执行安装工作流
     log!("Info:Running setup workflow...");
-    workflow_executor(setup_workflow, &into_dir, &package_struct)?;
+    workflow_executor(setup_workflow, into_dir.clone(), package_struct)?;
     log_ok_last!("Info:Running setup workflow...");
 
     // 保存上下文

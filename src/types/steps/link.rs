@@ -1,7 +1,7 @@
 use super::TStep;
 use crate::types::mixed_fs::MixedFS;
-use crate::types::package::GlobalPackage;
 use crate::types::permissions::{Generalizable, Permission, PermissionLevel};
+use crate::types::workflow::WorkflowContext;
 use crate::utils::env::{env_desktop, env_start_menu};
 use crate::utils::{count_sub_files, try_recycle};
 use crate::{log, p2s, types::verifiable::Verifiable, utils::parse_relative_path};
@@ -93,10 +93,10 @@ pub struct StepLink {
 }
 
 impl TStep for StepLink {
-    fn run(self, located: &String, _: &GlobalPackage) -> anyhow::Result<i32> {
+    fn run(self, cx: &mut WorkflowContext) -> anyhow::Result<i32> {
         // 解析源文件绝对路径
         let abs_clear_source_path =
-            parse_relative_path(&p2s!(Path::new(located).join(&self.source_file)))?;
+            parse_relative_path(&p2s!(Path::new(&cx.located).join(&self.source_file)))?;
         // println!("{abs_clear_source_path:?}");
         let abs_clear_source = p2s!(abs_clear_source_path);
 
@@ -139,7 +139,7 @@ impl TStep for StepLink {
 
         Ok(0)
     }
-    fn reverse_run(self, _: &String, _: &GlobalPackage) -> Result<()> {
+    fn reverse_run(self, _: &mut WorkflowContext) -> Result<()> {
         let set: HashSet<String> =
             HashSet::from_iter(self.at.clone().unwrap_or(vec!["Desktop".to_string()]));
         if set.contains("Desktop") {
@@ -211,7 +211,11 @@ impl Generalizable for StepLink {
 
 #[test]
 fn test_link() {
-    let pkg = GlobalPackage::_demo();
+    use crate::types::package::GlobalPackage;
+    let mut cx = WorkflowContext {
+        pkg: GlobalPackage::_demo(),
+        located: String::from("./apps/VSCode"),
+    };
     let step = StepLink {
         source_file: String::from("Code.exe"),
         target_name: String::from("VSC"),
@@ -221,6 +225,5 @@ fn test_link() {
     };
     step.verify_self(&String::from("./apps/Microsoft/VSCode"))
         .unwrap();
-    step.run(&String::from("./apps/Microsoft/VSCode"), &pkg)
-        .unwrap();
+    step.run(&mut cx).unwrap();
 }

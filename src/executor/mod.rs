@@ -6,7 +6,10 @@ use eval::Expr;
 
 use crate::{
     log, p2s,
-    types::{package::GlobalPackage, workflow::WorkflowNode},
+    types::{
+        package::GlobalPackage,
+        workflow::{WorkflowContext, WorkflowNode},
+    },
     utils::{get_bare_apps, is_strict_mode},
 };
 
@@ -47,25 +50,30 @@ fn condition_eval(condition: &String, exit_code: i32, located: &String) -> Resul
 // 执行工作流
 pub fn workflow_executor(
     flow: Vec<WorkflowNode>,
-    located: &String,
-    pkg: &GlobalPackage,
+    located: String,
+    pkg: GlobalPackage,
 ) -> Result<i32> {
     let mut exit_code = 0;
     let strict_mode = is_strict_mode();
+
+    let mut cx = WorkflowContext {
+        pkg,
+        located: located.clone(),
+    };
 
     // 遍历流节点
     for flow_node in flow {
         // 解释节点条件，判断是否需要跳过执行
         let c_if = flow_node.header.c_if;
-        if c_if.is_some() && !condition_eval(&c_if.unwrap(), exit_code, located)? {
+        if c_if.is_some() && !condition_eval(&c_if.unwrap(), exit_code, &located)? {
             continue;
         }
 
         // 创建变量解释器
-        let interpreter = |raw: String| values_replacer(raw, exit_code, located);
+        let interpreter = |raw: String| values_replacer(raw, exit_code, &located);
 
         // 匹配步骤类型以调用步骤解释器
-        let exec_res = flow_node.body.run(located, pkg, interpreter);
+        let exec_res = flow_node.body.run(&mut cx, interpreter);
         // 处理执行结果
         if let Err(e) = exec_res {
             log!(
@@ -95,15 +103,20 @@ pub fn workflow_executor(
 // 宽容地逆向执行 setup 工作流
 pub fn workflow_reverse_executor(
     flow: Vec<WorkflowNode>,
-    located: &String,
-    pkg: &GlobalPackage,
+    located: String,
+    pkg: GlobalPackage,
 ) -> Result<()> {
+    let mut cx = WorkflowContext {
+        pkg,
+        located: located.clone(),
+    };
+
     // 遍历流节点
     for flow_node in flow {
         // 创建变量解释器，ExitCode 始终置 0
-        let interpreter = |raw: String| values_replacer(raw, 0, located);
+        let interpreter = |raw: String| values_replacer(raw, 0, &located);
         // 匹配步骤类型以调用逆向步骤解释器
-        let exec_res = flow_node.body.reverse_run(located, pkg, interpreter);
+        let exec_res = flow_node.body.reverse_run(&mut cx, interpreter);
 
         // 对错误进行警告
         if let Err(e) = exec_res {
@@ -257,11 +270,7 @@ fn test_workflow_executor() {
         //     }),
         // },
     ];
-    let r1 = workflow_executor(
-        wf1,
-        &String::from("D:/Desktop/Projects/EdgelessPE/ept"),
-        &pkg,
-    );
+    let r1 = workflow_executor(wf1, String::from("D:/Desktop/Projects/EdgelessPE/ept"), pkg);
     println!("{r1:?}");
 }
 
@@ -300,8 +309,8 @@ fn test_workflow_executor_interpreter() {
     let pkg = GlobalPackage::_demo();
     workflow_executor(
         flow,
-        &String::from("D:/Desktop/Projects/EdgelessPE/ept"),
-        &pkg,
+        String::from("D:/Desktop/Projects/EdgelessPE/ept"),
+        pkg,
     )
     .unwrap();
 }
