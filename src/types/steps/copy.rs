@@ -1,5 +1,6 @@
-use anyhow::{Result,anyhow};
-use crate::{types::{permissions::Generalizable,permissions::Permission,workflow::WorkflowContext,mixed_fs::MixedFS, verifiable::Verifiable}, utils::{is_valid_wild_match, contains_wild_match}, executor::{values_validator_path, judge_perm_level}};
+use anyhow::{Result,anyhow, Ok};
+use serde::{Deserialize, Serialize};
+use crate::{types::{permissions::Generalizable,permissions::Permission,workflow::WorkflowContext,mixed_fs::MixedFS, verifiable::Verifiable}, utils::{common_wild_match_verify}, executor::{values_validator_path, judge_perm_level}};
 use super::TStep;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -11,7 +12,7 @@ pub struct StepCopy{
 
 impl TStep for StepCopy {
     fn run(self, cx: &mut WorkflowContext) -> Result<i32> {
-        
+        Ok(0)
     }
     fn reverse_run(self, cx: &mut WorkflowContext) -> Result<()> {
         Ok(())

@@ -1,5 +1,6 @@
-use anyhow::{Result, Ok, anyhow};
-use std::path::PathBuf;
+use anyhow::{Result, anyhow};
+use wildmatch::WildMatch;
+use std::path::{PathBuf, Path};
 use std::fs::read_dir;
 use crate::p2s;
 
@@ -16,7 +17,7 @@ fn split_parent(raw:&String,located:&String)->(PathBuf,String){
     // 拿到 base name
     let base=p2s!(abs_path.file_name().unwrap());
 
-    Ok((parent,base))
+    (parent,base)
 }
 
 pub fn contains_wild_match(raw:&String)->bool{
@@ -36,9 +37,9 @@ pub fn is_valid_wild_match(raw:&String,located:&String)->Result<bool>{
     
     // 判断父路径是否存在通配符
     if contains_wild_match(&parent){
-        Ok(true)
-    }else{
         Err(anyhow!("Error:Invalid wild match usage in '{raw}' : wild match shouldn't appear in parent path '{parent}'"))
+    }else{
+        Ok(true)
     }
 }
 
@@ -101,9 +102,10 @@ pub fn common_wild_match_verify(from:&String,to:&String,located:&String)->Result
 #[test]
 fn test_is_valid_wild_match(){
     let located=String::from("D:/Desktop/Projects/EdgelessPE/ept");
-    assert!(is_valid_wild_match(&"*.toml".to_string(), &located));
-    assert!(is_valid_wild_match(&"src/*.rs".to_string(), &located));
-    assert!(!is_valid_wild_match(&"src/*s/mod.rs".to_string(), &located));
+    assert!(is_valid_wild_match(&"*.toml".to_string(), &located).is_ok());
+    assert!(is_valid_wild_match(&"src/*.rs".to_string(), &located).is_ok());
+    assert!(is_valid_wild_match(&"src/*s/mod.rs".to_string(), &located).is_err());
+    assert!(is_valid_wild_match(&"src/types/mod?rs".to_string(), &located).is_ok());
 }
 
 #[test]
@@ -111,5 +113,6 @@ fn test_parse_wild_match(){
     let located=String::from("D:/Desktop/Projects/EdgelessPE/ept");
     println!("{res:#?}",res=parse_wild_match("*.toml".to_string(), &located).unwrap());
     println!("{res:#?}",res=parse_wild_match("src/*.rs".to_string(), &located).unwrap());
+    println!("{res:#?}",res=parse_wild_match("src/types/mod?rs".to_string(), &located).unwrap());
     assert!(parse_wild_match("src/*s/mod.rs".to_string(), &located).is_err());
 }

@@ -21,7 +21,7 @@ pub use self::path::{
 };
 pub use self::process::{is_alive_with_name, kill_with_name};
 pub use self::term::ask_yn;
-pub use self::wild_match::{contains_wild_match,is_valid_wild_match,parse_wild_match};
+pub use self::wild_match::{contains_wild_match,is_valid_wild_match,parse_wild_match,common_wild_match_verify};
 
 use std::fs::{create_dir_all, remove_dir_all};
 use std::path::PathBuf;
