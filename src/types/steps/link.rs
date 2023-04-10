@@ -1,4 +1,5 @@
 use super::TStep;
+use crate::executor::values_validator_path;
 use crate::types::mixed_fs::MixedFS;
 use crate::types::permissions::{Generalizable, Permission, PermissionLevel};
 use crate::types::workflow::WorkflowContext;
@@ -195,7 +196,7 @@ impl Verifiable for StepLink {
                 "Error(Link):Invalid field 'target_name' : shouldn't contain '..'"
             ));
         }
-        Ok(())
+        values_validator_path(&self.source_file)
     }
 }
 

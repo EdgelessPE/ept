@@ -1,5 +1,5 @@
 use anyhow::{Result,anyhow};
-use crate::{types::{permissions::Generalizable,permissions::Permission,workflow::WorkflowContext,mixed_fs::MixedFS, verifiable::Verifiable}, utils::{is_valid_wild_match, contains_wild_match}};
+use crate::{types::{permissions::Generalizable,permissions::Permission,workflow::WorkflowContext,mixed_fs::MixedFS, verifiable::Verifiable}, utils::{is_valid_wild_match, contains_wild_match}, executor::values_validator_path};
 use super::TStep;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -36,6 +36,8 @@ impl Generalizable for StepCopy{
 
 impl Verifiable for StepCopy{
     fn verify_self(&self, located: &String) -> Result<()> {
+        values_validator_path(&self.from)?;
+        values_validator_path(&self.to)?;
         common_wild_match_verify(&self.from,&self.to,located)
     }
 }
