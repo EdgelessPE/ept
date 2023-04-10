@@ -9,6 +9,7 @@ mod execute;
 mod link;
 mod log;
 mod path;
+mod copy;
 
 pub trait TStep: Verifiable + Generalizable {
     /// Run this step
