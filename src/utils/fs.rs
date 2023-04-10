@@ -1,11 +1,12 @@
 use crate::p2s;
 use anyhow::{anyhow, Result};
 use std::{
-    fs::{read_dir, remove_dir_all, remove_file},
-    path::{Path, PathBuf},
+    fs::{read_dir, remove_dir_all, remove_file, create_dir_all},
+    path::Path,
 };
 
-pub fn try_recycle(p: PathBuf) -> Result<()> {
+pub fn try_recycle<P: AsRef<Path>>(path:P) -> Result<()> {
+    let p=path.as_ref();
     let str = p2s!(p);
     if p.is_dir() {
         if let Err(e) = trash::delete(&p) {
@@ -24,10 +25,7 @@ pub fn try_recycle(p: PathBuf) -> Result<()> {
     }
 }
 
-pub fn read_sub_dir<P>(path: P) -> Result<Vec<String>>
-where
-    P: AsRef<Path>,
-{
+pub fn read_sub_dir<P: AsRef<Path>>(path: P) -> Result<Vec<String>> {
     let res = read_dir(path.as_ref())
         .map_err(|e| {
             anyhow!(
@@ -88,4 +86,13 @@ where
         })
         .fold(0, |acc, x| if filter(x) { acc + 1 } else { acc });
     Ok(count)
+}
+
+pub fn ensure_dir_exist<P: AsRef<Path>>(path:P)->Result<()>{
+    let path=path.as_ref();
+    if !path.exists(){
+        create_dir_all(path).map_err(|e|anyhow!("Error:Failed to create dir '{p}' : {err}",p=p2s!(path),err=e.to_string()))?;
+    }
+
+    Ok(())
 }

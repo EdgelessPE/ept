@@ -65,14 +65,14 @@ fn create_shortcut(sl: &ShellLink, name: &String, base: &String) -> Result<()> {
 
 fn delete_shortcut(name: &String, base: &String) -> Result<()> {
     let (target, parent) = parse_target(name, base)?;
-    try_recycle(Path::new(&target).to_path_buf())?;
+    try_recycle(&target)?;
     if parent {
         let parent_path = Path::new(&target).parent().unwrap();
         if count_sub_files(parent_path, |name| {
             name.ends_with(".lnk") || name.ends_with(".LNK")
         })? == 0
         {
-            if let Err(e) = try_recycle(parent_path.to_path_buf()) {
+            if let Err(e) = try_recycle(parent_path) {
                 log!(
                     "Warning(Link):Failed to delete empty shortcut directory '{p}' : {e}",
                     p = p2s!(parent_path)

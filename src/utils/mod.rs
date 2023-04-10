@@ -14,14 +14,14 @@ use regex::Regex;
 
 pub use self::cfg::{get_config, set_config, Cfg, Local};
 pub use self::exe_version::get_exe_version;
-pub use self::fs::{count_sub_files, read_sub_dir, try_recycle};
+pub use self::fs::{count_sub_files, read_sub_dir, try_recycle, ensure_dir_exist};
 pub use self::log::{fn_log, fn_log_ok_last};
 pub use self::path::{
     find_scope_with_name_locally, parse_relative_path, parse_relative_path_with_located,
 };
 pub use self::process::{is_alive_with_name, kill_with_name};
 pub use self::term::ask_yn;
-pub use self::wild_match::{contains_wild_match,is_valid_wild_match,parse_wild_match,common_wild_match_verify};
+pub use self::wild_match::{contains_wild_match,is_valid_wild_match,parse_wild_match,common_wild_match_verify,common_merge_wild_match};
 
 use std::fs::{create_dir_all, remove_dir_all};
 use std::path::PathBuf;
