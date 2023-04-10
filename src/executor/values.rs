@@ -140,6 +140,22 @@ pub fn values_validator_path(raw: &String) -> Result<()> {
     Ok(())
 }
 
+/// 给定内置函数访问的 fs 目标（包含内置变量），需要的权限级别
+pub fn judge_perm_level(fs_target: &String) -> Result<PermissionLevel> {
+    // 收集使用到的内置变量
+    let values = collect_values(fs_target)?;
+
+    let mut final_perm = PermissionLevel::Normal;
+    for val in values {
+        let cur = match_value_permission(&val)?;
+        if cur > final_perm {
+            final_perm = cur;
+        }
+    }
+
+    Ok(final_perm)
+}
+
 // {变量名称，值计算表达式，对应权限等级}
 define_values! {
     {"${SystemDrive}",env_system_drive(),PermissionLevel::Sensitive},

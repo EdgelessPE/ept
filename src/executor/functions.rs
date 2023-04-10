@@ -42,22 +42,6 @@ fn get_arg(val: Vec<eval::Value>) -> std::result::Result<String, eval::Error> {
     Ok(arg)
 }
 
-/// 给定内置函数访问的 fs 目标（包含内置变量），需要的权限级别
-fn judge_perm_level(fs_target: &String) -> std::result::Result<PermissionLevel, eval::Error> {
-    // 收集使用到的内置变量
-    let values = collect_values(fs_target).map_err(|e| eval::Error::Custom(e.to_string()))?;
-
-    let mut final_perm = PermissionLevel::Normal;
-    for val in values {
-        let cur = match_value_permission(&val).map_err(|e| eval::Error::Custom(e.to_string()))?;
-        if cur > final_perm {
-            final_perm = cur;
-        }
-    }
-
-    Ok(final_perm)
-}
-
 impl WorkflowHeader {
     /// 使用虚拟的函数定义捕获函数运行信息，返回（函数名，参数，参数是否为路径，所属表达式）
     fn capture_function_info(&self) -> Result<Vec<(String, String, bool, String)>> {
@@ -157,14 +141,14 @@ impl Generalizable for WorkflowHeader {
                 "Exist" => {
                     permissions.push(Permission {
                         key: "fs_read".to_string(),
-                        level: judge_perm_level(&arg)?,
+                        level: judge_perm_level(&arg).map_err(|e| eval::Error::Custom(e.to_string()))?,
                         targets: vec![arg],
                     });
                 }
                 "IsDirectory" => {
                     permissions.push(Permission {
                         key: "fs_read".to_string(),
-                        level: judge_perm_level(&arg)?,
+                        level: judge_perm_level(&arg).map_err(|e| eval::Error::Custom(e.to_string()))?,
                         targets: vec![arg],
                     });
                 }

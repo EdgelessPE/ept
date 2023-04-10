@@ -1,5 +1,5 @@
 use anyhow::{Result,anyhow};
-use crate::{types::{permissions::Generalizable,permissions::Permission,workflow::WorkflowContext,mixed_fs::MixedFS, verifiable::Verifiable}, utils::{is_valid_wild_match, contains_wild_match}, executor::values_validator_path};
+use crate::{types::{permissions::Generalizable,permissions::Permission,workflow::WorkflowContext,mixed_fs::MixedFS, verifiable::Verifiable}, utils::{is_valid_wild_match, contains_wild_match}, executor::{values_validator_path, judge_perm_level}};
 use super::TStep;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -30,7 +30,19 @@ impl TStep for StepCopy {
 
 impl Generalizable for StepCopy{
     fn generalize_permissions(&self) -> Result<Vec<Permission>> {
-        
+        let mut res=Vec::new();
+        res.push(Permission{
+            key:"fs_read".to_string(),
+            level:judge_perm_level(&self.from)?,
+            targets:vec![self.from.clone()]
+        });
+        res.push(Permission{
+            key:"fs_write".to_string(),
+            level:judge_perm_level(&self.to)?,
+            targets:vec![self.to.clone()]
+        });
+
+        Ok(res)
     }
 }
 
