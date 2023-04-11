@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 use anyhow::{Result,anyhow, Ok};
 use fs_extra::dir::CopyOptions;
 use serde::{Deserialize, Serialize};
-use crate::{types::{permissions::Generalizable,permissions::Permission,workflow::WorkflowContext,mixed_fs::MixedFS, verifiable::Verifiable}, utils::{common_wild_match_verify, common_merge_wild_match, contains_wild_match, ensure_dir_exist, try_recycle, parse_wild_match}, executor::{values_validator_path, judge_perm_level}, p2s, log};
+use crate::{types::{permissions::Generalizable,permissions::Permission,workflow::WorkflowContext,mixed_fs::MixedFS, verifiable::Verifiable, package::GlobalPackage}, utils::{common_wild_match_verify, common_merge_wild_match, contains_wild_match, ensure_dir_exist, try_recycle, parse_wild_match}, executor::{values_validator_path, judge_perm_level}, p2s, log};
 use super::TStep;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -128,4 +128,15 @@ impl Verifiable for StepCopy{
         values_validator_path(&self.to)?;
         common_wild_match_verify(&self.from,&self.to,located)
     }
+}
+
+#[test]
+fn test_copy(){
+    let mut cx=WorkflowContext { located: String::from("D:/Desktop/Projects/EdgelessPE/ept"), pkg: GlobalPackage::_demo() };
+    let step=StepCopy{
+        from: "src/main.rs".to_string(),
+        to: "test".to_string(),
+        overwrite: None,
+    };
+    step.run(&mut cx).unwrap();
 }

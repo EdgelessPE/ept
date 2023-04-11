@@ -47,7 +47,7 @@ pub struct GlobalPackage {
 impl GlobalPackage {
     pub fn _demo() -> Self {
         GlobalPackage {
-            nep: "0.2".to_string(),
+            nep: env!("CARGO_PKG_VERSION")[0..3].to_string(),
             package: Package {
                 name: "ept".to_string(),
                 description: "demo package".to_string(),
