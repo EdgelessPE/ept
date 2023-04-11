@@ -147,7 +147,6 @@ fn test_parse_wild_match() {
 
 #[test]
 fn test_common_merge_wild_match() {
-    let located = String::from("D:/Desktop/Projects/EdgelessPE/ept");
     assert_eq!(
         common_merge_wild_match(&"src/types/*.rs".to_string(), &"src/utils/".to_string()).as_str(),
         "src/utils/*.rs"

@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 use anyhow::{Result,anyhow, Ok};
 use fs_extra::dir::CopyOptions;
 use serde::{Deserialize, Serialize};
-use crate::{types::{permissions::Generalizable,permissions::Permission,workflow::WorkflowContext,mixed_fs::MixedFS, verifiable::Verifiable, package::GlobalPackage}, utils::{common_wild_match_verify, common_merge_wild_match, contains_wild_match, ensure_dir_exist, try_recycle, parse_wild_match}, executor::{values_validator_path, judge_perm_level}, p2s, log};
+use crate::{types::{permissions::Generalizable,permissions::Permission,workflow::WorkflowContext,mixed_fs::MixedFS, verifiable::Verifiable}, utils::{common_wild_match_verify, common_merge_wild_match, contains_wild_match, ensure_dir_exist, try_recycle, parse_wild_match, parse_relative_path_with_located}, executor::{values_validator_path, judge_perm_level}, p2s};
 use super::TStep;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -14,13 +14,24 @@ pub struct StepCopy{
 }
 
 // 入参不应包含通配符，返回 （指向父目录存在的目标路径，是否在拷贝文件）
-pub fn parse_target_for_copy(from:&String,to:&String)->Result<(PathBuf,bool)>{
+pub fn parse_target_for_copy(from:&String,to:&String,located:&String,wild_match_mode:bool)->Result<(PathBuf,bool)>{
     let from_path=Path::new(from);
-    let to_path=Path::new(to);
+    let to_path=parse_relative_path_with_located(to,located);
 
     // 如果 from 不存在直接报错
     if !from_path.exists(){
         return Err(anyhow!("Error:Field 'from' refers to a non-existent target : '{from}'"));
+    }
+
+    // 处理通配模式
+    if wild_match_mode{
+        let file_name=from_path.file_name().unwrap();
+        if from_path.is_file(){
+            ensure_dir_exist(&to_path)?;
+            return Ok((to_path.join(file_name).to_path_buf(),true));
+        }else{
+            return Ok((to_path.to_path_buf(),false));
+        }
     }
 
     // 如果 from 是文件夹，则 to 直接视为文件夹
@@ -46,7 +57,7 @@ pub fn parse_target_for_copy(from:&String,to:&String)->Result<(PathBuf,bool)>{
         if to.ends_with("/"){
             // 此时 from 是文件，说明 to 指向的是父目录，因此进行拼接
             let file_name=from_path.file_name().unwrap();
-            ensure_dir_exist(to_path)?;
+            ensure_dir_exist(&to_path)?;
             return Ok((to_path.join(file_name).to_path_buf(),true));
         }
 
@@ -57,8 +68,8 @@ pub fn parse_target_for_copy(from:&String,to:&String)->Result<(PathBuf,bool)>{
 
 }
 
-fn copy(from:&String,to:&String,overwrite:bool)->Result<()>{
-    let (to_path,is_copy_file)=parse_target_for_copy(from, to)?;
+fn copy(from:&String,to:&String,located:&String,overwrite:bool,wild_match_mode:bool)->Result<()>{
+    let (to_path,is_copy_file)=parse_target_for_copy(from, to,located,wild_match_mode)?;
     if to_path.exists(){
         if overwrite{
             try_recycle(&to_path)?;
@@ -68,9 +79,10 @@ fn copy(from:&String,to:&String,overwrite:bool)->Result<()>{
         }
     }
     if is_copy_file{
-        std::fs::copy(from, to_path).map_err(|e|anyhow!("Error:Failed to copy file from '{from}' to '{to}' : {err}",err=e.to_string()))?;
+        std::fs::copy(from, &to_path).map_err(|e|anyhow!("Error:Failed to copy file from '{from}' to '{to_str}' : {err}",err=e.to_string(),to_str=p2s!(to_path)))?;
     }else{
-        fs_extra::dir::copy(from, to_path, &CopyOptions::new()).map_err(|e|anyhow!("Error:Failed to copy dir from '{from}' to '{to}' : {err}",err=e.to_string()))?;
+        let opt=CopyOptions::new().copy_inside(true);
+        fs_extra::dir::copy(from, &to_path, &opt).map_err(|e|anyhow!("Error:Failed to copy dir from '{from}' to '{to_str}' : {err}",err=e.to_string(),to_str=p2s!(to_path)))?;
     }
 
     Ok(())
@@ -81,10 +93,10 @@ impl TStep for StepCopy {
         let overwrite=self.overwrite.unwrap_or(false);
         if contains_wild_match(&self.from){
             for from in parse_wild_match(self.from, &cx.located)?{
-                copy(&p2s!(from), &self.to, overwrite)?;
+                copy(&p2s!(from), &self.to,&cx.located, overwrite,true)?;
             }
         }else{
-            copy(&self.from, &self.to, overwrite)?;
+            copy(&self.from, &self.to,&cx.located, overwrite,false)?;
         }
 
         Ok(0)
@@ -132,10 +144,13 @@ impl Verifiable for StepCopy{
 
 #[test]
 fn test_copy(){
+    use crate::types::package::GlobalPackage;
+
+    envmnt::set("DEBUG", "true");
     let mut cx=WorkflowContext { located: String::from("D:/Desktop/Projects/EdgelessPE/ept"), pkg: GlobalPackage::_demo() };
     let step=StepCopy{
-        from: "src/main.rs".to_string(),
-        to: "test".to_string(),
+        from: "src/ca".to_string(),
+        to: "test/".to_string(),
         overwrite: None,
     };
     step.run(&mut cx).unwrap();
