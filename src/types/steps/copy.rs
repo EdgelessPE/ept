@@ -1,4 +1,4 @@
-use std::path::{Path, PathBuf};
+use std::{path::{Path, PathBuf}, fs::remove_dir_all};
 
 use anyhow::{Result,anyhow, Ok};
 use fs_extra::dir::CopyOptions;
@@ -23,15 +23,11 @@ pub fn parse_target_for_copy(from:&String,to:&String,located:&String,wild_match_
         return Err(anyhow!("Error:Field 'from' refers to a non-existent target : '{from}'"));
     }
 
-    // 处理通配模式
+    // 处理通配模式，将 to 作为父目录
     if wild_match_mode{
         let file_name=from_path.file_name().unwrap();
-        if from_path.is_file(){
-            ensure_dir_exist(&to_path)?;
-            return Ok((to_path.join(file_name).to_path_buf(),true));
-        }else{
-            return Ok((to_path.to_path_buf(),false));
-        }
+        ensure_dir_exist(&to_path)?;
+        return Ok((to_path.join(file_name).to_path_buf(),from_path.is_file()));
     }
 
     // 如果 from 是文件夹，则 to 直接视为文件夹
@@ -145,13 +141,49 @@ impl Verifiable for StepCopy{
 #[test]
 fn test_copy(){
     use crate::types::package::GlobalPackage;
-
     envmnt::set("DEBUG", "true");
     let mut cx=WorkflowContext { located: String::from("D:/Desktop/Projects/EdgelessPE/ept"), pkg: GlobalPackage::_demo() };
-    let step=StepCopy{
-        from: "src/ca".to_string(),
-        to: "test/".to_string(),
+    remove_dir_all("test").unwrap();
+
+    // 文件-文件
+    StepCopy{
+        from: "src/types/author.rs".to_string(),
+        to: "test/1.rs".to_string(),
         overwrite: None,
-    };
-    step.run(&mut cx).unwrap();
+    }.run(&mut cx).unwrap();
+    assert!(Path::new("test/1.rs").exists());
+
+    // 文件-不存在目录
+    StepCopy{
+        from: "src/types/extended_semver.rs".to_string(),
+        to: "test/ca/".to_string(),
+        overwrite: None,
+    }.run(&mut cx).unwrap();
+    assert!(Path::new("test/ca/extended_semver.rs").exists());
+
+    // 文件-已存在目录
+    StepCopy{
+        from: "src/types/info.rs".to_string(),
+        to: "test/ca".to_string(),
+        overwrite: None,
+    }.run(&mut cx).unwrap();
+    assert!(Path::new("test/ca/info.rs").exists());
+
+
+    // 通配符文件-不存在目录
+    StepCopy{
+        from: "src/*.rs".to_string(),
+        to: "test/main".to_string(),
+        overwrite: None,
+    }.run(&mut cx).unwrap();
+    assert!(Path::new("test/main/main.rs").exists());
+
+    // 通配符目录-目录
+    StepCopy{
+        from: "key?".to_string(),
+        to: "test/keys".to_string(),
+        overwrite: None,
+    }.run(&mut cx).unwrap();
+    assert!(Path::new("test/keys/keys/public.pem").exists());
+
 }
