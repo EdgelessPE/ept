@@ -45,6 +45,29 @@ impl MixedFS {
             to_remove_wild_match: HashSet::new(),
         }
     }
+
+    fn a_add(&mut self, path:String){
+        log!("Debug:Add path '{path}' to mixed fs");
+        self.to_remove.remove(&path);
+        self.to_add.insert(path);
+    }
+    fn a_remove(&mut self, path:String){
+        log!("Debug:Remove path '{path}' to mixed fs");
+        self.to_add.remove(&path);
+        self.to_remove.insert(path);
+    }
+    fn a_add_wild_match(&mut self, path:String){
+        log!("Debug:Add wm '{path}' to mixed fs");
+        self.to_remove_wild_match.remove(&path);
+        self.to_add_wild_match.insert(path);
+    }
+    fn a_remove_wild_match(&mut self, path:String){
+        log!("Debug:Remove wm '{path}' to mixed fs");
+        self.to_add_wild_match.remove(&path);
+        self.to_remove_wild_match.insert(path);
+    }
+
+
     pub fn add(&mut self, path: &String, from: &String) {
         debug_assert!(!contains_wild_match(path));
         if path.starts_with("${"){
@@ -60,14 +83,10 @@ impl MixedFS {
                 for exact_path in parse_wild_match(from, &self.located).unwrap_or(Vec::new()){
                     let exact_from=p2s!(exact_path);
                     let merged_path=merge_path(&exact_from, path.clone());
-                    log!("Debug:Add merged path '{merged_path}' to mixed fs");
-                    self.to_remove.remove(&merged_path);
-                    self.to_add.insert(merged_path);
+                    self.a_add(merged_path);
                 }
             }else{
-                log!("Debug:Add path '{path}' to mixed fs");
-                self.to_remove.remove(&path);
-                self.to_add.insert(path);
+                self.a_add(path);
             }
 
             return;
@@ -80,19 +99,14 @@ impl MixedFS {
             } else{
                 path+"/*"
             };
-            log!("Debug:Add '{to_insert}' to mixed fs");
-            self.to_remove_wild_match.remove(&to_insert);
-            self.to_add_wild_match.insert(to_insert);
+            self.a_add_wild_match(to_insert);
             return;
         }
 
         // 兜底，无法从来源确定此路径是文件还是目录，则宽容地添加两条记录
         let with_wm_end=path.clone()+"/*";
-        log!("Debug:Add '{path}' with '{with_wm_end}' to mixed fs");
-        self.to_remove_wild_match.remove(&with_wm_end);
-        self.to_add_wild_match.insert(with_wm_end);
-        self.to_remove.remove(&path);
-        self.to_add.insert(path);
+        self.a_add_wild_match(with_wm_end);
+        self.a_add(path);
 
 
     }
@@ -105,9 +119,7 @@ impl MixedFS {
             for exact_path in parse_wild_match(path, &self.located).unwrap_or(Vec::new()){
                 let str=p2s!(exact_path);
                 let str=&str[format_path(&self.located).len()..str.len()];
-                log!("Debug:Remove match '{str}' to mixed fs");
-                self.to_add.remove(str);
-                self.to_remove.insert(str.to_string());
+                self.a_remove(str.to_string());
             }
         } else {
             // 判断是否存在
@@ -123,13 +135,9 @@ impl MixedFS {
                 }else{
                     path+"/*"
                 };
-                log!("Debug:Remove '{path}' to mixed fs");
-                self.to_add_wild_match.remove(&path);
-                self.to_remove_wild_match.insert(path);
+                self.a_remove_wild_match(path);
             }else{
-                log!("Debug:Remove path '{path}' to mixed fs");
-                self.to_add.remove(&path);
-                self.to_remove.insert(path);
+                self.a_remove(path);
             }
         }
     }
