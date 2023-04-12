@@ -26,7 +26,7 @@ pub fn manifest_validator(base: &String, manifest: Vec<String>, fs: &mut MixedFS
         if contains_wild_match(&path){
             return Err(anyhow!("Error:Wild match shouldn't appear in manifest item '{path}'"));
         }
-        if !fs.exists(&path, base) {
+        if !fs.exists(&path) {
             missing_list.insert(path);
         }
     }

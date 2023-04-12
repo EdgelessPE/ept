@@ -9,6 +9,22 @@ use crate::p2s;
 
 use super::{format_path, get_bare_apps, get_config, read_sub_dir};
 
+pub fn split_parent(raw: &String, located: &String) -> (PathBuf, String) {
+    // 解析为绝对路径
+    let abs_path = parse_relative_path_with_located(raw, located);
+
+    // 拿到 parent
+    let parent = abs_path
+        .parent()
+        .unwrap_or_else(|| Path::new(located))
+        .to_path_buf();
+
+    // 拿到 base name
+    let base = p2s!(abs_path.file_name().unwrap());
+
+    (parent, base)
+}
+
 /// 使用配置文件中指定的 base 解析相对路径，不带路径格式化
 pub fn parse_relative_path(relative: &String) -> Result<PathBuf> {
     let path = Path::new(relative);

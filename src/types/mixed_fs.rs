@@ -2,9 +2,11 @@ use std::{collections::HashSet, path::Path};
 
 use wildmatch::WildMatch;
 
-use crate::utils::{contains_wild_match, format_path};
+use crate::{utils::{contains_wild_match, format_path, parse_wild_match}, p2s, log};
 
 pub struct MixedFS {
+    located: String,
+
     // 不含通配符
     to_add: HashSet<String>,
     to_remove: HashSet<String>,
@@ -26,37 +28,116 @@ fn is_match_wild_match_set(path: &String, set: &HashSet<String>) -> bool {
     false
 }
 
+// 拼接路径，解析出虚拟添加路径
+fn merge_path(exact_from:&String,to:String)->String{
+    let file_name=p2s!(Path::new(exact_from).file_name().unwrap());
+
+    to+&file_name
+}
+
 impl MixedFS {
-    pub fn new() -> Self {
+    pub fn new(located: String) -> Self {
         MixedFS {
+            located,
             to_add: HashSet::new(),
             to_remove: HashSet::new(),
             to_add_wild_match: HashSet::new(),
             to_remove_wild_match: HashSet::new(),
         }
     }
-    pub fn add(&mut self, path: &String) {
-        let path = format_path(path);
-        if contains_wild_match(&path) {
-            self.to_remove_wild_match.remove(&path);
-            self.to_add_wild_match.insert(path);
-        } else {
-            self.to_remove.remove(&path);
-            self.to_add.insert(path);
+    pub fn add(&mut self, path: &String, from: &String) {
+        debug_assert!(!contains_wild_match(path));
+        if path.starts_with("${"){
+            return;
         }
+        let path = format_path(path);
+        let from=format_path(from);
+
+        // 检查 from 是否也为包内路径
+        if !from.starts_with("${"){
+            if contains_wild_match(&from){
+                // 直接根据真实文件系统拓展 from，拼接到 MixedFS 内
+                for exact_path in parse_wild_match(from, &self.located).unwrap_or(Vec::new()){
+                    let exact_from=p2s!(exact_path);
+                    let merged_path=merge_path(&exact_from, path.clone());
+                    log!("Debug:Add merged path '{merged_path}' to mixed fs");
+                    self.to_remove.remove(&merged_path);
+                    self.to_add.insert(merged_path);
+                }
+            }else{
+                log!("Debug:Add path '{path}' to mixed fs");
+                self.to_remove.remove(&path);
+                self.to_add.insert(path);
+            }
+
+            return;
+        }
+
+        // 两个之一为目录，直接添加通配记录
+        if path.ends_with("/")||from.ends_with("/"){
+            let to_insert=if path.ends_with("/"){
+                path+"*"
+            } else{
+                path+"/*"
+            };
+            log!("Debug:Add '{to_insert}' to mixed fs");
+            self.to_remove_wild_match.remove(&to_insert);
+            self.to_add_wild_match.insert(to_insert);
+            return;
+        }
+
+        // 兜底，无法从来源确定此路径是文件还是目录，则宽容地添加两条记录
+        let with_wm_end=path.clone()+"/*";
+        log!("Debug:Add '{path}' with '{with_wm_end}' to mixed fs");
+        self.to_remove_wild_match.remove(&with_wm_end);
+        self.to_add_wild_match.insert(with_wm_end);
+        self.to_remove.remove(&path);
+        self.to_add.insert(path);
+
+
     }
     pub fn remove(&mut self, path: &String) {
+        if path.starts_with("${"){
+            return;
+        }
         let path = format_path(path);
         if contains_wild_match(&path) {
-            self.to_add_wild_match.remove(&path);
-            self.to_remove_wild_match.insert(path);
+            for exact_path in parse_wild_match(path, &self.located).unwrap_or(Vec::new()){
+                let str=p2s!(exact_path);
+                let str=&str[format_path(&self.located).len()..str.len()];
+                log!("Debug:Remove match '{str}' to mixed fs");
+                self.to_add.remove(str);
+                self.to_remove.insert(str.to_string());
+            }
         } else {
-            self.to_add.remove(&path);
-            self.to_remove.insert(path);
+            // 判断是否存在
+            if !self.exists(&path){
+                log!("Warning(MixedFS):Trying to remove a non-existent target : '{path}'");
+                return;
+            }
+
+            // 判断是文件夹还是文件
+            if path.ends_with("/")||Path::new(&path).is_dir(){
+                let path=if path.ends_with("/"){
+                    path+"*"
+                }else{
+                    path+"/*"
+                };
+                log!("Debug:Remove '{path}' to mixed fs");
+                self.to_add_wild_match.remove(&path);
+                self.to_remove_wild_match.insert(path);
+            }else{
+                log!("Debug:Remove path '{path}' to mixed fs");
+                self.to_add.remove(&path);
+                self.to_remove.insert(path);
+            }
         }
     }
 
-    pub fn exists(&self, path: &String, base: &String) -> bool {
+    pub fn exists(&self, path: &String) -> bool {
+        if path.starts_with("${") {
+            return true;
+        }
         let path = format_path(path);
         if self.to_add.contains(&path) {
             return true;
@@ -75,31 +156,47 @@ impl MixedFS {
             return false;
         }
 
-        // 此处不关心内置变量是否合法
-        if path.starts_with("${") {
-            return true;
-        }
-        Path::new(base).join(path).exists()
+        Path::new(&self.located).join(path).exists()
     }
 }
 
 #[test]
 fn test_mixed_fs() {
-    let mut mfs = MixedFS::new();
+    envmnt::set("DEBUG", "true");
     let base=&"./".to_string();
+    let mut mfs = MixedFS::new(base.clone());
 
-    assert!(!mfs.exists(&"./1.txt".to_string(), base));
-    assert!(mfs.exists(&"config.toml".to_string(), base));
+    // 基础判断能力
+    assert!(!mfs.exists(&"./1.txt".to_string()));
+    assert!(mfs.exists(&"config.toml".to_string()));
 
-    mfs.add(&"./1.txt".to_string());
+    // 增删指定文件
+    mfs.add(&"./1.txt".to_string(),&"./backup/1.txt".to_string());
     mfs.remove(&"config.toml".to_string());
 
-    assert!(mfs.exists(&"1.txt".to_string(), base));
-    assert!(!mfs.exists(&"config.toml".to_string(), base));
+    assert!(mfs.exists(&"1.txt".to_string()));
+    assert!(!mfs.exists(&"./backup/1.txt".to_string()));
+    assert!(!mfs.exists(&"config.toml".to_string()));
 
-    mfs.add(&"./b/*.rs".to_string());
-    mfs.remove(&"./a/main?rs".to_string());
+    // 增删通配文件
+    mfs.add(&"./c/".to_string(),&"./src/types/*.rs".to_string());
+    mfs.remove(&"./src/main?rs".to_string());
 
-    assert!(mfs.exists(&"b/mod.rs".to_string(), base));
-    assert!(!mfs.exists(&"./a/main.rs".to_string(), base));
+    assert!(mfs.exists(&"c/mod.rs".to_string()));
+    assert!(mfs.exists(&"src/types/mod.rs".to_string()));
+    assert!(!mfs.exists(&"./src/main.rs".to_string()));
+
+    // 指定文件与通配文件冲突
+    mfs.remove(&"./c/mixed_fs.rs".to_string());
+
+    assert!(mfs.exists(&"c/mod.rs".to_string()));
+    assert!(!mfs.exists(&"c/mixed_fs.rs".to_string()));
+
+    // 增删指定目录
+    mfs.add(&"./233".to_string(),&"${AppData}/Edgeless/ept/".to_string());
+    mfs.remove(&"target".to_string());
+
+    assert!(mfs.exists(&"233/whats.ts".to_string()));
+    assert!(!mfs.exists(&"./target/debug/ept.exe".to_string()));
+
 }

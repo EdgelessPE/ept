@@ -1,26 +1,10 @@
 use crate::p2s;
 use anyhow::{anyhow, Result};
 use std::fs::read_dir;
-use std::path::{Path, PathBuf};
+use std::path::{PathBuf};
 use wildmatch::WildMatch;
 
-use super::parse_relative_path_with_located;
-
-fn split_parent(raw: &String, located: &String) -> (PathBuf, String) {
-    // 解析为绝对路径
-    let abs_path = parse_relative_path_with_located(raw, located);
-
-    // 拿到 parent
-    let parent = abs_path
-        .parent()
-        .unwrap_or_else(|| Path::new(located))
-        .to_path_buf();
-
-    // 拿到 base name
-    let base = p2s!(abs_path.file_name().unwrap());
-
-    (parent, base)
-}
+use super::{split_parent};
 
 pub fn contains_wild_match(raw: &String) -> bool {
     raw.contains("*") || raw.contains("?")
@@ -62,7 +46,7 @@ pub fn parse_wild_match(raw: String, located: &String) -> Result<Vec<PathBuf>> {
     let wm = WildMatch::new(&child);
 
     // 读取父目录
-    let res = read_dir(&parent)
+    let res: Vec<PathBuf> = read_dir(&parent)
         .map_err(|e| {
             anyhow!(
                 "Error:Can't read '{p}' as directory : {e}",
@@ -88,7 +72,12 @@ pub fn parse_wild_match(raw: String, located: &String) -> Result<Vec<PathBuf>> {
         })
         .collect();
 
-    Ok(res)
+    // 判断是否存在匹配的内容
+    if res.len() > 0 {
+        Ok(res)
+    } else {
+        Err(anyhow!("Error:Wild match path '{raw}' matched nothing"))
+    }
 }
 
 /// 支持通配符步骤的通用校验函数
@@ -106,16 +95,6 @@ pub fn common_wild_match_verify(from: &String, to: &String, located: &String) ->
     }
 
     Ok(())
-}
-
-/// 将 from 中的通配符合并到 to（然后提交到 MixedFS），需要保证输入已经过 common_wild_match_verify 的校验
-pub fn common_merge_wild_match(from: &String, to: &String) -> String {
-    if contains_wild_match(from) {
-        let (_, item) = split_parent(from, &"".to_string());
-        to.to_owned() + &item
-    } else {
-        to.clone()
-    }
 }
 
 #[test]
@@ -143,12 +122,4 @@ fn test_parse_wild_match() {
         res = parse_wild_match("src/types/mod?rs".to_string(), &located).unwrap()
     );
     assert!(parse_wild_match("src/*s/mod.rs".to_string(), &located).is_err());
-}
-
-#[test]
-fn test_common_merge_wild_match() {
-    assert_eq!(
-        common_merge_wild_match(&"src/types/*.rs".to_string(), &"src/utils/".to_string()).as_str(),
-        "src/utils/*.rs"
-    );
 }

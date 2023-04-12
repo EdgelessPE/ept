@@ -55,18 +55,11 @@ pub fn verify(source_dir: &String) -> Result<GlobalPackage> {
     global.verify_self(&pkg_content_path)?;
     log_ok_last!("Info:Resolving data...");
 
-    // 校验 setup 工作流装箱单
-    log!("Info:Checking manifest...");
-    let setup_path = get_workflow_path(source_dir, "setup.toml");
-    let setup_flow = parse_workflow(&p2s!(setup_path))?;
-    let mut fs = MixedFS::new();
-    let setup_manifest = get_manifest(setup_flow.clone(), &mut fs);
-    manifest_validator(&pkg_content_path, setup_manifest, &mut fs)?;
-    log_ok_last!("Info:Checking manifest...");
-
     // 校验工作流
     log!("Info:Verifying workflows...");
-    verify_workflow(setup_flow, &pkg_content_path)?;
+    let setup_path = get_workflow_path(source_dir, "setup.toml");
+    let setup_flow = parse_workflow(&p2s!(setup_path))?;
+    verify_workflow(setup_flow.clone(), &pkg_content_path)?;
     let optional_path: Vec<PathBuf> = vec!["update.toml", "remove.toml"]
         .into_iter()
         .map(|name| get_workflow_path(source_dir, name))
@@ -78,6 +71,13 @@ pub fn verify(source_dir: &String) -> Result<GlobalPackage> {
         }
     }
     log_ok_last!("Info:Verifying workflows...");
+
+    // 校验 setup 工作流装箱单
+    log!("Info:Checking manifest...");
+    let mut fs = MixedFS::new(pkg_content_path.clone());
+    let setup_manifest = get_manifest(setup_flow, &mut fs);
+    manifest_validator(&pkg_content_path, setup_manifest, &mut fs)?;
+    log_ok_last!("Info:Checking manifest...");
 
     Ok(global)
 }

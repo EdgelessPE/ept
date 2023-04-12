@@ -36,8 +36,8 @@ impl Verifiable for Software {
 
         // 主程序应该存在且可以读取版本号
         if let Some(main_program) = &self.main_program {
-            let mixed_fs = MixedFS::new();
-            if !mixed_fs.exists(main_program, located) {
+            let mixed_fs = MixedFS::new(located.clone());
+            if !mixed_fs.exists(main_program) {
                 return Err(err_wrapper(anyhow!(
                     "given main program '{main_program}' doesn't exist"
                 )));

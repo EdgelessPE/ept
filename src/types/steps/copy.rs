@@ -1,9 +1,9 @@
-use std::{path::{Path, PathBuf}, fs::remove_dir_all};
+use std::{path::{Path, PathBuf}};
 
 use anyhow::{Result,anyhow, Ok};
 use fs_extra::dir::CopyOptions;
 use serde::{Deserialize, Serialize};
-use crate::{types::{permissions::Generalizable,permissions::Permission,workflow::WorkflowContext,mixed_fs::MixedFS, verifiable::Verifiable}, utils::{common_wild_match_verify, common_merge_wild_match, contains_wild_match, ensure_dir_exist, try_recycle, parse_wild_match, parse_relative_path_with_located}, executor::{values_validator_path, judge_perm_level}, p2s};
+use crate::{types::{permissions::Generalizable,permissions::Permission,workflow::WorkflowContext,mixed_fs::MixedFS, verifiable::Verifiable}, utils::{common_wild_match_verify, contains_wild_match, ensure_dir_exist, try_recycle, parse_wild_match, parse_relative_path_with_located}, executor::{values_validator_path, judge_perm_level}, p2s};
 use super::TStep;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -102,7 +102,7 @@ impl TStep for StepCopy {
     }
     fn get_manifest(&self, fs: &mut MixedFS) -> Vec<String> {
         fs.remove(&self.from);
-        fs.add(&common_merge_wild_match(&self.from, &self.to));
+        fs.add(&self.to,&self.from);
         Vec::new()
     }
     fn interpret<F>(self, interpreter: F) -> Self
@@ -141,6 +141,7 @@ impl Verifiable for StepCopy{
 #[test]
 fn test_copy(){
     use crate::types::package::GlobalPackage;
+    use std::fs::remove_dir_all;
     envmnt::set("DEBUG", "true");
     let mut cx=WorkflowContext { located: String::from("D:/Desktop/Projects/EdgelessPE/ept"), pkg: GlobalPackage::_demo() };
     remove_dir_all("test").unwrap();
