@@ -83,7 +83,11 @@ impl MixedFS {
                 for exact_path in parse_wild_match(from, &self.located).unwrap_or(Vec::new()){
                     let exact_from=p2s!(exact_path);
                     let merged_path=merge_path(&exact_from, path.clone());
-                    self.a_add(merged_path);
+                    if exact_path.is_dir(){
+                        self.a_add_wild_match(merged_path+"/*");
+                    }else{
+                        self.a_add(merged_path);
+                    }
                 }
             }else{
                 self.a_add(path);
@@ -207,4 +211,10 @@ fn test_mixed_fs() {
     assert!(mfs.exists(&"233/whats.ts".to_string()));
     assert!(!mfs.exists(&"./target/debug/ept.exe".to_string()));
 
+    // 增删通配目录
+    mfs.add(&"./234/".to_string(),&"./src/util?".to_string());
+    assert!(mfs.exists(&"234/utils/exe_version.ts".to_string()));
+    mfs.remove(&"./23?".to_string());
+    assert!(!mfs.exists(&"234/utils/exe_version.ts".to_string()));
+    assert!(!mfs.exists(&"233".to_string()));
 }
