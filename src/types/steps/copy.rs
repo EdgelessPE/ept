@@ -23,6 +23,11 @@ pub fn parse_target_for_copy(from:&String,to:&String,located:&String,wild_match_
         return Err(anyhow!("Error:Field 'from' refers to a non-existent target : '{from}'"));
     }
 
+    // 如果 from 以 / 结尾但不是目录则报错
+    if from.ends_with("/")&&!from_path.is_dir(){
+        return Err(anyhow!("Error:Field 'from' ends with '/' but doesn't refer to a directory : '{from}'"));
+    }
+
     // 处理通配模式，将 to 作为父目录
     if wild_match_mode{
         let file_name=from_path.file_name().unwrap();
