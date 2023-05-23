@@ -175,6 +175,30 @@ fn test_copy(){
     }.run(&mut cx).unwrap();
     assert!(Path::new("test/ca/info.rs").exists());
 
+    // 目录-不存在目录
+    StepCopy{
+        from: "src/entrances".to_string(),
+        to: "test/entry1".to_string(),
+        overwrite: None,
+    }.run(&mut cx).unwrap();
+    assert!(Path::new("test/entry1/utils/mod.rs").exists());
+
+    // 目录-不存在目录
+    StepCopy{
+        from: "src/entrances".to_string(),
+        to: "test/entry2/".to_string(),
+        overwrite: None,
+    }.run(&mut cx).unwrap();
+    assert!(Path::new("test/entry2/utils/mod.rs").exists());
+
+    // 目录-已存在目录
+    StepCopy{
+        from: "src/entrances".to_string(),
+        to: "test/entry2/entrances".to_string(),
+        overwrite: None,
+    }.run(&mut cx).unwrap();
+    assert!(Path::new("test/entry2/entrances/utils/mod.rs").exists());
+
 
     // 通配符文件-不存在目录
     StepCopy{
