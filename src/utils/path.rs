@@ -49,11 +49,12 @@ pub fn parse_relative_path(relative: &String) -> Result<PathBuf> {
 /// 使用给定的 located 解析相对路径，带路径格式化
 pub fn parse_relative_path_with_located(relative: &String, located: &String) -> PathBuf {
     let relative = format_path(relative);
+    let located=format_path(located);
     let path = Path::new(&relative);
     if path.is_absolute() {
         path.to_path_buf()
     } else {
-        Path::new(located).join(relative).to_path_buf()
+        Path::new(&located).join(relative).to_path_buf()
     }
 }
 
