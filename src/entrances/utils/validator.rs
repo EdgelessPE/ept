@@ -4,7 +4,7 @@ use std::{
     path::Path,
 };
 
-use crate::{executor::values_validator_path, p2s, types::mixed_fs::MixedFS, utils::contains_wild_match};
+use crate::{executor::values_validator_path, p2s, types::mixed_fs::MixedFS, utils::{contains_wild_match, ask_yn}, log};
 
 pub fn inner_validator(dir: &String) -> Result<()> {
     let manifest = vec!["package.toml", "workflows/setup.toml"];
@@ -19,7 +19,7 @@ pub fn inner_validator(dir: &String) -> Result<()> {
     Ok(())
 }
 
-pub fn manifest_validator(base: &String, manifest: Vec<String>, fs: &mut MixedFS) -> Result<()> {
+pub fn manifest_validator(base: &String, manifest: Vec<String>, fs: &mut MixedFS,var_warn_manifest:bool) -> Result<()> {
     let mut missing_list = HashSet::new();
     for path in manifest {
         values_validator_path(&path)?;
@@ -32,9 +32,18 @@ pub fn manifest_validator(base: &String, manifest: Vec<String>, fs: &mut MixedFS
     }
     if !missing_list.is_empty() {
         let items: Vec<String> = missing_list.into_iter().collect();
-        return Err(anyhow!(
-            "Error:Invalid nep inner package : missing flow item '{items:?}' in '{base}'"
-        ));
+        if var_warn_manifest{
+            log!(
+                "Warning:May missing these flow items '{items:?}' in '{base}', continue? (y/n)"
+            );
+            if !ask_yn(){
+                return Err(anyhow!("Error:Operation canceled by user"));
+            }
+        }else{
+            return Err(anyhow!(
+                "Error:Invalid nep inner package : missing flow item '{items:?}' in '{base}'"
+            ));
+        }
     }
 
     Ok(())
