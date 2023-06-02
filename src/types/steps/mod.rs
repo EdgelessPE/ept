@@ -10,6 +10,7 @@ mod link;
 mod log;
 mod path;
 mod copy;
+mod mv;
 
 pub trait TStep: Verifiable + Generalizable {
     /// Run this step
@@ -107,12 +108,14 @@ macro_rules! def_enum_step {
 }
 
 // 注册步骤
-def_enum_step!(StepLink, StepExecute, StepPath, StepLog);
+def_enum_step!(StepLink, StepExecute, StepPath, StepLog, StepCopy, StepMove);
 
 pub use self::execute::StepExecute;
 pub use self::link::StepLink;
 pub use self::log::StepLog;
 pub use self::path::StepPath;
+pub use self::copy::StepCopy;
+pub use self::mv::StepMove;
 
 use super::mixed_fs::MixedFS;
 use super::workflow::WorkflowContext;
