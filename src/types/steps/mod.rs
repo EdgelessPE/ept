@@ -11,6 +11,7 @@ mod log;
 mod path;
 mod copy;
 mod mv;
+mod rename;
 
 pub trait TStep: Verifiable + Generalizable {
     /// Run this step

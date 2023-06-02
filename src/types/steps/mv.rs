@@ -11,7 +11,7 @@ pub struct StepMove{
 }
 
 fn mv(from:&String,to:&String,located:&String,overwrite:bool,wild_match_mode:bool)->Result<()>{
-    let (to_path,_)=parse_target_for_copy(from, to,located,wild_match_mode)?;
+    let (to_path,_)=parse_target_for_copy(from, to,located,wild_match_mode,"Move")?;
     if to_path.exists(){
         if overwrite{
             try_recycle(&to_path)?;
@@ -53,14 +53,13 @@ impl TStep for StepMove {
 
 impl Generalizable for StepMove{
     fn generalize_permissions(&self) -> Result<Vec<Permission>> {
-        let mut res=Vec::new();
-        res.push(Permission{
-            key:"fs_write".to_string(),
-            level:judge_perm_level(&self.from)?,
-            targets:vec![self.from.clone(),self.to.clone()]
-        });
-
-        Ok(res)
+        Ok(vec![
+            Permission{
+                key:"fs_write".to_string(),
+                level:judge_perm_level(&self.from)?,
+                targets:vec![self.from.clone(),self.to.clone()]
+            }
+        ])
     }
 }
 

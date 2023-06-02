@@ -1,0 +1,88 @@
+use anyhow::{Result,anyhow};
+use regex::Regex;
+use serde::{Deserialize, Serialize};
+
+use crate::{utils::{parse_relative_path_with_located, split_parent, contains_wild_match}, types::{verifiable::Verifiable, permissions::{Generalizable, Permission}}, executor::{values_validator_path, judge_perm_level}, p2s};
+
+use super::TStep;
+
+lazy_static! {
+    static ref PURE_NAME_REGEX: Regex = Regex::new(r"(^[^\/\*\:\$])+$").unwrap();
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct StepRename{
+    pub from:String,
+    pub to:String,
+}
+
+// 将to的文件名替代拼接到from末尾
+fn concat_to(to:&String,from:&String,located:&String)->String{
+    let (parent,_)=split_parent(from, located);
+    p2s!(parent.join(to))
+}
+
+fn rename(from:&String,to:&String,located:&String)->Result<()>{
+    let from_path=parse_relative_path_with_located(from,located);
+    // 检查是否存在
+    if !from_path.exists(){
+        return Err(anyhow!("Error(Rename):Field 'from' refers to a non-existent target : '{from}'"));
+    }
+
+    // 拼接to path
+    let final_to=concat_to(to, from, located);
+
+    // 执行重命名
+    std::fs::rename(from, &final_to).map_err(|e|anyhow!("Error(Rename):Error:Failed to rename '{from}' to '{final_to}' : {err}",err=e.to_string()))?;
+
+
+    Ok(())
+}
+
+impl TStep for StepRename {
+    fn run(self, cx: &mut crate::types::workflow::WorkflowContext) -> Result<i32> {
+        rename(&self.from, &self.to, &cx.located)?;
+        Ok(0)
+    }
+    fn reverse_run(self, cx: &mut crate::types::workflow::WorkflowContext) -> Result<()> {
+        Ok(())
+    }
+    fn get_manifest(&self, fs: &mut crate::types::mixed_fs::MixedFS) -> Vec<String> {
+        fs.remove(&self.from);
+        fs.add(&concat_to(&self.to, &self.from, &String::new()),&self.from);
+        Vec::new()
+    }
+    fn interpret<F>(self, interpreter: F) -> Self
+        where
+            F: Fn(String) -> String {
+        Self{from:interpreter(self.from),to:interpreter(self.to)}
+    }
+}
+
+impl Generalizable for StepRename{
+    fn generalize_permissions(&self) -> Result<Vec<crate::types::permissions::Permission>> {
+        Ok(vec![
+            Permission{
+                key:"fs_write".to_string(),
+                level:judge_perm_level(&self.from)?,
+                targets:vec![self.from.clone()]
+            }
+        ])
+    }
+}
+
+impl Verifiable for StepRename {
+    fn verify_self(&self, located: &String) -> Result<()> {
+        values_validator_path(&self.from)?;
+        // 检查 from 是否包含通配符
+        if contains_wild_match(&self.from){
+            return Err(anyhow!("Error(Rename):Field 'from' shouldn't contain wild match : '{from}'",from=&self.from));
+        }
+        // 检查 to 的正则表达式
+        if !PURE_NAME_REGEX.is_match(&self.to){
+            return Err(anyhow!("Error(Rename):Field 'to' illegal, expect pure file or directory name, got '{to}'",to=&self.to));
+        }
+
+        Ok(())
+    }
+}

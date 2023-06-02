@@ -14,18 +14,18 @@ pub struct StepCopy{
 }
 
 // 入参不应包含通配符，返回 （指向父目录存在的目标路径，是否在拷贝文件）
-pub fn parse_target_for_copy(from:&String,to:&String,located:&String,wild_match_mode:bool)->Result<(PathBuf,bool)>{
-    let from_path=Path::new(from);
+pub fn parse_target_for_copy(from:&String,to:&String,located:&String,wild_match_mode:bool,step_name:&str)->Result<(PathBuf,bool)>{
+    let from_path=parse_relative_path_with_located(from,located);
     let to_path=parse_relative_path_with_located(to,located);
 
     // 如果 from 不存在直接报错
     if !from_path.exists(){
-        return Err(anyhow!("Error:Field 'from' refers to a non-existent target : '{from}'"));
+        return Err(anyhow!("Error({step_name}):Field 'from' refers to a non-existent target : '{from}'"));
     }
 
     // 如果 from 以 / 结尾但不是目录则报错
     if from.ends_with("/")&&!from_path.is_dir(){
-        return Err(anyhow!("Error:Field 'from' ends with '/' but doesn't refer to a directory : '{from}'"));
+        return Err(anyhow!("Error({step_name}):Field 'from' ends with '/' but doesn't refer to a directory : '{from}'"));
     }
 
     // 处理通配模式，将 to 作为父目录
@@ -50,7 +50,7 @@ pub fn parse_target_for_copy(from:&String,to:&String,located:&String,wild_match_
                 let file_name=from_path.file_name().unwrap();
                 return Ok((to_path.join(file_name).to_path_buf(),true));
             }else{
-                return Err(anyhow!("Error:Field 'to' refers to a existing abnormal target : '{to}'"));
+                return Err(anyhow!("Error({step_name}):Field 'to' refers to a existing abnormal target : '{to}'"));
             }
         }
     
@@ -70,7 +70,7 @@ pub fn parse_target_for_copy(from:&String,to:&String,located:&String,wild_match_
 }
 
 fn copy(from:&String,to:&String,located:&String,overwrite:bool,wild_match_mode:bool)->Result<()>{
-    let (to_path,is_copy_file)=parse_target_for_copy(from, to,located,wild_match_mode)?;
+    let (to_path,is_copy_file)=parse_target_for_copy(from, to,located,wild_match_mode,"Copy")?;
     if to_path.exists(){
         if overwrite{
             try_recycle(&to_path)?;
@@ -80,10 +80,10 @@ fn copy(from:&String,to:&String,located:&String,overwrite:bool,wild_match_mode:b
         }
     }
     if is_copy_file{
-        std::fs::copy(from, &to_path).map_err(|e|anyhow!("Error:Failed to copy file from '{from}' to '{to_str}' : {err}",err=e.to_string(),to_str=p2s!(to_path)))?;
+        std::fs::copy(from, &to_path).map_err(|e|anyhow!("Error(Copy):Failed to copy file from '{from}' to '{to_str}' : {err}",err=e.to_string(),to_str=p2s!(to_path)))?;
     }else{
         let opt=CopyOptions::new().copy_inside(true);
-        fs_extra::dir::copy(from, &to_path, &opt).map_err(|e|anyhow!("Error:Failed to copy dir from '{from}' to '{to_str}' : {err}",err=e.to_string(),to_str=p2s!(to_path)))?;
+        fs_extra::dir::copy(from, &to_path, &opt).map_err(|e|anyhow!("Error(Copy):Failed to copy dir from '{from}' to '{to_str}' : {err}",err=e.to_string(),to_str=p2s!(to_path)))?;
     }
 
     Ok(())
