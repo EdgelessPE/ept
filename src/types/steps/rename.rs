@@ -86,3 +86,51 @@ impl Verifiable for StepRename {
         Ok(())
     }
 }
+
+#[test]
+fn test_rename(){
+    use std::path::Path;
+    use crate::types::package::GlobalPackage;
+    use std::fs::remove_dir_all;
+    use fs_extra::dir::CopyOptions;
+    use crate::types::workflow::WorkflowContext;
+    envmnt::set("DEBUG", "true");
+    let mut cx=WorkflowContext { located: String::from("D:/Desktop/Projects/EdgelessPE/ept"), pkg: GlobalPackage::_demo() };
+    remove_dir_all("test").unwrap();
+
+    // 准备源
+    let opt=CopyOptions::new();
+    fs_extra::dir::copy("src","test/src",&opt);
+
+    // 文件
+    StepRename{
+        from: "test/src/types/author.rs".to_string(),
+        to: "1.rs".to_string(),
+    }.run(&mut cx).unwrap();
+    assert!(Path::new("test/src/types/1.rs").exists());
+    assert!(!Path::new("test/src/types/author.rs").exists());
+
+    // 文件覆盖
+    StepRename{
+        from: "test/src/types/info.rs".to_string(),
+        to: "1.rs".to_string(),
+    }.run(&mut cx).unwrap();
+    assert!(Path::new("test/src/types/1.rs").exists());
+    assert!(!Path::new("test/src/types/info.rs").exists());
+
+    // 目录
+    StepRename{
+        from: "test/src".to_string(),
+        to: "source".to_string(),
+    }.run(&mut cx).unwrap();
+    assert!(Path::new("test/source/types/1.rs").exists());
+    assert!(!Path::new("test/src/types/1.rs").exists());
+
+    // 目录覆盖
+    StepRename{
+        from: "test/utils".to_string(),
+        to: "tools".to_string(),
+    }.run(&mut cx).unwrap();
+    assert!(Path::new("test/tools/cfg.rs").exists());
+    assert!(!Path::new("test/utils/cfg.rs").exists());
+}
