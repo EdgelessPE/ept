@@ -119,7 +119,8 @@ def_enum_step!(
     StepCopy,
     StepMove,
     StepRename,
-    StepNew
+    StepNew,
+    StepWait
 );
 
 pub use self::copy::StepCopy;
@@ -130,6 +131,7 @@ pub use self::mv::StepMove;
 pub use self::new::StepNew;
 pub use self::path::StepPath;
 pub use self::rename::StepRename;
+pub use self::wait::StepWait;
 
 use super::mixed_fs::MixedFS;
 use super::workflow::WorkflowContext;

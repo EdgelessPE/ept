@@ -13,8 +13,7 @@ use anyhow::{anyhow, Ok, Result};
 use serde::{Deserialize, Serialize};
 use std::{
     fs::File,
-    fs::{create_dir_all, metadata},
-    os::unix::prelude::MetadataExt,
+    fs::create_dir_all,
     path::Path,
 };
 
@@ -122,6 +121,10 @@ fn test_new() {
     use crate::types::workflow::WorkflowContext;
     use std::fs::remove_dir_all;
     use std::path::Path;
+    use std::{
+        fs::metadata,
+        os::unix::prelude::MetadataExt,
+    };
     envmnt::set("DEBUG", "true");
     let mut cx = WorkflowContext {
         located: String::from("D:/Desktop/Projects/EdgelessPE/ept"),
