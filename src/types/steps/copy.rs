@@ -1,5 +1,4 @@
-use std::{path::{Path, PathBuf}};
-
+use std::path::PathBuf;
 use anyhow::{Result,anyhow, Ok};
 use fs_extra::dir::CopyOptions;
 use serde::{Deserialize, Serialize};
@@ -147,6 +146,7 @@ impl Verifiable for StepCopy{
 fn test_copy(){
     use crate::types::package::GlobalPackage;
     use std::fs::remove_dir_all;
+    use std::path::Path;
     envmnt::set("DEBUG", "true");
     let mut cx=WorkflowContext { located: String::from("D:/Desktop/Projects/EdgelessPE/ept"), pkg: GlobalPackage::_demo() };
     remove_dir_all("test").unwrap();

@@ -13,6 +13,7 @@ mod copy;
 mod mv;
 mod rename;
 mod new;
+mod wait;
 
 pub trait TStep: Verifiable + Generalizable {
     /// Run this step
