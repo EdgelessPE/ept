@@ -14,9 +14,7 @@ use regex::Regex;
 
 use crate::types::{permissions::Generalizable, workflow::WorkflowHeader};
 
-use super::{
-    values_validator_path, judge_perm_level,
-};
+use super::{judge_perm_level, values_validator_path};
 
 lazy_static! {
     static ref RESOURCE_REGEX: Regex = Regex::new(r"^[^/]+/[^/]+$").unwrap();
@@ -140,14 +138,16 @@ impl Generalizable for WorkflowHeader {
                 "Exist" => {
                     permissions.push(Permission {
                         key: "fs_read".to_string(),
-                        level: judge_perm_level(&arg).map_err(|e| eval::Error::Custom(e.to_string()))?,
+                        level: judge_perm_level(&arg)
+                            .map_err(|e| eval::Error::Custom(e.to_string()))?,
                         targets: vec![arg],
                     });
                 }
                 "IsDirectory" => {
                     permissions.push(Permission {
                         key: "fs_read".to_string(),
-                        level: judge_perm_level(&arg).map_err(|e| eval::Error::Custom(e.to_string()))?,
+                        level: judge_perm_level(&arg)
+                            .map_err(|e| eval::Error::Custom(e.to_string()))?,
                         targets: vec![arg],
                     });
                 }

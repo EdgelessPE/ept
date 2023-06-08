@@ -1,12 +1,12 @@
 use crate::p2s;
 use anyhow::{anyhow, Result};
 use std::{
-    fs::{read_dir, remove_dir_all, remove_file, create_dir_all},
+    fs::{create_dir_all, read_dir, remove_dir_all, remove_file},
     path::Path,
 };
 
-pub fn try_recycle<P: AsRef<Path>>(path:P) -> Result<()> {
-    let p=path.as_ref();
+pub fn try_recycle<P: AsRef<Path>>(path: P) -> Result<()> {
+    let p = path.as_ref();
     let str = p2s!(p);
     if p.is_dir() {
         if let Err(e) = trash::delete(&p) {
@@ -88,10 +88,16 @@ where
     Ok(count)
 }
 
-pub fn ensure_dir_exist<P: AsRef<Path>>(path:P)->Result<()>{
-    let path=path.as_ref();
-    if !path.exists(){
-        create_dir_all(path).map_err(|e|anyhow!("Error:Failed to create dir '{p}' : {err}",p=p2s!(path),err=e.to_string()))?;
+pub fn ensure_dir_exist<P: AsRef<Path>>(path: P) -> Result<()> {
+    let path = path.as_ref();
+    if !path.exists() {
+        create_dir_all(path).map_err(|e| {
+            anyhow!(
+                "Error:Failed to create dir '{p}' : {err}",
+                p = p2s!(path),
+                err = e.to_string()
+            )
+        })?;
     }
 
     Ok(())

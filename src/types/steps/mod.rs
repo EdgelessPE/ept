@@ -5,14 +5,14 @@ use anyhow::{anyhow, Result};
 use serde::de;
 use serde::{Deserialize, Serialize};
 
+mod copy;
 mod execute;
 mod link;
 mod log;
-mod path;
-mod copy;
 mod mv;
-mod rename;
 mod new;
+mod path;
+mod rename;
 mod wait;
 
 pub trait TStep: Verifiable + Generalizable {
@@ -111,16 +111,25 @@ macro_rules! def_enum_step {
 }
 
 // 注册步骤
-def_enum_step!(StepLink, StepExecute, StepPath, StepLog, StepCopy, StepMove, StepRename, StepNew);
+def_enum_step!(
+    StepLink,
+    StepExecute,
+    StepPath,
+    StepLog,
+    StepCopy,
+    StepMove,
+    StepRename,
+    StepNew
+);
 
+pub use self::copy::StepCopy;
 pub use self::execute::StepExecute;
 pub use self::link::StepLink;
 pub use self::log::StepLog;
-pub use self::path::StepPath;
-pub use self::copy::StepCopy;
 pub use self::mv::StepMove;
-pub use self::rename::StepRename;
 pub use self::new::StepNew;
+pub use self::path::StepPath;
+pub use self::rename::StepRename;
 
 use super::mixed_fs::MixedFS;
 use super::workflow::WorkflowContext;

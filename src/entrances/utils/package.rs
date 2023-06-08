@@ -83,7 +83,7 @@ pub fn unpack_nep(
         min(s.available_memory() / 10, 500 * 1024 * 1024),
     );
 
-    let res=if size <= size_limit {
+    let res = if size <= size_limit {
         log!("Debug:Use fast unpack method ({size}/{size_limit})");
         fast_unpack_nep(source_file, verify_signature)?
     } else {
@@ -92,7 +92,7 @@ pub fn unpack_nep(
     };
 
     // 离线模式下强制执行一次检查
-    if !verify_signature{
+    if !verify_signature {
         entrances::verify::verify(&p2s!(res.0))?;
     }
 

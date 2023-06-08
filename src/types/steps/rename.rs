@@ -1,8 +1,16 @@
-use anyhow::{Result,anyhow};
+use anyhow::{anyhow, Result};
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 
-use crate::{utils::{parse_relative_path_with_located, split_parent, contains_wild_match}, types::{verifiable::Verifiable, permissions::{Generalizable, Permission}}, executor::{values_validator_path, judge_perm_level}, p2s};
+use crate::{
+    executor::{judge_perm_level, values_validator_path},
+    p2s,
+    types::{
+        permissions::{Generalizable, Permission},
+        verifiable::Verifiable,
+    },
+    utils::{contains_wild_match, parse_relative_path_with_located, split_parent},
+};
 
 use super::TStep;
 
@@ -11,30 +19,36 @@ lazy_static! {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct StepRename{
-    pub from:String,
-    pub to:String,
+pub struct StepRename {
+    pub from: String,
+    pub to: String,
 }
 
 // 将to的文件名替代拼接到from末尾
-fn concat_to(to:&String,from:&String,located:&String)->String{
-    let (parent,_)=split_parent(from, located);
+fn concat_to(to: &String, from: &String, located: &String) -> String {
+    let (parent, _) = split_parent(from, located);
     p2s!(parent.join(to))
 }
 
-fn rename(from:&String,to:&String,located:&String)->Result<()>{
-    let from_path=parse_relative_path_with_located(from,located);
+fn rename(from: &String, to: &String, located: &String) -> Result<()> {
+    let from_path = parse_relative_path_with_located(from, located);
     // 检查是否存在
-    if !from_path.exists(){
-        return Err(anyhow!("Error(Rename):Field 'from' refers to a non-existent target : '{from}'"));
+    if !from_path.exists() {
+        return Err(anyhow!(
+            "Error(Rename):Field 'from' refers to a non-existent target : '{from}'"
+        ));
     }
 
     // 拼接to path
-    let final_to=concat_to(to, from, located);
+    let final_to = concat_to(to, from, located);
 
     // 执行重命名
-    std::fs::rename(from, &final_to).map_err(|e|anyhow!("Error(Rename):Error:Failed to rename '{from}' to '{final_to}' : {err}",err=e.to_string()))?;
-
+    std::fs::rename(from, &final_to).map_err(|e| {
+        anyhow!(
+            "Error(Rename):Error:Failed to rename '{from}' to '{final_to}' : {err}",
+            err = e.to_string()
+        )
+    })?;
 
     Ok(())
 }
@@ -49,25 +63,27 @@ impl TStep for StepRename {
     }
     fn get_manifest(&self, fs: &mut crate::types::mixed_fs::MixedFS) -> Vec<String> {
         fs.remove(&self.from);
-        fs.add(&concat_to(&self.to, &self.from, &String::new()),&self.from);
+        fs.add(&concat_to(&self.to, &self.from, &String::new()), &self.from);
         Vec::new()
     }
     fn interpret<F>(self, interpreter: F) -> Self
-        where
-            F: Fn(String) -> String {
-        Self{from:interpreter(self.from),to:interpreter(self.to)}
+    where
+        F: Fn(String) -> String,
+    {
+        Self {
+            from: interpreter(self.from),
+            to: interpreter(self.to),
+        }
     }
 }
 
-impl Generalizable for StepRename{
+impl Generalizable for StepRename {
     fn generalize_permissions(&self) -> Result<Vec<crate::types::permissions::Permission>> {
-        Ok(vec![
-            Permission{
-                key:"fs_write".to_string(),
-                level:judge_perm_level(&self.from)?,
-                targets:vec![self.from.clone()]
-            }
-        ])
+        Ok(vec![Permission {
+            key: "fs_write".to_string(),
+            level: judge_perm_level(&self.from)?,
+            targets: vec![self.from.clone()],
+        }])
     }
 }
 
@@ -75,12 +91,18 @@ impl Verifiable for StepRename {
     fn verify_self(&self, located: &String) -> Result<()> {
         values_validator_path(&self.from)?;
         // 检查 from 是否包含通配符
-        if contains_wild_match(&self.from){
-            return Err(anyhow!("Error(Rename):Field 'from' shouldn't contain wild match : '{from}'",from=&self.from));
+        if contains_wild_match(&self.from) {
+            return Err(anyhow!(
+                "Error(Rename):Field 'from' shouldn't contain wild match : '{from}'",
+                from = &self.from
+            ));
         }
         // 检查 to 的正则表达式
-        if !PURE_NAME_REGEX.is_match(&self.to){
-            return Err(anyhow!("Error(Rename):Field 'to' illegal, expect pure file or directory name, got '{to}'",to=&self.to));
+        if !PURE_NAME_REGEX.is_match(&self.to) {
+            return Err(anyhow!(
+                "Error(Rename):Field 'to' illegal, expect pure file or directory name, got '{to}'",
+                to = &self.to
+            ));
         }
 
         Ok(())
@@ -88,49 +110,60 @@ impl Verifiable for StepRename {
 }
 
 #[test]
-fn test_rename(){
-    use std::path::Path;
+fn test_rename() {
     use crate::types::package::GlobalPackage;
-    use std::fs::remove_dir_all;
-    use fs_extra::dir::CopyOptions;
     use crate::types::workflow::WorkflowContext;
+    use fs_extra::dir::CopyOptions;
+    use std::fs::remove_dir_all;
+    use std::path::Path;
     envmnt::set("DEBUG", "true");
-    let mut cx=WorkflowContext { located: String::from("D:/Desktop/Projects/EdgelessPE/ept"), pkg: GlobalPackage::_demo() };
+    let mut cx = WorkflowContext {
+        located: String::from("D:/Desktop/Projects/EdgelessPE/ept"),
+        pkg: GlobalPackage::_demo(),
+    };
     remove_dir_all("test").unwrap();
 
     // 准备源
-    let opt=CopyOptions::new();
-    fs_extra::dir::copy("src","test/src",&opt);
+    let opt = CopyOptions::new();
+    fs_extra::dir::copy("src", "test/src", &opt);
 
     // 文件
-    StepRename{
+    StepRename {
         from: "test/src/types/author.rs".to_string(),
         to: "1.rs".to_string(),
-    }.run(&mut cx).unwrap();
+    }
+    .run(&mut cx)
+    .unwrap();
     assert!(Path::new("test/src/types/1.rs").exists());
     assert!(!Path::new("test/src/types/author.rs").exists());
 
     // 文件覆盖
-    StepRename{
+    StepRename {
         from: "test/src/types/info.rs".to_string(),
         to: "1.rs".to_string(),
-    }.run(&mut cx).unwrap();
+    }
+    .run(&mut cx)
+    .unwrap();
     assert!(Path::new("test/src/types/1.rs").exists());
     assert!(!Path::new("test/src/types/info.rs").exists());
 
     // 目录
-    StepRename{
+    StepRename {
         from: "test/src".to_string(),
         to: "source".to_string(),
-    }.run(&mut cx).unwrap();
+    }
+    .run(&mut cx)
+    .unwrap();
     assert!(Path::new("test/source/types/1.rs").exists());
     assert!(!Path::new("test/src/types/1.rs").exists());
 
     // 目录覆盖
-    StepRename{
+    StepRename {
         from: "test/utils".to_string(),
         to: "tools".to_string(),
-    }.run(&mut cx).unwrap();
+    }
+    .run(&mut cx)
+    .unwrap();
     assert!(Path::new("test/tools/cfg.rs").exists());
     assert!(!Path::new("test/utils/cfg.rs").exists());
 }

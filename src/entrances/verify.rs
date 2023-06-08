@@ -11,19 +11,19 @@ use std::path::{Path, PathBuf};
 
 use super::utils::validator::{inner_validator, manifest_validator};
 
-fn get_manifest(flow: Vec<WorkflowNode>, fs: &mut MixedFS) -> (Vec<String>,bool) {
+fn get_manifest(flow: Vec<WorkflowNode>, fs: &mut MixedFS) -> (Vec<String>, bool) {
     let mut manifest = Vec::new();
     // TEMP:手动维护一份会导致文件系统新增文件的步骤名称列表，检测到白名单步骤时对manifest检测异常警告而非报错
-    let white_list=HashSet::from(["Copy","Move","Rename","New"]);
-    let mut var_warn_manifest=false;
+    let white_list = HashSet::from(["Copy", "Move", "Rename", "New"]);
+    let mut var_warn_manifest = false;
 
     for node in flow {
         manifest.append(&mut node.body.get_manifest(fs));
-        if white_list.contains(node.header.step.as_str()){
-            var_warn_manifest=true;
+        if white_list.contains(node.header.step.as_str()) {
+            var_warn_manifest = true;
         }
     }
-    (manifest,var_warn_manifest)
+    (manifest, var_warn_manifest)
 }
 
 fn get_workflow_path(source_dir: &String, file_name: &str) -> PathBuf {
@@ -83,8 +83,13 @@ pub fn verify(source_dir: &String) -> Result<GlobalPackage> {
     // 校验 setup 工作流装箱单
     log!("Info:Checking manifest...");
     let mut fs = MixedFS::new(pkg_content_path.clone());
-    let (setup_manifest,var_warn_manifest) = get_manifest(setup_flow, &mut fs);
-    manifest_validator(&pkg_content_path, setup_manifest, &mut fs,var_warn_manifest)?;
+    let (setup_manifest, var_warn_manifest) = get_manifest(setup_flow, &mut fs);
+    manifest_validator(
+        &pkg_content_path,
+        setup_manifest,
+        &mut fs,
+        var_warn_manifest,
+    )?;
     log_ok_last!("Info:Checking manifest...");
 
     Ok(global)

@@ -15,7 +15,7 @@ use crate::{
 
 use self::{functions::functions_decorator, values::values_replacer};
 
-pub use self::values::{values_validator_path,judge_perm_level};
+pub use self::values::{judge_perm_level, values_validator_path};
 
 // 配置部分内置变量的值
 lazy_static! {
