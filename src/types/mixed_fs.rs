@@ -73,6 +73,17 @@ impl MixedFS {
         if path.starts_with("${"){
             return;
         }
+        // 特殊处理 New 的逻辑
+        if from.is_empty(){
+            let path=path.to_owned();
+            if path.ends_with("/"){
+                self.a_add_wild_match(path+"*");
+                return;
+            }else{
+                self.a_add(path);
+            }
+            return;
+        }
         let path = format_path(path);
         let from=format_path(from);
 
