@@ -1,3 +1,5 @@
+use std::{path::Path, fs::remove_dir_all};
+
 use anyhow::{anyhow, Result};
 use regex::Regex;
 use serde::{Deserialize, Serialize};
@@ -41,6 +43,12 @@ fn rename(from: &String, to: &String, located: &String) -> Result<()> {
 
     // 拼接to path
     let final_to = concat_to(to, from, located);
+
+    // 清理存在的目录
+    let to_path=Path::new(&final_to);
+    if to_path.exists() && to_path.is_dir(){
+        remove_dir_all(to_path).map_err(|e|anyhow!("Error(Rename):Failed to remove '{final_to}' : {err}",err=e.to_string()))?;
+    }
 
     // 执行重命名
     std::fs::rename(from, &final_to).map_err(|e| {
@@ -117,10 +125,12 @@ fn test_rename() {
     use std::path::Path;
     envmnt::set("DEBUG", "true");
     let mut cx = WorkflowContext::_demo();
-    remove_dir_all("test").unwrap();
+    if Path::new("test").exists(){
+        remove_dir_all("test").unwrap();
+    }
 
     // 准备源
-    let opt = CopyOptions::new();
+    let opt = CopyOptions::new().copy_inside(true);
     fs_extra::dir::copy("src", "test/src", &opt).unwrap();
 
     // 文件
@@ -155,11 +165,20 @@ fn test_rename() {
 
     // 目录覆盖
     StepRename {
-        from: "test/utils".to_string(),
+        from: "test/source/utils".to_string(),
         to: "tools".to_string(),
     }
     .run(&mut cx)
     .unwrap();
-    assert!(Path::new("test/tools/cfg.rs").exists());
-    assert!(!Path::new("test/utils/cfg.rs").exists());
+    assert!(Path::new("test/source/tools/cfg.rs").exists());
+    assert!(!Path::new("test/source/utils/cfg.rs").exists());
+
+    StepRename {
+        from: "test/source/types".to_string(),
+        to: "tools".to_string(),
+    }
+    .run(&mut cx)
+    .unwrap();
+    assert!(Path::new("test/source/tools/steps/rename.rs").exists());
+    assert!(!Path::new("test/source/types/steps/rename.rs").exists());
 }
