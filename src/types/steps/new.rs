@@ -26,7 +26,7 @@ pub struct StepNew {
 }
 
 fn new_file(at: &String) -> Result<()> {
-    let f = File::create(at).map_err(|e| {
+    File::create(at).map_err(|e| {
         anyhow!(
             "Error(New):Failed to create file at '{at}' : {err}",
             err = e.to_string()
@@ -48,7 +48,7 @@ fn new_dir(at: &String) -> Result<()> {
 }
 
 impl TStep for StepNew {
-    fn run(self, cx: &mut WorkflowContext) -> Result<i32> {
+    fn run(self, _: &mut WorkflowContext) -> Result<i32> {
         // 检测是否存在
         let p = Path::new(&self.at);
         if p.exists() {
@@ -72,7 +72,7 @@ impl TStep for StepNew {
 
         Ok(0)
     }
-    fn reverse_run(self, cx: &mut WorkflowContext) -> Result<()> {
+    fn reverse_run(self, _: &mut WorkflowContext) -> Result<()> {
         Ok(())
     }
     fn get_manifest(&self, fs: &mut MixedFS) -> Vec<String> {
@@ -91,7 +91,7 @@ impl TStep for StepNew {
 }
 
 impl Verifiable for StepNew {
-    fn verify_self(&self, located: &String) -> Result<()> {
+    fn verify_self(&self, _: &String) -> Result<()> {
         values_validator_path(&self.at)?;
         // 检查 at 是否包含通配符
         if contains_wild_match(&self.at) {
@@ -123,7 +123,6 @@ fn test_new() {
     use std::path::Path;
     use std::{
         fs::metadata,
-        os::unix::prelude::MetadataExt,
     };
     envmnt::set("DEBUG", "true");
     let mut cx = WorkflowContext {
@@ -156,7 +155,7 @@ fn test_new() {
     .run(&mut cx)
     .unwrap();
     let meta = metadata("test/main.rs").unwrap();
-    assert!(meta.size() < 16);
+    assert!(meta.len() < 16);
 
     // 目录覆盖
     StepNew {

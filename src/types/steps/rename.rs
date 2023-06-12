@@ -58,7 +58,7 @@ impl TStep for StepRename {
         rename(&self.from, &self.to, &cx.located)?;
         Ok(0)
     }
-    fn reverse_run(self, cx: &mut crate::types::workflow::WorkflowContext) -> Result<()> {
+    fn reverse_run(self, _: &mut crate::types::workflow::WorkflowContext) -> Result<()> {
         Ok(())
     }
     fn get_manifest(&self, fs: &mut crate::types::mixed_fs::MixedFS) -> Vec<String> {
@@ -88,7 +88,7 @@ impl Generalizable for StepRename {
 }
 
 impl Verifiable for StepRename {
-    fn verify_self(&self, located: &String) -> Result<()> {
+    fn verify_self(&self, _: &String) -> Result<()> {
         values_validator_path(&self.from)?;
         // 检查 from 是否包含通配符
         if contains_wild_match(&self.from) {
@@ -125,7 +125,7 @@ fn test_rename() {
 
     // 准备源
     let opt = CopyOptions::new();
-    fs_extra::dir::copy("src", "test/src", &opt);
+    fs_extra::dir::copy("src", "test/src", &opt).unwrap();
 
     // 文件
     StepRename {

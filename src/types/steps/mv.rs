@@ -109,8 +109,8 @@ fn test_copy() {
 
     // 准备源
     let opt = CopyOptions::new();
-    fs_extra::dir::copy("src", "test/src", &opt);
-    fs_extra::dir::copy("keys", "test/src/keys", &opt);
+    fs_extra::dir::copy("src", "test/src", &opt).unwrap();
+    fs_extra::dir::copy("keys", "test/src/keys", &opt).unwrap();
 
     // 文件-文件
     StepMove {

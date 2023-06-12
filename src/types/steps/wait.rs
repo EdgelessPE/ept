@@ -14,19 +14,19 @@ pub struct StepWait {
 }
 
 impl TStep for StepWait {
-    fn run(self, cx: &mut WorkflowContext) -> Result<i32> {
+    fn run(self, _: &mut WorkflowContext) -> Result<i32> {
         let d = Duration::from_millis(self.timeout);
         sleep(d);
 
         Ok(0)
     }
-    fn reverse_run(self, cx: &mut WorkflowContext) -> Result<()> {
+    fn reverse_run(self, _: &mut WorkflowContext) -> Result<()> {
         Ok(())
     }
-    fn get_manifest(&self, fs: &mut MixedFS) -> Vec<String> {
+    fn get_manifest(&self, _: &mut MixedFS) -> Vec<String> {
         Vec::new()
     }
-    fn interpret<F>(self, interpreter: F) -> Self
+    fn interpret<F>(self, _: F) -> Self
     where
         F: Fn(String) -> String,
     {
@@ -35,7 +35,7 @@ impl TStep for StepWait {
 }
 
 impl Verifiable for StepWait {
-    fn verify_self(&self, located: &String) -> Result<()> {
+    fn verify_self(&self, _: &String) -> Result<()> {
         Ok(())
     }
 }
