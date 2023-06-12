@@ -233,12 +233,10 @@ fn test_header_valid() {
         step: "Step".to_string(),
         c_if: Some("Exist(\"./mc/vsc.exe\") && IsDirectory(\"${SystemDrive}/Windows\") || Exist(\"${AppData}/Roaming/Edgeless/ept\")".to_string()),
     };
-    println!(
-        "{res:#?}",
-        res = flow
+
+    flow
             .verify_self(&String::from(
-                "D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode"
+                "./apps/VSCode"
             ))
-            .unwrap()
-    );
+            .unwrap();
 }

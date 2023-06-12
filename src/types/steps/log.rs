@@ -65,7 +65,7 @@ fn test_log() {
         msg: String::from("Hello nep!"),
     };
     step.verify_self(&String::from(
-        "D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode",
+        "./",
     ))
     .unwrap();
     step.run(&mut cx).unwrap();

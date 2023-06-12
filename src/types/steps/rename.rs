@@ -111,16 +111,12 @@ impl Verifiable for StepRename {
 
 #[test]
 fn test_rename() {
-    use crate::types::package::GlobalPackage;
     use crate::types::workflow::WorkflowContext;
     use fs_extra::dir::CopyOptions;
     use std::fs::remove_dir_all;
     use std::path::Path;
     envmnt::set("DEBUG", "true");
-    let mut cx = WorkflowContext {
-        located: String::from("D:/Desktop/Projects/EdgelessPE/ept"),
-        pkg: GlobalPackage::_demo(),
-    };
+    let mut cx = WorkflowContext::_demo();
     remove_dir_all("test").unwrap();
 
     // 准备源

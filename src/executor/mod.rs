@@ -132,10 +132,11 @@ pub fn workflow_reverse_executor(
 
 #[test]
 fn test_condition_eval() {
+    let located=&String::from("./apps/VSCode");
     let r1 = condition_eval(
         &String::from("${ExitCode}==114"),
         114,
-        &String::from("D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode"),
+        located,
     )
     .unwrap();
     assert!(r1);
@@ -143,7 +144,7 @@ fn test_condition_eval() {
     let r2 = condition_eval(
         &String::from("${ExitCode}==514"),
         114,
-        &String::from("D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode"),
+        located,
     )
     .unwrap();
     assert_eq!(r2, false);
@@ -151,23 +152,23 @@ fn test_condition_eval() {
     let r3 = condition_eval(
         &String::from("\"${SystemDrive}\"==\"C:\""),
         0,
-        &String::from("D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode"),
+        located,
     )
     .unwrap();
     assert!(r3);
 
     let r4 = condition_eval(
-        &String::from("\"${DefaultLocation}\"==\"D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode\""),
+        &String::from("\"${DefaultLocation}\"==\"./apps/VSCode\""),
         0,
-        &String::from("D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode"),
+        located,
     )
     .unwrap();
     assert!(r4);
 
     let r5 = condition_eval(
-        &String::from("Exist(\"src/main.rs\") && IsDirectory(\"bin\")"),
+        &String::from("Exist(\"src/main.rs\") && IsDirectory(\"src\")"),
         0,
-        &String::from("D:/Desktop/Projects/EdgelessPE/ept"),
+        &String::from("./"),
     )
     .unwrap();
     assert!(r5);
@@ -175,7 +176,7 @@ fn test_condition_eval() {
     let r6 = condition_eval(
         &String::from("Exist(\"./src/main.ts\")"),
         0,
-        &String::from("D:/Desktop/Projects/EdgelessPE/ept"),
+        located,
     )
     .unwrap();
     assert_eq!(r6, false);
@@ -183,7 +184,7 @@ fn test_condition_eval() {
     let r7 = condition_eval(
         &String::from("Exist(\"${AppData}\") && IsDirectory(\"${SystemDrive}/Windows\")"),
         0,
-        &String::from("D:/Desktop/Projects/EdgelessPE/ept/apps/VSCode"),
+        located,
     )
     .unwrap();
     assert!(r7);
@@ -199,7 +200,7 @@ fn test_workflow_executor() {
         // StepPath,
     };
     use crate::types::workflow::{WorkflowHeader, WorkflowNode};
-    let pkg = GlobalPackage::_demo();
+    let cx=WorkflowContext::_demo();
     let wf1 = vec![
         // WorkflowNode {
         //     header: WorkflowHeader {
@@ -270,7 +271,7 @@ fn test_workflow_executor() {
         //     }),
         // },
     ];
-    let r1 = workflow_executor(wf1, String::from("D:/Desktop/Projects/EdgelessPE/ept"), pkg);
+    let r1 = workflow_executor(wf1, cx.located, cx.pkg);
     println!("{r1:?}");
 }
 
@@ -306,11 +307,11 @@ fn test_workflow_executor_interpreter() {
             }),
         },
     ];
-    let pkg = GlobalPackage::_demo();
+    let cx = WorkflowContext::_demo();
     workflow_executor(
         flow,
-        String::from("D:/Desktop/Projects/EdgelessPE/ept"),
-        pkg,
+        cx.located,
+        cx.pkg,
     )
     .unwrap();
 }

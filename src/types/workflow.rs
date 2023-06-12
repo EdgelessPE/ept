@@ -1,7 +1,9 @@
+use std::env::current_dir;
+
 use super::{
     package::GlobalPackage, permissions::Generalizable, steps::Step, verifiable::Verifiable,
 };
-use crate::types::permissions::Permission;
+use crate::{types::permissions::Permission, p2s};
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
@@ -38,4 +40,10 @@ impl Verifiable for WorkflowNode {
 pub struct WorkflowContext {
     pub located: String,
     pub pkg: GlobalPackage,
+}
+
+impl WorkflowContext{
+    pub fn _demo()->Self{
+        Self { located: p2s!(current_dir().unwrap()), pkg: GlobalPackage::_demo() }
+    }
 }

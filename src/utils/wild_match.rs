@@ -99,7 +99,7 @@ pub fn common_wild_match_verify(from: &String, to: &String, located: &String) ->
 
 #[test]
 fn test_is_valid_wild_match() {
-    let located = String::from("D:/Desktop/Projects/EdgelessPE/ept");
+    let located = String::from("./");
     assert!(is_valid_wild_match(&"*.toml".to_string(), &located).is_ok());
     assert!(is_valid_wild_match(&"src/*.rs".to_string(), &located).is_ok());
     assert!(is_valid_wild_match(&"src/*s/mod.rs".to_string(), &located).is_err());
@@ -108,18 +108,10 @@ fn test_is_valid_wild_match() {
 
 #[test]
 fn test_parse_wild_match() {
-    let located = String::from("D:/Desktop/Projects/EdgelessPE/ept");
-    println!(
-        "{res:#?}",
-        res = parse_wild_match("*.toml".to_string(), &located).unwrap()
-    );
-    println!(
-        "{res:#?}",
-        res = parse_wild_match("src/*.rs".to_string(), &located).unwrap()
-    );
-    println!(
-        "{res:#?}",
-        res = parse_wild_match("src/types/mod?rs".to_string(), &located).unwrap()
-    );
+    use std::env::current_dir;
+    let located = p2s!(current_dir().unwrap());
+    assert!(parse_wild_match("*.toml".to_string(), &located).unwrap().len()==1);
+    assert!(parse_wild_match("src/*.rs".to_string(), &located).unwrap().len()==1);
+    assert!(parse_wild_match("src/types/mod?rs".to_string(), &located).unwrap().len()==1);
     assert!(parse_wild_match("src/*s/mod.rs".to_string(), &located).is_err());
 }

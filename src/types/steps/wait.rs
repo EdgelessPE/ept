@@ -48,14 +48,10 @@ impl Generalizable for StepWait {
 
 #[test]
 fn test_wait() {
-    use crate::types::package::GlobalPackage;
     use crate::types::workflow::WorkflowContext;
     use std::time::Instant;
     envmnt::set("DEBUG", "true");
-    let mut cx = WorkflowContext {
-        located: String::from("D:/Desktop/Projects/EdgelessPE/ept"),
-        pkg: GlobalPackage::_demo(),
-    };
+    let mut cx = WorkflowContext::_demo();
 
     let d = Duration::from_millis(3000);
     let now = Instant::now();
