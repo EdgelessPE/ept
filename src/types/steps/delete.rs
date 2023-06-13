@@ -23,7 +23,7 @@ fn delete(target:&String,force:bool)->Result<()>{
     if let Err(e)=try_recycle(p){
         if force{
             if force_delete_file_folder(OsString::from(target)){
-                log!("Warning(Delete):Shredded '{target}'");
+                log!("Warning(Delete):Force deleted '{target}'");
                 Ok(())
             }else{
                 return Err(anyhow!("Error(Delete):Failed to force delete '{target}' : '{err}'",err=e.to_string()));

@@ -6,7 +6,7 @@ use crate::{
         mixed_fs::MixedFS, permissions::Generalizable, permissions::Permission,
         verifiable::Verifiable, workflow::WorkflowContext,
     },
-    utils::{common_wild_match_verify, contains_wild_match, parse_wild_match, try_recycle},
+    utils::{common_wild_match_verify, contains_wild_match, parse_wild_match, try_recycle}, log,
 };
 use anyhow::{anyhow, Ok, Result};
 use serde::{Deserialize, Serialize};
@@ -28,9 +28,11 @@ fn mv(
     let (to_path, _) = parse_target_for_copy(from, to, located, wild_match_mode, "Move")?;
     if to_path.exists() {
         if overwrite {
+            log!("Warning(Move):Target '{to}' exists, overwriting");
             try_recycle(&to_path)?;
         } else {
             // 如果不覆盖则不需要移动
+            log!("Warning(Move):Target '{to}' exists, enable field 'overwrite' to process still");
             return Ok(());
         }
     }

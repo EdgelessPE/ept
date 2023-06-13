@@ -9,7 +9,7 @@ use crate::{
     utils::{
         common_wild_match_verify, contains_wild_match, ensure_dir_exist,
         parse_relative_path_with_located, parse_wild_match, try_recycle,
-    },
+    }, log,
 };
 use anyhow::{anyhow, Ok, Result};
 use fs_extra::dir::CopyOptions;
@@ -99,9 +99,11 @@ fn copy(
         parse_target_for_copy(from, to, located, wild_match_mode, "Copy")?;
     if to_path.exists() {
         if overwrite {
+            log!("Warning(Copy):Target '{to}' exists, overwriting");
             try_recycle(&to_path)?;
         } else {
             // 如果不覆盖则不需要复制
+            log!("Warning(Copy):Target '{to}' exists, enable field 'overwrite' to process still");
             return Ok(());
         }
     }

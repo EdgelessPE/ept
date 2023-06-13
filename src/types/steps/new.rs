@@ -53,11 +53,11 @@ impl TStep for StepNew {
         let p = Path::new(&self.at);
         if p.exists() {
             if !self.overwrite.unwrap_or(false) {
-                log!("Warning(New):Path '{at}' already exists, enable field 'overwrite' to process still",at=self.at);
+                log!("Warning(New):Target '{at}' already exists, enable field 'overwrite' to process still",at=self.at);
                 return Ok(0);
             } else {
                 log!(
-                    "Warning(New):Path '{at}' already exists, overwrite",
+                    "Warning(New):Target '{at}' already exists, overwrite",
                     at = self.at
                 );
             }

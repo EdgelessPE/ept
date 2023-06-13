@@ -11,7 +11,7 @@ use crate::{
         permissions::{Generalizable, Permission},
         verifiable::Verifiable,
     },
-    utils::{contains_wild_match, parse_relative_path_with_located, split_parent},
+    utils::{contains_wild_match, parse_relative_path_with_located, split_parent}, log,
 };
 
 use super::TStep;
@@ -46,8 +46,11 @@ fn rename(from: &String, to: &String, located: &String) -> Result<()> {
 
     // 清理存在的目录
     let to_path=Path::new(&final_to);
-    if to_path.exists() && to_path.is_dir(){
-        remove_dir_all(to_path).map_err(|e|anyhow!("Error(Rename):Failed to remove '{final_to}' : {err}",err=e.to_string()))?;
+    if to_path.exists() {
+        log!("Warning(Rename):Target '{to}' exists, overwriting");
+        if to_path.is_dir() {
+            remove_dir_all(to_path).map_err(|e|anyhow!("Error(Rename):Failed to remove '{final_to}' : {err}",err=e.to_string()))?;
+        }
     }
 
     // 执行重命名
