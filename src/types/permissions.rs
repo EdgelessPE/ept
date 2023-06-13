@@ -7,7 +7,7 @@ pub enum PermissionLevel {
     Important,
     Sensitive,
 }
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug,PartialEq)]
 pub struct Permission {
     pub key: String,
     pub level: PermissionLevel,

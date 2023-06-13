@@ -26,7 +26,7 @@ call_installer = true
 [run]
 name = "Run program"
 step = "Execute"
-command = "unknown.exe --slient"
+command = "unknown.exe --silent"
 
 [copy]
 name = "Copy dll"
