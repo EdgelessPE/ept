@@ -14,6 +14,7 @@ mod new;
 mod path;
 mod rename;
 mod wait;
+mod toast;
 
 pub trait TStep: Verifiable + Generalizable {
     /// Run this step
