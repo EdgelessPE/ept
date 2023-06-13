@@ -64,9 +64,6 @@ fn test_log() {
         level: String::from("Info"),
         msg: String::from("Hello nep!"),
     };
-    step.verify_self(&String::from(
-        "./",
-    ))
-    .unwrap();
+    step.verify_self(&String::from("./")).unwrap();
     step.run(&mut cx).unwrap();
 }

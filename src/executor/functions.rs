@@ -234,9 +234,5 @@ fn test_header_valid() {
         c_if: Some("Exist(\"./mc/vsc.exe\") && IsDirectory(\"${SystemDrive}/Windows\") || Exist(\"${AppData}/Roaming/Edgeless/ept\")".to_string()),
     };
 
-    flow
-            .verify_self(&String::from(
-                "./apps/VSCode"
-            ))
-            .unwrap();
+    flow.verify_self(&String::from("./apps/VSCode")).unwrap();
 }

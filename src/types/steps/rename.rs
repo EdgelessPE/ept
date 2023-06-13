@@ -1,4 +1,4 @@
-use std::{path::Path, fs::remove_dir_all};
+use std::{fs::remove_dir_all, path::Path};
 
 use anyhow::{anyhow, Result};
 use regex::Regex;
@@ -6,12 +6,12 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     executor::{judge_perm_level, values_validator_path},
-    p2s,
+    log, p2s,
     types::{
         permissions::{Generalizable, Permission},
         verifiable::Verifiable,
     },
-    utils::{contains_wild_match, parse_relative_path_with_located, split_parent}, log,
+    utils::{contains_wild_match, parse_relative_path_with_located, split_parent},
 };
 
 use super::TStep;
@@ -45,11 +45,16 @@ fn rename(from: &String, to: &String, located: &String) -> Result<()> {
     let final_to = concat_to(to, from, located);
 
     // 清理存在的目录
-    let to_path=Path::new(&final_to);
+    let to_path = Path::new(&final_to);
     if to_path.exists() {
         log!("Warning(Rename):Target '{to}' exists, overwriting");
         if to_path.is_dir() {
-            remove_dir_all(to_path).map_err(|e|anyhow!("Error(Rename):Failed to remove '{final_to}' : {err}",err=e.to_string()))?;
+            remove_dir_all(to_path).map_err(|e| {
+                anyhow!(
+                    "Error(Rename):Failed to remove '{final_to}' : {err}",
+                    err = e.to_string()
+                )
+            })?;
         }
     }
 
@@ -128,7 +133,7 @@ fn test_rename() {
     use std::path::Path;
     envmnt::set("DEBUG", "true");
     let mut cx = WorkflowContext::_demo();
-    if Path::new("test").exists(){
+    if Path::new("test").exists() {
         remove_dir_all("test").unwrap();
     }
 

@@ -6,9 +6,9 @@ use crate::types::{
     verifiable::Verifiable,
     workflow::WorkflowContext,
 };
-use anyhow::{Ok, Result,anyhow};
-use serde::{Deserialize, Serialize};
+use anyhow::{anyhow, Ok, Result};
 use notify_rust::Notification;
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct StepToast {
@@ -23,7 +23,14 @@ impl TStep for StepToast {
             .summary(&self.title)
             .body(&self.content)
             .show()
-            .map_err(|e|anyhow!("Error(Toast):Failed to send toast : '{err}' (title : '{t}', content : '{c}')",err=e.to_string(),t=self.title,c=self.content))?;
+            .map_err(|e| {
+                anyhow!(
+                    "Error(Toast):Failed to send toast : '{err}' (title : '{t}', content : '{c}')",
+                    err = e.to_string(),
+                    t = self.title,
+                    c = self.content
+                )
+            })?;
         Ok(0)
     }
     fn reverse_run(self, _: &mut WorkflowContext) -> Result<()> {
@@ -59,16 +66,15 @@ impl Generalizable for StepToast {
     }
 }
 
-
 #[test]
-fn test_toast(){
+fn test_toast() {
     use crate::types::workflow::WorkflowContext;
     envmnt::set("DEBUG", "true");
     let mut cx = WorkflowContext::_demo();
 
-    StepToast{
-        title:"测试标题😘".to_string(),
-        content:"Hey, love from ept\n你好，爱来自乙烯丙烯三元聚合物".to_string(),
+    StepToast {
+        title: "测试标题😘".to_string(),
+        content: "Hey, love from ept\n你好，爱来自乙烯丙烯三元聚合物".to_string(),
     }
     .run(&mut cx)
     .unwrap();

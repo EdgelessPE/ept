@@ -11,11 +11,7 @@ use crate::{
 };
 use anyhow::{anyhow, Ok, Result};
 use serde::{Deserialize, Serialize};
-use std::{
-    fs::File,
-    fs::create_dir_all,
-    path::Path,
-};
+use std::{fs::create_dir_all, fs::File, path::Path};
 
 use super::TStep;
 
@@ -118,14 +114,12 @@ impl Generalizable for StepNew {
 #[test]
 fn test_new() {
     use crate::types::workflow::WorkflowContext;
+    use std::fs::metadata;
     use std::fs::remove_dir_all;
     use std::path::Path;
-    use std::{
-        fs::metadata,
-    };
     envmnt::set("DEBUG", "true");
     let mut cx = WorkflowContext::_demo();
-    if Path::new("test").exists(){
+    if Path::new("test").exists() {
         remove_dir_all("test").unwrap();
     }
 

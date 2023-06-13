@@ -3,7 +3,10 @@ use std::collections::{HashMap, HashSet};
 use crate::{
     p2s,
     parsers::parse_workflow,
-    types::{meta::MetaResult, permissions::{Generalizable, PermissionLevel, Permission}},
+    types::{
+        meta::MetaResult,
+        permissions::{Generalizable, Permission, PermissionLevel},
+    },
 };
 use anyhow::Result;
 
@@ -22,9 +25,9 @@ pub fn meta(source_file: &String, verify_signature: bool) -> Result<MetaResult> 
         .into_iter()
         .filter_map(|name| {
             let p = temp_dir_inner_path.join("workflows").join(name);
-            if p.exists(){
+            if p.exists() {
                 Some(p2s!(p))
-            }else{
+            } else {
                 None
             }
         })
@@ -34,20 +37,18 @@ pub fn meta(source_file: &String, verify_signature: bool) -> Result<MetaResult> 
     let total_workflow = exists_workflows
         .clone()
         .into_iter()
-        .map(|p| {
-            parse_workflow(&p).unwrap()
-        })
+        .map(|p| parse_workflow(&p).unwrap())
         .fold(Vec::new(), |mut acc, mut x| {
             acc.append(&mut x);
             acc
         });
 
     // 收集并合并同类权限
-    let mut map:HashMap<(PermissionLevel,String), HashSet<String>>=HashMap::new();
-    for node in total_workflow{
-        for perm in node.generalize_permissions()?{
-            let entry=map.entry((perm.level,perm.key)).or_insert(HashSet::new());
-            for target in perm.targets{
+    let mut map: HashMap<(PermissionLevel, String), HashSet<String>> = HashMap::new();
+    for node in total_workflow {
+        for perm in node.generalize_permissions()? {
+            let entry = map.entry((perm.level, perm.key)).or_insert(HashSet::new());
+            for target in perm.targets {
                 entry.insert(target);
             }
         }
@@ -56,11 +57,11 @@ pub fn meta(source_file: &String, verify_signature: bool) -> Result<MetaResult> 
     // println!("map {map:#?}");
 
     let mut permissions = Vec::new();
-    for ((level,key),targets) in map {
-        permissions.push(Permission{
+    for ((level, key), targets) in map {
+        permissions.push(Permission {
             key,
             level,
-            targets:Vec::from_iter(targets)
+            targets: Vec::from_iter(targets),
         });
     }
     permissions.sort_by(|a, b| {
@@ -84,10 +85,7 @@ pub fn meta(source_file: &String, verify_signature: bool) -> Result<MetaResult> 
 
 #[test]
 fn test_meta() {
-    let res = meta(
-        &"./examples/PermissionsTest".to_string(),
-        false,
-    );
+    let res = meta(&"./examples/PermissionsTest".to_string(), false);
     println!("{res:#?}");
     assert!(res.is_ok());
 }

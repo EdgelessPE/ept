@@ -1,3 +1,5 @@
+use super::TStep;
+use crate::types::steps::Permission;
 use crate::types::{
     mixed_fs::MixedFS, permissions::Generalizable, verifiable::Verifiable,
     workflow::WorkflowContext,
@@ -5,8 +7,6 @@ use crate::types::{
 use anyhow::{Ok, Result};
 use serde::{Deserialize, Serialize};
 use std::{thread::sleep, time::Duration};
-use crate::types::steps::Permission;
-use super::TStep;
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct StepWait {
     pub timeout: u64,

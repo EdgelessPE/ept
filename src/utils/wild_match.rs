@@ -110,8 +110,23 @@ fn test_is_valid_wild_match() {
 fn test_parse_wild_match() {
     use std::env::current_dir;
     let located = p2s!(current_dir().unwrap());
-    assert!(parse_wild_match("*.toml".to_string(), &located).unwrap().len()==1);
-    assert!(parse_wild_match("src/*.rs".to_string(), &located).unwrap().len()==1);
-    assert!(parse_wild_match("src/types/mod?rs".to_string(), &located).unwrap().len()==1);
+    assert!(
+        parse_wild_match("*.toml".to_string(), &located)
+            .unwrap()
+            .len()
+            == 1
+    );
+    assert!(
+        parse_wild_match("src/*.rs".to_string(), &located)
+            .unwrap()
+            .len()
+            == 1
+    );
+    assert!(
+        parse_wild_match("src/types/mod?rs".to_string(), &located)
+            .unwrap()
+            .len()
+            == 1
+    );
     assert!(parse_wild_match("src/*s/mod.rs".to_string(), &located).is_err());
 }

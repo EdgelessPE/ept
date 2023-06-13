@@ -132,29 +132,14 @@ pub fn workflow_reverse_executor(
 
 #[test]
 fn test_condition_eval() {
-    let located=&String::from("./apps/VSCode");
-    let r1 = condition_eval(
-        &String::from("${ExitCode}==114"),
-        114,
-        located,
-    )
-    .unwrap();
+    let located = &String::from("./apps/VSCode");
+    let r1 = condition_eval(&String::from("${ExitCode}==114"), 114, located).unwrap();
     assert!(r1);
 
-    let r2 = condition_eval(
-        &String::from("${ExitCode}==514"),
-        114,
-        located,
-    )
-    .unwrap();
+    let r2 = condition_eval(&String::from("${ExitCode}==514"), 114, located).unwrap();
     assert_eq!(r2, false);
 
-    let r3 = condition_eval(
-        &String::from("\"${SystemDrive}\"==\"C:\""),
-        0,
-        located,
-    )
-    .unwrap();
+    let r3 = condition_eval(&String::from("\"${SystemDrive}\"==\"C:\""), 0, located).unwrap();
     assert!(r3);
 
     let r4 = condition_eval(
@@ -173,12 +158,7 @@ fn test_condition_eval() {
     .unwrap();
     assert!(r5);
 
-    let r6 = condition_eval(
-        &String::from("Exist(\"./src/main.ts\")"),
-        0,
-        located,
-    )
-    .unwrap();
+    let r6 = condition_eval(&String::from("Exist(\"./src/main.ts\")"), 0, located).unwrap();
     assert_eq!(r6, false);
 
     let r7 = condition_eval(
@@ -200,7 +180,7 @@ fn test_workflow_executor() {
         // StepPath,
     };
     use crate::types::workflow::{WorkflowHeader, WorkflowNode};
-    let cx=WorkflowContext::_demo();
+    let cx = WorkflowContext::_demo();
     let wf1 = vec![
         // WorkflowNode {
         //     header: WorkflowHeader {
@@ -308,10 +288,5 @@ fn test_workflow_executor_interpreter() {
         },
     ];
     let cx = WorkflowContext::_demo();
-    workflow_executor(
-        flow,
-        cx.located,
-        cx.pkg,
-    )
-    .unwrap();
+    workflow_executor(flow, cx.located, cx.pkg).unwrap();
 }

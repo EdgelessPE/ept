@@ -1,12 +1,12 @@
 use super::{copy::parse_target_for_copy, TStep};
 use crate::{
     executor::{judge_perm_level, values_validator_path},
-    p2s,
+    log, p2s,
     types::{
         mixed_fs::MixedFS, permissions::Generalizable, permissions::Permission,
         verifiable::Verifiable, workflow::WorkflowContext,
     },
-    utils::{common_wild_match_verify, contains_wild_match, parse_wild_match, try_recycle}, log,
+    utils::{common_wild_match_verify, contains_wild_match, parse_wild_match, try_recycle},
 };
 use anyhow::{anyhow, Ok, Result};
 use serde::{Deserialize, Serialize};
@@ -90,7 +90,7 @@ impl Generalizable for StepMove {
                 key: "fs_write".to_string(),
                 level: judge_perm_level(&self.to)?,
                 targets: vec![self.to.clone()],
-            }
+            },
         ])
     }
 }
@@ -110,7 +110,7 @@ fn test_copy() {
     use std::path::Path;
     envmnt::set("DEBUG", "true");
     let mut cx = WorkflowContext::_demo();
-    if Path::new("test").exists(){
+    if Path::new("test").exists() {
         remove_dir_all("test").unwrap();
     }
 

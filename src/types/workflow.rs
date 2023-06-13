@@ -3,7 +3,7 @@ use std::env::current_dir;
 use super::{
     package::GlobalPackage, permissions::Generalizable, steps::Step, verifiable::Verifiable,
 };
-use crate::{types::permissions::Permission, p2s};
+use crate::{p2s, types::permissions::Permission};
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
@@ -42,8 +42,11 @@ pub struct WorkflowContext {
     pub pkg: GlobalPackage,
 }
 
-impl WorkflowContext{
-    pub fn _demo()->Self{
-        Self { located: p2s!(current_dir().unwrap()), pkg: GlobalPackage::_demo() }
+impl WorkflowContext {
+    pub fn _demo() -> Self {
+        Self {
+            located: p2s!(current_dir().unwrap()),
+            pkg: GlobalPackage::_demo(),
+        }
     }
 }

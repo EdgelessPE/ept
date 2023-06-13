@@ -1,7 +1,7 @@
 use super::TStep;
 use crate::{
     executor::{judge_perm_level, values_validator_path},
-    p2s,
+    log, p2s,
     types::{
         mixed_fs::MixedFS, permissions::Generalizable, permissions::Permission,
         verifiable::Verifiable, workflow::WorkflowContext,
@@ -9,7 +9,7 @@ use crate::{
     utils::{
         common_wild_match_verify, contains_wild_match, ensure_dir_exist,
         parse_relative_path_with_located, parse_wild_match, try_recycle,
-    }, log,
+    },
 };
 use anyhow::{anyhow, Ok, Result};
 use fs_extra::dir::CopyOptions;
@@ -174,7 +174,7 @@ impl Generalizable for StepCopy {
                 key: "fs_write".to_string(),
                 level: judge_perm_level(&self.to)?,
                 targets: vec![self.to.clone()],
-            }
+            },
         ])
     }
 }

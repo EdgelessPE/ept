@@ -6,17 +6,17 @@ use serde::de;
 use serde::{Deserialize, Serialize};
 
 mod copy;
+mod delete;
 mod execute;
+mod kill;
 mod link;
 mod log;
 mod mv;
 mod new;
 mod path;
 mod rename;
-mod wait;
 mod toast;
-mod delete;
-mod kill;
+mod wait;
 
 pub trait TStep: Verifiable + Generalizable {
     /// Run this step
@@ -130,17 +130,17 @@ def_enum_step!(
 );
 
 pub use self::copy::StepCopy;
+pub use self::delete::StepDelete;
 pub use self::execute::StepExecute;
+pub use self::kill::StepKill;
 pub use self::link::StepLink;
 pub use self::log::StepLog;
 pub use self::mv::StepMove;
 pub use self::new::StepNew;
 pub use self::path::StepPath;
 pub use self::rename::StepRename;
-pub use self::wait::StepWait;
 pub use self::toast::StepToast;
-pub use self::delete::StepDelete;
-pub use self::kill::StepKill;
+pub use self::wait::StepWait;
 
 use super::mixed_fs::MixedFS;
 use super::workflow::WorkflowContext;
