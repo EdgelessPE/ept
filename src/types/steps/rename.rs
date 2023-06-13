@@ -17,7 +17,7 @@ use crate::{
 use super::TStep;
 
 lazy_static! {
-    static ref PURE_NAME_REGEX: Regex = Regex::new(r"(^[^\/\*\:\$])+$").unwrap();
+    static ref PURE_NAME_NOT_MATCH_REGEX: Regex = Regex::new(r"[\\\/\*\:\$]").unwrap();
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -109,7 +109,7 @@ impl Verifiable for StepRename {
             ));
         }
         // 检查 to 的正则表达式
-        if !PURE_NAME_REGEX.is_match(&self.to) {
+        if PURE_NAME_NOT_MATCH_REGEX.is_match(&self.to) {
             return Err(anyhow!(
                 "Error(Rename):Field 'to' illegal, expect pure file or directory name, got '{to}'",
                 to = &self.to

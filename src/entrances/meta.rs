@@ -1,7 +1,9 @@
+use std::collections::{HashMap, HashSet};
+
 use crate::{
     p2s,
     parsers::parse_workflow,
-    types::{meta::MetaResult, permissions::Generalizable},
+    types::{meta::MetaResult, permissions::{Generalizable, PermissionLevel, Permission}},
 };
 use anyhow::Result;
 
@@ -16,11 +18,15 @@ pub fn meta(source_file: &String, verify_signature: bool) -> Result<MetaResult> 
     verify(&temp_dir)?;
 
     // 检查工作流存在
-    let exists_workflows: Vec<&str> = vec!["setup.toml", "update.toml", "remove.toml"]
+    let exists_workflows: Vec<String> = vec!["setup.toml", "update.toml", "remove.toml"]
         .into_iter()
-        .filter(|name| {
+        .filter_map(|name| {
             let p = temp_dir_inner_path.join("workflows").join(name);
-            p.exists()
+            if p.exists(){
+                Some(p2s!(p))
+            }else{
+                None
+            }
         })
         .collect();
 
@@ -28,23 +34,38 @@ pub fn meta(source_file: &String, verify_signature: bool) -> Result<MetaResult> 
     let total_workflow = exists_workflows
         .clone()
         .into_iter()
-        .map(|name| {
-            let p = temp_dir_inner_path.join("workflows").join(name);
-            parse_workflow(&p2s!(p)).unwrap()
+        .map(|p| {
+            parse_workflow(&p).unwrap()
         })
         .fold(Vec::new(), |mut acc, mut x| {
             acc.append(&mut x);
             acc
         });
 
-    // 收集权限
+    // 收集并合并同类权限
+    let mut map:HashMap<(PermissionLevel,String), HashSet<String>>=HashMap::new();
+    for node in total_workflow{
+        for perm in node.generalize_permissions()?{
+            let entry=map.entry((perm.level,perm.key)).or_insert(HashSet::new());
+            for target in perm.targets{
+                entry.insert(target);
+            }
+        }
+    }
+
+    // println!("map {map:#?}");
+
     let mut permissions = Vec::new();
-    for node in total_workflow {
-        permissions.append(&mut node.generalize_permissions()?);
+    for ((level,key),targets) in map {
+        permissions.push(Permission{
+            key,
+            level,
+            targets:Vec::from_iter(targets)
+        });
     }
     permissions.sort_by(|a, b| {
         if a.level != b.level {
-            a.level.partial_cmp(&b.level).unwrap()
+            a.level.partial_cmp(&b.level).unwrap().reverse()
         } else {
             a.key.cmp(&b.key)
         }
@@ -64,8 +85,9 @@ pub fn meta(source_file: &String, verify_signature: bool) -> Result<MetaResult> 
 #[test]
 fn test_meta() {
     let res = meta(
-        &r"D:\Desktop\Projects\EdgelessPE\edgeless-bot\workshop\360压缩\_ready".to_string(),
+        &"./examples/PermissionsTest".to_string(),
         false,
     );
     println!("{res:#?}");
+    assert!(res.is_ok());
 }

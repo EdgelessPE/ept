@@ -1,0 +1,41 @@
+[create_shortcut]
+name = "Create shortcut"
+step = "Link"
+source_file = "bin"
+target_name = "Build tools"
+
+[create_shortcut2]
+name = "Create shortcut2"
+step = "Link"
+source_file = "Code.exe"
+target_name = "MS/Visual Studio Code"
+at = ["Desktop","StartMenu"]
+
+[add_path]
+name = "Add PATH"
+step = "Path"
+record = "Code.exe"
+operation = "Add"
+
+[install]
+name = "Run installer"
+step = "Execute"
+command = "installer /S"
+call_installer = true
+
+[run]
+name = "Run program"
+step = "Execute"
+command = "unknown.exe --slient"
+
+[copy]
+name = "Copy dll"
+step = "Copy"
+from = "${ProgramFiles_X86}/Microsoft/32.dll"
+to = "./lib"
+
+[move]
+name = "Move pwsh"
+step = "Move"
+from = "${AppData}/pwsh.exe"
+to = "${Desktop}/Public"

@@ -264,9 +264,9 @@ impl Verifiable for StepPath {
 
 impl Generalizable for StepPath {
     fn generalize_permissions(&self) -> Result<Vec<Permission>> {
-        // 检查是否有拓展名，以此判断添加的是目录还是单文件
+        // 检查是否有拓展名且不以 / 結尾，以此判断添加的是目录还是单文件
         let p = Path::new(&self.record);
-        let node = if p.extension().is_some() {
+        let node = if p.extension().is_some() && !self.record.ends_with("/") {
             Permission {
                 key: "path_entrances".to_string(),
                 level: PermissionLevel::Normal,

@@ -1,0 +1,20 @@
+[rename]
+name = "Rename dll"
+step = "Rename"
+from = "${ProgramFiles_X64}/Microsoft/64.dll"
+to = "128杜拉拉.dll"
+
+[new]
+name = "New windows"
+step = "New"
+at = "${SystemDrive}/system32/Windows/"
+
+[delete]
+name = "Delete download"
+step = "Delete"
+at = "${Home}/Download"
+
+[kill]
+name = "Kill"
+step = "Kill"
+target = "Code.exe"

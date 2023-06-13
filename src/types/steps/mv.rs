@@ -80,11 +80,18 @@ impl TStep for StepMove {
 
 impl Generalizable for StepMove {
     fn generalize_permissions(&self) -> Result<Vec<Permission>> {
-        Ok(vec![Permission {
-            key: "fs_write".to_string(),
-            level: judge_perm_level(&self.from)?,
-            targets: vec![self.from.clone(), self.to.clone()],
-        }])
+        Ok(vec![
+            Permission {
+                key: "fs_write".to_string(),
+                level: judge_perm_level(&self.from)?,
+                targets: vec![self.from.clone()],
+            },
+            Permission {
+                key: "fs_write".to_string(),
+                level: judge_perm_level(&self.to)?,
+                targets: vec![self.to.clone()],
+            }
+        ])
     }
 }
 

@@ -202,11 +202,28 @@ impl Verifiable for StepLink {
 
 impl Generalizable for StepLink {
     fn generalize_permissions(&self) -> Result<Vec<Permission>> {
-        Ok(vec![Permission {
-            key: "link_desktop".to_string(),
+        let mut keys=Vec::new();
+        if let Some(ats)=&self.at{
+            if ats.contains(&"Desktop".to_string()){
+                keys.push("link_desktop")
+            }
+            if ats.contains(&"StartMenu".to_string()){
+                keys.push("link_startmenu")
+            }
+        }else{
+            keys.push("link_desktop")
+        }
+
+        let res:Vec<Permission>=keys
+        .into_iter()
+        .map(|key|Permission {
+            key: key.to_string(),
             level: PermissionLevel::Normal,
             targets: vec![self.target_name.to_owned()],
-        }])
+        })
+        .collect();
+
+        Ok(res)
     }
 }
 

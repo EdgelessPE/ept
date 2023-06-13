@@ -164,19 +164,18 @@ impl TStep for StepCopy {
 
 impl Generalizable for StepCopy {
     fn generalize_permissions(&self) -> Result<Vec<Permission>> {
-        let mut res = Vec::new();
-        res.push(Permission {
-            key: "fs_read".to_string(),
-            level: judge_perm_level(&self.from)?,
-            targets: vec![self.from.clone()],
-        });
-        res.push(Permission {
-            key: "fs_write".to_string(),
-            level: judge_perm_level(&self.to)?,
-            targets: vec![self.to.clone()],
-        });
-
-        Ok(res)
+        Ok(vec![
+            Permission {
+                key: "fs_read".to_string(),
+                level: judge_perm_level(&self.from)?,
+                targets: vec![self.from.clone()],
+            },
+            Permission {
+                key: "fs_write".to_string(),
+                level: judge_perm_level(&self.to)?,
+                targets: vec![self.to.clone()],
+            }
+        ])
     }
 }
 
