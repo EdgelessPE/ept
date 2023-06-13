@@ -15,6 +15,7 @@ mod path;
 mod rename;
 mod wait;
 mod toast;
+mod delete;
 
 pub trait TStep: Verifiable + Generalizable {
     /// Run this step
@@ -121,7 +122,9 @@ def_enum_step!(
     StepMove,
     StepRename,
     StepNew,
-    StepWait
+    StepWait,
+    StepToast,
+    StepDelete
 );
 
 pub use self::copy::StepCopy;
@@ -133,6 +136,8 @@ pub use self::new::StepNew;
 pub use self::path::StepPath;
 pub use self::rename::StepRename;
 pub use self::wait::StepWait;
+pub use self::toast::StepToast;
+pub use self::delete::StepDelete;
 
 use super::mixed_fs::MixedFS;
 use super::workflow::WorkflowContext;
