@@ -125,11 +125,13 @@ fn test_new() {
     };
     envmnt::set("DEBUG", "true");
     let mut cx = WorkflowContext::_demo();
-    remove_dir_all("test").unwrap();
+    if Path::new("test").exists(){
+        remove_dir_all("test").unwrap();
+    }
 
     // 创建目录和文件
     StepNew {
-        at: "test".to_string(),
+        at: "test/".to_string(),
         overwrite: None,
     }
     .run(&mut cx)
