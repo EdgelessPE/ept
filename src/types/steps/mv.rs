@@ -101,10 +101,12 @@ fn test_copy() {
     use std::path::Path;
     envmnt::set("DEBUG", "true");
     let mut cx = WorkflowContext::_demo();
-    remove_dir_all("test").unwrap();
+    if Path::new("test").exists(){
+        remove_dir_all("test").unwrap();
+    }
 
     // 准备源
-    let opt = CopyOptions::new();
+    let opt = CopyOptions::new().copy_inside(true);
     fs_extra::dir::copy("src", "test/src", &opt).unwrap();
     fs_extra::dir::copy("keys", "test/src/keys", &opt).unwrap();
 
@@ -119,6 +121,17 @@ fn test_copy() {
     assert!(Path::new("test/1.rs").exists());
     assert!(!Path::new("test/src/types/author.rs").exists());
 
+    // 文件-覆盖文件
+    StepMove {
+        from: "test/src/types/steps/mv.rs".to_string(),
+        to: "test/1.rs".to_string(),
+        overwrite: Some(true),
+    }
+    .run(&mut cx)
+    .unwrap();
+    assert!(Path::new("test/1.rs").exists());
+    assert!(!Path::new("test/src/types/steps/mv.rs").exists());
+
     // 文件-不存在目录
     StepMove {
         from: "test/src/types/extended_semver.rs".to_string(),
@@ -132,14 +145,25 @@ fn test_copy() {
 
     // 文件-已存在目录
     StepMove {
-        from: "test/src/types/info.rs".to_string(),
+        from: "test/src/types/mod.rs".to_string(),
         to: "test/ca".to_string(),
         overwrite: None,
     }
     .run(&mut cx)
     .unwrap();
-    assert!(Path::new("test/ca/info.rs").exists());
-    assert!(!Path::new("test/src/types/info.rs").exists());
+    assert!(Path::new("test/ca/mod.rs").exists());
+    assert!(!Path::new("test/src/types/mod.rs").exists());
+
+    // 文件-已存在目录覆盖
+    StepMove {
+        from: "test/src/types/steps/mod.rs".to_string(),
+        to: "test/ca".to_string(),
+        overwrite: Some(true),
+    }
+    .run(&mut cx)
+    .unwrap();
+    assert!(Path::new("test/ca/mod.rs").exists());
+    assert!(!Path::new("test/src/types/steps/mod.rs").exists());
 
     // 目录-不存在目录
     StepMove {
@@ -173,6 +197,18 @@ fn test_copy() {
     .unwrap();
     assert!(Path::new("test/entry2/entrances/README.md").exists());
     assert!(!Path::new("test/src/executor").exists());
+
+    // 目录-已存在目录覆盖
+    StepMove {
+        from: "test/src/compression".to_string(),
+        to: "test/entry2/entrances".to_string(),
+        overwrite: Some(true),
+    }
+    .run(&mut cx)
+    .unwrap();
+    assert!(Path::new("test/entry2/entrances/tar.rs").exists());
+    assert!(!Path::new("test/entry2/entrances/README.md").exists());
+    assert!(!Path::new("test/src/compression/mod.rs").exists());
 
     // 通配符文件-不存在目录
     StepMove {
