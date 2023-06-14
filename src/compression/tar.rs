@@ -1,7 +1,9 @@
 use anyhow::Result;
-use std::fs::{create_dir_all, remove_dir_all, File};
+use std::fs::{create_dir_all, remove_dir_all, File, remove_file};
 use std::path::Path;
 use tar::{Archive, Builder};
+
+use crate::utils::try_recycle;
 
 pub fn release_tar(source: &String, into: &String) -> Result<()> {
     let file = File::open(source)?;
@@ -27,19 +29,32 @@ pub fn pack_tar(source: &String, store_at: &String) -> Result<()> {
 }
 
 #[test]
-fn test_release_tar() {
-    let res = release_tar(
-        &r"D:\Desktop\Projects\EdgelessPE\ept\examples\VSCode\VSCode.tar".to_string(),
-        &"./temp/VSCode_1.0.0.0_Cno/Inner".to_string(),
-    );
-    println!("{res:?}");
+fn test_pack_tar() {
+    let p=Path::new("./test/VSCode_1.0.0.0_Cno.tar");
+    if p.exists(){
+        remove_file(p).unwrap();
+    }
+    pack_tar(
+        &"examples/VSCode".to_string(),
+        &"./test/VSCode_1.0.0.0_Cno.tar".to_string(),
+    ).unwrap();
+    assert!(p.exists());
 }
 
 #[test]
-fn test_pack_tar() {
-    let res = pack_tar(
-        &"./temp/VSCode_1.0.0.0_Cno/Inner".to_string(),
-        &r"D:\Desktop\Projects\EdgelessPE\ept\examples\VSCode\Pack.tar".to_string(),
-    );
-    println!("{res:?}");
+fn test_release_tar() {
+    if !Path::new("./test/VSCode_1.0.0.0_Cno.tar").exists(){
+        test_pack_tar();
+    }
+    let target=Path::new("test/VSCode_1.0.0.0_Cno");
+    if target.exists(){
+        try_recycle(target).unwrap();
+    }
+
+    release_tar(
+        &"./test/VSCode_1.0.0.0_Cno.tar".to_string(),
+        &"./test/VSCode_1.0.0.0_Cno".to_string(),
+    ).unwrap();
+
+    assert!(Path::new("test/VSCode_1.0.0.0_Cno/package.toml").exists());
 }
