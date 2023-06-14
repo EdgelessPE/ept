@@ -1,6 +1,7 @@
 use crate::types::software::Software;
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
+use std::path::Path;
 
 use super::{extended_semver::ExSemVer, verifiable::Verifiable};
 
@@ -70,6 +71,9 @@ impl GlobalPackage {
 
 impl Verifiable for GlobalPackage {
     fn verify_self(&self, located: &String) -> Result<()> {
+        if !Path::new(located).exists(){
+            return Err(anyhow!("Error:Path '{located}' not exist"));
+        }
         self.package.verify_self(located)?;
         if let Some(software) = &self.software {
             software.verify_self(located)?;

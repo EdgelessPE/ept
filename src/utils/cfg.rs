@@ -9,7 +9,7 @@ use dirs::home_dir;
 use serde::{Deserialize, Serialize};
 use toml::{from_str, to_string_pretty, Value};
 
-use crate::p2s;
+use crate::{p2s, types::verifiable::Verifiable};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Local {
@@ -60,14 +60,23 @@ impl Cfg {
     pub fn init() -> Result<Self> {
         let from = Self::use_which()?;
         let text = read_to_string(from.clone())?;
-        from_str(&text).map_err(|e| {
+        let cfg:Self=from_str(&text).map_err(|e| {
             anyhow!(
                 "Error:Invalid config content, try delete '{f}' : {e}",
                 f = p2s!(from),
             )
-        })
+        })?;
+
+        // 校验
+        cfg.verify_self(&"".to_string()).map_err(|e|anyhow!("Error:Invalid config '{f}' : {err}",f=p2s!(from),err=e.to_string()))?;
+
+        Ok(cfg)
     }
     pub fn overwrite(&mut self, other: Self) -> Result<()> {
+        // 校验
+        other.verify_self(&"".to_string()).map_err(|e|anyhow!("Error:Invalid overwrite config : {err}",err=e.to_string()))?;
+
+        // 赋值
         self.local = other.local.clone();
 
         let from = Self::use_which()?;
@@ -78,13 +87,19 @@ impl Cfg {
     }
 }
 
-#[test]
-fn test_init() {
-    let mut cfg = Cfg::init().unwrap();
-    cfg.local = Local {
-        base: "".to_string(),
-    };
-    println!("{cfg:#?}");
+impl Verifiable for Cfg{
+    fn verify_self(&self, _: &String) -> Result<()> {
+        // base 必须为存在的绝对路径
+        let base_path=Path::new(&self.local.base);
+        if !base_path.is_absolute(){
+            return Err(anyhow!("Error:Field 'local.base' should be absolute"));
+        }
+        if !base_path.exists(){
+            return Err(anyhow!("Error:Field 'local.base' doesn't exist"));
+        }
+
+        Ok(())
+    }
 }
 
 pub fn get_config() -> Cfg {
@@ -101,5 +116,5 @@ fn test_config() {
     println!("{cfg:#?}");
     cfg.local.base = "2333".to_string();
     println!("{cfg:#?}");
-    set_config(cfg).unwrap();
+    assert!(set_config(cfg).is_err());
 }

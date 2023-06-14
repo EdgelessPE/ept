@@ -101,8 +101,8 @@ pub fn pack(source_dir: &String, into_file: Option<String>, need_sign: bool) -> 
 fn test_pack() {
     envmnt::set("DEBUG", "true");
     pack(
-        &r"D:\Download\VSCode_1.75.0.0_Cno".to_string(),
-        Some(r"D:\Download\VSCode_1.75.0.0_Cno.nep".to_string()),
+        &"./examples/ComplexFS".to_string(),
+        Some("./test/ComplexFS_1.75.0.0_Cno.nep".to_string()),
         true,
     )
     .unwrap();

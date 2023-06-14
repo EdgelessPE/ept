@@ -17,8 +17,8 @@ pub use self::exe_version::get_exe_version;
 pub use self::fs::{count_sub_files, ensure_dir_exist, read_sub_dir, try_recycle};
 pub use self::log::{fn_log, fn_log_ok_last};
 pub use self::path::{
-    find_scope_with_name_locally, parse_relative_path, parse_relative_path_with_located,
-    split_parent,
+    find_scope_with_name_locally, parse_relative_path_with_located,
+    split_parent,parse_relative_path_with_base,
 };
 pub use self::process::{is_alive_with_name, kill_with_name};
 pub use self::term::ask_yn;
@@ -69,12 +69,12 @@ pub fn format_path(raw: &String) -> String {
 }
 
 pub fn get_bare_apps() -> Result<PathBuf> {
-    ensure_exist(parse_relative_path(&"apps".to_string())?)
+    ensure_exist(parse_relative_path_with_base(&"apps".to_string())?)
 }
 
 /// 不确保目录存在，可选确保 scope 目录存在
 pub fn get_path_apps(scope: &String, name: &String, ensure_scope: bool) -> Result<PathBuf> {
-    let scope_p = parse_relative_path(&"apps".to_string())?.join(scope);
+    let scope_p = parse_relative_path_with_base(&"apps".to_string())?.join(scope);
     Ok(if ensure_scope {
         ensure_exist(scope_p)?
     } else {
@@ -84,11 +84,11 @@ pub fn get_path_apps(scope: &String, name: &String, ensure_scope: bool) -> Resul
 }
 
 pub fn parse_bare_temp() -> Result<PathBuf> {
-    parse_relative_path(&"temp".to_string())
+    parse_relative_path_with_base(&"temp".to_string())
 }
 
 pub fn get_path_temp(name: &String, keep_clear: bool, sub_dir: bool) -> Result<PathBuf> {
-    let p = parse_relative_path(&"temp".to_string())?.join(name);
+    let p = parse_relative_path_with_base(&"temp".to_string())?.join(name);
     if keep_clear && p.exists() {
         remove_dir_all(p.clone()).map_err(|_| {
             anyhow!(
@@ -105,7 +105,7 @@ pub fn get_path_temp(name: &String, keep_clear: bool, sub_dir: bool) -> Result<P
 }
 
 pub fn get_path_bin() -> Result<PathBuf> {
-    ensure_exist(parse_relative_path(&"bin".to_string())?)
+    ensure_exist(parse_relative_path_with_base(&"bin".to_string())?)
 }
 
 pub fn is_url(text: &String) -> bool {

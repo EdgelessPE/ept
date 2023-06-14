@@ -5,8 +5,9 @@ use crate::types::permissions::{Generalizable, Permission, PermissionLevel};
 use crate::types::workflow::WorkflowContext;
 use crate::utils::env::{env_desktop, env_start_menu};
 use crate::utils::{count_sub_files, try_recycle};
-use crate::{log, p2s, types::verifiable::Verifiable, utils::parse_relative_path};
+use crate::{log, p2s, types::verifiable::Verifiable, utils::parse_relative_path_with_located};
 use anyhow::{anyhow, Result};
+use dirs::desktop_dir;
 use mslnk::ShellLink;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
@@ -97,7 +98,7 @@ impl TStep for StepLink {
     fn run(self, cx: &mut WorkflowContext) -> anyhow::Result<i32> {
         // 解析源文件绝对路径
         let abs_clear_source_path =
-            parse_relative_path(&p2s!(Path::new(&cx.located).join(&self.source_file)))?;
+            parse_relative_path_with_located(&self.source_file,&cx.located);
         // println!("{abs_clear_source_path:?}");
         let abs_clear_source = p2s!(abs_clear_source_path);
 
@@ -107,7 +108,7 @@ impl TStep for StepLink {
 
         // 填充额外参数
         if self.target_icon.is_some() {
-            sl.set_icon_location(self.target_icon);
+            sl.set_icon_location(self.target_icon.map(|relative_icon|p2s!(parse_relative_path_with_located(&relative_icon, &cx.located))));
         }
         if self.target_args.is_some() {
             sl.set_arguments(self.target_args);
@@ -229,19 +230,24 @@ impl Generalizable for StepLink {
 
 #[test]
 fn test_link() {
-    use crate::types::package::GlobalPackage;
-    let mut cx = WorkflowContext {
-        pkg: GlobalPackage::_demo(),
-        located: String::from("./apps/VSCode"),
-    };
+    let mut cx = WorkflowContext::_demo();
     let step = StepLink {
-        source_file: String::from("Code.exe"),
+        source_file: String::from("examples/VSCode/VSCode/Code.exe"),
         target_name: String::from("VSC"),
         target_args: Some("--debug".to_string()),
-        target_icon: Some(r"D:\Download\favicon.ico".to_string()),
-        at: Some(vec!["Desktop".to_string()]),
+        target_icon: Some("examples/VSCode/VSCode/favicon.ico".to_string()),
+        at: Some(vec!["Desktop".to_string(),"StartMenu".to_string()]),
     };
-    step.verify_self(&String::from("./apps/Microsoft/VSCode"))
+    step.verify_self(&String::from("./examples/VSCode/VSCode"))
         .unwrap();
     step.run(&mut cx).unwrap();
+
+    let desktop_path=desktop_dir().unwrap().join("VSC.lnk");
+    let start_path=Path::new(&env_start_menu()).join("VSC.lnk");
+
+    assert!(desktop_path.exists());
+    assert!(start_path.exists());
+
+    try_recycle(desktop_path).unwrap();
+    try_recycle(start_path).unwrap();
 }

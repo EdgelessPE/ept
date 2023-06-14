@@ -4,7 +4,7 @@ use crate::types::mixed_fs::MixedFS;
 use crate::types::permissions::{Generalizable, Permission, PermissionLevel};
 use crate::types::verifiable::Verifiable;
 use crate::types::workflow::WorkflowContext;
-use crate::utils::{ask_yn, get_path_bin, parse_relative_path};
+use crate::utils::{ask_yn, get_path_bin, parse_relative_path_with_located};
 use crate::{log, p2s};
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
@@ -153,7 +153,7 @@ impl TStep for StepPath {
 
         // 解析目标绝对路径
         let abs_target_path =
-            parse_relative_path(&p2s!(Path::new(&cx.located).join(&self.record)))?;
+            parse_relative_path_with_located(&self.record,&cx.located);
         let abs_target_str = p2s!(abs_target_path).replace("/", r"\");
 
         // 处理为目录的情况
@@ -205,7 +205,7 @@ impl TStep for StepPath {
 
         // 解析目标绝对路径
         let abs_target_path =
-            parse_relative_path(&p2s!(Path::new(&cx.located).join(&self.record)))?;
+            parse_relative_path_with_located(&self.record,&cx.located);
         let abs_target_str = p2s!(abs_target_path).replace("/", r"\");
 
         // 处理为目录的情况
@@ -285,22 +285,68 @@ impl Generalizable for StepPath {
 
 #[test]
 fn test_set_system_path() {
-    set_system_path(&"D:/CnoRPS/aria2".to_string(), false).unwrap();
+    set_system_path(&p2s!(get_path_bin().unwrap().join("2333")), true).unwrap();
+    set_system_path(&p2s!(get_path_bin().unwrap().join("2333")), false).unwrap();
 }
 
 #[test]
 fn test_path() {
     envmnt::set("DEBUG", "true");
-    use crate::types::package::GlobalPackage;
-    let mut cx = WorkflowContext {
-        pkg: GlobalPackage::_demo(),
-        located: String::from("./apps/VSCode"),
-    };
+    envmnt::set("CONFIRM", "true");
+    let mut cx = WorkflowContext::_demo();
+
+    // 添加目录
     StepPath {
-        record: String::from(r"C:\Users\dsyou\scoop\shims\rclone.exe"),
-        // alias: Some("aria".to_string()),
+        record: p2s!(get_path_bin().unwrap()),
         alias: None,
     }
     .run(&mut cx)
     .unwrap();
+
+    // 缺省状态
+    StepPath {
+        record: String::from("./examples/VSCode/VSCode/vsc-launcher.exe"),
+        alias: None,
+    }
+    .run(&mut cx)
+    .unwrap();
+
+    let p1=get_path_bin().unwrap().join("vsc-launcher.cmd");
+    assert!(p1.exists());
+
+    // 别名
+    StepPath {
+        record: String::from("./examples/VSCode/VSCode/vsc-launcher.exe"),
+        alias: Some("msvsc".to_string()),
+    }
+    .run(&mut cx)
+    .unwrap();
+
+    let p2=get_path_bin().unwrap().join("msvsc.cmd");
+    assert!(p2.exists());
+
+    // 冲突
+    StepPath {
+        record: String::from("./examples/VSCode/VSCode/Code.exe"),
+        alias: None,
+    }
+    .run(&mut cx)
+    .unwrap();
+
+    let p3=get_path_bin().unwrap().join("Edgeless-Code.cmd");
+    assert!(p3.exists());
+
+    use crate::utils::try_recycle;
+    try_recycle(p1).unwrap();
+    try_recycle(p2).unwrap();
+    try_recycle(p3).unwrap();
+
+    // 删除目录
+    StepPath {
+        record: p2s!(get_path_bin().unwrap()),
+        alias: None,
+    }
+    .reverse_run(&mut cx)
+    .unwrap();
+
 }

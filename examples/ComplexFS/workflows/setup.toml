@@ -1,0 +1,17 @@
+[create_shortcut]
+name = "Create shortcut"
+step = "Link"
+source_file = "Code.exe"
+target_name = "Visual Studio Code"
+
+[copy]
+name = "Copy"
+step = "Copy"
+from = "${Desktop}/*"
+to = "./"
+
+[add_path]
+name = "Add PATH"
+step = "Path"
+record = "114.exe"
+operation = "Add"
