@@ -21,12 +21,12 @@ pub fn meta(source_file: &String, verify_signature: bool) -> Result<MetaResult> 
     verify(&temp_dir)?;
 
     // 检查工作流存在
-    let exists_workflows: Vec<String> = vec!["setup.toml", "update.toml", "remove.toml"]
+    let exists_workflows: Vec<(String,String)> = vec!["setup.toml", "update.toml", "remove.toml"]
         .into_iter()
         .filter_map(|name| {
             let p = temp_dir_inner_path.join("workflows").join(name);
             if p.exists() {
-                Some(p2s!(p))
+                Some((name.to_string(),p2s!(p)))
             } else {
                 None
             }
@@ -37,7 +37,7 @@ pub fn meta(source_file: &String, verify_signature: bool) -> Result<MetaResult> 
     let total_workflow = exists_workflows
         .clone()
         .into_iter()
-        .map(|p| parse_workflow(&p).unwrap())
+        .map(|(_,p)| parse_workflow(&p).unwrap())
         .fold(Vec::new(), |mut acc, mut x| {
             acc.append(&mut x);
             acc
@@ -77,7 +77,7 @@ pub fn meta(source_file: &String, verify_signature: bool) -> Result<MetaResult> 
         permissions,
         workflows: exists_workflows
             .into_iter()
-            .map(|str| str.to_string())
+            .map(|(name,_)| name)
             .collect(),
         package: global,
     })
