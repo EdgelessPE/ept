@@ -1,0 +1,23 @@
+# nep 版本号
+nep = "0.2"
+
+[package]
+# 包名
+name = "Dism++"
+# 包模板 仅可取 "Software"
+template = "Software"
+# 版本号
+version = "1.75.0.0"
+# 打包者/作者
+authors = ["Cno <dsyourshy@qq.com>","Chuyu"]
+description = "全球第一款基于 CBS 的 Dism GUI 实现。"
+
+[software]
+scope = "Chuyu"
+# 上游发布页面 URL
+upstream = "https://github.com/Chuyu-Team/Dism-Multi-language"
+# 软件分类
+category = "实用工具"
+tags = ["dism"]
+language = "Multi"
+main_program = "Dism++x64.exe"

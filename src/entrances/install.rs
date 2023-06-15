@@ -1,5 +1,6 @@
 use anyhow::{anyhow, Result};
-use std::fs::{remove_dir_all, rename};
+use dirs::desktop_dir;
+use std::fs::{remove_dir_all, rename, remove_file};
 use std::path::Path;
 
 use super::{
@@ -7,6 +8,7 @@ use super::{
     utils::package::{clean_temp, unpack_nep},
     utils::validator::installed_validator,
 };
+use crate::utils::get_path_bin;
 use crate::{executor::workflow_executor, parsers::parse_workflow, utils::get_path_apps};
 use crate::{log, log_ok_last, p2s};
 
@@ -83,10 +85,47 @@ pub fn install_using_package(source_file: &String, verify_signature: bool) -> Re
 
 #[test]
 fn test_install() {
-    // envmnt::set("OFFLINE", "true");
-    install_using_package(
-        &r"D:\Desktop\Projects\EdgelessPE\edgeless-bot\workshop\adb\_ready".to_string(),
-        false,
+    envmnt::set("DEBUG", "true");
+    envmnt::set("CONFIRM", "true");
+
+    let shortcut_path=desktop_dir().unwrap().join("Visual Studio Code.lnk");
+    let entry1_path=get_path_bin().unwrap().join("Code.cmd");
+    let entry2_path=get_path_bin().unwrap().join("Microsoft-Code.cmd");
+    let app_path=get_path_apps(&"Microsoft".to_string(),&"VSCode".to_string(),false).unwrap();
+    let mp_path=app_path.join("Code.exe");
+    let cx_path=app_path.join(".nep_context").join("package.toml");
+
+    if shortcut_path.exists(){
+        remove_file(&shortcut_path).unwrap();
+    }
+    if entry1_path.exists(){
+        remove_file(&entry1_path).unwrap();
+    }
+    if entry2_path.exists(){
+        remove_file(&entry2_path).unwrap();
+    }
+
+    crate::pack(
+        &"./examples/VSCode".to_string(),
+        Some("./test/VSCode_1.75.0.0_Cno.nep".to_string()),
+        true,
     )
     .unwrap();
+    install_using_package(
+        &"./test/VSCode_1.75.0.0_Cno.nep".to_string(),
+        true,
+    )
+    .unwrap();
+
+    assert!(shortcut_path.exists());
+    assert!(entry1_path.exists()||entry2_path.exists());
+    assert!(mp_path.exists());
+    assert!(cx_path.exists());
+
+    crate::uninstall(&"VSCode".to_string()).unwrap();
+
+    assert!(!shortcut_path.exists());
+    assert!(!entry1_path.exists()||entry2_path.exists());
+    assert!(!mp_path.exists());
+    assert!(!cx_path.exists());
 }

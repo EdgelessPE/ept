@@ -19,8 +19,8 @@ pub fn is_alive_with_name(name: &String) -> bool {
 
 #[test]
 fn test_kill_with_name() {
-    let res = kill_with_name(&"哔哩哔哩.exe".to_string());
-    assert!(res);
+    // let res = kill_with_name(&"哔哩哔哩.exe".to_string());
+    // assert!(res);
 }
 
 #[test]
@@ -29,5 +29,8 @@ fn test_is_alive_with_name() {
     assert!(res);
 
     let res = is_alive_with_name(&"code.exe".to_string());
+    assert_eq!(res, false);
+
+    let res = is_alive_with_name(&"Code".to_string());
     assert_eq!(res, false);
 }

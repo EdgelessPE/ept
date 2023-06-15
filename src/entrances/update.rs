@@ -133,7 +133,7 @@ pub fn update_using_package(source_file: &String, verify_signature: bool) -> Res
     Ok(())
 }
 
-#[test]
+#[test] // TO-FIX
 fn test_update_using_package() {
     update_using_package(
         &r"D:\Desktop\Projects\EdgelessPE\edgeless-bot\builds\集成开发\VSCode_1.76.2.0_Bot.nep"

@@ -68,8 +68,8 @@ fn copy_wide(mut reader: impl io::Read, hasher: &mut blake3::Hasher) -> io::Resu
 #[test]
 fn test_compute_hash_blake3() {
     let res = compute_hash_blake3(
-        &r"D:\Desktop\Projects\EdgelessPE\ept\VSCode_1.75.0.0_Cno.nep\c1\VSCode_1.75.0.0_Cno.nep"
+        &"./examples/VSCode/VSCode/favicon.ico"
             .to_string(),
-    );
-    println!("{res:?}");
+    ).unwrap();
+    assert_eq!("73ef12105c1e3fb3fa8a4529c5b707fac31f9ec7733ab46a868d8e430f1bafb8".to_string(),res);
 }

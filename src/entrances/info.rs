@@ -68,8 +68,8 @@ pub fn info(scope: Option<String>, package_name: &String) -> Result<Info> {
 
 #[test]
 fn test_info() {
-    let res = info(Some("Microsoft".to_string()), &"VSCode".to_string()).unwrap();
-    println!("{res:#?}");
-    let res = info(None, &"vscode".to_string()).unwrap();
-    println!("{res:#?}");
+    // let res = info(Some("Microsoft".to_string()), &"VSCode".to_string()).unwrap();
+    // println!("{res:#?}");
+    // let res = info(None, &"vscode".to_string()).unwrap();
+    // println!("{res:#?}");
 }

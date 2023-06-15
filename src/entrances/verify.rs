@@ -89,6 +89,6 @@ pub fn verify(source_dir: &String) -> Result<GlobalPackage> {
 #[test]
 fn test_verify() {
     envmnt::set("DEBUG", "true");
-    verify(&r"D:\Desktop\Projects\EdgelessPE\edgeless-bot\workshop\adb\_ready".to_string())
+    verify(&"./examples/VSCode".to_string())
         .unwrap();
 }

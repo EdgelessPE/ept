@@ -71,9 +71,12 @@ pub fn get_exe_version<P: AsRef<Path>>(file_path: P) -> Result<String> {
 
 #[test]
 fn test_get_exe_version() {
-    let res = get_exe_version(r"D:\CnoRPS\Dism++10.1.1002.1\Dism++x64.exe".to_string()).unwrap();
+    let res = get_exe_version("./examples/Dism++/Dism++/Dism++x64.exe".to_string()).unwrap();
     assert_eq!(res, String::from("10.1.1002.1"));
 
-    let res = get_exe_version(r"D:\CnoRPS\Dism++10.1.1002.1\Dism++x86.exe".to_string()).unwrap();
+    let res = get_exe_version("./examples/Dism++/Dism++/Dism++x86.exe".to_string()).unwrap();
+    assert_eq!(res, String::from("10.1.1002.1"));
+
+    let res = get_exe_version("./examples/Dism++/Dism++/Dism++ARM64.exe".to_string()).unwrap();
     assert_eq!(res, String::from("10.1.1002.1"));
 }

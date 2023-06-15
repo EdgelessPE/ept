@@ -250,7 +250,7 @@ fn fast_unpack_nep(
     Ok((temp_dir_inner_path, package_struct))
 }
 
-#[test]
+#[test] // TO-FIX
 fn test_unpack_nep() {
     if cfg!(debug_assertions) {
         log!("Warning:Debug mode enabled");
@@ -264,7 +264,7 @@ fn test_unpack_nep() {
     println!("{res:?}");
 }
 
-#[test]
+#[test] // TO-FIX
 fn test_fast_unpack_nep() {
     let res = fast_unpack_nep(
         &r"D:\Desktop\Projects\EdgelessPE\ept\VSCode_1.75.0.0_Cno.nep".to_string(),
@@ -274,7 +274,7 @@ fn test_fast_unpack_nep() {
     println!("{res:?}");
 }
 
-#[test]
+#[test] // TO-FIX
 fn benchmark_fast_unpack_nep() {
     use std::time::Instant;
     let normal = Instant::now();

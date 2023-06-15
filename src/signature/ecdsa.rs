@@ -51,7 +51,7 @@ MC4CAQAwBQYDK2VwBCIEIBiVVXXhLTr/EY/FROnl67TVJz/jGV1WWN9HgptLMNWO
             .to_string(),
     )
     .unwrap();
-    assert_eq!(res, false);
+    assert!(!res);
 
     let res = verify_with_ecdsa(
         &public_key,
@@ -60,5 +60,5 @@ MC4CAQAwBQYDK2VwBCIEIBiVVXXhLTr/EY/FROnl67TVJz/jGV1WWN9HgptLMNWO
             .to_string(),
     )
     .unwrap();
-    assert_eq!(res, false);
+    assert!(!res);
 }
