@@ -18,7 +18,7 @@ fn update_main_program(
 ) -> Result<()> {
     let located = located.unwrap();
     // 获取主程序相对路径
-    let file_path = parse_relative_path_with_located(&software.main_program.unwrap(),&located);
+    let file_path = parse_relative_path_with_located(&software.main_program.unwrap(), &located);
 
     // 读取包申明版本号
     let ex_sv_declared = ExSemVer::parse(&pkg.package.version)?;

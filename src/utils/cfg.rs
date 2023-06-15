@@ -60,7 +60,7 @@ impl Cfg {
     pub fn init() -> Result<Self> {
         let from = Self::use_which()?;
         let text = read_to_string(from.clone())?;
-        let cfg:Self=from_str(&text).map_err(|e| {
+        let cfg: Self = from_str(&text).map_err(|e| {
             anyhow!(
                 "Error:Invalid config content, try delete '{f}' : {e}",
                 f = p2s!(from),
@@ -68,13 +68,24 @@ impl Cfg {
         })?;
 
         // 校验
-        cfg.verify_self(&"".to_string()).map_err(|e|anyhow!("Error:Invalid config '{f}' : {err}",f=p2s!(from),err=e.to_string()))?;
+        cfg.verify_self(&"".to_string()).map_err(|e| {
+            anyhow!(
+                "Error:Invalid config '{f}' : {err}",
+                f = p2s!(from),
+                err = e.to_string()
+            )
+        })?;
 
         Ok(cfg)
     }
     pub fn overwrite(&mut self, other: Self) -> Result<()> {
         // 校验
-        other.verify_self(&"".to_string()).map_err(|e|anyhow!("Error:Invalid overwrite config : {err}",err=e.to_string()))?;
+        other.verify_self(&"".to_string()).map_err(|e| {
+            anyhow!(
+                "Error:Invalid overwrite config : {err}",
+                err = e.to_string()
+            )
+        })?;
 
         // 赋值
         self.local = other.local.clone();
@@ -87,14 +98,14 @@ impl Cfg {
     }
 }
 
-impl Verifiable for Cfg{
+impl Verifiable for Cfg {
     fn verify_self(&self, _: &String) -> Result<()> {
         // base 必须为存在的绝对路径
-        let base_path=Path::new(&self.local.base);
-        if !base_path.is_absolute(){
+        let base_path = Path::new(&self.local.base);
+        if !base_path.is_absolute() {
             return Err(anyhow!("Error:Field 'local.base' should be absolute"));
         }
-        if !base_path.exists(){
+        if !base_path.exists() {
             return Err(anyhow!("Error:Field 'local.base' doesn't exist"));
         }
 

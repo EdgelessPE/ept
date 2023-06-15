@@ -71,7 +71,7 @@ impl GlobalPackage {
 
 impl Verifiable for GlobalPackage {
     fn verify_self(&self, located: &String) -> Result<()> {
-        if !Path::new(located).exists(){
+        if !Path::new(located).exists() {
             return Err(anyhow!("Error:Path '{located}' not exist"));
         }
         self.package.verify_self(located)?;

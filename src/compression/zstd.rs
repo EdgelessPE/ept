@@ -25,32 +25,34 @@ pub fn fast_decompress_zstd(raw: &Vec<u8>) -> Result<Vec<u8>> {
 #[test]
 fn test_compress_zstd() {
     use std::path::Path;
-    let p=Path::new("./test/package.toml.zst");
-    if p.exists(){
+    let p = Path::new("./test/package.toml.zst");
+    if p.exists() {
         std::fs::remove_file(p).unwrap();
     }
     compress_zstd(
         &"examples/VSCode/package.toml".to_string(),
         &"./test/package.toml.zst".to_string(),
-    ).unwrap();
+    )
+    .unwrap();
     assert!(p.exists());
 }
 
 #[test]
 fn test_decompress_zstd() {
     use std::path::Path;
-    if !Path::new("./test/package.toml.zst").exists(){
+    if !Path::new("./test/package.toml.zst").exists() {
         test_compress_zstd();
     }
-    let target=Path::new("test/package.toml");
-    if target.exists(){
+    let target = Path::new("test/package.toml");
+    if target.exists() {
         std::fs::remove_file(target).unwrap();
     }
 
     decompress_zstd(
         &"./test/package.toml.zst".to_string(),
         &"test/package.toml".to_string(),
-    ).unwrap();
+    )
+    .unwrap();
 
     assert!(target.exists());
 }

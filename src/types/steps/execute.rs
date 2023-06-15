@@ -128,7 +128,7 @@ fn test_execute() {
     use crate::types::package::GlobalPackage;
     let mut cx = WorkflowContext {
         pkg: GlobalPackage::_demo(),
-        located: String::from("./apps/VSCode"),
+        located: String::from("./examples/VSCode"),
     };
 
     StepExecute {

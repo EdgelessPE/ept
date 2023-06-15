@@ -76,11 +76,7 @@ pub fn verify(source_dir: &String) -> Result<GlobalPackage> {
     log!("Info:Checking manifest...");
     let mut fs = MixedFS::new(pkg_content_path.clone());
     let setup_manifest = get_manifest(setup_flow, &mut fs);
-    manifest_validator(
-        &pkg_content_path,
-        setup_manifest,
-        &mut fs,
-    )?;
+    manifest_validator(&pkg_content_path, setup_manifest, &mut fs)?;
     log_ok_last!("Info:Checking manifest...");
 
     Ok(global)
@@ -89,6 +85,5 @@ pub fn verify(source_dir: &String) -> Result<GlobalPackage> {
 #[test]
 fn test_verify() {
     envmnt::set("DEBUG", "true");
-    verify(&"./examples/VSCode".to_string())
-        .unwrap();
+    verify(&"./examples/VSCode".to_string()).unwrap();
 }

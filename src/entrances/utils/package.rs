@@ -269,11 +269,7 @@ fn test_unpack_nep() {
     )
     .unwrap();
 
-    let res = unpack_nep(
-        &"./test/VSCode_1.75.0.0_Cno.nep".to_string(),
-        true,
-    )
-    .unwrap();
+    let res = unpack_nep(&"./test/VSCode_1.75.0.0_Cno.nep".to_string(), true).unwrap();
     println!("{res:#?}");
 }
 
@@ -296,11 +292,7 @@ fn test_fast_unpack_nep() {
     )
     .unwrap();
 
-    let res = fast_unpack_nep(
-        &"./test/VSCode_1.75.0.0_Cno.nep".to_string(),
-        true,
-    )
-    .unwrap();
+    let res = fast_unpack_nep(&"./test/VSCode_1.75.0.0_Cno.nep".to_string(), true).unwrap();
     println!("{res:#?}");
 }
 
@@ -323,20 +315,16 @@ fn benchmark_fast_unpack_nep() {
     use std::time::Instant;
     let normal = Instant::now();
     for _ in 0..10 {
-        unpack_nep(
-            &"./test/Dism++_10.1.1002.1_Cno.nep".to_string(),
-            true,
-        )
-        .unwrap();
+        unpack_nep(&"./test/Dism++_10.1.1002.1_Cno.nep".to_string(), true).unwrap();
     }
 
     let fast = Instant::now();
     for _ in 0..10 {
-        fast_unpack_nep(
-            &"./test/Dism++_10.1.1002.1_Cno.nep".to_string(),
-            true,
-        )
-        .unwrap();
+        fast_unpack_nep(&"./test/Dism++_10.1.1002.1_Cno.nep".to_string(), true).unwrap();
     }
-    println!("Normal unpack cost {n}ms, fast unpack cost {f}ms",n=normal.elapsed().as_millis(),f=fast.elapsed().as_millis());
+    println!(
+        "Normal unpack cost {n}ms, fast unpack cost {f}ms",
+        n = normal.elapsed().as_millis(),
+        f = fast.elapsed().as_millis()
+    );
 }

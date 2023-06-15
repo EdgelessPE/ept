@@ -28,31 +28,33 @@ pub fn pack_tar(source: &String, store_at: &String) -> Result<()> {
 
 #[test]
 fn test_pack_tar() {
-    let p=Path::new("./test/VSCode_1.0.0.0_Cno.tar");
-    if p.exists(){
+    let p = Path::new("./test/VSCode_1.0.0.0_Cno.tar");
+    if p.exists() {
         crate::compression::remove_file(p).unwrap();
     }
     pack_tar(
         &"examples/VSCode".to_string(),
         &"./test/VSCode_1.0.0.0_Cno.tar".to_string(),
-    ).unwrap();
+    )
+    .unwrap();
     assert!(p.exists());
 }
 
 #[test]
 fn test_release_tar() {
-    if !Path::new("./test/VSCode_1.0.0.0_Cno.tar").exists(){
+    if !Path::new("./test/VSCode_1.0.0.0_Cno.tar").exists() {
         test_pack_tar();
     }
-    let target=Path::new("test/VSCode_1.0.0.0_Cno");
-    if target.exists(){
+    let target = Path::new("test/VSCode_1.0.0.0_Cno");
+    if target.exists() {
         crate::utils::try_recycle(target).unwrap();
     }
 
     release_tar(
         &"./test/VSCode_1.0.0.0_Cno.tar".to_string(),
         &"./test/VSCode_1.0.0.0_Cno".to_string(),
-    ).unwrap();
+    )
+    .unwrap();
 
     assert!(Path::new("test/VSCode_1.0.0.0_Cno/package.toml").exists());
 }

@@ -17,8 +17,8 @@ pub use self::exe_version::get_exe_version;
 pub use self::fs::{count_sub_files, ensure_dir_exist, read_sub_dir, try_recycle};
 pub use self::log::{fn_log, fn_log_ok_last};
 pub use self::path::{
-    find_scope_with_name_locally, parse_relative_path_with_located,
-    split_parent,parse_relative_path_with_base,
+    find_scope_with_name_locally, parse_relative_path_with_base, parse_relative_path_with_located,
+    split_parent,
 };
 pub use self::process::{is_alive_with_name, kill_with_name};
 pub use self::term::ask_yn;

@@ -92,26 +92,28 @@ fn test_install() {
     std::fs::create_dir_all("test").unwrap();
 
     // 校验路径
-    let shortcut_path=dirs::desktop_dir().unwrap().join("Visual Studio Code.lnk");
-    let entry1_path=crate::utils::get_path_bin().unwrap().join("Code.cmd");
-    let entry2_path=crate::utils::get_path_bin().unwrap().join("Microsoft-Code.cmd");
-    let app_path=get_path_apps(&"Microsoft".to_string(),&"VSCode".to_string(),false).unwrap();
-    let mp_path=app_path.join("Code.exe");
-    let cx_path=app_path.join(".nep_context").join("package.toml");
+    let shortcut_path = dirs::desktop_dir().unwrap().join("Visual Studio Code.lnk");
+    let entry1_path = crate::utils::get_path_bin().unwrap().join("Code.cmd");
+    let entry2_path = crate::utils::get_path_bin()
+        .unwrap()
+        .join("Microsoft-Code.cmd");
+    let app_path = get_path_apps(&"Microsoft".to_string(), &"VSCode".to_string(), false).unwrap();
+    let mp_path = app_path.join("Code.exe");
+    let cx_path = app_path.join(".nep_context").join("package.toml");
 
     use std::fs::remove_file;
-    if shortcut_path.exists(){
+    if shortcut_path.exists() {
         remove_file(&shortcut_path).unwrap();
     }
-    if entry1_path.exists(){
+    if entry1_path.exists() {
         remove_file(&entry1_path).unwrap();
     }
-    if entry2_path.exists(){
+    if entry2_path.exists() {
         remove_file(&entry2_path).unwrap();
     }
 
     // 卸载
-    if crate::entrances::info_local(&"Microsoft".to_string(), &"VSCode".to_string()).is_ok(){
+    if crate::entrances::info_local(&"Microsoft".to_string(), &"VSCode".to_string()).is_ok() {
         crate::uninstall(&"VSCode".to_string()).unwrap();
     }
 
@@ -122,21 +124,17 @@ fn test_install() {
         true,
     )
     .unwrap();
-    install_using_package(
-        &"./test/VSCode_1.75.0.0_Cno.nep".to_string(),
-        true,
-    )
-    .unwrap();
+    install_using_package(&"./test/VSCode_1.75.0.0_Cno.nep".to_string(), true).unwrap();
 
     assert!(shortcut_path.exists());
-    assert!(entry1_path.exists()||entry2_path.exists());
+    assert!(entry1_path.exists() || entry2_path.exists());
     assert!(mp_path.exists());
     assert!(cx_path.exists());
 
     crate::uninstall(&"VSCode".to_string()).unwrap();
 
     assert!(!shortcut_path.exists());
-    assert!(!entry1_path.exists()||entry2_path.exists());
+    assert!(!entry1_path.exists() || entry2_path.exists());
     assert!(!mp_path.exists());
     assert!(!cx_path.exists());
 }

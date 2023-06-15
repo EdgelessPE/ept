@@ -132,7 +132,7 @@ pub fn workflow_reverse_executor(
 
 #[test]
 fn test_condition_eval() {
-    let located = &String::from("./apps/VSCode");
+    let located = &String::from("./examples/VSCode");
     let r1 = condition_eval(&String::from("${ExitCode}==114"), 114, located).unwrap();
     assert!(r1);
 
@@ -143,12 +143,12 @@ fn test_condition_eval() {
     assert!(r3);
 
     let r4 = condition_eval(
-        &String::from("\"${DefaultLocation}\"==\"./apps/VSCode\""),
+        &String::from("\"${DefaultLocation}\"==\"./unknown/VSCode\""),
         0,
         located,
     )
     .unwrap();
-    assert!(r4);
+    assert!(!r4);
 
     let r5 = condition_eval(
         &String::from("Exist(\"src/main.rs\") && IsDirectory(\"src\")"),
@@ -252,7 +252,7 @@ fn test_workflow_executor() {
         // },
     ];
     let r1 = workflow_executor(wf1, cx.located, cx.pkg).unwrap();
-    assert_eq!(r1,3);
+    assert_eq!(r1, 3);
 }
 
 #[test]

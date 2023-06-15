@@ -26,7 +26,7 @@ pub fn split_parent(raw: &String, located: &String) -> (PathBuf, String) {
 }
 
 /// 使用配置文件中指定的 base 解析相对路径，不带路径格式化
-#[deprecated(note="意义不明确的函数名及其实现，改用 parse_relative_path_with_xxx")]
+#[deprecated(note = "意义不明确的函数名及其实现，改用 parse_relative_path_with_xxx")]
 pub fn _parse_relative_path(relative: &String) -> Result<PathBuf> {
     let path = Path::new(relative);
 
@@ -35,7 +35,11 @@ pub fn _parse_relative_path(relative: &String) -> Result<PathBuf> {
     } else {
         let cfg = get_config();
         let relative = Path::new(&cfg.local.base).join(relative);
-        let dirty_abs = p2s!(canonicalize(relative.clone()).map_err(|e|anyhow!("Error:Path '{p}' not exist : {err}",p=p2s!(relative),err=e.to_string()))?);
+        let dirty_abs = p2s!(canonicalize(relative.clone()).map_err(|e| anyhow!(
+            "Error:Path '{p}' not exist : {err}",
+            p = p2s!(relative),
+            err = e.to_string()
+        ))?);
         Path::new(&dirty_abs[4..]).to_path_buf()
     }
     .clean();
@@ -48,8 +52,8 @@ pub fn _parse_relative_path(relative: &String) -> Result<PathBuf> {
 }
 
 /// 使用配置文件中指定的 base 解析相对路径
-pub fn parse_relative_path_with_base(relative:&String)->Result<PathBuf>{
-    let relative=format_path(relative);
+pub fn parse_relative_path_with_base(relative: &String) -> Result<PathBuf> {
+    let relative = format_path(relative);
     let path = Path::new(&relative);
 
     let absolute_path = if path.is_absolute() {
@@ -71,7 +75,7 @@ pub fn parse_relative_path_with_base(relative:&String)->Result<PathBuf>{
 pub fn parse_relative_path_with_located(relative: &String, located: &String) -> PathBuf {
     // debug_assert!(Path::new(located).is_absolute());
     debug_assert!(Path::new(located).exists());
-    
+
     let relative = format_path(relative);
     let located = format_path(located);
     let path = Path::new(&relative);

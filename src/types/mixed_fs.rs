@@ -19,7 +19,7 @@ pub struct MixedFS {
     to_remove_wild_match: HashSet<String>,
 
     // TEMP:是否被调用了会导致文件系统新增文件的步骤，若是则检测到白名单步骤时对 manifest 检测异常警告而非报错
-    pub var_warn_manifest:bool,
+    pub var_warn_manifest: bool,
 }
 
 // 输入的 path 来自 manifest，不会携带通配符
@@ -49,7 +49,7 @@ impl MixedFS {
             to_remove: HashSet::new(),
             to_add_wild_match: HashSet::new(),
             to_remove_wild_match: HashSet::new(),
-            var_warn_manifest:false,
+            var_warn_manifest: false,
         }
     }
 
@@ -79,9 +79,9 @@ impl MixedFS {
         if path.starts_with("${") {
             return;
         }
-        
+
         // 配置 var_warn_manifest flag
-        self.var_warn_manifest=true;
+        self.var_warn_manifest = true;
 
         // 特殊处理 New 的逻辑
         if from.is_empty() {

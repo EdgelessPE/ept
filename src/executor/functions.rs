@@ -224,29 +224,26 @@ fn test_header_perm() {
         c_if: Some("Exist(\"./mc/vsc.exe\") && IsDirectory(\"${SystemDrive}/Windows\") || Exist(\"${AppData}/Roaming/Edgeless/ept\")".to_string()),
     };
     let res = flow.generalize_permissions().unwrap();
-    assert_eq!(res,vec![
-        Permission {
-            key: "fs_read".to_string(),
-            level: PermissionLevel::Normal,
-            targets: vec![
-                "./mc/vsc.exe".to_string(),
-            ],
-        },
-        Permission {
-            key: "fs_read".to_string(),
-            level: PermissionLevel::Sensitive,
-            targets: vec![
-                "${SystemDrive}/Windows".to_string(),
-            ],
-        },
-        Permission {
-            key: "fs_read".to_string(),
-            level: PermissionLevel::Sensitive,
-            targets: vec![
-                "${AppData}/Roaming/Edgeless/ept".to_string(),
-            ],
-        },
-    ])
+    assert_eq!(
+        res,
+        vec![
+            Permission {
+                key: "fs_read".to_string(),
+                level: PermissionLevel::Normal,
+                targets: vec!["./mc/vsc.exe".to_string(),],
+            },
+            Permission {
+                key: "fs_read".to_string(),
+                level: PermissionLevel::Sensitive,
+                targets: vec!["${SystemDrive}/Windows".to_string(),],
+            },
+            Permission {
+                key: "fs_read".to_string(),
+                level: PermissionLevel::Sensitive,
+                targets: vec!["${AppData}/Roaming/Edgeless/ept".to_string(),],
+            },
+        ]
+    )
 }
 
 #[test]

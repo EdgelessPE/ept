@@ -27,14 +27,17 @@ pub fn parse_author(raw: &String) -> Result<Author> {
 
 #[test]
 fn test_parse_author() {
-    assert_eq!(Author{
-        name:"Cno".to_string(),
-        email:None
-    },parse_author(&"Cno".to_string()).unwrap());
     assert_eq!(
-        Author{
-            name:"Cno".to_string(),
-            email:Some("dsyourshy@qq.com".to_string())
+        Author {
+            name: "Cno".to_string(),
+            email: None
+        },
+        parse_author(&"Cno".to_string()).unwrap()
+    );
+    assert_eq!(
+        Author {
+            name: "Cno".to_string(),
+            email: Some("dsyourshy@qq.com".to_string())
         },
         parse_author(&"Cno <dsyourshy@qq.com>".to_string()).unwrap()
     );

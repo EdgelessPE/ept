@@ -22,7 +22,7 @@ fn test_get_temp_tar() {
     ));
     assert_eq!(
         res,
-        r"D:\Desktop\Projects\EdgelessPE\ept\examples\VSCode\Pack.tar".to_string()
+        "D:/Desktop/Projects/EdgelessPE/ept/examples/VSCode/Pack.tar".to_string()
     );
 }
 
@@ -61,31 +61,33 @@ pub fn decompress(source_file: &String, into_dir: &String) -> Result<()> {
 
 #[test]
 fn test_compress() {
-    let p=Path::new("./test/VSCode_1.0.0.0_Cno.tar.zst");
-    if p.exists(){
+    let p = Path::new("./test/VSCode_1.0.0.0_Cno.tar.zst");
+    if p.exists() {
         remove_file(p).unwrap();
     }
     compress(
         &"examples/VSCode".to_string(),
         &"./test/VSCode_1.0.0.0_Cno.tar.zst".to_string(),
-    ).unwrap();
+    )
+    .unwrap();
     assert!(p.exists());
 }
 
 #[test]
 fn test_decompress() {
-    if !Path::new("./test/VSCode_1.0.0.0_Cno.tar.zst").exists(){
+    if !Path::new("./test/VSCode_1.0.0.0_Cno.tar.zst").exists() {
         test_compress();
     }
-    let target=Path::new("test/VSCode_1.0.0.0_Cno");
-    if target.exists(){
+    let target = Path::new("test/VSCode_1.0.0.0_Cno");
+    if target.exists() {
         crate::utils::try_recycle(target).unwrap();
     }
 
     decompress(
         &"./test/VSCode_1.0.0.0_Cno.tar.zst".to_string(),
         &"./test/VSCode_1.0.0.0_Cno".to_string(),
-    ).unwrap();
+    )
+    .unwrap();
 
     assert!(Path::new("test/VSCode_1.0.0.0_Cno/package.toml").exists());
 }

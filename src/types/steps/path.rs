@@ -152,8 +152,7 @@ impl TStep for StepPath {
         }
 
         // 解析目标绝对路径
-        let abs_target_path =
-            parse_relative_path_with_located(&self.record,&cx.located);
+        let abs_target_path = parse_relative_path_with_located(&self.record, &cx.located);
         let abs_target_str = p2s!(abs_target_path).replace("/", r"\");
 
         // 处理为目录的情况
@@ -204,8 +203,7 @@ impl TStep for StepPath {
         }
 
         // 解析目标绝对路径
-        let abs_target_path =
-            parse_relative_path_with_located(&self.record,&cx.located);
+        let abs_target_path = parse_relative_path_with_located(&self.record, &cx.located);
         let abs_target_str = p2s!(abs_target_path).replace("/", r"\");
 
         // 处理为目录的情况
@@ -311,7 +309,7 @@ fn test_path() {
     .run(&mut cx)
     .unwrap();
 
-    let p1=get_path_bin().unwrap().join("vsc-launcher.cmd");
+    let p1 = get_path_bin().unwrap().join("vsc-launcher.cmd");
     assert!(p1.exists());
 
     // 别名
@@ -322,7 +320,7 @@ fn test_path() {
     .run(&mut cx)
     .unwrap();
 
-    let p2=get_path_bin().unwrap().join("msvsc.cmd");
+    let p2 = get_path_bin().unwrap().join("msvsc.cmd");
     assert!(p2.exists());
 
     // 冲突
@@ -333,7 +331,7 @@ fn test_path() {
     .run(&mut cx)
     .unwrap();
 
-    let p3=get_path_bin().unwrap().join("Edgeless-Code.cmd");
+    let p3 = get_path_bin().unwrap().join("Edgeless-Code.cmd");
     assert!(p3.exists());
 
     use crate::utils::try_recycle;
@@ -348,5 +346,4 @@ fn test_path() {
     }
     .reverse_run(&mut cx)
     .unwrap();
-
 }
