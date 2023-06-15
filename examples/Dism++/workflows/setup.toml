@@ -2,16 +2,16 @@
 name = "Create shortcut1"
 step = "Link"
 source_file = "Dism++ARM64.exe"
-target_name = "Dism++ARM64.exe"
+# target_name = "Dism++ARM64.exe"
 
 [create_shortcut2]
 name = "Create shortcut2"
 step = "Link"
 source_file = "Dism++x64.exe"
-target_name = "Dism++x64.exe"
+# target_name = "Dism++x64.exe"
 
 [create_shortcut3]
 name = "Create shortcut3"
 step = "Link"
 source_file = "Dism++x86.exe"
-target_name = "Dism++x86.exe"
+# target_name = "Dism++x86.exe"

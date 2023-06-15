@@ -87,14 +87,26 @@ fn delete_shortcut(name: &String, base: &String) -> Result<()> {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct StepLink {
     pub source_file: String,
-    pub target_name: String,
+    pub target_name: Option<String>,
     pub target_args: Option<String>,
     pub target_icon: Option<String>,
     pub at: Option<Vec<String>>,
 }
 
+impl StepLink{
+    fn get_target_name(&self)->String{
+        self.target_name.to_owned().unwrap_or_else(||{
+            let p=Path::new(&self.source_file);
+            p2s!(p.file_stem().unwrap())
+        })
+    }
+}
+
 impl TStep for StepLink {
     fn run(self, cx: &mut WorkflowContext) -> anyhow::Result<i32> {
+        // 确定 target_name
+        let target_name=self.get_target_name();
+
         // 解析源文件绝对路径
         let abs_clear_source_path =
             parse_relative_path_with_located(&self.source_file, &cx.located);
@@ -122,10 +134,10 @@ impl TStep for StepLink {
         let set: HashSet<String> =
             HashSet::from_iter(self.at.clone().unwrap_or(vec!["Desktop".to_string()]));
         if set.contains("Desktop") {
-            create_shortcut(&sl, &self.target_name, &env_desktop())?;
+            create_shortcut(&sl, &target_name, &env_desktop())?;
         }
         if set.contains("StartMenu") {
-            create_shortcut(&sl, &self.target_name, &env_start_menu())?;
+            create_shortcut(&sl, &target_name, &env_start_menu())?;
             // 发送全局广播
             let result = unsafe {
                 SendMessageTimeoutA(
@@ -148,11 +160,12 @@ impl TStep for StepLink {
     fn reverse_run(self, _: &mut WorkflowContext) -> Result<()> {
         let set: HashSet<String> =
             HashSet::from_iter(self.at.clone().unwrap_or(vec!["Desktop".to_string()]));
+        let target_name=self.get_target_name();
         if set.contains("Desktop") {
-            delete_shortcut(&self.target_name, &env_desktop())?;
+            delete_shortcut(&target_name, &env_desktop())?;
         }
         if set.contains("StartMenu") {
-            delete_shortcut(&self.target_name, &env_start_menu())?;
+            delete_shortcut(&target_name, &env_start_menu())?;
             // 发送全局广播
             let result = unsafe {
                 SendMessageTimeoutA(
@@ -180,7 +193,7 @@ impl TStep for StepLink {
     {
         Self {
             source_file: interpreter(self.source_file),
-            target_name: interpreter(self.target_name),
+            target_name: self.target_name.map(&interpreter),
             target_args: self.target_args.map(&interpreter),
             target_icon: self.target_icon.map(&interpreter),
             at: self.at,
@@ -190,18 +203,26 @@ impl TStep for StepLink {
 
 impl Verifiable for StepLink {
     fn verify_self(&self, _: &String) -> Result<()> {
-        if !TARGET_RE.is_match(&self.target_name) {
-            return Err(anyhow!(
-                "Error(Link):Invalid field 'target_name', expect 'NAME' or 'FOLDER/NAME', got '{name}'",
-                name=self.target_name
-            ));
+        values_validator_path(&self.source_file)?;
+        if let Some(target_name)=&self.target_name{
+            if !TARGET_RE.is_match(&target_name) {
+                return Err(anyhow!(
+                    "Error(Link):Invalid field 'target_name', expect 'NAME' or 'FOLDER/NAME', got '{target_name}'"
+                ));
+            }
+            if target_name.contains("..") {
+                return Err(anyhow!(
+                    "Error(Link):Invalid field 'target_name' : shouldn't contain '..', got '{target_name}'"
+                ));
+            }
+            if target_name.to_lowercase().ends_with(".lnk") {
+                return Err(anyhow!(
+                    "Error(Link):Invalid field 'target_name' : shouldn't end with '.lnk', got '{target_name}'"
+                ));
+            }
         }
-        if self.target_name.contains("..") {
-            return Err(anyhow!(
-                "Error(Link):Invalid field 'target_name' : shouldn't contain '..'"
-            ));
-        }
-        values_validator_path(&self.source_file)
+
+        Ok(())
     }
 }
 
@@ -224,7 +245,7 @@ impl Generalizable for StepLink {
             .map(|key| Permission {
                 key: key.to_string(),
                 level: PermissionLevel::Normal,
-                targets: vec![self.target_name.to_owned()],
+                targets: vec![self.get_target_name()],
             })
             .collect();
 
@@ -237,7 +258,7 @@ fn test_link() {
     let mut cx = WorkflowContext::_demo();
     let step = StepLink {
         source_file: String::from("examples/VSCode/VSCode/Code.exe"),
-        target_name: String::from("VSC"),
+        target_name: Some(String::from("VSC")),
         target_args: Some("--debug".to_string()),
         target_icon: Some("examples/VSCode/VSCode/favicon.ico".to_string()),
         at: Some(vec!["Desktop".to_string(), "StartMenu".to_string()]),
@@ -254,4 +275,17 @@ fn test_link() {
 
     try_recycle(desktop_path).unwrap();
     try_recycle(start_path).unwrap();
+
+    StepLink {
+        source_file: String::from("examples/VSCode/VSCode/Code.exe"),
+        target_name: None,
+        target_args: None,
+        target_icon: None,
+        at: None,
+    }
+    .run(&mut cx)
+    .unwrap();
+    let desktop_path = dirs::desktop_dir().unwrap().join("Code.lnk");
+    assert!(desktop_path.exists());
+    try_recycle(desktop_path).unwrap();
 }
