@@ -133,12 +133,53 @@ pub fn update_using_package(source_file: &String, verify_signature: bool) -> Res
     Ok(())
 }
 
-#[test] // TO-FIX
+#[test]
 fn test_update_using_package() {
-    update_using_package(
-        &r"D:\Desktop\Projects\EdgelessPE\edgeless-bot\builds\集成开发\VSCode_1.76.2.0_Bot.nep"
-            .to_string(),
+    envmnt::set("DEBUG", "true");
+    envmnt::set("CONFIRM", "true");
+    use std::path::Path;
+    if Path::new("test").exists() {
+        remove_dir_all("test").unwrap();
+    }
+    std::fs::create_dir_all("test").unwrap();
+
+    // 卸载
+    if crate::entrances::info_local(&"Microsoft".to_string(), &"VSCode".to_string()).is_ok(){
+        crate::uninstall(&"VSCode".to_string()).unwrap();
+    }
+
+    // 安装旧版本
+    crate::pack(
+        &"./examples/VSCode".to_string(),
+        Some("./test/VSCode_1.75.0.0_Cno.nep".to_string()),
         true,
     )
     .unwrap();
+    install_using_package(
+        &"./test/VSCode_1.75.0.0_Cno.nep".to_string(),
+        true,
+    )
+    .unwrap();
+
+    // 手动更新版本号
+    let opt = fs_extra::dir::CopyOptions::new().copy_inside(true);
+    fs_extra::dir::copy("examples/VSCode", "test/VSCode", &opt).unwrap();
+    let mut pkg=crate::parsers::parse_package(&"test/VSCode/package.toml".to_string(), None).unwrap();
+    pkg.package.version="1.75.0.1".to_string();
+    let text=toml::to_string_pretty(&pkg).unwrap();
+    std::fs::write("test/VSCode/package.toml", text).unwrap();
+
+    // 更新文件
+    let old_ico=get_path_apps(&"Microsoft".to_string(), &"VSCode".to_string(), false).unwrap().join("favicon.ico");
+    let new_ico=get_path_apps(&"Microsoft".to_string(), &"VSCode".to_string(), false).unwrap().join("icon.ico");
+    assert!(old_ico.exists());
+    rename("test/VSCode/VSCode/favicon.ico","test/VSCode/VSCode/icon.ico").unwrap();
+
+    // 安装新版本
+    update_using_package(&"test/VSCode".to_string(), false).unwrap();
+    assert!(!old_ico.exists());
+    assert!(new_ico.exists());
+
+    // 卸载
+    crate::uninstall(&"VSCode".to_string()).unwrap();
 }

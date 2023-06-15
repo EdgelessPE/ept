@@ -1,7 +1,6 @@
 mod tar;
 mod zstd;
 
-use crate::utils::try_recycle;
 use crate::{log, p2s};
 
 pub use self::tar::{pack_tar, release_tar};
@@ -80,7 +79,7 @@ fn test_decompress() {
     }
     let target=Path::new("test/VSCode_1.0.0.0_Cno");
     if target.exists(){
-        try_recycle(target).unwrap();
+        crate::utils::try_recycle(target).unwrap();
     }
 
     decompress(

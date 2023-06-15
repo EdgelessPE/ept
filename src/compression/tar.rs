@@ -1,9 +1,7 @@
 use anyhow::Result;
-use std::fs::{create_dir_all, remove_dir_all, File, remove_file};
+use std::fs::{create_dir_all, remove_dir_all, File};
 use std::path::Path;
 use tar::{Archive, Builder};
-
-use crate::utils::try_recycle;
 
 pub fn release_tar(source: &String, into: &String) -> Result<()> {
     let file = File::open(source)?;
@@ -32,7 +30,7 @@ pub fn pack_tar(source: &String, store_at: &String) -> Result<()> {
 fn test_pack_tar() {
     let p=Path::new("./test/VSCode_1.0.0.0_Cno.tar");
     if p.exists(){
-        remove_file(p).unwrap();
+        crate::compression::remove_file(p).unwrap();
     }
     pack_tar(
         &"examples/VSCode".to_string(),
@@ -48,7 +46,7 @@ fn test_release_tar() {
     }
     let target=Path::new("test/VSCode_1.0.0.0_Cno");
     if target.exists(){
-        try_recycle(target).unwrap();
+        crate::utils::try_recycle(target).unwrap();
     }
 
     release_tar(

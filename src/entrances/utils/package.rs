@@ -250,53 +250,93 @@ fn fast_unpack_nep(
     Ok((temp_dir_inner_path, package_struct))
 }
 
-#[test] // TO-FIX
+#[test]
 fn test_unpack_nep() {
     if cfg!(debug_assertions) {
         log!("Warning:Debug mode enabled");
         envmnt::set("DEBUG", "true");
     }
+    use std::path::Path;
+    if Path::new("test").exists() {
+        remove_dir_all("test").unwrap();
+    }
+    std::fs::create_dir_all("test").unwrap();
+
+    crate::pack(
+        &"./examples/VSCode".to_string(),
+        Some("./test/VSCode_1.75.0.0_Cno.nep".to_string()),
+        true,
+    )
+    .unwrap();
+
     let res = unpack_nep(
-        &r"D:\Desktop\Projects\EdgelessPE\ept\VSCode_1.75.0.0_Cno.nep".to_string(),
+        &"./test/VSCode_1.75.0.0_Cno.nep".to_string(),
         true,
     )
     .unwrap();
-    println!("{res:?}");
+    println!("{res:#?}");
 }
 
-#[test] // TO-FIX
+#[test]
 fn test_fast_unpack_nep() {
-    let res = fast_unpack_nep(
-        &r"D:\Desktop\Projects\EdgelessPE\ept\VSCode_1.75.0.0_Cno.nep".to_string(),
+    if cfg!(debug_assertions) {
+        log!("Warning:Debug mode enabled");
+        envmnt::set("DEBUG", "true");
+    }
+    use std::path::Path;
+    if Path::new("test").exists() {
+        remove_dir_all("test").unwrap();
+    }
+    std::fs::create_dir_all("test").unwrap();
+
+    crate::pack(
+        &"./examples/VSCode".to_string(),
+        Some("./test/VSCode_1.75.0.0_Cno.nep".to_string()),
         true,
     )
     .unwrap();
-    println!("{res:?}");
+
+    let res = fast_unpack_nep(
+        &"./test/VSCode_1.75.0.0_Cno.nep".to_string(),
+        true,
+    )
+    .unwrap();
+    println!("{res:#?}");
 }
 
-#[test] // TO-FIX
+#[test]
 fn benchmark_fast_unpack_nep() {
+    // 准备带有一定体积的包
+    use std::path::Path;
+    if Path::new("test").exists() {
+        remove_dir_all("test").unwrap();
+    }
+    std::fs::create_dir_all("test").unwrap();
+
+    crate::pack(
+        &"./examples/Dism++".to_string(),
+        Some("./test/Dism++_10.1.1002.1_Cno.nep".to_string()),
+        true,
+    )
+    .unwrap();
+
     use std::time::Instant;
     let normal = Instant::now();
     for _ in 0..10 {
         unpack_nep(
-            &r"D:\Desktop\Projects\EdgelessPE\ept\VSCode_1.75.0.0_Cno.nep".to_string(),
+            &"./test/Dism++_10.1.1002.1_Cno.nep".to_string(),
             true,
         )
         .unwrap();
     }
-    println!(
-        "Normal unpack cost {sec}s",
-        sec = normal.elapsed().as_secs()
-    ); // 42s
 
     let fast = Instant::now();
     for _ in 0..10 {
         fast_unpack_nep(
-            &r"D:\Desktop\Projects\EdgelessPE\ept\VSCode_1.75.0.0_Cno.nep".to_string(),
+            &"./test/Dism++_10.1.1002.1_Cno.nep".to_string(),
             true,
         )
         .unwrap();
     }
-    println!("Fast unpack cost {sec}s", sec = fast.elapsed().as_secs()); // 34s
+    println!("Normal unpack cost {n}ms, fast unpack cost {f}ms",n=normal.elapsed().as_millis(),f=fast.elapsed().as_millis());
 }

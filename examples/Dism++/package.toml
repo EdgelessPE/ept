@@ -7,7 +7,7 @@ name = "Dism++"
 # 包模板 仅可取 "Software"
 template = "Software"
 # 版本号
-version = "1.75.0.0"
+version = "10.1.1002.1"
 # 打包者/作者
 authors = ["Cno <dsyourshy@qq.com>","Chuyu"]
 description = "全球第一款基于 CBS 的 Dism GUI 实现。"

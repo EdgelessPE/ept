@@ -7,7 +7,6 @@ use crate::utils::env::{env_desktop, env_start_menu};
 use crate::utils::{count_sub_files, try_recycle};
 use crate::{log, p2s, types::verifiable::Verifiable, utils::parse_relative_path_with_located};
 use anyhow::{anyhow, Result};
-use dirs::desktop_dir;
 use mslnk::ShellLink;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
@@ -242,7 +241,7 @@ fn test_link() {
         .unwrap();
     step.run(&mut cx).unwrap();
 
-    let desktop_path=desktop_dir().unwrap().join("VSC.lnk");
+    let desktop_path=dirs::desktop_dir().unwrap().join("VSC.lnk");
     let start_path=Path::new(&env_start_menu()).join("VSC.lnk");
 
     assert!(desktop_path.exists());

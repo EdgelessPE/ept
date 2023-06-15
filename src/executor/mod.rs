@@ -170,11 +170,11 @@ fn test_condition_eval() {
     assert!(r7);
 }
 
-#[test] // TO-FIX
+#[test]
 fn test_workflow_executor() {
     use crate::types::steps::{
         Step,
-        // StepExecute,
+        StepExecute,
         // StepLink,
         StepLog,
         // StepPath,
@@ -182,29 +182,29 @@ fn test_workflow_executor() {
     use crate::types::workflow::{WorkflowHeader, WorkflowNode};
     let cx = WorkflowContext::_demo();
     let wf1 = vec![
-        // WorkflowNode {
-        //     header: WorkflowHeader {
-        //         name: "Log".to_string(),
-        //         step: "Step log".to_string(),
-        //         c_if: None,
-        //     },
-        //     body: Step::StepLog(StepLog {
-        //         level: "Info".to_string(),
-        //         msg: "Hello nep! 你好，尼普！".to_string(),
-        //     }),
-        // },
-        // WorkflowNode {
-        //     header: WorkflowHeader {
-        //         name: "Throw".to_string(),
-        //         step: "Try throw".to_string(),
-        //         c_if: Some(String::from("${ExitCode}==0")),
-        //     },
-        //     body: Step::StepExecute(StepExecute {
-        //         command: "exit 3".to_string(),
-        //         pwd: None,
-        //         call_installer: None,
-        //     }),
-        // },
+        WorkflowNode {
+            header: WorkflowHeader {
+                name: "Log".to_string(),
+                step: "Step log".to_string(),
+                c_if: None,
+            },
+            body: Step::StepLog(StepLog {
+                level: "Info".to_string(),
+                msg: "Hello nep! 你好，尼普！".to_string(),
+            }),
+        },
+        WorkflowNode {
+            header: WorkflowHeader {
+                name: "Throw".to_string(),
+                step: "Try throw".to_string(),
+                c_if: Some(String::from("${ExitCode}==0")),
+            },
+            body: Step::StepExecute(StepExecute {
+                command: "exit 3".to_string(),
+                pwd: None,
+                call_installer: None,
+            }),
+        },
         // WorkflowNode {
         //     header: WorkflowHeader {
         //         name: "Fix".to_string(),
@@ -221,7 +221,7 @@ fn test_workflow_executor() {
                 name: "Exist".to_string(),
                 step: "If exist".to_string(),
                 c_if: Some(
-                    "IsAlive(\"code.exe\") && IsInstalled(\"Microsoft/VSCode\")".to_string(),
+                    "IsAlive(\"unknown.exe\") && IsInstalled(\"Microsoft/VSCode\")".to_string(),
                 ),
             },
             body: Step::StepLog(StepLog {
@@ -251,8 +251,8 @@ fn test_workflow_executor() {
         //     }),
         // },
     ];
-    let r1 = workflow_executor(wf1, cx.located, cx.pkg);
-    println!("{r1:?}");
+    let r1 = workflow_executor(wf1, cx.located, cx.pkg).unwrap();
+    assert_eq!(r1,3);
 }
 
 #[test]
