@@ -63,14 +63,14 @@ impl WorkflowContext {
                 Some(val) => {
                     if val == 0 {
                         log!(
-                            "Info(Execute):Async command '{cmd}' output : \n{o}",
-                            o = read_console(output.stdout)
+                            "Info(Execute):Async command '{cmd}' output :"
                         );
+                        println!("{output}",output=read_console(output.stdout));
                     } else {
                         log!(
-                            "Error(Execute):Async command '{cmd}' failed, output : \n{o}",
-                            o = read_console(output.stderr)
+                            "Error(Execute):Async command '{cmd}' failed, output :"
                         );
+                        println!("{output}",output=read_console(output.stdout));
                     }
                 }
                 None => {

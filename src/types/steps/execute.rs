@@ -59,16 +59,17 @@ impl TStep for StepExecute {
                 Some(val) => {
                     if val == 0 {
                         log!(
-                            "Info(Execute):Command '{cmd}' output : \n{o}",
-                            cmd = self.command,
-                            o = read_console(output.stdout)
+                            "Info(Execute):Command '{cmd}' output :",
+                            cmd = self.command
                         );
+                        println!("{output}",output=read_console(output.stdout));
                     } else {
                         log!(
                             "Error(Execute):Command '{cmd}' failed, output : \n{o}",
                             cmd = self.command,
                             o = read_console(output.stderr)
                         );
+                        println!("{output}",output=read_console(output.stdout));
                     }
                     Ok(val)
                 }
