@@ -51,8 +51,7 @@ fn rename(from: &String, to: &String, located: &String) -> Result<()> {
         if to_path.is_dir() {
             remove_dir_all(to_path).map_err(|e| {
                 anyhow!(
-                    "Error(Rename):Failed to remove '{final_to}' : {err}",
-                    err = e.to_string()
+                    "Error(Rename):Failed to remove '{final_to}' : {e}"
                 )
             })?;
         }
@@ -61,8 +60,7 @@ fn rename(from: &String, to: &String, located: &String) -> Result<()> {
     // 执行重命名
     std::fs::rename(from, &final_to).map_err(|e| {
         anyhow!(
-            "Error(Rename):Error:Failed to rename '{from}' to '{final_to}' : {err}",
-            err = e.to_string()
+            "Error(Rename):Error:Failed to rename '{from}' to '{final_to}' : {e}"
         )
     })?;
 

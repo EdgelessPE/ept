@@ -38,8 +38,7 @@ fn mv(
     }
     std::fs::rename(from, &to_path).map_err(|e| {
         anyhow!(
-            "Error:Failed to move file from '{from}' to '{to_str}' : {err}",
-            err = e.to_string(),
+            "Error:Failed to move file from '{from}' to '{to_str}' : {e}",
             to_str = p2s!(to_path)
         )
     })

@@ -36,9 +36,8 @@ pub fn _parse_relative_path(relative: &String) -> Result<PathBuf> {
         let cfg = get_config();
         let relative = Path::new(&cfg.local.base).join(relative);
         let dirty_abs = p2s!(canonicalize(relative.clone()).map_err(|e| anyhow!(
-            "Error:Path '{p}' not exist : {err}",
-            p = p2s!(relative),
-            err = e.to_string()
+            "Error:Path '{p}' not exist : {e}",
+            p = p2s!(relative)
         ))?);
         Path::new(&dirty_abs[4..]).to_path_buf()
     }

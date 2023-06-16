@@ -55,11 +55,7 @@ impl Generalizable for StepLog {
 
 #[test]
 fn test_log() {
-    use crate::types::package::GlobalPackage;
-    let mut cx = WorkflowContext {
-        pkg: GlobalPackage::_demo(),
-        located: String::from("./apps/VSCode"),
-    };
+    let mut cx = WorkflowContext::_demo();
     let step = StepLog {
         level: String::from("Info"),
         msg: String::from("Hello nep!"),

@@ -24,8 +24,7 @@ pub struct StepNew {
 fn new_file(at: &String) -> Result<()> {
     File::create(at).map_err(|e| {
         anyhow!(
-            "Error(New):Failed to create file at '{at}' : {err}",
-            err = e.to_string()
+            "Error(New):Failed to create file at '{at}' : {e}"
         )
     })?;
 
@@ -35,8 +34,7 @@ fn new_file(at: &String) -> Result<()> {
 fn new_dir(at: &String) -> Result<()> {
     create_dir_all(at).map_err(|e| {
         anyhow!(
-            "Error(New):Failed to create directory at '{at}' : {err}",
-            err = e.to_string()
+            "Error(New):Failed to create directory at '{at}' : {e}"
         )
     })?;
 

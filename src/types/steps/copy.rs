@@ -110,8 +110,7 @@ fn copy(
     if is_copy_file {
         std::fs::copy(from, &to_path).map_err(|e| {
             anyhow!(
-                "Error(Copy):Failed to copy file from '{from}' to '{to_str}' : {err}",
-                err = e.to_string(),
+                "Error(Copy):Failed to copy file from '{from}' to '{to_str}' : {e}",
                 to_str = p2s!(to_path)
             )
         })?;
@@ -119,8 +118,7 @@ fn copy(
         let opt = CopyOptions::new().copy_inside(true);
         fs_extra::dir::copy(from, &to_path, &opt).map_err(|e| {
             anyhow!(
-                "Error(Copy):Failed to copy dir from '{from}' to '{to_str}' : {err}",
-                err = e.to_string(),
+                "Error(Copy):Failed to copy dir from '{from}' to '{to_str}' : {e}",
                 to_str = p2s!(to_path)
             )
         })?;

@@ -93,9 +93,8 @@ pub fn ensure_dir_exist<P: AsRef<Path>>(path: P) -> Result<()> {
     if !path.exists() {
         create_dir_all(path).map_err(|e| {
             anyhow!(
-                "Error:Failed to create dir '{p}' : {err}",
-                p = p2s!(path),
-                err = e.to_string()
+                "Error:Failed to create dir '{p}' : {e}",
+                p = p2s!(path)
             )
         })?;
     }

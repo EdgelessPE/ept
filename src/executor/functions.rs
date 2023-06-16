@@ -78,8 +78,7 @@ impl WorkflowHeader {
             // 执行
             expr.exec().map_err(|e| {
                 anyhow!(
-                    "Error:Failed to execute expression '{cond}' : {err}",
-                    err = e.to_string()
+                    "Error:Failed to execute expression '{cond}' : {e}"
                 )
             })?;
         }
@@ -205,8 +204,7 @@ impl Verifiable for WorkflowHeader {
             if need_path_check {
                 values_validator_path(&arg).map_err(|e| {
                     anyhow!(
-                        "Error:Failed to validate path argument in expression '{expr}' : {err}",
-                        err = e.to_string()
+                        "Error:Failed to validate path argument in expression '{expr}' : {e}"
                     )
                 })?;
             }

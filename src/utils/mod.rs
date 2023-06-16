@@ -21,7 +21,7 @@ pub use self::path::{
     split_parent,
 };
 pub use self::process::{is_alive_with_name, kill_with_name};
-pub use self::term::ask_yn;
+pub use self::term::{ask_yn,read_console};
 pub use self::wild_match::{
     common_wild_match_verify, contains_wild_match, is_valid_wild_match, parse_wild_match,
 };

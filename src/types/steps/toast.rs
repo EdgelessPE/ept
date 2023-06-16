@@ -25,8 +25,7 @@ impl TStep for StepToast {
             .show()
             .map_err(|e| {
                 anyhow!(
-                    "Error(Toast):Failed to send toast : '{err}' (title : '{t}', content : '{c}')",
-                    err = e.to_string(),
+                    "Error(Toast):Failed to send toast : '{e}' (title : '{t}', content : '{c}')",
                     t = self.title,
                     c = self.content
                 )

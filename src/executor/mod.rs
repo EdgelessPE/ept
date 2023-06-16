@@ -59,6 +59,7 @@ pub fn workflow_executor(
     let mut cx = WorkflowContext {
         pkg,
         located: located.clone(),
+        async_execution_handlers: Vec::new(),
     };
 
     // 遍历流节点
@@ -97,6 +98,9 @@ pub fn workflow_executor(
         }
     }
 
+    // 完成
+    cx.finish()?;
+
     Ok(exit_code)
 }
 
@@ -109,6 +113,7 @@ pub fn workflow_reverse_executor(
     let mut cx = WorkflowContext {
         pkg,
         located: located.clone(),
+        async_execution_handlers: Vec::new(),
     };
 
     // 遍历流节点
@@ -126,6 +131,9 @@ pub fn workflow_reverse_executor(
             );
         }
     }
+
+    // 完成
+    cx.finish()?;
 
     Ok(())
 }
@@ -203,6 +211,7 @@ fn test_workflow_executor() {
                 command: "exit 3".to_string(),
                 pwd: None,
                 call_installer: None,
+                wait: None,
             }),
         },
         // WorkflowNode {
@@ -273,6 +282,7 @@ fn test_workflow_executor_interpreter() {
                 command: "exit 3".to_string(),
                 pwd: None,
                 call_installer: None,
+                wait: None,
             }),
         },
         WorkflowNode {

@@ -1,10 +1,12 @@
-use std::env::current_dir;
+use std::{env::current_dir, process::Child};
 
 use super::{
     package::GlobalPackage, permissions::Generalizable, steps::Step, verifiable::Verifiable,
 };
+use crate::log;
 use crate::{p2s, types::permissions::Permission};
-use anyhow::Result;
+use crate::utils::read_console;
+use anyhow::{Result, anyhow};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -40,6 +42,7 @@ impl Verifiable for WorkflowNode {
 pub struct WorkflowContext {
     pub located: String,
     pub pkg: GlobalPackage,
+    pub async_execution_handlers: Vec<(String,Child)>,
 }
 
 impl WorkflowContext {
@@ -47,6 +50,37 @@ impl WorkflowContext {
         Self {
             located: p2s!(current_dir().unwrap()),
             pkg: GlobalPackage::_demo(),
+            async_execution_handlers: Vec::new(),
         }
+    }
+
+    pub fn finish(self)->Result<()>{
+        // 等待异步 handlers
+        for (cmd,handler) in self.async_execution_handlers{
+            let output=handler.wait_with_output().map_err(|e|anyhow!("Error(Execute):Failed to wait on async command '{cmd}' : {e}"))?;
+            // 处理退出码
+            match output.status.code() {
+                Some(val) => {
+                    if val == 0 {
+                        log!(
+                            "Info(Execute):Async command '{cmd}' output : \n{o}",
+                            o = read_console(output.stdout)
+                        );
+                    } else {
+                        log!(
+                            "Error(Execute):Async command '{cmd}' failed, output : \n{o}",
+                            o = read_console(output.stderr)
+                        );
+                    }
+                }
+                None => {
+                    log!(
+                        "Error(Execute):Async command '{cmd}' terminated by signal"
+                    );
+                },
+            }
+        }
+
+        Ok(())
     }
 }

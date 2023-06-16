@@ -32,12 +32,11 @@ fn delete(target: &String, force: bool) -> Result<()> {
                 Ok(())
             } else {
                 return Err(anyhow!(
-                    "Error(Delete):Failed to force delete '{target}' : '{err}'",
-                    err = e.to_string()
+                    "Error(Delete):Failed to force delete '{target}' : '{e}'"
                 ));
             }
         } else {
-            return Err(anyhow!("Error(Delete):Failed to delete '{target}' : '{err}', enable field 'force' to try shredding",err=e.to_string()));
+            return Err(anyhow!("Error(Delete):Failed to delete '{target}' : '{e}', enable field 'force' to try shredding"));
         }
     } else {
         Ok(())

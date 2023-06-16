@@ -21,8 +21,7 @@ impl Verifiable for Software {
     fn verify_self(&self, located: &String) -> Result<()> {
         let err_wrapper = |e: anyhow::Error| {
             anyhow!(
-                "Error:Failed to verify table 'software' in 'package.toml' : {err}",
-                err = e.to_string()
+                "Error:Failed to verify table 'software' in 'package.toml' : {e}"
             )
         };
 
@@ -48,8 +47,7 @@ impl Verifiable for Software {
             if mp_path.exists() {
                 if let Err(e) = get_exe_version(p2s!(mp_path)) {
                     return Err(err_wrapper(anyhow!(
-                        "failed to get main program ('{main_program}') file version : {err}",
-                        err = e.to_string()
+                        "failed to get main program ('{main_program}') file version : {e}"
                     )));
                 }
             }

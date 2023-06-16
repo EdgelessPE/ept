@@ -19,8 +19,7 @@ impl Verifiable for Package {
     fn verify_self(&self, _: &String) -> Result<()> {
         let err_wrapper = |e: anyhow::Error| {
             anyhow!(
-                "Error:Failed to verify table 'package' in 'package.toml' : {err}",
-                err = e.to_string()
+                "Error:Failed to verify table 'package' in 'package.toml' : {e}"
             )
         };
 

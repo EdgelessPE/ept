@@ -70,9 +70,8 @@ impl Cfg {
         // 校验
         cfg.verify_self(&"".to_string()).map_err(|e| {
             anyhow!(
-                "Error:Invalid config '{f}' : {err}",
-                f = p2s!(from),
-                err = e.to_string()
+                "Error:Invalid config '{f}' : {e}",
+                f = p2s!(from)
             )
         })?;
 
@@ -82,8 +81,7 @@ impl Cfg {
         // 校验
         other.verify_self(&"".to_string()).map_err(|e| {
             anyhow!(
-                "Error:Invalid overwrite config : {err}",
-                err = e.to_string()
+                "Error:Invalid overwrite config : {e}"
             )
         })?;
 
