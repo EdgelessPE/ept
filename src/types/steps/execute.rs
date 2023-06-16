@@ -1,6 +1,7 @@
 use crate::log;
 use crate::types::mixed_fs::MixedFS;
 use crate::types::permissions::{Generalizable, Permission, PermissionLevel};
+use crate::types::steps::StepLog;
 use crate::types::verifiable::Verifiable;
 use crate::types::workflow::WorkflowContext;
 use crate::utils::read_console;
@@ -8,7 +9,7 @@ use crate::utils::read_console;
 use super::TStep;
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
-use std::process::Command;
+use std::process::{Command, Stdio};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct StepExecute {
@@ -34,6 +35,11 @@ impl TStep for StepExecute {
         // 指定工作目录
         let workshop = self.pwd.unwrap_or(cx.located.to_owned());
         cmd.current_dir(&workshop);
+
+        // 指定 stdio
+        cmd
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped());
 
         // 异步执行分流
         if self.wait.unwrap_or(true){
@@ -167,7 +173,7 @@ fn test_async_execute() {
     let mut cx = WorkflowContext::_demo();
 
     StepExecute {
-        command: "timeout 3 && echo 1st msg".to_string(),
+        command: "timeout 3 && echo 1st第一条输出".to_string(),
         pwd: None,
         call_installer: None,
         wait: Some(false),
@@ -192,6 +198,13 @@ fn test_async_execute() {
     .run(&mut cx)
     .unwrap();
     assert_eq!(res, 0);
+
+    StepLog{
+        level:"Info".to_string(),
+        msg:"running other steps...".to_string(),
+    }
+    .run(&mut cx)
+    .unwrap();
 
     cx.finish().unwrap();
     println!("Exit");
