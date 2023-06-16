@@ -1,8 +1,8 @@
+use crate::utils::is_confirm_mode;
+use encoding::all::GBK;
+use encoding::{DecoderTrap, Encoding};
 use std::io::stdin;
 use std::str::from_utf8;
-use encoding::all::GBK;
-use encoding::{Encoding, EncoderTrap, DecoderTrap};
-use crate::utils::is_confirm_mode;
 
 pub fn ask_yn() -> bool {
     if is_confirm_mode() {
@@ -21,10 +21,10 @@ pub fn ask_yn() -> bool {
 
 pub fn read_console(v: Vec<u8>) -> String {
     // 首先尝试使用 UTF-8 编码转换
-    if let Ok(str)=from_utf8(&v){
+    if let Ok(str) = from_utf8(&v) {
         return str.to_string();
     // 尝试使用 GBK 编码转换
-    }else if let Ok(str)=GBK.decode(&v,DecoderTrap::Strict){
+    } else if let Ok(str) = GBK.decode(&v, DecoderTrap::Strict) {
         return str;
     }
 
