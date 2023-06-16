@@ -8,6 +8,7 @@ mod path;
 mod process;
 mod term;
 mod wild_match;
+mod window;
 
 use anyhow::{anyhow, Result};
 use regex::Regex;
