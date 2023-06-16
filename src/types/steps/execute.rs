@@ -1,7 +1,6 @@
 use crate::log;
 use crate::types::mixed_fs::MixedFS;
 use crate::types::permissions::{Generalizable, Permission, PermissionLevel};
-use crate::types::steps::StepLog;
 use crate::types::verifiable::Verifiable;
 use crate::types::workflow::WorkflowContext;
 use crate::utils::read_console;
@@ -170,6 +169,7 @@ fn test_execute() {
 
 #[test]
 fn test_async_execute() {
+    use crate::types::steps::StepLog;
     let mut cx = WorkflowContext::_demo();
 
     StepExecute {
