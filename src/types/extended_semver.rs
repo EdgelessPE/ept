@@ -4,34 +4,71 @@ use std::cmp::Ordering::{Equal, Greater, Less};
 use std::fmt;
 use std::{cmp::Ordering, str::FromStr};
 
+fn split_pre_build(raw:&String)->(String,String){
+    // 分割 -
+    let sp:Vec<&str>=raw.split("-").collect();
+    let clear=sp[0].to_string();
+
+    // 分割 +
+    let sp:Vec<&str>=clear.split("+").collect();
+    let clear=sp[0].to_string();
+
+    // 根据 clear 长度拆出 pre 和 build 部分
+    let pre_build=&raw[clear.len()..];
+
+    (clear,pre_build.to_string())
+}
+
+#[test]
+fn test_split_pre_build(){
+    assert_eq!(split_pre_build(&"1.0.0.0".to_string()),("1.0.0.0".to_string(),"".to_string()));
+    assert_eq!(split_pre_build(&"1.0.0.0-alpha".to_string()),("1.0.0.0".to_string(),"-alpha".to_string()));
+    assert_eq!(split_pre_build(&"1.2.0.0-alpha.1".to_string()),("1.2.0.0".to_string(),"-alpha.1".to_string()));
+    assert_eq!(split_pre_build(&"1.0.0.0-alpha.beta".to_string()),("1.0.0.0".to_string(),"-alpha.beta".to_string()));
+    assert_eq!(split_pre_build(&"1.0.0.0-beta".to_string()),("1.0.0.0".to_string(),"-beta".to_string()));
+    assert_eq!(split_pre_build(&"1.0.0.0-beta.2".to_string()),("1.0.0.0".to_string(),"-beta.2".to_string()));
+    assert_eq!(split_pre_build(&"1.0.0.0-beta.11+build114514".to_string()),("1.0.0.0".to_string(),"-beta.11+build114514".to_string()));
+    assert_eq!(split_pre_build(&"1.0.0.0-rc.1".to_string()),("1.0.0.0".to_string(),"-rc.1".to_string()));
+    assert_eq!(split_pre_build(&"1.0.0.0+BLAKE1919810".to_string()),("1.0.0.0".to_string(),"+BLAKE1919810".to_string()));
+}
+
+/// 拓展的 SemVer 规范，在修订号后面多了一位保留号（reserved）用于标记不同的打包版本
 #[derive(Clone, Debug, Eq)]
 pub struct ExSemVer {
     pub major: u64,
     pub minor: u64,
     pub patch: u64,
     pub reserved: u64,
+    pub pre: Prerelease,
+    pub build: BuildMetadata,
+
     pub semver_instance: semver::Version,
 }
 
 impl ExSemVer {
-    pub fn _new(major: u64, minor: u64, patch: u64, reserved: u64) -> Self {
+    pub fn _new(major: u64, minor: u64, patch: u64, reserved: u64, pre:Prerelease,build:BuildMetadata) -> Self {
         ExSemVer {
             major,
             minor,
             patch,
             reserved,
+            pre:pre.clone(),
+            build:build.clone(),
             semver_instance: semver::Version {
                 major,
                 minor,
                 patch,
-                pre: Prerelease::EMPTY,
-                build: BuildMetadata::EMPTY,
+                pre,
+                build,
             },
         }
     }
     pub fn parse(text: &String) -> Result<Self> {
+        // 分割 pre 和 build
+        let (clear_text,pre_build)=split_pre_build(text);
+
         // 使用小数点分割
-        let s: Vec<&str> = text.split(".").collect();
+        let s: Vec<&str> = clear_text.split(".").collect();
         if s.len() != 4 {
             return Err(anyhow!(
                 "Error:Can't parse '{text}' as extended semver : expected 4 fields, got {len} ",
@@ -40,8 +77,9 @@ impl ExSemVer {
         }
 
         // 生成标准 semver
-        let sem_version = format!("{}.{}.{}", s[0], s[1], s[2]);
-        let semver_instance = semver::Version::parse(&sem_version)?;
+        let sem_version = format!("{}.{}.{}{}", s[0], s[1], s[2],pre_build);
+        let semver = semver::Version::parse(&sem_version)?;
+        let semver_instance=semver.clone();
 
         // 解析字符串为 u64
         let major = s[0].parse::<u64>()?;
@@ -54,6 +92,8 @@ impl ExSemVer {
             minor,
             patch,
             reserved,
+            pre:semver.pre,
+            build:semver.build,
             semver_instance,
         })
     }
@@ -64,12 +104,15 @@ impl ExSemVer {
 
 impl From<semver::Version> for ExSemVer {
     fn from(sv: semver::Version) -> Self {
+        let semver_instance=sv.clone();
         Self {
             major: sv.major,
             minor: sv.minor,
             patch: sv.patch,
             reserved: 0,
-            semver_instance: sv,
+            pre: sv.pre,
+            build: sv.build,
+            semver_instance,
         }
     }
 }
@@ -166,10 +209,13 @@ impl fmt::Display for ExSemVer {
 
 #[test]
 fn test_ex_semver() {
-    let v1 = ExSemVer::_new(1, 2, 3, 4);
+    // 不带 pre 和 build
+    let v1 = ExSemVer::_new(1, 2, 3, 4,Prerelease::EMPTY,BuildMetadata::EMPTY);
     let v2 = ExSemVer::from_str("1.2.3.4").unwrap();
     assert_eq!(v1, v2);
     assert_eq!(v1.to_string(), String::from("1.2.3.4"));
+    
+    assert!(ExSemVer::parse(&"1.12.3".to_string()).is_err());
 
     let v1 = ExSemVer::parse(&"1.2.3.4".to_string()).unwrap();
     let v2 = ExSemVer::parse(&"1.3.3.1".to_string()).unwrap();
@@ -194,4 +240,22 @@ fn test_ex_semver() {
     v2.set_reserved(810);
     let v3 = ExSemVer::from_str("114.514.19.810").unwrap();
     assert_eq!(v2, v3);
+
+    // 带 pre 和 build
+    let v1=ExSemVer::parse(&"1.2.3.4-alpha.2.turing".to_string()).unwrap();
+    assert_eq!(v1,ExSemVer::_new(1, 2, 3, 4, Prerelease::from_str("alpha.2.turing").unwrap(), BuildMetadata::EMPTY));
+
+    let v2=ExSemVer::parse(&"1.20.3.4+build114514".to_string()).unwrap();
+    assert_eq!(v2,ExSemVer::_new(1, 20, 3, 4, Prerelease::EMPTY, BuildMetadata::from_str("build114514").unwrap()));
+
+    let v3=ExSemVer::parse(&"1.12.3.4-beta.2.edgeless+blake456".to_string()).unwrap();
+    assert_eq!(v3,ExSemVer::_new(1, 12, 3, 4, Prerelease::from_str("beta.2.edgeless").unwrap(), BuildMetadata::from_str("blake456").unwrap()));
+
+    assert!(v1<v3);
+    assert!(v1<v2);
+    assert!(v2>v3);
+
+    assert!(ExSemVer::parse(&"1.12.3-alpha".to_string()).is_err());
+    assert!(ExSemVer::parse(&"1.12.3-alpha-beta".to_string()).is_err());
+    assert!(ExSemVer::parse(&"1.12.3+alpha-beta".to_string()).is_err());
 }
