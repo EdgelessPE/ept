@@ -250,6 +250,7 @@ fn test_ex_semver() {
     assert_eq!(v1.to_string(), String::from("1.2.3.4"));
 
     assert!(ExSemVer::parse(&"1.12.3".to_string()).is_err());
+    assert!(ExSemVer::parse(&"1.12.3.9.0".to_string()).is_err());
 
     let v1 = ExSemVer::parse(&"1.2.3.4".to_string()).unwrap();
     let v2 = ExSemVer::parse(&"1.3.3.1".to_string()).unwrap();
