@@ -10,7 +10,7 @@ use crate::{
         package::GlobalPackage,
         workflow::{WorkflowContext, WorkflowNode},
     },
-    utils::{get_bare_apps, is_strict_mode},
+    utils::{get_bare_apps, is_strict_mode, parse_arch, get_arch},
 };
 
 use self::{functions::functions_decorator, values::values_replacer};
@@ -56,6 +56,17 @@ pub fn workflow_executor(
     let mut exit_code = 0;
     let strict_mode = is_strict_mode();
 
+    // 检查包架构是否与当前架构相同
+    if let Some(software)=&pkg.software{
+        if let Some(arch)=&software.arch{
+            let sys_arch=get_arch()?;
+            if parse_arch(arch)?!=sys_arch{
+                return Err(anyhow!("Error:Package arch '{arch}' doesn't match current os arch '{sys_arch:?}'"));
+            }
+        }
+    }
+
+    // 准备上下文
     let mut cx = WorkflowContext {
         pkg,
         located: located.clone(),
