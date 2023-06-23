@@ -60,6 +60,7 @@ impl GlobalPackage {
                 scope: "Edgeless".to_string(),
                 upstream: "https://github.com/EdgelessPE/ept".to_string(),
                 category: "实用工具".to_string(),
+                arch: None,
                 language: "en-US".to_string(),
                 main_program: None,
                 tags: None,

@@ -18,4 +18,15 @@ macro_rules! verify_enum {
         ))
         }
     };
+    ($field:expr,$val:expr,$($enum:pat_param)|+) => {
+        if matches!($val.as_str(),$($enum)|+){
+            Ok(())
+        }else{
+            Err(anyhow::anyhow!("Error:Illegal enumeration value at field '{}' : expected to be one of [{}], got '{}'",
+            $field,
+            stringify!($($enum),+),
+            $val,
+        ))
+        }
+    };
 }
