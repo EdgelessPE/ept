@@ -101,7 +101,7 @@ impl Verifiable for Cfg {
         // base 必须为存在的绝对路径
         let base_path = Path::new(&self.local.base);
         if !base_path.is_absolute() {
-            return Err(anyhow!("Error:Field 'local.base' should be absolute"));
+            return Err(anyhow!("Error:Field 'local.base' should be absolute, got '{base}'",base=self.local.base));
         }
         if !base_path.exists() {
             return Err(anyhow!("Error:Field 'local.base' doesn't exist"));

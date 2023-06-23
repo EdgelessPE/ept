@@ -26,7 +26,7 @@ pub fn parse_arch(text:&String)->Result<SysArch>{
     match text.as_str() {
         "X64"=>Ok(SysArch::X64),
         "X86"=>Ok(SysArch::X86),
-        "Arm64"=>Ok(SysArch::ARM64),
+        "ARM64"=>Ok(SysArch::ARM64),
         _=>Err(anyhow!("Error:Failed to parse '{text}' as valid system arch"))
     }
 }
