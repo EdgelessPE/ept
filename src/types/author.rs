@@ -8,9 +8,9 @@ pub struct Author {
 
 impl PartialEq for Author {
     fn eq(&self, other: &Self) -> bool {
-        // 如果两个都有邮箱则判断为一致
+        // 如果两个都有邮箱则判断邮箱是否一致
         if self.email.is_some() && other.email.is_some() {
-            return true;
+            return self.email == other.email;
         }
         self.name == other.name
     }
