@@ -10,7 +10,7 @@ use crate::{
         package::GlobalPackage,
         workflow::{WorkflowContext, WorkflowNode},
     },
-    utils::{get_bare_apps, is_strict_mode, parse_arch, get_arch},
+    utils::{get_bare_apps, is_strict_mode, is_current_arch_match},
 };
 
 use self::{functions::functions_decorator, values::values_replacer};
@@ -59,10 +59,7 @@ pub fn workflow_executor(
     // 检查包架构是否与当前架构相同
     if let Some(software)=&pkg.software{
         if let Some(arch)=&software.arch{
-            let sys_arch=get_arch()?;
-            if parse_arch(arch)?!=sys_arch{
-                return Err(anyhow!("Error:Package arch '{arch}' doesn't match current os arch '{sys_arch:?}'"));
-            }
+            is_current_arch_match(arch)?;
         }
     }
 

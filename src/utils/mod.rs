@@ -27,7 +27,7 @@ pub use self::term::{ask_yn,read_console};
 pub use self::wild_match::{
     common_wild_match_verify, contains_wild_match, is_valid_wild_match, parse_wild_match,
 };
-pub use self::arch::{get_arch,parse_arch};
+pub use self::arch::{is_current_arch_match};
 
 use std::fs::{create_dir_all, remove_dir_all};
 use std::path::PathBuf;
