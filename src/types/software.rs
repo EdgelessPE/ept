@@ -31,6 +31,9 @@ impl Verifiable for Software {
             verify_enum!("arch",arch,"X64"|"X86"|"ARM64")?;
         }
 
+        // 检查 language 枚举
+        verify_enum!("language",&self.language,"Multi"|"zh-CN"|"en-US")?;
+
         // 上游必须是 URL
         if !is_url(&self.upstream) {
             return Err(err_wrapper(anyhow!(

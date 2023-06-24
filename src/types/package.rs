@@ -31,7 +31,7 @@ impl Verifiable for Package {
         }
 
         // 版本号必须可以解析
-        let _ = ExSemVer::parse(&self.version)?;
+        ExSemVer::parse(&self.version)?;
 
         Ok(())
     }
