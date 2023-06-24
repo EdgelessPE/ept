@@ -18,9 +18,7 @@ pub struct Package {
 impl Verifiable for Package {
     fn verify_self(&self, _: &String) -> Result<()> {
         let err_wrapper = |e: anyhow::Error| {
-            anyhow!(
-                "Error:Failed to verify table 'package' in 'package.toml' : {e}"
-            )
+            anyhow!("Error:Failed to verify table 'package' in 'package.toml' : {e}")
         };
 
         // 模板只能是 Software

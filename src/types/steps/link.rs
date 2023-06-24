@@ -93,10 +93,10 @@ pub struct StepLink {
     pub at: Option<Vec<String>>,
 }
 
-impl StepLink{
-    fn get_target_name(&self)->String{
-        self.target_name.to_owned().unwrap_or_else(||{
-            let p=Path::new(&self.source_file);
+impl StepLink {
+    fn get_target_name(&self) -> String {
+        self.target_name.to_owned().unwrap_or_else(|| {
+            let p = Path::new(&self.source_file);
             p2s!(p.file_stem().unwrap())
         })
     }
@@ -105,7 +105,7 @@ impl StepLink{
 impl TStep for StepLink {
     fn run(self, cx: &mut WorkflowContext) -> anyhow::Result<i32> {
         // 确定 target_name
-        let target_name=self.get_target_name();
+        let target_name = self.get_target_name();
 
         // 解析源文件绝对路径
         let abs_clear_source_path =
@@ -160,7 +160,7 @@ impl TStep for StepLink {
     fn reverse_run(self, _: &mut WorkflowContext) -> Result<()> {
         let set: HashSet<String> =
             HashSet::from_iter(self.at.clone().unwrap_or(vec!["Desktop".to_string()]));
-        let target_name=self.get_target_name();
+        let target_name = self.get_target_name();
         if set.contains("Desktop") {
             delete_shortcut(&target_name, &env_desktop())?;
         }
@@ -204,7 +204,7 @@ impl TStep for StepLink {
 impl Verifiable for StepLink {
     fn verify_self(&self, _: &String) -> Result<()> {
         values_validator_path(&self.source_file)?;
-        if let Some(target_name)=&self.target_name{
+        if let Some(target_name) = &self.target_name {
             if !TARGET_RE.is_match(&target_name) {
                 return Err(anyhow!(
                     "Error(Link):Invalid field 'target_name', expect 'NAME' or 'FOLDER/NAME', got '{target_name}'"

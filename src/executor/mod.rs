@@ -10,7 +10,7 @@ use crate::{
         package::GlobalPackage,
         workflow::{WorkflowContext, WorkflowNode},
     },
-    utils::{get_bare_apps, is_strict_mode, is_current_arch_match},
+    utils::{get_bare_apps, is_current_arch_match, is_strict_mode},
 };
 
 use self::{functions::functions_decorator, values::values_replacer};
@@ -57,8 +57,8 @@ pub fn workflow_executor(
     let strict_mode = is_strict_mode();
 
     // 检查包架构是否与当前架构相同
-    if let Some(software)=&pkg.software{
-        if let Some(arch)=&software.arch{
+    if let Some(software) = &pkg.software {
+        if let Some(arch) = &software.arch {
             is_current_arch_match(arch)?;
         }
     }

@@ -1,0 +1,16 @@
+{
+    "cSpell.words": [
+        "appdata",
+        "canonicalize",
+        "envmnt",
+        "Secp",
+        "vecu"
+    ],
+    "rust-analyzer.linkedProjects": [
+        ".\\Cargo.toml"
+    ],
+    "rust-analyzer.cargo.buildScripts.overrideCommand": null,
+    "[rust]": {
+        "editor.formatOnSave": true,
+    }
+}

@@ -36,12 +36,10 @@ impl TStep for StepExecute {
         cmd.current_dir(&workshop);
 
         // 指定 stdio
-        cmd
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped());
+        cmd.stdout(Stdio::piped()).stderr(Stdio::piped());
 
         // 异步执行分流
-        if self.wait.unwrap_or(true){
+        if self.wait.unwrap_or(true) {
             // 同步执行并收集结果
             log!(
                 "Info(Execute):Running sync command '{cmd}' in '{workshop}'",
@@ -53,23 +51,20 @@ impl TStep for StepExecute {
                     cmd = self.command,
                 )
             })?;
-    
+
             // 处理退出码
             match output.status.code() {
                 Some(val) => {
                     if val == 0 {
-                        log!(
-                            "Info(Execute):Command '{cmd}' output :",
-                            cmd = self.command
-                        );
-                        println!("{output}",output=read_console(output.stdout));
+                        log!("Info(Execute):Command '{cmd}' output :", cmd = self.command);
+                        println!("{output}", output = read_console(output.stdout));
                     } else {
                         log!(
                             "Error(Execute):Command '{cmd}' failed, output : \n{o}",
                             cmd = self.command,
                             o = read_console(output.stderr)
                         );
-                        println!("{output}",output=read_console(output.stdout));
+                        println!("{output}", output = read_console(output.stdout));
                     }
                     Ok(val)
                 }
@@ -78,15 +73,19 @@ impl TStep for StepExecute {
                     cmd = self.command
                 )),
             }
-
-        }else{
+        } else {
             // 异步执行
             log!(
                 "Info(Execute):Running async command '{cmd}' in '{workshop}' without wait",
                 cmd = self.command,
             );
-            let handler=cmd.spawn().map_err(|e|anyhow!("Error(Execute):Command '{cmd}' execution failed : {e}",cmd=self.command))?;
-            cx.async_execution_handlers.push((self.command,handler));
+            let handler = cmd.spawn().map_err(|e| {
+                anyhow!(
+                    "Error(Execute):Command '{cmd}' execution failed : {e}",
+                    cmd = self.command
+                )
+            })?;
+            cx.async_execution_handlers.push((self.command, handler));
 
             Ok(0)
         }
@@ -167,7 +166,6 @@ fn test_execute() {
     assert_eq!(res, 2);
 }
 
-
 #[test]
 fn test_async_execute() {
     use crate::types::steps::StepLog;
@@ -200,9 +198,9 @@ fn test_async_execute() {
     .unwrap();
     assert_eq!(res, 0);
 
-    StepLog{
-        level:"Info".to_string(),
-        msg:"running other steps...".to_string(),
+    StepLog {
+        level: "Info".to_string(),
+        msg: "running other steps...".to_string(),
     }
     .run(&mut cx)
     .unwrap();

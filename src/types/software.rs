@@ -1,6 +1,7 @@
 use crate::{
     p2s,
-    utils::{get_exe_version, is_url, parse_relative_path_with_located}, verify_enum,
+    utils::{get_exe_version, is_url, parse_relative_path_with_located},
+    verify_enum,
 };
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
@@ -21,18 +22,16 @@ pub struct Software {
 impl Verifiable for Software {
     fn verify_self(&self, located: &String) -> Result<()> {
         let err_wrapper = |e: anyhow::Error| {
-            anyhow!(
-                "Error:Failed to verify table 'software' in 'package.toml' : {e}"
-            )
+            anyhow!("Error:Failed to verify table 'software' in 'package.toml' : {e}")
         };
 
         // 检查 arch 枚举
-        if let Some(arch)=&self.arch{
-            verify_enum!("arch",arch,"X64"|"X86"|"ARM64")?;
+        if let Some(arch) = &self.arch {
+            verify_enum!("arch", arch, "X64" | "X86" | "ARM64")?;
         }
 
         // 检查 language 枚举
-        verify_enum!("language",&self.language,"Multi"|"zh-CN"|"en-US")?;
+        verify_enum!("language", &self.language, "Multi" | "zh-CN" | "en-US")?;
 
         // 上游必须是 URL
         if !is_url(&self.upstream) {
@@ -67,13 +66,13 @@ impl Verifiable for Software {
 }
 
 #[test]
-fn test_verify_software(){
+fn test_verify_software() {
     use crate::types::package::GlobalPackage;
-    let located="".to_string();
-    let base=GlobalPackage::_demo().software.unwrap();
+    let located = "".to_string();
+    let base = GlobalPackage::_demo().software.unwrap();
     assert!(base.verify_self(&located).is_ok());
 
-    let mut s1=base.clone();
-    s1.arch=Some("X32".to_string());
+    let mut s1 = base.clone();
+    s1.arch = Some("X32".to_string());
     assert!(s1.verify_self(&located).is_err());
 }

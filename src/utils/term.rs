@@ -20,7 +20,7 @@ pub fn ask_yn() -> bool {
 
 pub fn read_console(v: Vec<u8>) -> String {
     // 先尝试使用 GBK 编码转换
-    if let Ok(str) =GBK.decode(&v, DecoderTrap::Strict) {
+    if let Ok(str) = GBK.decode(&v, DecoderTrap::Strict) {
         return str;
     }
 

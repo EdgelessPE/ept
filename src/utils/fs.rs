@@ -91,12 +91,8 @@ where
 pub fn ensure_dir_exist<P: AsRef<Path>>(path: P) -> Result<()> {
     let path = path.as_ref();
     if !path.exists() {
-        create_dir_all(path).map_err(|e| {
-            anyhow!(
-                "Error:Failed to create dir '{p}' : {e}",
-                p = p2s!(path)
-            )
-        })?;
+        create_dir_all(path)
+            .map_err(|e| anyhow!("Error:Failed to create dir '{p}' : {e}", p = p2s!(path)))?;
     }
 
     Ok(())

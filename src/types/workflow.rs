@@ -4,9 +4,9 @@ use super::{
     package::GlobalPackage, permissions::Generalizable, steps::Step, verifiable::Verifiable,
 };
 use crate::log;
-use crate::{p2s, types::permissions::Permission};
 use crate::utils::read_console;
-use anyhow::{Result, anyhow};
+use crate::{p2s, types::permissions::Permission};
+use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -42,7 +42,7 @@ impl Verifiable for WorkflowNode {
 pub struct WorkflowContext {
     pub located: String,
     pub pkg: GlobalPackage,
-    pub async_execution_handlers: Vec<(String,Child)>,
+    pub async_execution_handlers: Vec<(String, Child)>,
 }
 
 impl WorkflowContext {
@@ -54,30 +54,26 @@ impl WorkflowContext {
         }
     }
 
-    pub fn finish(self)->Result<()>{
+    pub fn finish(self) -> Result<()> {
         // 等待异步 handlers
-        for (cmd,handler) in self.async_execution_handlers{
-            let output=handler.wait_with_output().map_err(|e|anyhow!("Error(Execute):Failed to wait on async command '{cmd}' : {e}"))?;
+        for (cmd, handler) in self.async_execution_handlers {
+            let output = handler.wait_with_output().map_err(|e| {
+                anyhow!("Error(Execute):Failed to wait on async command '{cmd}' : {e}")
+            })?;
             // 处理退出码
             match output.status.code() {
                 Some(val) => {
                     if val == 0 {
-                        log!(
-                            "Info(Execute):Async command '{cmd}' output :"
-                        );
-                        println!("{output}",output=read_console(output.stdout));
+                        log!("Info(Execute):Async command '{cmd}' output :");
+                        println!("{output}", output = read_console(output.stdout));
                     } else {
-                        log!(
-                            "Error(Execute):Async command '{cmd}' failed, output :"
-                        );
-                        println!("{output}",output=read_console(output.stdout));
+                        log!("Error(Execute):Async command '{cmd}' failed, output :");
+                        println!("{output}", output = read_console(output.stdout));
                     }
                 }
                 None => {
-                    log!(
-                        "Error(Execute):Async command '{cmd}' terminated by signal"
-                    );
-                },
+                    log!("Error(Execute):Async command '{cmd}' terminated by signal");
+                }
             }
         }
 

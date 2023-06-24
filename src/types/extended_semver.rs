@@ -233,15 +233,15 @@ impl Ord for ExSemVer {
 
 impl fmt::Display for ExSemVer {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let pre=if self.pre.is_empty(){
+        let pre = if self.pre.is_empty() {
             "".to_string()
-        }else{
-            String::from("-")+self.pre.as_str()
+        } else {
+            String::from("-") + self.pre.as_str()
         };
-        let build=if self.build.is_empty(){
+        let build = if self.build.is_empty() {
             "".to_string()
-        }else{
-            String::from("+")+self.build.as_str()
+        } else {
+            String::from("+") + self.build.as_str()
         };
 
         write!(
@@ -259,7 +259,7 @@ fn test_ex_semver() {
     let v2 = ExSemVer::from_str("1.2.3.4").unwrap();
     assert_eq!(v1, v2);
     assert_eq!(v1.to_string(), String::from("1.2.3.4"));
-    assert_eq!(format!("{v2}"),"1.2.3.4".to_string());
+    assert_eq!(format!("{v2}"), "1.2.3.4".to_string());
 
     assert!(ExSemVer::parse(&"1.12.3".to_string()).is_err());
     assert!(ExSemVer::parse(&"1.12.3.9.0".to_string()).is_err());
@@ -332,7 +332,10 @@ fn test_ex_semver() {
     assert!(v1 < v2);
     assert!(v2 > v3);
 
-    assert_eq!(format!("{v3}"),"1.12.3.4-beta.2.edgeless+blake456".to_string());
+    assert_eq!(
+        format!("{v3}"),
+        "1.12.3.4-beta.2.edgeless+blake456".to_string()
+    );
 
     assert!(ExSemVer::parse(&"1.12.3-alpha".to_string()).is_err());
     assert!(ExSemVer::parse(&"1.12.3-alpha-beta".to_string()).is_err());

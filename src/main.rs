@@ -124,17 +124,11 @@ fn router(action: Action) -> Result<String> {
             save_at,
         } => {
             let res = meta(&source_package, verify_signature)?;
-            let text = serde_json::to_string_pretty(&res).map_err(|e| {
-                anyhow!(
-                    "Error:Failed to deserialize result : {e}"
-                )
-            })?;
+            let text = serde_json::to_string_pretty(&res)
+                .map_err(|e| anyhow!("Error:Failed to deserialize result : {e}"))?;
             if let Some(into) = save_at {
-                write(&into, text).map_err(|e| {
-                    anyhow!(
-                        "Error:Failed to write to '{into}' : {e}"
-                    )
-                })?;
+                write(&into, text)
+                    .map_err(|e| anyhow!("Error:Failed to write to '{into}' : {e}"))?;
                 return Ok(format!("Success:Meta report saved at '{into}'"));
             } else {
                 return Ok(text);
