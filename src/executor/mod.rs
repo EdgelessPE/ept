@@ -24,7 +24,7 @@ lazy_static! {
 }
 
 // 执行条件以判断是否成立
-fn condition_eval(condition: &String, exit_code: i32, located: &String) -> Result<bool> {
+pub fn condition_eval(condition: &String, exit_code: i32, located: &String) -> Result<bool> {
     // 装饰变量与函数
     let condition = values_replacer(condition.to_owned(), exit_code, located);
     let expr = Expr::new(&condition);
@@ -38,13 +38,13 @@ fn condition_eval(condition: &String, exit_code: i32, located: &String) -> Resul
 
     // 检查执行结果
     let result = eval_res.as_bool();
-    if result.is_none() {
-        return Err(anyhow!(
+    if let Some(res) = result {
+        Ok(res)
+    } else {
+        Err(anyhow!(
             "Error:Can't eval statement '{condition}' into bool result"
-        ));
+        ))
     }
-
-    Ok(result.unwrap())
 }
 
 // 执行工作流
