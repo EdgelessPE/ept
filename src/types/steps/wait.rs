@@ -30,12 +30,14 @@ impl TStep for StepWait {
                 loop {
                     sleep(step_d);
                     // TODO:exit_code需要通过上下文获取
-                    if start_instant.elapsed() >= d || condition_eval(&cond, 0, &cx.located)? {
+                    if start_instant.elapsed() >= d
+                        || condition_eval(&cond, cx.exit_code, &cx.located)?
+                    {
                         break;
                     }
                 }
                 // 最终检查一次条件并配置 ExitCode
-                return if condition_eval(&cond, 0, &cx.located)? {
+                return if condition_eval(&cond, cx.exit_code, &cx.located)? {
                     Ok(0)
                 } else {
                     Ok(1)
@@ -105,10 +107,10 @@ fn test_wait() {
 
     // 测试恒真等待
     let now = Instant::now();
-
+    cx.exit_code=1;
     StepWait {
         timeout: 5000,
-        break_if: Some("${ExitCode}==0".to_string()),
+        break_if: Some("${ExitCode}==1".to_string()),
     }
     .run(&mut cx)
     .unwrap();
