@@ -18,7 +18,13 @@ pub fn decompress_zstd(source: &String, into: &String) -> Result<()> {
 }
 
 pub fn fast_decompress_zstd(raw: &Vec<u8>) -> Result<Vec<u8>> {
-    zstd::bulk::decompress(raw, max(raw.capacity() * 5, 1024 * 1024))
+    // 首先尝试将目标缓存配置为 *6，对应 16% 的压缩率，理论上能应付 95% 的包
+    if let Ok(res) = zstd::bulk::decompress(raw, max(raw.capacity() * 6, 1024 * 1024)) {
+        return Ok(res);
+    }
+
+    // 10 倍兜底
+    zstd::bulk::decompress(raw, max(raw.capacity() * 10, 1024 * 1024))
         .map_err(|e| anyhow!("Error:Failed to fast decompress : {e}"))
 }
 
