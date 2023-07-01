@@ -24,7 +24,7 @@ lazy_static! {
 }
 
 // 执行条件以判断是否成立
-fn condition_eval(condition: &String, exit_code: i32, located: &String) -> Result<bool> {
+pub fn condition_eval(condition: &String, exit_code: i32, located: &String) -> Result<bool> {
     // 装饰变量与函数
     let condition = values_replacer(condition.to_owned(), exit_code, located);
     let expr = Expr::new(&condition);
@@ -38,13 +38,13 @@ fn condition_eval(condition: &String, exit_code: i32, located: &String) -> Resul
 
     // 检查执行结果
     let result = eval_res.as_bool();
-    if result.is_none() {
-        return Err(anyhow!(
+    if let Some(res) = result {
+        Ok(res)
+    } else {
+        Err(anyhow!(
             "Error:Can't eval statement '{condition}' into bool result"
-        ));
+        ))
     }
-
-    Ok(result.unwrap())
 }
 
 // 执行工作流
@@ -53,7 +53,6 @@ pub fn workflow_executor(
     located: String,
     pkg: GlobalPackage,
 ) -> Result<i32> {
-    let mut exit_code = 0;
     let strict_mode = is_strict_mode();
 
     // 检查包架构是否与当前架构相同
@@ -68,18 +67,20 @@ pub fn workflow_executor(
         pkg,
         located: located.clone(),
         async_execution_handlers: Vec::new(),
+        exit_code: 0,
     };
 
     // 遍历流节点
     for flow_node in flow {
         // 解释节点条件，判断是否需要跳过执行
         let c_if = flow_node.header.c_if;
-        if c_if.is_some() && !condition_eval(&c_if.unwrap(), exit_code, &located)? {
+        if c_if.is_some() && !condition_eval(&c_if.unwrap(), cx.exit_code, &located)? {
             continue;
         }
 
         // 创建变量解释器
-        let interpreter = |raw: String| values_replacer(raw, exit_code, &located);
+        let cur_exit_code = cx.exit_code;
+        let interpreter = |raw: String| values_replacer(raw, cur_exit_code, &located);
 
         // 匹配步骤类型以调用步骤解释器
         let exec_res = flow_node.body.run(&mut cx, interpreter);
@@ -89,27 +90,26 @@ pub fn workflow_executor(
                 "Warning(Main):Workflow step '{name}' failed to execute : {e}, check your workflow syntax again",
                 name=flow_node.header.name,
             );
-            exit_code = 1;
+            cx.exit_code = 1;
         } else {
-            exit_code = exec_res.unwrap();
-            if exit_code != 0 {
+            cx.exit_code = exec_res.unwrap();
+            if cx.exit_code != 0 {
                 log!(
                     "Warning(Main):Workflow step '{name}' finished with exit code '{exit_code}'",
                     name = flow_node.header.name,
+                    exit_code = cx.exit_code,
                 );
             }
         }
 
         // 在严格模式下立即返回错误
-        if exit_code != 0 && strict_mode {
+        if cx.exit_code != 0 && strict_mode {
             return Err(anyhow!("Error:Throw due to strict mode"));
         }
     }
 
     // 完成
-    cx.finish()?;
-
-    Ok(exit_code)
+    cx.finish()
 }
 
 // 宽容地逆向执行 setup 工作流
@@ -122,6 +122,7 @@ pub fn workflow_reverse_executor(
         pkg,
         located: located.clone(),
         async_execution_handlers: Vec::new(),
+        exit_code: 0,
     };
 
     // 遍历流节点

@@ -58,13 +58,8 @@ pub fn parse_package(p: &String, located: Option<String>) -> Result<GlobalPackag
     // 检查 nep 版本号是否符合
     let ver_opt = dirty_toml.get("nep");
     if let Some(val) = ver_opt {
-        let ver = val.as_str().unwrap_or("0.0");
-        let s_ver = &env!("CARGO_PKG_VERSION")[0..ver.len()];
-        if ver != s_ver {
-            return Err(anyhow!(
-                "Error:Can't parse nep version with '{ver}', current ept only accept version '{s_ver}'"
-            ));
-        }
+        let pkg_ver = val.as_str().unwrap_or("0.0").to_string() + ".0";
+        is_nep_version_compatible(&pkg_ver, &env!("CARGO_PKG_VERSION").to_string())?;
     } else {
         return Err(anyhow!("Error:Field 'nep' undefined in '{p}'"));
     }
@@ -79,7 +74,7 @@ pub fn parse_package(p: &String, located: Option<String>) -> Result<GlobalPackag
         let author = parse_author(&raw)?;
         // 第一作者必须提供邮箱
         if i == 0 && author.email == None {
-            return Err(anyhow!("Error:Can't validate package.toml : first author in field 'package.authors' should have email (e.g. \"Cno <cno@edgeless.top>\")"));
+            return Err(anyhow!("Error:Can't validate package.toml : first author '{name}' in field 'package.authors' should have email (e.g. \"Cno <cno@edgeless.top>\")",name=author.name));
         }
     }
 
@@ -95,4 +90,39 @@ pub fn parse_package(p: &String, located: Option<String>) -> Result<GlobalPackag
     }
 
     Ok(pkg)
+}
+
+fn is_nep_version_compatible(pkg_str: &String, ept_str: &String) -> Result<()> {
+    let pkg_ver = semver::Version::parse(&(pkg_str.clone() + ".0"))
+        .map_err(|e| anyhow!("Error:Failed to parse nep package version '{pkg_str}' : '{e}'"))?;
+    let ept_ver = semver::Version::parse(ept_str)?;
+
+    if pkg_ver.major != ept_ver.major || pkg_ver.minor != ept_ver.minor {
+        // 0 开头的要求 major 和 minor 一致
+        if pkg_str.starts_with("0.") || ept_str.to_string().starts_with("0.") {
+            return Err(anyhow!(
+                "Error:Nep package version '{pkg_str}' incompatible, current ept only accept version '{ept_str}'"
+            ));
+        } else {
+            // 检查 major 是否一致
+            if pkg_ver.major != ept_ver.major {
+                return Err(anyhow!(
+                    "Error:Nep package version '{pkg_str}' incompatible, current ept only accept version starts with '{major}'",
+                    major=ept_ver.major
+                ));
+            }
+        }
+    }
+
+    Ok(())
+}
+
+#[test]
+fn test_is_nep_version_compatible() {
+    assert!(is_nep_version_compatible(&"0.2".to_string(), &"0.2.1".to_string()).is_ok());
+    assert!(is_nep_version_compatible(&"0.1".to_string(), &"0.2.1".to_string()).is_err());
+    assert!(is_nep_version_compatible(&"1.0".to_string(), &"1.10.3".to_string()).is_ok());
+    assert!(is_nep_version_compatible(&"1.0".to_string(), &"1.0.30".to_string()).is_ok());
+    assert!(is_nep_version_compatible(&"1.2".to_string(), &"1.0.30".to_string()).is_ok());
+    assert!(is_nep_version_compatible(&"1.8".to_string(), &"2.0.0".to_string()).is_err());
 }

@@ -43,6 +43,7 @@ pub struct WorkflowContext {
     pub located: String,
     pub pkg: GlobalPackage,
     pub async_execution_handlers: Vec<(String, Child)>,
+    pub exit_code: i32,
 }
 
 impl WorkflowContext {
@@ -51,10 +52,11 @@ impl WorkflowContext {
             located: p2s!(current_dir().unwrap()),
             pkg: GlobalPackage::_demo(),
             async_execution_handlers: Vec::new(),
+            exit_code: 0,
         }
     }
 
-    pub fn finish(self) -> Result<()> {
+    pub fn finish(self) -> Result<i32> {
         // 等待异步 handlers
         for (cmd, handler) in self.async_execution_handlers {
             let output = handler.wait_with_output().map_err(|e| {
@@ -77,6 +79,6 @@ impl WorkflowContext {
             }
         }
 
-        Ok(())
+        Ok(self.exit_code)
     }
 }
