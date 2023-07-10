@@ -9,6 +9,7 @@ use super::TStep;
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
 use std::process::{Command, Stdio};
+use std::time::Instant;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct StepExecute {
@@ -45,6 +46,7 @@ impl TStep for StepExecute {
                 "Info(Execute):Running sync command '{cmd}' in '{workshop}'",
                 cmd = self.command,
             );
+            let start_instant = Instant::now();
             let output = cmd.output().map_err(|err| {
                 anyhow!(
                     "Error(Execute):Command '{cmd}' execution failed : {err}",
@@ -52,15 +54,29 @@ impl TStep for StepExecute {
                 )
             })?;
 
+            // 如果在调用安装器，检查是否过快退出
+            let duration = start_instant.elapsed();
+            let sec = duration.as_secs_f32();
+            let (level, hint) = if self.call_installer.unwrap_or(false)
+                && duration.as_millis() <= 500
+            {
+                ("Warning",format!("exit in {sec:.1}s, you may need to manually operate the installer/uninstaller to complete the steps"))
+            } else {
+                ("Info", format!("exit in {sec:.1}s"))
+            };
+
             // 处理退出码
             match output.status.code() {
                 Some(val) => {
                     if val == 0 {
-                        log!("Info(Execute):Command '{cmd}' output :", cmd = self.command);
+                        log!(
+                            "{level}(Execute):Command '{cmd}' {hint}, output :",
+                            cmd = self.command
+                        );
                         println!("{output}", output = read_console(output.stdout));
                     } else {
                         log!(
-                            "Error(Execute):Command '{cmd}' failed, output : \n{o}",
+                            "Error(Execute):Failed command '{cmd}' {hint}, output : \n{o}",
                             cmd = self.command,
                             o = read_console(output.stderr)
                         );
@@ -164,6 +180,15 @@ fn test_execute() {
     .run(&mut cx)
     .unwrap();
     assert_eq!(res, 2);
+
+    StepExecute {
+        command: "exit 0".to_string(),
+        pwd: None,
+        call_installer: Some(true),
+        wait: None,
+    }
+    .run(&mut cx)
+    .unwrap();
 }
 
 #[test]
