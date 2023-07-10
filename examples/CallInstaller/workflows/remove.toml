@@ -1,0 +1,5 @@
+[uninstall]
+name = "Call Uninstaller"
+step = "Execute"
+command = "Uninstaller.exe /S"
+call_installer = true

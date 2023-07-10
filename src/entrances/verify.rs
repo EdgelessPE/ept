@@ -1,6 +1,7 @@
 use crate::parsers::{parse_package, parse_workflow};
 use crate::types::mixed_fs::MixedFS;
 use crate::types::package::GlobalPackage;
+use crate::types::steps::Step;
 use crate::types::verifiable::Verifiable;
 use crate::types::workflow::WorkflowNode;
 use crate::{log, log_ok_last, p2s};
@@ -25,11 +26,18 @@ fn get_workflow_path(source_dir: &String, file_name: &str) -> PathBuf {
         .to_path_buf()
 }
 
-fn verify_workflow(flow: Vec<WorkflowNode>, located: &String) -> Result<()> {
+// 返回是否调用了 call_installer
+fn verify_workflow(flow: Vec<WorkflowNode>, located: &String) -> Result<bool> {
+    let mut have_call_installer = false;
     for node in flow {
         node.verify_self(located)?;
+        if let Step::StepExecute(step) = node.body {
+            if !have_call_installer {
+                have_call_installer = step.call_installer.unwrap_or(false);
+            }
+        }
     }
-    Ok(())
+    Ok(have_call_installer)
 }
 
 pub fn verify(source_dir: &String) -> Result<GlobalPackage> {
@@ -59,15 +67,20 @@ pub fn verify(source_dir: &String) -> Result<GlobalPackage> {
     log!("Info:Verifying workflows...");
     let setup_path = get_workflow_path(source_dir, "setup.toml");
     let setup_flow = parse_workflow(&p2s!(setup_path))?;
-    verify_workflow(setup_flow.clone(), &pkg_content_path)?;
-    let optional_path: Vec<PathBuf> = vec!["update.toml", "remove.toml"]
-        .into_iter()
-        .map(|name| get_workflow_path(source_dir, name))
-        .collect();
-    for opt_path in optional_path {
+
+    // 记录 setup 中是否用到 call_installer
+    let check_call_installer = verify_workflow(setup_flow.clone(), &pkg_content_path)?;
+
+    // 检查其他工作流
+    let optional_workflows = vec!["update.toml", "remove.toml"];
+    for opt_workflow in optional_workflows {
+        let opt_path = get_workflow_path(source_dir, opt_workflow);
         if opt_path.exists() {
             let flow = parse_workflow(&p2s!(opt_path))?;
-            verify_workflow(flow, source_dir)?;
+            let call_installer = verify_workflow(flow, source_dir)?;
+            if check_call_installer && !call_installer {
+                return Err(anyhow!("Error:Workflow '{opt_workflow}' should include 'Execute' step with 'call_installer' field enabled when workflow 'setup.toml' includes such step"));
+            }
         }
     }
     log_ok_last!("Info:Verifying workflows...");
@@ -86,4 +99,14 @@ pub fn verify(source_dir: &String) -> Result<GlobalPackage> {
 fn test_verify() {
     envmnt::set("DEBUG", "true");
     verify(&"./examples/VSCode".to_string()).unwrap();
+    verify(&"./examples/CallInstaller".to_string()).unwrap();
+
+    // 手动添加没有 call_installer 的 update.toml
+    std::fs::copy(
+        "./examples/VSCode/workflows/setup.toml",
+        "./examples/CallInstaller/workflows/update.toml",
+    )
+    .unwrap();
+    assert!(verify(&"./examples/CallInstaller".to_string()).is_err());
+    std::fs::remove_file("./examples/CallInstaller/workflows/update.toml").unwrap();
 }
