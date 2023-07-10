@@ -18,3 +18,9 @@ at = "${Home}/Download"
 name = "Kill"
 step = "Kill"
 target = "Code.exe"
+
+[uninstall]
+name = "Run uninstaller"
+step = "Execute"
+command = "uninstaller /S"
+call_installer = true
