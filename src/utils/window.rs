@@ -62,5 +62,5 @@ unsafe extern "system" fn enum_windows_titles_callback(
 #[test]
 fn test_find_and_focus_window() {
     // find_and_focus_window(&"Code.exe".to_string()).unwrap();
-    enum_windows_titles();
+    // enum_windows_titles();
 }

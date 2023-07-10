@@ -17,3 +17,9 @@ name = "Add Dir PATH"
 step = "Path"
 record = "bin"
 operation = "Add"
+
+[updater]
+name = "Run updater"
+step = "Execute"
+command = "updater /S"
+call_installer = true

@@ -2,10 +2,12 @@ use crate::types::software::Software;
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
 use std::path::Path;
+use ts_rs::TS;
 
 use super::{extended_semver::ExSemVer, verifiable::Verifiable};
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, TS)]
+#[ts(export)]
 pub struct Package {
     pub name: String,
     pub description: String,
@@ -35,7 +37,8 @@ impl Verifiable for Package {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, TS)]
+#[ts(export)]
 pub struct GlobalPackage {
     pub nep: String,
     pub package: Package,

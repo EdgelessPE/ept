@@ -35,6 +35,7 @@ sysinfo = "0.28.0"
 tar = "0.4.38"
 toml = { version = "0.5.11", features = ["preserve_order"] }
 trash = "3.0.1"
+ts-rs = "6.2.1"
 which = "4.4.0"
 wildmatch = "2.1.1"
 zstd = "0.12.3"
