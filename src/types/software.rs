@@ -7,8 +7,10 @@ use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
 
 use super::{mixed_fs::MixedFS, verifiable::Verifiable};
+use ts_rs::TS;
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, TS)]
+#[ts(export)]
 pub struct Software {
     pub scope: String,
     pub upstream: String,

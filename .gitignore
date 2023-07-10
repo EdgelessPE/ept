@@ -8,3 +8,4 @@
 *.nep
 /config.toml
 /test
+/bindings
