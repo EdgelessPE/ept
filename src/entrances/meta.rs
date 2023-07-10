@@ -15,20 +15,31 @@ use crate::{
 };
 use anyhow::{anyhow, Result};
 
-use super::{info_local, utils::package::unpack_nep};
+use super::{
+    info_local,
+    utils::{package::unpack_nep, validator::installed_validator},
+    verify::verify,
+};
 
-fn find_meta_target(input: &String, verify_signature: bool) -> Result<(PathBuf, GlobalPackage)> {
+// 返回 (临时目录，工作流所在目录，全局包)
+fn find_meta_target(
+    input: &String,
+    verify_signature: bool,
+) -> Result<(PathBuf, PathBuf, GlobalPackage)> {
     // 作为路径使用，可以是一个包或者已经解包的目录
     let p = Path::new(input);
     if p.exists() {
-        return unpack_nep(input, verify_signature);
+        let (path, pkg) = unpack_nep(input, verify_signature)?;
+        verify(&p2s!(path))?;
+        return Ok((path.clone(), path.join("workflows"), pkg));
     }
 
     // 作为名称使用，在本地已安装列表中搜索
     if let Ok(scope) = find_scope_with_name_locally(input) {
         let path = get_path_apps(&scope, input, false)?;
         let (pkg, _) = info_local(&scope, input)?;
-        return Ok((path, pkg));
+        installed_validator(&p2s!(path))?;
+        return Ok((path.clone(), path.join(".nep_context/workflows"), pkg));
     }
 
     Err(anyhow!(
@@ -38,14 +49,14 @@ fn find_meta_target(input: &String, verify_signature: bool) -> Result<(PathBuf, 
 
 pub fn meta(input: &String, verify_signature: bool) -> Result<MetaResult> {
     // 解包
-    let (temp_dir_inner_path, global) = find_meta_target(input, verify_signature)?;
+    let (temp_dir_inner_path, workflow_path, global) = find_meta_target(input, verify_signature)?;
     let temp_dir = p2s!(temp_dir_inner_path);
 
     // 检查工作流存在
     let exists_workflows: Vec<(String, String)> = vec!["setup.toml", "update.toml", "remove.toml"]
         .into_iter()
         .filter_map(|name| {
-            let p = temp_dir_inner_path.join("workflows").join(name);
+            let p = workflow_path.join(name);
             if p.exists() {
                 Some((name.to_string(), p2s!(p)))
             } else {
@@ -103,7 +114,7 @@ pub fn meta(input: &String, verify_signature: bool) -> Result<MetaResult> {
 
 #[test]
 fn test_meta() {
-    let res = meta(&"./examples/PermissionsTest".to_string(), false);
+    let res = meta(&"VSCode".to_string(), false);
     println!("{res:#?}");
     assert!(res.is_ok());
 }
