@@ -58,7 +58,7 @@ pub fn parse_package(p: &String, located: Option<String>) -> Result<GlobalPackag
     // 检查 nep 版本号是否符合
     let ver_opt = dirty_toml.get("nep");
     if let Some(val) = ver_opt {
-        let pkg_ver = val.as_str().unwrap_or("0.0").to_string() + ".0";
+        let pkg_ver = val.as_str().unwrap_or("0.0").to_string();
         is_nep_version_compatible(&pkg_ver, &env!("CARGO_PKG_VERSION").to_string())?;
     } else {
         return Err(anyhow!("Error:Field 'nep' undefined in '{p}'"));
