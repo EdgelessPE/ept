@@ -4,7 +4,8 @@ use std::path::Path;
 use std::{fs::File, io::Read};
 use toml::Value;
 
-use crate::types::{workflow::WorkflowNode, KV};
+use crate::types::steps::Step;
+use crate::types::workflow::WorkflowNode;
 
 fn cmd_converter(origin: &String) -> Result<String> {
     // 需要增加 c_ 前缀的字段
@@ -51,7 +52,7 @@ pub fn parse_workflow(p: &String) -> Result<Vec<WorkflowNode>> {
             .map_err(|e| anyhow!("Error:Illegal workflow node at key '{key}' : {e}"))?;
 
         // 解析步骤体
-        let body = KV::new(key, val).try_into()?;
+        let body = Step::try_from_kv(key, val)?;
 
         res.push(WorkflowNode { header, body })
     }
