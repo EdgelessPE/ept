@@ -18,3 +18,9 @@ pub struct KV {
     pub key: String,
     pub value: Value,
 }
+
+impl KV {
+    pub fn new(key: String, value: Value) -> Self {
+        Self { key, value }
+    }
+}
