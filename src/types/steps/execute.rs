@@ -3,7 +3,7 @@ use crate::types::mixed_fs::MixedFS;
 use crate::types::permissions::{Generalizable, Permission, PermissionLevel};
 use crate::types::verifiable::Verifiable;
 use crate::types::workflow::WorkflowContext;
-use crate::utils::read_console;
+use crate::utils::{format_path, read_console};
 
 use super::TStep;
 use anyhow::{anyhow, Result};
@@ -127,6 +127,13 @@ impl TStep for StepExecute {
 
 impl Verifiable for StepExecute {
     fn verify_self(&self, _: &String) -> Result<()> {
+        let formatted_cmd = format_path(&self.command);
+
+        // 禁止出现 :/
+        if formatted_cmd.contains(":/") {
+            return Err(anyhow!("Error:Absolute path in '{formatted_cmd}' is not allowed (keyword ':/' detected), use proper inner values instead"));
+        }
+
         Ok(())
     }
 }
