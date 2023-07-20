@@ -2,7 +2,7 @@ use crate::log;
 use crate::types::permissions::PermissionLevel;
 use crate::utils::env::{
     env_appdata, env_desktop, env_home, env_program_files_x64, env_program_files_x86,
-    env_system_drive,
+    env_public_desktop, env_system_drive,
 };
 use anyhow::{anyhow, Result};
 use eval::Expr;
@@ -163,7 +163,8 @@ define_values! {
     {"${AppData}",env_appdata(),PermissionLevel::Sensitive},
     {"${ProgramFiles_X64}",env_program_files_x64(),PermissionLevel::Sensitive},
     {"${ProgramFiles_X86}",env_program_files_x86(),PermissionLevel::Sensitive},
-    {"${Desktop}",env_desktop(),PermissionLevel::Important}
+    {"${Desktop}",env_desktop(),PermissionLevel::Important},
+    {"${PublicDesktop}",env_public_desktop(),PermissionLevel::Important}
 }
 
 #[test]

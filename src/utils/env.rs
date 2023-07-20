@@ -30,6 +30,10 @@ pub fn env_desktop() -> String {
     p2s!(desktop_dir().unwrap())
 }
 
+pub fn env_public_desktop() -> String {
+    env_system_drive() + "/Users/Public/Desktop"
+}
+
 pub fn env_start_menu() -> String {
     let str = env_appdata() + "/Roaming/Microsoft/Windows/Start Menu/Programs/Nep Apps";
     ensure_exist(Path::new(&str).to_path_buf()).unwrap();
