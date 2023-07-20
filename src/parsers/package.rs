@@ -23,7 +23,7 @@ fn update_main_program(
     // 读取包申明版本号
     let ex_sv_declared = ExSemVer::parse(&pkg.package.version)?;
 
-    // 读取主程序版本号
+    // 读取主程序版本号（只关心符合 SemVer 规范的前三位）
     let exe_file_str = p2s!(file_path);
     let mp_version = get_exe_version(file_path)?;
     let mut ex_sv_latest = ExSemVer::parse(&mp_version)?;
