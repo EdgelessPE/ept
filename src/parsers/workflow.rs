@@ -4,7 +4,8 @@ use std::path::Path;
 use std::{fs::File, io::Read};
 use toml::Value;
 
-use crate::types::{workflow::WorkflowNode, KV};
+use crate::types::steps::Step;
+use crate::types::workflow::WorkflowNode;
 
 fn cmd_converter(origin: &String) -> Result<String> {
     // 需要增加 c_ 前缀的字段
@@ -33,38 +34,25 @@ pub fn parse_workflow(p: &String) -> Result<Vec<WorkflowNode>> {
     // 替换条件命令字段
     let text_ready = cmd_converter(&text)?;
 
-    // 转换文本为平工作流
+    // 反序列化工作流并解析为 Table
     let plain_flow: Value = toml::from_str(&text_ready)
         .map_err(|err| anyhow!("Error:Can't parse '{p}' as legal toml file : {err}"))?;
-
-    // 通过正则表达式获取工作流顺序
-    let reg = Regex::new(r"\s*\[(\w+)\]")?;
-    let mut kvs: Vec<KV> = Vec::new();
-    for cap in reg.captures_iter(&plain_flow.to_string()) {
-        let key = &cap[1];
-        let value = plain_flow[key].to_owned();
-        kvs.push(KV {
-            key: key.to_string(),
-            value,
-        })
-    }
-    // println!("{values:?}");
+    let table = plain_flow
+        .as_table()
+        .ok_or(anyhow!("Error:Failed to convert workflow as valid table"))?
+        .to_owned();
 
     // 解析工作流步骤，生成已解析数组
     let mut res = Vec::new();
-    for kv_node in kvs {
-        // 结构键值对
-        let kv = kv_node.clone();
-        let key = kv_node.key;
-        let val = kv_node.value;
-
+    for (key, val) in table {
         // 解析步骤头
         let header = val
+            .clone()
             .try_into()
             .map_err(|e| anyhow!("Error:Illegal workflow node at key '{key}' : {e}"))?;
 
-        // 根据步骤名称解析步骤体
-        let body = kv.try_into()?;
+        // 解析步骤体
+        let body = Step::try_from_kv(key, val)?;
 
         res.push(WorkflowNode { header, body })
     }

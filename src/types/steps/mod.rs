@@ -1,9 +1,9 @@
 use crate::types::permissions::{Generalizable, Permission};
 use crate::types::verifiable::Verifiable;
-use crate::types::KV;
 use anyhow::{anyhow, Result};
 use serde::de;
 use serde::{Deserialize, Serialize};
+use toml::Value;
 
 mod copy;
 mod delete;
@@ -31,13 +31,11 @@ pub trait TStep: Verifiable + Generalizable {
         F: Fn(String) -> String;
 }
 
-fn toml_try_into<'de, T>(kv: KV) -> Result<T>
+fn toml_try_into<'de, T>(key: String, val: Value) -> Result<T>
 where
     T: de::Deserialize<'de>,
 {
-    let val = kv.value;
     val.to_owned().try_into().map_err(|err| {
-        let key = kv.key;
         let name_brw = val["name"].to_owned();
         let name = name_brw.as_str().unwrap_or("unknown name");
         let step = val["step"].as_str().unwrap_or("unknown step");
@@ -54,6 +52,20 @@ macro_rules! def_enum_step {
         }
 
         impl Step {
+            pub fn try_from_kv(key:String,val:Value)->Result<Step>{
+                // 读取步骤名称
+                let step=String::from("Step")+val["step"].as_str().unwrap();
+
+                // 根据步骤名称解析步骤体
+                let res=match step.as_str() {
+                    $( stringify!($x) => Step::$x(toml_try_into(key,val)?) ),* ,
+                    _ => {
+                        return Err(anyhow!("Error:Unknown step '{step}'"));
+                    },
+                };
+                Ok(res)
+            }
+
             pub fn run<F>(self, cx: &mut WorkflowContext, interpreter: F) -> Result<i32>
             where
                 F: Fn(String) -> String,
@@ -74,24 +86,6 @@ macro_rules! def_enum_step {
                 match self {
                     $( Step::$x(step) => step.get_manifest(fs) ),*
                 }
-            }
-        }
-
-        impl TryFrom<KV> for Step {
-            type Error=anyhow::Error;
-            fn try_from(kv:KV)->Result<Step>{
-                // 读取步骤名称
-                let val=kv.value.clone();
-                let step=String::from("Step")+val["step"].as_str().unwrap();
-
-                // 根据步骤名称解析步骤体
-                let res=match step.as_str() {
-                    $( stringify!($x) => Step::$x(toml_try_into(kv)?) ),* ,
-                    _ => {
-                        return Err(anyhow!("Error:Unknown step '{step}'"));
-                    },
-                };
-                Ok(res)
             }
         }
 

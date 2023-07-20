@@ -114,7 +114,7 @@ pub fn meta(input: &String, verify_signature: bool) -> Result<MetaResult> {
 
 #[test]
 fn test_meta() {
-    let res = meta(&"VSCode".to_string(), false);
+    let res = meta(&"examples/VSCode".to_string(), false);
     println!("{res:#?}");
     assert!(res.is_ok());
 }

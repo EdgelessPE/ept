@@ -10,11 +10,3 @@ pub mod software;
 pub mod steps;
 pub mod verifiable;
 pub mod workflow;
-
-use toml::Value;
-
-#[derive(Clone, Debug)]
-pub struct KV {
-    pub key: String,
-    pub value: Value,
-}
