@@ -14,7 +14,7 @@ use regex::Regex;
 
 use crate::types::{permissions::Generalizable, workflow::WorkflowHeader};
 
-use super::{judge_perm_level, values_validator_path};
+use super::{condition_eval, judge_perm_level, values_validator_path};
 
 lazy_static! {
     static ref RESOURCE_REGEX: Regex = Regex::new(r"^[^/]+/[^/]+$").unwrap();
@@ -175,7 +175,7 @@ impl Generalizable for WorkflowHeader {
 }
 
 impl Verifiable for WorkflowHeader {
-    fn verify_self(&self, _: &String) -> Result<()> {
+    fn verify_self(&self, located: &String) -> Result<()> {
         // 捕获函数执行信息
         let func_info = self.capture_function_info()?;
 
@@ -203,6 +203,12 @@ impl Verifiable for WorkflowHeader {
                     anyhow!("Error:Failed to validate path argument in expression '{expr}' : {e}")
                 })?;
             }
+        }
+
+        // 对条件进行 eval 校验
+        if let Some(cond) = &self.c_if {
+            condition_eval(cond, 0, located)
+                .map_err(|e| anyhow!("Error:Failed to validate condition in field 'if' : {e}"))?;
         }
 
         Ok(())
