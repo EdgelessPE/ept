@@ -5,7 +5,7 @@ use crate::types::{
     mixed_fs::MixedFS, permissions::Generalizable, verifiable::Verifiable,
     workflow::WorkflowContext,
 };
-use anyhow::{Ok, Result};
+use anyhow::{anyhow, Ok, Result};
 use serde::{Deserialize, Serialize};
 use std::time::Instant;
 use std::{thread::sleep, time::Duration};
@@ -63,7 +63,20 @@ impl TStep for StepWait {
 }
 
 impl Verifiable for StepWait {
-    fn verify_self(&self, _: &String) -> Result<()> {
+    fn verify_self(&self, located: &String) -> Result<()> {
+        // timeout 时间应当小于等于 30min
+        if &self.timeout > &(30 * 60 * 1000) {
+            return Err(anyhow!(
+                "Error:Timeout should not be longer than 30 min, got '{}'",
+                &self.timeout
+            ));
+        }
+
+        // 测试跳出条件 eval
+        if let Some(cond) = &self.break_if {
+            condition_eval(cond, 0, located)?;
+        }
+
         Ok(())
     }
 }
@@ -107,7 +120,7 @@ fn test_wait() {
 
     // 测试恒真等待
     let now = Instant::now();
-    cx.exit_code=1;
+    cx.exit_code = 1;
     StepWait {
         timeout: 5000,
         break_if: Some("${ExitCode}==1".to_string()),
