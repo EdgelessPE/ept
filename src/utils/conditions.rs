@@ -88,7 +88,7 @@ pub fn verify_conditions(conditions: Vec<String>, located: &String) -> Result<()
     // 对条件进行 eval 校验
     for cond in conditions {
         condition_eval(&cond, 0, located)
-            .map_err(|e| anyhow!("Error:Failed to validate condition in field 'if' : {e}"))?;
+            .map_err(|e| anyhow!("Error:Failed to validate condition : {e}"))?;
     }
 
     Ok(())

@@ -6,6 +6,7 @@ use crate::types::{
     mixed_fs::MixedFS, permissions::Generalizable, verifiable::Verifiable,
     workflow::WorkflowContext,
 };
+use crate::utils::{get_permissions_from_conditions, verify_conditions};
 use anyhow::{anyhow, Ok, Result};
 use serde::{Deserialize, Serialize};
 use std::time::Instant;
@@ -73,9 +74,9 @@ impl Verifiable for StepWait {
             ));
         }
 
-        // 测试跳出条件 eval
+        // 校验跳出条件
         if let Some(cond) = &self.break_if {
-            condition_eval(cond, 0, located)?;
+            verify_conditions(vec![cond.to_owned()], located)?;
         }
 
         Ok(())
@@ -84,7 +85,14 @@ impl Verifiable for StepWait {
 
 impl Generalizable for StepWait {
     fn generalize_permissions(&self) -> Result<Vec<Permission>> {
-        Ok(Vec::new())
+        let mut permissions = Vec::new();
+
+        if let Some(cond) = &self.break_if {
+            let mut cond_permissions = get_permissions_from_conditions(vec![cond.to_owned()])?;
+            permissions.append(&mut cond_permissions);
+        }
+
+        Ok(permissions)
     }
 }
 
