@@ -4,8 +4,11 @@ use regex::Regex;
 use std::sync::{Arc, Mutex};
 
 use crate::{
-    executor::{condition_eval, judge_perm_level, values_validator_path},
-    types::permissions::{Permission, PermissionLevel},
+    executor::{
+        condition_eval, get_eval_function_names, get_eval_function_permission,
+        verify_eval_function_arg,
+    },
+    types::permissions::Permission,
 };
 
 lazy_static! {
@@ -22,15 +25,10 @@ pub fn ensure_arg(val: &Value) -> std::result::Result<String, error::EvalexprErr
     }
 }
 
-/// 使用虚拟的函数定义捕获函数运行信息，返回（函数名，参数，参数是否为路径，所属表达式）
-fn capture_function_info(conditions: &Vec<String>) -> Result<Vec<(String, String, bool, String)>> {
-    // 定义已知函数信息，（函数名，入参是否为路径）
-    let info_arr = vec![
-        ("Exist", true),
-        ("IsDirectory", true),
-        ("IsAlive", false),
-        ("IsInstalled", false),
-    ];
+/// 使用虚拟的函数定义捕获函数运行信息，返回（函数名，参数，所属表达式）
+fn capture_function_info(conditions: &Vec<String>) -> Result<Vec<(String, String, String)>> {
+    // 获取已注册的 eval 函数名称
+    let info_arr = get_eval_function_names();
 
     // 迭代所有条件语句
     let res = Arc::new(Mutex::new(Vec::new()));
@@ -39,7 +37,7 @@ fn capture_function_info(conditions: &Vec<String>) -> Result<Vec<(String, String
         let mut context = HashMapContext::new();
 
         // 迭代函数信息，创建收集闭包
-        for (name, is_fs) in info_arr.clone() {
+        for name in info_arr.clone() {
             let r = res.clone();
             let c = cond.clone();
             context
@@ -48,7 +46,7 @@ fn capture_function_info(conditions: &Vec<String>) -> Result<Vec<(String, String
                     Function::new(move |val| {
                         let arg = ensure_arg(val)?;
                         let mut r = r.lock().unwrap();
-                        r.push((name.to_string(), arg, is_fs, c.to_owned()));
+                        r.push((name.to_string(), arg, c.to_owned()));
 
                         Ok(Value::Boolean(true))
                     }),
@@ -71,43 +69,8 @@ pub fn get_permissions_from_conditions(conditions: Vec<String>) -> Result<Vec<Pe
 
     // 匹配生成权限信息
     let mut permissions = Vec::new();
-    for (name, arg, _, expr) in func_info {
-        match name.as_str() {
-            "Exist" => {
-                permissions.push(Permission {
-                    key: "fs_read".to_string(),
-                    level: judge_perm_level(&arg)?,
-                    targets: vec![arg],
-                });
-            }
-            "IsDirectory" => {
-                permissions.push(Permission {
-                    key: "fs_read".to_string(),
-                    level: judge_perm_level(&arg)?,
-                    targets: vec![arg],
-                });
-            }
-            "IsAlive" => {
-                permissions.push(Permission {
-                    key: "process_query".to_string(),
-                    level: PermissionLevel::Normal,
-                    targets: vec![arg],
-                });
-            }
-            "IsInstalled" => {
-                permissions.push(Permission {
-                    key: "nep_installed".to_string(),
-                    level: PermissionLevel::Normal,
-                    targets: vec![arg],
-                });
-            }
-            _ => {
-                // 理论上此处是不可到达的，因为会在 eval 执行的时候报错
-                return Err(anyhow!(
-                    "Error:Unknown function '{name}' in expression '{expr}'"
-                ));
-            }
-        }
+    for (name, arg, _) in func_info {
+        permissions.push(get_eval_function_permission(name, arg)?);
     }
 
     Ok(permissions)
@@ -117,30 +80,9 @@ pub fn verify_conditions(conditions: Vec<String>, located: &String) -> Result<()
     // 捕获函数执行信息
     let func_info = capture_function_info(&conditions)?;
 
-    // 匹配函数名称进行校验
-    for (name, arg, need_path_check, expr) in func_info {
-        // 特定函数的预校验
-        match name.as_str() {
-            "IsAlive" => {
-                if !arg.to_ascii_lowercase().ends_with(".exe") {
-                    return Err(anyhow!(
-                        "Error:Argument of 'IsAlive' should ends with '.exe', got '{arg}'"
-                    ));
-                }
-            }
-            "IsInstalled" => {
-                if !RESOURCE_REGEX.is_match(&arg) {
-                    return Err(anyhow!("Error:Argument of 'IsAlive' should match pattern 'SCOPE/NAME' (e.g. Microsoft/VSCode)"));
-                }
-            }
-            _ => {}
-        }
-        // 路径参数校验
-        if need_path_check {
-            values_validator_path(&arg).map_err(|e| {
-                anyhow!("Error:Failed to validate path argument in expression '{expr}' : {e}")
-            })?;
-        }
+    // 匹配函数入参进行校验
+    for (name, arg, _) in func_info {
+        verify_eval_function_arg(name, arg)?;
     }
 
     // 对条件进行 eval 校验

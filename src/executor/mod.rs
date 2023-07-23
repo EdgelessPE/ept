@@ -13,9 +13,11 @@ use crate::{
     utils::{get_bare_apps, is_current_arch_match, is_strict_mode},
 };
 
-use self::{functions::get_context_with_function, values::values_replacer};
-
+pub use self::functions::{
+    get_eval_function_names, get_eval_function_permission, verify_eval_function_arg,
+};
 pub use self::values::{judge_perm_level, values_validator_path};
+use self::{functions::get_context_with_function, values::values_replacer};
 
 // 配置部分内置变量的值
 lazy_static! {

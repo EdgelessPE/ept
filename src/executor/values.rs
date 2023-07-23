@@ -20,7 +20,7 @@ macro_rules! define_values {
             let mut arr=vec![$($key.to_string()),*];
             if extra{
                 arr.push("${ExitCode}".to_string());
-                arr.push( "${DefaultLocation}".to_string());
+                arr.push("${DefaultLocation}".to_string());
             }
             arr
         }
