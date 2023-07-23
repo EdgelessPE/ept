@@ -111,7 +111,7 @@ fn test_parse_wild_match() {
     use std::env::current_dir;
     let located = p2s!(current_dir().unwrap());
     assert!(
-        parse_wild_match("*.toml".to_string(), &located)
+        parse_wild_match("*.lock".to_string(), &located)
             .unwrap()
             .len()
             == 1
