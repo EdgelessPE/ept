@@ -42,7 +42,7 @@ impl Verifiable for WorkflowNode {
 pub struct WorkflowContext {
     pub located: String,
     pub pkg: GlobalPackage,
-    pub async_execution_handlers: Vec<(String, Child)>,
+    pub async_execution_handlers: Vec<(String, Child, bool)>, // 命令，handler，是否被抛弃
     pub exit_code: i32,
 }
 
@@ -58,23 +58,27 @@ impl WorkflowContext {
 
     pub fn finish(self) -> Result<i32> {
         // 等待异步 handlers
-        for (cmd, handler) in self.async_execution_handlers {
-            let output = handler.wait_with_output().map_err(|e| {
-                anyhow!("Error(Execute):Failed to wait on async command '{cmd}' : {e}")
-            })?;
-            // 处理退出码
-            match output.status.code() {
-                Some(val) => {
-                    if val == 0 {
-                        log!("Info(Execute):Async command '{cmd}' output :");
-                        println!("{output}", output = read_console(output.stdout));
-                    } else {
-                        log!("Error(Execute):Async command '{cmd}' failed, output :");
-                        println!("{output}", output = read_console(output.stdout));
+        for (cmd, handler, abandon) in self.async_execution_handlers {
+            if abandon {
+                continue;
+            } else {
+                let output = handler.wait_with_output().map_err(|e| {
+                    anyhow!("Error(Execute):Failed to wait on async command '{cmd}' : {e}")
+                })?;
+                // 处理退出码
+                match output.status.code() {
+                    Some(val) => {
+                        if val == 0 {
+                            log!("Info(Execute):Async command '{cmd}' output :");
+                            println!("{output}", output = read_console(output.stdout));
+                        } else {
+                            log!("Error(Execute):Async command '{cmd}' failed, output :");
+                            println!("{output}", output = read_console(output.stdout));
+                        }
                     }
-                }
-                None => {
-                    log!("Error(Execute):Async command '{cmd}' terminated by signal");
+                    None => {
+                        log!("Error(Execute):Async command '{cmd}' terminated by signal");
+                    }
                 }
             }
         }

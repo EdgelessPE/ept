@@ -1,9 +1,9 @@
-use crate::log;
 use crate::types::mixed_fs::MixedFS;
 use crate::types::permissions::{Generalizable, Permission, PermissionLevel};
 use crate::types::verifiable::Verifiable;
 use crate::types::workflow::WorkflowContext;
 use crate::utils::{format_path, read_console};
+use crate::{log, verify_enum};
 
 use super::TStep;
 use anyhow::{anyhow, Result};
@@ -16,7 +16,7 @@ pub struct StepExecute {
     pub command: String,
     pub pwd: Option<String>,
     pub call_installer: Option<bool>,
-    pub wait: Option<bool>,
+    pub wait: Option<String>,
 }
 
 impl TStep for StepExecute {
@@ -40,7 +40,8 @@ impl TStep for StepExecute {
         cmd.stdout(Stdio::piped()).stderr(Stdio::piped());
 
         // 异步执行分流
-        if self.wait.unwrap_or(true) {
+        let wait = self.wait.unwrap_or("Sync".to_string());
+        if wait == "Sync".to_string() {
             // 同步执行并收集结果
             log!(
                 "Info(Execute):Running sync command '{cmd}' in '{workshop}'",
@@ -101,7 +102,11 @@ impl TStep for StepExecute {
                     cmd = self.command
                 )
             })?;
-            cx.async_execution_handlers.push((self.command, handler));
+            cx.async_execution_handlers.push((
+                self.command,
+                handler,
+                wait == "Abandon".to_string(),
+            ));
 
             Ok(0)
         }
@@ -132,6 +137,11 @@ impl Verifiable for StepExecute {
         // 禁止出现 :/
         if formatted_cmd.contains(":/") {
             return Err(anyhow!("Error:Absolute path in '{formatted_cmd}' is not allowed (keyword ':/' detected), use proper inner values instead"));
+        }
+
+        // 校验 wait 枚举值
+        if let Some(wait) = &self.wait {
+            verify_enum!("Execute", "wait", wait, "Sync" | "Delay" | "Abandon")?;
         }
 
         Ok(())
@@ -207,7 +217,7 @@ fn test_async_execute() {
         command: "timeout 3 && echo 1st第一条输出".to_string(),
         pwd: None,
         call_installer: None,
-        wait: Some(false),
+        wait: Some("Delay".to_string()),
     }
     .run(&mut cx)
     .unwrap();
@@ -215,7 +225,7 @@ fn test_async_execute() {
         command: "dir".to_string(),
         pwd: Some("./src".to_string()),
         call_installer: None,
-        wait: Some(false),
+        wait: Some("Delay".to_string()),
     }
     .run(&mut cx)
     .unwrap();
@@ -224,7 +234,7 @@ fn test_async_execute() {
         command: "exit 2".to_string(),
         pwd: None,
         call_installer: None,
-        wait: Some(false),
+        wait: Some("Delay".to_string()),
     }
     .run(&mut cx)
     .unwrap();

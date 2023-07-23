@@ -4,6 +4,8 @@ pub trait Verifiable {
     fn verify_self(&self, located: &String) -> Result<()>;
 }
 
+/// 校验字符串的枚举值是否有效
+/// 入参：(当前步骤名称),字段名称,值,枚举值1|枚举值2|...
 #[macro_export]
 macro_rules! verify_enum {
     ($step:expr,$field:expr,$val:expr,$($enum:pat_param)|+) => {
