@@ -61,6 +61,7 @@ pub fn workflow_executor(
 
     // 遍历流节点
     for flow_node in flow {
+        log!("Debug:Start step '{name}'", name = flow_node.header.name);
         // 解释节点条件，判断是否需要跳过执行
         let c_if = flow_node.header.c_if;
         if c_if.is_some() && !condition_eval(&c_if.unwrap(), cx.exit_code, &located)? {
@@ -95,6 +96,7 @@ pub fn workflow_executor(
         if cx.exit_code != 0 && strict_mode {
             return Err(anyhow!("Error:Throw due to strict mode"));
         }
+        log!("Debug:Stop step '{name}'", name = flow_node.header.name);
     }
 
     // 完成
@@ -116,6 +118,10 @@ pub fn workflow_reverse_executor(
 
     // 遍历流节点
     for flow_node in flow {
+        log!(
+            "Debug:Start reverse step '{name}'",
+            name = flow_node.header.name
+        );
         // 创建变量解释器，ExitCode 始终置 0
         let interpreter = |raw: String| values_replacer(raw, 0, &located);
         // 匹配步骤类型以调用逆向步骤解释器
@@ -128,6 +134,10 @@ pub fn workflow_reverse_executor(
                 name = flow_node.header.name
             );
         }
+        log!(
+            "Debug:Stop reverse step '{name}'",
+            name = flow_node.header.name
+        );
     }
 
     // 完成

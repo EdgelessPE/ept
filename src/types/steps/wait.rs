@@ -1,5 +1,6 @@
 use super::TStep;
 use crate::executor::condition_eval;
+use crate::log;
 use crate::types::steps::Permission;
 use crate::types::{
     mixed_fs::MixedFS, permissions::Generalizable, verifiable::Verifiable,
@@ -27,6 +28,7 @@ impl TStep for StepWait {
             } else {
                 let start_instant = Instant::now();
                 // 每 500ms 检查一次条件是否成立
+                log!("Info(Wait):Waiting with break condition '{cond}'...");
                 loop {
                     sleep(step_d);
                     // TODO:exit_code需要通过上下文获取
