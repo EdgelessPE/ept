@@ -164,6 +164,7 @@ fn main() {
     let res = router(args.action);
     if res.is_ok() {
         log!("{msg}", msg = res.unwrap());
+        exit(0);
     } else {
         log!("{msg}", msg = res.unwrap_err());
         exit(1);
