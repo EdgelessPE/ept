@@ -31,7 +31,6 @@ impl TStep for StepWait {
                 log!("Info(Wait):Waiting with break condition '{cond}'...");
                 loop {
                     sleep(step_d);
-                    // TODO:exit_code需要通过上下文获取
                     if start_instant.elapsed() >= d
                         || condition_eval(&cond, cx.exit_code, &cx.located)?
                     {

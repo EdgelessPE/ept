@@ -188,6 +188,7 @@ fn test_condition_eval() {
 
 #[test]
 fn test_workflow_executor() {
+    envmnt::set("DEBUG", "true");
     use crate::types::steps::{
         Step,
         StepExecute,
