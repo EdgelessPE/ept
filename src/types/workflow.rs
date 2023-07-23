@@ -125,10 +125,16 @@ impl WorkflowContext {
     }
 
     pub fn finish(self) -> Result<i32> {
+        log!("Debug:Finish context");
+
         // 等待异步 handlers
-        for (cmd, handler, abandon) in self.async_execution_handlers {
+        for (cmd, mut handler, abandon) in self.async_execution_handlers {
             if abandon {
-                continue;
+                if let Err(e) = handler.kill() {
+                    log!("Warning(Execute):Failed to kill async abandoned command '{cmd}' : {e}");
+                } else {
+                    log!("Info(Execute):Killed async abandoned command '{cmd}'");
+                }
             } else {
                 let output = handler.wait_with_output().map_err(|e| {
                     anyhow!("Error(Execute):Failed to wait on async command '{cmd}' : {e}")
