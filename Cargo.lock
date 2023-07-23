@@ -784,7 +784,7 @@ dependencies = [
  "ed25519-compact",
  "encoding",
  "envmnt",
- "eval",
+ "evalexpr",
  "force-delete-win",
  "fs_extra",
  "lazy_static",
@@ -843,15 +843,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "eval"
-version = "0.4.3"
+name = "evalexpr"
+version = "11.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ba90c19bed0c67afb0a24340b42d13ddddcb5413c4c17a04c11871bd6b572c42"
-dependencies = [
- "quick-error",
- "serde",
- "serde_json",
-]
+checksum = "ec3b4e80fd8edee77d6fc35d59862d5765dae7512a95f49fd7bf03847c85b26a"
 
 [[package]]
 name = "event-listener"
@@ -1485,12 +1480,6 @@ checksum = "fa1fb82fc0c281dd9671101b66b771ebbe1eaf967b96ac8740dcba4b70005ca8"
 dependencies = [
  "unicode-ident",
 ]
-
-[[package]]
-name = "quick-error"
-version = "1.2.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a1d01941d82fa2ab50be1e79e6714289dd7cde78eba4c074bc5a4374f650dfe0"
 
 [[package]]
 name = "quick-xml"
