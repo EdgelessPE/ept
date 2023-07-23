@@ -93,7 +93,7 @@ impl TStep for StepExecute {
         } else {
             // 异步执行
             log!(
-                "Info(Execute):Running async command '{cmd}' in '{workshop}' without wait",
+                "Info(Execute):Running async command('{wait}') '{cmd}' in '{workshop}'",
                 cmd = self.command,
             );
             let handler = cmd.spawn().map_err(|e| {
