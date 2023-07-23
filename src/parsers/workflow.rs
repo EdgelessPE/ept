@@ -14,7 +14,7 @@ fn cmd_converter(origin: &String) -> Result<String> {
     // 转换器
     let mut text = origin.to_owned();
     for cmd in list {
-        let reg_str = String::from("(");
+        let reg_str = String::from("^(");
         let rep = Regex::new(&(reg_str + cmd + r"\s?=.+)"))?;
         text = rep.replace_all(&text, "c_$1").to_string();
     }
