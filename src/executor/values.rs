@@ -5,7 +5,6 @@ use crate::utils::env::{
     env_public_desktop, env_system_drive,
 };
 use anyhow::{anyhow, Result};
-use eval::Expr;
 use lazy_static::lazy_static;
 use regex::Regex;
 use std::collections::HashSet;
@@ -26,15 +25,7 @@ macro_rules! define_values {
             arr
         }
 
-        // 目前使用的内置变量均为模板字符串模式，啥时候需要真正的内置变量了再启用
-        #[deprecated]
-        pub fn _values_decorator(expr:Expr, exit_code: i32, located: &String)->Expr{
-            expr
-            .value("${ExitCode}",exit_code)
-            .value("${DefaultLocation}",located.to_owned())
-            $(.value($key,$val))*
-        }
-
+        // 目前使用的内置变量均为模板字符串模式
         pub fn values_replacer(raw:String, exit_code: i32, located: &String)->String{
             raw
             .replace("${ExitCode}",&exit_code.to_string())

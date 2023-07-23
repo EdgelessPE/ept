@@ -2,7 +2,7 @@ mod functions;
 mod values;
 
 use anyhow::{anyhow, Result};
-use eval::Expr;
+use evalexpr::*;
 
 use crate::{
     log, p2s,
@@ -13,7 +13,7 @@ use crate::{
     utils::{get_bare_apps, is_current_arch_match, is_strict_mode},
 };
 
-use self::{functions::functions_decorator, values::values_replacer};
+use self::{functions::get_context_with_function, values::values_replacer};
 
 pub use self::values::{judge_perm_level, values_validator_path};
 
@@ -26,25 +26,14 @@ lazy_static! {
 // 执行条件以判断是否成立
 pub fn condition_eval(condition: &String, exit_code: i32, located: &String) -> Result<bool> {
     // 装饰变量与函数
-    let condition = values_replacer(condition.to_owned(), exit_code, located);
-    let expr = Expr::new(&condition);
-    // let expr = values_decorator(expr, exit_code, located);
-    let expr = functions_decorator(expr, located);
+    let condition_with_values_interpreted =
+        values_replacer(condition.to_owned(), exit_code, located);
+    let context = get_context_with_function(located);
 
     // 执行 eval
-    let eval_res = expr
-        .exec()
-        .map_err(|res| anyhow!("Error:Can't eval statement '{condition}' : {res}"))?;
-
-    // 检查执行结果
-    let result = eval_res.as_bool();
-    if let Some(res) = result {
-        Ok(res)
-    } else {
-        Err(anyhow!(
-            "Error:Can't eval statement '{condition}' into bool result"
-        ))
-    }
+    eval_boolean_with_context(&condition_with_values_interpreted, &context).map_err(|res| {
+        anyhow!("Error:Can't eval statement '{condition}'  into bool result : {res}")
+    })
 }
 
 // 执行工作流

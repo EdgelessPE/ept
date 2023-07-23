@@ -9,7 +9,7 @@ use crate::{
     utils::{is_alive_with_name, parse_relative_path_with_located},
 };
 use anyhow::{anyhow, Result};
-use eval::Expr;
+use evalexpr::*;
 use regex::Regex;
 
 use crate::types::{permissions::Generalizable, workflow::WorkflowHeader};
@@ -20,23 +20,14 @@ lazy_static! {
     static ref RESOURCE_REGEX: Regex = Regex::new(r"^[^/]+/[^/]+$").unwrap();
 }
 
-fn get_arg(val: Vec<eval::Value>) -> std::result::Result<String, eval::Error> {
-    if val.len() > 1 {
-        return Err(eval::Error::ArgumentsGreater(1));
+fn get_arg(val: &Value) -> std::result::Result<String, error::EvalexprError> {
+    if let Value::String(str) = val {
+        Ok(str.to_string())
+    } else {
+        Err(error::EvalexprError::ExpectedString {
+            actual: val.clone(),
+        })
     }
-    if val.len() == 0 {
-        return Err(eval::Error::ArgumentsLess(1));
-    }
-    let arg = &val[0];
-    if !arg.is_string() {
-        return Err(eval::Error::Custom("Argument is not a string".to_string()));
-    }
-
-    let mut arg = arg.to_string();
-    if arg.starts_with("\"") && arg.ends_with("\"") {
-        arg = arg[1..arg.len() - 1].to_string();
-    }
-    Ok(arg)
 }
 
 impl WorkflowHeader {
@@ -59,24 +50,29 @@ impl WorkflowHeader {
         // 迭代所有条件语句
         let res = Arc::new(Mutex::new(Vec::new()));
         for cond in conditions {
-            // 初始化表达式
-            let mut expr = Expr::new(cond);
+            // 初始化上下文
+            let mut context = HashMapContext::new();
 
-            // 迭代函数信息，收集
+            // 迭代函数信息，创建收集闭包
             for (name, is_fs) in info_arr.clone() {
                 let r = res.clone();
                 let c = cond.clone();
-                expr = expr.function(name, move |val| {
-                    let arg = get_arg(val)?;
-                    let mut r = r.lock().unwrap();
-                    r.push((name.to_string(), arg, is_fs, c.to_owned()));
+                context
+                    .set_function(
+                        name.to_string(),
+                        Function::new(move |val| {
+                            let arg = get_arg(val)?;
+                            let mut r = r.lock().unwrap();
+                            r.push((name.to_string(), arg, is_fs, c.to_owned()));
 
-                    Ok(eval::Value::Bool(true))
-                });
+                            Ok(Value::Boolean(true))
+                        }),
+                    )
+                    .unwrap();
             }
 
             // 执行
-            expr.exec()
+            eval_boolean_with_context(cond, &context)
                 .map_err(|e| anyhow!("Error:Failed to execute expression '{cond}' : {e}"))?;
         }
 
@@ -85,41 +81,38 @@ impl WorkflowHeader {
     }
 }
 
-pub fn functions_decorator(expr: Expr, located: &String) -> Expr {
-    let l = located.to_owned();
-    let expr = expr.function("Exist", move |val| {
+pub fn get_context_with_function(located: &String) -> HashMapContext {
+    let l1 = located.to_owned();
+    let l2 = located.to_owned();
+    context_map! {
+        "Exist"=>Function::new(move |val| {
         let arg = get_arg(val)?;
-        let p = parse_relative_path_with_located(&arg, &l);
+        let p = parse_relative_path_with_located(&arg, &l1);
 
-        Ok(eval::Value::Bool(p.exists()))
-    });
-
-    let l = located.to_owned();
-    let expr = expr.function("IsDirectory", move |val| {
+        Ok(Value::Boolean(p.exists()))
+    }),
+    "IsDirectory"=>Function::new(move |val| {
         let arg = get_arg(val)?;
-        let p = parse_relative_path_with_located(&arg, &l);
+        let p = parse_relative_path_with_located(&arg, &l2);
 
-        Ok(eval::Value::Bool(p.is_dir()))
-    });
-
-    let expr = expr.function("IsAlive", move |val| {
+        Ok(Value::Boolean(p.is_dir()))
+    }),
+    "IsAlive"=>Function::new(move |val|{
         let arg = get_arg(val)?;
-
-        Ok(eval::Value::Bool(is_alive_with_name(&arg)))
-    });
-
-    let expr = expr.function("IsInstalled", move |val| {
+        Ok(Value::Boolean(is_alive_with_name(&arg)))
+    }),
+    "IsInstalled"=>Function::new(move |val| {
         let arg = get_arg(val)?;
         let sp: Vec<&str> = arg.split("/").collect();
         if sp.len() != 2 {
-            return Err(eval::Error::Custom(format!("Invalid argument '{arg}'")));
+            return Err(error::EvalexprError::CustomMessage(format!("Invalid argument '{arg}' : expect 'SCOPE/NAME', e.g. 'Microsoft/VSCode'")));
         }
         let info = info(Some(sp[0].to_string()), &sp[1].to_string());
 
-        Ok(eval::Value::Bool(info.is_ok()))
-    });
-
-    expr
+        Ok(Value::Boolean(info.is_ok()))
+    })
+    }
+    .unwrap()
 }
 
 impl Generalizable for WorkflowHeader {
@@ -134,16 +127,14 @@ impl Generalizable for WorkflowHeader {
                 "Exist" => {
                     permissions.push(Permission {
                         key: "fs_read".to_string(),
-                        level: judge_perm_level(&arg)
-                            .map_err(|e| eval::Error::Custom(e.to_string()))?,
+                        level: judge_perm_level(&arg)?,
                         targets: vec![arg],
                     });
                 }
                 "IsDirectory" => {
                     permissions.push(Permission {
                         key: "fs_read".to_string(),
-                        level: judge_perm_level(&arg)
-                            .map_err(|e| eval::Error::Custom(e.to_string()))?,
+                        level: judge_perm_level(&arg)?,
                         targets: vec![arg],
                     });
                 }
@@ -253,5 +244,6 @@ fn test_header_valid() {
         c_if: Some("Exist(\"./mc/vsc.exe\") && IsDirectory(\"${SystemDrive}/Windows\") || Exist(\"${AppData}/Roaming/Edgeless/ept\")".to_string()),
     };
 
-    flow.verify_self(&String::from("./apps/VSCode")).unwrap();
+    flow.verify_self(&String::from("./examples/VSCode"))
+        .unwrap();
 }

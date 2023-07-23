@@ -3,6 +3,7 @@
         "appdata",
         "canonicalize",
         "envmnt",
+        "Evalexpr",
         "Secp",
         "vecu"
     ],
