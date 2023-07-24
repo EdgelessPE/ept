@@ -9,8 +9,8 @@ mod fs;
 mod path;
 mod process;
 mod term;
+pub mod test;
 mod wild_match;
-mod window;
 
 use anyhow::{anyhow, Result};
 use regex::Regex;

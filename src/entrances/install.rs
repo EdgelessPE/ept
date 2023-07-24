@@ -28,9 +28,7 @@ pub fn install_using_package(source_file: &String, verify_signature: bool) -> Re
     log!("Info:Deploying files...");
 
     // 检查对应包名有没有被安装过
-    let try_get_info_res = info_local(&software.scope, &package.name);
-    if try_get_info_res.is_ok() {
-        let (_, diff) = try_get_info_res.unwrap();
+    if let Ok((_, diff)) = info_local(&software.scope, &package.name) {
         return Err(anyhow!(
             "Error:Package '{name}' has been installed({ver}), use 'ept update \"{source_file}\"' instead",
             name = package.name,
@@ -130,6 +128,9 @@ fn test_install() {
     assert!(entry1_path.exists() || entry2_path.exists());
     assert!(mp_path.exists());
     assert!(cx_path.exists());
+
+    // 重复安装，会被要求使用升级
+    assert!(install_using_package(&"./test/VSCode_1.75.0.0_Cno.nep".to_string(), true).is_err());
 
     crate::uninstall(&"VSCode".to_string()).unwrap();
 

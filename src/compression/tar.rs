@@ -45,11 +45,18 @@ fn test_release_tar() {
     if !Path::new("./test/VSCode_1.0.0.0_Cno.tar").exists() {
         test_pack_tar();
     }
-    let target = Path::new("test/VSCode_1.0.0.0_Cno");
-    if target.exists() {
-        crate::utils::try_recycle(target).unwrap();
-    }
 
+    release_tar(
+        &"./test/VSCode_1.0.0.0_Cno.tar".to_string(),
+        &"./test/VSCode_1.0.0.0_Cno".to_string(),
+    )
+    .unwrap();
+
+    assert!(Path::new("test/VSCode_1.0.0.0_Cno/package.toml").exists());
+
+    // 测试覆盖
+    use crate::utils::try_recycle;
+    try_recycle("test/VSCode_1.0.0.0_Cno/package.toml").unwrap();
     release_tar(
         &"./test/VSCode_1.0.0.0_Cno.tar".to_string(),
         &"./test/VSCode_1.0.0.0_Cno".to_string(),

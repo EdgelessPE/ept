@@ -114,7 +114,12 @@ pub fn meta(input: &String, verify_signature: bool) -> Result<MetaResult> {
 
 #[test]
 fn test_meta() {
-    let res = meta(&"examples/VSCode".to_string(), false);
+    envmnt::set("CONFIRM", "true");
+    let res = meta(&"examples/VSCode".to_string(), false).unwrap();
     println!("{res:#?}");
-    assert!(res.is_ok());
+
+    // 从本地安装中生成 meta
+    crate::utils::test::_ensure_testing_vscode();
+    meta(&"VSCode".to_string(), false).unwrap();
+    crate::utils::test::_ensure_testing_vscode_uninstalled();
 }
