@@ -126,18 +126,19 @@ fn test_uninstall() {
     let mut cx = crate::types::workflow::WorkflowContext::_demo();
     crate::types::steps::StepExecute {
         command: "notepad.exe".to_string(),
-        pwd: Some(pwd),
+        pwd: Some(pwd.clone()),
         call_installer: None,
         wait: Some("Abandon".to_string()),
     }
     .run(&mut cx)
     .unwrap();
     crate::types::steps::StepWait {
-        timeout: 3000,
+        timeout: 2000,
         break_if: None,
     }
     .run(&mut cx)
     .unwrap();
 
     uninstall(&"Notepad".to_string()).unwrap();
+    assert!(!std::path::Path::new(&pwd).exists());
 }
