@@ -71,6 +71,11 @@ pub fn verify(source_dir: &String) -> Result<GlobalPackage> {
     // 记录 setup 中是否用到 call_installer
     let check_call_installer = verify_workflow(setup_flow.clone(), &pkg_content_path)?;
 
+    // 用到了 call_installer 必须有卸载流
+    if check_call_installer && !get_workflow_path(source_dir, "remove.toml").exists() {
+        return Err(anyhow!("Error:Workflow 'remove.toml' should include 'Execute' step with 'call_installer' field enabled when workflow 'setup.toml' includes such step"));
+    }
+
     // 检查其他工作流
     let optional_workflows = vec!["update.toml", "remove.toml"];
     for opt_workflow in optional_workflows {
