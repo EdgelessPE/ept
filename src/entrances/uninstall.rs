@@ -118,5 +118,26 @@ pub fn uninstall(package_name: &String) -> Result<()> {
 #[test]
 fn test_uninstall() {
     // 完整的安装和卸载流程案例位于entrances::install::test_install
-    // uninstall(&"VSCode".to_string()).unwrap();
+
+    // 这里测试一下需要杀进程的案例
+    use crate::types::steps::TStep;
+    envmnt::set("CONFIRM", "true");
+    let pwd = crate::utils::test::_ensure_testing("Microsoft", "Notepad");
+    let mut cx = crate::types::workflow::WorkflowContext::_demo();
+    crate::types::steps::StepExecute {
+        command: "notepad.exe".to_string(),
+        pwd: Some(pwd),
+        call_installer: None,
+        wait: Some("Abandon".to_string()),
+    }
+    .run(&mut cx)
+    .unwrap();
+    crate::types::steps::StepWait {
+        timeout: 3000,
+        break_if: None,
+    }
+    .run(&mut cx)
+    .unwrap();
+
+    uninstall(&"Notepad".to_string()).unwrap();
 }
