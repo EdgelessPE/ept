@@ -100,10 +100,17 @@ pub fn pack(source_dir: &String, into_file: Option<String>, need_sign: bool) -> 
 #[test]
 fn test_pack() {
     envmnt::set("DEBUG", "true");
+    envmnt::set("CONFIRM", "true");
     pack(
         &"./examples/ComplexFS".to_string(),
         Some("./test/ComplexFS_1.75.0.0_Cno.nep".to_string()),
         true,
+    )
+    .unwrap();
+    pack(
+        &"./examples/ComplexFS".to_string(),
+        Some("./test/ComplexFS_1.75.0.0_Cno.nep".to_string()),
+        false,
     )
     .unwrap();
 }

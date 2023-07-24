@@ -144,6 +144,7 @@ pub fn clean() -> Result<()> {
 
 #[test]
 fn test_clean() {
+    // TODO:创建环境，完善 clean 单测
     // envmnt::set("DEBUG", "true");
     clean().unwrap();
 }
