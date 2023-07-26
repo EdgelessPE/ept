@@ -151,10 +151,10 @@ pub fn workflow_reverse_executor(
 #[test]
 fn test_condition_eval() {
     let located = &String::from("./examples/VSCode");
-    let r1 = condition_eval(&String::from("\"${ExitCode}\"==114"), 114, located).unwrap();
+    let r1 = condition_eval(&String::from("\"${ExitCode}\"==\"114\""), 114, located).unwrap();
     assert!(r1);
 
-    let r2 = condition_eval(&String::from("\"${ExitCode}\"==514"), 114, located).unwrap();
+    let r2 = condition_eval(&String::from("\"${ExitCode}\"==\"514\""), 114, located).unwrap();
     assert_eq!(r2, false);
 
     let r3 = condition_eval(&String::from("\"${SystemDrive}\"==\"C:\""), 0, located).unwrap();
