@@ -29,3 +29,11 @@ pub fn _ensure_testing_uninstalled(scope: &str, name: &str) {
         crate::uninstall(&name.to_string()).unwrap();
     }
 }
+
+pub fn _ensure_clear_test_dir() {
+    use std::path::Path;
+    if Path::new("test").exists() {
+        std::fs::remove_dir_all("test").unwrap();
+    }
+    std::fs::create_dir_all("test").unwrap();
+}

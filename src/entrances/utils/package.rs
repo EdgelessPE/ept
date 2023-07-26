@@ -256,11 +256,7 @@ fn test_unpack_nep() {
         log!("Warning:Debug mode enabled");
         envmnt::set("DEBUG", "true");
     }
-    use std::path::Path;
-    if Path::new("test").exists() {
-        remove_dir_all("test").unwrap();
-    }
-    std::fs::create_dir_all("test").unwrap();
+    crate::utils::test::_ensure_clear_test_dir();
 
     crate::pack(
         &"./examples/VSCode".to_string(),
@@ -279,11 +275,7 @@ fn test_fast_unpack_nep() {
         log!("Warning:Debug mode enabled");
         envmnt::set("DEBUG", "true");
     }
-    use std::path::Path;
-    if Path::new("test").exists() {
-        remove_dir_all("test").unwrap();
-    }
-    std::fs::create_dir_all("test").unwrap();
+    crate::utils::test::_ensure_clear_test_dir();
 
     crate::pack(
         &"./examples/VSCode".to_string(),
@@ -299,11 +291,7 @@ fn test_fast_unpack_nep() {
 #[test]
 fn benchmark_fast_unpack_nep() {
     // 准备带有一定体积的包
-    use std::path::Path;
-    if Path::new("test").exists() {
-        remove_dir_all("test").unwrap();
-    }
-    std::fs::create_dir_all("test").unwrap();
+    crate::utils::test::_ensure_clear_test_dir();
 
     crate::pack(
         &"./examples/Dism++".to_string(),
@@ -327,4 +315,71 @@ fn benchmark_fast_unpack_nep() {
         n = normal.elapsed().as_millis(),
         f = fast.elapsed().as_millis()
     );
+}
+
+#[test]
+fn test_bad_package() {
+    crate::utils::test::_ensure_clear_test_dir();
+
+    // 生成基础目录
+    crate::pack(
+        &"./examples/Dism++".to_string(),
+        Some("./test/Normal.nep".to_string()),
+        true,
+    )
+    .unwrap();
+    release_tar(
+        &"./test/Normal.nep".to_string(),
+        &"./test/Normal".to_string(),
+    )
+    .unwrap();
+    let opt = fs_extra::dir::CopyOptions::new().copy_inside(true);
+
+    // 未签名
+    crate::pack(
+        &"./examples/Dism++".to_string(),
+        Some("./test/UnSig++_10.1.1002.1_Cno.nep".to_string()),
+        false,
+    )
+    .unwrap();
+    assert!(unpack_nep(&"./test/UnSig++_10.1.1002.1_Cno.nep".to_string(), true).is_err());
+
+    // 被篡改的签名
+    fs_extra::dir::copy("test/Normal", "test/BadSig", &opt).unwrap();
+    let mut signature_struct = parse_signature(&"test/BadSig/signature.toml".to_string()).unwrap();
+    signature_struct.package.signature = signature_struct
+        .package
+        .signature
+        .map(|s| s.chars().rev().collect());
+    let text = toml::to_string_pretty(&signature_struct).unwrap();
+    std::fs::write("test/BadSig/signature.toml", text).unwrap();
+    crate::compression::pack_tar(
+        &"test/BadSig".to_string(),
+        &"test/BadSig++_10.1.1002.1_Cno.nep".to_string(),
+    )
+    .unwrap();
+    assert!(unpack_nep(&"test/BadSig++_10.1.1002.1_Cno.nep".to_string(), true).is_err());
+
+    // 缺失签名文件
+    fs_extra::dir::copy("test/Normal", "test/NoSig", &opt).unwrap();
+    std::fs::remove_file("test/NoSig/signature.toml").unwrap();
+    crate::compression::pack_tar(
+        &"test/NoSig".to_string(),
+        &"test/NoSig++_10.1.1002.1_Cno.nep".to_string(),
+    )
+    .unwrap();
+    assert!(unpack_nep(&"test/NoSig++_10.1.1002.1_Cno.nep".to_string(), true).is_err());
+
+    // 错误的打包者
+    fs_extra::dir::copy("test/Normal", "test/BadAuth", &opt).unwrap();
+    let mut signature_struct = parse_signature(&"test/BadAuth/signature.toml".to_string()).unwrap();
+    signature_struct.package.signer = "Jack".to_string();
+    let text = toml::to_string_pretty(&signature_struct).unwrap();
+    std::fs::write("test/BadAuth/signature.toml", text).unwrap();
+    crate::compression::pack_tar(
+        &"test/BadAuth".to_string(),
+        &"test/BadAuth++_10.1.1002.1_Cno.nep".to_string(),
+    )
+    .unwrap();
+    assert!(unpack_nep(&"test/BadAuth++_10.1.1002.1_Cno.nep".to_string(), true).is_err());
 }
