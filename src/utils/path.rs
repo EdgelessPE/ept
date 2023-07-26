@@ -1,9 +1,6 @@
 use anyhow::{anyhow, Result};
 use path_clean::PathClean;
-use std::{
-    fs::canonicalize,
-    path::{Path, PathBuf},
-};
+use std::path::{Path, PathBuf};
 
 use crate::p2s;
 
@@ -23,29 +20,6 @@ pub fn split_parent(raw: &String, located: &String) -> (PathBuf, String) {
     let base = p2s!(abs_path.file_name().unwrap());
 
     (parent, base)
-}
-
-/// 使用配置文件中指定的 base 解析相对路径，不带路径格式化
-#[deprecated(note = "意义不明确的函数名及其实现，改用 parse_relative_path_with_xxx")]
-pub fn _parse_relative_path(relative: &String) -> Result<PathBuf> {
-    let path = Path::new(relative);
-
-    let absolute_path = if path.is_absolute() {
-        path.to_path_buf()
-    } else {
-        let cfg = get_config();
-        let relative = Path::new(&cfg.local.base).join(relative);
-        let dirty_abs = p2s!(canonicalize(relative.clone())
-            .map_err(|e| anyhow!("Error:Path '{p}' not exist : {e}", p = p2s!(relative)))?);
-        Path::new(&dirty_abs[4..]).to_path_buf()
-    }
-    .clean();
-
-    log!(
-        "Debug:Parse relative path '{relative}' into '{p}'",
-        p = p2s!(absolute_path)
-    );
-    Ok(absolute_path)
 }
 
 /// 使用配置文件中指定的 base 解析相对路径

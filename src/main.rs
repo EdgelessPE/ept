@@ -85,6 +85,7 @@ enum Action {
     Clean,
 }
 
+#[cfg(not(tarpaulin_include))]
 fn router(action: Action) -> Result<String> {
     // 环境变量读取
     let verify_signature = envmnt::get_or("OFFLINE", "false") == String::from("false");
@@ -139,6 +140,7 @@ fn router(action: Action) -> Result<String> {
     }
 }
 
+#[cfg(not(tarpaulin_include))]
 fn main() {
     let args = Args::parse();
 

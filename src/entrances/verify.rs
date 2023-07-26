@@ -114,4 +114,15 @@ fn test_verify() {
     .unwrap();
     assert!(verify(&"./examples/CallInstaller".to_string()).is_err());
     std::fs::remove_file("./examples/CallInstaller/workflows/update.toml").unwrap();
+
+    // 调用了 call_installer 但是不提供 remove.toml
+    std::fs::rename(
+        "examples/CallInstaller/workflows/remove.toml",
+        "examples/CallInstaller/workflows/_remove.toml",
+    ).unwrap();
+    assert!(verify(&"./examples/CallInstaller".to_string()).is_err());
+    std::fs::rename(
+        "examples/CallInstaller/workflows/_remove.toml",
+        "examples/CallInstaller/workflows/remove.toml",
+    ).unwrap();
 }

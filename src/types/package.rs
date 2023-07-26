@@ -31,7 +31,7 @@ impl Verifiable for Package {
         }
 
         // 版本号必须可以解析
-        ExSemVer::parse(&self.version)?;
+        ExSemVer::parse(&self.version).map_err(err_wrapper)?;
 
         Ok(())
     }

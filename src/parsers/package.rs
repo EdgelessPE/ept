@@ -118,6 +118,23 @@ fn is_nep_version_compatible(pkg_str: &String, ept_str: &String) -> Result<()> {
 }
 
 #[test]
+fn test_update_main_program() {
+    let located = "examples/Dism++".to_string();
+    let mut pkg = parse_package(&"examples/Dism++/package.toml".to_string(), Some(located.clone())).unwrap();
+    pkg.package.version="10.1.112.1".to_string();
+    let software = pkg.clone().software.unwrap();
+
+    update_main_program(
+        &mut pkg,
+        software,
+        Some("examples/Dism++/Dism++".to_string()),
+        &Path::new("test/nul.toml"),
+    )
+    .unwrap();
+    assert!(pkg.package.version == "10.1.1002.0".to_string());
+}
+
+#[test]
 fn test_is_nep_version_compatible() {
     assert!(is_nep_version_compatible(&"0.2".to_string(), &"0.2.1".to_string()).is_ok());
     assert!(is_nep_version_compatible(&"0.1".to_string(), &"0.2.1".to_string()).is_err());

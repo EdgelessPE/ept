@@ -29,11 +29,12 @@ impl Verifiable for Software {
 
         // 检查 arch 枚举
         if let Some(arch) = &self.arch {
-            verify_enum!("arch", arch, "X64" | "X86" | "ARM64")?;
+            verify_enum!("arch", arch, "X64" | "X86" | "ARM64").map_err(err_wrapper)?;
         }
 
         // 检查 language 枚举
-        verify_enum!("language", &self.language, "Multi" | "zh-CN" | "en-US")?;
+        verify_enum!("language", &self.language, "Multi" | "zh-CN" | "en-US")
+            .map_err(err_wrapper)?;
 
         // 上游必须是 URL
         if !is_url(&self.upstream) {

@@ -93,3 +93,118 @@ pub fn verify_conditions(conditions: Vec<String>, located: &String) -> Result<()
 
     Ok(())
 }
+
+#[test]
+fn test_condition() {
+    let located = "examples/VSCode".to_string();
+
+    let conditions: Vec<String> = vec![
+        "\"${ExitCode}\"==114",
+        "\"${SystemDrive}\"==\"C:\"",
+        "\"${DefaultLocation}\"==\"./unknown/VSCode\"",
+        "Exist(\"src/main.rs\") && IsDirectory(\"src\")",
+        "Exist(\"${AppData}\") && IsDirectory(\"${SystemDrive}/Windows\")",
+        "Exist(\"./src/main.ts\")",
+        "(IsInstalled(\"Foo/Bar\") && IsAlive(\"陈睿's mother.exe\")) || IsAlive(\"aunt.exe\")",
+    ]
+    .into_iter()
+    .map(|s| s.to_string())
+    .collect();
+
+    // verify_conditions
+    verify_conditions(conditions.clone(), &located).unwrap();
+
+    // capture_function_info
+    let res = capture_function_info(&conditions.clone()).unwrap();
+    let answer: Vec<(String, String, String)> = vec![
+        (
+            "Exist",
+            "src/main.rs",
+            "Exist(\"src/main.rs\") && IsDirectory(\"src\")",
+        ),
+        (
+            "IsDirectory",
+            "src",
+            "Exist(\"src/main.rs\") && IsDirectory(\"src\")",
+        ),
+        (
+            "Exist",
+            "${AppData}",
+            "Exist(\"${AppData}\") && IsDirectory(\"${SystemDrive}/Windows\")",
+        ),
+        (
+            "IsDirectory",
+            "${SystemDrive}/Windows",
+            "Exist(\"${AppData}\") && IsDirectory(\"${SystemDrive}/Windows\")",
+        ),
+        ("Exist", "./src/main.ts", "Exist(\"./src/main.ts\")"),
+        (
+            "IsInstalled",
+            "Foo/Bar",
+            "(IsInstalled(\"Foo/Bar\") && IsAlive(\"陈睿's mother.exe\")) || IsAlive(\"aunt.exe\")",
+        ),
+        (
+            "IsAlive",
+            "陈睿's mother.exe",
+            "(IsInstalled(\"Foo/Bar\") && IsAlive(\"陈睿's mother.exe\")) || IsAlive(\"aunt.exe\")",
+        ),
+        (
+            "IsAlive",
+            "aunt.exe",
+            "(IsInstalled(\"Foo/Bar\") && IsAlive(\"陈睿's mother.exe\")) || IsAlive(\"aunt.exe\")",
+        ),
+    ]
+    .into_iter()
+    .map(|(func, arg, source)| (func.to_string(), arg.to_string(), source.to_string()))
+    .collect();
+    assert_eq!(res, answer);
+
+    // get_permissions_from_conditions
+    use crate::types::permissions::PermissionLevel;
+    let res = get_permissions_from_conditions(conditions.clone()).unwrap();
+    let answer = vec![
+        Permission {
+            key: "fs_read".to_string(),
+            level: PermissionLevel::Normal,
+            targets: vec!["src/main.rs".to_string()],
+        },
+        Permission {
+            key: "fs_read".to_string(),
+            level: PermissionLevel::Normal,
+            targets: vec!["src".to_string()],
+        },
+        Permission {
+            key: "fs_read".to_string(),
+            level: PermissionLevel::Sensitive,
+            targets: vec!["${AppData}".to_string()],
+        },
+        Permission {
+            key: "fs_read".to_string(),
+            level: PermissionLevel::Sensitive,
+            targets: vec!["${SystemDrive}/Windows".to_string()],
+        },
+        Permission {
+            key: "fs_read".to_string(),
+            level: PermissionLevel::Normal,
+            targets: vec!["./src/main.ts".to_string()],
+        },
+        Permission {
+            key: "nep_installed".to_string(),
+            level: PermissionLevel::Normal,
+            targets: vec!["Foo/Bar".to_string()],
+        },
+        Permission {
+            key: "process_query".to_string(),
+            level: PermissionLevel::Normal,
+            targets: vec!["陈睿's mother.exe".to_string()],
+        },
+        Permission {
+            key: "process_query".to_string(),
+            level: PermissionLevel::Normal,
+            targets: vec!["aunt.exe".to_string()],
+        },
+    ];
+    assert_eq!(res, answer);
+
+    // println!("{res:#?}");
+}
