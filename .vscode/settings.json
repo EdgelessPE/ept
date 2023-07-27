@@ -1,11 +1,29 @@
 {
     "cSpell.words": [
+        "ABORTIFHUNG",
         "appdata",
         "canonicalize",
         "envmnt",
         "Evalexpr",
+        "hkcu",
+        "HKEY",
+        "HWND",
+        "LPARAM",
+        "minwindef",
+        "mslnk",
+        "msvsc",
+        "predef",
         "Secp",
-        "vecu"
+        "SETTINGCHANGE",
+        "SMTO",
+        "startmenu",
+        "subkey",
+        "sysinfo",
+        "vecu",
+        "winapi",
+        "winreg",
+        "winuser",
+        "WPARAM"
     ],
     "rust-analyzer.linkedProjects": [
         ".\\Cargo.toml"
