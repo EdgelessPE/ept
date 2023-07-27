@@ -32,7 +32,7 @@ fn mv(
             try_recycle(&to_path)?;
         } else {
             // 如果不覆盖则不需要移动
-            log!("Warning(Move):Target '{to}' exists, enable field 'overwrite' to process still");
+            log!("Warning(Move):Ignoring due to target '{to}' exists, enable field 'overwrite' to process still");
             return Ok(());
         }
     }

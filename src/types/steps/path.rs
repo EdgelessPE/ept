@@ -57,8 +57,7 @@ fn conflict_resolver(bin_abs: &String, stem: &String, scope: &String) -> String 
     origin
 }
 
-// 配置系统 PATH 变量，但是需要注销并重新登录以生效
-// 返回的 bool 表示是否执行了操作
+// 配置系统 PATH 变量；返回的 bool 表示是否发送了全局广播
 fn set_system_path(record: &String, is_add: bool) -> Result<bool> {
     // 转换 record 为反斜杠
     let record = record.replace("/", r"\");
@@ -94,7 +93,7 @@ fn set_system_path(record: &String, is_add: bool) -> Result<bool> {
                 .filter(|x| x != &record_str)
                 .collect();
         } else {
-            log!("Warning(Path):Record '{record_str}' not exist in PATH");
+            log!("Warning(Path):Ignoring due to record '{record_str}' not exist in PATH");
             return Ok(false);
         }
     }
@@ -126,7 +125,7 @@ fn set_system_path(record: &String, is_add: bool) -> Result<bool> {
         )
     };
     if result == 0 {
-        log!("Warning(Path):Failed to apply PATH change, restart is required")
+        log!("Warning(Path):Failed to apply PATH change, os restart is required");
     }
 
     Ok(true)
@@ -157,17 +156,17 @@ impl TStep for StepPath {
 
         // 处理为目录的情况
         if abs_target_path.is_dir() {
-            if self.alias.is_some() {
+            if let Some(a) = self.alias {
                 log!(
-                    "Warning(Path):Ignoring alias '{a}', since record refers to a dictionary",
-                    a = self.alias.unwrap()
+                    "Warning(Path):Ignoring alias '{a}', since record '{r}' refers to a dictionary",
+                    r = &self.record
                 );
             }
             let add_res = set_system_path(&abs_target_str, true);
             if add_res.is_err() {
                 log!("Warning(Path):Failed to add system PATH '{bin_abs}', manually add later");
             } else if add_res.unwrap() {
-                log!("Warning(Path):Added system PATH '{bin_abs}', restart to enable");
+                log!("Warning(Path):Added system PATH for '{bin_abs}'");
             }
             return Ok(0);
         }

@@ -61,9 +61,9 @@ impl TStep for StepExecute {
             let (level, hint) = if self.call_installer.unwrap_or(false)
                 && duration.as_millis() <= 500
             {
-                ("Warning",format!("exit in {sec:.1}s, you may need to manually operate the installer/uninstaller to complete the steps"))
+                ("Warning",format!("exited in {sec:.1}s, you may need to manually operate the installer/uninstaller to complete the steps"))
             } else {
-                ("Info", format!("exit in {sec:.1}s"))
+                ("Info", format!("exited in {sec:.1}s"))
             };
 
             // 处理退出码
@@ -77,7 +77,7 @@ impl TStep for StepExecute {
                         println!("{output}", output = read_console(output.stdout));
                     } else {
                         log!(
-                            "Error(Execute):Failed command '{cmd}' {hint}, output : \n{o}",
+                            "Error(Execute):Failed command '{cmd}' {hint}, output(code={val}) : \n{o}",
                             cmd = self.command,
                             o = read_console(output.stderr)
                         );
@@ -86,7 +86,7 @@ impl TStep for StepExecute {
                     Ok(val)
                 }
                 None => Err(anyhow!(
-                    "Error(Execute):Command '{cmd}' terminated by signal",
+                    "Error(Execute):Command '{cmd}' terminated by outer signal",
                     cmd = self.command
                 )),
             }
@@ -98,7 +98,7 @@ impl TStep for StepExecute {
             );
             let handler = cmd.spawn().map_err(|e| {
                 anyhow!(
-                    "Error(Execute):Command '{cmd}' execution failed : {e}",
+                    "Error(Execute):Command '{cmd}' spawn failed : {e}",
                     cmd = self.command
                 )
             })?;

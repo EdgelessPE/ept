@@ -139,4 +139,17 @@ fn test_wait() {
 
     let elapsed = now.elapsed();
     assert!(Duration::from_millis(500) <= elapsed && elapsed <= Duration::from_millis(550));
+
+    // 测试过短条件等待
+    let d = Duration::from_millis(200);
+    let now = Instant::now();
+
+    StepWait {
+        timeout: 200,
+        break_if: None,
+    }
+    .run(&mut cx)
+    .unwrap();
+    let e = now.elapsed();
+    assert!(e >= d && e <= Duration::from_millis(500));
 }

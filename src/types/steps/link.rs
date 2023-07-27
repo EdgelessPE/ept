@@ -29,7 +29,9 @@ fn parse_target(name: &String, base: &String) -> Result<(String, bool)> {
     let sp: Vec<&str> = name.split("/").collect();
     let length = sp.len();
     let (lnk_folder_opt, lnk_name) = if length > 2 {
-        return Err(anyhow!("Error:Invalid filed 'target_name' : '{name}'"));
+        return Err(anyhow!(
+            "Error(Link):Invalid field 'target_name', expect 'NAME' or 'FOLDER/NAME', got '{name}'"
+        ));
     } else if length == 2 {
         (
             Some(sp.get(0).unwrap().to_string()),
@@ -256,9 +258,11 @@ impl Generalizable for StepLink {
 #[test]
 fn test_link() {
     let mut cx = WorkflowContext::_demo();
+
+    // 配置拉满
     let step = StepLink {
         source_file: String::from("examples/VSCode/VSCode/Code.exe"),
-        target_name: Some(String::from("VSC")),
+        target_name: Some(String::from("ms_ept_test/VSC")),
         target_args: Some("--debug".to_string()),
         target_icon: Some("examples/VSCode/VSCode/favicon.ico".to_string()),
         at: Some(vec!["Desktop".to_string(), "StartMenu".to_string()]),
@@ -267,15 +271,17 @@ fn test_link() {
         .unwrap();
     step.run(&mut cx).unwrap();
 
-    let desktop_path = dirs::desktop_dir().unwrap().join("VSC.lnk");
-    let start_path = Path::new(&env_start_menu()).join("VSC.lnk");
+    let desktop_path = dirs::desktop_dir().unwrap().join("ms_ept_test/VSC.lnk");
+    let desktop_folder_path = dirs::desktop_dir().unwrap().join("ms_ept_test");
+    let start_path = Path::new(&env_start_menu()).join("ms_ept_test/VSC.lnk");
 
     assert!(desktop_path.exists());
     assert!(start_path.exists());
 
-    try_recycle(desktop_path).unwrap();
+    try_recycle(desktop_folder_path).unwrap();
     try_recycle(start_path).unwrap();
 
+    // 缺省状态
     StepLink {
         source_file: String::from("examples/VSCode/VSCode/Code.exe"),
         target_name: None,
@@ -286,6 +292,20 @@ fn test_link() {
     .run(&mut cx)
     .unwrap();
     let desktop_path = dirs::desktop_dir().unwrap().join("Code.lnk");
+    assert!(desktop_path.exists());
+    try_recycle(desktop_path).unwrap();
+
+    // 重命名
+    StepLink {
+        source_file: String::from("examples/VSCode/VSCode/Code.exe"),
+        target_name: Some("vsc".to_string()),
+        target_args: None,
+        target_icon: None,
+        at: None,
+    }
+    .run(&mut cx)
+    .unwrap();
+    let desktop_path = dirs::desktop_dir().unwrap().join("vsc.lnk");
     assert!(desktop_path.exists());
     try_recycle(desktop_path).unwrap();
 }

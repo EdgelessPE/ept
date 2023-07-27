@@ -30,7 +30,7 @@ fn kill(target: &String) -> Result<()> {
         }
     }
     if count_suc + count_fail == 0 {
-        log!("Warning(Kill):No process named '{target}' found, please note that field 'target' is case-sensitive and generally end with '.exe'");
+        log!("Warning(Kill):No process named '{target}' found.Tip for developer : note that field 'target' is case-sensitive and generally end with '.exe'");
     } else {
         log!("{level}(Kill):Killing '{target}' finished with {count_suc} succeeded, {count_fail} failed",level=if count_fail>0 {"Warning"}else{"Info"});
     }
@@ -84,10 +84,29 @@ impl Generalizable for StepKill {
 fn test_kill() {
     use crate::types::workflow::WorkflowContext;
     envmnt::set("DEBUG", "true");
+    envmnt::set("CONFIRM", "true");
     let mut cx = WorkflowContext::_demo();
 
+    crate::utils::test::_ensure_clear_test_dir();
+    std::fs::copy("examples/Notepad/Notepad/notepad.exe", "test/7zGM.exe").unwrap();
+    crate::types::steps::StepExecute {
+        command: "7zGM.exe".to_string(),
+        pwd: Some("test".to_string()),
+        call_installer: None,
+        wait: Some("Abandon".to_string()),
+    }
+    .run(&mut cx)
+    .unwrap();
+
+    crate::types::steps::StepWait {
+        timeout: 3000,
+        break_if: None,
+    }
+    .run(&mut cx)
+    .unwrap();
+
     StepKill {
-        target: "360ChromeX.exe".to_string(),
+        target: "7zGM.exe".to_string(),
     }
     .run(&mut cx)
     .unwrap();
