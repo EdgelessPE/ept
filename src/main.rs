@@ -14,76 +14,15 @@ mod types;
 mod utils;
 
 use anyhow::{anyhow, Result};
-use clap::{Parser, Subcommand};
+
 use entrances::meta;
 use std::fs::write;
 use std::process::exit;
 
+use self::types::cli::{Action, Args};
 use crate::entrances::{
     clean, info, install_using_package, list, pack, uninstall, update_using_package,
 };
-
-/// [Alpha] Edgeless Package Tool (ept) for Edgeless Next-Generation Packages (nep)
-#[derive(Parser, Debug)]
-#[command(version)]
-struct Args {
-    #[command(subcommand)]
-    action: Action,
-    /// Confirm each "Yes or No" question
-    #[arg(short, long)]
-    yes: bool,
-    /// Strict mode, throw immediately when a workflow step goes wrong
-    #[arg(short, long)]
-    strict: bool,
-    /// (Dangerous) Disable online Edgeless CA to skip signature signing or verifying
-    #[arg(long)]
-    offline: bool,
-    /// Run commands in debug mode
-    #[arg(short, long)]
-    debug: bool,
-}
-
-#[derive(Subcommand, Debug)]
-enum Action {
-    /// Install a package with path (locally in current version)
-    Install {
-        /// Package path (or package name in future versions)
-        package: String,
-    },
-    /// Update a package with path (locally in current version)
-    Update {
-        /// Package path (or package name in future versions)
-        package: String,
-    },
-    /// Uninstall a package with package name
-    Uninstall {
-        /// Package name
-        package_name: String,
-    },
-    /// Pack a directory content into nep
-    Pack {
-        /// Source directory ready to be packed
-        source_dir: String,
-        /// (Optional) Store packed nep at
-        into_file: Option<String>,
-    },
-    /// Query package information (locally in current version)
-    Info {
-        /// Package name
-        package_name: String,
-    },
-    /// List information of installed packages
-    List,
-    /// Get meta data of given package
-    Meta {
-        /// Source package
-        source_package: String,
-        /// (Optional) Save meta report at
-        save_at: Option<String>,
-    },
-    /// Clean temporary or illegal files
-    Clean,
-}
 
 #[cfg(not(tarpaulin_include))]
 fn router(action: Action) -> Result<String> {
@@ -137,11 +76,14 @@ fn router(action: Action) -> Result<String> {
         }
 
         Action::Clean => clean().map(|_| format!("Success:Cleaned")),
+        Action::Config { operation } => Ok("".to_string()),
     }
 }
 
 #[cfg(not(tarpaulin_include))]
 fn main() {
+    use clap::Parser;
+
     let args = Args::parse();
 
     // 配置环境变量

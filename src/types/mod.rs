@@ -1,4 +1,5 @@
 pub mod author;
+pub mod cli;
 pub mod extended_semver;
 pub mod info;
 pub mod meta;
