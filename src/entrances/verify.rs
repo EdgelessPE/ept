@@ -119,10 +119,12 @@ fn test_verify() {
     std::fs::rename(
         "examples/CallInstaller/workflows/remove.toml",
         "examples/CallInstaller/workflows/_remove.toml",
-    ).unwrap();
+    )
+    .unwrap();
     assert!(verify(&"./examples/CallInstaller".to_string()).is_err());
     std::fs::rename(
         "examples/CallInstaller/workflows/_remove.toml",
         "examples/CallInstaller/workflows/remove.toml",
-    ).unwrap();
+    )
+    .unwrap();
 }
