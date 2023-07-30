@@ -15,7 +15,7 @@ use std::{fs::create_dir_all, fs::File, path::Path};
 
 use super::TStep;
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct StepNew {
     pub at: String,
     pub overwrite: Option<bool>,

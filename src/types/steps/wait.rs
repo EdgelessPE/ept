@@ -11,7 +11,7 @@ use anyhow::{anyhow, Ok, Result};
 use serde::{Deserialize, Serialize};
 use std::time::Instant;
 use std::{thread::sleep, time::Duration};
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct StepWait {
     pub timeout: u64,
     pub break_if: Option<String>,

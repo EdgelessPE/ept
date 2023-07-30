@@ -8,7 +8,7 @@ use crate::{log, types::verifiable::Verifiable, verify_enum};
 
 use super::TStep;
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct StepLog {
     pub level: String,
     pub msg: String,

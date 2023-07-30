@@ -10,7 +10,7 @@ use anyhow::{anyhow, Ok, Result};
 use notify_rust::Notification;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct StepToast {
     pub title: String,
     pub content: String,

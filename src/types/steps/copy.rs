@@ -16,7 +16,7 @@ use fs_extra::dir::CopyOptions;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct StepCopy {
     pub from: String,
     pub to: String,

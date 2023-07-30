@@ -86,7 +86,7 @@ fn delete_shortcut(name: &String, base: &String) -> Result<()> {
     Ok(())
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct StepLink {
     pub source_file: String,
     pub target_name: Option<String>,

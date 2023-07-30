@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 use std::process::{Command, Stdio};
 use std::time::Instant;
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct StepExecute {
     pub command: String,
     pub pwd: Option<String>,

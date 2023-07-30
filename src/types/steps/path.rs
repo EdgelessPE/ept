@@ -19,7 +19,7 @@ use winapi::um::winuser::{
 };
 use winreg::{enums::*, RegKey};
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct StepPath {
     pub record: String,
     pub alias: Option<String>,

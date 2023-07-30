@@ -20,7 +20,7 @@ lazy_static! {
     static ref PURE_NAME_NOT_MATCH_REGEX: Regex = Regex::new(r"[\\\/\*\:\$]").unwrap();
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct StepRename {
     pub from: String,
     pub to: String,

@@ -46,7 +46,7 @@ where
 macro_rules! def_enum_step {
     ($($x:ident),*) => {
 
-        #[derive(Serialize, Deserialize, Clone, Debug)]
+        #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
         pub enum Step {
             $( $x($x) ),*
         }

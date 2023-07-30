@@ -9,7 +9,7 @@ use crate::{p2s, types::permissions::Permission};
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct WorkflowHeader {
     pub name: String,
     pub step: String,
@@ -84,7 +84,7 @@ fn test_header_valid() {
         .unwrap();
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct WorkflowNode {
     pub header: WorkflowHeader,
     pub body: Step,

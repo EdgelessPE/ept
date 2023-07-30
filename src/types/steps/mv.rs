@@ -11,7 +11,7 @@ use crate::{
 use anyhow::{anyhow, Ok, Result};
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct StepMove {
     pub from: String,
     pub to: String,

@@ -14,8 +14,8 @@ fn cmd_converter(origin: &String) -> Result<String> {
     // 转换器
     let mut text = origin.to_owned();
     for cmd in list {
-        let reg_str = String::from("^(");
-        let rep = Regex::new(&(reg_str + cmd + r"\s?=.+)"))?;
+        let reg_str = String::from("(?m)^(");
+        let rep = Regex::new(&(reg_str + cmd + r"\s*=)"))?;
         text = rep.replace_all(&text, "c_$1").to_string();
     }
     Ok(text)
@@ -58,4 +58,51 @@ pub fn parse_workflow(p: &String) -> Result<Vec<WorkflowNode>> {
     }
 
     Ok(res)
+}
+
+#[test]
+fn test_parse_workflow() {
+    use crate::types::steps::{Step, StepLink, StepPath, StepWait};
+    use crate::types::workflow::{WorkflowHeader, WorkflowNode};
+
+    let res = parse_workflow(&"examples/ComplexSteps/workflows/setup.toml".to_string()).unwrap();
+    let answer = vec![
+        WorkflowNode {
+            header: WorkflowHeader {
+                name: "Create shortcut".to_string(),
+                step: "Link".to_string(),
+                c_if: None,
+            },
+            body: Step::StepLink(StepLink {
+                source_file: "Code.exe".to_string(),
+                target_name: Some("Visual Studio Code".to_string()),
+                target_args: None,
+                target_icon: None,
+                at: None,
+            }),
+        },
+        WorkflowNode {
+            header: WorkflowHeader {
+                name: "Add PATH".to_string(),
+                step: "Path".to_string(),
+                c_if: Some("${AppData} if = 114514".to_string()),
+            },
+            body: Step::StepPath(StepPath {
+                record: "Code.exe".to_string(),
+                alias: None,
+            }),
+        },
+        WorkflowNode {
+            header: WorkflowHeader {
+                name: "Wait".to_string(),
+                step: "Wait".to_string(),
+                c_if: None,
+            },
+            body: Step::StepWait(StepWait {
+                timeout: 30000,
+                break_if: Some("true".to_string()),
+            }),
+        },
+    ];
+    assert_eq!(res, answer);
 }

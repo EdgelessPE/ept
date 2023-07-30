@@ -14,7 +14,7 @@ use crate::{
 use anyhow::{anyhow, Result};
 use force_delete_win::force_delete_file_folder;
 use serde::{Deserialize, Serialize};
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct StepDelete {
     pub at: String,
     pub force: Option<bool>,
