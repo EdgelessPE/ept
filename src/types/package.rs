@@ -65,6 +65,7 @@ impl GlobalPackage {
                 language: "en-US".to_string(),
                 main_program: None,
                 tags: None,
+                alias: None,
             }),
         }
     }

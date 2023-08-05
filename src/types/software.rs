@@ -19,6 +19,7 @@ pub struct Software {
     pub language: String,
     pub main_program: Option<String>,
     pub tags: Option<Vec<String>>,
+    pub alias: Option<Vec<String>>,
 }
 
 impl Verifiable for Software {
