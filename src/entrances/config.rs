@@ -148,7 +148,9 @@ fn test_config() {
 
     // 还原现场
     if let Some(text) = scene_opt {
-        fs::write("config.toml", text).unwrap();
+        // 需要手动重置一次全局 Cfg，否则之后的测试无法正确进行
+        let cfg: Cfg = toml::from_str(&text).unwrap();
+        set_config(cfg).unwrap();
     } else {
         fs::remove_file("config.toml").unwrap();
     }
