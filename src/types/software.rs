@@ -65,6 +65,32 @@ impl Verifiable for Software {
             }
         }
 
+        // tags 不应该 software 表中的字段重复
+        let mut alias = self
+            .alias
+            .to_owned()
+            .unwrap_or(Vec::new())
+            .into_iter()
+            .map(|tag| ("alias", tag))
+            .collect();
+        let mut fields = vec![
+            ("scope", self.scope.to_owned()),
+            ("category", self.category.to_owned()),
+        ];
+        fields.append(&mut alias);
+        let tag_checker = |tag: &String| {
+            for (field, text) in fields.clone() {
+                if text.contains(tag) {
+                    return Err(anyhow!("Error:Value '{tag}' in field 'tags' contains duplicated key word found in field '{field}' : '{text}'"));
+                }
+            }
+
+            Ok(())
+        };
+        for tag in self.tags.to_owned().unwrap_or(Vec::new()) {
+            tag_checker(&tag)?;
+        }
+
         Ok(())
     }
 }
@@ -76,7 +102,23 @@ fn test_verify_software() {
     let base = GlobalPackage::_demo().software.unwrap();
     assert!(base.verify_self(&located).is_ok());
 
+    // 校验架构
     let mut s1 = base.clone();
     s1.arch = Some("X32".to_string());
     assert!(s1.verify_self(&located).is_err());
+
+    // 校验语言
+    let mut s2 = base.clone();
+    s2.language = "ZH-CN".to_string();
+    assert!(s2.verify_self(&located).is_err());
+
+    // 校验 tags 重复
+    let mut s3 = base.clone();
+    s3.tags = Some(vec!["Visual Studio".to_string(),"Microsoft".to_string()]);
+    s3.alias = Some(vec!["Visual Studio Code".to_string()]);
+    assert!(s3.verify_self(&located).is_err());
+    s3.alias=None;
+    assert!(s3.verify_self(&located).is_ok());
+    s3.scope="Microsoft".to_string();
+    assert!(s3.verify_self(&located).is_err());
 }
