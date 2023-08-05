@@ -95,12 +95,9 @@ impl Generalizable for StepDelete {
 #[test]
 fn test_delete() {
     use fs_extra::dir::CopyOptions;
-    use std::fs::remove_dir_all;
     envmnt::set("DEBUG", "true");
     let mut cx = WorkflowContext::_demo();
-    if Path::new("test").exists() {
-        remove_dir_all("test").unwrap();
-    }
+    crate::utils::test::_ensure_clear_test_dir();
 
     // 准备源
     let opt = CopyOptions::new().copy_inside(true);

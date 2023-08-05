@@ -106,13 +106,10 @@ impl Generalizable for StepNew {
 fn test_new() {
     use crate::types::workflow::WorkflowContext;
     use std::fs::metadata;
-    use std::fs::remove_dir_all;
     use std::path::Path;
     envmnt::set("DEBUG", "true");
     let mut cx = WorkflowContext::_demo();
-    if Path::new("test").exists() {
-        remove_dir_all("test").unwrap();
-    }
+    crate::utils::test::_ensure_clear_test_dir();
 
     // 创建目录和文件
     StepNew {

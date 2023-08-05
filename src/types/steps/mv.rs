@@ -105,13 +105,10 @@ impl Verifiable for StepMove {
 #[test]
 fn test_copy() {
     use fs_extra::dir::CopyOptions;
-    use std::fs::remove_dir_all;
     use std::path::Path;
     envmnt::set("DEBUG", "true");
     let mut cx = WorkflowContext::_demo();
-    if Path::new("test").exists() {
-        remove_dir_all("test").unwrap();
-    }
+    crate::utils::test::_ensure_clear_test_dir();
 
     // 准备源
     let opt = CopyOptions::new().copy_inside(true);

@@ -1,7 +1,4 @@
-use std::{
-    fs::{remove_dir_all, rename},
-    str::FromStr,
-};
+use std::{fs::remove_dir_all, str::FromStr};
 
 use anyhow::{anyhow, Result};
 
@@ -10,7 +7,7 @@ use crate::{
     p2s,
     parsers::{parse_author, parse_workflow},
     types::extended_semver::ExSemVer,
-    utils::{ask_yn, get_path_apps},
+    utils::{ask_yn, get_path_apps, move_or_copy},
 };
 use crate::{log, log_ok_last};
 
@@ -94,9 +91,9 @@ pub fn update_using_package(source_file: &String, verify_signature: bool) -> Res
 
     // 移动程序至 apps 目录
     log!("Info:Deploying files...");
-    rename(
+    move_or_copy(
         temp_dir_inner_path.join(&fresh_package.package.name),
-        &located,
+        located.clone(),
     )?;
     log_ok_last!("Info:Deploying files...");
 
@@ -120,7 +117,7 @@ pub fn update_using_package(source_file: &String, verify_signature: bool) -> Res
 
     // 保存上下文
     let ctx_path = located.join(".nep_context");
-    rename(temp_dir_inner_path, ctx_path)?;
+    move_or_copy(temp_dir_inner_path, ctx_path)?;
 
     // 检查更新是否完整
     log!("Info:Validating update...");
@@ -137,11 +134,7 @@ pub fn update_using_package(source_file: &String, verify_signature: bool) -> Res
 fn test_update_using_package() {
     envmnt::set("DEBUG", "true");
     envmnt::set("CONFIRM", "true");
-    use std::path::Path;
-    if Path::new("test").exists() {
-        remove_dir_all("test").unwrap();
-    }
-    std::fs::create_dir_all("test").unwrap();
+    crate::utils::test::_ensure_clear_test_dir();
 
     // 卸载
     if crate::entrances::info_local(&"Microsoft".to_string(), &"VSCode".to_string()).is_ok() {
@@ -174,7 +167,7 @@ fn test_update_using_package() {
         .unwrap()
         .join("icon.ico");
     assert!(old_ico.exists());
-    rename(
+    std::fs::rename(
         "test/VSCode/VSCode/favicon.ico",
         "test/VSCode/VSCode/icon.ico",
     )

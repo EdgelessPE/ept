@@ -1,7 +1,8 @@
 use crate::p2s;
 use anyhow::{anyhow, Result};
+use fs_extra::dir::CopyOptions;
 use std::{
-    fs::{create_dir_all, read_dir, remove_dir_all, remove_file},
+    fs::{create_dir_all, read_dir, remove_dir_all, remove_file, rename},
     path::Path,
 };
 
@@ -93,6 +94,24 @@ pub fn ensure_dir_exist<P: AsRef<Path>>(path: P) -> Result<()> {
     if !path.exists() {
         create_dir_all(path)
             .map_err(|e| anyhow!("Error:Failed to create dir '{p}' : {e}", p = p2s!(path)))?;
+    }
+
+    Ok(())
+}
+
+pub fn move_or_copy<P: AsRef<Path>>(from: P, to: P) -> Result<()> {
+    let from = from.as_ref();
+    let to = to.as_ref();
+    let from_str = p2s!(from);
+    let to_str = p2s!(to);
+
+    if let Err(e) = rename(from, to) {
+        log!("Warning:Failed to move '{from_str}' to '{to_str}', trying to copy : {e}");
+
+        // 尝试进行 Copy
+        let opt = CopyOptions::new().copy_inside(true);
+        fs_extra::dir::copy(from, to, &opt)
+            .map_err(|e| anyhow!("Error:Failed to copy '{from_str}' to '{to_str}' : {e}"))?;
     }
 
     Ok(())

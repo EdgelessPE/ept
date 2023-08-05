@@ -1,5 +1,5 @@
 use anyhow::{anyhow, Result};
-use std::fs::{remove_dir_all, rename};
+use std::fs::remove_dir_all;
 use std::path::Path;
 
 use super::{
@@ -8,6 +8,7 @@ use super::{
     utils::validator::installed_validator,
 };
 use crate::entrances::update_using_package;
+use crate::utils::move_or_copy;
 use crate::{executor::workflow_executor, parsers::parse_workflow, utils::get_path_apps};
 use crate::{log, log_ok_last, p2s};
 
@@ -48,7 +49,6 @@ pub fn install_using_package(source_file: &String, verify_signature: bool) -> Re
             )
         })?;
     }
-    let into_dir = p2s!(into_dir);
 
     // 移动程序至 apps 目录
     let app_path = temp_dir_inner_path.join(&package.name);
@@ -58,17 +58,18 @@ pub fn install_using_package(source_file: &String, verify_signature: bool) -> Re
             dir = p2s!(app_path)
         ));
     }
-    rename(app_path, into_dir.clone())?;
+    move_or_copy(app_path.clone(), into_dir.clone())?;
     log_ok_last!("Info:Deploying files...");
 
     // 执行安装工作流
+    let into_dir = p2s!(into_dir);
     log!("Info:Running setup workflow...");
     workflow_executor(setup_workflow, into_dir.clone(), package_struct)?;
     log_ok_last!("Info:Running setup workflow...");
 
     // 保存上下文
     let ctx_path = Path::new(&into_dir).join(".nep_context");
-    rename(temp_dir_inner_path, ctx_path)?;
+    move_or_copy(temp_dir_inner_path, ctx_path)?;
 
     // 检查安装是否完整
     log!("Info:Validating setup...");
@@ -85,11 +86,7 @@ pub fn install_using_package(source_file: &String, verify_signature: bool) -> Re
 fn test_install() {
     envmnt::set("DEBUG", "true");
     envmnt::set("CONFIRM", "true");
-    use std::path::Path;
-    if Path::new("test").exists() {
-        remove_dir_all("test").unwrap();
-    }
-    std::fs::create_dir_all("test").unwrap();
+    crate::utils::test::_ensure_clear_test_dir();
 
     // 校验路径
     let shortcut_path = dirs::desktop_dir().unwrap().join("Visual Studio Code.lnk");

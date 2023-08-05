@@ -19,7 +19,7 @@ pub use self::arch::is_current_arch_match;
 pub use self::cfg::{get_config, set_config, Cfg, Local};
 pub use self::conditions::{ensure_arg, get_permissions_from_conditions, verify_conditions};
 pub use self::exe_version::get_exe_version;
-pub use self::fs::{count_sub_files, ensure_dir_exist, read_sub_dir, try_recycle};
+pub use self::fs::{count_sub_files, ensure_dir_exist, move_or_copy, read_sub_dir, try_recycle};
 pub use self::log::{fn_log, fn_log_ok_last};
 pub use self::path::{
     find_scope_with_name_locally, parse_relative_path_with_base, parse_relative_path_with_located,
