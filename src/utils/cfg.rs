@@ -11,11 +11,11 @@ use toml::{from_str, to_string_pretty, Value};
 
 use crate::{p2s, types::verifiable::Verifiable};
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct Local {
     pub base: String,
 }
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct Cfg {
     pub local: Local,
 }
@@ -29,14 +29,14 @@ lazy_static! {
 }
 
 impl Cfg {
-    fn default() -> Self {
+    pub fn default() -> Self {
         Self {
             local: Local {
                 base: p2s!(USER_DIR),
             },
         }
     }
-    fn use_which() -> Result<PathBuf> {
+    pub fn use_which() -> Result<PathBuf> {
         let from = if CUR_DIR.join(FILE_NAME).exists() {
             CUR_DIR.join(FILE_NAME)
         } else {
@@ -55,6 +55,7 @@ impl Cfg {
             }
             from
         };
+        log!("Debug:Use config at '{f}'", f = p2s!(from));
         Ok(from)
     }
     pub fn init() -> Result<Self> {
@@ -96,12 +97,15 @@ impl Verifiable for Cfg {
         let base_path = Path::new(&self.local.base);
         if !base_path.is_absolute() {
             return Err(anyhow!(
-                "Error:Field 'local.base' should be absolute, got '{base}'",
+                "Error:Field 'local.base' should be absolute path, got '{base}'",
                 base = self.local.base
             ));
         }
         if !base_path.exists() {
-            return Err(anyhow!("Error:Field 'local.base' doesn't exist"));
+            return Err(anyhow!(
+                "Error:Field 'local.base' doesn't exist : '{base}'",
+                base = self.local.base
+            ));
         }
 
         Ok(())

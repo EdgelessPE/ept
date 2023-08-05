@@ -1,4 +1,5 @@
 mod clean;
+pub mod config;
 mod info;
 mod install;
 mod list;

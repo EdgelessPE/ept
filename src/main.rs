@@ -19,7 +19,8 @@ use entrances::meta;
 use std::fs::write;
 use std::process::exit;
 
-use self::types::cli::{Action, Args};
+use self::types::cli::{Action, ActionConfig, Args};
+use crate::entrances::config::{config_get, config_init, config_list, config_set, config_which};
 use crate::entrances::{
     clean, info, install_using_package, list, pack, uninstall, update_using_package,
 };
@@ -76,7 +77,15 @@ fn router(action: Action) -> Result<String> {
         }
 
         Action::Clean => clean().map(|_| format!("Success:Cleaned")),
-        Action::Config { operation } => Ok("".to_string()),
+        Action::Config { operation } => match operation {
+            ActionConfig::Set { table, key, value } => config_set(&table, &key, &value)
+                .map(|_| format!("Success:Config value of '{key}' has been set to '{value}'")),
+            ActionConfig::Get { table, key } => config_get(&table, &key),
+            ActionConfig::List => config_list(),
+            ActionConfig::Init => config_init()
+                .map(|location| format!("Success:Initial config stored at '{location}'")),
+            ActionConfig::Which => config_which(),
+        },
     }
 }
 
