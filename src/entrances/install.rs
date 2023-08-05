@@ -7,6 +7,7 @@ use super::{
     utils::package::{clean_temp, unpack_nep},
     utils::validator::installed_validator,
 };
+use crate::entrances::update_using_package;
 use crate::{executor::workflow_executor, parsers::parse_workflow, utils::get_path_apps};
 use crate::{log, log_ok_last, p2s};
 
@@ -29,11 +30,12 @@ pub fn install_using_package(source_file: &String, verify_signature: bool) -> Re
 
     // 检查对应包名有没有被安装过
     if let Ok((_, diff)) = info_local(&software.scope, &package.name) {
-        return Err(anyhow!(
-            "Error:Package '{name}' has been installed({ver}), use 'ept update \"{source_file}\"' instead",
+        log!(
+            "Warning:Package '{name}' has been installed({ver}), switch to update entrance",
             name = package.name,
             ver = diff.version,
-        ));
+        );
+        return update_using_package(source_file, verify_signature);
     }
 
     // 解析最终安装位置
@@ -129,7 +131,7 @@ fn test_install() {
     assert!(mp_path.exists());
     assert!(cx_path.exists());
 
-    // 重复安装，会被要求使用升级
+    // 重复安装，会被要求使用升级，但是会由于同版本导致升级失败
     assert!(install_using_package(&"./test/VSCode_1.75.0.0_Cno.nep".to_string(), true).is_err());
 
     crate::uninstall(&"VSCode".to_string()).unwrap();
