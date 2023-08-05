@@ -114,11 +114,11 @@ fn test_verify_software() {
 
     // 校验 tags 重复
     let mut s3 = base.clone();
-    s3.tags = Some(vec!["Visual Studio".to_string(),"Microsoft".to_string()]);
+    s3.tags = Some(vec!["Visual Studio".to_string(), "Microsoft".to_string()]);
     s3.alias = Some(vec!["Visual Studio Code".to_string()]);
     assert!(s3.verify_self(&located).is_err());
-    s3.alias=None;
+    s3.alias = None;
     assert!(s3.verify_self(&located).is_ok());
-    s3.scope="Microsoft".to_string();
+    s3.scope = "Microsoft".to_string();
     assert!(s3.verify_self(&located).is_err());
 }
