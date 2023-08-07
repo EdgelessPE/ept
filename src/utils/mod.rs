@@ -31,6 +31,7 @@ pub use self::wild_match::{
     common_wild_match_verify, contains_wild_match, is_valid_wild_match, parse_wild_match,
 };
 
+use std::env::var;
 use std::fs::{create_dir_all, remove_dir_all};
 use std::path::PathBuf;
 
@@ -113,6 +114,16 @@ pub fn get_path_bin() -> Result<PathBuf> {
     ensure_exist(parse_relative_path_with_base(&"bin".to_string())?)
 }
 
+pub fn get_system_drive() -> Result<String> {
+    let root = var("SystemRoot")?;
+    Ok(root[0..2].to_string())
+}
+
 pub fn is_url(text: &String) -> bool {
     URL_RE.is_match(text)
+}
+
+#[test]
+fn test_get_system_drive() {
+    assert_eq!(get_system_drive().unwrap(), "C:".to_string())
 }

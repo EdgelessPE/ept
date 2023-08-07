@@ -10,7 +10,7 @@ use crate::{
         package::GlobalPackage,
         workflow::{WorkflowContext, WorkflowNode},
     },
-    utils::{get_bare_apps, is_current_arch_match, is_strict_mode},
+    utils::{get_bare_apps, get_system_drive, is_current_arch_match, is_strict_mode},
 };
 
 use self::functions::get_context_with_function;
@@ -21,7 +21,7 @@ pub use self::values::{judge_perm_level, values_replacer, values_validator_path}
 
 // 配置部分内置变量的值
 lazy_static! {
-    static ref SYSTEM_DRIVE: String = "C:".to_string();
+    static ref SYSTEM_DRIVE: String = get_system_drive().unwrap();
     static ref DEFAULT_LOCATION: String = p2s!(get_bare_apps().unwrap());
 }
 
