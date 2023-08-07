@@ -63,7 +63,8 @@ pub fn workflow_executor(
 
     // 遍历流节点
     for flow_node in flow {
-        log!("Debug:Start step '{name}'", name = flow_node.header.name);
+        let name = flow_node.header.name.unwrap();
+        log!("Debug:Start step '{name}'");
         // 解释节点条件，判断是否需要跳过执行
         let c_if = flow_node.header.c_if;
         if c_if.is_some() && !condition_eval(&c_if.unwrap(), cx.exit_code, &located)? {
@@ -80,7 +81,6 @@ pub fn workflow_executor(
         if let Err(e) = exec_res {
             log!(
                 "Warning(Main):Workflow step '{name}' failed to execute : {e}, check your workflow syntax again",
-                name=flow_node.header.name,
             );
             cx.exit_code = 1;
         } else {
@@ -88,7 +88,6 @@ pub fn workflow_executor(
             if cx.exit_code != 0 {
                 log!(
                     "Warning(Main):Workflow step '{name}' finished with exit code '{exit_code}'",
-                    name = flow_node.header.name,
                     exit_code = cx.exit_code,
                 );
             }
@@ -98,7 +97,7 @@ pub fn workflow_executor(
         if cx.exit_code != 0 && strict_mode {
             return Err(anyhow!("Error:Throw due to strict mode"));
         }
-        log!("Debug:Stop step '{name}'", name = flow_node.header.name);
+        log!("Debug:Stop step '{name}'");
     }
 
     // 完成
@@ -120,10 +119,8 @@ pub fn workflow_reverse_executor(
 
     // 遍历流节点
     for flow_node in flow {
-        log!(
-            "Debug:Start reverse step '{name}'",
-            name = flow_node.header.name
-        );
+        let name = flow_node.header.name.unwrap();
+        log!("Debug:Start reverse step '{name}'");
         // 创建变量解释器，ExitCode 始终置 0
         let interpreter = |raw: String| values_replacer(raw, 0, &located);
         // 匹配步骤类型以调用逆向步骤解释器
@@ -131,15 +128,9 @@ pub fn workflow_reverse_executor(
 
         // 对错误进行警告
         if let Err(e) = exec_res {
-            log!(
-                "Warning(Main):Reverse workflow step '{name}' failed to execute : {e}",
-                name = flow_node.header.name
-            );
+            log!("Warning(Main):Reverse workflow step '{name}' failed to execute : {e}");
         }
-        log!(
-            "Debug:Stop reverse step '{name}'",
-            name = flow_node.header.name
-        );
+        log!("Debug:Stop reverse step '{name}'");
     }
 
     // 完成
@@ -203,7 +194,7 @@ fn test_workflow_executor() {
     let wf1 = vec![
         WorkflowNode {
             header: WorkflowHeader {
-                name: "Log".to_string(),
+                name: Some("Log".to_string()),
                 step: "Step log".to_string(),
                 c_if: None,
             },
@@ -214,7 +205,7 @@ fn test_workflow_executor() {
         },
         WorkflowNode {
             header: WorkflowHeader {
-                name: "Throw".to_string(),
+                name: Some("Throw".to_string()),
                 step: "Try throw".to_string(),
                 c_if: Some(String::from("${ExitCode}==0")),
             },
@@ -238,7 +229,7 @@ fn test_workflow_executor() {
         // },
         WorkflowNode {
             header: WorkflowHeader {
-                name: "Exist".to_string(),
+                name: Some("Exist".to_string()),
                 step: "If exist".to_string(),
                 c_if: Some(
                     "IsAlive(\"unknown.exe\") && IsInstalled(\"Microsoft/VSCode\")".to_string(),
@@ -285,7 +276,7 @@ fn test_workflow_executor_interpreter() {
     let flow = vec![
         WorkflowNode {
             header: WorkflowHeader {
-                name: "Throw".to_string(),
+                name: Some("Throw".to_string()),
                 step: "Try throw".to_string(),
                 c_if: Some(String::from("${ExitCode}==0")),
             },
@@ -298,7 +289,7 @@ fn test_workflow_executor_interpreter() {
         },
         WorkflowNode {
             header: WorkflowHeader {
-                name: "Log".to_string(),
+                name: Some("Log".to_string()),
                 step: "Step log".to_string(),
                 c_if: None,
             },

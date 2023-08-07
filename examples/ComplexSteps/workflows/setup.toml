@@ -1,5 +1,4 @@
 [create_shortcut]
-name = "Create shortcut"
 step = "Link"
 source_file = "Code.exe"
 target_name = "Visual Studio Code"
@@ -12,7 +11,6 @@ record = "Code.exe"
 operation = "Add"
 
 [wait]
-name = "Wait"
 step = "Wait"
 timeout = 30000
 break_if = "true"

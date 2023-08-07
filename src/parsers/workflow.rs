@@ -1,11 +1,12 @@
 use anyhow::{anyhow, Result};
+use inflector::cases::sentencecase::to_sentence_case;
 use regex::Regex;
 use std::path::Path;
 use std::{fs::File, io::Read};
 use toml::Value;
 
 use crate::types::steps::Step;
-use crate::types::workflow::WorkflowNode;
+use crate::types::workflow::{WorkflowHeader, WorkflowNode};
 
 fn cmd_converter(origin: &String) -> Result<String> {
     // 需要增加 c_ 前缀的字段
@@ -46,10 +47,15 @@ pub fn parse_workflow(p: &String) -> Result<Vec<WorkflowNode>> {
     let mut res = Vec::new();
     for (key, val) in table {
         // 解析步骤头
-        let header = val
+        let mut header: WorkflowHeader = val
             .clone()
             .try_into()
             .map_err(|e| anyhow!("Error:Illegal workflow node at key '{key}' : {e}"))?;
+
+        // 如果步骤头没有提供 name 则使用 key 的 sentence case
+        if header.name.is_none() {
+            header.name = Some(to_sentence_case(&key));
+        }
 
         // 解析步骤体
         let body = Step::try_from_kv(key, val)?;
@@ -69,7 +75,7 @@ fn test_parse_workflow() {
     let answer = vec![
         WorkflowNode {
             header: WorkflowHeader {
-                name: "Create shortcut".to_string(),
+                name: Some("Create shortcut".to_string()),
                 step: "Link".to_string(),
                 c_if: None,
             },
@@ -83,7 +89,7 @@ fn test_parse_workflow() {
         },
         WorkflowNode {
             header: WorkflowHeader {
-                name: "Add PATH".to_string(),
+                name: Some("Add PATH".to_string()),
                 step: "Path".to_string(),
                 c_if: Some("${AppData} if = 114514".to_string()),
             },
@@ -94,7 +100,7 @@ fn test_parse_workflow() {
         },
         WorkflowNode {
             header: WorkflowHeader {
-                name: "Wait".to_string(),
+                name: Some("Wait".to_string()),
                 step: "Wait".to_string(),
                 c_if: None,
             },

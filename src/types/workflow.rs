@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct WorkflowHeader {
-    pub name: String,
+    pub name: Option<String>, // 解析时如果没有提供 name 则人为赋 key 的 sentence case
     pub step: String,
     pub c_if: Option<String>,
 }
@@ -45,7 +45,7 @@ impl Verifiable for WorkflowHeader {
 fn test_header_perm() {
     use crate::types::permissions::PermissionLevel;
     let flow=WorkflowHeader{
-        name: "Name".to_string(),
+        name: Some("Name".to_string()),
         step: "Step".to_string(),
         c_if: Some("Exist(\"./mc/vsc.exe\") && IsDirectory(\"${SystemDrive}/Windows\") || Exist(\"${AppData}/Roaming/Edgeless/ept\")".to_string()),
     };
@@ -75,7 +75,7 @@ fn test_header_perm() {
 #[test]
 fn test_header_valid() {
     let flow=WorkflowHeader{
-        name: "Name".to_string(),
+        name: Some("Name".to_string()),
         step: "Step".to_string(),
         c_if: Some("Exist(\"./mc/vsc.exe\") && IsDirectory(\"${SystemDrive}/Windows\") || Exist(\"${AppData}/Roaming/Edgeless/ept\")".to_string()),
     };
