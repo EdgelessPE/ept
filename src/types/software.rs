@@ -1,6 +1,8 @@
 use crate::{
     p2s,
-    utils::{get_exe_version, is_url, parse_relative_path_with_located},
+    utils::{
+        get_exe_version, is_starts_with_inner_value, is_url, parse_relative_path_with_located,
+    },
     verify_enum,
 };
 use anyhow::{anyhow, Result};
@@ -20,6 +22,7 @@ pub struct Software {
     pub main_program: Option<String>,
     pub tags: Option<Vec<String>>,
     pub alias: Option<Vec<String>>,
+    pub installed: Option<String>,
 }
 
 impl Verifiable for Software {
@@ -89,6 +92,15 @@ impl Verifiable for Software {
         };
         for tag in self.tags.to_owned().unwrap_or(Vec::new()) {
             tag_checker(&tag)?;
+        }
+
+        // installed 应该以内置变量开头
+        if let Some(installed) = &self.installed {
+            if !is_starts_with_inner_value(installed) {
+                return Err(anyhow!(
+                    "Error:Field 'installed' should start with inner value"
+                ));
+            }
         }
 
         Ok(())

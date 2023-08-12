@@ -123,6 +123,10 @@ pub fn is_url(text: &String) -> bool {
     URL_RE.is_match(text)
 }
 
+pub fn is_starts_with_inner_value(p: &String) -> bool {
+    p.starts_with("${")
+}
+
 #[test]
 fn test_get_system_drive() {
     assert_eq!(get_system_drive().unwrap(), "C:".to_string())

@@ -7,8 +7,8 @@ use super::{
     utils::package::{clean_temp, unpack_nep},
     utils::validator::installed_validator,
 };
-use crate::entrances::update_using_package;
 use crate::utils::move_or_copy;
+use crate::{entrances::update_using_package, utils::ask_yn};
 use crate::{executor::workflow_executor, parsers::parse_workflow, utils::get_path_apps};
 use crate::{log, log_ok_last, p2s};
 
@@ -26,9 +26,21 @@ pub fn install_using_package(source_file: &String, verify_signature: bool) -> Re
     let software = package_struct.software.clone().unwrap();
     log_ok_last!("Info:Resolving package...");
 
-    // 创建 apps 文件夹
-    log!("Info:Deploying files...");
+    // 使用 installed 字段，检查是否已经全局安装过该软件
+    if let Some(installed) = &software.installed {
+        let p = Path::new(installed);
+        if p.exists() {
+            log!(
+                "Warning:'{name}' has been installed at '{installed}', continue? (y/n)",
+                name = package.name
+            );
+            if !ask_yn() {
+                return Err(anyhow!("Error:Operation canceled by user"));
+            }
+        }
+    }
 
+    log!("Info:Deploying files...");
     // 检查对应包名有没有被安装过
     if let Ok((_, diff)) = info_local(&software.scope, &package.name) {
         log!(
@@ -74,6 +86,12 @@ pub fn install_using_package(source_file: &String, verify_signature: bool) -> Re
     // 检查安装是否完整
     log!("Info:Validating setup...");
     installed_validator(&into_dir)?;
+    if let Some(installed) = &software.installed {
+        let p = Path::new(installed);
+        if !p.exists() {
+            return Err(anyhow!("Error:Validating failed : field 'installed' provided in table 'software' not exist : '{installed}'"));
+        }
+    }
     log_ok_last!("Info:Validating setup...");
 
     // 清理临时文件夹
