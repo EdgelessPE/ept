@@ -1,6 +1,7 @@
 use std::{ffi::OsString, path::Path};
 
 use super::TStep;
+use crate::types::interpretable::Interpretable;
 use crate::types::steps::Permission;
 use crate::{
     executor::{judge_perm_level, values_validator_path},
@@ -63,6 +64,9 @@ impl TStep for StepDelete {
         fs.remove(&self.at);
         Vec::new()
     }
+}
+
+impl Interpretable for StepDelete {
     fn interpret<F>(self, interpreter: F) -> Self
     where
         F: Fn(String) -> String,

@@ -18,17 +18,13 @@ mod rename;
 mod toast;
 mod wait;
 
-pub trait TStep: Verifiable + Generalizable {
+pub trait TStep: Verifiable + Generalizable + Interpretable {
     /// Run this step
     fn run(self, cx: &mut WorkflowContext) -> Result<i32>;
     /// Run reversed step
     fn reverse_run(self, cx: &mut WorkflowContext) -> Result<()>;
     /// Get manifest
     fn get_manifest(&self, fs: &mut MixedFS) -> Vec<String>;
-    /// Get interpreted step
-    fn interpret<F>(self, interpreter: F) -> Self
-    where
-        F: Fn(String) -> String;
 }
 
 fn toml_try_into<'de, T>(key: String, val: Value) -> Result<T>
@@ -136,5 +132,6 @@ pub use self::rename::StepRename;
 pub use self::toast::StepToast;
 pub use self::wait::StepWait;
 
+use super::interpretable::Interpretable;
 use super::mixed_fs::MixedFS;
 use super::workflow::WorkflowContext;

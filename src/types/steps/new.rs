@@ -14,6 +14,7 @@ use serde::{Deserialize, Serialize};
 use std::{fs::create_dir_all, fs::File, path::Path};
 
 use super::TStep;
+use crate::types::interpretable::Interpretable;
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct StepNew {
@@ -66,6 +67,9 @@ impl TStep for StepNew {
         fs.add(&self.at, &"".to_string());
         Vec::new()
     }
+}
+
+impl Interpretable for StepNew {
     fn interpret<F>(self, interpreter: F) -> Self
     where
         F: Fn(String) -> String,

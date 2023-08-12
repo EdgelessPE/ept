@@ -1,3 +1,4 @@
+use crate::types::interpretable::Interpretable;
 use crate::types::mixed_fs::MixedFS;
 use crate::types::permissions::{Generalizable, Permission, PermissionLevel};
 use crate::types::verifiable::Verifiable;
@@ -117,6 +118,9 @@ impl TStep for StepExecute {
     fn get_manifest(&self, _fs: &mut MixedFS) -> Vec<String> {
         Vec::new()
     }
+}
+
+impl Interpretable for StepExecute {
     fn interpret<F>(self, interpreter: F) -> Self
     where
         F: Fn(String) -> String,

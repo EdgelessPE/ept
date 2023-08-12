@@ -4,6 +4,7 @@ use anyhow::{anyhow, Result};
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 
+use crate::types::interpretable::Interpretable;
 use crate::{
     executor::{judge_perm_level, values_validator_path},
     log, p2s,
@@ -75,6 +76,9 @@ impl TStep for StepRename {
         fs.add(&concat_to(&self.to, &self.from, &String::new()), &self.from);
         Vec::new()
     }
+}
+
+impl Interpretable for StepRename {
     fn interpret<F>(self, interpreter: F) -> Self
     where
         F: Fn(String) -> String,

@@ -1,6 +1,7 @@
 use super::TStep;
 use crate::executor::condition_eval;
 use crate::log;
+use crate::types::interpretable::Interpretable;
 use crate::types::steps::Permission;
 use crate::types::{
     mixed_fs::MixedFS, permissions::Generalizable, verifiable::Verifiable,
@@ -56,6 +57,9 @@ impl TStep for StepWait {
     fn get_manifest(&self, _: &mut MixedFS) -> Vec<String> {
         Vec::new()
     }
+}
+
+impl Interpretable for StepWait {
     fn interpret<F>(self, _: F) -> Self
     where
         F: Fn(String) -> String,

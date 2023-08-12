@@ -1,6 +1,7 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
+use crate::types::interpretable::Interpretable;
 use crate::types::mixed_fs::MixedFS;
 use crate::types::permissions::{Generalizable, Permission};
 use crate::types::workflow::WorkflowContext;
@@ -25,6 +26,9 @@ impl TStep for StepLog {
     fn get_manifest(&self, _fs: &mut MixedFS) -> Vec<String> {
         Vec::new()
     }
+}
+
+impl Interpretable for StepLog {
     fn interpret<F>(self, interpreter: F) -> Self
     where
         F: Fn(String) -> String,

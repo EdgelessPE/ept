@@ -3,8 +3,8 @@ use crate::{
     executor::{judge_perm_level, values_validator_path},
     log, p2s,
     types::{
-        mixed_fs::MixedFS, permissions::Generalizable, permissions::Permission,
-        verifiable::Verifiable, workflow::WorkflowContext,
+        interpretable::Interpretable, mixed_fs::MixedFS, permissions::Generalizable,
+        permissions::Permission, verifiable::Verifiable, workflow::WorkflowContext,
     },
     utils::{
         common_wild_match_verify, contains_wild_match, ensure_dir_exist,
@@ -148,6 +148,9 @@ impl TStep for StepCopy {
         fs.add(&self.to, &self.from);
         Vec::new()
     }
+}
+
+impl Interpretable for StepCopy {
     fn interpret<F>(self, interpreter: F) -> Self
     where
         F: Fn(String) -> String,

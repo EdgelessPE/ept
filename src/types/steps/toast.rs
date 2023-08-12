@@ -1,4 +1,5 @@
 use super::TStep;
+use crate::types::interpretable::Interpretable;
 use crate::types::steps::Permission;
 use crate::types::{
     mixed_fs::MixedFS,
@@ -38,6 +39,9 @@ impl TStep for StepToast {
     fn get_manifest(&self, _: &mut MixedFS) -> Vec<String> {
         Vec::new()
     }
+}
+
+impl Interpretable for StepToast {
     fn interpret<F>(self, interpreter: F) -> Self
     where
         F: Fn(String) -> String,

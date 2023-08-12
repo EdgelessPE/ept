@@ -2,6 +2,7 @@ pub mod author;
 pub mod cli;
 pub mod extended_semver;
 pub mod info;
+pub mod interpretable;
 pub mod meta;
 pub mod mixed_fs;
 pub mod package;

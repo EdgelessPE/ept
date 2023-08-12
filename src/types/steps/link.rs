@@ -1,5 +1,6 @@
 use super::TStep;
 use crate::executor::values_validator_path;
+use crate::types::interpretable::Interpretable;
 use crate::types::mixed_fs::MixedFS;
 use crate::types::permissions::{Generalizable, Permission, PermissionLevel};
 use crate::types::workflow::WorkflowContext;
@@ -189,6 +190,9 @@ impl TStep for StepLink {
     fn get_manifest(&self, _fs: &mut MixedFS) -> Vec<String> {
         vec![self.source_file.to_owned()]
     }
+}
+
+impl Interpretable for StepLink {
     fn interpret<F>(self, interpreter: F) -> Self
     where
         F: Fn(String) -> String,

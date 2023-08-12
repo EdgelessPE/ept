@@ -1,4 +1,5 @@
 use super::TStep;
+use crate::types::interpretable::Interpretable;
 use crate::types::steps::Permission;
 use crate::{
     log,
@@ -50,6 +51,9 @@ impl TStep for StepKill {
     fn get_manifest(&self, _: &mut MixedFS) -> Vec<String> {
         Vec::new()
     }
+}
+
+impl Interpretable for StepKill {
     fn interpret<F>(self, _: F) -> Self
     where
         F: Fn(String) -> String,

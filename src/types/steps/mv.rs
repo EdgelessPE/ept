@@ -1,4 +1,5 @@
 use super::{copy::parse_target_for_copy, TStep};
+use crate::types::interpretable::Interpretable;
 use crate::{
     executor::{judge_perm_level, values_validator_path},
     log, p2s,
@@ -65,6 +66,9 @@ impl TStep for StepMove {
         fs.add(&self.to, &self.from);
         Vec::new()
     }
+}
+
+impl Interpretable for StepMove {
     fn interpret<F>(self, interpreter: F) -> Self
     where
         F: Fn(String) -> String,
