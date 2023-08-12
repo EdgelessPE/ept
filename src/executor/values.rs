@@ -4,7 +4,7 @@ use crate::utils::env::{
     env_appdata, env_desktop, env_home, env_program_files_x64, env_program_files_x86,
     env_public_desktop, env_system_drive,
 };
-use crate::utils::get_arch;
+use crate::utils::{get_arch, is_starts_with_inner_value};
 use anyhow::{anyhow, Result};
 use evalexpr::{ContextWithMutableVariables, HashMapContext, Value};
 use lazy_static::lazy_static;
@@ -103,7 +103,9 @@ pub fn values_validator_path(raw: &String) -> Result<()> {
     let collection = collect_values(raw)?;
 
     // 如果以一个近似内置变量的名称打头，但是又不存在这个内置变量则阻止
-    if raw.starts_with("${") && (collection.len() == 0 || !raw.starts_with(&collection[0])) {
+    if is_starts_with_inner_value(raw)
+        && (collection.len() == 0 || !raw.starts_with(&collection[0]))
+    {
         return Err(anyhow!(
             "Error:Shouldn't start with an unknown inner value in '{raw}'"
         ));

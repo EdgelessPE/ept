@@ -4,7 +4,7 @@ use wildmatch::WildMatch;
 
 use crate::{
     log, p2s,
-    utils::{contains_wild_match, format_path, parse_wild_match},
+    utils::{contains_wild_match, format_path, is_starts_with_inner_value, parse_wild_match},
 };
 
 pub struct MixedFS {
@@ -77,7 +77,7 @@ impl MixedFS {
 
     pub fn add(&mut self, path: &String, from: &String) {
         debug_assert!(!contains_wild_match(path));
-        if path.starts_with("${") {
+        if is_starts_with_inner_value(path) {
             return;
         }
 
@@ -99,7 +99,7 @@ impl MixedFS {
         let from = format_path(from);
 
         // 检查 from 是否也为包内路径
-        if !from.starts_with("${") {
+        if !is_starts_with_inner_value(&from) {
             if contains_wild_match(&from) {
                 // 直接根据真实文件系统拓展 from，拼接到 MixedFS 内
                 for exact_path in parse_wild_match(from, &self.located).unwrap_or(Vec::new()) {
@@ -135,7 +135,7 @@ impl MixedFS {
         self.a_add(path);
     }
     pub fn remove(&mut self, path: &String) {
-        if path.starts_with("${") {
+        if is_starts_with_inner_value(path) {
             return;
         }
         let path = format_path(path);
@@ -167,7 +167,7 @@ impl MixedFS {
     }
 
     pub fn exists(&self, path: &String) -> bool {
-        if path.starts_with("${") {
+        if is_starts_with_inner_value(path) {
             return true;
         }
         let path = format_path(path);

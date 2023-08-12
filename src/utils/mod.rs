@@ -128,7 +128,7 @@ pub fn is_url(text: &String) -> bool {
 }
 
 pub fn is_starts_with_inner_value(p: &String) -> bool {
-    p.starts_with("${")
+    p.starts_with("${") || p.starts_with("\"${")
 }
 
 #[test]
