@@ -188,7 +188,7 @@ fn test_parse_package() {
             category: "办公编辑".to_string(),
             arch: None,
             language: "Multi".to_string(),
-            main_program: None,
+            main_program: Some("Code.exe".to_string()),
             tags: Some(vec!["Electron".to_string()]),
             alias: None,
         }),
