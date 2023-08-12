@@ -116,9 +116,13 @@ pub struct WorkflowContext {
 
 impl WorkflowContext {
     pub fn _demo() -> Self {
+        Self::new(&p2s!(current_dir().unwrap()), GlobalPackage::_demo())
+    }
+
+    pub fn new(located: &String, pkg: GlobalPackage) -> Self {
         Self {
-            located: p2s!(current_dir().unwrap()),
-            pkg: GlobalPackage::_demo(),
+            pkg,
+            located: located.to_owned(),
             async_execution_handlers: Vec::new(),
             exit_code: 0,
         }

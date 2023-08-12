@@ -60,12 +60,7 @@ pub fn workflow_executor(
     }
 
     // 准备上下文
-    let mut cx = WorkflowContext {
-        pkg,
-        located: located.clone(),
-        async_execution_handlers: Vec::new(),
-        exit_code: 0,
-    };
+    let mut cx = WorkflowContext::new(&located, pkg);
 
     // 遍历流节点
     for flow_node in flow {
@@ -116,12 +111,7 @@ pub fn workflow_reverse_executor(
     located: String,
     pkg: GlobalPackage,
 ) -> Result<()> {
-    let mut cx = WorkflowContext {
-        pkg,
-        located: located.clone(),
-        async_execution_handlers: Vec::new(),
-        exit_code: 0,
-    };
+    let mut cx = WorkflowContext::new(&located, pkg);
 
     // 遍历流节点
     for flow_node in flow {
