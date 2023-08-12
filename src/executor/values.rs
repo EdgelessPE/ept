@@ -27,7 +27,7 @@ macro_rules! define_values {
             arr
         }
 
-        // 目前使用的内置变量均为模板字符串模式
+        // 支持虚假的模板字符串
         pub fn values_replacer(raw:String, exit_code: i32, located: &String)->String{
             raw
             .replace("${ExitCode}",&exit_code.to_string())
@@ -35,8 +35,7 @@ macro_rules! define_values {
             $(.replace($key,&$val))*
         }
 
-        pub fn set_context_with_constant_values(context: &mut HashMapContext, located: &String){
-            context.set_value("DefaultLocation".to_string(),Value::String(located.to_owned())).unwrap();
+        pub fn set_context_with_constant_values(context: &mut HashMapContext){
             $(
                 context.set_value(
                     $key[2..$key.len()-1].to_string(),
@@ -45,8 +44,9 @@ macro_rules! define_values {
             )*
         }
 
-        pub fn set_context_with_mutable_values(context: &mut HashMapContext, exit_code: i32){
+        pub fn set_context_with_mutable_values(context: &mut HashMapContext, exit_code: i32, located: &String){
             context.set_value("ExitCode".to_string(),Value::Int(exit_code.into())).unwrap();
+            context.set_value("DefaultLocation".to_string(),Value::String(located.to_owned())).unwrap();
         }
 
         pub fn match_value_permission(value:&String)->Result<PermissionLevel>{

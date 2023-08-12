@@ -34,8 +34,8 @@ pub fn condition_eval(condition: &String, exit_code: i32, located: &String) -> R
     let condition_with_values_interpreted =
         values_replacer(condition.to_owned(), exit_code, located);
     let mut context = HashMapContext::new();
-    set_context_with_constant_values(&mut context, located);
-    set_context_with_mutable_values(&mut context, exit_code);
+    set_context_with_constant_values(&mut context);
+    set_context_with_mutable_values(&mut context, exit_code, located);
     set_context_with_function(&mut context, located);
 
     // 执行 eval
