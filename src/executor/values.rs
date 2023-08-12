@@ -6,6 +6,7 @@ use crate::utils::env::{
 };
 use crate::utils::get_arch;
 use anyhow::{anyhow, Result};
+use evalexpr::{ContextWithMutableVariables, HashMapContext, Value};
 use lazy_static::lazy_static;
 use regex::Regex;
 use std::collections::HashSet;
@@ -32,6 +33,20 @@ macro_rules! define_values {
             .replace("${ExitCode}",&exit_code.to_string())
             .replace("${DefaultLocation}",located)
             $(.replace($key,&$val))*
+        }
+
+        pub fn set_context_with_constant_values(context: &mut HashMapContext, located: &String){
+            context.set_value("DefaultLocation".to_string(),Value::String(located.to_owned())).unwrap();
+            $(
+                context.set_value(
+                    $key[2..$key.len()-1].to_string(),
+                    Value::String($val)
+                ).unwrap();
+            )*
+        }
+
+        pub fn set_context_with_mutable_values(context: &mut HashMapContext, exit_code: i32){
+            context.set_value("ExitCode".to_string(),Value::Int(exit_code.into())).unwrap();
         }
 
         pub fn match_value_permission(value:&String)->Result<PermissionLevel>{

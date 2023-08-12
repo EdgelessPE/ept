@@ -12,16 +12,13 @@ use evalexpr::*;
 
 macro_rules! def_eval_functions {
     ($($x:ident),*) => {
-        pub fn get_context_with_function(located: &String) -> HashMapContext {
-            let mut context=HashMapContext::new();
+        pub fn set_context_with_function(context: &mut HashMapContext,located: &String) {
             $(
                 context.set_function(
                     stringify!($x).to_string(),
                     $x::get_closure(located.clone()),
                 ).unwrap();
              )*
-
-            context
         }
 
         pub fn get_eval_function_names()->Vec<&'static str> {

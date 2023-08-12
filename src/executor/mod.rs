@@ -13,11 +13,14 @@ use crate::{
     utils::{get_bare_apps, get_system_drive, is_current_arch_match, is_strict_mode},
 };
 
-use self::functions::get_context_with_function;
 pub use self::functions::{
     get_eval_function_names, get_eval_function_permission, verify_eval_function_arg,
 };
 pub use self::values::{judge_perm_level, values_replacer, values_validator_path};
+use self::{
+    functions::set_context_with_function,
+    values::{set_context_with_constant_values, set_context_with_mutable_values},
+};
 
 // 配置部分内置变量的值
 lazy_static! {
@@ -30,7 +33,10 @@ pub fn condition_eval(condition: &String, exit_code: i32, located: &String) -> R
     // 装饰变量与函数
     let condition_with_values_interpreted =
         values_replacer(condition.to_owned(), exit_code, located);
-    let context = get_context_with_function(located);
+    let mut context = HashMapContext::new();
+    set_context_with_constant_values(&mut context, located);
+    set_context_with_mutable_values(&mut context, exit_code);
+    set_context_with_function(&mut context, located);
 
     // 执行 eval
     eval_boolean_with_context(&condition_with_values_interpreted, &context).map_err(|res| {
@@ -142,13 +148,28 @@ pub fn workflow_reverse_executor(
 #[test]
 fn test_condition_eval() {
     let located = &String::from("./examples/VSCode");
-    let r1 = condition_eval(&String::from("\"${ExitCode}\"==\"114\""), 114, located).unwrap();
+    let r1 = condition_eval(
+        &String::from("\"${ExitCode}\"==\"114\" && ExitCode==114"),
+        114,
+        located,
+    )
+    .unwrap();
     assert!(r1);
 
-    let r2 = condition_eval(&String::from("\"${ExitCode}\"==\"514\""), 114, located).unwrap();
+    let r2 = condition_eval(
+        &String::from("\"${ExitCode}\"!=\"114\" || ExitCode==514"),
+        114,
+        located,
+    )
+    .unwrap();
     assert_eq!(r2, false);
 
-    let r3 = condition_eval(&String::from("\"${SystemDrive}\"==\"C:\""), 0, located).unwrap();
+    let r3 = condition_eval(
+        &String::from("\"${SystemDrive}\"==\"C:\" && SystemDrive==\"C:\""),
+        0,
+        located,
+    )
+    .unwrap();
     assert!(r3);
 
     let r4 = condition_eval(
