@@ -75,7 +75,6 @@ impl GlobalPackage {
                 main_program: None,
                 tags: None,
                 alias: None,
-                installed: None,
             }),
         }
     }

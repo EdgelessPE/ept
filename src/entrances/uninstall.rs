@@ -79,9 +79,8 @@ pub fn uninstall(package_name: &String) -> Result<()> {
             let mut hit_list: HashSet<String> = HashSet::from_iter(setup_manifest);
 
             // 加入主程序
-            let mp_opt = global.software.unwrap().main_program;
-            if mp_opt.is_some() {
-                hit_list.insert(mp_opt.unwrap());
+            if let Some(mp) = global.software.unwrap().main_program {
+                hit_list.insert(mp);
             }
 
             // 杀死其中列出的 exe 程序

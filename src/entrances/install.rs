@@ -26,10 +26,10 @@ pub fn install_using_package(source_file: &String, verify_signature: bool) -> Re
     let software = package_struct.software.clone().unwrap();
     log_ok_last!("Info:Resolving package...");
 
-    // 使用 installed 字段，检查是否已经全局安装过该软件
-    if let Some(installed) = &software.installed {
+    // 使用绝对路径的 main_program 字段，检查是否已经全局安装过该软件
+    if let Some(installed) = &software.main_program {
         let p = Path::new(installed);
-        if p.exists() {
+        if p.is_absolute() && p.exists() {
             log!(
                 "Warning:'{name}' has been installed at '{installed}', continue? (y/n)",
                 name = package.name
@@ -86,10 +86,10 @@ pub fn install_using_package(source_file: &String, verify_signature: bool) -> Re
     // 检查安装是否完整
     log!("Info:Validating setup...");
     installed_validator(&into_dir)?;
-    if let Some(installed) = &software.installed {
+    if let Some(installed) = &software.main_program {
         let p = Path::new(installed);
         if !p.exists() {
-            return Err(anyhow!("Error:Validating failed : field 'installed' provided in table 'software' not exist : '{installed}'"));
+            return Err(anyhow!("Error:Validating failed : field 'main_program' provided in table 'software' not exist : '{installed}'"));
         }
     }
     log_ok_last!("Info:Validating setup...");

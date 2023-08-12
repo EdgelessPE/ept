@@ -191,9 +191,6 @@ fn test_parse_package() {
             main_program: None,
             tags: Some(vec!["Electron".to_string()]),
             alias: None,
-            installed: Some(
-                crate::utils::env::env_appdata() + "/Local/Programs/Microsoft VS Code/Code.exe",
-            ),
         }),
     };
     assert_eq!(pkg, answer)

@@ -1,5 +1,5 @@
 use crate::{
-    p2s,
+    log, p2s,
     utils::{
         get_exe_version, is_starts_with_inner_value, is_url, parse_relative_path_with_located,
     },
@@ -22,7 +22,6 @@ pub struct Software {
     pub main_program: Option<String>,
     pub tags: Option<Vec<String>>,
     pub alias: Option<Vec<String>>,
-    pub installed: Option<String>,
 }
 
 impl Verifiable for Software {
@@ -48,22 +47,27 @@ impl Verifiable for Software {
             )));
         }
 
-        // 主程序应该存在且可以读取版本号
         if let Some(main_program) = &self.main_program {
-            let mixed_fs = MixedFS::new(located.to_owned());
-            if !mixed_fs.exists(main_program) {
-                return Err(err_wrapper(anyhow!(
-                    "given main program '{main_program}' doesn't exist"
-                )));
-            }
-
-            // 对于相对路径的主程序，尝试进行读取
-            let mp_path = parse_relative_path_with_located(main_program, located);
-            if mp_path.exists() {
-                if let Err(e) = get_exe_version(p2s!(mp_path)) {
+            // 区分是绝对路径还是相对路径
+            if is_starts_with_inner_value(main_program) {
+            } else {
+                // 相对路径的主程序应该存在
+                let mixed_fs = MixedFS::new(located.to_owned());
+                if !mixed_fs.exists(main_program) {
                     return Err(err_wrapper(anyhow!(
-                        "failed to get main program ('{main_program}') file version : {e}"
+                        "given main program '{main_program}' doesn't exist"
                     )));
+                }
+
+                // 对于相对路径的主程序，尝试进行读取
+                let mp_path = parse_relative_path_with_located(main_program, located);
+                if mp_path.exists() {
+                    if let Err(e) = get_exe_version(p2s!(mp_path)) {
+                        // 读不了版本号则警告
+                        log!(
+                            "Warning:Failed to get main program ('{main_program}') file version : {e}"
+                        );
+                    }
                 }
             }
         }
@@ -94,15 +98,6 @@ impl Verifiable for Software {
             tag_checker(&tag)?;
         }
 
-        // installed 应该以内置变量开头
-        if let Some(installed) = &self.installed {
-            if !is_starts_with_inner_value(installed) {
-                return Err(anyhow!(
-                    "Error:Field 'installed' should start with inner value : '{installed}'"
-                ));
-            }
-        }
-
         Ok(())
     }
 }
@@ -112,7 +107,7 @@ impl Interpretable for Software {
     where
         F: Fn(String) -> String,
     {
-        self.installed = self.installed.map(interpreter);
+        self.main_program = self.main_program.map(interpreter);
         self
     }
 }
