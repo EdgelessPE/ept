@@ -7,10 +7,7 @@ use super::{
     utils::package::{clean_temp, unpack_nep},
     utils::validator::installed_validator,
 };
-use crate::utils::{
-    env::env_desktop, move_or_copy, parse_relative_path_with_located,
-    test::_ensure_testing_uninstalled,
-};
+use crate::utils::{is_qa_mode, move_or_copy, parse_relative_path_with_located};
 use crate::{entrances::update_using_package, utils::ask_yn};
 use crate::{executor::workflow_executor, parsers::parse_workflow, utils::get_path_apps};
 use crate::{log, log_ok_last, p2s};
@@ -92,7 +89,11 @@ pub fn install_using_package(source_file: &String, verify_signature: bool) -> Re
     if let Some(installed) = &software.main_program {
         let p = parse_relative_path_with_located(installed, &into_dir);
         if !p.exists() {
-            return Err(anyhow!("Error:Validating failed : field 'main_program' provided in table 'software' not exist : '{installed}'"));
+            if is_qa_mode() {
+                log!("Warning:Validating failed : field 'main_program' provided in table 'software' not exist : '{installed}'")
+            } else {
+                return Err(anyhow!("Error:Validating failed : field 'main_program' provided in table 'software' not exist : '{installed}'"));
+            }
         }
     }
     log_ok_last!("Info:Validating setup...");
@@ -160,8 +161,11 @@ fn test_install() {
     assert!(!cx_path.exists());
 
     // 准备测试 main_program 校验
-    _ensure_testing_uninstalled(&"Microsoft".to_string(), &"CallInstaller".to_string());
-    let binding = env_desktop() + "/Call.exe";
+    crate::utils::test::_ensure_testing_uninstalled(
+        &"Microsoft".to_string(),
+        &"CallInstaller".to_string(),
+    );
+    let binding = crate::utils::env::env_desktop() + "/Call.exe";
     let desktop_call_path = Path::new(&binding);
     if desktop_call_path.exists() {
         std::fs::remove_file(desktop_call_path).unwrap();

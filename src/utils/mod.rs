@@ -57,6 +57,10 @@ pub fn is_debug_mode() -> bool {
     envmnt::get_or("DEBUG", "false") == String::from("true")
 }
 
+pub fn is_qa_mode() -> bool {
+    envmnt::get_or("QA", "false") == String::from("true")
+}
+
 pub fn is_confirm_mode() -> bool {
     envmnt::get_or("CONFIRM", "false") == String::from("true")
 }

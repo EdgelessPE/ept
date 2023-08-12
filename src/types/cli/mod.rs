@@ -21,6 +21,10 @@ pub struct Args {
     #[arg(long)]
     pub offline: bool,
 
+    /// Tweaking certain behavior when running in Edgeless QA
+    #[arg(long)]
+    pub qa: bool,
+
     /// Run commands in debug mode
     #[arg(short, long)]
     pub debug: bool,
