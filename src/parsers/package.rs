@@ -1,5 +1,7 @@
+use crate::executor::values_replacer;
+use crate::types::interpretable::Interpretable;
 use crate::types::{extended_semver::ExSemVer, package::GlobalPackage, software::Software};
-use crate::utils::{get_exe_version, parse_relative_path_with_located};
+use crate::utils::{get_exe_version, get_path_apps, parse_relative_path_with_located};
 use crate::{log, p2s};
 use anyhow::{anyhow, Result};
 use std::path::Path;
@@ -12,11 +14,12 @@ use super::parse_author;
 
 fn update_main_program(
     pkg: &mut GlobalPackage,
-    software: Software,
+    software: &Software,
     located: Option<String>,
     package_path: &Path,
 ) -> Result<()> {
     let located = located.unwrap();
+    let software = software.clone();
     // 获取主程序相对路径
     let file_path = parse_relative_path_with_located(&software.main_program.unwrap(), &located);
 
@@ -81,13 +84,22 @@ pub fn parse_package(p: &String, located: Option<String>) -> Result<GlobalPackag
     // 跟随主程序 exe 文件版本号更新版本号
     let software = pkg.software.clone().unwrap();
     if located.is_some() && pkg.software.is_some() && software.main_program.is_some() {
-        if let Err(e) = update_main_program(&mut pkg, software, located, package_path) {
+        if let Err(e) = update_main_program(&mut pkg, &software, located.clone(), package_path) {
             log!(
                 "Warning:Failed to update main program version for {name} : {e}",
                 name = pkg.package.name,
             );
         }
     }
+
+    // 解释
+    let scope = &software.scope;
+    let located = located.unwrap_or_else(|| {
+        let p = get_path_apps(scope, &pkg.package.name, false).unwrap();
+        p2s!(p)
+    });
+    let interpreter = |raw: String| values_replacer(raw, 0, &located);
+    let pkg = pkg.interpret(interpreter);
 
     Ok(pkg)
 }
@@ -130,7 +142,7 @@ fn test_update_main_program() {
 
     update_main_program(
         &mut pkg,
-        software,
+        &software,
         Some("examples/Dism++/Dism++".to_string()),
         &Path::new("test/nul.toml"),
     )
@@ -146,4 +158,37 @@ fn test_is_nep_version_compatible() {
     assert!(is_nep_version_compatible(&"1.0".to_string(), &"1.0.30".to_string()).is_ok());
     assert!(is_nep_version_compatible(&"1.2".to_string(), &"1.0.30".to_string()).is_ok());
     assert!(is_nep_version_compatible(&"1.8".to_string(), &"2.0.0".to_string()).is_err());
+}
+
+#[test]
+fn test_parse_package() {
+    let pkg = parse_package(&"examples/VSCode/package.toml".to_string(), None).unwrap();
+    let answer = GlobalPackage {
+        nep: "0.2".to_string(),
+        package: crate::types::package::Package {
+            name: "VSCode".to_string(),
+            description: "Visual Studio Code".to_string(),
+            template: "Software".to_string(),
+            version: "1.75.0.0".to_string(),
+            authors: vec![
+                "Cno <dsyourshy@qq.com>".to_string(),
+                "Microsoft".to_string(),
+            ],
+            license: None,
+        },
+        software: Some(Software {
+            scope: "Microsoft".to_string(),
+            upstream: "https://code.visualstudio.com/".to_string(),
+            category: "办公编辑".to_string(),
+            arch: None,
+            language: "Multi".to_string(),
+            main_program: None,
+            tags: Some(vec!["Electron".to_string()]),
+            alias: None,
+            installed: Some(
+                crate::utils::env::env_appdata() + "/Local/Programs/Microsoft VS Code/Code.exe",
+            ),
+        }),
+    };
+    assert_eq!(pkg, answer)
 }

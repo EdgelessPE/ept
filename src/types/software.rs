@@ -8,10 +8,10 @@ use crate::{
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
 
-use super::{mixed_fs::MixedFS, verifiable::Verifiable};
+use super::{interpretable::Interpretable, mixed_fs::MixedFS, verifiable::Verifiable};
 use ts_rs::TS;
 
-#[derive(Serialize, Deserialize, Clone, Debug, TS)]
+#[derive(Serialize, Deserialize, Clone, Debug, TS, PartialEq)]
 #[ts(export)]
 pub struct Software {
     pub scope: String,
@@ -104,6 +104,16 @@ impl Verifiable for Software {
         }
 
         Ok(())
+    }
+}
+
+impl Interpretable for Software {
+    fn interpret<F>(mut self, interpreter: F) -> Self
+    where
+        F: Fn(String) -> String,
+    {
+        self.installed = self.installed.map(interpreter);
+        self
     }
 }
 

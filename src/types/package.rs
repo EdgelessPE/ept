@@ -4,9 +4,9 @@ use serde::{Deserialize, Serialize};
 use std::path::Path;
 use ts_rs::TS;
 
-use super::{extended_semver::ExSemVer, verifiable::Verifiable};
+use super::{extended_semver::ExSemVer, interpretable::Interpretable, verifiable::Verifiable};
 
-#[derive(Serialize, Deserialize, Clone, Debug, TS)]
+#[derive(Serialize, Deserialize, Clone, Debug, TS, PartialEq)]
 #[ts(export)]
 pub struct Package {
     pub name: String,
@@ -37,7 +37,16 @@ impl Verifiable for Package {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, TS)]
+impl Interpretable for Package {
+    fn interpret<F>(self, _interpreter: F) -> Self
+    where
+        F: Fn(String) -> String,
+    {
+        self
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, TS, PartialEq)]
 #[ts(export)]
 pub struct GlobalPackage {
     pub nep: String,
@@ -83,5 +92,18 @@ impl Verifiable for GlobalPackage {
         }
 
         Ok(())
+    }
+}
+
+impl Interpretable for GlobalPackage {
+    fn interpret<F>(self, interpreter: F) -> Self
+    where
+        F: Fn(String) -> String,
+    {
+        Self {
+            nep: self.nep,
+            package: self.package.interpret(&interpreter),
+            software: self.software.map(|soft| soft.interpret(interpreter)),
+        }
     }
 }
