@@ -160,6 +160,10 @@ fn test_update_using_package() {
     )
     .unwrap();
     pkg.package.version = "1.75.0.1".to_string();
+    pkg.software = pkg.software.map(|mut soft| {
+        soft.installed = Some("${AppData}/Local/Programs/Microsoft VS Code/Code.exe".to_string());
+        soft
+    });
     let text = toml::to_string_pretty(&pkg).unwrap();
     std::fs::write("test/VSCode/package.toml", text).unwrap();
 
