@@ -59,6 +59,7 @@ pub fn verify(source_dir: &String) -> Result<GlobalPackage> {
     log!("Info:Resolving data...");
     let pkg_path = Path::new(source_dir).join("package.toml");
     let global = parse_package(&p2s!(pkg_path), source_dir, false)?;
+    let software = global.software.clone().unwrap();
     let pkg_content_path = p2s!(Path::new(source_dir).join(&global.package.name));
     log_ok_last!("Info:Resolving data...");
 
@@ -70,9 +71,18 @@ pub fn verify(source_dir: &String) -> Result<GlobalPackage> {
     // 记录 setup 中是否用到 call_installer
     let check_call_installer = verify_workflow(setup_flow.clone(), &pkg_content_path)?;
 
-    // 用到了 call_installer 必须有卸载流
-    if check_call_installer && !get_workflow_path(source_dir, "remove.toml").exists() {
-        return Err(anyhow!("Error:Workflow 'remove.toml' should include 'Execute' step with 'call_installer' field enabled when workflow 'setup.toml' includes such step"));
+    // 如果用到了 call_installer 则有一些特殊逻辑：
+    if check_call_installer {
+        // 必须有卸载流
+        if !get_workflow_path(source_dir, "remove.toml").exists() {
+            return Err(anyhow!("Error:Workflow 'remove.toml' should include 'Execute' step with 'call_installer' field enabled when workflow 'setup.toml' includes such step"));
+        }
+
+        // 必须提供绝对路径的 main_program
+        let mp=software.main_program.ok_or(anyhow!("Error:Field 'main_program' in table 'software' should be provided when workflow 'setup.toml' includes 'Execute' step with 'call_installer' field"))?;
+        if !Path::new(&mp).is_absolute() {
+            return Err(anyhow!("Error:Field 'main_program' in table 'software' should starts with inner value when workflow 'setup.toml' includes 'Execute' step with 'call_installer' field, got '{mp}'"));
+        }
     }
 
     // 检查其他工作流
@@ -102,6 +112,7 @@ pub fn verify(source_dir: &String) -> Result<GlobalPackage> {
 #[test]
 fn test_verify() {
     envmnt::set("DEBUG", "true");
+    use std::fs::write;
     verify(&"./examples/VSCode".to_string()).unwrap();
     verify(&"./examples/CallInstaller".to_string()).unwrap();
 
@@ -126,4 +137,30 @@ fn test_verify() {
         "examples/CallInstaller/workflows/remove.toml",
     )
     .unwrap();
+
+    // 保存现场
+    let package_scene = std::fs::read_to_string("examples/CallInstaller/package.toml").unwrap();
+    // 读取 package
+    let pkg_path = &"examples/CallInstaller/package.toml".to_string();
+    let mut raw_pkg =
+        parse_package(pkg_path, &"examples/CallInstaller".to_string(), false).unwrap();
+
+    // 删除 CallInstaller 的 main_program
+    raw_pkg.software = raw_pkg.software.map(|mut soft| {
+        soft.main_program = None;
+        soft
+    });
+    write(pkg_path, toml::to_string_pretty(&raw_pkg).unwrap()).unwrap();
+    assert!(verify(&"./examples/CallInstaller".to_string()).is_err());
+
+    // 令 CallInstaller 的 main_program 为相对路径
+    raw_pkg.software = raw_pkg.software.map(|mut soft| {
+        soft.main_program = Some("Installer.exe".to_string());
+        soft
+    });
+    write(pkg_path, toml::to_string_pretty(&raw_pkg).unwrap()).unwrap();
+    assert!(verify(&"./examples/CallInstaller".to_string()).is_err());
+
+    // 还原现场
+    write(pkg_path, package_scene).unwrap();
 }

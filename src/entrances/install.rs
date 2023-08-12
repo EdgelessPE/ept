@@ -7,7 +7,10 @@ use super::{
     utils::package::{clean_temp, unpack_nep},
     utils::validator::installed_validator,
 };
-use crate::utils::move_or_copy;
+use crate::utils::{
+    env::env_desktop, move_or_copy, parse_relative_path_with_located,
+    test::_ensure_testing_uninstalled,
+};
 use crate::{entrances::update_using_package, utils::ask_yn};
 use crate::{executor::workflow_executor, parsers::parse_workflow, utils::get_path_apps};
 use crate::{log, log_ok_last, p2s};
@@ -87,7 +90,7 @@ pub fn install_using_package(source_file: &String, verify_signature: bool) -> Re
     log!("Info:Validating setup...");
     installed_validator(&into_dir)?;
     if let Some(installed) = &software.main_program {
-        let p = Path::new(installed);
+        let p = parse_relative_path_with_located(installed, &into_dir);
         if !p.exists() {
             return Err(anyhow!("Error:Validating failed : field 'main_program' provided in table 'software' not exist : '{installed}'"));
         }
@@ -155,4 +158,25 @@ fn test_install() {
     assert!(!entry1_path.exists() || entry2_path.exists());
     assert!(!mp_path.exists());
     assert!(!cx_path.exists());
+
+    // 准备测试 main_program 校验
+    _ensure_testing_uninstalled(&"Microsoft".to_string(), &"CallInstaller".to_string());
+    let binding = env_desktop() + "/Call.exe";
+    let desktop_call_path = Path::new(&binding);
+    if desktop_call_path.exists() {
+        std::fs::remove_file(desktop_call_path).unwrap();
+    }
+
+    // 安装 CallInstaller，预期会因为不存在主程序 ${Desktop}/Call.exe 而安装失败
+    assert!(install_using_package(&"examples/CallInstaller".to_string(), false).is_err());
+    crate::clean().unwrap();
+
+    // 提供指定的主程序后安装成功
+    std::fs::write(desktop_call_path, "114514").unwrap();
+    crate::uninstall(&"CallInstaller".to_string()).unwrap();
+    install_using_package(&"examples/CallInstaller".to_string(), false).unwrap();
+
+    // 清理
+    std::fs::remove_file(desktop_call_path).unwrap();
+    crate::uninstall(&"CallInstaller".to_string()).unwrap();
 }

@@ -48,9 +48,8 @@ impl Verifiable for Software {
         }
 
         if let Some(main_program) = &self.main_program {
-            // 区分是绝对路径还是相对路径
-            if is_starts_with_inner_value(main_program) {
-            } else {
+            // 区分是绝对路径还是相对路径，仅校验相对路径的主程序
+            if !is_starts_with_inner_value(main_program) {
                 // 相对路径的主程序应该存在
                 let mixed_fs = MixedFS::new(located.to_owned());
                 if !mixed_fs.exists(main_program) {
