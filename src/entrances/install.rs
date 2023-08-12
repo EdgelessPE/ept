@@ -184,3 +184,21 @@ fn test_install() {
     std::fs::remove_file(desktop_call_path).unwrap();
     crate::uninstall(&"CallInstaller".to_string()).unwrap();
 }
+
+#[test]
+fn test_install_dism() {
+    use crate::utils::test::_ensure_testing_uninstalled;
+    use crate::utils::SysArch;
+    _ensure_testing_uninstalled(&"Chuyu".to_string(), &"Dism++".to_string());
+
+    install_using_package(&"examples/Dism++".to_string(), false).unwrap();
+    let stem_name = match crate::utils::get_arch().unwrap() {
+        SysArch::X64 => "Dism++x64",
+        SysArch::X86 => "Dism++x86",
+        SysArch::ARM64 => "Dism++ARM64",
+    };
+    let p = format!("{d}/{stem_name}.lnk", d = crate::utils::env::env_desktop());
+    println!("{p}");
+    assert!(Path::new(&p).exists());
+    std::fs::remove_file(&p).unwrap();
+}

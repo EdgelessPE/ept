@@ -4,6 +4,7 @@ use crate::utils::env::{
     env_appdata, env_desktop, env_home, env_program_files_x64, env_program_files_x86,
     env_public_desktop, env_system_drive,
 };
+use crate::utils::get_arch;
 use anyhow::{anyhow, Result};
 use lazy_static::lazy_static;
 use regex::Regex;
@@ -155,7 +156,8 @@ define_values! {
     {"${ProgramFiles_X64}",env_program_files_x64(),PermissionLevel::Sensitive},
     {"${ProgramFiles_X86}",env_program_files_x86(),PermissionLevel::Sensitive},
     {"${Desktop}",env_desktop(),PermissionLevel::Important},
-    {"${PublicDesktop}",env_public_desktop(),PermissionLevel::Important}
+    {"${PublicDesktop}",env_public_desktop(),PermissionLevel::Important},
+    {"${Arch}",get_arch().unwrap().to_string(),PermissionLevel::Normal}
 }
 
 #[test]

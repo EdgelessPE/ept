@@ -1,5 +1,6 @@
 use anyhow::{anyhow, Ok, Result};
 use serde::{Deserialize, Serialize};
+use std::fmt;
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum SysArch {
@@ -7,8 +8,13 @@ pub enum SysArch {
     X86,
     ARM64,
 }
+impl fmt::Display for SysArch {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
 
-fn get_arch() -> Result<SysArch> {
+pub fn get_arch() -> Result<SysArch> {
     #[cfg(target_arch = "x86")]
     return Ok(SysArch::X86);
     #[cfg(target_arch = "x86_64")]

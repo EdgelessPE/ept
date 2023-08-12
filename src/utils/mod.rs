@@ -15,7 +15,7 @@ mod wild_match;
 use anyhow::{anyhow, Result};
 use regex::Regex;
 
-pub use self::arch::is_current_arch_match;
+pub use self::arch::{get_arch, is_current_arch_match, SysArch};
 pub use self::cfg::{get_config, set_config, Cfg, Local};
 pub use self::conditions::{ensure_arg, get_permissions_from_conditions, verify_conditions};
 pub use self::exe_version::get_exe_version;
