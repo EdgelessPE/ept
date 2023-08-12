@@ -49,31 +49,27 @@ pub fn clean_temp(source_file: &String) -> Result<()> {
 }
 
 /// 返回 (Inner 临时目录,package 结构体)
-pub fn unpack_nep(
-    source_file: &String,
-    verify_signature: bool,
-) -> Result<(PathBuf, GlobalPackage)> {
+pub fn unpack_nep(source: &String, verify_signature: bool) -> Result<(PathBuf, GlobalPackage)> {
     // 处理输入目录的情况
-    let source_path = Path::new(source_file);
+    let source_path = Path::new(source);
     if source_path.is_dir() {
         if verify_signature {
             return Err(anyhow!("Error:Given path refers to a directory, use '--offline' flag to process as develop directory"));
         } else {
             // 检查是否为合法的输入目录
-            inner_validator(source_file)?;
+            inner_validator(source)?;
             // 校验
-            entrances::verify::verify(source_file)?;
+            entrances::verify::verify(source)?;
             // 读取 package.toml
-            let package_path = Path::new(source_file).join("package.toml");
-            let global = parse_package(&p2s!(package_path), None)?;
+            let package_path = Path::new(source).join("package.toml");
+            let global = parse_package(&p2s!(package_path), source, false)?;
 
-            return Ok((Path::new(source_file).to_path_buf(), global));
+            return Ok((Path::new(source).to_path_buf(), global));
         }
     }
 
     // 检查文件大小
-    let file = File::open(source_file)
-        .map_err(|e| anyhow!("Error:Can't open file '{source_file}' : {e}"))?;
+    let file = File::open(source).map_err(|e| anyhow!("Error:Can't open file '{source}' : {e}"))?;
     let meta = file.metadata()?;
     let size = meta.len();
     // 获取 fast 处理方法的文件大小上限
@@ -85,16 +81,16 @@ pub fn unpack_nep(
 
     let res = if size <= size_limit {
         log!("Debug:Use fast unpack method ({size}/{size_limit})");
-        fast_unpack_nep(source_file, verify_signature)?
+        fast_unpack_nep(source, verify_signature)?
     } else {
         log!("Debug:Use normal unpack method ({size}/{size_limit})");
-        normal_unpack_nep(source_file, verify_signature)?
+        normal_unpack_nep(source, verify_signature)?
     };
 
     // 离线模式下强制执行一次检查
-    if !verify_signature {
-        entrances::verify::verify(&p2s!(res.0))?;
-    }
+    // if !verify_signature {
+    //     entrances::verify::verify(&p2s!(res.0))?;
+    // }
 
     Ok(res)
 }
@@ -151,7 +147,11 @@ fn normal_unpack_nep(
     log_ok_last!("Info:Decompressing inner package...");
 
     // 读取 package.toml
-    let package_struct = parse_package(&p2s!(temp_dir_inner_path.join("package.toml")), None)?;
+    let package_struct = parse_package(
+        &p2s!(temp_dir_inner_path.join("package.toml")),
+        &temp_dir_inner_str,
+        false,
+    )?;
 
     // 检查签名者与第一作者是否一致
     let author = parse_author(&package_struct.package.authors[0])?;
@@ -231,7 +231,11 @@ fn fast_unpack_nep(
     log_ok_last!("Info:Decompressing inner package...");
 
     // 读取 package.toml
-    let package_struct = parse_package(&p2s!(temp_dir_inner_path.join("package.toml")), None)?;
+    let package_struct = parse_package(
+        &p2s!(temp_dir_inner_path.join("package.toml")),
+        &temp_dir_inner_str,
+        false,
+    )?;
 
     // 检查签名者与第一作者是否一致
     let author = parse_author(&package_struct.package.authors[0])?;
@@ -290,11 +294,12 @@ fn test_fast_unpack_nep() {
 
 #[test]
 fn benchmark_fast_unpack_nep() {
+    envmnt::set("DEBUG", "true");
     // 准备带有一定体积的包
     crate::utils::test::_ensure_clear_test_dir();
 
     crate::pack(
-        &"./examples/Dism++".to_string(),
+        &"examples/Dism++".to_string(),
         Some("./test/Dism++_10.1.1002.1_Cno.nep".to_string()),
         true,
     )

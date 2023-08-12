@@ -43,6 +43,7 @@ fn merge_path(exact_from: &String, to: String) -> String {
 
 impl MixedFS {
     pub fn new(located: String) -> Self {
+        log!("Debug:MixedFS instance created with located '{located}'");
         MixedFS {
             located,
             to_add: HashSet::new(),

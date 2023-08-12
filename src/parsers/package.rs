@@ -1,7 +1,8 @@
 use crate::executor::values_replacer;
 use crate::types::interpretable::Interpretable;
+use crate::types::verifiable::Verifiable;
 use crate::types::{extended_semver::ExSemVer, package::GlobalPackage, software::Software};
-use crate::utils::{get_exe_version, get_path_apps, parse_relative_path_with_located};
+use crate::utils::{get_exe_version, parse_relative_path_with_located};
 use crate::{log, p2s};
 use anyhow::{anyhow, Result};
 use std::path::Path;
@@ -15,10 +16,9 @@ use super::parse_author;
 fn update_main_program(
     pkg: &mut GlobalPackage,
     software: &Software,
-    located: Option<String>,
+    located: &String,
     package_path: &Path,
 ) -> Result<()> {
-    let located = located.unwrap();
     let software = software.clone();
     // 获取主程序相对路径
     let file_path = parse_relative_path_with_located(&software.main_program.unwrap(), &located);
@@ -46,8 +46,13 @@ fn update_main_program(
     Ok(())
 }
 
-/// p 输入 package.toml 所在位置，如需自动更新主程序版本号则传入 located 为包安装后的所在路径
-pub fn parse_package(p: &String, located: Option<String>) -> Result<GlobalPackage> {
+/// p 输入 package.toml 所在位置
+pub fn parse_package(
+    p: &String,
+    located: &String,
+    need_update_main_program: bool,
+) -> Result<GlobalPackage> {
+    log!("Debug:Parse package '{p}' with located '{located}'");
     let package_path = Path::new(p);
     if !package_path.exists() {
         return Err(anyhow!("Error:Fatal:Can't find package.toml path : {p}"));
@@ -83,8 +88,8 @@ pub fn parse_package(p: &String, located: Option<String>) -> Result<GlobalPackag
 
     // 跟随主程序 exe 文件版本号更新版本号
     let software = pkg.software.clone().unwrap();
-    if located.is_some() && pkg.software.is_some() && software.main_program.is_some() {
-        if let Err(e) = update_main_program(&mut pkg, &software, located.clone(), package_path) {
+    if need_update_main_program && software.main_program.is_some() {
+        if let Err(e) = update_main_program(&mut pkg, &software, located, package_path) {
             log!(
                 "Warning:Failed to update main program version for {name} : {e}",
                 name = pkg.package.name,
@@ -92,12 +97,14 @@ pub fn parse_package(p: &String, located: Option<String>) -> Result<GlobalPackag
         }
     }
 
+    // 支持智能识别 located 指的 "根目录" 还是 "根目录/名称"
+    if Path::new(&(located.to_owned() + "/package.toml")).exists() {
+        pkg.verify_self(&format!("{located}/{name}", name = pkg.package.name))?;
+    } else {
+        pkg.verify_self(located)?;
+    }
+
     // 解释
-    let scope = &software.scope;
-    let located = located.unwrap_or_else(|| {
-        let p = get_path_apps(scope, &pkg.package.name, false).unwrap();
-        p2s!(p)
-    });
     let interpreter = |raw: String| values_replacer(raw, 0, &located);
     let pkg = pkg.interpret(interpreter);
 
@@ -131,19 +138,16 @@ fn is_nep_version_compatible(pkg_str: &String, ept_str: &String) -> Result<()> {
 
 #[test]
 fn test_update_main_program() {
-    let located = "examples/Dism++".to_string();
-    let mut pkg = parse_package(
-        &"examples/Dism++/package.toml".to_string(),
-        Some(located.clone()),
-    )
-    .unwrap();
+    let located = &"examples/Dism++".to_string();
+    let mut pkg =
+        parse_package(&"examples/Dism++/package.toml".to_string(), located, true).unwrap();
     pkg.package.version = "10.1.112.1".to_string();
     let software = pkg.clone().software.unwrap();
 
     update_main_program(
         &mut pkg,
         &software,
-        Some("examples/Dism++/Dism++".to_string()),
+        &"examples/Dism++/Dism++".to_string(),
         &Path::new("test/nul.toml"),
     )
     .unwrap();
@@ -162,7 +166,9 @@ fn test_is_nep_version_compatible() {
 
 #[test]
 fn test_parse_package() {
-    let pkg = parse_package(&"examples/VSCode/package.toml".to_string(), None).unwrap();
+    envmnt::set("DEBUG", "true");
+    let located = &"examples/VSCode".to_string();
+    let pkg = parse_package(&"examples/VSCode/package.toml".to_string(), located, false).unwrap();
     let answer = GlobalPackage {
         nep: "0.2".to_string(),
         package: crate::types::package::Package {

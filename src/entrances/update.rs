@@ -153,8 +153,12 @@ fn test_update_using_package() {
     // 手动更新版本号
     let opt = fs_extra::dir::CopyOptions::new().copy_inside(true);
     fs_extra::dir::copy("examples/VSCode", "test/VSCode", &opt).unwrap();
-    let mut pkg =
-        crate::parsers::parse_package(&"test/VSCode/package.toml".to_string(), None).unwrap();
+    let mut pkg = crate::parsers::parse_package(
+        &"test/VSCode/package.toml".to_string(),
+        &"test/VSCode".to_string(),
+        false,
+    )
+    .unwrap();
     pkg.package.version = "1.75.0.1".to_string();
     let text = toml::to_string_pretty(&pkg).unwrap();
     std::fs::write("test/VSCode/package.toml", text).unwrap();

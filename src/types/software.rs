@@ -50,7 +50,7 @@ impl Verifiable for Software {
 
         // 主程序应该存在且可以读取版本号
         if let Some(main_program) = &self.main_program {
-            let mixed_fs = MixedFS::new(located.clone());
+            let mixed_fs = MixedFS::new(located.to_owned());
             if !mixed_fs.exists(main_program) {
                 return Err(err_wrapper(anyhow!(
                     "given main program '{main_program}' doesn't exist"
@@ -98,7 +98,7 @@ impl Verifiable for Software {
         if let Some(installed) = &self.installed {
             if !is_starts_with_inner_value(installed) {
                 return Err(anyhow!(
-                    "Error:Field 'installed' should start with inner value"
+                    "Error:Field 'installed' should start with inner value : '{installed}'"
                 ));
             }
         }

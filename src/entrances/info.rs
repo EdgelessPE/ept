@@ -25,7 +25,7 @@ pub fn info_local(scope: &String, package_name: &String) -> Result<(GlobalPackag
     let ctx_path = Path::new(&ctx_str);
     // 读入包信息
     let pkg_path = ctx_path.join("package.toml");
-    let global = parse_package(&p2s!(pkg_path), Some(local_str))?;
+    let global = parse_package(&p2s!(pkg_path), &local_str, true)?;
     // 写本地信息
     let authors = global.package.authors.clone();
     let local = InfoDiff {

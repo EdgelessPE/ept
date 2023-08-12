@@ -58,9 +58,8 @@ pub fn verify(source_dir: &String) -> Result<GlobalPackage> {
     // 读取包信息
     log!("Info:Resolving data...");
     let pkg_path = Path::new(source_dir).join("package.toml");
-    let global = parse_package(&p2s!(pkg_path), None)?;
+    let global = parse_package(&p2s!(pkg_path), source_dir, false)?;
     let pkg_content_path = p2s!(Path::new(source_dir).join(&global.package.name));
-    global.verify_self(&pkg_content_path)?;
     log_ok_last!("Info:Resolving data...");
 
     // 校验工作流

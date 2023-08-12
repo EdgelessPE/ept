@@ -42,7 +42,11 @@ pub fn uninstall(package_name: &String) -> Result<()> {
     installed_validator(&app_str)?;
 
     // 读入 package.toml
-    let global = parse_package(&p2s!(app_path.join(".nep_context/package.toml")), None)?;
+    let global = parse_package(
+        &p2s!(app_path.join(".nep_context/package.toml")),
+        &app_str,
+        false,
+    )?;
 
     // 读入卸载工作流
     let remove_flow_path = app_path.join(".nep_context/workflows/remove.toml");
