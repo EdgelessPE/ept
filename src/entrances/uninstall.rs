@@ -2,6 +2,7 @@ use anyhow::{anyhow, Result};
 use std::{
     collections::HashSet,
     fs::{read_dir, remove_dir, remove_dir_all},
+    path::Path,
     thread::sleep,
     time::Duration,
 };
@@ -80,7 +81,9 @@ pub fn uninstall(package_name: &String) -> Result<()> {
 
             // 加入主程序
             if let Some(mp) = global.software.unwrap().main_program {
-                hit_list.insert(mp);
+                if let Some(file_name) = Path::new(&mp).file_name() {
+                    hit_list.insert(file_name.to_string_lossy().to_string());
+                }
             }
 
             // 杀死其中列出的 exe 程序
