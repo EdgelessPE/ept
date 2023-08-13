@@ -123,8 +123,11 @@ where
     let from_str = p2s!(from.as_ref());
     let to_str = p2s!(to.as_ref());
 
-    let opt = CopyOptions::new().copy_inside(true);
-    fs_extra::dir::copy("examples/CallInstaller", "test/CallInstaller1", &opt)
+    let opt = CopyOptions::new()
+        .copy_inside(true)
+        .overwrite(true)
+        .content_only(true);
+    fs_extra::dir::copy(from, to, &opt)
         .map_err(|e| anyhow!("Error:Failed to copy directory '{from_str}' to '{to_str}' : {e}"))?;
 
     Ok(())
