@@ -73,7 +73,7 @@ pub fn parse_package(
     }
 
     // 序列化
-    let mut pkg: GlobalPackage = dirty_toml
+    let pkg: GlobalPackage = dirty_toml
         .try_into()
         .map_err(|res| anyhow!("Error:Can't validate package.toml at '{p}' : {res}"))?;
 
@@ -86,6 +86,17 @@ pub fn parse_package(
         }
     }
 
+    // 支持智能识别 located 指的 "根目录" 还是 "根目录/名称"
+    if Path::new(&(located.to_owned() + "/package.toml")).exists() {
+        pkg.verify_self(&format!("{located}/{name}", name = pkg.package.name))?;
+    } else {
+        pkg.verify_self(located)?;
+    }
+
+    // 解释
+    let interpreter = |raw: String| values_replacer(raw, 0, &located);
+    let mut pkg = pkg.interpret(interpreter);
+
     // 跟随主程序 exe 文件版本号更新版本号
     let software = pkg.software.clone().unwrap();
     if need_update_main_program && software.main_program.is_some() {
@@ -96,17 +107,6 @@ pub fn parse_package(
             );
         }
     }
-
-    // 支持智能识别 located 指的 "根目录" 还是 "根目录/名称"
-    if Path::new(&(located.to_owned() + "/package.toml")).exists() {
-        pkg.verify_self(&format!("{located}/{name}", name = pkg.package.name))?;
-    } else {
-        pkg.verify_self(located)?;
-    }
-
-    // 解释
-    let interpreter = |raw: String| values_replacer(raw, 0, &located);
-    let pkg = pkg.interpret(interpreter);
 
     Ok(pkg)
 }
