@@ -817,6 +817,7 @@ dependencies = [
  "notify-rust",
  "path-clean",
  "pelite",
+ "rand",
  "regex",
  "rusty-hook",
  "rustyline",
