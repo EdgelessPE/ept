@@ -21,7 +21,9 @@ pub use self::cfg::{get_config, set_config, Cfg, Local};
 pub use self::command::split_command;
 pub use self::conditions::{ensure_arg, get_permissions_from_conditions, verify_conditions};
 pub use self::exe_version::get_exe_version;
-pub use self::fs::{count_sub_files, ensure_dir_exist, move_or_copy, read_sub_dir, try_recycle};
+pub use self::fs::{
+    copy_dir, count_sub_files, ensure_dir_exist, move_or_copy, read_sub_dir, try_recycle,
+};
 pub use self::log::{fn_log, fn_log_ok_last};
 pub use self::path::{
     find_scope_with_name_locally, parse_relative_path_with_base, parse_relative_path_with_located,
@@ -100,6 +102,7 @@ pub fn parse_bare_temp() -> Result<PathBuf> {
 }
 
 pub fn get_path_temp(name: &String, keep_clear: bool, sub_dir: bool) -> Result<PathBuf> {
+    // TODO:在结尾加上随机字符串
     let p = parse_relative_path_with_base(&"temp".to_string())?.join(name);
     if keep_clear && p.exists() {
         remove_dir_all(p.clone()).map_err(|_| {

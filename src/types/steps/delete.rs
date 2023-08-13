@@ -98,14 +98,12 @@ impl Generalizable for StepDelete {
 
 #[test]
 fn test_delete() {
-    use fs_extra::dir::CopyOptions;
     envmnt::set("DEBUG", "true");
     let mut cx = WorkflowContext::_demo();
     crate::utils::test::_ensure_clear_test_dir();
 
     // 准备源
-    let opt = CopyOptions::new().copy_inside(true);
-    fs_extra::dir::copy("src", "test/src", &opt).unwrap();
+    crate::utils::copy_dir("src", "test/src").unwrap();
 
     // 普通删除
     StepDelete {

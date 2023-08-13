@@ -7,12 +7,11 @@ use crate::{
         permissions::Permission, verifiable::Verifiable, workflow::WorkflowContext,
     },
     utils::{
-        common_wild_match_verify, contains_wild_match, ensure_dir_exist,
+        common_wild_match_verify, contains_wild_match, copy_dir, ensure_dir_exist,
         parse_relative_path_with_located, parse_wild_match, try_recycle,
     },
 };
 use anyhow::{anyhow, Ok, Result};
-use fs_extra::dir::CopyOptions;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
@@ -115,13 +114,7 @@ fn copy(
             )
         })?;
     } else {
-        let opt = CopyOptions::new().copy_inside(true);
-        fs_extra::dir::copy(from, &to_path, &opt).map_err(|e| {
-            anyhow!(
-                "Error(Copy):Failed to copy dir from '{from}' to '{to_str}' : {e}",
-                to_str = p2s!(to_path)
-            )
-        })?;
+        copy_dir(from, &to_path)?;
     }
 
     Ok(())

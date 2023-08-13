@@ -18,7 +18,7 @@ use crate::{
     parsers::{fast_parse_signature, parse_author, parse_package, parse_signature},
     signature::{fast_verify, verify},
     types::package::GlobalPackage,
-    utils::{get_path_temp, is_debug_mode},
+    utils::{copy_dir, get_path_temp, is_debug_mode},
 };
 use crate::{log, log_ok_last};
 
@@ -58,13 +58,17 @@ pub fn unpack_nep(source: &String, verify_signature: bool) -> Result<(PathBuf, G
         } else {
             // 检查是否为合法的输入目录
             inner_validator(source)?;
-            // 校验
             entrances::verify::verify(source)?;
+
             // 读取 package.toml
             let package_path = Path::new(source).join("package.toml");
             let global = parse_package(&p2s!(package_path), source, false)?;
 
-            return Ok((Path::new(source).to_path_buf(), global));
+            // 复制到临时目录
+            let temp_path = get_path_temp(&global.package.name, true, false)?;
+            copy_dir(source_path, &temp_path)?;
+
+            return Ok((temp_path, global));
         }
     }
 
@@ -338,7 +342,6 @@ fn test_bad_package() {
         &"./test/Normal".to_string(),
     )
     .unwrap();
-    let opt = fs_extra::dir::CopyOptions::new().copy_inside(true);
 
     // 未签名
     crate::pack(
@@ -350,7 +353,7 @@ fn test_bad_package() {
     assert!(unpack_nep(&"./test/UnSig++_10.1.1002.1_Cno.nep".to_string(), true).is_err());
 
     // 被篡改的签名
-    fs_extra::dir::copy("test/Normal", "test/BadSig", &opt).unwrap();
+    crate::utils::copy_dir("test/Normal", "test/BadSig").unwrap();
     let mut signature_struct = parse_signature(&"test/BadSig/signature.toml".to_string()).unwrap();
     signature_struct.package.signature = signature_struct
         .package
@@ -366,7 +369,7 @@ fn test_bad_package() {
     assert!(unpack_nep(&"test/BadSig++_10.1.1002.1_Cno.nep".to_string(), true).is_err());
 
     // 缺失签名文件
-    fs_extra::dir::copy("test/Normal", "test/NoSig", &opt).unwrap();
+    crate::utils::copy_dir("test/Normal", "test/NoSig").unwrap();
     std::fs::remove_file("test/NoSig/signature.toml").unwrap();
     crate::compression::pack_tar(
         &"test/NoSig".to_string(),
@@ -376,7 +379,7 @@ fn test_bad_package() {
     assert!(unpack_nep(&"test/NoSig++_10.1.1002.1_Cno.nep".to_string(), true).is_err());
 
     // 错误的打包者
-    fs_extra::dir::copy("test/Normal", "test/BadAuth", &opt).unwrap();
+    crate::utils::copy_dir("test/Normal", "test/BadAuth").unwrap();
     let mut signature_struct = parse_signature(&"test/BadAuth/signature.toml".to_string()).unwrap();
     signature_struct.package.signer = "Jack".to_string();
     let text = toml::to_string_pretty(&signature_struct).unwrap();

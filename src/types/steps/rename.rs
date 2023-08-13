@@ -125,15 +125,13 @@ impl Verifiable for StepRename {
 #[test]
 fn test_rename() {
     use crate::types::workflow::WorkflowContext;
-    use fs_extra::dir::CopyOptions;
     use std::path::Path;
     envmnt::set("DEBUG", "true");
     let mut cx = WorkflowContext::_demo();
     crate::utils::test::_ensure_clear_test_dir();
 
     // 准备源
-    let opt = CopyOptions::new().copy_inside(true);
-    fs_extra::dir::copy("src", "test/src", &opt).unwrap();
+    crate::utils::copy_dir("src", "test/src").unwrap();
 
     // 文件
     StepRename {

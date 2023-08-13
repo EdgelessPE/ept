@@ -109,10 +109,23 @@ pub fn move_or_copy<P: AsRef<Path>>(from: P, to: P) -> Result<()> {
         log!("Warning:Failed to move '{from_str}' to '{to_str}', trying to copy : {e}");
 
         // 尝试进行 Copy
-        let opt = CopyOptions::new().copy_inside(true);
-        fs_extra::dir::copy(from, to, &opt)
-            .map_err(|e| anyhow!("Error:Failed to copy '{from_str}' to '{to_str}' : {e}"))?;
+        copy_dir(from, to)?;
     }
+
+    Ok(())
+}
+
+pub fn copy_dir<P, Q>(from: P, to: Q) -> Result<()>
+where
+    P: AsRef<Path>,
+    Q: AsRef<Path>,
+{
+    let from_str = p2s!(from.as_ref());
+    let to_str = p2s!(to.as_ref());
+
+    let opt = CopyOptions::new().copy_inside(true);
+    fs_extra::dir::copy("examples/CallInstaller", "test/CallInstaller1", &opt)
+        .map_err(|e| anyhow!("Error:Failed to copy directory '{from_str}' to '{to_str}' : {e}"))?;
 
     Ok(())
 }

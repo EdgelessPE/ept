@@ -151,8 +151,7 @@ fn test_update_using_package() {
     install_using_package(&"./test/VSCode_1.75.0.0_Cno.nep".to_string(), true).unwrap();
 
     // 手动更新版本号
-    let opt = fs_extra::dir::CopyOptions::new().copy_inside(true);
-    fs_extra::dir::copy("examples/VSCode", "test/VSCode", &opt).unwrap();
+    crate::utils::copy_dir("examples/VSCode", "test/VSCode").unwrap();
     let mut pkg = crate::parsers::parse_package(
         &"test/VSCode/package.toml".to_string(),
         &"test/VSCode".to_string(),
