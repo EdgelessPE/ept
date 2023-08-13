@@ -3,7 +3,7 @@ use crate::types::mixed_fs::MixedFS;
 use crate::types::permissions::{Generalizable, Permission, PermissionLevel};
 use crate::types::verifiable::Verifiable;
 use crate::types::workflow::WorkflowContext;
-use crate::utils::{format_path, read_console, split_command};
+use crate::utils::{format_path, is_starts_with_inner_value, read_console, split_command};
 use crate::{log, verify_enum};
 
 use super::TStep;
@@ -119,7 +119,20 @@ impl TStep for StepExecute {
         Ok(())
     }
     fn get_manifest(&self, _fs: &mut MixedFS) -> Vec<String> {
-        Vec::new()
+        let mut manifest = Vec::new();
+
+        // 调用相对路径的安装包
+        if self.call_installer.unwrap_or(false) {
+            if let Ok(sp_command) = split_command(&self.command) {
+                if let Some(exe) = sp_command.get(0) {
+                    if !is_starts_with_inner_value(exe) {
+                        manifest.push(exe.to_owned());
+                    }
+                }
+            }
+        }
+
+        manifest
     }
 }
 
@@ -151,6 +164,9 @@ impl Verifiable for StepExecute {
             verify_enum!("Execute", "wait", wait, "Sync" | "Delay" | "Abandon")?;
         }
 
+        // 命令应该是有效的 posix 命令
+        split_command(&self.command)?;
+
         Ok(())
     }
 }
@@ -172,6 +188,38 @@ impl Generalizable for StepExecute {
         };
         Ok(vec![node])
     }
+}
+
+#[test]
+fn test_execute_manifest() {
+    let mut fs = MixedFS::new("examples/Dism++/Dism++".to_string());
+
+    let manifest = StepExecute {
+        command: "./Dism++x64.exe /S".to_string(),
+        pwd: None,
+        call_installer: Some(true),
+        wait: None,
+    }
+    .get_manifest(&mut fs);
+    assert_eq!(manifest, vec!["./Dism++x64.exe".to_string()]);
+
+    let manifest = StepExecute {
+        command: "\"./Dism++x64.exe\" /S".to_string(),
+        pwd: None,
+        call_installer: Some(true),
+        wait: None,
+    }
+    .get_manifest(&mut fs);
+    assert_eq!(manifest, vec!["./Dism++x64.exe".to_string()]);
+
+    let manifest = StepExecute {
+        command: "\"${ProgramFiles_X64}/Oray/SunLogin/SunloginClient/SunloginClient.exe\" --mod=uninstall".to_string(),
+        pwd: None,
+        call_installer: Some(true),
+        wait: None,
+    }
+    .get_manifest(&mut fs);
+    assert!(manifest.is_empty());
 }
 
 #[test]
