@@ -3,7 +3,9 @@ use crate::types::mixed_fs::MixedFS;
 use crate::types::permissions::{Generalizable, Permission, PermissionLevel};
 use crate::types::verifiable::Verifiable;
 use crate::types::workflow::WorkflowContext;
-use crate::utils::{format_path, is_starts_with_inner_value, read_console, split_command};
+use crate::utils::{
+    command::split_command, format_path, is_starts_with_inner_value, term::read_console,
+};
 use crate::{log, verify_enum};
 
 use super::TStep;

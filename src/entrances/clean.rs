@@ -10,7 +10,7 @@ use crate::{
     log, log_ok_last, p2s,
     parsers::parse_workflow,
     types::{steps::Step, workflow::WorkflowNode},
-    utils::{ask_yn, get_bare_apps, get_path_apps, get_path_bin, parse_bare_temp},
+    utils::{get_bare_apps, get_path_apps, get_path_bin, parse_bare_temp, term::ask_yn},
 };
 
 use super::info_local;

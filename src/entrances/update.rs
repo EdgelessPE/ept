@@ -7,7 +7,7 @@ use crate::{
     p2s,
     parsers::{parse_author, parse_workflow},
     types::extended_semver::ExSemVer,
-    utils::{ask_yn, get_path_apps, move_or_copy},
+    utils::{fs::move_or_copy, get_path_apps, term::ask_yn},
 };
 use crate::{log, log_ok_last};
 
@@ -151,7 +151,7 @@ fn test_update_using_package() {
     install_using_package(&"./test/VSCode_1.75.0.0_Cno.nep".to_string(), true).unwrap();
 
     // 手动更新版本号
-    crate::utils::copy_dir("examples/VSCode", "test/VSCode").unwrap();
+    crate::utils::fs::copy_dir("examples/VSCode", "test/VSCode").unwrap();
     let mut pkg = crate::parsers::parse_package(
         &"test/VSCode/package.toml".to_string(),
         &"test/VSCode".to_string(),

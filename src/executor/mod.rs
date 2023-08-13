@@ -10,7 +10,7 @@ use crate::{
         package::GlobalPackage,
         workflow::{WorkflowContext, WorkflowNode},
     },
-    utils::{get_bare_apps, get_system_drive, is_current_arch_match, is_strict_mode},
+    utils::{arch::is_current_arch_match, get_bare_apps, get_system_drive, is_strict_mode},
 };
 
 pub use self::functions::{

@@ -12,7 +12,10 @@ use crate::{
         permissions::{Generalizable, Permission},
         verifiable::Verifiable,
     },
-    utils::{contains_wild_match, parse_relative_path_with_located, split_parent},
+    utils::{
+        path::{parse_relative_path_with_located, split_parent},
+        wild_match::contains_wild_match,
+    },
 };
 
 use super::TStep;
@@ -131,7 +134,7 @@ fn test_rename() {
     crate::utils::test::_ensure_clear_test_dir();
 
     // 准备源
-    crate::utils::copy_dir("src", "test/src").unwrap();
+    crate::utils::fs::copy_dir("src", "test/src").unwrap();
 
     // 文件
     StepRename {

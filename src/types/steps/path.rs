@@ -5,7 +5,7 @@ use crate::types::mixed_fs::MixedFS;
 use crate::types::permissions::{Generalizable, Permission, PermissionLevel};
 use crate::types::verifiable::Verifiable;
 use crate::types::workflow::WorkflowContext;
-use crate::utils::{ask_yn, get_path_bin, parse_relative_path_with_located};
+use crate::utils::{get_path_bin, path::parse_relative_path_with_located, term::ask_yn};
 use crate::{log, p2s};
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
@@ -337,7 +337,7 @@ fn test_path() {
     let p3 = get_path_bin().unwrap().join("Edgeless-Code.cmd");
     assert!(p3.exists());
 
-    use crate::utils::try_recycle;
+    use crate::utils::fs::try_recycle;
     try_recycle(p1).unwrap();
     try_recycle(p2).unwrap();
     try_recycle(p3).unwrap();

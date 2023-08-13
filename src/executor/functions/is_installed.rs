@@ -1,7 +1,7 @@
 use crate::{
     entrances::info,
     types::permissions::{Permission, PermissionLevel},
-    utils::ensure_arg,
+    utils::conditions::ensure_arg,
 };
 use anyhow::{anyhow, Result};
 use evalexpr::{error, Function, Value};

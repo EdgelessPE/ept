@@ -80,7 +80,7 @@ fn test_decompress() {
     }
     let target = Path::new("test/VSCode_1.0.0.0_Cno");
     if target.exists() {
-        crate::utils::try_recycle(target).unwrap();
+        crate::utils::fs::try_recycle(target).unwrap();
     }
 
     decompress(

@@ -9,7 +9,7 @@ use crate::{
         info::{Info, InfoDiff},
         package::GlobalPackage,
     },
-    utils::{find_scope_with_name_locally, get_path_apps},
+    utils::{get_path_apps, path::find_scope_with_name_locally},
 };
 
 use super::utils::validator::installed_validator;

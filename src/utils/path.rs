@@ -2,9 +2,9 @@ use anyhow::{anyhow, Result};
 use path_clean::PathClean;
 use std::path::{Path, PathBuf};
 
-use crate::p2s;
+use crate::{p2s, utils::cfg::get_config};
 
-use super::{format_path, get_bare_apps, get_config, read_sub_dir};
+use super::{format_path, fs::read_sub_dir, get_bare_apps};
 
 pub fn split_parent(raw: &String, located: &String) -> (PathBuf, String) {
     // 解析为绝对路径

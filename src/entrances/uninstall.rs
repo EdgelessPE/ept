@@ -12,7 +12,10 @@ use crate::{
     log, log_ok_last, p2s,
     parsers::{parse_package, parse_workflow},
     types::{mixed_fs::MixedFS, workflow::WorkflowNode},
-    utils::{ask_yn, find_scope_with_name_locally, get_bare_apps, get_path_apps, kill_with_name},
+    utils::{
+        get_bare_apps, get_path_apps, path::find_scope_with_name_locally, process::kill_with_name,
+        term::ask_yn,
+    },
 };
 
 use super::utils::validator::installed_validator;

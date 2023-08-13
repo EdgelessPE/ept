@@ -7,7 +7,10 @@ use crate::{
         mixed_fs::MixedFS, permissions::Generalizable, permissions::Permission,
         verifiable::Verifiable, workflow::WorkflowContext,
     },
-    utils::{common_wild_match_verify, contains_wild_match, parse_wild_match, try_recycle},
+    utils::{
+        fs::try_recycle,
+        wild_match::{common_wild_match_verify, contains_wild_match, parse_wild_match},
+    },
 };
 use anyhow::{anyhow, Ok, Result};
 use serde::{Deserialize, Serialize};
@@ -108,14 +111,15 @@ impl Verifiable for StepMove {
 
 #[test]
 fn test_copy() {
+    use crate::utils::fs::copy_dir;
     use std::path::Path;
     envmnt::set("DEBUG", "true");
     let mut cx = WorkflowContext::_demo();
     crate::utils::test::_ensure_clear_test_dir();
 
     // 准备源
-    crate::utils::copy_dir("src", "test/src").unwrap();
-    crate::utils::copy_dir("keys", "test/src/keys").unwrap();
+    copy_dir("src", "test/src").unwrap();
+    copy_dir("keys", "test/src/keys").unwrap();
 
     // 文件-文件
     StepMove {

@@ -1,7 +1,8 @@
 use crate::{
     log, p2s,
     utils::{
-        get_exe_version, is_starts_with_inner_value, is_url, parse_relative_path_with_located,
+        exe_version::get_exe_version, is_starts_with_inner_value, is_url,
+        path::parse_relative_path_with_located,
     },
     verify_enum,
 };

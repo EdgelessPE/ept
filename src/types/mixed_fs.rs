@@ -4,7 +4,10 @@ use wildmatch::WildMatch;
 
 use crate::{
     log, p2s,
-    utils::{contains_wild_match, format_path, is_starts_with_inner_value, parse_wild_match},
+    utils::{
+        format_path, is_starts_with_inner_value,
+        wild_match::{contains_wild_match, parse_wild_match},
+    },
 };
 
 pub struct MixedFS {

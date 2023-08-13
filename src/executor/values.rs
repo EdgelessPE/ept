@@ -4,7 +4,7 @@ use crate::utils::env::{
     env_appdata, env_desktop, env_home, env_program_files_x64, env_program_files_x86,
     env_public_desktop, env_system_drive,
 };
-use crate::utils::{get_arch, is_starts_with_inner_value};
+use crate::utils::{arch::get_arch, is_starts_with_inner_value};
 use anyhow::{anyhow, Result};
 use evalexpr::{ContextWithMutableVariables, HashMapContext, Value};
 use lazy_static::lazy_static;

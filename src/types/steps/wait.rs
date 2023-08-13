@@ -7,7 +7,7 @@ use crate::types::{
     mixed_fs::MixedFS, permissions::Generalizable, verifiable::Verifiable,
     workflow::WorkflowContext,
 };
-use crate::utils::{get_permissions_from_conditions, verify_conditions};
+use crate::utils::conditions::{get_permissions_from_conditions, verify_conditions};
 use anyhow::{anyhow, Ok, Result};
 use serde::{Deserialize, Serialize};
 use std::time::Instant;

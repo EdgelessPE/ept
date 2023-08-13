@@ -10,7 +10,10 @@ use crate::{
         mixed_fs::MixedFS, permissions::Generalizable, verifiable::Verifiable,
         workflow::WorkflowContext,
     },
-    utils::{contains_wild_match, parse_wild_match, try_recycle},
+    utils::{
+        fs::try_recycle,
+        wild_match::{contains_wild_match, parse_wild_match},
+    },
 };
 use anyhow::{anyhow, Result};
 use force_delete_win::force_delete_file_folder;
@@ -103,7 +106,7 @@ fn test_delete() {
     crate::utils::test::_ensure_clear_test_dir();
 
     // 准备源
-    crate::utils::copy_dir("src", "test/src").unwrap();
+    crate::utils::fs::copy_dir("src", "test/src").unwrap();
 
     // 普通删除
     StepDelete {

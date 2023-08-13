@@ -3,7 +3,7 @@ use crate::entrances::verify::verify;
 use crate::parsers::parse_author;
 use crate::signature::sign;
 use crate::types::{signature::Signature, signature::SignatureNode};
-use crate::utils::{ask_yn, get_path_temp, is_debug_mode};
+use crate::utils::{get_path_temp, is_debug_mode, term::ask_yn};
 use crate::{log, log_ok_last, p2s};
 use anyhow::{anyhow, Result};
 use std::fs::{remove_dir_all, write};

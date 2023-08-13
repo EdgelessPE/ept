@@ -5,8 +5,10 @@ use crate::types::mixed_fs::MixedFS;
 use crate::types::permissions::{Generalizable, Permission, PermissionLevel};
 use crate::types::workflow::WorkflowContext;
 use crate::utils::env::{env_desktop, env_start_menu};
-use crate::utils::{count_sub_files, try_recycle};
-use crate::{log, p2s, types::verifiable::Verifiable, utils::parse_relative_path_with_located};
+use crate::utils::fs::{count_sub_files, try_recycle};
+use crate::{
+    log, p2s, types::verifiable::Verifiable, utils::path::parse_relative_path_with_located,
+};
 use anyhow::{anyhow, Result};
 use mslnk::ShellLink;
 use regex::Regex;

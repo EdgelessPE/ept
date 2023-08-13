@@ -1,6 +1,6 @@
 use crate::{
     types::permissions::{Permission, PermissionLevel},
-    utils::{ensure_arg, is_alive_with_name},
+    utils::{conditions::ensure_arg, process::is_alive_with_name},
 };
 use anyhow::{anyhow, Result};
 use evalexpr::{Function, Value};

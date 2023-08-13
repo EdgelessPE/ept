@@ -2,7 +2,7 @@ use anyhow::Result;
 
 use crate::{
     types::info::Info,
-    utils::{get_bare_apps, read_sub_dir},
+    utils::{fs::read_sub_dir, get_bare_apps},
 };
 
 use super::info::info;

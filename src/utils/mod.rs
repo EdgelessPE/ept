@@ -1,43 +1,26 @@
-mod exe_version;
+pub mod exe_version;
 #[macro_use]
-mod log;
-mod arch;
-mod cfg;
-mod command;
-mod conditions;
+pub mod log;
+pub mod arch;
+pub mod cfg;
+pub mod command;
+pub mod conditions;
 pub mod env;
-mod fs;
-mod path;
-mod process;
-mod term;
+pub mod fs;
+pub mod path;
+pub mod process;
+pub mod term;
 pub mod test;
-mod wild_match;
+pub mod wild_match;
 
 use anyhow::{anyhow, Result};
 use regex::Regex;
 
-pub use self::arch::{get_arch, is_current_arch_match, SysArch};
-pub use self::cfg::{get_config, set_config, Cfg, Local};
-pub use self::command::split_command;
-pub use self::conditions::{ensure_arg, get_permissions_from_conditions, verify_conditions};
-pub use self::exe_version::get_exe_version;
-pub use self::fs::{
-    copy_dir, count_sub_files, ensure_dir_exist, move_or_copy, read_sub_dir, try_recycle,
-};
-pub use self::log::{fn_log, fn_log_ok_last};
-pub use self::path::{
-    find_scope_with_name_locally, parse_relative_path_with_base, parse_relative_path_with_located,
-    split_parent,
-};
-pub use self::process::{is_alive_with_name, kill_with_name};
-pub use self::term::{ask_yn, read_console};
-pub use self::wild_match::{
-    common_wild_match_verify, contains_wild_match, is_valid_wild_match, parse_wild_match,
-};
-
 use std::env::var;
 use std::fs::{create_dir_all, remove_dir_all};
 use std::path::PathBuf;
+
+use self::path::parse_relative_path_with_base;
 
 lazy_static! {
     static ref URL_RE: Regex = Regex::new(r"^https?://").unwrap();

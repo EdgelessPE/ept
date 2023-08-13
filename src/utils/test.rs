@@ -1,6 +1,6 @@
 pub fn _ensure_testing_vscode() -> String {
     if crate::entrances::info_local(&"Microsoft".to_string(), &"VSCode".to_string()).is_err() {
-        crate::utils::copy_dir("examples/VSCode", "test/VSCode").unwrap();
+        crate::utils::fs::copy_dir("examples/VSCode", "test/VSCode").unwrap();
         crate::install_using_package(&"test/VSCode".to_string(), false).unwrap();
     }
 
@@ -15,7 +15,7 @@ pub fn _ensure_testing_vscode_uninstalled() {
 
 pub fn _ensure_testing(scope: &str, name: &str) -> String {
     if crate::entrances::info_local(&scope.to_string(), &name.to_string()).is_err() {
-        crate::utils::copy_dir(format!("examples/{name}"), format!("test/{name}")).unwrap();
+        crate::utils::fs::copy_dir(format!("examples/{name}"), format!("test/{name}")).unwrap();
         crate::install_using_package(&format!("test/{name}"), false).unwrap();
     }
 

@@ -7,7 +7,7 @@ use crate::{
         verifiable::Verifiable,
         workflow::WorkflowContext,
     },
-    utils::contains_wild_match,
+    utils::wild_match::contains_wild_match,
 };
 use anyhow::{anyhow, Ok, Result};
 use serde::{Deserialize, Serialize};

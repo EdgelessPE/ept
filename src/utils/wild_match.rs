@@ -4,7 +4,7 @@ use std::fs::read_dir;
 use std::path::PathBuf;
 use wildmatch::WildMatch;
 
-use super::split_parent;
+use super::path::split_parent;
 
 pub fn contains_wild_match(raw: &String) -> bool {
     raw.contains("*") || raw.contains("?")

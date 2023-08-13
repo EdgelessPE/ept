@@ -8,7 +8,7 @@ use crate::{
     executor::values_validator_path,
     log, p2s,
     types::mixed_fs::MixedFS,
-    utils::{ask_yn, contains_wild_match},
+    utils::{term::ask_yn, wild_match::contains_wild_match},
 };
 
 pub fn inner_validator(dir: &String) -> Result<()> {

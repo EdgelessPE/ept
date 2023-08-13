@@ -2,7 +2,7 @@ use crate::executor::values_replacer;
 use crate::types::interpretable::Interpretable;
 use crate::types::verifiable::Verifiable;
 use crate::types::{extended_semver::ExSemVer, package::GlobalPackage, software::Software};
-use crate::utils::{get_exe_version, parse_relative_path_with_located};
+use crate::utils::{exe_version::get_exe_version, path::parse_relative_path_with_located};
 use crate::{log, p2s};
 use anyhow::{anyhow, Result};
 use std::path::Path;

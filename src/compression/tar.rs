@@ -55,7 +55,7 @@ fn test_release_tar() {
     assert!(Path::new("test/VSCode_1.0.0.0_Cno/package.toml").exists());
 
     // 测试覆盖
-    use crate::utils::try_recycle;
+    use crate::utils::fs::try_recycle;
     try_recycle("test/VSCode_1.0.0.0_Cno/package.toml").unwrap();
     release_tar(
         &"./test/VSCode_1.0.0.0_Cno.tar".to_string(),

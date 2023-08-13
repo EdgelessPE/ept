@@ -1,7 +1,7 @@
 use crate::{
     executor::{judge_perm_level, values_validator_path},
     types::permissions::Permission,
-    utils::{ensure_arg, parse_relative_path_with_located},
+    utils::{conditions::ensure_arg, path::parse_relative_path_with_located},
 };
 use anyhow::Result;
 use evalexpr::{Function, Value};

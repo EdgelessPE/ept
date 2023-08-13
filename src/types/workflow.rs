@@ -4,7 +4,10 @@ use super::{
     package::GlobalPackage, permissions::Generalizable, steps::Step, verifiable::Verifiable,
 };
 use crate::log;
-use crate::utils::{get_permissions_from_conditions, read_console, verify_conditions};
+use crate::utils::{
+    conditions::{get_permissions_from_conditions, verify_conditions},
+    term::read_console,
+};
 use crate::{p2s, types::permissions::Permission};
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};

@@ -7,8 +7,10 @@ use super::{
     utils::package::{clean_temp, unpack_nep},
     utils::validator::installed_validator,
 };
-use crate::utils::{is_qa_mode, move_or_copy, parse_relative_path_with_located};
-use crate::{entrances::update_using_package, utils::ask_yn};
+use crate::entrances::update_using_package;
+use crate::utils::{
+    fs::move_or_copy, is_qa_mode, path::parse_relative_path_with_located, term::ask_yn,
+};
 use crate::{executor::workflow_executor, parsers::parse_workflow, utils::get_path_apps};
 use crate::{log, log_ok_last, p2s};
 
@@ -106,6 +108,7 @@ pub fn install_using_package(source_file: &String, verify_signature: bool) -> Re
 
 #[test]
 fn test_install() {
+    use crate::utils::fs::copy_dir;
     envmnt::set("DEBUG", "true");
     envmnt::set("CONFIRM", "true");
     crate::utils::test::_ensure_clear_test_dir();
@@ -172,7 +175,7 @@ fn test_install() {
     }
 
     // 安装 CallInstaller，预期会因为不存在主程序 ${Desktop}/Call.exe 而安装失败
-    crate::utils::copy_dir("examples/CallInstaller", "test/CallInstaller1").unwrap();
+    copy_dir("examples/CallInstaller", "test/CallInstaller1").unwrap();
 
     assert!(install_using_package(&"test/CallInstaller1".to_string(), false).is_err());
     crate::clean().unwrap();
@@ -180,7 +183,7 @@ fn test_install() {
     // 提供指定的主程序后安装成功
     std::fs::write(desktop_call_path, "114514").unwrap();
     crate::uninstall(&"CallInstaller".to_string()).unwrap();
-    crate::utils::copy_dir("examples/CallInstaller", "test/CallInstaller2").unwrap();
+    copy_dir("examples/CallInstaller", "test/CallInstaller2").unwrap();
     install_using_package(&"test/CallInstaller2".to_string(), false).unwrap();
 
     // 清理
@@ -190,14 +193,14 @@ fn test_install() {
 
 #[test]
 fn test_install_dism() {
+    use crate::utils::arch::{get_arch, SysArch};
     use crate::utils::test::_ensure_testing_uninstalled;
-    use crate::utils::SysArch;
     _ensure_testing_uninstalled(&"Chuyu".to_string(), &"Dism++".to_string());
 
-    crate::utils::copy_dir("examples/Dism++", "test/Dism++").unwrap();
+    crate::utils::fs::copy_dir("examples/Dism++", "test/Dism++").unwrap();
 
     install_using_package(&"test/Dism++".to_string(), false).unwrap();
-    let stem_name = match crate::utils::get_arch().unwrap() {
+    let stem_name = match get_arch().unwrap() {
         SysArch::X64 => "Dism++x64",
         SysArch::X86 => "Dism++x86",
         SysArch::ARM64 => "Dism++ARM64",
