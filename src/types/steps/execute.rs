@@ -3,7 +3,7 @@ use crate::types::mixed_fs::MixedFS;
 use crate::types::permissions::{Generalizable, Permission, PermissionLevel};
 use crate::types::verifiable::Verifiable;
 use crate::types::workflow::WorkflowContext;
-use crate::utils::{format_path, read_console};
+use crate::utils::{format_path, read_console, split_command};
 use crate::{log, verify_enum};
 
 use super::TStep;
@@ -31,7 +31,10 @@ impl TStep for StepExecute {
 
         // 构造执行器
         let mut c = Command::new(launch_terminal.0);
-        let cmd = c.args([launch_terminal.1, &self.command]);
+        let c = c.arg(launch_terminal.1);
+
+        // 解析命令传入
+        let cmd = c.args(split_command(&self.command)?);
 
         // 指定工作目录
         let workshop = self.pwd.unwrap_or(cx.located.to_owned());

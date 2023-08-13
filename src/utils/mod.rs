@@ -3,6 +3,7 @@ mod exe_version;
 mod log;
 mod arch;
 mod cfg;
+mod command;
 mod conditions;
 pub mod env;
 mod fs;
@@ -17,6 +18,7 @@ use regex::Regex;
 
 pub use self::arch::{get_arch, is_current_arch_match, SysArch};
 pub use self::cfg::{get_config, set_config, Cfg, Local};
+pub use self::command::split_command;
 pub use self::conditions::{ensure_arg, get_permissions_from_conditions, verify_conditions};
 pub use self::exe_version::get_exe_version;
 pub use self::fs::{count_sub_files, ensure_dir_exist, move_or_copy, read_sub_dir, try_recycle};
