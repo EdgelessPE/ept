@@ -172,13 +172,17 @@ fn test_install() {
     }
 
     // 安装 CallInstaller，预期会因为不存在主程序 ${Desktop}/Call.exe 而安装失败
-    assert!(install_using_package(&"examples/CallInstaller".to_string(), false).is_err());
+    let opt = fs_extra::dir::CopyOptions::new().copy_inside(true);
+    fs_extra::dir::copy("examples/CallInstaller", "test/CallInstaller1", &opt).unwrap();
+
+    assert!(install_using_package(&"test/CallInstaller1".to_string(), false).is_err());
     crate::clean().unwrap();
 
     // 提供指定的主程序后安装成功
     std::fs::write(desktop_call_path, "114514").unwrap();
     crate::uninstall(&"CallInstaller".to_string()).unwrap();
-    install_using_package(&"examples/CallInstaller".to_string(), false).unwrap();
+    fs_extra::dir::copy("examples/CallInstaller", "test/CallInstaller2", &opt).unwrap();
+    install_using_package(&"test/CallInstaller2".to_string(), false).unwrap();
 
     // 清理
     std::fs::remove_file(desktop_call_path).unwrap();
@@ -191,7 +195,10 @@ fn test_install_dism() {
     use crate::utils::SysArch;
     _ensure_testing_uninstalled(&"Chuyu".to_string(), &"Dism++".to_string());
 
-    install_using_package(&"examples/Dism++".to_string(), false).unwrap();
+    let opt = fs_extra::dir::CopyOptions::new().copy_inside(true);
+    fs_extra::dir::copy("examples/Dism++", "test/Dism++", &opt).unwrap();
+
+    install_using_package(&"test/Dism++".to_string(), false).unwrap();
     let stem_name = match crate::utils::get_arch().unwrap() {
         SysArch::X64 => "Dism++x64",
         SysArch::X86 => "Dism++x86",
