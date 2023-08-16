@@ -43,7 +43,15 @@ pub fn uninstall(package_name: &String) -> Result<()> {
     let app_str = p2s!(app_path);
 
     // 判断安装路径是否完整
-    installed_validator(&app_str)?;
+    if let Err(e) = installed_validator(&app_str) {
+        // 简单的删除目录
+        log!("Warning:Incomplete folder found, simply perform a deletion : {e}");
+        return remove_dir_all(&app_str).map_err(|e| {
+            anyhow!(
+                "Warning:Can't clean the directory, please delete '{app_str}' manually later : {e}"
+            )
+        });
+    }
 
     // 读入 package.toml
     let global = parse_package(
