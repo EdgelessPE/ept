@@ -21,6 +21,7 @@ use std::env::var;
 use std::fs::{create_dir_all, remove_dir_all};
 use std::path::PathBuf;
 
+use self::fs::try_recycle;
 use self::path::parse_relative_path_with_base;
 use self::random::random_short_string;
 
@@ -119,6 +120,12 @@ pub fn is_url(text: &String) -> bool {
 
 pub fn is_starts_with_inner_value(p: &String) -> bool {
     p.starts_with("${") || p.starts_with("\"${")
+}
+
+pub fn launch_clean() -> Result<()> {
+    // 删除 temp 目录
+    let p = parse_relative_path_with_base(&"temp".to_string())?;
+    try_recycle(p)
 }
 
 #[test]

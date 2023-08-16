@@ -93,6 +93,8 @@ fn router(action: Action) -> Result<String> {
 fn main() {
     use clap::Parser;
 
+    use crate::utils::launch_clean;
+
     let args = Args::parse();
 
     // 配置环境变量
@@ -102,6 +104,8 @@ fn main() {
     if args.debug || args.qa || cfg!(debug_assertions) {
         log!("Warning:Debug mode enabled");
         envmnt::set("DEBUG", "true");
+    } else {
+        launch_clean().unwrap();
     }
     if args.offline {
         log!("Warning:Offline mode enabled, ept couldn't guarantee security or integrality of packages");
