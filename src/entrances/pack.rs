@@ -43,7 +43,7 @@ pub fn pack(source_dir: &String, into_file: Option<String>, need_sign: bool) -> 
 
     // 生成内包
     log!("Info:Compressing inner package...");
-    let inner_path_str = p2s!(temp_dir_path.join(&(file_stem + ".tar.zst")));
+    let inner_path_str = p2s!(temp_dir_path.join(&(file_stem.clone() + ".tar.zst")));
     compress(source_dir, &inner_path_str)?;
     log_ok_last!("Info:Compressing inner package...");
 
@@ -58,6 +58,7 @@ pub fn pack(source_dir: &String, into_file: Option<String>, need_sign: bool) -> 
     let sign_file_path = temp_dir_path.join("signature.toml");
     let signature_struct = Signature {
         package: SignatureNode {
+            raw_name_stem: file_stem,
             signer: first_author.email.unwrap(),
             signature,
         },

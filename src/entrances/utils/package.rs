@@ -22,17 +22,17 @@ use crate::{
 };
 use crate::{log, log_ok_last};
 
-/// 根据源文件路径创建并返回(临时目录,文件茎)
-fn get_temp_dir_path(source_file: &String, keep_clear: bool) -> Result<(PathBuf, String)> {
+/// 根据源文件路径创建临时目录
+fn get_temp_dir_path(source_file: &String, keep_clear: bool) -> Result<PathBuf> {
     let file_stem = p2s!(Path::new(source_file).file_stem().unwrap());
     let temp_dir_path = get_path_temp(&file_stem, keep_clear, true)?;
 
-    Ok((temp_dir_path, file_stem))
+    Ok(temp_dir_path)
 }
 
 /// 清理临时目录(会判断 debug)
 pub fn clean_temp(source_file: &String) -> Result<()> {
-    let (temp_dir_path, _) = get_temp_dir_path(source_file, false)?;
+    let temp_dir_path = get_temp_dir_path(source_file, false)?;
     if !is_debug_mode() {
         log!("Info:Cleaning...");
         let clean_res = remove_dir_all(&temp_dir_path);
@@ -104,7 +104,7 @@ fn normal_unpack_nep(
     verify_signature: bool,
 ) -> Result<(PathBuf, GlobalPackage)> {
     // 创建临时目录
-    let (temp_dir_path, file_stem) = get_temp_dir_path(source_file, true)?;
+    let temp_dir_path = get_temp_dir_path(source_file, true)?;
     let temp_dir_outer_path = temp_dir_path.join("Outer");
     let temp_dir_inner_path = temp_dir_path.join("Inner");
 
@@ -113,12 +113,12 @@ fn normal_unpack_nep(
     let temp_dir_outer_str = p2s!(temp_dir_outer_path);
     release_tar(source_file, &temp_dir_outer_str)
         .map_err(|e| anyhow!("Error:Invalid nep package : {e}"))?;
-    let inner_pkg_str = outer_validator(&temp_dir_outer_str, &file_stem)?;
     let signature_path = temp_dir_outer_path.join("signature.toml");
     log_ok_last!("Info:Unpacking outer package...");
 
     // 签名文件加载与校验
     let signature_struct = parse_signature(&p2s!(signature_path))?.package;
+    let inner_pkg_str = outer_validator(&temp_dir_outer_str, &signature_struct.raw_name_stem)?;
     if verify_signature {
         log!("Info:Verifying package signature...");
         if signature_struct.signature.is_some() {
@@ -178,7 +178,7 @@ fn fast_unpack_nep(
     verify_signature: bool,
 ) -> Result<(PathBuf, GlobalPackage)> {
     // 创建临时目录
-    let (temp_dir_path, file_stem) = get_temp_dir_path(source_file, true)?;
+    let temp_dir_path = get_temp_dir_path(source_file, true)?;
     let temp_dir_inner_path = temp_dir_path.join("Inner");
 
     // 读取外包，生成 hashmap
@@ -194,13 +194,17 @@ fn fast_unpack_nep(
         entry.read_to_end(&mut buffer)?;
         outer_map.insert(name, buffer);
     }
-    outer_hashmap_validator(&outer_map, &file_stem)?;
     log_ok_last!("Info:Reading outer package...");
 
     // 签名文件加载与校验
-    let signature_raw = outer_map.get_mut("signature.toml").unwrap();
+    let signature_raw = outer_map.get_mut("signature.toml").ok_or(anyhow!(
+        "Error:Invalid nep outer package : missing 'signature.toml'"
+    ))?;
     let signature_struct = fast_parse_signature(signature_raw)?.package;
-    let inner_pkg_raw = outer_map.get(&(file_stem + ".tar.zst")).unwrap();
+    outer_hashmap_validator(&outer_map, &signature_struct.raw_name_stem)?;
+    let inner_pkg_raw = outer_map
+        .get(&(signature_struct.raw_name_stem + ".tar.zst"))
+        .unwrap();
     if verify_signature {
         log!("Info:Verifying package signature...");
         if signature_struct.signature.is_some() {

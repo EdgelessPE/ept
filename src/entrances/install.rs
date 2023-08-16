@@ -142,11 +142,11 @@ fn test_install() {
     // 打包并安装
     crate::pack(
         &"./examples/VSCode".to_string(),
-        Some("./test/VSCode_1.75.0.0_Cno.nep".to_string()),
+        Some("./test/VSCode_1.75.0.0_Cno (1).nep".to_string()),
         true,
     )
     .unwrap();
-    install_using_package(&"./test/VSCode_1.75.0.0_Cno.nep".to_string(), true).unwrap();
+    install_using_package(&"./test/VSCode_1.75.0.0_Cno (1).nep".to_string(), true).unwrap();
 
     assert!(shortcut_path.exists());
     assert!(entry1_path.exists() || entry2_path.exists());
@@ -154,7 +154,9 @@ fn test_install() {
     assert!(cx_path.exists());
 
     // 重复安装，会被要求使用升级，但是会由于同版本导致升级失败
-    assert!(install_using_package(&"./test/VSCode_1.75.0.0_Cno.nep".to_string(), true).is_err());
+    assert!(
+        install_using_package(&"./test/VSCode_1.75.0.0_Cno (1).nep".to_string(), true).is_err()
+    );
 
     crate::uninstall(&"VSCode".to_string()).unwrap();
 
