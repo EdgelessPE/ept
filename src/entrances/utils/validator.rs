@@ -57,7 +57,7 @@ pub fn manifest_validator(base: &String, manifest: Vec<String>, fs: &mut MixedFS
 // 定义外包的装箱单（内包名称需要传入）
 macro_rules! def_outer_manifest {
     ($inner_pkg_name:expr) => {{
-        vec!["signature.toml", &$inner_pkg_name]
+        vec![&$inner_pkg_name]
     }};
 }
 
