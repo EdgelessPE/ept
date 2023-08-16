@@ -23,6 +23,7 @@ pub struct Software {
     pub main_program: Option<String>,
     pub tags: Option<Vec<String>>,
     pub alias: Option<Vec<String>>,
+    pub registry_entry: Option<String>,
 }
 
 impl Verifiable for Software {

@@ -192,6 +192,7 @@ fn test_parse_package() {
             main_program: Some("Code.exe".to_string()),
             tags: Some(vec!["Electron".to_string()]),
             alias: None,
+            registry_entry: None,
         }),
     };
     assert_eq!(pkg, answer)
