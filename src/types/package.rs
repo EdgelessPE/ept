@@ -15,6 +15,7 @@ pub struct Package {
     pub version: String,
     pub authors: Vec<String>,
     pub license: Option<String>,
+    pub icon: Option<String>,
 }
 
 impl Verifiable for Package {
@@ -65,6 +66,7 @@ impl GlobalPackage {
                 version: "1.0.0".to_string(),
                 authors: vec!["Cno".to_string()],
                 license: None,
+                icon: None,
             },
             software: Some(Software {
                 scope: "Edgeless".to_string(),

@@ -181,6 +181,7 @@ fn test_parse_package() {
                 "Microsoft".to_string(),
             ],
             license: None,
+            icon: None,
         },
         software: Some(Software {
             scope: "Microsoft".to_string(),
