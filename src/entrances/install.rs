@@ -19,6 +19,10 @@ pub fn install_using_package(source_file: &String, verify_signature: bool) -> Re
 
     // 解包
     let (temp_dir_inner_path, package_struct) = unpack_nep(source_file, verify_signature)?;
+    log!(
+        "Info:If installation fails, use 'ept uninstall \"{name}\"' to roll back",
+        name = &package_struct.package.name
+    );
 
     // 读入安装工作流
     log!("Info:Resolving package...");
