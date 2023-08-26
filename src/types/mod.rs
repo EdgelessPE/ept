@@ -10,5 +10,6 @@ pub mod permissions;
 pub mod signature;
 pub mod software;
 pub mod steps;
+pub mod uninstall_reg_entry;
 pub mod verifiable;
 pub mod workflow;

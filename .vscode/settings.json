@@ -19,6 +19,7 @@
         "Oray",
         "posix",
         "predef",
+        "Rustup",
         "Secp",
         "sentencecase",
         "SETTINGCHANGE",

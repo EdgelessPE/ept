@@ -10,6 +10,7 @@ pub mod fs;
 pub mod path;
 pub mod process;
 pub mod random;
+pub mod reg_entry;
 pub mod term;
 pub mod test;
 pub mod wild_match;
