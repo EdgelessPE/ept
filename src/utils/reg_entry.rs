@@ -45,7 +45,18 @@ pub fn get_reg_entry(entry_id: &String) -> UninstallRegEntry {
             };
 
             // 获取卸载指令
-            let uninstall_string: Option<String> = entry.get_value("UninstallString").ok();
+            let uninstall_string_hidden: Option<String> =
+                entry.get_value("UninstallString_Hidden").ok();
+            let quiet_uninstall_string: Option<String> =
+                entry.get_value("QuietUninstallString").ok();
+            let literal_uninstall_string: Option<String> = entry.get_value("UninstallString").ok();
+            let uninstall_string = if uninstall_string_hidden.is_some() {
+                uninstall_string_hidden
+            } else if quiet_uninstall_string.is_some() {
+                quiet_uninstall_string
+            } else {
+                literal_uninstall_string
+            };
 
             return UninstallRegEntry {
                 version,
