@@ -11,10 +11,14 @@ use crate::{
     executor::{workflow_executor, workflow_reverse_executor},
     log, log_ok_last, p2s,
     parsers::{parse_package, parse_workflow},
-    types::{mixed_fs::MixedFS, workflow::WorkflowNode},
+    types::{
+        mixed_fs::MixedFS,
+        steps::{StepExecute, TStep},
+        workflow::{WorkflowContext, WorkflowNode},
+    },
     utils::{
         get_bare_apps, get_path_apps, path::find_scope_with_name_locally, process::kill_with_name,
-        term::ask_yn,
+        reg_entry::get_reg_entry, term::ask_yn,
     },
 };
 
@@ -59,6 +63,22 @@ pub fn uninstall(package_name: &String) -> Result<()> {
         &app_str,
         false,
     )?;
+    let software = global.clone().software.unwrap();
+
+    // 如果提供了注册表入口，则先跑卸载命令（独立的工作流上下文）
+    if let Some(entry_id) = software.registry_entry {
+        let e = get_reg_entry(&entry_id);
+        if let Some(uninstall_string) = e.uninstall_string {
+            let mut cx = WorkflowContext::new(&app_str, global.clone());
+            StepExecute {
+                command: uninstall_string,
+                pwd: None,
+                call_installer: Some(true),
+                wait: None,
+            }
+            .run(&mut cx)?;
+        }
+    }
 
     // 读入卸载工作流
     let remove_flow_path = app_path.join(".nep_context/workflows/remove.toml");

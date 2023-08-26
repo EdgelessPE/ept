@@ -2,6 +2,7 @@ use crate::executor::values_replacer;
 use crate::types::interpretable::Interpretable;
 use crate::types::verifiable::Verifiable;
 use crate::types::{extended_semver::ExSemVer, package::GlobalPackage, software::Software};
+use crate::utils::reg_entry::get_reg_entry;
 use crate::utils::{exe_version::get_exe_version, path::parse_relative_path_with_located};
 use crate::{log, p2s};
 use anyhow::{anyhow, Result};
@@ -97,12 +98,24 @@ pub fn parse_package(
     let interpreter = |raw: String| values_replacer(raw, 0, &located);
     let mut pkg = pkg.interpret(interpreter);
 
-    // 跟随主程序 exe 文件版本号更新版本号
+    // 跟随主程序 exe 文件版本号或是注册表入口 ID 更新版本号
     let software = pkg.software.clone().unwrap();
     if need_update_main_program && software.main_program.is_some() {
         if let Err(e) = update_main_program(&mut pkg, &software, located, package_path) {
             log!(
-                "Warning:Failed to update main program version for {name} : {e}",
+                "Warning:Failed to update main program version for '{name}' : {e}",
+                name = pkg.package.name,
+            );
+        }
+    }
+    if need_update_main_program && software.registry_entry.is_some() {
+        let registry_entry = software.registry_entry.unwrap();
+        let e = get_reg_entry(&registry_entry);
+        if let Some(version) = e.version {
+            pkg.package.version = version;
+        } else {
+            log!(
+                "Warning:Failed to update main program version for '{name}' with reg entry '{registry_entry}'",
                 name = pkg.package.name,
             );
         }

@@ -71,19 +71,18 @@ pub fn verify(source_dir: &String) -> Result<GlobalPackage> {
     // 记录 setup 中是否用到 call_installer
     let check_call_installer = verify_workflow(setup_flow.clone(), &pkg_content_path)?;
 
-    // 如果用到了 call_installer 则有一些特殊逻辑：
-    if check_call_installer {
+    // 如果用到了 call_installer 则有一些特殊逻辑，除非提供了 registry_entry：
+    if check_call_installer && software.registry_entry.is_none() {
         // 必须有卸载流
         if !get_workflow_path(source_dir, "remove.toml").exists() {
             return Err(anyhow!("Error:Workflow 'remove.toml' should include 'Execute' step with 'call_installer' field enabled when workflow 'setup.toml' includes such step"));
         }
 
-        // 必须提供绝对路径的 main_program 或是 registry_entry
+        // 必须提供绝对路径的 main_program
         if let Some(mp) = software.main_program {
             if !Path::new(&mp).is_absolute() {
                 return Err(anyhow!("Error:Field 'main_program' in table 'software' should starts with inner value when workflow 'setup.toml' includes 'Execute' step with 'call_installer' field, got '{mp}'"));
             }
-        } else if let Some(_entry_id) = software.registry_entry {
         } else {
             return Err(anyhow!("Error:Field 'main_program' or 'registry_entry' in table 'software' should be provided when workflow 'setup.toml' includes 'Execute' step with 'call_installer' field"));
         }
