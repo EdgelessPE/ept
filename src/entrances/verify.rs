@@ -78,10 +78,14 @@ pub fn verify(source_dir: &String) -> Result<GlobalPackage> {
             return Err(anyhow!("Error:Workflow 'remove.toml' should include 'Execute' step with 'call_installer' field enabled when workflow 'setup.toml' includes such step"));
         }
 
-        // 必须提供绝对路径的 main_program
-        let mp=software.main_program.ok_or(anyhow!("Error:Field 'main_program' in table 'software' should be provided when workflow 'setup.toml' includes 'Execute' step with 'call_installer' field"))?;
-        if !Path::new(&mp).is_absolute() {
-            return Err(anyhow!("Error:Field 'main_program' in table 'software' should starts with inner value when workflow 'setup.toml' includes 'Execute' step with 'call_installer' field, got '{mp}'"));
+        // 必须提供绝对路径的 main_program 或是 registry_entry
+        if let Some(mp) = software.main_program {
+            if !Path::new(&mp).is_absolute() {
+                return Err(anyhow!("Error:Field 'main_program' in table 'software' should starts with inner value when workflow 'setup.toml' includes 'Execute' step with 'call_installer' field, got '{mp}'"));
+            }
+        } else if let Some(_entry_id) = software.registry_entry {
+        } else {
+            return Err(anyhow!("Error:Field 'main_program' or 'registry_entry' in table 'software' should be provided when workflow 'setup.toml' includes 'Execute' step with 'call_installer' field"));
         }
     }
 
