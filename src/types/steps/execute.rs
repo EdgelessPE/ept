@@ -228,7 +228,7 @@ fn test_execute_manifest() {
 fn test_execute() {
     let mut cx = WorkflowContext::_demo();
 
-    StepExecute {
+    let res = StepExecute {
         command: "echo hello nep ! && echo 你好，尼普！".to_string(),
         pwd: None,
         call_installer: None,
@@ -236,7 +236,9 @@ fn test_execute() {
     }
     .run(&mut cx)
     .unwrap();
-    StepExecute {
+    assert_eq!(res, 0);
+
+    let res = StepExecute {
         command: "dir".to_string(),
         pwd: Some("./src".to_string()),
         call_installer: None,
@@ -244,6 +246,7 @@ fn test_execute() {
     }
     .run(&mut cx)
     .unwrap();
+    assert_eq!(res, 0);
 
     let res = StepExecute {
         command: "exit 2".to_string(),
@@ -255,7 +258,7 @@ fn test_execute() {
     .unwrap();
     assert_eq!(res, 2);
 
-    StepExecute {
+    let res = StepExecute {
         command: "exit 0".to_string(),
         pwd: None,
         call_installer: Some(true),
@@ -263,6 +266,7 @@ fn test_execute() {
     }
     .run(&mut cx)
     .unwrap();
+    assert_eq!(res, 0);
 }
 
 #[test]
