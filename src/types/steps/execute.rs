@@ -11,6 +11,7 @@ use crate::{log, verify_enum};
 use super::TStep;
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
+use std::path::Path;
 use std::process::{Command, Stdio};
 use std::time::Instant;
 
@@ -23,7 +24,7 @@ pub struct StepExecute {
 }
 
 impl TStep for StepExecute {
-    fn run(self, cx: &mut WorkflowContext) -> Result<i32> {
+    fn run(mut self, cx: &mut WorkflowContext) -> Result<i32> {
         // 配置终端
         let launch_terminal = if cfg!(target_os = "windows") {
             ("cmd", "/c")
@@ -34,6 +35,12 @@ impl TStep for StepExecute {
         // 构造执行器
         let mut c = Command::new(launch_terminal.0);
         let c = c.arg(launch_terminal.1);
+
+        // 特殊优化逻辑：如果命令为直接绝对路径则加上双引号，否则无法执行
+        let cmd_p = Path::new(&self.command);
+        if cmd_p.exists() && cmd_p.is_absolute() {
+            self.command = format!("\"{c}\"", c = &self.command);
+        }
 
         // 解析命令传入
         let cmd = c.args(split_command(&self.command)?);
