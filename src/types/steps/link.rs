@@ -263,7 +263,7 @@ impl Generalizable for StepLink {
 
 #[test]
 fn test_link() {
-    use std::fs::{remove_file,remove_dir};
+    use std::fs::{remove_dir, remove_file};
     let mut cx = WorkflowContext::_demo();
 
     // 配置拉满
