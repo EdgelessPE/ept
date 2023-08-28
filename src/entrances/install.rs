@@ -7,7 +7,7 @@ use super::{
     utils::package::{clean_temp, unpack_nep},
     utils::validator::installed_validator,
 };
-use crate::entrances::update_using_package;
+use crate::entrances::{info, update_using_package};
 use crate::utils::{
     fs::move_or_copy, is_qa_mode, path::parse_relative_path_with_located, term::ask_yn,
 };
@@ -92,6 +92,7 @@ pub fn install_using_package(source_file: &String, verify_signature: bool) -> Re
     // 检查安装是否完整
     log!("Info:Validating setup...");
     installed_validator(&into_dir)?;
+    // 如果提供了主程序检查是否存在
     if let Some(installed) = &software.main_program {
         let p = parse_relative_path_with_located(installed, &into_dir);
         if !p.exists() {
@@ -101,6 +102,14 @@ pub fn install_using_package(source_file: &String, verify_signature: bool) -> Re
                 return Err(anyhow!("Error:Validating failed : field 'main_program' provided in table 'software' not exist : '{installed}'"));
             }
         }
+    }
+    // 执行一次 info
+    if let Err(e) = info(Some(software.scope.clone()), &package.name) {
+        return Err(anyhow!(
+            "Error:Validating failed : failed to get info of '{scope}/{name}' : {e}",
+            scope = software.scope,
+            name = package.name
+        ));
     }
     log_ok_last!("Info:Validating setup...");
 
@@ -201,7 +210,7 @@ fn test_install() {
 fn test_install_dism() {
     use crate::utils::arch::{get_arch, SysArch};
     use crate::utils::test::_ensure_testing_uninstalled;
-    _ensure_testing_uninstalled(&"Chuyu".to_string(), &"Dism++".to_string());
+    _ensure_testing_uninstalled("Chuyu", "Dism++");
 
     crate::utils::fs::copy_dir("examples/Dism++", "test/Dism++").unwrap();
 
@@ -215,4 +224,75 @@ fn test_install_dism() {
     println!("{p}");
     assert!(Path::new(&p).exists());
     std::fs::remove_file(&p).unwrap();
+}
+
+#[test]
+fn test_reg_entry() {
+    use crate::types::{steps::TStep, workflow::WorkflowContext};
+    use winreg::enums::HKEY_CURRENT_USER;
+    envmnt::set("DEBUG", "true");
+    let cur_dir_pb = std::env::current_dir().unwrap();
+    let cur_dir = p2s!(cur_dir_pb);
+    let flag_path = Path::new("_reg_entry_success.log");
+    if flag_path.exists() {
+        std::fs::remove_file(flag_path).unwrap();
+    }
+
+    // 替换并写注册表
+    let raw_reg_text = std::fs::read_to_string("examples/RegEntry/RegEntry/add_reg.reg").unwrap();
+    let replaced = raw_reg_text.replace("${CUR_DIR}", &cur_dir.replace(r"\", r"\\"));
+    let write_path = cur_dir_pb.join("test/_add_reg_entry.reg");
+    std::fs::write(&write_path, replaced).unwrap();
+
+    let mut cx = WorkflowContext::_demo();
+    crate::types::steps::StepExecute {
+        command: format!("reg import \"{r}\"", r = p2s!(write_path)),
+        pwd: None,
+        call_installer: None,
+        wait: None,
+    }
+    .run(&mut cx)
+    .unwrap();
+
+    // 替换卸载命令
+    let scene_text = std::fs::read_to_string("examples/RegEntry/RegEntry/uninstall.cmd").unwrap();
+    let replaced_uninstall_text = scene_text.replace("${CUR_DIR}", &cur_dir);
+    std::fs::write(
+        "examples/RegEntry/RegEntry/uninstall.cmd",
+        replaced_uninstall_text,
+    )
+    .unwrap();
+
+    // 校验
+    assert!(crate::entrances::verify::verify(&"examples/RegEntry".to_string()).is_ok());
+
+    // 安装
+    use crate::utils::test::{_ensure_testing, _ensure_testing_uninstalled};
+    _ensure_testing_uninstalled("Cno", "RegEntry");
+    _ensure_testing("Cno", "RegEntry");
+
+    // 确认版本号已经更新
+    assert_eq!(
+        crate::entrances::info(Some("Cno".to_string()), &"RegEntry".to_string())
+            .unwrap()
+            .local
+            .unwrap()
+            .version,
+        "1.1.4.0".to_string()
+    );
+
+    // 执行卸载
+    crate::entrances::uninstall(&"RegEntry".to_string()).unwrap();
+
+    // 断言 flag 的存在
+    assert!(flag_path.exists());
+
+    // 清理和恢复现场
+    std::fs::remove_file(flag_path).unwrap();
+    std::fs::write("examples/RegEntry/RegEntry/uninstall.cmd", scene_text).unwrap();
+    let reg_root = winreg::RegKey::predef(HKEY_CURRENT_USER);
+    let node = reg_root
+        .open_subkey(r"Software\Microsoft\Windows\CurrentVersion\Uninstall")
+        .unwrap();
+    node.delete_subkey("_RegEntry").unwrap();
 }

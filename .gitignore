@@ -6,6 +6,7 @@
 *.tar
 *.zst
 *.nep
+*.log
 /config.toml
 /test
 /bindings

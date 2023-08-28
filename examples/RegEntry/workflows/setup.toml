@@ -1,0 +1,4 @@
+[install]
+step = "Execute"
+command = "install.cmd"
+call_installer = true

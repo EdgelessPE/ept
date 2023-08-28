@@ -14,35 +14,69 @@ use std::{
 
 use super::parse_author;
 
-fn update_main_program(
+// 输入读到的版本号，判断是否需要更新 pkg 并自动写文件系统
+fn update_pkg_version(
     pkg: &mut GlobalPackage,
-    software: &Software,
-    located: &String,
+    read_ver: &String,
     package_path: &Path,
+    according_to: String,
 ) -> Result<()> {
-    let software = software.clone();
-    // 获取主程序相对路径
-    let file_path = parse_relative_path_with_located(&software.main_program.unwrap(), &located);
-
-    // 读取包申明版本号
-    let ex_sv_declared = ExSemVer::parse(&pkg.package.version)?;
-
-    // 读取主程序版本号（只关心符合 SemVer 规范的前三位）
-    let exe_file_str = p2s!(file_path);
-    let mp_version = get_exe_version(file_path)?;
-    let mut ex_sv_latest = ExSemVer::parse(&mp_version)?;
-    ex_sv_latest.set_reserved(0);
+    // 解析为 ExSemVeer 实例
+    let mut read_ver = ExSemVer::parse(read_ver)?;
+    read_ver.set_reserved(0); // 对读到的版本号保留位清 0
+    let current_ver = ExSemVer::parse(&pkg.package.version)?;
 
     // 判断是否更新
-    if ex_sv_declared.semver_instance != ex_sv_latest.semver_instance {
+    if read_ver.semver_instance != current_ver.semver_instance {
         log!(
-            "Warning:Updated '{name}' version from '{ex_sv_declared}' to '{ex_sv_latest}' according to '{exe_file_str}'",
+            "Warning:Updated '{name}' version from '{current_ver}' to '{read_ver}' according to {according_to}",
             name = pkg.package.name
         );
-        pkg.package.version = ex_sv_latest.to_string();
+        pkg.package.version = read_ver.to_string();
         let new_pkg_text = toml::to_string_pretty(&pkg)?;
         write(package_path, new_pkg_text)?;
     };
+
+    Ok(())
+}
+
+fn update_ver_with_main_program(
+    pkg: &mut GlobalPackage,
+    main_program: &String,
+    located: &String,
+    package_path: &Path,
+) -> Result<()> {
+    // 获取主程序相对路径
+    let file_path = parse_relative_path_with_located(main_program, &located);
+
+    // 读取主程序版本号
+    let exe_file_str = p2s!(file_path);
+    let mp_version = get_exe_version(file_path)?;
+
+    update_pkg_version(
+        pkg,
+        &mp_version,
+        package_path,
+        format!("main program '{exe_file_str}'"),
+    )
+}
+
+fn update_ver_with_reg_entry(
+    pkg: &mut GlobalPackage,
+    entry_id: &String,
+    package_path: &Path,
+) -> Result<()> {
+    let e = get_reg_entry(entry_id);
+    if let Some(read_ver) = e.version {
+        return update_pkg_version(
+            pkg,
+            &read_ver,
+            package_path,
+            format!("registry entry '{entry_id}'"),
+        );
+    } else {
+        log!("Warning:Failed to read version due to registry entry '{entry_id}'");
+    }
 
     Ok(())
 }
@@ -77,6 +111,7 @@ pub fn parse_package(
     let pkg: GlobalPackage = dirty_toml
         .try_into()
         .map_err(|res| anyhow!("Error:Can't validate package.toml at '{p}' : {res}"))?;
+    let software = pkg.software.clone().unwrap();
 
     // 逐一解析作者
     for (i, raw) in pkg.package.authors.clone().into_iter().enumerate() {
@@ -99,9 +134,13 @@ pub fn parse_package(
     let mut pkg = pkg.interpret(interpreter);
 
     // 跟随主程序 exe 文件版本号或是注册表入口 ID 更新版本号
-    let software = pkg.software.clone().unwrap();
     if need_update_main_program && software.main_program.is_some() {
-        if let Err(e) = update_main_program(&mut pkg, &software, located, package_path) {
+        if let Err(e) = update_ver_with_main_program(
+            &mut pkg,
+            &software.main_program.unwrap(),
+            located,
+            package_path,
+        ) {
             log!(
                 "Warning:Failed to update main program version for '{name}' : {e}",
                 name = pkg.package.name,
@@ -110,12 +149,9 @@ pub fn parse_package(
     }
     if need_update_main_program && software.registry_entry.is_some() {
         let registry_entry = software.registry_entry.unwrap();
-        let e = get_reg_entry(&registry_entry);
-        if let Some(version) = e.version {
-            pkg.package.version = version;
-        } else {
+        if let Err(e) = update_ver_with_reg_entry(&mut pkg, &registry_entry, package_path) {
             log!(
-                "Warning:Failed to update main program version for '{name}' with reg entry '{registry_entry}'",
+                "Warning:Failed to update main program version for '{name}' with reg entry '{registry_entry}' : {e}",
                 name = pkg.package.name,
             );
         }
@@ -157,9 +193,9 @@ fn test_update_main_program() {
     pkg.package.version = "10.1.112.1".to_string();
     let software = pkg.clone().software.unwrap();
 
-    update_main_program(
+    update_ver_with_main_program(
         &mut pkg,
-        &software,
+        &software.main_program.unwrap(),
         &"examples/Dism++/Dism++".to_string(),
         &Path::new("test/nul.toml"),
     )

@@ -69,6 +69,7 @@ pub fn uninstall(package_name: &String) -> Result<()> {
     if let Some(entry_id) = software.registry_entry {
         let e = get_reg_entry(&entry_id);
         if let Some(uninstall_string) = e.uninstall_string {
+            log!("Info:Running uninstaller due to registry entry...");
             let mut cx = WorkflowContext::new(&app_str, global.clone());
             StepExecute {
                 command: uninstall_string,
@@ -77,6 +78,8 @@ pub fn uninstall(package_name: &String) -> Result<()> {
                 wait: None,
             }
             .run(&mut cx)?;
+            cx.finish()?;
+            log_ok_last!("Info:Running uninstaller due to registry entry...");
         }
     }
 
