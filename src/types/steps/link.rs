@@ -263,6 +263,7 @@ impl Generalizable for StepLink {
 
 #[test]
 fn test_link() {
+    use std::fs::{remove_file,remove_dir};
     let mut cx = WorkflowContext::_demo();
 
     // 配置拉满
@@ -284,8 +285,9 @@ fn test_link() {
     assert!(desktop_path.exists());
     assert!(start_path.exists());
 
-    try_recycle(desktop_folder_path).unwrap();
-    try_recycle(start_path).unwrap();
+    remove_file(desktop_path).unwrap();
+    remove_dir(desktop_folder_path).unwrap();
+    remove_file(start_path).unwrap();
 
     // 缺省状态
     StepLink {
@@ -299,7 +301,7 @@ fn test_link() {
     .unwrap();
     let desktop_path = dirs::desktop_dir().unwrap().join("Code.lnk");
     assert!(desktop_path.exists());
-    try_recycle(desktop_path).unwrap();
+    remove_file(desktop_path).unwrap();
 
     // 重命名
     StepLink {
@@ -313,5 +315,5 @@ fn test_link() {
     .unwrap();
     let desktop_path = dirs::desktop_dir().unwrap().join("vsc.lnk");
     assert!(desktop_path.exists());
-    try_recycle(desktop_path).unwrap();
+    remove_file(desktop_path).unwrap();
 }

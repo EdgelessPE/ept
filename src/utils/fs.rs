@@ -9,20 +9,15 @@ use std::{
 pub fn try_recycle<P: AsRef<Path>>(path: P) -> Result<()> {
     let p = path.as_ref();
     let str = p2s!(p);
-    if p.is_dir() {
-        if let Err(e) = trash::delete(&p) {
-            log!("Warning:Failed to recycle '{str}' : {e}, try removing it");
-            remove_dir_all(p).map_err(|e| anyhow!("Error:Failed to delete '{str}' : {e}"))
+    if let Err(e) = trash::delete(&p) {
+        log!("Warning:Failed to recycle '{str}' : {e}, try removing it");
+        if p.is_dir() {
+            remove_dir_all(p).map_err(|e| anyhow!("Error:Failed to delete directory '{str}' : {e}"))
         } else {
-            Ok(())
+            remove_file(p).map_err(|e| anyhow!("Error:Failed to delete file '{str}' : {e}"))
         }
     } else {
-        if let Err(e) = trash::delete(&p) {
-            log!("Warning:Failed to recycle '{str}' : {e}, try removing it");
-            remove_file(p).map_err(|e| anyhow!("Error:Failed to delete '{str}' : {e}"))
-        } else {
-            Ok(())
-        }
+        Ok(())
     }
 }
 
