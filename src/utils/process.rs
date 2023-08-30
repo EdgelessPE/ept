@@ -25,12 +25,12 @@ fn test_kill_with_name() {
 
 #[test]
 fn test_is_alive_with_name() {
-    let res = is_alive_with_name(&"Code.exe".to_string());
+    let res = is_alive_with_name(&"cargo.exe".to_string());
     assert!(res);
 
-    let res = is_alive_with_name(&"code.exe".to_string());
+    let res = is_alive_with_name(&"Cargo.exe".to_string());
     assert_eq!(res, false);
 
-    let res = is_alive_with_name(&"Code".to_string());
+    let res = is_alive_with_name(&"cargo".to_string());
     assert_eq!(res, false);
 }
