@@ -38,7 +38,10 @@ impl TStep for StepExecute {
 
         // 特殊优化逻辑：如果命令为直接绝对路径则加上双引号，否则无法执行
         let cmd_p = Path::new(&self.command);
-        if cmd_p.exists() && cmd_p.is_absolute() {
+        if cmd_p.exists()
+            && cmd_p.is_absolute()
+            && !(self.command.starts_with("\"") || self.command.ends_with("\""))
+        {
             self.command = format!("\"{c}\"", c = &self.command);
         }
 
