@@ -61,6 +61,7 @@ pub fn decompress(source_file: &String, into_dir: &String) -> Result<()> {
 
 #[test]
 fn test_compress() {
+    crate::utils::test::_ensure_clear_test_dir();
     let p = Path::new("./test/VSCode_1.0.0.0_Cno.tar.zst");
     if p.exists() {
         remove_file(p).unwrap();
@@ -75,6 +76,7 @@ fn test_compress() {
 
 #[test]
 fn test_decompress() {
+    crate::utils::test::_ensure_clear_test_dir();
     if !Path::new("./test/VSCode_1.0.0.0_Cno.tar.zst").exists() {
         test_compress();
     }

@@ -30,6 +30,7 @@ pub fn fast_decompress_zstd(raw: &Vec<u8>) -> Result<Vec<u8>> {
 
 #[test]
 fn test_compress_zstd() {
+    crate::utils::test::_ensure_clear_test_dir();
     use std::path::Path;
     let p = Path::new("./test/package.toml.zst");
     if p.exists() {
@@ -45,6 +46,7 @@ fn test_compress_zstd() {
 
 #[test]
 fn test_decompress_zstd() {
+    crate::utils::test::_ensure_clear_test_dir();
     use std::path::Path;
     if !Path::new("./test/package.toml.zst").exists() {
         test_compress_zstd();

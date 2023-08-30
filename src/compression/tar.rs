@@ -28,6 +28,7 @@ pub fn pack_tar(source: &String, store_at: &String) -> Result<()> {
 
 #[test]
 fn test_pack_tar() {
+    crate::utils::test::_ensure_clear_test_dir();
     let p = Path::new("./test/VSCode_1.0.0.0_Cno.tar");
     if p.exists() {
         crate::compression::remove_file(p).unwrap();
@@ -42,6 +43,7 @@ fn test_pack_tar() {
 
 #[test]
 fn test_release_tar() {
+    crate::utils::test::_ensure_clear_test_dir();
     if !Path::new("./test/VSCode_1.0.0.0_Cno.tar").exists() {
         test_pack_tar();
     }
