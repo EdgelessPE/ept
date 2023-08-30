@@ -334,7 +334,12 @@ fn test_path() {
     .run(&mut cx)
     .unwrap();
 
-    let p3 = get_path_bin().unwrap().join("Edgeless-Code.cmd");
+    let entry_name = if which("Code").is_ok() {
+        "Edgeless-Code.cmd"
+    } else {
+        "Code.cmd"
+    };
+    let p3 = get_path_bin().unwrap().join(entry_name);
     assert!(p3.exists());
 
     use crate::utils::fs::try_recycle;
