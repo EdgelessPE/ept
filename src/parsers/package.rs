@@ -1,7 +1,7 @@
 use crate::executor::values_replacer;
 use crate::types::interpretable::Interpretable;
 use crate::types::verifiable::Verifiable;
-use crate::types::{extended_semver::ExSemVer, package::GlobalPackage, software::Software};
+use crate::types::{extended_semver::ExSemVer, package::GlobalPackage};
 use crate::utils::reg_entry::get_reg_entry;
 use crate::utils::{exe_version::get_exe_version, path::parse_relative_path_with_located};
 use crate::{log, p2s};
@@ -232,7 +232,7 @@ fn test_parse_package() {
             license: None,
             icon: None,
         },
-        software: Some(Software {
+        software: Some(crate::types::software::Software {
             scope: "Microsoft".to_string(),
             upstream: "https://code.visualstudio.com/".to_string(),
             category: "办公编辑".to_string(),
