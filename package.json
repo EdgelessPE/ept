@@ -1,0 +1,18 @@
+{
+  "name": "ept-docs",
+  "version": "1.0.0",
+  "license": "MPL-2.0",
+  "scripts": {
+    "dev": "rspress dev",
+    "build": "rspress build",
+    "preview": "rspress preview"
+  },
+  "dependencies": {
+    "rspress": "latest"
+  },
+  "devDependencies": {
+    "@modern-js/tsconfig": "2.30.0",
+    "@types/jest": "^29",
+    "@types/node": "^14"
+  }
+}

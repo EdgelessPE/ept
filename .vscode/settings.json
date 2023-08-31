@@ -19,6 +19,7 @@
         "Oray",
         "posix",
         "predef",
+        "rspress",
         "Rustup",
         "Secp",
         "sentencecase",
