@@ -1,0 +1,28 @@
+[
+  {
+    "type": "dir",
+    "name": "introduction",
+    "label": "介绍"
+  },
+  {
+    "type": "dir",
+    "name": "struct",
+    "label": "包结构"
+  },
+  {
+    "type": "dir",
+    "name": "ability",
+    "label": "能力"
+  },
+  {
+    "type": "dir",
+    "name": "workflow",
+    "label": "工作流"
+  },
+  {
+    "type": "dir",
+    "name": "definition",
+    "label": "定义与API",
+    "collapsed": true
+  }
+]
