@@ -1,0 +1,18 @@
+name: Run unit test
+
+on: [push, pull_request]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: Swatinem/rust-cache@v2.6.2
+      - name: Build
+        run: cargo build
+      - name: Run tests
+        run: cargo test -- --test-threads 1
