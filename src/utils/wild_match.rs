@@ -114,7 +114,7 @@ fn test_parse_wild_match() {
         parse_wild_match("*.lock".to_string(), &located)
             .unwrap()
             .len()
-            == 1
+            == 2
     );
     assert!(
         parse_wild_match("src/*.rs".to_string(), &located)
