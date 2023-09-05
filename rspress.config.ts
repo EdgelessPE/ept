@@ -20,7 +20,7 @@ export default defineConfig({
     ],
     editLink: {
       docRepoBaseUrl:
-        'https://github.com/EdgelessPE/ept/tree/develop/doc',
+        'https://github.com/EdgelessPE/ept/edit/develop/doc',
       text: 'Edit this page on GitHub',
     },
   },
