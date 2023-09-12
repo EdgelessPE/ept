@@ -1424,65 +1424,65 @@
     "@svgr/webpack" "8.0.1"
     "@swc/helpers" "0.5.1"
 
-"@modern-js/mdx-rs-binding-darwin-arm64@0.2.5":
-  version "0.2.5"
-  resolved "https://registry.yarnpkg.com/@modern-js/mdx-rs-binding-darwin-arm64/-/mdx-rs-binding-darwin-arm64-0.2.5.tgz#d4c46d6de00f089119b5ce84d12d9db860b11933"
-  integrity sha512-lqoksSJE2xjAnxftQ/LRc6FMuS+ohcn+TvRz7mBYINrcGdDvPnnDEQ4x5eQcecCUY5ERHf0tZ0R1ovxLC1tE9g==
+"@modern-js/mdx-rs-binding-darwin-arm64@0.2.6":
+  version "0.2.6"
+  resolved "https://registry.yarnpkg.com/@modern-js/mdx-rs-binding-darwin-arm64/-/mdx-rs-binding-darwin-arm64-0.2.6.tgz#d17031bb590f749e3f5e9399cccff27a788e2efc"
+  integrity sha512-Jz1U8vS27wGzCEtYVUE9o1Z0I9FG08YVYx/egCDgiFSMagrLWLznUvkcPx9eQzel35SmCP05SS6QwHxfRxIYcg==
 
-"@modern-js/mdx-rs-binding-darwin-x64@0.2.5":
-  version "0.2.5"
-  resolved "https://registry.yarnpkg.com/@modern-js/mdx-rs-binding-darwin-x64/-/mdx-rs-binding-darwin-x64-0.2.5.tgz#806c29ce1ca6771bacf029aa239d9f768650021e"
-  integrity sha512-vq1KJZB1FX5t+LKBjKrYvAsslGJRCPn4uWUHGEQE5uc5CTOvxTiDoYA1lTpmv/0m8ZKRVwyd5M4NAx4YzCOn3w==
+"@modern-js/mdx-rs-binding-darwin-x64@0.2.6":
+  version "0.2.6"
+  resolved "https://registry.yarnpkg.com/@modern-js/mdx-rs-binding-darwin-x64/-/mdx-rs-binding-darwin-x64-0.2.6.tgz#2ea9aa6d9548964deaa8bbe83293e1e19a4dc630"
+  integrity sha512-9FMcrAW7u5k3i3mk1zJP19eo0plm29lnpaFkbS+bbqIKCV7BNao1Z3zm8Oxj07LwUyPSHqVWuRXpVM4vBxmz/Q==
 
-"@modern-js/mdx-rs-binding-linux-arm-gnueabihf@0.2.5":
-  version "0.2.5"
-  resolved "https://registry.yarnpkg.com/@modern-js/mdx-rs-binding-linux-arm-gnueabihf/-/mdx-rs-binding-linux-arm-gnueabihf-0.2.5.tgz#dcbdb7c416139e05d5f965d79e2cb47dd4e9c8ca"
-  integrity sha512-L+b5TOhbHv1q9G7/U4FXgdbJLEnnmoV2St+c24wBkPEwS2HocGxZcd5ttT+Yvdfdom/I6G3OxRe1C/sxyq/hJw==
+"@modern-js/mdx-rs-binding-linux-arm-gnueabihf@0.2.6":
+  version "0.2.6"
+  resolved "https://registry.yarnpkg.com/@modern-js/mdx-rs-binding-linux-arm-gnueabihf/-/mdx-rs-binding-linux-arm-gnueabihf-0.2.6.tgz#187dc56ecd8363346c8664ffa0bb0d17e9053250"
+  integrity sha512-22himQxeL7k6GNqHP4DS5cNXj56VSOJjzxe9hUivpDh+5lj4ZQXKWrk2k35ti5THd9aCJ3QSqGStHQIg6HAicQ==
 
-"@modern-js/mdx-rs-binding-linux-arm64-gnu@0.2.5":
-  version "0.2.5"
-  resolved "https://registry.yarnpkg.com/@modern-js/mdx-rs-binding-linux-arm64-gnu/-/mdx-rs-binding-linux-arm64-gnu-0.2.5.tgz#faf64c3f2d0579c7541506b746e224022f39ba67"
-  integrity sha512-VHKCTJYDmrnahL8uXQRmHHy/KaJwWMJ1ggzx0sjPdXgEX4qQS2dM+7Uxv/r7MUEoeyT/9zvuOXM1BEGWuOj61Q==
+"@modern-js/mdx-rs-binding-linux-arm64-gnu@0.2.6":
+  version "0.2.6"
+  resolved "https://registry.yarnpkg.com/@modern-js/mdx-rs-binding-linux-arm64-gnu/-/mdx-rs-binding-linux-arm64-gnu-0.2.6.tgz#cdc528b64c7f1525cea9024afe9049bb96926d85"
+  integrity sha512-987DSi1s0SV47JZ9YQtDzoI+c5KcS9EWh+y9h6FCPefURNW60NjZWqcWYFRsubPB+MNI6gPFn4fuALTLAwWfRw==
 
-"@modern-js/mdx-rs-binding-linux-arm64-musl@0.2.5":
-  version "0.2.5"
-  resolved "https://registry.yarnpkg.com/@modern-js/mdx-rs-binding-linux-arm64-musl/-/mdx-rs-binding-linux-arm64-musl-0.2.5.tgz#1c6114648545a6242fec7229c05a445b4a3d925b"
-  integrity sha512-e12ECjcWHGDDMQWkEoynz+bH33JVm2OcRkd3T5MHbXxI5iz14FX1wQOvTUujEhoj78PG0pxytcY4sBPRQtNCow==
+"@modern-js/mdx-rs-binding-linux-arm64-musl@0.2.6":
+  version "0.2.6"
+  resolved "https://registry.yarnpkg.com/@modern-js/mdx-rs-binding-linux-arm64-musl/-/mdx-rs-binding-linux-arm64-musl-0.2.6.tgz#d9b85224cb931e2543f47d3720d1035f620bcaf6"
+  integrity sha512-YsS1PhGRbhtBK7lTzVDFTDFOR1uwQUgvCGZnX0t8YZbkFnSByK6RIsP+OXjhLd7OqHvbtmADBV6DpjUIW/7xlw==
 
-"@modern-js/mdx-rs-binding-linux-x64-gnu@0.2.5":
-  version "0.2.5"
-  resolved "https://registry.yarnpkg.com/@modern-js/mdx-rs-binding-linux-x64-gnu/-/mdx-rs-binding-linux-x64-gnu-0.2.5.tgz#450fe606fda13cbe006a1bab36237a8d2a29e308"
-  integrity sha512-2PgsRmiAL9/q+W7OnlAaJ5J1KhtO3n/OPLaw/MmxLRKMLm2XtA3Dv7hkLELuP38cvp2x3o5oKRRN4TDk0tadKw==
+"@modern-js/mdx-rs-binding-linux-x64-gnu@0.2.6":
+  version "0.2.6"
+  resolved "https://registry.yarnpkg.com/@modern-js/mdx-rs-binding-linux-x64-gnu/-/mdx-rs-binding-linux-x64-gnu-0.2.6.tgz#8613c6db6a9d831685ee67f25f0012f089ff96ae"
+  integrity sha512-UY7n9uXki2xUkMs8VFe0iNIkefG+q+xunSTyrC4vCNGmG0MGqe3y4CRrbLDxQckYwjOO1a0L7jyAW2cQbYArwg==
 
-"@modern-js/mdx-rs-binding-linux-x64-musl@0.2.5":
-  version "0.2.5"
-  resolved "https://registry.yarnpkg.com/@modern-js/mdx-rs-binding-linux-x64-musl/-/mdx-rs-binding-linux-x64-musl-0.2.5.tgz#050d4ca98851e70f08679e9e14fe4d9d350bd6ba"
-  integrity sha512-rX2Wr2+4T9VP6zgYCJ7QnL/xV9mjmeSAiyPY8LSxJRM4OYDtVA4Y81bOhEgUGWXAX3ZUvkawG4L8g/Uea9U9hg==
+"@modern-js/mdx-rs-binding-linux-x64-musl@0.2.6":
+  version "0.2.6"
+  resolved "https://registry.yarnpkg.com/@modern-js/mdx-rs-binding-linux-x64-musl/-/mdx-rs-binding-linux-x64-musl-0.2.6.tgz#f9612fba1bff3c9b1fe28a80902e2aebeb426217"
+  integrity sha512-PdYaQKV//gTCNI4QtzpjHM+4Y2gK9hYfk+OsfNlQxktiIF/VJkhfy8tLVjqMBnNc90qEkYo7W8swjwTv0rwS8g==
 
-"@modern-js/mdx-rs-binding-win32-arm64-msvc@0.2.5":
-  version "0.2.5"
-  resolved "https://registry.yarnpkg.com/@modern-js/mdx-rs-binding-win32-arm64-msvc/-/mdx-rs-binding-win32-arm64-msvc-0.2.5.tgz#7d43ca439d64678d3830bb35031d9485132c7dbb"
-  integrity sha512-4azLpJIP2B4Hqe/2mZ2TBTaBT4eXhflTMosY9ktohwYFu4sd+V1Wz+jrnxvworp5Gyz9bvixYz0CREHjG5XyCg==
+"@modern-js/mdx-rs-binding-win32-arm64-msvc@0.2.6":
+  version "0.2.6"
+  resolved "https://registry.yarnpkg.com/@modern-js/mdx-rs-binding-win32-arm64-msvc/-/mdx-rs-binding-win32-arm64-msvc-0.2.6.tgz#af346108125e1021a1ab298663802f554ae8bd29"
+  integrity sha512-RrTKghF+A88uHt0gKrcITjK2uBO0rQaNTwKDITwE5gYBvYWX5QL3nyZM5fovWeJ+vnk7cI+7ab8BhNRqrE/Yog==
 
-"@modern-js/mdx-rs-binding-win32-x64-msvc@0.2.5":
-  version "0.2.5"
-  resolved "https://registry.yarnpkg.com/@modern-js/mdx-rs-binding-win32-x64-msvc/-/mdx-rs-binding-win32-x64-msvc-0.2.5.tgz#cf2e34a6f7f7d11f32b603983f4e101b55e48e4d"
-  integrity sha512-T9PYpQoflT4sAXOTb3Q0b8HpVMnurfTDOAaj7moSjyaziblvhCFS0XDLDeSdL3600NNqDWSBHWlrSjT/v+M1xQ==
+"@modern-js/mdx-rs-binding-win32-x64-msvc@0.2.6":
+  version "0.2.6"
+  resolved "https://registry.yarnpkg.com/@modern-js/mdx-rs-binding-win32-x64-msvc/-/mdx-rs-binding-win32-x64-msvc-0.2.6.tgz#30a8e72866aae296da744c649faea703f1810e70"
+  integrity sha512-UjjNHRuQaLpZ7/rHWLHfKjt+wtk+h8ESsDgxN7W/KnU4MQxhNM4Nnkj4dZbfTUYoLQ7joIlKSnAW+3aghRYkuA==
 
-"@modern-js/mdx-rs-binding@0.2.5":
-  version "0.2.5"
-  resolved "https://registry.yarnpkg.com/@modern-js/mdx-rs-binding/-/mdx-rs-binding-0.2.5.tgz#d74b6e5ed9d13dc095425eb210015759dd5ef8bc"
-  integrity sha512-enx4UAvfdiCWEDmnheB3XLjkrgCedPq4qRDUNIwtZR5D+r7t3DGD4U44z/RENgi6vj8zahUopgDNbAXqa2aNjg==
+"@modern-js/mdx-rs-binding@0.2.6":
+  version "0.2.6"
+  resolved "https://registry.yarnpkg.com/@modern-js/mdx-rs-binding/-/mdx-rs-binding-0.2.6.tgz#f8fd5feaad25a7448537db1a56e9de6774dd4aaf"
+  integrity sha512-GG/199VP8ltTQ5By79459iZMQw62G83GyUa18L+CBQfgQgOwG8Yzxuq/0igfxl/qG5mhHapZriApUiTzswJPoA==
   optionalDependencies:
-    "@modern-js/mdx-rs-binding-darwin-arm64" "0.2.5"
-    "@modern-js/mdx-rs-binding-darwin-x64" "0.2.5"
-    "@modern-js/mdx-rs-binding-linux-arm-gnueabihf" "0.2.5"
-    "@modern-js/mdx-rs-binding-linux-arm64-gnu" "0.2.5"
-    "@modern-js/mdx-rs-binding-linux-arm64-musl" "0.2.5"
-    "@modern-js/mdx-rs-binding-linux-x64-gnu" "0.2.5"
-    "@modern-js/mdx-rs-binding-linux-x64-musl" "0.2.5"
-    "@modern-js/mdx-rs-binding-win32-arm64-msvc" "0.2.5"
-    "@modern-js/mdx-rs-binding-win32-x64-msvc" "0.2.5"
+    "@modern-js/mdx-rs-binding-darwin-arm64" "0.2.6"
+    "@modern-js/mdx-rs-binding-darwin-x64" "0.2.6"
+    "@modern-js/mdx-rs-binding-linux-arm-gnueabihf" "0.2.6"
+    "@modern-js/mdx-rs-binding-linux-arm64-gnu" "0.2.6"
+    "@modern-js/mdx-rs-binding-linux-arm64-musl" "0.2.6"
+    "@modern-js/mdx-rs-binding-linux-x64-gnu" "0.2.6"
+    "@modern-js/mdx-rs-binding-linux-x64-musl" "0.2.6"
+    "@modern-js/mdx-rs-binding-win32-arm64-msvc" "0.2.6"
+    "@modern-js/mdx-rs-binding-win32-x64-msvc" "0.2.6"
 
 "@modern-js/monorepo-utils@2.34.0":
   version "2.34.0"
@@ -1747,10 +1747,10 @@
     parse5 "7.1.1"
     tapable "2.2.1"
 
-"@rspress/core@0.0.10":
-  version "0.0.10"
-  resolved "https://registry.yarnpkg.com/@rspress/core/-/core-0.0.10.tgz#f624a4e15e02fb5172716ab9ace1d5df5d19f994"
-  integrity sha512-kO/1ARR3Y4U4it2DZWbmxnSeEvAVSHWqrti5YmM3GvViD1DDBu4Qvguz8benxa+TxmD76L3vjZjd5fONPlEnAA==
+"@rspress/core@0.0.12":
+  version "0.0.12"
+  resolved "https://registry.yarnpkg.com/@rspress/core/-/core-0.0.12.tgz#4ff53e518d7d83c4f2e6bcad530626dd22bde1f6"
+  integrity sha512-+lvKCaoNc9l95ZSGKK+4RkhlZLIrb5MJNDALEjbDUJC62yiRB0V3A0r0yVGxfp33A0RRAnSbuZthYVpURLwIgQ==
   dependencies:
     "@headlessui/react" "^1.7.7"
     "@loadable/component" "5.15.2"
@@ -1759,13 +1759,13 @@
     "@mdx-js/react" "2.2.1"
     "@modern-js/builder" "2.34.0"
     "@modern-js/builder-rspack-provider" "2.34.0"
-    "@modern-js/mdx-rs-binding" "0.2.5"
+    "@modern-js/mdx-rs-binding" "0.2.6"
     "@modern-js/utils" "2.34.0"
-    "@rspress/plugin-auto-nav-sidebar" "0.0.10"
-    "@rspress/plugin-container-syntax" "0.0.10"
-    "@rspress/plugin-last-updated" "0.0.10"
-    "@rspress/plugin-medium-zoom" "0.0.10"
-    "@rspress/shared" "0.0.10"
+    "@rspress/plugin-auto-nav-sidebar" "0.0.12"
+    "@rspress/plugin-container-syntax" "0.0.12"
+    "@rspress/plugin-last-updated" "0.0.12"
+    "@rspress/plugin-medium-zoom" "0.0.12"
+    "@rspress/shared" "0.0.12"
     "@types/compression" "^1.7.2"
     "@types/polka" "^0.5.4"
     acorn "^8.8.1"
@@ -1778,7 +1778,6 @@
     fs-extra "10.1.0"
     github-slugger "^2.0.0"
     globby "11.1.0"
-    hast "^1.0.0"
     hast-util-from-html "^1.0.0"
     html-to-text "^9.0.3"
     jsdom "20.0.3"
@@ -1804,7 +1803,7 @@
     remark-html "^15.0.1"
     remark-parse "^10.0.1"
     remark-rehype "^10.1.0"
-    rspack-plugin-virtual-module "0.1.11"
+    rspack-plugin-virtual-module "0.1.12"
     sirv "^2.0.2"
     source-map "0.7.4"
     string-replace-loader "^3.1.0"
@@ -1814,37 +1813,37 @@
     unist-util-visit-children "^2.0.1"
     yaml-front-matter "^4.1.1"
 
-"@rspress/plugin-auto-nav-sidebar@0.0.10":
-  version "0.0.10"
-  resolved "https://registry.yarnpkg.com/@rspress/plugin-auto-nav-sidebar/-/plugin-auto-nav-sidebar-0.0.10.tgz#4206c0ef4fc236c9d61941338f61072076274377"
-  integrity sha512-Qz82NiahM096NSAlokzdSl9a0YNtq0DDFu7cYVu5gEtJA7NMcnw59FtoM6KvTxqIwV2ctRTtOYmcZNaZzDwysA==
+"@rspress/plugin-auto-nav-sidebar@0.0.12":
+  version "0.0.12"
+  resolved "https://registry.yarnpkg.com/@rspress/plugin-auto-nav-sidebar/-/plugin-auto-nav-sidebar-0.0.12.tgz#c03fa9fad20885e5363d53b11a3f947c28331079"
+  integrity sha512-hcBHehF7C98/8p9zIbdtkL1Hr/MsWeVHsFAwmGgOBai3qUKnpqUUxtiUw/SEZ0QCUF+fw75KwatkAk+LtRFnbQ==
   dependencies:
     "@modern-js/utils" "2.34.0"
-    "@rspress/shared" "0.0.10"
+    "@rspress/shared" "0.0.12"
 
-"@rspress/plugin-container-syntax@0.0.10":
-  version "0.0.10"
-  resolved "https://registry.yarnpkg.com/@rspress/plugin-container-syntax/-/plugin-container-syntax-0.0.10.tgz#32f2de5205e6c12637923d095166fd67247dbbf9"
-  integrity sha512-IGxOIUp4HHRWe0m6QoFmGSGqkSCHdZhjwoOkR7AvhqsHd6DEhkJti9iLUQgjZyUUP3TaaKMgXmXcyLr38GsT2Q==
+"@rspress/plugin-container-syntax@0.0.12":
+  version "0.0.12"
+  resolved "https://registry.yarnpkg.com/@rspress/plugin-container-syntax/-/plugin-container-syntax-0.0.12.tgz#44b36da978913b2841d9f1a558fac7fe51d40f96"
+  integrity sha512-ryzBlOQhG2qVjWDt1lQD6K14LRLFtgLYwt2sSFfJp4yzENqp/I3tiZ+dyt7k6szHk49/vNXnS+DGfd34BrleBQ==
 
-"@rspress/plugin-last-updated@0.0.10":
-  version "0.0.10"
-  resolved "https://registry.yarnpkg.com/@rspress/plugin-last-updated/-/plugin-last-updated-0.0.10.tgz#9822c3efd13fa2987a9bd6f4f27bc634af3ffa5a"
-  integrity sha512-YJE7DT3j5u/JpVZdCntL8yjdQygKbMvsqZ535yakVGqlIe5UHCmOqGY9wDAJ0PsdEaJBjSSIVO37WThgQSrUyw==
+"@rspress/plugin-last-updated@0.0.12":
+  version "0.0.12"
+  resolved "https://registry.yarnpkg.com/@rspress/plugin-last-updated/-/plugin-last-updated-0.0.12.tgz#5a418971e689fb3f79fac26c53473564cd06c8b1"
+  integrity sha512-juxy/8jNz/tXJcgXCMRsCBipxMyHzJWfqB7iPWIRDZ3EjyGqeV8gZHst6+QbRIs+xyooqCDzPivLxymYDLFFvw==
   dependencies:
     "@modern-js/utils" "2.34.0"
 
-"@rspress/plugin-medium-zoom@0.0.10":
-  version "0.0.10"
-  resolved "https://registry.yarnpkg.com/@rspress/plugin-medium-zoom/-/plugin-medium-zoom-0.0.10.tgz#7cc1a89cfed50dd6c935d8028a111b0cd09b469d"
-  integrity sha512-/PnJnejUKT9n7b+dK5MPZdYwaP8oletsRdHedxdP5VWMrF1IXGPYyxw6ra8CxzJaGOCid1CbqsMxXtMBhF2Tgw==
+"@rspress/plugin-medium-zoom@0.0.12":
+  version "0.0.12"
+  resolved "https://registry.yarnpkg.com/@rspress/plugin-medium-zoom/-/plugin-medium-zoom-0.0.12.tgz#0012f8de7ac04bfb0a140b49b0362348e71edb60"
+  integrity sha512-4FgUIuo3xVOW4P3ZNrxtHy6bQ2mVhmgWhR1tvAYslLGhe72Rw90s+EoCN/f1UIJsWyvsTp8IR0o1bT17Y5RJ8Q==
   dependencies:
     medium-zoom "1.0.8"
 
-"@rspress/shared@0.0.10":
-  version "0.0.10"
-  resolved "https://registry.yarnpkg.com/@rspress/shared/-/shared-0.0.10.tgz#3f2ca2704cbe12ce8b70b72b7cec5e0ed091531f"
-  integrity sha512-dnS+IyeBZ7ILRwrENBNbgwH0Wx00tdJQ+BlptYnnheoIdRa1MP4qcFFwD8qftCq6opEuP7z/1drlZKsbpjui7A==
+"@rspress/shared@0.0.12":
+  version "0.0.12"
+  resolved "https://registry.yarnpkg.com/@rspress/shared/-/shared-0.0.12.tgz#006a590ff40497e32570397f301fc7ce877b2e49"
+  integrity sha512-Q0+Zy93QoBe1vC4TQ/FRR5YaaT6Rt7lx7K5N+9ZaLmlMH+cgUrSJLYRsVZC6LgtjFVWIHqVZJxofK35ubOTaNg==
   dependencies:
     "@modern-js/builder" "2.34.0"
     "@modern-js/builder-rspack-provider" "2.34.0"
@@ -4097,11 +4096,6 @@ hast-util-whitespace@^2.0.0:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/hast-util-whitespace/-/hast-util-whitespace-2.0.1.tgz#0ec64e257e6fc216c7d14c8a1b74d27d650b4557"
   integrity sha512-nAxA0v8+vXSBDt3AnRUNjyRIQ0rD+ntpbAp4LnPkumc5M9yUbSMa4XDU9Q6etY4f1Wp4bNgvc1yjiZtsTTrSng==
-
-hast@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/hast/-/hast-1.0.0.tgz#50615e6b2b0583e5608bc76c47029722f1e00607"
-  integrity sha512-vFUqlRV5C+xqP76Wwq2SrM0kipnmpxJm7OfvVXpB35Fp+Fn4MV+ozr+JZr5qFvyR1q/U+Foim2x+3P+x9S1PLA==
 
 hastscript@^6.0.0:
   version "6.0.0"
@@ -6550,10 +6544,10 @@ rspack-manifest-plugin@5.0.0-alpha0:
     tapable "^2.0.0"
     webpack-sources "^2.2.0"
 
-rspack-plugin-virtual-module@0.1.11:
-  version "0.1.11"
-  resolved "https://registry.yarnpkg.com/rspack-plugin-virtual-module/-/rspack-plugin-virtual-module-0.1.11.tgz#691a0df28ed30e0ff9bf0460fdeec4ce5ccba092"
-  integrity sha512-dD7vo8PY3sG7nM1JAuytJ4XTXqALKUDjISFaxFyIHcSvUBKu8nmJf9TaRq1htS+bsXujqkKhKR859k0/zTHwxQ==
+rspack-plugin-virtual-module@0.1.12:
+  version "0.1.12"
+  resolved "https://registry.yarnpkg.com/rspack-plugin-virtual-module/-/rspack-plugin-virtual-module-0.1.12.tgz#96c580ae79bdb457990b3bbb3ec51274ddf5087d"
+  integrity sha512-qyBM9XsP7oxBQSms2cr715XOeoDi6p5hUYXtlNDfst0jha8vfWVPNeC7j5+j5dG+yt//1OCmLaOY2rWqPSVXDg==
   dependencies:
     fs-extra "^11.1.1"
 
@@ -6564,13 +6558,13 @@ rspack-plugin-virtual-module@0.1.7:
   dependencies:
     fs-extra "^11.1.1"
 
-rspress@^0.0.10:
-  version "0.0.10"
-  resolved "https://registry.yarnpkg.com/rspress/-/rspress-0.0.10.tgz#440e7704c7e9637095ef628cfea518cc05562701"
-  integrity sha512-OuBft8gBm41Jd4Wt39DqIefG+pB+8S+phSa4LOziN17shBOTOK2GecOofrQcFfTQN+LZaQByNjsmnFwqY2jRBw==
+rspress@^0.0.12:
+  version "0.0.12"
+  resolved "https://registry.yarnpkg.com/rspress/-/rspress-0.0.12.tgz#b7c54ea0255140745b0ba197fb3f738e206aaf6e"
+  integrity sha512-KO81G07Bxmhy3wn2ZJbDwI1oAy7yXBKJC0UGCjFmc9MyrXCzB9BZOLhbsVqk8AL6LWn+d0io6Uk/s1PRg6RvFA==
   dependencies:
     "@modern-js/node-bundle-require" "2.34.0"
-    "@rspress/core" "0.0.10"
+    "@rspress/core" "0.0.12"
     cac "^6.7.14"
     chalk "5.3.0"
     chokidar "^3.5.3"
