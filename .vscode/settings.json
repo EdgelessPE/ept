@@ -33,6 +33,7 @@
         "vecu",
         "wildmatch",
         "winapi",
+        "Winget",
         "winreg",
         "winuser",
         "WPARAM"
