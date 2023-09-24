@@ -3,6 +3,7 @@
         "ABORTIFHUNG",
         "appdata",
         "appname",
+        "Bandizip",
         "canonicalize",
         "chfsgui",
         "Chuyu",
@@ -36,7 +37,9 @@
         "Winget",
         "winreg",
         "winuser",
-        "WPARAM"
+        "WPARAM",
+        "Zstandard",
+        "zstd"
     ],
     "rust-analyzer.linkedProjects": [
         ".\\Cargo.toml"
