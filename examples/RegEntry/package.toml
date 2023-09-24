@@ -11,7 +11,7 @@ version = "1.0.0.0"
 # 打包者/作者
 authors = ["Cno <dsyourshy@qq.com>"]
 # 许可证缩写或链接（可选）
-licence = "MIT"
+license = "MIT"
 description = "Testing registry entry"
 
 [software]
