@@ -229,7 +229,7 @@ fn test_parse_package() {
                 "Cno <dsyourshy@qq.com>".to_string(),
                 "Microsoft".to_string(),
             ],
-            license: None,
+            license: Some("MIT".to_string()),
             icon: None,
         },
         software: Some(crate::types::software::Software {
