@@ -28,15 +28,20 @@ lazy_static! {
     static ref DEFAULT_LOCATION: String = p2s!(get_bare_apps().unwrap());
 }
 
+pub fn get_eval_context(exit_code: i32, located: &String) -> HashMapContext {
+    let mut context = HashMapContext::new();
+    set_context_with_constant_values(&mut context);
+    set_context_with_mutable_values(&mut context, exit_code, located);
+    set_context_with_function(&mut context, located);
+    context
+}
+
 // 执行条件以判断是否成立
 pub fn condition_eval(condition: &String, exit_code: i32, located: &String) -> Result<bool> {
     // 装饰变量与函数
     let condition_with_values_interpreted =
         values_replacer(condition.to_owned(), exit_code, located);
-    let mut context = HashMapContext::new();
-    set_context_with_constant_values(&mut context);
-    set_context_with_mutable_values(&mut context, exit_code, located);
-    set_context_with_function(&mut context, located);
+    let context = get_eval_context(exit_code, located);
 
     // 执行 eval
     eval_boolean_with_context(&condition_with_values_interpreted, &context).map_err(|res| {

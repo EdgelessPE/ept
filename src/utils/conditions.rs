@@ -5,7 +5,7 @@ use std::sync::{Arc, Mutex};
 
 use crate::{
     executor::{
-        condition_eval, get_eval_function_names, get_eval_function_permission,
+        condition_eval, get_eval_context, get_eval_function_names, get_eval_function_permission,
         verify_eval_function_arg,
     },
     types::permissions::Permission,
@@ -34,7 +34,7 @@ fn capture_function_info(conditions: &Vec<String>) -> Result<Vec<(String, String
     let res = Arc::new(Mutex::new(Vec::new()));
     for cond in conditions {
         // 初始化上下文
-        let mut context = HashMapContext::new();
+        let mut context = get_eval_context(0, &"".to_string());
 
         // 迭代函数信息，创建收集闭包
         for name in info_arr.clone() {
