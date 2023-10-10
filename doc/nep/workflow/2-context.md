@@ -2,7 +2,12 @@
 在一条工作流的执行过程中会产生执行上下文，通常包含内置变量、内置函数等信息。
 
 ## 内置变量
-在字符串中，你可以在合适的位置使用`${}`语句来调用内置变量，例如`${ProgramFiles_X64}`表示`Program Files`目录的路径，因此你可以写出这样的工作流：
+在[条件](./3-conditions)语句字段中可以通过变量名称来调用内置变量，例如：
+```toml
+if = 'Arch=="X64"'
+```
+
+在常规的字符串字段中（[条件](./3-conditions)语句之外的字段通常都为字符串字段），你可以使用`${}`语句来调用内置变量，这种写法类似于 JS 中的[模板字符串](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Template_literals)。例如`${ProgramFiles_X64}`表示`Program Files`目录的路径，因此你可以这样写：
 ```toml
 [move_shortcut]
 step = "Move"
@@ -11,18 +16,16 @@ to = "${ProgramFiles_X64}/Microsoft/VSCode/"
 ```
 在执行该步骤时，假设系统盘盘符为`C:`，那么`lib.dll`就会被移动到`C:/Program Files/Microsoft/VSCode/lib.dll`。
 
-在[条件](./3-conditions)语句中可以直接通过变量名称来调用内置变量，而不是使用`${}`包裹。因此下面三个条件语句是等效的：
+:::warning
+如果想在条件语句中使用模板字符串写法，需要确保表达式位于字符串（`""`）内：
 ```toml
-# 写法1，使用转义符
-if = "\"${Arch}\"==\"X64\""
+# 需要拼接字符串时这种写法比较有用
+if = '"${SystemDrive}/User${ExitCode}"=="C:/User0"'
 
-# 写法2，使用单引号来避免为双引号添加转义符
+# 不需要拼接字符串时，这种写法就比较啰嗦
 if = '"${Arch}"=="X64"'
-
-# 写法3，去掉双引号和花括号
-if = 'Arch=="X64"'
 ```
-显然写法 3 更加简洁清晰，这也是我们推荐的条件语句写法。
+:::
 
 你可以在[定义与API](/nep/definition/2-context)中找到完整的内置变量定义。
 
