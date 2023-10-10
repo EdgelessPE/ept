@@ -1,20 +1,20 @@
 [create_shortcut1]
 name = "Create shortcut1"
-if = "\"${Arch}\"==\"ARM64\""
+if = 'Arch=="ARM64"'
 step = "Link"
 source_file = "Dism++ARM64.exe"
 # target_name = "Dism++ARM64.exe"
 
 [create_shortcut2]
 name = "Create shortcut2"
-if = "\"${Arch}\"==\"X64\""
+if = 'Arch=="X64"'
 step = "Link"
 source_file = "Dism++x64.exe"
 # target_name = "Dism++x64.exe"
 
 [create_shortcut3]
 name = "Create shortcut3"
-if = "\"${Arch}\"==\"X86\""
+if = 'Arch=="X86"'
 step = "Link"
 source_file = "Dism++x86.exe"
 # target_name = "Dism++x86.exe"

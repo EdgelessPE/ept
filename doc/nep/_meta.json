@@ -12,13 +12,13 @@
   },
   {
     "type": "dir",
-    "name": "ability",
-    "label": "能力"
+    "name": "workflow",
+    "label": "工作流"
   },
   {
     "type": "dir",
-    "name": "workflow",
-    "label": "工作流"
+    "name": "ability",
+    "label": "能力"
   },
   {
     "type": "dir",
