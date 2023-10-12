@@ -115,7 +115,7 @@ pub fn meta(input: &String, verify_signature: bool) -> Result<MetaResult> {
 #[test]
 fn test_meta() {
     envmnt::set("CONFIRM", "true");
-    let res = meta(&"examples/VSCode".to_string(), false).unwrap();
+    let res = meta(&"examples/PermissionsTest".to_string(), false).unwrap();
     println!("{res:#?}");
 
     // 从本地安装中生成 meta

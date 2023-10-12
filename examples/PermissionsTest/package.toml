@@ -22,3 +22,4 @@ upstream = "https://code.visualstudio.com/"
 category = "办公编辑"
 tags = ["Electron"]
 language = "Multi"
+main_program = "${AppData}/Local/Programs/Microsoft VS Code/Code.exe"

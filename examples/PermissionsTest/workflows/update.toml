@@ -1,14 +1,14 @@
 [toast]
 name = "Toast"
 step = "Toast"
-if = "${ExitCode}==0"
+if = "ExitCode==0"
 title = "Updated successfully"
 content = "Code has been installed"
 
 [toast_else]
 name = "Toast else"
 step = "Toast"
-if = "${ExitCode}!=0"
+if = "ExitCode!=0"
 title = "Updated failed"
 content = "Uninstall code then try again"
 
