@@ -215,7 +215,7 @@ fn test_workflow_executor() {
                 c_if: None,
             },
             body: Step::StepLog(StepLog {
-                level: "Info".to_string(),
+                level: None,
                 msg: "Hello nep! 你好，尼普！".to_string(),
             }),
         },
@@ -252,7 +252,7 @@ fn test_workflow_executor() {
                 ),
             },
             body: Step::StepLog(StepLog {
-                level: "Warning".to_string(),
+                level: Some("Warning".to_string()),
                 msg: "桌面路径：${Desktop}，应用路径：${DefaultLocation}".to_string(),
             }),
         },
@@ -310,7 +310,7 @@ fn test_workflow_executor_interpreter() {
                 c_if: None,
             },
             body: Step::StepLog(StepLog {
-                level: "Info".to_string(),
+                level: None,
                 msg: "exit : ${ExitCode}".to_string(),
             }),
         },

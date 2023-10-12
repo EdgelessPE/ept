@@ -312,7 +312,7 @@ fn test_async_execute() {
     assert_eq!(res, 0);
 
     StepLog {
-        level: "Info".to_string(),
+        level: None,
         msg: "running other steps...".to_string(),
     }
     .run(&mut cx)

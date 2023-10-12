@@ -11,13 +11,14 @@ use super::TStep;
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct StepLog {
-    pub level: String,
+    pub level: Option<String>,
     pub msg: String,
 }
 
 impl TStep for StepLog {
     fn run(self, _: &mut WorkflowContext) -> Result<i32> {
-        log!("{l}(Log):{m}", l = self.level, m = self.msg);
+        let level = self.level.unwrap_or("Info".to_string());
+        log!("{level}(Log):{m}", m = self.msg);
         Ok(0)
     }
     fn reverse_run(self, _: &mut WorkflowContext) -> Result<()> {
@@ -42,12 +43,15 @@ impl Interpretable for StepLog {
 
 impl Verifiable for StepLog {
     fn verify_self(&self, _: &String) -> Result<()> {
-        verify_enum!(
-            "Log",
-            "level",
-            self.level,
-            "Debug" | "Info" | "Warning" | "Error" | "Success"
-        )
+        if let Some(level) = &self.level {
+            verify_enum!(
+                "Log",
+                "level",
+                level,
+                "Debug" | "Info" | "Warning" | "Error" | "Success"
+            )?;
+        }
+        Ok(())
     }
 }
 
@@ -61,7 +65,7 @@ impl Generalizable for StepLog {
 fn test_log() {
     let mut cx = WorkflowContext::_demo();
     let step = StepLog {
-        level: String::from("Info"),
+        level: Some(String::from("Info")),
         msg: String::from("Hello nep!"),
     };
     step.verify_self(&String::from("./")).unwrap();
