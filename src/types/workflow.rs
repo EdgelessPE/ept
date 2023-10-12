@@ -85,6 +85,15 @@ fn test_header_valid() {
 
     flow.verify_self(&String::from("./examples/VSCode"))
         .unwrap();
+
+    
+    let flow=WorkflowHeader{
+        name: Some("Name".to_string()),
+        step: "Step".to_string(),
+        c_if: Some("${Arch}==\"X64\"".to_string()),
+    };
+
+    assert!(flow.verify_self(&String::from("./examples/VSCode")).is_err());
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]

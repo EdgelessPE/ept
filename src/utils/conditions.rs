@@ -77,6 +77,13 @@ pub fn get_permissions_from_conditions(conditions: Vec<String>) -> Result<Vec<Pe
 }
 
 pub fn verify_conditions(conditions: Vec<String>, located: &String) -> Result<()> {
+    // 检查模板字符串用法
+    for cond in &conditions {
+        if !check_proper_template_inner_value(cond) {
+            return Err(anyhow!("Error:Failed to validate condition '{cond}' : invalid inner value usage, e.g. 'Arch==\\\"X64\\\" && \\\"${{SystemDrive}}/Windows\\\"==\\\"C:/Windows\\\"'"));
+        }
+    }
+
     // 捕获函数执行信息
     let func_info = capture_function_info(&conditions)?;
 
@@ -88,7 +95,7 @@ pub fn verify_conditions(conditions: Vec<String>, located: &String) -> Result<()
     // 对条件进行 eval 校验
     for cond in conditions {
         condition_eval(&cond, 0, located)
-            .map_err(|e| anyhow!("Error:Failed to validate condition : {e}"))?;
+            .map_err(|e| anyhow!("Error:Failed to validate condition '{cond}' : {e}"))?;
     }
 
     Ok(())
@@ -207,4 +214,44 @@ fn test_condition() {
     assert_eq!(res, answer);
 
     // println!("{res:#?}");
+}
+
+// 检查用户是否在字符串外面用了模板内置变量 ${} 的写法
+pub fn check_proper_template_inner_value(condition: &String) -> bool {
+    // 当前指针是否在字符串内部
+    let mut inside_string_flag = false;
+
+    for cur in condition.chars() {
+        if cur == '"' {
+            inside_string_flag = !inside_string_flag;
+            continue;
+        }
+        if !inside_string_flag && (cur == '$' || cur == '{' || cur == '}') {
+            return false;
+        }
+    }
+
+    true
+}
+
+#[test]
+fn test_check_proper_template_inner_value() {
+    assert!(check_proper_template_inner_value(
+        &"Arch==\"X64\"".to_string()
+    ));
+    assert!(check_proper_template_inner_value(
+        &"Arch==\"X64\" && \"${SystemDrive}/Windows\"==\"C:/Windows\"".to_string()
+    ));
+    assert!(check_proper_template_inner_value(
+        &"\"${ExitCode}\"==\"114514\"".to_string()
+    ));
+    assert!(!check_proper_template_inner_value(
+        &"${Arch}==X64".to_string()
+    ));
+    assert!(!check_proper_template_inner_value(
+        &"$\"{Arch}\"==X64".to_string()
+    ));
+    assert!(!check_proper_template_inner_value(
+        &"${Arch}==X64".to_string()
+    ));
 }
