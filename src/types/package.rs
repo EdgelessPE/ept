@@ -9,12 +9,20 @@ use super::{extended_semver::ExSemVer, interpretable::Interpretable, verifiable:
 #[derive(Serialize, Deserialize, Clone, Debug, TS, PartialEq)]
 #[ts(export)]
 pub struct Package {
+    /// 包名
     pub name: String,
+    /// 包的简短描述，尽量从官方渠道摘取
     pub description: String,
+    /// 包模板，当前版本中仅能为 "Software"
     pub template: String,
+    /// 包版本号，使用 ExSemVer 规范
     pub version: String,
+    /// 包作者，第一作者应为打包者，后面通常跟发行商、制作方
+    /// 支持使用 <> 包裹作者邮箱，e.g. Cno <dsyourshy@qq.com>
     pub authors: Vec<String>,
+    /// 许可证 [SPDX 标识符](https://spdx.org/licenses/)或链接
     pub license: Option<String>,
+    /// 包图标 URL
     pub icon: Option<String>,
 }
 

@@ -5,14 +5,18 @@
   "scripts": {
     "dev": "rspress dev",
     "build": "rspress build",
-    "preview": "rspress preview"
+    "preview": "rspress preview",
+    "gen": "ts-node ./scripts/index.ts"
   },
   "dependencies": {
-    "rspress": "^1.0.2"
+    "rspress": "^1.0.2",
+    "typescript": "^5.2.2"
   },
   "devDependencies": {
     "@modern-js/tsconfig": "2.30.0",
     "@types/jest": "^29",
-    "@types/node": "^20.6.5"
+    "@types/node": "^20.6.5",
+    "ts-node": "^10.9.1",
+    "ts-results": "^3.3.0"
   }
 }
