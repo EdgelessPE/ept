@@ -6,10 +6,11 @@ function fieldRenderer(
   { titleLevel }: { titleLevel: number }
 ): string {
   const clearWiki = info.wiki.replace(/</g, "\\<").replace(/>/g, "\\>");
+  const enumText = info.type.enum ? info.type.enum.map((t) => `\`${t}\``).join(' ') : undefined;
   return `
 ${"#".repeat(titleLevel)} ${info.name}
 ${info.type.optional ? "<Tag>可选</Tag> " : ""}${clearWiki}
-* 类型 \`${info.type.identifier}\``;
+* 类型：\`${info.type.identifier}\`${enumText?"\n* 有效值："+enumText:""}`;
 }
 
 // 渲染一个结构

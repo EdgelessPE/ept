@@ -2,21 +2,24 @@ import fs from "fs";
 import path from "path";
 import { Result, Ok, Err } from "ts-results";
 import { FieldInfo, FileInfo } from "./type";
+import { parseFilePath } from "./utils";
+import { parseEnumDefinitions } from "./enum";
 
 // 读取 Rust 中的某个 struct，分析出所有字段信息
-export function parseStruct({
-  file,
-  structName,
-}: FileInfo): Result<FieldInfo[], string> {
+export function parseStruct(fileInfo: FileInfo): Result<FieldInfo[], string> {
+  let { file, structName } = fileInfo;
+
   // 解析路径
-  if (file.startsWith("@/")) {
-    file = file.replace("@/", path.join(__dirname, "../src/"));
-  }
+  file = parseFilePath(file);
+
   // 打开文件
   if (!fs.existsSync(file)) {
     return new Err(`Error:Failed to open file '${file}'`);
   }
   const text = fs.readFileSync(file).toString();
+
+  // 解析枚举值
+  const enumValuesMap = parseEnumDefinitions(fileInfo);
 
   // 匹配结构体
   const m = text.match(new RegExp(`pub struct ${structName} {[^}]+}`, "gm"));
@@ -54,16 +57,26 @@ export function parseStruct({
     const m = line.match(/(\w+):\s?([\w<>()]+)/);
     if (m) {
       const [, name, rawType] = m;
+      const enumValues = enumValuesMap[name];
       const type: FieldInfo["type"] =
         rawType.startsWith("Option<") && rawType.endsWith(">")
           ? {
               identifier: rawType.slice(7, -1),
               optional: true,
+              enum: enumValues,
             }
           : {
               identifier: rawType,
               optional: false,
+              enum: enumValues,
             };
+      if(enumValues){
+        if(type.identifier!=="String"){
+          throw new Error(`Error:Field '${name}' has enum but not a string (got '${type.identifier}')`)
+        }else{
+          type.identifier="String 枚举"
+        }
+      }
       result.push({
         name,
         type,

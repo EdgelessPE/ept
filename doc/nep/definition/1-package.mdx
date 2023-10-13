@@ -7,69 +7,71 @@ import { Tag } from "../../components/tag.tsx"
  
 ### name
 包名
-* 类型 `String`
+* 类型：`String`
 
 ### description
 包的简短描述，尽量从官方渠道摘取
-* 类型 `String`
+* 类型：`String`
 
 ### template
 包模板，当前版本中仅能为 "Software"
-* 类型 `String`
+* 类型：`String`
 
 ### version
 包版本号，使用 ExSemVer 规范
-* 类型 `String`
+* 类型：`String`
 
 ### authors
 包作者，第一作者应为打包者，后面通常跟发行商、制作方
 
 支持使用 \<\> 包裹作者邮箱，e.g. Cno \<dsyourshy@qq.com\>
-* 类型 `Vec<String>`
+* 类型：`Vec<String>`
 
 ### license
 <Tag>可选</Tag> 许可证 [SPDX 标识符](https://spdx.org/licenses/)或链接
-* 类型 `String`
+* 类型：`String`
 
 ### icon
 <Tag>可选</Tag> 包图标 URL
-* 类型 `String`
+* 类型：`String`
 
 ## software 
 软件包独占表
  
 ### scope
 
-* 类型 `String`
+* 类型：`String`
 
 ### upstream
 
-* 类型 `String`
+* 类型：`String`
 
 ### category
 
-* 类型 `String`
+* 类型：`String`
 
 ### arch
 <Tag>可选</Tag> 
-* 类型 `String`
+* 类型：`String 枚举`
+* 有效值：`X64` `X86` `ARM64`
 
 ### language
 
-* 类型 `String`
+* 类型：`String 枚举`
+* 有效值：`Multi` `zh-CN` `en-US`
 
 ### main_program
 <Tag>可选</Tag> 
-* 类型 `String`
+* 类型：`String`
 
 ### tags
 <Tag>可选</Tag> 
-* 类型 `Vec<String>`
+* 类型：`Vec<String>`
 
 ### alias
 <Tag>可选</Tag> 
-* 类型 `Vec<String>`
+* 类型：`Vec<String>`
 
 ### registry_entry
 <Tag>可选</Tag> 
-* 类型 `String`
+* 类型：`String`

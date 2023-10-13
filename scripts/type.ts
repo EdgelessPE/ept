@@ -3,6 +3,7 @@ export interface FieldInfo {
   type: {
     identifier: string;
     optional: boolean;
+    enum?: string[];
   };
   wiki: string;
 }
