@@ -5,6 +5,35 @@ import { FieldInfo, FileInfo } from "./type";
 import { parseFilePath } from "./utils";
 import { parseEnumDefinitions } from "./enum";
 
+// 给定源文件内容，选择一个结构体名称对应的代码块
+function matchStructBlock(name:string,text:string):string[]{
+  const lines=text.split('\n')
+  // 检索结构体申明开始行号
+  let startLineIndex=-1;
+  lines.find((line,index)=>{
+    if(line.startsWith(`pub struct ${name} {`)){
+      startLineIndex=index
+      return true
+    }else{
+      return false
+    }
+  })
+  if(startLineIndex===-1) return []
+
+  // 向下检索申明结束行号
+  let endLineIndex=-1
+  for(let i=startLineIndex;i<lines.length;i++){
+    const line=lines[i]
+    if(line==="}"){
+      endLineIndex=i
+      break
+    }
+  }
+  if(endLineIndex===-1) return []
+  
+  return lines.slice(startLineIndex+1,endLineIndex)
+}
+
 // 读取 Rust 中的某个 struct，分析出所有字段信息
 export function parseStruct(fileInfo: FileInfo): Result<FieldInfo[], string> {
   let { file, structName } = fileInfo;
@@ -22,7 +51,7 @@ export function parseStruct(fileInfo: FileInfo): Result<FieldInfo[], string> {
   const enumValuesMap = parseEnumDefinitions(fileInfo);
 
   // 匹配结构体
-  const m = text.match(new RegExp(`pub struct ${structName} {[^}]+}`, "gm"));
+  const m = matchStructBlock(structName,text);
   if (!m.length) {
     return new Err(
       `Error:Failed to find struct '${structName}' in file '${file}'`
@@ -30,9 +59,7 @@ export function parseStruct(fileInfo: FileInfo): Result<FieldInfo[], string> {
   }
 
   // 清理数据并按行分割
-  const clearMatches = m[0]
-    .split("\n")
-    .slice(1, -1)
+  const clearMatches = m
     .map((line) => {
       let r = line.trim();
       if (r.startsWith("pub ")) {
@@ -52,6 +79,10 @@ export function parseStruct(fileInfo: FileInfo): Result<FieldInfo[], string> {
     }
     if (line.startsWith("//# ")) {
       demoStack.push(line.slice(4));
+    }
+    // 表示这是一个多行代码块中的空行
+    if (line==="//#") {
+      demoStack.push('');
     }
 
     // 忽略普通或其他特殊注释

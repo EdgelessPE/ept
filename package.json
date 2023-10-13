@@ -4,7 +4,7 @@
   "license": "MPL-2.0",
   "scripts": {
     "dev": "rspress dev",
-    "build": "rspress build",
+    "build": "yarn gen && rspress build",
     "preview": "rspress preview",
     "gen": "ts-node ./scripts/index.ts"
   },
