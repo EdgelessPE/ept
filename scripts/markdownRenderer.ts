@@ -12,13 +12,15 @@ ${info.type.optional?"<Tag>可选</Tag> ":""}${clearWiki}
 }
 
 // 渲染一个结构
-export function structRenderer(tableName:string,fields:FieldInfo[],{
+export function structRenderer(top:{title:string,description?:string},fields:FieldInfo[],{
   titleLevel
 }:{titleLevel:number}){
   const needImportTag=fields.find(item=>item.type.optional)
-  const fieldsText=fields.map(item=>fieldRenderer(item,{titleLevel:titleLevel+1})).join('')
+  const fieldsText=fields.map(item=>fieldRenderer(item,{titleLevel:titleLevel+1})).join('\n')
+  const title=titleLevel===0?'':`${"#".repeat(titleLevel)} ${top.title}`
 
-  return `${"#".repeat(titleLevel)} ${tableName} 
-${needImportTag?'\nimport { Tag } from "../../components/tag.tsx"':''}
-${fieldsText}`
+  return {
+    text:`${title} ${top.description?"\n"+top.description+"\n":""} ${fieldsText}`,
+    needImportTag
+  }
 }

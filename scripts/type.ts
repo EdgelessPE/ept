@@ -6,3 +6,9 @@ export interface FieldInfo {
   };
   wiki: string;
 }
+
+export interface FileInfo {
+  file: string;
+  structName: string;
+  description?:string;
+}

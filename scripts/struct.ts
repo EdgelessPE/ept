@@ -1,12 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { Result, Ok, Err } from "ts-results";
-import { FieldInfo } from "./type";
-
-interface FileInfo {
-  file: string;
-  structName: string;
-}
+import { FieldInfo, FileInfo } from "./type";
 
 // 读取 Rust 中的某个 struct，分析出所有字段信息
 export function parseStruct({
@@ -44,7 +39,7 @@ export function parseStruct({
     });
 
   // 解析
-  const result:FieldInfo[]=[]
+  const result: FieldInfo[] = [];
   let stack: string[] = [];
   for (const line of clearMatches) {
     // 将 wiki 注释推入栈
@@ -72,9 +67,9 @@ export function parseStruct({
       result.push({
         name,
         type,
-        wiki:stack.join('\n\n')
-      })
-      stack=[]
+        wiki: stack.join("\n\n"),
+      });
+      stack = [];
     } else {
       return new Err(
         `Error:Failed to parse line '${line}' as valid rust field declaration`
