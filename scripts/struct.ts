@@ -4,6 +4,8 @@ import { Result, Ok, Err } from "ts-results";
 import { FieldInfo, FileInfo } from "./type";
 import { gracefulJoinMarkdown, parseFilePath } from "./utils";
 import { parseEnumDefinitions } from "./enum";
+import { structRenderer } from "./markdownRenderer";
+import { writeWiki } from "./writer";
 
 // 给定源文件内容，选择一个结构体名称对应的代码块
 function matchStructBlock(name:string,text:string):string[]{
@@ -35,7 +37,7 @@ function matchStructBlock(name:string,text:string):string[]{
 }
 
 // 读取 Rust 中的某个 struct，分析出所有字段信息
-export function parseStruct(fileInfo: FileInfo): Result<FieldInfo[], string> {
+function parseStruct(fileInfo: FileInfo): Result<FieldInfo[], string> {
   let { file, structName } = fileInfo;
 
   // 解析路径
@@ -135,4 +137,43 @@ export function parseStruct(fileInfo: FileInfo): Result<FieldInfo[], string> {
   }
 
   return new Ok(result);
+}
+
+// 支持从一个或多个文件中读取结构体并生成 wiki
+export function genStructsWiki(
+  top: { title: string; description?: string },
+  fileInfos: FileInfo[],
+  toFileName: string
+) {
+  const onlyOneStruct = fileInfos.length === 1;
+
+  const structInfos = fileInfos.map((info) => ({
+    fields: parseStruct(info).unwrap(),
+    structName: info.structName,
+    description: info.description,
+  }));
+  const structWikiTexts = structInfos.map((info) =>
+    structRenderer(
+      {
+        title: info.structName.toLocaleLowerCase(),
+        description: info.description,
+      },
+      info.fields,
+      {
+        titleLevel: onlyOneStruct ? 0 : 2,
+      }
+    )
+  );
+  const needImportTag = structWikiTexts.find((node) => node.needImportTag);
+  writeWiki(
+    {
+      title: top.title,
+      imports: needImportTag
+        ? ['import { Tag } from "../../components/tag.tsx"']
+        : undefined,
+      description: top.description,
+      content: structWikiTexts.map((node) => node.text).join("\n\n"),
+    },
+    toFileName
+  );
 }
