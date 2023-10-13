@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import { Result, Ok, Err } from "ts-results";
 import { FieldInfo, FileInfo } from "./type";
-import { parseFilePath } from "./utils";
+import { gracefulJoinMarkdown, parseFilePath } from "./utils";
 import { parseEnumDefinitions } from "./enum";
 
 // 给定源文件内容，选择一个结构体名称对应的代码块
@@ -122,7 +122,7 @@ export function parseStruct(fileInfo: FileInfo): Result<FieldInfo[], string> {
       result.push({
         name,
         type,
-        wiki: wikiStack.length ? wikiStack.join("\n\n") : undefined,
+        wiki: wikiStack.length ? gracefulJoinMarkdown(wikiStack) : undefined,
         demo: demoStack.length ? demoStack.join("\n") : undefined,
       });
       wikiStack = [];
