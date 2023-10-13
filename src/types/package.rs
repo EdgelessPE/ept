@@ -42,6 +42,14 @@ impl Verifiable for Package {
             anyhow!("Error:Failed to verify table 'package' in 'package.toml' : {e}")
         };
 
+        // name 不能包含下划线
+        if self.name.contains("_") {
+            return Err(err_wrapper(anyhow!(
+                "field 'name' shouldn't contain underline (_), got '{n}'",
+                n = &self.name
+            )));
+        }
+
         // 模板只能是 Software
         verify_enum!("template", &self.template, "Software").map_err(err_wrapper)?;
 
