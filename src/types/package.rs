@@ -13,8 +13,8 @@ pub struct Package {
     /// 包名
     //# `name = "VSCode"`
     pub name: String,
-    /// 包的简短描述，尽量从官方渠道摘取
-    //# `description = "微软出品的开源编辑器"`
+    /// 包的简短描述，尽量从官方渠道摘取简介
+    //# `description = "微软开发的跨平台开源编辑器"`
     pub description: String,
     /// 包模板，当前版本中仅能为 "Software"
     //# `template = "Software"`
