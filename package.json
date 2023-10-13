@@ -9,6 +9,7 @@
     "gen": "ts-node ./scripts/index.ts"
   },
   "dependencies": {
+    "react": "^18.2.0",
     "rspress": "^1.0.2",
     "typescript": "^5.2.2"
   },

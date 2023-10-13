@@ -1,19 +1,11 @@
 import fs from "fs";
 import path from "path";
 import { Result, Ok, Err } from "ts-results";
+import { FieldInfo } from "./type";
 
 interface FileInfo {
   file: string;
   structName: string;
-}
-
-interface FieldInfo {
-  name: string;
-  type: {
-    identifier: string;
-    optional: boolean;
-  };
-  wiki: string;
 }
 
 // 读取 Rust 中的某个 struct，分析出所有字段信息
@@ -80,7 +72,7 @@ export function parseStruct({
       result.push({
         name,
         type,
-        wiki:stack.join('\n')
+        wiki:stack.join('\n\n')
       })
       stack=[]
     } else {
