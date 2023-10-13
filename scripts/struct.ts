@@ -83,6 +83,11 @@ export function parseStruct(fileInfo: FileInfo): Result<FieldInfo[], string> {
           type.identifier = "String 枚举";
         }
       }
+      // 特殊处理多行示例代码
+      if(demoStack.length&&demoStack[0].startsWith('```')){
+        demoStack=demoStack.map(line=>`  ${line}`)
+        demoStack.unshift("")
+      }
       result.push({
         name,
         type,
