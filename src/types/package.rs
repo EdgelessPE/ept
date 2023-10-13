@@ -10,27 +10,28 @@ use super::{extended_semver::ExSemVer, interpretable::Interpretable, verifiable:
 #[derive(Serialize, Deserialize, Clone, Debug, TS, PartialEq)]
 #[ts(export)]
 pub struct Package {
-    /// 包名
+    /// 包名，推荐仅使用英文、中文和空格。
+    /// 不得包含下划线（`_`），请使用空格或横杠线（`-`）代替。
     //# `name = "VSCode"`
     pub name: String,
-    /// 包的简短描述，尽量从官方渠道摘取简介
+    /// 包的简短描述，尽量从官方渠道摘取简介。
     //# `description = "微软开发的跨平台开源编辑器"`
     pub description: String,
-    /// 包模板，当前版本中仅能为 "Software"
+    /// 包模板，当前版本中仅能为 "Software"。
     //# `template = "Software"`
     pub template: String,
-    /// 包版本号，使用 ExSemVer 规范
-    /// ExSemVer 规范在 [SemVer](https://semver.org) 的基础上在`PATCH`和`PRE`之间增加了一位`RESERVED`位，用于标记不同的打包版本，或是用来兼容在 Windows 平台常见的 4 位版本号；若上游版本号符合 SemVer 规范则将`RESERVED`位置`0`即可
+    /// 包版本号，使用 ExSemVer 规范。
+    /// ExSemVer 规范在 [SemVer](https://semver.org) 的基础上在`PATCH`和`PRE`之间增加了一位`RESERVED`位，用于标记不同的打包版本，或是用来兼容在 Windows 平台常见的 4 位版本号；若上游版本号符合 SemVer 规范则将`RESERVED`位置`0`即可。
     //# `version = "1.0.0.0"`
     pub version: String,
-    /// 包作者，第一作者应为打包者，后面通常跟发行商、制作方
-    /// 支持使用 `<>` 包裹作者邮箱
+    /// 包作者，第一作者应为打包者，后面通常跟发行商、制作方。
+    /// 支持使用 `<>` 包裹作者邮箱。
     //# `authors = ["Cno <dsyourshy@qq.com>", "Microsoft"]`
     pub authors: Vec<String>,
-    /// 开源许可证的 [SPDX 标识符](https://spdx.org/licenses/)或 EULA 链接
+    /// 开源许可证的 [SPDX 标识符](https://spdx.org/licenses/)或 EULA 链接。
     //# `license = "MIT"`
     pub license: Option<String>,
-    /// 包图标 URL
+    /// 包图标 URL。
     //# `icon = "https://code.visualstudio.com/favicon.ico"`
     pub icon: Option<String>,
 }

@@ -15,42 +15,42 @@ use ts_rs::TS;
 #[derive(Serialize, Deserialize, Clone, Debug, TS, PartialEq)]
 #[ts(export)]
 pub struct Software {
-    /// 软件发行域，通常填写上游组织名称
-    /// 若软件包的直接上游为发行商（组织）则使用发行商的名称，例如 PortableApps；若软件包的直接上游为官方网站则使用开发商（组织）的名称，例如 Microsoft
-    /// 若上游组织为正式的、拥有独立域名的组织，则将发行域开头大写，例如对于 GitHub 发布的 GitHub Desktop 软件使用 `GitHub` 作为发行域；若上游组织表示对一个群体的泛指，则将发行域开头小写，例如对于将发行托管在 GitHub Releases 上的开源项目使用 `github` 作为发行域
+    /// 软件发行域，通常填写上游组织名称。
+    /// 若软件包的直接上游为发行商（组织）则使用发行商的名称，例如 PortableApps；若软件包的直接上游为官方网站则使用开发商（组织）的名称，例如 Microsoft。
+    /// 若上游组织为正式的、拥有独立域名的组织，则将发行域开头大写，例如对于 GitHub 发布的 GitHub Desktop 软件使用 `GitHub` 作为发行域；若上游组织表示对一个群体的泛指，则将发行域开头小写，例如对于将发行托管在 GitHub Releases 上的开源项目使用 `github` 作为发行域。
     //# `scope = "Microsoft"`
     pub scope: String,
-    /// 软件上游 URL，可以是官方网站的下载页或发行商（组织）提供的发行详情页
+    /// 软件上游 URL，可以是官方网站的下载页或发行商（组织）提供的发行详情页。
     //# `upstream = "https://code.visualstudio.com/"`
     pub upstream: String,
-    /// 软件分类，推荐为 Edgeless 插件包分类中的一种，不会校验枚举
+    /// 软件分类，推荐为 Edgeless 插件包分类中的一种。
     //# `category = "集成开发"`
     pub category: String,
-    /// 软件的编译目标架构，缺省表示安装时不检查架构兼容性
+    /// 软件的编译目标架构，缺省表示安装时不检查架构兼容性。
     //# `arch = "X64`
     pub arch: Option<String>,
-    /// 软件语言，`Multi`表示多语言
+    /// 软件语言，`Multi`表示多语言。
     //# `language = "Multi"`
     pub language: String,
-    /// 主程序路径，可以是相对路径或绝对路径
-    /// 如果使用绝对路径，必须以[内置变量](/nep/workflow/2-context.html#内置变量)开头
+    /// 主程序路径，可以是相对路径或绝对路径。
+    /// 如果使用绝对路径，必须以[内置变量](/nep/workflow/2-context.html#内置变量)开头。
     //# ```toml
-    //# # 绝对路径写法
-    //# main_program = "${AppData}/Local/Programs/Microsoft VS Code/Code.exe"
-    //#
     //# # 相对路径写法
     //# main_program = "./code.exe"
+    //#
+    //# # 绝对路径写法
+    //# main_program = "${AppData}/Local/Programs/Microsoft VS Code/Code.exe"
     //# ```
     pub main_program: Option<String>,
-    /// 标签，用于联想推荐相似包或聚合多个相近的包
-    /// 不需要重复输入包名、分类或是作者名中的信息
+    /// 标签，用于联想推荐相似包或聚合多个相近的包。
+    /// 不需要重复输入包名、分类或是作者名中的信息。
     //# `tags = ["electron", "typescript"]`
     pub tags: Option<Vec<String>>,
-    /// 别名，用于关联查找
-    /// 不需要重复输入包名、分类或是标签中的信息
+    /// 别名，用于关联查找。
+    /// 不需要重复输入标签中的信息。
     //# `alias = ["code", "vsc", "Visual Studio Code"]`
     pub alias: Option<Vec<String>>,
-    /// 注册表入口，如果该软件是调用安装器安装的且在注册表中有 Uninstall 入口，提供该字段可以免去编写卸载工作流并帮助 ept 获取更多信息
+    /// 注册表入口，如果该软件是调用安装器安装的且在注册表中有 Uninstall 入口，提供该字段可以免去编写卸载工作流并帮助 ept 获取更多信息。
     /// 支持如下 3 个位置的入口：
     /// ```
     /// HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall
