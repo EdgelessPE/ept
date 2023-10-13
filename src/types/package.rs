@@ -10,19 +10,26 @@ use super::{extended_semver::ExSemVer, interpretable::Interpretable, verifiable:
 #[ts(export)]
 pub struct Package {
     /// 包名
+    //# `name = "VSCode"`
     pub name: String,
     /// 包的简短描述，尽量从官方渠道摘取
+    //# `description = "微软出品的开源编辑器"`
     pub description: String,
     /// 包模板，当前版本中仅能为 "Software"
+    //# `template = "Software"`
     pub template: String,
     /// 包版本号，使用 ExSemVer 规范
+    //# `version = "1.0.0.0"`
     pub version: String,
     /// 包作者，第一作者应为打包者，后面通常跟发行商、制作方
-    /// 支持使用 <> 包裹作者邮箱，e.g. Cno <dsyourshy@qq.com>
+    /// 支持使用 `<>` 包裹作者邮箱
+    //# `authors = ["Cno <dsyourshy@qq.com>", "Microsoft"]`
     pub authors: Vec<String>,
-    /// 许可证 [SPDX 标识符](https://spdx.org/licenses/)或链接
+    /// 开源许可证的 [SPDX 标识符](https://spdx.org/licenses/)或 EULA 链接
+    //# `license = "MIT"`
     pub license: Option<String>,
     /// 包图标 URL
+    //# `icon = "https://code.visualstudio.com/favicon.ico"`
     pub icon: Option<String>,
 }
 

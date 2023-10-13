@@ -5,12 +5,12 @@ function fieldRenderer(
   info: FieldInfo,
   { titleLevel }: { titleLevel: number }
 ): string {
-  const clearWiki = info.wiki.replace(/</g, "\\<").replace(/>/g, "\\>");
+  const clearWiki = info.wiki??"";
   const enumText = info.type.enum ? info.type.enum.map((t) => `\`${t}\``).join(' ') : undefined;
   return `
 ${"#".repeat(titleLevel)} ${info.name}
 ${info.type.optional ? "<Tag>可选</Tag> " : ""}${clearWiki}
-* 类型：\`${info.type.identifier}\`${enumText?"\n* 有效值："+enumText:""}`;
+* 类型：\`${info.type.identifier}\` ${enumText?"\n* 有效值："+enumText:""} ${info.demo?"\n* 示例："+info.demo:""}`;
 }
 
 // 渲染一个结构

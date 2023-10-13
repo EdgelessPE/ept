@@ -7,71 +7,78 @@ import { Tag } from "../../components/tag.tsx"
  
 ### name
 包名
-* 类型：`String`
+* 类型：`String`  
+* 示例：`name = "VSCode"`
 
 ### description
 包的简短描述，尽量从官方渠道摘取
-* 类型：`String`
+* 类型：`String`  
+* 示例：`description = "微软出品的开源编辑器"`
 
 ### template
 包模板，当前版本中仅能为 "Software"
-* 类型：`String`
+* 类型：`String`  
+* 示例：`template = "Software"`
 
 ### version
 包版本号，使用 ExSemVer 规范
-* 类型：`String`
+* 类型：`String`  
+* 示例：`version = "1.0.0.0"`
 
 ### authors
 包作者，第一作者应为打包者，后面通常跟发行商、制作方
 
-支持使用 \<\> 包裹作者邮箱，e.g. Cno \<dsyourshy@qq.com\>
-* 类型：`Vec<String>`
+支持使用 `<>` 包裹作者邮箱
+* 类型：`Vec<String>`  
+* 示例：`authors = ["Cno <dsyourshy@qq.com>", "Microsoft"]`
 
 ### license
-<Tag>可选</Tag> 许可证 [SPDX 标识符](https://spdx.org/licenses/)或链接
-* 类型：`String`
+<Tag>可选</Tag> 开源许可证的 [SPDX 标识符](https://spdx.org/licenses/)或 EULA 链接
+* 类型：`String`  
+* 示例：`license = "MIT"`
 
 ### icon
 <Tag>可选</Tag> 包图标 URL
-* 类型：`String`
+* 类型：`String`  
+* 示例：`icon = "https://code.visualstudio.com/favicon.ico"`
 
 ## software 
 软件包独占表
  
 ### scope
 
-* 类型：`String`
+* 类型：`String`  
 
 ### upstream
 
-* 类型：`String`
+* 类型：`String`  
 
 ### category
 
-* 类型：`String`
+* 类型：`String`  
 
 ### arch
 <Tag>可选</Tag> 
-* 类型：`String 枚举`
-* 有效值：`X64` `X86` `ARM64`
+* 类型：`String 枚举` 
+* 有效值：`X64` `X86` `ARM64` 
 
 ### language
 
-* 类型：`String 枚举`
-* 有效值：`Multi` `zh-CN` `en-US`
+* 类型：`String 枚举` 
+* 有效值：`Multi` `zh-CN` `en-US` 
 
 ### main_program
 <Tag>可选</Tag> 
-* 类型：`String`
+* 类型：`String`  
 
 ### tags
 <Tag>可选</Tag> 
-* 类型：`Vec<String>`
+* 类型：`Vec<String>`  
 
 ### alias
 <Tag>可选</Tag> 
-* 类型：`Vec<String>`
+* 类型：`Vec<String>`  
 
 ### registry_entry
 <Tag>可选</Tag> 
-* 类型：`String`
+* 类型：`String`  

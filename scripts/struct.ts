@@ -43,11 +43,15 @@ export function parseStruct(fileInfo: FileInfo): Result<FieldInfo[], string> {
 
   // 解析
   const result: FieldInfo[] = [];
-  let stack: string[] = [];
+  let wikiStack: string[] = [];
+  let demoStack: string[] = [];
   for (const line of clearMatches) {
-    // 将 wiki 注释推入栈
+    // 将 wiki 和 demo 注释推入栈
     if (line.startsWith("/// ")) {
-      stack.push(line.slice(4));
+      wikiStack.push(line.slice(4));
+    }
+    if (line.startsWith("//# ")) {
+      demoStack.push(line.slice(4));
     }
 
     // 忽略普通或其他特殊注释
@@ -70,19 +74,23 @@ export function parseStruct(fileInfo: FileInfo): Result<FieldInfo[], string> {
               optional: false,
               enum: enumValues,
             };
-      if(enumValues){
-        if(type.identifier!=="String"){
-          throw new Error(`Error:Field '${name}' has enum but not a string (got '${type.identifier}')`)
-        }else{
-          type.identifier="String 枚举"
+      if (enumValues) {
+        if (type.identifier !== "String") {
+          throw new Error(
+            `Error:Field '${name}' has enum but not a string (got '${type.identifier}')`
+          );
+        } else {
+          type.identifier = "String 枚举";
         }
       }
       result.push({
         name,
         type,
-        wiki: stack.join("\n\n"),
+        wiki: wikiStack.length ? wikiStack.join("\n\n") : undefined,
+        demo: demoStack.length ? demoStack.join("\n") : undefined,
       });
-      stack = [];
+      wikiStack = [];
+      demoStack = [];
     } else {
       return new Err(
         `Error:Failed to parse line '${line}' as valid rust field declaration`

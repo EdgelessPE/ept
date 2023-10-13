@@ -5,7 +5,8 @@ export interface FieldInfo {
     optional: boolean;
     enum?: string[];
   };
-  wiki: string;
+  wiki?: string;
+  demo?: string;
 }
 
 export interface FileInfo {
