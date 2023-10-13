@@ -1,8 +1,6 @@
 import { structRenderer } from "./markdownRenderer";
 import { parseStruct } from "./struct";
-import fs from "fs";
 import { FileInfo } from "./type";
-import path from "path";
 import { writeWiki } from "./writer";
 
 // 支持从一个或多个文件中读取结构体并生成 wiki
@@ -40,7 +38,7 @@ function genStructsWiki(
       description: top.description,
       content: structWikiTexts.map((node) => node.text).join("\n\n"),
     },
-    "1-package"
+    toFileName
   );
 }
 

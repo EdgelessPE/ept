@@ -10,5 +10,5 @@ export interface FieldInfo {
 export interface FileInfo {
   file: string;
   structName: string;
-  description?:string;
+  description?: string;
 }
