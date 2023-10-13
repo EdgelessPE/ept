@@ -1,4 +1,5 @@
 use crate::types::software::Software;
+use crate::verify_enum;
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
 use std::path::Path;
@@ -40,11 +41,7 @@ impl Verifiable for Package {
         };
 
         // 模板只能是 Software
-        if self.template != "Software".to_string() {
-            return Err(err_wrapper(anyhow!(
-                "field 'template' should be 'Software'"
-            )));
-        }
+        verify_enum!("template", &self.template, "Software").map_err(err_wrapper)?;
 
         // 版本号必须可以解析
         ExSemVer::parse(&self.version).map_err(err_wrapper)?;
