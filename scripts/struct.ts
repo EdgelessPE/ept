@@ -1,90 +1,90 @@
-import { FieldInfo, FileInfo } from "./type";
-import { parseEnumDefinitions } from "./enum";
-import { structRenderer } from "./markdownRenderer";
-import { writeWiki } from "./writer";
-import { splitBlock } from "./block";
+import { type FieldInfo, type FileInfo } from './type'
+import { parseEnumDefinitions } from './enum'
+import { structRenderer } from './markdownRenderer'
+import { writeWiki } from './writer'
+import { splitBlock } from './block'
 
 // 读取 Rust 中的某个 struct，分析出所有字段信息
-function parseStruct(fileInfo: FileInfo): FieldInfo[] {
-  let { file, structName } = fileInfo;
+function parseStruct (fileInfo: FileInfo): FieldInfo[] {
+  const { file, structName } = fileInfo
 
   // 分割代码块
   const splittedBlock = splitBlock({
     file,
-    startsWith: `pub struct ${structName}`,
-  });
-  console.log(splittedBlock);
+    startsWith: `pub struct ${structName}`
+  })
+  console.log(splittedBlock)
 
   // 解析枚举定义
-  const enumValuesMap = parseEnumDefinitions(fileInfo);
+  const enumValuesMap = parseEnumDefinitions(fileInfo)
 
   return splittedBlock.map(({ wiki, declaration, demo }) => {
     // 解析字段名和类型
-    const m = declaration.match(/(\w+):\s?([\w<>()]+)/);
+    const m = declaration.match(/(\w+):\s?([\w<>()]+)/)
     if (m) {
-      const [, name, rawType] = m;
-      const enumValues = enumValuesMap[name];
-      const type: FieldInfo["type"] =
-        rawType.startsWith("Option<") && rawType.endsWith(">")
+      const [, name, rawType] = m
+      const enumValues = enumValuesMap[name]
+      const type: FieldInfo['type'] =
+        rawType.startsWith('Option<') && rawType.endsWith('>')
           ? {
               identifier: rawType.slice(7, -1),
               optional: true,
-              enum: enumValues,
+              enum: enumValues
             }
           : {
               identifier: rawType,
               optional: false,
-              enum: enumValues,
-            };
+              enum: enumValues
+            }
       if (enumValues) {
-        if (type.identifier !== "String") {
+        if (type.identifier !== 'String') {
           throw new Error(
             `Error:Field '${name}' has enum but not a string (got '${type.identifier}')`
-          );
+          )
         } else {
-          type.identifier = "String 枚举";
+          type.identifier = 'String 枚举'
         }
       }
       return {
         name,
         type,
         wiki,
-        demo,
-      };
+        demo
+      }
     } else {
       throw new Error(
         `Error:Failed to parse line '${declaration}' as valid rust field declaration`
-      );
+      )
     }
-  });
+  })
 }
 
 // 支持从一个或多个文件中读取结构体并生成 wiki
-export function genStructsWiki(
-  top: { title: string; description?: string },
+export function genStructsWiki (
+  top: { title: string, description?: string },
   fileInfos: FileInfo[],
   toFileName: string
 ) {
-  const onlyOneStruct = fileInfos.length === 1;
+  const onlyOneStruct = fileInfos.length === 1
 
   const structInfos = fileInfos.map((info) => ({
     fields: parseStruct(info),
     structName: info.structName,
-    description: info.description,
-  }));
+    description: info.description
+  }))
   const structWikiTexts = structInfos.map((info) =>
     structRenderer(
       {
         title: info.structName.toLocaleLowerCase(),
-        description: info.description,
+        description: info.description
       },
       info.fields,
       {
-        titleLevel: onlyOneStruct ? 0 : 2,
+        titleLevel: onlyOneStruct ? 0 : 2
       }
     )
-  );
-  const needImportTag = structWikiTexts.find((node) => node.needImportTag);
+  )
+  const needImportTag = structWikiTexts.find((node) => node.needImportTag)
   writeWiki(
     {
       title: top.title,
@@ -92,8 +92,8 @@ export function genStructsWiki(
         ? ['import { Tag } from "../../components/tag.tsx"']
         : undefined,
       description: top.description,
-      content: structWikiTexts.map((node) => node.text).join("\n\n"),
+      content: structWikiTexts.map((node) => node.text).join('\n\n')
     },
     toFileName
-  );
+  )
 }
