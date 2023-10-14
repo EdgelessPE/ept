@@ -6,17 +6,24 @@
     "dev": "rspress dev",
     "build": "yarn gen && rspress build",
     "preview": "rspress preview",
-    "gen": "ts-node ./scripts/index.ts"
+    "gen": "ts-node ./scripts/index.ts",
+    "lint": "eslint ./scripts --fix"
   },
   "dependencies": {
     "react": "^18.2.0",
     "rspress": "^1.0.2",
-    "typescript": "^5.2.2"
+    "typescript": "*"
   },
   "devDependencies": {
     "@modern-js/tsconfig": "2.30.0",
     "@types/jest": "^29",
     "@types/node": "^20.6.5",
+    "@typescript-eslint/eslint-plugin": "^6.4.0",
+    "eslint": "^8.0.1",
+    "eslint-config-standard-with-typescript": "^39.1.1",
+    "eslint-plugin-import": "^2.25.2",
+    "eslint-plugin-n": "^15.0.0 || ^16.0.0 ",
+    "eslint-plugin-promise": "^6.0.0",
     "ts-node": "^10.9.1",
     "ts-results": "^3.3.0"
   }
