@@ -1,7 +1,7 @@
-import { type PermissionLevel } from '../type'
+import type { ValueInfo, PermissionLevel } from './type'
 import { splitBlock } from '../block'
 
-export function parseInnerValues (file: string): Array<{ name: string, level: PermissionLevel, wiki?: string, demo?: string }> {
+export function parseInnerValues (file: string): ValueInfo[] {
   const splittedBlock = splitBlock({ file, startsWith: 'define_values!' })
   return splittedBlock.map(({ wiki, declaration, demo }) => {
     const m = declaration.match(

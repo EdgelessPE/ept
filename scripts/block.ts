@@ -1,6 +1,30 @@
 import fs from 'fs'
-import { gracefulJoinMarkdown, parseFilePath } from './utils'
-import { type CommonFieldInfo } from './type'
+import { parseFilePath } from './utils'
+import { type CommonFieldInfo } from './struct/type'
+
+// 优雅地在 md 行之间加入换行符
+function gracefulJoinMarkdown (lines: string[]): string {
+  let insideCodeBlock = false
+  let finalText = ''
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i]
+    if (line.startsWith('```')) {
+      insideCodeBlock = !insideCodeBlock
+    }
+    if (i === lines.length - 1) {
+      finalText = finalText + line
+      break
+    }
+    if (insideCodeBlock) {
+      finalText = finalText + `${line}\n`
+    } else {
+      finalText = finalText + `${line}\n\n`
+    }
+  }
+
+  return finalText
+}
 
 // 匹配用花括号包裹的代码块，返回块内的所有行
 function matchBlock (startsWith: string, text: string): string[] {

@@ -1,6 +1,6 @@
 import { type FileInfo } from './type'
 import fs from 'fs'
-import { parseFilePath } from './utils'
+import { parseFilePath } from '../utils'
 
 function clearMatchLine (line: string) {
   const sp = line

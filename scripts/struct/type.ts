@@ -20,5 +20,3 @@ export interface FileInfo {
   structName: string
   description?: string
 }
-
-export type PermissionLevel = 'Normal' | 'Important' | 'Sensitive'

@@ -1,8 +1,8 @@
 import { type FieldInfo, type FileInfo } from './type'
 import { parseEnumDefinitions } from './enum'
 import { structRenderer } from './markdownRenderer'
-import { writeWiki } from './writer'
-import { splitBlock } from './block'
+import { writeWiki } from '../writer'
+import { splitBlock } from '../block'
 
 // 读取 Rust 中的某个 struct，分析出所有字段信息
 function parseStruct (fileInfo: FileInfo): FieldInfo[] {
