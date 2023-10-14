@@ -7,7 +7,10 @@
     "build": "yarn gen && rspress build",
     "preview": "rspress preview",
     "gen": "ts-node ./scripts/index.ts",
-    "lint": "eslint scripts/* --fix"
+    "lint": "eslint scripts/* --fix",
+    "postinstall": "husky install",
+    "prepack": "pinst --disable",
+    "postpack": "pinst --enable"
   },
   "dependencies": {
     "react": "^18.2.0",
@@ -24,7 +27,13 @@
     "eslint-plugin-import": "^2.25.2",
     "eslint-plugin-n": "^15.0.0 || ^16.0.0 ",
     "eslint-plugin-promise": "^6.0.0",
+    "husky": "^8.0.0",
+    "lint-staged": "^14.0.1",
+    "pinst": "^3.0.0",
     "ts-node": "^10.9.1",
     "ts-results": "^3.3.0"
+  },
+  "lint-staged": {
+    "*.ts": "eslint --fix"
   }
 }
