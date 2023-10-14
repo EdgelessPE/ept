@@ -4,5 +4,5 @@ export interface ValueInfo {
   level: PermissionLevel;
   wiki?: string;
   demo?: string;
-  demoValue?: string;
+  demoValue?: string | number;
 }

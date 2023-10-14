@@ -38,6 +38,21 @@ genContext(
   {
     valuesFile: "@/executor/values.rs",
     fnDir: "@/executor/functions",
+    appendValues: [
+      {
+        name: "ExitCode",
+        level: "Normal",
+        wiki: "上一步骤的退出码，**类型为整数**。",
+        demoValue: 0,
+      },
+      {
+        name: "DefaultLocation",
+        level: "Normal",
+        wiki: "当前包的默认安装位置",
+        demo: `to = "\${DefaultLocation}/config"`,
+        demoValue: "C:/Users/UserName/ept/Microsoft/VSCode",
+      },
+    ],
   },
   "2-context",
 );

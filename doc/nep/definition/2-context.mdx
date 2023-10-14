@@ -4,6 +4,25 @@
   
 ## 内置变量
 工作流执行时能提供的内置变量。注意在非条件字段中使用时需要使用模板写法，详见[内置变量](/nep/workflow/2-context.html#内置变量)。
+### ExitCode
+上一步骤的退出码，**类型为整数**。 
+* 示例值：`0` 
+* 示例：
+    ```toml
+    # 条件字段中使用
+    if = 'ExitCode==0'
+    ```
+### DefaultLocation
+当前包的默认安装位置 
+* 示例值：`C:/Users/UserName/ept/Microsoft/VSCode` 
+* 示例：
+    ```toml
+    # 非条件字段中使用
+    to = "${DefaultLocation}/config"
+
+    # 条件字段中使用
+    if = 'DefaultLocation=="C:/Users/UserName/ept/Microsoft/VSCode"'
+    ```
 ### SystemDrive
 系统盘符 
 * 示例值：`C:` 
