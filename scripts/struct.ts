@@ -1,8 +1,4 @@
-import fs from "fs";
-import path from "path";
-import { Result, Ok, Err } from "ts-results";
 import { FieldInfo, FileInfo } from "./type";
-import { gracefulJoinMarkdown, parseFilePath } from "./utils";
 import { parseEnumDefinitions } from "./enum";
 import { structRenderer } from "./markdownRenderer";
 import { writeWiki } from "./writer";
@@ -13,15 +9,18 @@ function parseStruct(fileInfo: FileInfo): FieldInfo[] {
   let { file, structName } = fileInfo;
 
   // 分割代码块
-  const splittedBlock=splitBlock({file,startsWith:`pub struct ${structName}`})
+  const splittedBlock = splitBlock({
+    file,
+    startsWith: `pub struct ${structName}`,
+  });
   console.log(splittedBlock);
-  
-  // 解析枚举定义
-  const enumValuesMap=parseEnumDefinitions(fileInfo)
 
-  return splittedBlock.map(({wiki,declaration:line,demo})=>{
+  // 解析枚举定义
+  const enumValuesMap = parseEnumDefinitions(fileInfo);
+
+  return splittedBlock.map(({ wiki, declaration, demo }) => {
     // 解析字段名和类型
-    const m = line.match(/(\w+):\s?([\w<>()]+)/);
+    const m = declaration.match(/(\w+):\s?([\w<>()]+)/);
     if (m) {
       const [, name, rawType] = m;
       const enumValues = enumValuesMap[name];
@@ -54,10 +53,10 @@ function parseStruct(fileInfo: FileInfo): FieldInfo[] {
       };
     } else {
       throw new Error(
-        `Error:Failed to parse line '${line}' as valid rust field declaration`
+        `Error:Failed to parse line '${declaration}' as valid rust field declaration`
       );
     }
-  })
+  });
 }
 
 // 支持从一个或多个文件中读取结构体并生成 wiki
