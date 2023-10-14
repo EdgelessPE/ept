@@ -1,6 +1,6 @@
 import fs from "fs";
 import { parseFilePath } from "./utils";
-import { type CommonFieldInfo } from "./struct/type";
+import type { CommonFieldInfo } from "./type";
 
 // 优雅地在 md 行之间加入换行符
 function gracefulJoinMarkdown(lines: string[]): string {
@@ -55,6 +55,34 @@ function matchBlock(startsWith: string, text: string): string[] {
   return lines.slice(startLineIndex + 1, endLineIndex);
 }
 
+// 注册已知的注释信息
+const COMMENTS_DEFINITION: Array<{
+  // 字段名称
+  key: keyof Omit<CommonFieldInfo, "declaration">;
+  // 注释起始标识
+  startsWith: string[];
+  // 把栈渲染为字符串
+  renderer: (stack: string[]) => string | undefined;
+}> = [
+  {
+    key: "wiki",
+    startsWith: ["/// ", "//- "],
+    renderer: (wikiStack) =>
+      wikiStack.length > 0 ? gracefulJoinMarkdown(wikiStack) : undefined,
+  },
+  {
+    key: "demo",
+    startsWith: ["//# ", "//#"],
+    renderer: (demoStack) => {
+      if (demoStack.length > 0 && demoStack[0].startsWith("```")) {
+        demoStack = demoStack.map((line) => `  ${line}`);
+        demoStack.unshift("");
+      }
+      return demoStack.length > 0 ? demoStack.join("\n") : undefined;
+    },
+  },
+];
+
 // 匹配代码块并解析注释
 export function splitBlock({
   file,
@@ -75,22 +103,32 @@ export function splitBlock({
     );
   }
 
+  // 构建注释信息
+  const stackRegister: Array<{
+    prefix: string;
+    key: string;
+  }> = [];
+  const stackMap: Record<string, string[]> = {};
+  for (const node of COMMENTS_DEFINITION) {
+    stackMap[node.key] = [];
+    for (const prefix of node.startsWith) {
+      stackRegister.push({
+        prefix,
+        key: node.key,
+      });
+    }
+  }
+
   const result: CommonFieldInfo[] = [];
-  let wikiStack: string[] = [];
-  let demoStack: string[] = [];
 
   const clearLines = lines.map((line) => line.trim());
   for (const line of clearLines) {
-    // 将 wiki 和 demo 注释推入栈
-    if (line.startsWith("/// ") || line.startsWith("//- ")) {
-      wikiStack.push(line.slice(4));
-    }
-    if (line.startsWith("//# ")) {
-      demoStack.push(line.slice(4));
-    }
-    // 表示这是一个多行代码块中的空行
-    if (line === "//#") {
-      demoStack.push("");
+    // 依次检查是否匹配注册过的注释前缀
+    for (const { prefix, key } of stackRegister) {
+      if (line.startsWith(prefix)) {
+        stackMap[key].push(line.slice(prefix.length));
+        break;
+      }
     }
 
     // 忽略普通或其他特殊注释
@@ -98,19 +136,13 @@ export function splitBlock({
 
     // 走到这个位置说明匹配到申明语句了
 
-    // 特殊处理多行示例代码
-    if (demoStack.length > 0 && demoStack[0].startsWith("```")) {
-      demoStack = demoStack.map((line) => `  ${line}`);
-      demoStack.unshift("");
+    // 使用栈构造字段
+    const r: CommonFieldInfo = { declaration: line };
+    for (const { key, renderer } of COMMENTS_DEFINITION) {
+      r[key] = renderer(stackMap[key]);
+      stackMap[key] = [];
     }
-    result.push({
-      declaration: line,
-      wiki: wikiStack.length > 0 ? gracefulJoinMarkdown(wikiStack) : undefined,
-      demo: demoStack.length > 0 ? demoStack.join("\n") : undefined,
-    });
-
-    wikiStack = [];
-    demoStack = [];
+    result.push(r);
   }
   return result;
 }
