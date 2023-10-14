@@ -9,8 +9,16 @@ export interface FieldInfo {
   demo?: string;
 }
 
+export interface CommonFieldInfo {
+  wiki?: string;
+  demo?: string;
+  declaration: string;
+}
+
 export interface FileInfo {
   file: string;
   structName: string;
   description?: string;
 }
+
+export type PermissionLevel = "Normal" | "Important" | "Sensitive";

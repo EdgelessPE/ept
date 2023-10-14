@@ -1,4 +1,7 @@
+import { parseInnerValues } from "./context/values";
 import { genStructsWiki } from "./struct";
+
+console.log(parseInnerValues("@/executor/values.rs"));
 
 genStructsWiki(
   {
