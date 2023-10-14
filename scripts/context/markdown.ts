@@ -6,8 +6,13 @@ function valueFieldRenderer(
   info: ValueInfo,
   { titleLevel }: { titleLevel: number },
 ): string {
-  const demoText = info.demo
-    ? `\n* 示例值：\`${info.demo}\` \n* 示例：\`if = '${info.name}=="${info.demo}"'\``
+  const demoText = info.demoValue
+    ? `\n* 示例值：\`${info.demoValue}\` \n* 示例：
+    \`\`\`toml
+    ${
+      info.demo ? "# 非条件字段中使用\n    " + info.demo + "\n\n    " : ""
+    }# 条件字段中使用\n    if = '${info.name}=="${info.demoValue}"'
+    \`\`\``
     : "";
   return `${"#".repeat(titleLevel)} ${info.name}
 ${info.wiki} ${demoText}`;

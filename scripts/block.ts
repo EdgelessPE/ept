@@ -67,19 +67,24 @@ const COMMENTS_DEFINITION: Array<{
   {
     key: "wiki",
     startsWith: ["/// ", "//- "],
-    renderer: (wikiStack) =>
-      wikiStack.length > 0 ? gracefulJoinMarkdown(wikiStack) : undefined,
+    renderer: (stack) =>
+      stack.length > 0 ? gracefulJoinMarkdown(stack) : undefined,
   },
   {
     key: "demo",
     startsWith: ["//# ", "//#"],
-    renderer: (demoStack) => {
-      if (demoStack.length > 0 && demoStack[0].startsWith("```")) {
-        demoStack = demoStack.map((line) => `  ${line}`);
-        demoStack.unshift("");
+    renderer: (stack) => {
+      if (stack.length > 0 && stack[0].startsWith("```")) {
+        stack = stack.map((line) => `  ${line}`);
+        stack.unshift("");
       }
-      return demoStack.length > 0 ? demoStack.join("\n") : undefined;
+      return stack.length > 0 ? stack.join("\n") : undefined;
     },
+  },
+  {
+    key: "demoValue",
+    startsWith: ["//! "],
+    renderer: (stack) => (stack.length > 0 ? stack.join("\n") : undefined),
   },
 ];
 

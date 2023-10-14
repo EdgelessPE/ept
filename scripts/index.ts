@@ -27,7 +27,11 @@ genStructsWiki(
 
 genContext(
   {
-    valuesTop: { title: "内置变量" },
+    valuesTop: {
+      title: "内置变量",
+      description:
+        "工作流执行时能提供的内置变量。注意在非条件字段中使用时需要使用模板写法，详见[内置变量](/nep/workflow/2-context.html#内置变量)。",
+    },
     fnTop: { title: "内置函数" },
     top: { title: "上下文" },
   },

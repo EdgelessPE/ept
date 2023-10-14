@@ -6,5 +6,6 @@ export interface Top {
 export interface CommonFieldInfo {
   wiki?: string;
   demo?: string;
+  demoValue?: string;
   declaration: string;
 }
