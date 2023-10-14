@@ -1,5 +1,6 @@
 import { parseInnerValues } from "./context/values";
 import { genStructsWiki } from "./struct";
+import { genContext } from "./context";
 
 console.log(parseInnerValues("@/executor/values.rs"));
 
@@ -22,4 +23,17 @@ genStructsWiki(
     },
   ],
   "1-package",
+);
+
+genContext(
+  {
+    valuesTop: { title: "内置变量" },
+    fnTop: { title: "内置函数" },
+    top: { title: "上下文" },
+  },
+  {
+    valuesFile: "@/executor/values.rs",
+    fnDir: "@/executor/functions",
+  },
+  "2-context",
 );

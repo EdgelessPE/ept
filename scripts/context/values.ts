@@ -5,7 +5,7 @@ export function parseInnerValues(file: string): ValueInfo[] {
   const splittedBlock = splitBlock({ file, startsWith: "define_values!" });
   return splittedBlock.map(({ wiki, declaration, demo }) => {
     const m = declaration.match(
-      /\{"\$\{(\w+)\}",[\w.()]+\(\),PermissionLevel::(\w+)\},?/,
+      /\{"\$\{(\w+)}",[\w.()]+\(\),PermissionLevel::(\w+)},?/,
     );
     if (m) {
       return {

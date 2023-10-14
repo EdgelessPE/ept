@@ -50,5 +50,6 @@
     "rust-analyzer.cargo.buildScripts.overrideCommand": null,
     "[rust]": {
         "editor.formatOnSave": true,
-    }
+    },
+    "editor.formatOnSave": false
 }

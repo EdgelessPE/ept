@@ -1,8 +1,9 @@
 import { type FieldInfo, type FileInfo } from "./type";
 import { parseEnumDefinitions } from "./enum";
-import { structRenderer } from "./markdownRenderer";
+import { structRenderer } from "./markdown";
 import { writeWiki } from "../writer";
 import { splitBlock } from "../block";
+import { type Top } from "../type";
 
 // 读取 Rust 中的某个 struct，分析出所有字段信息
 function parseStruct(fileInfo: FileInfo): FieldInfo[] {
@@ -61,7 +62,7 @@ function parseStruct(fileInfo: FileInfo): FieldInfo[] {
 
 // 支持从一个或多个文件中读取结构体并生成 wiki
 export function genStructsWiki(
-  top: { title: string; description?: string },
+  top: Top,
   fileInfos: FileInfo[],
   toFileName: string,
 ) {

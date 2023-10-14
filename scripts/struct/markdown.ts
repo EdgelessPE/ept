@@ -1,4 +1,5 @@
-import { type FieldInfo } from "./type";
+import type { Top } from "../type";
+import type { FieldInfo } from "./type";
 
 // 渲染单一字段
 function fieldRenderer(
@@ -19,7 +20,7 @@ ${info.type.optional ? "<Tag>可选</Tag> " : ""}${clearWiki}
 
 // 渲染一个结构
 export function structRenderer(
-  top: { title: string; description?: string },
+  top: Top,
   fields: FieldInfo[],
   { titleLevel }: { titleLevel: number },
 ) {

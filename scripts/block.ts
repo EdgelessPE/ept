@@ -9,7 +9,7 @@ function gracefulJoinMarkdown(lines: string[]): string {
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    if (line.startsWith("```")) {
+    if (line.startsWith("```") || line.startsWith(":::")) {
       insideCodeBlock = !insideCodeBlock;
     }
     if (i === lines.length - 1) {
@@ -82,7 +82,7 @@ export function splitBlock({
   const clearLines = lines.map((line) => line.trim());
   for (const line of clearLines) {
     // 将 wiki 和 demo 注释推入栈
-    if (line.startsWith("/// ")) {
+    if (line.startsWith("/// ") || line.startsWith("//- ")) {
       wikiStack.push(line.slice(4));
     }
     if (line.startsWith("//# ")) {
