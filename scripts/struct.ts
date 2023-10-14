@@ -25,7 +25,7 @@ function matchStructBlock(name:string,text:string):string[]{
   // 向下检索申明结束行号
   let endLineIndex=-1
   for(let i=startLineIndex;i<lines.length;i++){
-    const line=lines[i]
+    const line=lines[i].trim();
     if(line==="}"){
       endLineIndex=i
       break
