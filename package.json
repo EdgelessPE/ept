@@ -7,7 +7,7 @@
     "build": "yarn gen && rspress build",
     "preview": "rspress preview",
     "gen": "ts-node ./scripts/index.ts",
-    "lint": "eslint scripts/* --fix",
+    "lint": "eslint --fix scripts/**",
     "postinstall": "husky install",
     "prepack": "pinst --disable",
     "postpack": "pinst --enable"
