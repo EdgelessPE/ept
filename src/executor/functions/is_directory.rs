@@ -8,12 +8,13 @@ use evalexpr::{Function, Value};
 
 use super::EvalFunction;
 
-pub struct IsDirectory {}
-
-impl EvalFunction for IsDirectory {
+pub struct IsDirectory {
     //- 检查某个路径是否指向一个目录
     //@ 需要输入合法的路径
     //# `if = 'IsDirectory("C:/Windows")'`
+}
+
+impl EvalFunction for IsDirectory {
     fn get_closure(located: String) -> Function {
         Function::new(move |val| {
             let arg = ensure_arg(val)?;

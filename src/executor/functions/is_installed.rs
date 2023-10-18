@@ -13,12 +13,13 @@ lazy_static! {
     static ref RESOURCE_REGEX: Regex = Regex::new(r"^[^/]+/[^/]+$").unwrap();
 }
 
-pub struct IsInstalled {}
-
-impl EvalFunction for IsInstalled {
+pub struct IsInstalled {
     //- 检查某个包是否已被 ept 安装
     //@ 需要匹配模式 'SCOPE/NAME'
     //# `if = 'IsInstalled("Microsoft/VSCode")'`
+}
+
+impl EvalFunction for IsInstalled {
     fn get_closure(_: String) -> Function {
         Function::new(move |val| {
             let arg = ensure_arg(val)?;

@@ -3,6 +3,7 @@ import { parseInnerValues } from "./values";
 import { valuesRenderer } from "./markdown";
 import { writeWiki } from "../writer";
 import { type ValueInfo } from "./type";
+import { parseInnerFn } from "./functions";
 
 export function genContext(
   { valuesTop, fnTop, top }: { valuesTop: Top; fnTop: Top; top: Top },
@@ -27,4 +28,6 @@ export function genContext(
     },
     toFileName,
   );
+
+  console.log(parseInnerFn("@/executor/functions"));
 }

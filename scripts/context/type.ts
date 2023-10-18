@@ -6,3 +6,14 @@ export interface ValueInfo {
   demo?: string;
   demoValue?: string | number;
 }
+
+export interface FnValue {
+  name: string;
+  wiki?: string;
+  demo?: string;
+  permission: {
+    key: string;
+    level: PermissionLevel | "JUDGE_WITH_PATH";
+  };
+  validationRules?: string;
+}

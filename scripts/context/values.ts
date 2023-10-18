@@ -3,7 +3,7 @@ import { splitBlock } from "../block";
 
 export function parseInnerValues(file: string): ValueInfo[] {
   const splittedBlock = splitBlock({ file, startsWith: "define_values!" });
-  return splittedBlock.map(({ wiki, declaration, demo, demoValue }) => {
+  return splittedBlock.map(({ wiki, declaration, demo, extra }) => {
     const m = declaration.match(
       /\{"\$\{(\w+)}",[\w.()]+\(\),PermissionLevel::(\w+)},?/,
     );
@@ -13,7 +13,7 @@ export function parseInnerValues(file: string): ValueInfo[] {
         level: m[2] as PermissionLevel,
         wiki,
         demo,
-        demoValue,
+        demoValue: extra,
       };
     } else {
       throw new Error(

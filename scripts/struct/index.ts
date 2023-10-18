@@ -14,7 +14,7 @@ function parseStruct(fileInfo: FileInfo): FieldInfo[] {
     file,
     startsWith: `pub struct ${structName}`,
   });
-  console.log(splittedBlock);
+  // console.log(splittedBlock);
 
   // 解析枚举定义
   const enumValuesMap = parseEnumDefinitions(fileInfo);

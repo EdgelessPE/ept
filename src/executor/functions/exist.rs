@@ -8,12 +8,13 @@ use evalexpr::{Function, Value};
 
 use super::EvalFunction;
 
-pub struct Exist {}
-
-impl EvalFunction for Exist {
+pub struct Exist {
     //- 检查某个路径指向的文件或目录是否存在
     //@ 需要输入合法的路径
     //# `if = 'Exist("C:/Windows")'`
+}
+
+impl EvalFunction for Exist {
     fn get_closure(located: String) -> Function {
         Function::new(move |val| {
             let arg = ensure_arg(val)?;

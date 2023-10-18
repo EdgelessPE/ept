@@ -82,8 +82,8 @@ const COMMENTS_DEFINITION: Array<{
     },
   },
   {
-    key: "demoValue",
-    startsWith: ["//! "],
+    key: "extra",
+    startsWith: ["//@ "],
     renderer: (stack) => (stack.length > 0 ? stack.join("\n") : undefined),
   },
 ];
@@ -149,5 +149,23 @@ export function splitBlock({
     }
     result.push(r);
   }
+
+  // 结束后如果有栈不为空，则建一个空白申明语句
+  let isStackClear = true;
+  for (const { key } of COMMENTS_DEFINITION) {
+    if (stackMap[key].length) {
+      isStackClear = false;
+      break;
+    }
+  }
+  if (!isStackClear) {
+    const r: CommonFieldInfo = { declaration: "" };
+    for (const { key, renderer } of COMMENTS_DEFINITION) {
+      r[key] = renderer(stackMap[key]);
+      stackMap[key] = [];
+    }
+    result.push(r);
+  }
+
   return result;
 }
