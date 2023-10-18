@@ -16,6 +16,9 @@ lazy_static! {
 pub struct IsInstalled {}
 
 impl EvalFunction for IsInstalled {
+    //- 检查某个包是否已被 ept 安装
+    //@ 需要匹配模式 'SCOPE/NAME'
+    //# `if = 'IsInstalled("Microsoft/VSCode")'`
     fn get_closure(_: String) -> Function {
         Function::new(move |val| {
             let arg = ensure_arg(val)?;

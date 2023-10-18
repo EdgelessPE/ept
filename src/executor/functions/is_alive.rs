@@ -10,6 +10,9 @@ use super::EvalFunction;
 pub struct IsAlive {}
 
 impl EvalFunction for IsAlive {
+    //- 检查某个进程是否正在运行
+    //@ 需要以 `.exe` 结尾
+    //# `if = 'IsAlive("code.exe")'`
     fn get_closure(_: String) -> Function {
         Function::new(move |val| {
             let arg = ensure_arg(val)?;

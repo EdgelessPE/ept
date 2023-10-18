@@ -168,38 +168,38 @@ pub fn judge_perm_level(fs_target: &String) -> Result<PermissionLevel> {
 // {变量名称，值计算表达式，对应权限等级}
 define_values! {
     //- 系统盘符
-    //! C:
+    //@ C:
     //# to = "${SystemDrive}/Windows/system32"
     {"${SystemDrive}",env_system_drive(),PermissionLevel::Sensitive},
     //- 用户主目录
-    //! C:/Users/UserName
+    //@ C:/Users/UserName
     //# to = "${Home}/Document"
     {"${Home}",env_home(),PermissionLevel::Important},
     //- 应用数据目录
     //- :::warning
     //- 注意：此变量和 Windows 系统内的 `%appdata%` 变量表示的目录位置不同，其不会自动在末尾加上`Roaming`
     //- :::
-    //! C:/Users/UserName/AppData
+    //@ C:/Users/UserName/AppData
     //# to = "${AppData}/Roaming/Microsoft/Windows/Start Menu"
     {"${AppData}",env_appdata(),PermissionLevel::Sensitive},
     //- ProgramFiles 目录
-    //! C:/Program Files
+    //@ C:/Program Files
     //# to = "${ProgramFiles_X64}/Microsoft/Windows"
     {"${ProgramFiles_X64}",env_program_files_x64(),PermissionLevel::Sensitive},
     //- ProgramFiles (x86) 目录
-    //! C:/Program Files (x86)
+    //@ C:/Program Files (x86)
     //# to = "${ProgramFiles_X86}/Microsoft"
     {"${ProgramFiles_X86}",env_program_files_x86(),PermissionLevel::Sensitive},
     //- 当前用户桌面目录
-    //! C:/Users/UserName/Desktop
+    //@ C:/Users/UserName/Desktop
     //# to = "${Desktop}"
     {"${Desktop}",env_desktop(),PermissionLevel::Important},
     //- 公用桌面目录
-    //! C:/Users/Public/Desktop
+    //@ C:/Users/Public/Desktop
     //# to = "${PublicDesktop}"
     {"${PublicDesktop}",env_public_desktop(),PermissionLevel::Important},
     //- 运行时系统架构，可能的值：`X64` `X86` `ARM64`
-    //! X64
+    //@ X64
     {"${Arch}",get_arch().unwrap().to_string(),PermissionLevel::Normal}
 }
 

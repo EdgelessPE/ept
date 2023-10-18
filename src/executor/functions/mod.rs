@@ -1,11 +1,9 @@
+mod exist;
 mod is_alive;
 mod is_directory;
-mod is_exist;
 mod is_installed;
 
-use self::{
-    is_alive::IsAlive, is_directory::IsDirectory, is_exist::Exist, is_installed::IsInstalled,
-};
+use self::{exist::Exist, is_alive::IsAlive, is_directory::IsDirectory, is_installed::IsInstalled};
 use crate::types::permissions::Permission;
 use anyhow::{anyhow, Result};
 use evalexpr::*;
