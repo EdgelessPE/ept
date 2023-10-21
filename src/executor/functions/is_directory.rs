@@ -11,7 +11,7 @@ use super::EvalFunction;
 pub struct IsDirectory {
     //- 检查某个路径是否指向一个目录
     //@ 需要输入合法的路径
-    //# `if = 'IsDirectory("C:/Windows")'`
+    //# `if = 'IsDirectory("${SystemDrive}/Windows")'`
 }
 
 impl EvalFunction for IsDirectory {

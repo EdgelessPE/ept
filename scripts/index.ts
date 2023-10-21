@@ -1,8 +1,5 @@
-import { parseInnerValues } from "./context/values";
 import { genStructsWiki } from "./struct";
 import { genContext } from "./context";
-
-console.log(parseInnerValues("@/executor/values.rs"));
 
 genStructsWiki(
   {
@@ -27,13 +24,21 @@ genStructsWiki(
 
 genContext(
   {
+    top: {
+      title: "上下文",
+      description:
+        "提供在工作流执行过程中可用的上下文信息，例如内置变量和内置函数。",
+    },
     valuesTop: {
       title: "内置变量",
       description:
-        "工作流执行时能提供的内置变量。注意在非条件字段中使用时需要使用模板写法，详见[内置变量](/nep/workflow/2-context.html#内置变量)。",
+        "步骤字段中可用的内置变量。注意在非条件字段中使用时需要使用模板写法，详见[内置变量](/nep/workflow/2-context.html#内置变量)。",
     },
-    fnTop: { title: "内置函数" },
-    top: { title: "上下文" },
+    fnTop: {
+      title: "内置函数",
+      description:
+        "步骤的条件语句可用的内置变量。当前版本提供的内置变量都是输入为`String`输出为`Bool`的简单函数。",
+    },
   },
   {
     valuesFile: "@/executor/values.rs",

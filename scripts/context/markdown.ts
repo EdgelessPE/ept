@@ -1,7 +1,7 @@
 import type { Top } from "../type";
-import type { ValueInfo } from "./type";
+import type { FnValue, ValueInfo } from "./type";
 
-// 渲染单一字段
+// 渲染内置变量的单一字段
 function valueFieldRenderer(
   info: ValueInfo,
   { titleLevel }: { titleLevel: number },
@@ -29,5 +29,35 @@ export function valuesRenderer(
 ${top.description ?? ""}
 ${infos
   .map((info) => valueFieldRenderer(info, { titleLevel: titleLevel + 1 }))
+  .join("\n")}`;
+}
+
+// 渲染内置函数的单一字段
+function functionFieldRenderer(
+  info: FnValue,
+  { titleLevel }: { titleLevel: number },
+): string {
+  const permissionLevel =
+    info.permission.level === "JUDGE_WITH_PATH"
+      ? "根据输入路径决定"
+      : `\`${info.permission.level}\``;
+  return `${"#".repeat(titleLevel)} ${info.name}
+${info.wiki ?? ""}
+* 入参校验：${info.validationRules ?? ""}
+* 示例：\`${info.demo ?? ""}\`
+* 权限：
+  * 类型：\`${info.permission.key}\`
+  * 等级：${permissionLevel}`;
+}
+
+export function functionRenderer(
+  top: Top,
+  infos: FnValue[],
+  { titleLevel }: { titleLevel: number },
+) {
+  return `${"#".repeat(titleLevel)} ${top.title}
+${top.description ?? ""}
+${infos
+  .map((info) => functionFieldRenderer(info, { titleLevel: titleLevel + 1 }))
   .join("\n")}`;
 }

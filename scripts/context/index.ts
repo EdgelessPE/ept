@@ -1,6 +1,6 @@
 import { type Top } from "../type";
 import { parseInnerValues } from "./values";
-import { valuesRenderer } from "./markdown";
+import { functionRenderer, valuesRenderer } from "./markdown";
 import { writeWiki } from "../writer";
 import { type ValueInfo } from "./type";
 import { parseInnerFn } from "./functions";
@@ -20,14 +20,15 @@ export function genContext(
     appendValues.concat(valuesInfo),
     { titleLevel: 2 },
   );
+  const fnInfo = parseInnerFn("@/executor/functions");
+  const fnText = functionRenderer(fnTop, fnInfo, { titleLevel: 2 });
+
   writeWiki(
     {
       title: top.title,
       description: top.description,
-      content: valuesText,
+      content: `${valuesText}\n\n${fnText}`,
     },
     toFileName,
   );
-
-  console.log(parseInnerFn("@/executor/functions"));
 }

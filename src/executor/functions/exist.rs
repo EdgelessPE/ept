@@ -11,7 +11,7 @@ use super::EvalFunction;
 pub struct Exist {
     //- 检查某个路径指向的文件或目录是否存在
     //@ 需要输入合法的路径
-    //# `if = 'Exist("C:/Windows")'`
+    //# `if = 'Exist("${SystemDrive}/Windows")'`
 }
 
 impl EvalFunction for Exist {
