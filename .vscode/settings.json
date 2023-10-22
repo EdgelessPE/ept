@@ -23,6 +23,7 @@
         "posix",
         "postpack",
         "predef",
+        "pwsh",
         "rspress",
         "Rustup",
         "Secp",

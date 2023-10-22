@@ -116,7 +116,97 @@ pub fn meta(input: &String, verify_signature: bool) -> Result<MetaResult> {
 fn test_meta() {
     envmnt::set("CONFIRM", "true");
     let res = meta(&"examples/PermissionsTest".to_string(), false).unwrap();
-    println!("{res:#?}");
+    let mut sorted_permissions: Vec<Permission> = res
+        .permissions
+        .into_iter()
+        .map(|mut node| {
+            node.targets.sort();
+            node
+        })
+        .collect();
+    sorted_permissions.sort_by(|a, b| a.key.cmp(&b.key));
+    assert_eq!(
+        sorted_permissions,
+        vec![
+            Permission {
+                key: PermissionKey::path_entrances,
+                level: PermissionLevel::Normal,
+                targets: vec!["Code.exe".to_string()],
+            },
+            Permission {
+                key: PermissionKey::path_dirs,
+                level: PermissionLevel::Important,
+                targets: vec!["bin".to_string(),],
+            },
+            Permission {
+                key: PermissionKey::link_desktop,
+                level: PermissionLevel::Normal,
+                targets: vec![
+                    "Build tools".to_string(),
+                    "MS/Visual Studio Code".to_string(),
+                ],
+            },
+            Permission {
+                key: PermissionKey::link_startmenu,
+                level: PermissionLevel::Normal,
+                targets: vec!["MS/Visual Studio Code".to_string(),],
+            },
+            Permission {
+                key: PermissionKey::execute_installer,
+                level: PermissionLevel::Important,
+                targets: vec![
+                    "installer /S".to_string(),
+                    "uninstaller /S".to_string(),
+                    "updater /S".to_string(),
+                ],
+            },
+            Permission {
+                key: PermissionKey::execute_custom,
+                level: PermissionLevel::Sensitive,
+                targets: vec!["unknown.exe --silent".to_string(),],
+            },
+            Permission {
+                key: PermissionKey::fs_read,
+                level: PermissionLevel::Sensitive,
+                targets: vec!["${ProgramFiles_X86}/Microsoft/32.dll".to_string(),],
+            },
+            Permission {
+                key: PermissionKey::fs_write,
+                level: PermissionLevel::Sensitive,
+                targets: vec![
+                    "${AppData}/pwsh.exe".to_string(),
+                    "${ProgramFiles_X64}/Microsoft/64.dll".to_string(),
+                    "${SystemDrive}/system32/Windows/".to_string(),
+                ],
+            },
+            Permission {
+                key: PermissionKey::fs_write,
+                level: PermissionLevel::Important,
+                targets: vec![
+                    "${Desktop}/Public".to_string(),
+                    "${Home}/Download".to_string(),
+                ],
+            },
+            Permission {
+                key: PermissionKey::fs_write,
+                level: PermissionLevel::Normal,
+                targets: vec!["./lib".to_string(),],
+            },
+            Permission {
+                key: PermissionKey::notify_toast,
+                level: PermissionLevel::Normal,
+                targets: vec![
+                    "Updated failed".to_string(),
+                    "Updated successfully".to_string(),
+                ],
+            },
+            Permission {
+                key: PermissionKey::process_kill,
+                level: PermissionLevel::Sensitive,
+                targets: vec!["Code.exe".to_string(),],
+            },
+        ]
+    );
 
     // 从本地安装中生成 meta
     crate::utils::test::_ensure_testing_vscode();
