@@ -33,7 +33,7 @@ genContextWiki(
     valuesTop: {
       title: "内置变量",
       description:
-        "步骤字段中可用的内置变量。注意在非条件字段中使用时需要使用模板写法，详见[内置变量](/nep/workflow/2-context.html#内置变量)。",
+        "步骤字段中可用的内置变量。注意在非条件字段中使用时需要使用模板写法，详见[内置变量](/nep/workflow/2-context.html#内置变量)。\n\n“权限等级”字段表示该内置变量对应路径在访问时所需要的[权限](/nep/ability/1-permission)等级。",
     },
     fnTop: {
       title: "内置函数",

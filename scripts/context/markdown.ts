@@ -17,7 +17,10 @@ function valueFieldRenderer(
     \`\`\``
       : "";
   return `${"#".repeat(titleLevel)} ${info.name}
-${info.wiki} ${demoText}`;
+${info.wiki}
+* 权限等级：[\`${
+    info.level
+  }\`](/nep/definition/3-permissions#${info.level.toLowerCase()})${demoText}`;
 }
 
 export function valuesRenderer(

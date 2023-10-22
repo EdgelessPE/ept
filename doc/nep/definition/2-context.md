@@ -5,8 +5,11 @@
 提供在工作流执行过程中可用的上下文信息，例如内置变量和内置函数。 
 ## 内置变量
 步骤字段中可用的内置变量。注意在非条件字段中使用时需要使用模板写法，详见[内置变量](/nep/workflow/2-context.html#内置变量)。
+
+“权限等级”字段表示该内置变量对应路径在访问时所需要的[权限](/nep/ability/1-permission)等级。
 ### ExitCode
-上一步骤的退出码，**类型为整数**。 
+上一步骤的退出码，**类型为整数**。
+* 权限等级：[`Normal`](/nep/definition/3-permissions#normal)
 * 示例值：`0` 
 * 示例：
     ```toml
@@ -14,7 +17,8 @@
     if = 'ExitCode==0'
     ```
 ### DefaultLocation
-当前包的默认安装位置 
+当前包的默认安装位置
+* 权限等级：[`Normal`](/nep/definition/3-permissions#normal)
 * 示例值：`C:/Users/UserName/ept/Microsoft/VSCode` 
 * 示例：
     ```toml
@@ -25,7 +29,8 @@
     if = 'DefaultLocation=="C:/Users/UserName/ept/Microsoft/VSCode"'
     ```
 ### SystemDrive
-系统盘符 
+系统盘符
+* 权限等级：[`Sensitive`](/nep/definition/3-permissions#sensitive)
 * 示例值：`C:` 
 * 示例：
     ```toml
@@ -36,7 +41,8 @@
     if = 'SystemDrive=="C:"'
     ```
 ### Home
-用户主目录 
+用户主目录
+* 权限等级：[`Important`](/nep/definition/3-permissions#important)
 * 示例值：`C:/Users/UserName` 
 * 示例：
     ```toml
@@ -51,7 +57,8 @@
 
 :::warning
 注意：此变量和 Windows 系统内的 `%appdata%` 变量表示的目录位置不同，其不会自动在末尾加上`Roaming`
-::: 
+:::
+* 权限等级：[`Sensitive`](/nep/definition/3-permissions#sensitive)
 * 示例值：`C:/Users/UserName/AppData` 
 * 示例：
     ```toml
@@ -62,7 +69,8 @@
     if = 'AppData=="C:/Users/UserName/AppData"'
     ```
 ### ProgramFiles_X64
-ProgramFiles 目录 
+ProgramFiles 目录
+* 权限等级：[`Sensitive`](/nep/definition/3-permissions#sensitive)
 * 示例值：`C:/Program Files` 
 * 示例：
     ```toml
@@ -73,7 +81,8 @@ ProgramFiles 目录
     if = 'ProgramFiles_X64=="C:/Program Files"'
     ```
 ### ProgramFiles_X86
-ProgramFiles (x86) 目录 
+ProgramFiles (x86) 目录
+* 权限等级：[`Sensitive`](/nep/definition/3-permissions#sensitive)
 * 示例值：`C:/Program Files (x86)` 
 * 示例：
     ```toml
@@ -84,7 +93,8 @@ ProgramFiles (x86) 目录
     if = 'ProgramFiles_X86=="C:/Program Files (x86)"'
     ```
 ### Desktop
-当前用户桌面目录 
+当前用户桌面目录
+* 权限等级：[`Important`](/nep/definition/3-permissions#important)
 * 示例值：`C:/Users/UserName/Desktop` 
 * 示例：
     ```toml
@@ -95,7 +105,8 @@ ProgramFiles (x86) 目录
     if = 'Desktop=="C:/Users/UserName/Desktop"'
     ```
 ### PublicDesktop
-公用桌面目录 
+公用桌面目录
+* 权限等级：[`Important`](/nep/definition/3-permissions#important)
 * 示例值：`C:/Users/Public/Desktop` 
 * 示例：
     ```toml
@@ -106,7 +117,8 @@ ProgramFiles (x86) 目录
     if = 'PublicDesktop=="C:/Users/Public/Desktop"'
     ```
 ### Arch
-运行时系统架构，可能的值：`X64` `X86` `ARM64` 
+运行时系统架构，可能的值：`X64` `X86` `ARM64`
+* 权限等级：[`Normal`](/nep/definition/3-permissions#normal)
 * 示例值：`X64` 
 * 示例：
     ```toml
