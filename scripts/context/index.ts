@@ -5,7 +5,7 @@ import { writeWiki } from "../writer";
 import { type ValueInfo } from "./type";
 import { parseInnerFn } from "./functions";
 
-export function genContext(
+export function genContextWiki(
   { valuesTop, fnTop, top }: { valuesTop: Top; fnTop: Top; top: Top },
   {
     valuesFile,

@@ -1,5 +1,6 @@
 import { genStructsWiki } from "./struct";
-import { genContext } from "./context";
+import { genContextWiki } from "./context";
+import { genPermissionsWiki } from "./permission";
 
 genStructsWiki(
   {
@@ -22,7 +23,7 @@ genStructsWiki(
   "1-package",
 );
 
-genContext(
+genContextWiki(
   {
     top: {
       title: "上下文",
@@ -61,3 +62,23 @@ genContext(
   },
   "2-context",
 );
+
+genPermissionsWiki({
+  file: "@/types/permissions.rs",
+  top: {
+    title: "权限",
+    description:
+      "Nep 规范支持 ept 通过对包的工作流上下文进行总结获得该包生命周期过程中需要使用的权限信息，便于用户在确认使用该包之前查看所有的权限信息。",
+  },
+  levelTop: {
+    title: "权限等级",
+    description:
+      "不同类型、不同目标的权限会被分为不同的权限等级，下列排序为权限敏感程度升序排列。",
+  },
+  keyTop: {
+    title: "权限类型",
+    description:
+      "不同的工作流步骤或内置函数调用会产生不同类型的权限。请注意有些时候即使权限类型相同，其对应的权限等级也有可能不同。",
+  },
+  toFileName: "3-permissions",
+});

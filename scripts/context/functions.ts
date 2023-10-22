@@ -14,7 +14,7 @@ function parsePermission(file: string): FnValue["permission"] {
     return m[0].replace(reg, "$1");
   };
 
-  const key = extract(/key: "(\w+)".to_string/);
+  const key = extract(/key: PermissionKey::(\w+),/);
 
   const level: FnValue["permission"]["level"] = text.includes(
     "judge_perm_level(&arg)",

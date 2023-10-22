@@ -46,7 +46,9 @@ ${info.wiki ?? ""}
 * 入参校验：${info.validationRules ?? ""}
 * 示例：\`${info.demo ?? ""}\`
 * 权限：
-  * 类型：\`${info.permission.key}\`
+  * 类型：[\`${info.permission.key}\`](/nep/definition/3-permissions#${
+    info.permission.key
+  })
   * 等级：${permissionLevel}`;
 }
 

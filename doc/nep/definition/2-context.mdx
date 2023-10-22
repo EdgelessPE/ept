@@ -121,26 +121,26 @@ ProgramFiles (x86) 目录
 * 入参校验：需要输入合法的路径
 * 示例：``if = 'Exist("${SystemDrive}/Windows")'``
 * 权限：
-  * 类型：`fs_read`
+  * 类型：[`fs_read`](/nep/definition/3-permissions#fs_read)
   * 等级：根据输入路径决定
 ### IsAlive
 检查某个进程是否正在运行
 * 入参校验：需要以 `.exe` 结尾
 * 示例：``if = 'IsAlive("code.exe")'``
 * 权限：
-  * 类型：`process_query`
+  * 类型：[`process_query`](/nep/definition/3-permissions#process_query)
   * 等级：`Normal`
 ### IsDirectory
 检查某个路径是否指向一个目录
 * 入参校验：需要输入合法的路径
 * 示例：``if = 'IsDirectory("${SystemDrive}/Windows")'``
 * 权限：
-  * 类型：`fs_read`
+  * 类型：[`fs_read`](/nep/definition/3-permissions#fs_read)
   * 等级：根据输入路径决定
 ### IsInstalled
 检查某个包是否已被 ept 安装
 * 入参校验：需要匹配模式 'SCOPE/NAME'
 * 示例：``if = 'IsInstalled("Microsoft/VSCode")'``
 * 权限：
-  * 类型：`nep_installed`
+  * 类型：[`nep_installed`](/nep/definition/3-permissions#nep_installed)
   * 等级：`Normal`
