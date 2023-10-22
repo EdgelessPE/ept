@@ -3,6 +3,6 @@
     border: 1px solid transparent;
     border-radius: 10px;
     color: var(--rp-c-brand-dark);
-    background: #eaf3fe;
+    background: var(--rp-c-brand-tint);
     padding: 0 8px;
 }
