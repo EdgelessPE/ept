@@ -89,6 +89,24 @@ fn delete_shortcut(name: &String, base: &String) -> Result<()> {
     Ok(())
 }
 
+fn update_start_menu() {
+    // 发送全局广播
+    let result = unsafe {
+        SendMessageTimeoutA(
+            HWND_BROADCAST,
+            WM_SETTINGCHANGE,
+            0 as WPARAM,
+            0 as LPARAM,
+            SMTO_ABORTIFHUNG,
+            3000,
+            null_mut(),
+        )
+    };
+    if result == 0 {
+        log!("Warning(Link):Failed to update start menu, restart is required")
+    }
+}
+
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct StepLink {
     pub source_file: String,
@@ -143,21 +161,7 @@ impl TStep for StepLink {
         }
         if set.contains("StartMenu") {
             create_shortcut(&sl, &target_name, &env_start_menu())?;
-            // 发送全局广播
-            let result = unsafe {
-                SendMessageTimeoutA(
-                    HWND_BROADCAST,
-                    WM_SETTINGCHANGE,
-                    0 as WPARAM,
-                    0 as LPARAM,
-                    SMTO_ABORTIFHUNG,
-                    3000,
-                    null_mut(),
-                )
-            };
-            if result == 0 {
-                log!("Warning(Link):Failed to apply start menu change, restart is required")
-            }
+            update_start_menu();
         }
 
         Ok(0)
@@ -171,21 +175,7 @@ impl TStep for StepLink {
         }
         if set.contains("StartMenu") {
             delete_shortcut(&target_name, &env_start_menu())?;
-            // 发送全局广播
-            let result = unsafe {
-                SendMessageTimeoutA(
-                    HWND_BROADCAST,
-                    WM_SETTINGCHANGE,
-                    0 as WPARAM,
-                    0 as LPARAM,
-                    SMTO_ABORTIFHUNG,
-                    3000,
-                    null_mut(),
-                )
-            };
-            if result == 0 {
-                log!("Warning(Link):Failed to apply start menu change, restart is required")
-            }
+            update_start_menu();
         }
         Ok(())
     }
