@@ -1,6 +1,6 @@
 use crate::{
     executor::{judge_perm_level, values_validator_path},
-    types::permissions::Permission,
+    types::permissions::{Permission, PermissionKey},
     utils::{conditions::ensure_arg, path::parse_relative_path_with_located},
 };
 use anyhow::Result;
@@ -25,7 +25,7 @@ impl EvalFunction for Exist {
     }
     fn get_permission(arg: String) -> Result<Permission> {
         Ok(Permission {
-            key: "fs_read".to_string(),
+            key: PermissionKey::fs_read,
             level: judge_perm_level(&arg)?,
             targets: vec![arg],
         })

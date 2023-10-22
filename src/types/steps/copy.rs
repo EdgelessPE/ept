@@ -3,8 +3,12 @@ use crate::{
     executor::{judge_perm_level, values_validator_path},
     log, p2s,
     types::{
-        interpretable::Interpretable, mixed_fs::MixedFS, permissions::Generalizable,
-        permissions::Permission, verifiable::Verifiable, workflow::WorkflowContext,
+        interpretable::Interpretable,
+        mixed_fs::MixedFS,
+        permissions::Generalizable,
+        permissions::{Permission, PermissionKey},
+        verifiable::Verifiable,
+        workflow::WorkflowContext,
     },
     utils::{
         fs::{copy_dir, ensure_dir_exist, try_recycle},
@@ -161,12 +165,12 @@ impl Generalizable for StepCopy {
     fn generalize_permissions(&self) -> Result<Vec<Permission>> {
         Ok(vec![
             Permission {
-                key: "fs_read".to_string(),
+                key: PermissionKey::fs_read,
                 level: judge_perm_level(&self.from)?,
                 targets: vec![self.from.clone()],
             },
             Permission {
-                key: "fs_write".to_string(),
+                key: PermissionKey::fs_write,
                 level: judge_perm_level(&self.to)?,
                 targets: vec![self.to.clone()],
             },

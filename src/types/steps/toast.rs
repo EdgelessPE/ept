@@ -1,5 +1,6 @@
 use super::TStep;
 use crate::types::interpretable::Interpretable;
+use crate::types::permissions::PermissionKey;
 use crate::types::steps::Permission;
 use crate::types::{
     mixed_fs::MixedFS,
@@ -62,7 +63,7 @@ impl Verifiable for StepToast {
 impl Generalizable for StepToast {
     fn generalize_permissions(&self) -> Result<Vec<Permission>> {
         Ok(vec![Permission {
-            key: "notify_toast".to_string(),
+            key: PermissionKey::notify_toast,
             level: PermissionLevel::Normal,
             targets: vec![self.title.clone()],
         }])

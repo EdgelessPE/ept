@@ -2,7 +2,7 @@ use super::TStep;
 use crate::executor::values_validator_path;
 use crate::types::interpretable::Interpretable;
 use crate::types::mixed_fs::MixedFS;
-use crate::types::permissions::{Generalizable, Permission, PermissionLevel};
+use crate::types::permissions::{Generalizable, Permission, PermissionKey, PermissionLevel};
 use crate::types::verifiable::Verifiable;
 use crate::types::workflow::WorkflowContext;
 use crate::utils::{get_path_bin, path::parse_relative_path_with_located, term::ask_yn};
@@ -269,13 +269,13 @@ impl Generalizable for StepPath {
         let p = Path::new(&self.record);
         let node = if p.extension().is_some() && !self.record.ends_with("/") {
             Permission {
-                key: "path_entrances".to_string(),
+                key: PermissionKey::path_entrances,
                 level: PermissionLevel::Normal,
                 targets: vec![self.record.to_owned()],
             }
         } else {
             Permission {
-                key: "path_dirs".to_string(),
+                key: PermissionKey::path_dirs,
                 level: PermissionLevel::Important,
                 targets: vec![self.record.to_owned()],
             }

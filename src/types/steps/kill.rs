@@ -1,5 +1,6 @@
 use super::TStep;
 use crate::types::interpretable::Interpretable;
+use crate::types::permissions::PermissionKey;
 use crate::types::steps::Permission;
 use crate::{
     log,
@@ -77,7 +78,7 @@ impl Verifiable for StepKill {
 impl Generalizable for StepKill {
     fn generalize_permissions(&self) -> Result<Vec<Permission>> {
         Ok(vec![Permission {
-            key: "process_kill".to_string(),
+            key: PermissionKey::process_kill,
             level: PermissionLevel::Sensitive,
             targets: vec![self.target.clone()],
         }])

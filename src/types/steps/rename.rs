@@ -5,6 +5,7 @@ use regex::Regex;
 use serde::{Deserialize, Serialize};
 
 use crate::types::interpretable::Interpretable;
+use crate::types::permissions::PermissionKey;
 use crate::{
     executor::{judge_perm_level, values_validator_path},
     log, p2s,
@@ -96,7 +97,7 @@ impl Interpretable for StepRename {
 impl Generalizable for StepRename {
     fn generalize_permissions(&self) -> Result<Vec<crate::types::permissions::Permission>> {
         Ok(vec![Permission {
-            key: "fs_write".to_string(),
+            key: PermissionKey::fs_write,
             level: judge_perm_level(&self.from)?,
             targets: vec![self.from.clone()],
         }])

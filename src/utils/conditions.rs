@@ -167,46 +167,46 @@ fn test_condition() {
     assert_eq!(res, answer);
 
     // get_permissions_from_conditions
-    use crate::types::permissions::PermissionLevel;
+    use crate::types::permissions::{PermissionKey, PermissionLevel};
     let res = get_permissions_from_conditions(conditions.clone()).unwrap();
     let answer = vec![
         Permission {
-            key: "fs_read".to_string(),
+            key: PermissionKey::fs_read,
             level: PermissionLevel::Normal,
             targets: vec!["src/main.rs".to_string()],
         },
         Permission {
-            key: "fs_read".to_string(),
+            key: PermissionKey::fs_read,
             level: PermissionLevel::Normal,
             targets: vec!["src".to_string()],
         },
         Permission {
-            key: "fs_read".to_string(),
+            key: PermissionKey::fs_read,
             level: PermissionLevel::Sensitive,
             targets: vec!["${AppData}".to_string()],
         },
         Permission {
-            key: "fs_read".to_string(),
+            key: PermissionKey::fs_read,
             level: PermissionLevel::Sensitive,
             targets: vec!["${SystemDrive}/Windows".to_string()],
         },
         Permission {
-            key: "fs_read".to_string(),
+            key: PermissionKey::fs_read,
             level: PermissionLevel::Normal,
             targets: vec!["./src/main.ts".to_string()],
         },
         Permission {
-            key: "nep_installed".to_string(),
+            key: PermissionKey::nep_installed,
             level: PermissionLevel::Normal,
             targets: vec!["Foo/Bar".to_string()],
         },
         Permission {
-            key: "process_query".to_string(),
+            key: PermissionKey::process_query,
             level: PermissionLevel::Normal,
             targets: vec!["陈睿's mother.exe".to_string()],
         },
         Permission {
-            key: "process_query".to_string(),
+            key: PermissionKey::process_query,
             level: PermissionLevel::Normal,
             targets: vec!["aunt.exe".to_string()],
         },

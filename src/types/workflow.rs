@@ -46,7 +46,7 @@ impl Verifiable for WorkflowHeader {
 
 #[test]
 fn test_header_perm() {
-    use crate::types::permissions::PermissionLevel;
+    use crate::types::permissions::{PermissionKey, PermissionLevel};
     let flow=WorkflowHeader{
         name: Some("Name".to_string()),
         step: "Step".to_string(),
@@ -57,17 +57,17 @@ fn test_header_perm() {
         res,
         vec![
             Permission {
-                key: "fs_read".to_string(),
+                key: PermissionKey::fs_read,
                 level: PermissionLevel::Normal,
                 targets: vec!["./mc/vsc.exe".to_string(),],
             },
             Permission {
-                key: "fs_read".to_string(),
+                key: PermissionKey::fs_read,
                 level: PermissionLevel::Sensitive,
                 targets: vec!["${SystemDrive}/Windows".to_string(),],
             },
             Permission {
-                key: "fs_read".to_string(),
+                key: PermissionKey::fs_read,
                 level: PermissionLevel::Sensitive,
                 targets: vec!["${AppData}/Roaming/Edgeless/ept".to_string(),],
             },

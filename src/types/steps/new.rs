@@ -3,7 +3,7 @@ use crate::{
     log,
     types::{
         mixed_fs::MixedFS,
-        permissions::{Generalizable, Permission},
+        permissions::{Generalizable, Permission, PermissionKey},
         verifiable::Verifiable,
         workflow::WorkflowContext,
     },
@@ -99,7 +99,7 @@ impl Verifiable for StepNew {
 impl Generalizable for StepNew {
     fn generalize_permissions(&self) -> Result<Vec<crate::types::permissions::Permission>> {
         Ok(vec![Permission {
-            key: "fs_write".to_string(),
+            key: PermissionKey::fs_write,
             level: judge_perm_level(&self.at)?,
             targets: vec![self.at.clone()],
         }])

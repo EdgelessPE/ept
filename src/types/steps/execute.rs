@@ -1,6 +1,6 @@
 use crate::types::interpretable::Interpretable;
 use crate::types::mixed_fs::MixedFS;
-use crate::types::permissions::{Generalizable, Permission, PermissionLevel};
+use crate::types::permissions::{Generalizable, Permission, PermissionKey, PermissionLevel};
 use crate::types::verifiable::Verifiable;
 use crate::types::workflow::WorkflowContext;
 use crate::utils::{
@@ -187,13 +187,13 @@ impl Generalizable for StepExecute {
     fn generalize_permissions(&self) -> Result<Vec<Permission>> {
         let node = if self.call_installer.unwrap_or(false) {
             Permission {
-                key: "execute_installer".to_string(),
+                key: PermissionKey::execute_installer,
                 level: PermissionLevel::Important,
                 targets: vec![self.command.to_owned()],
             }
         } else {
             Permission {
-                key: "execute_custom".to_string(),
+                key: PermissionKey::execute_custom,
                 level: PermissionLevel::Sensitive,
                 targets: vec![self.command.to_owned()],
             }

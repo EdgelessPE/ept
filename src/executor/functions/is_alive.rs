@@ -1,5 +1,5 @@
 use crate::{
-    types::permissions::{Permission, PermissionLevel},
+    types::permissions::{Permission, PermissionKey, PermissionLevel},
     utils::{conditions::ensure_arg, process::is_alive_with_name},
 };
 use anyhow::{anyhow, Result};
@@ -22,7 +22,7 @@ impl EvalFunction for IsAlive {
     }
     fn get_permission(arg: String) -> Result<Permission> {
         Ok(Permission {
-            key: "process_query".to_string(),
+            key: PermissionKey::process_query,
             level: PermissionLevel::Normal,
             targets: vec![arg],
         })

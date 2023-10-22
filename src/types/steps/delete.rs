@@ -2,6 +2,7 @@ use std::{ffi::OsString, path::Path};
 
 use super::TStep;
 use crate::types::interpretable::Interpretable;
+use crate::types::permissions::PermissionKey;
 use crate::types::steps::Permission;
 use crate::{
     executor::{judge_perm_level, values_validator_path},
@@ -92,7 +93,7 @@ impl Verifiable for StepDelete {
 impl Generalizable for StepDelete {
     fn generalize_permissions(&self) -> Result<Vec<Permission>> {
         Ok(vec![Permission {
-            key: "fs_write".to_string(),
+            key: PermissionKey::fs_write,
             level: judge_perm_level(&self.at)?,
             targets: vec![self.at.clone()],
         }])

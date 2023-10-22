@@ -9,7 +9,7 @@ use crate::{
     types::{
         meta::MetaResult,
         package::GlobalPackage,
-        permissions::{Generalizable, Permission, PermissionLevel},
+        permissions::{Generalizable, Permission, PermissionKey, PermissionLevel},
     },
     utils::{get_path_apps, path::find_scope_with_name_locally},
 };
@@ -76,7 +76,7 @@ pub fn meta(input: &String, verify_signature: bool) -> Result<MetaResult> {
         });
 
     // 收集并合并同类权限
-    let mut map: HashMap<(PermissionLevel, String), HashSet<String>> = HashMap::new();
+    let mut map: HashMap<(PermissionLevel, PermissionKey), HashSet<String>> = HashMap::new();
     for node in total_workflow {
         for perm in node.generalize_permissions()? {
             let entry = map.entry((perm.level, perm.key)).or_insert(HashSet::new());

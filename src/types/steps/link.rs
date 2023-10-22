@@ -2,7 +2,7 @@ use super::TStep;
 use crate::executor::values_validator_path;
 use crate::types::interpretable::Interpretable;
 use crate::types::mixed_fs::MixedFS;
-use crate::types::permissions::{Generalizable, Permission, PermissionLevel};
+use crate::types::permissions::{Generalizable, Permission, PermissionKey, PermissionLevel};
 use crate::types::workflow::WorkflowContext;
 use crate::utils::env::{env_desktop, env_start_menu};
 use crate::utils::fs::{count_sub_files, try_recycle};
@@ -239,19 +239,19 @@ impl Generalizable for StepLink {
         let mut keys = Vec::new();
         if let Some(ats) = &self.at {
             if ats.contains(&"Desktop".to_string()) {
-                keys.push("link_desktop")
+                keys.push(PermissionKey::link_desktop)
             }
             if ats.contains(&"StartMenu".to_string()) {
-                keys.push("link_startmenu")
+                keys.push(PermissionKey::link_startmenu)
             }
         } else {
-            keys.push("link_desktop")
+            keys.push(PermissionKey::link_desktop)
         }
 
         let res: Vec<Permission> = keys
             .into_iter()
             .map(|key| Permission {
-                key: key.to_string(),
+                key,
                 level: PermissionLevel::Normal,
                 targets: vec![self.get_target_name()],
             })

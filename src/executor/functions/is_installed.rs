@@ -1,6 +1,6 @@
 use crate::{
     entrances::info,
-    types::permissions::{Permission, PermissionLevel},
+    types::permissions::{Permission, PermissionKey, PermissionLevel},
     utils::conditions::ensure_arg,
 };
 use anyhow::{anyhow, Result};
@@ -36,7 +36,7 @@ impl EvalFunction for IsInstalled {
     }
     fn get_permission(arg: String) -> Result<Permission> {
         Ok(Permission {
-            key: "nep_installed".to_string(),
+            key: PermissionKey::nep_installed,
             level: PermissionLevel::Normal,
             targets: vec![arg],
         })
