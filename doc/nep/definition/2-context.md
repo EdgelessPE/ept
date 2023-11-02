@@ -141,7 +141,7 @@ ProgramFiles (x86) 目录
 * 示例：``if = 'IsAlive("code.exe")'``
 * 权限：
   * 类型：[`process_query`](/nep/definition/3-permissions#process_query)
-  * 等级：`Normal`
+  * 等级：[`Normal`](/nep/definition/3-permissions#Normal)
 ### IsDirectory
 检查某个路径是否指向一个目录
 * 入参校验：需要输入合法的路径
@@ -155,4 +155,4 @@ ProgramFiles (x86) 目录
 * 示例：``if = 'IsInstalled("Microsoft/VSCode")'``
 * 权限：
   * 类型：[`nep_installed`](/nep/definition/3-permissions#nep_installed)
-  * 等级：`Normal`
+  * 等级：[`Normal`](/nep/definition/3-permissions#Normal)
