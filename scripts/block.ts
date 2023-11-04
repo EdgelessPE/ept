@@ -211,7 +211,6 @@ export function getCommentsInBlock({
       }
     }
   }
-  console.log(lines);
 
   // 构造 key map
   const keyMap: Record<string, keyof PureCommentInfo> = {};
