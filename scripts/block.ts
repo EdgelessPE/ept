@@ -169,3 +169,76 @@ export function splitBlock({
 
   return result;
 }
+
+// 获取一个代码块中的注释信息
+type PureCommentInfo = Omit<CommonFieldInfo, "declaration">;
+export function getCommentsInBlock({
+  file,
+  startsWith,
+}: {
+  file: string;
+  startsWith: string;
+}): PureCommentInfo {
+  const filePath = parseFilePath(file);
+  if (!fs.existsSync(filePath)) {
+    throw new Error(`Error:Failed to open file '${filePath}'`);
+  }
+  const text = fs.readFileSync(filePath).toString();
+
+  // 筛选出 block 内的所有注释
+  const lines: string[] = [];
+  let insideBlock = false;
+  let braceCount = 0;
+  for (const _line of text.split("\n")) {
+    const line = _line.trim();
+    if (line.startsWith(startsWith) && line.endsWith("{")) {
+      insideBlock = true;
+      continue;
+    }
+    if (insideBlock) {
+      if (line.endsWith("{")) {
+        braceCount++;
+      }
+      if (line.startsWith("//")) {
+        lines.push(line);
+      }
+      if (line === "}") {
+        braceCount--;
+        if (braceCount <= 0) {
+          insideBlock = false;
+          break;
+        }
+      }
+    }
+  }
+  console.log(lines);
+
+  // 构造 key map
+  const keyMap: Record<string, keyof PureCommentInfo> = {};
+  const startsWithArr: string[] = [];
+  for (const node of COMMENTS_DEFINITION) {
+    for (const st of node.startsWith) {
+      keyMap[st] = node.key;
+      startsWithArr.push(st);
+    }
+  }
+
+  // 合并注释
+  const cateComments: PureCommentInfo = {};
+  for (const line of lines) {
+    for (const st of startsWithArr) {
+      if (line.startsWith(st)) {
+        const key = keyMap[st];
+        const content = line.slice(st.length);
+        if (cateComments[key]) {
+          cateComments[key] = `${cateComments[key]}\n${content}`;
+        } else {
+          cateComments[key] = content;
+        }
+        break;
+      }
+    }
+  }
+
+  return cateComments;
+}
