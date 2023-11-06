@@ -43,7 +43,7 @@ function functionFieldRenderer(
   const permissionLevel =
     info.permission.level === "JUDGE_WITH_PATH"
       ? "根据输入路径决定"
-      : `\`${info.permission.level}\``;
+      : `[\`${info.permission.level}\`](/nep/definition/3-permissions#${info.permission.level})`;
   return `${"#".repeat(titleLevel)} ${info.name}
 ${info.wiki ?? ""}
 * 入参校验：${info.validationRules ?? ""}
