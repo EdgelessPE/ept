@@ -114,7 +114,9 @@ impl Generalizable for StepRename {
 
 impl Verifiable for StepRename {
     fn verify_self(&self, _: &String) -> Result<()> {
-        values_validator_path(&self.from)?;
+        values_validator_path(&self.from).map_err(|e| {
+            anyhow!("Error(Rename):Failed to validate field 'from' as valid path : {e}")
+        })?;
         // 检查 from 是否包含通配符
         if contains_wild_match(&self.from) {
             return Err(anyhow!(

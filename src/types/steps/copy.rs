@@ -197,8 +197,12 @@ impl Generalizable for StepCopy {
 
 impl Verifiable for StepCopy {
     fn verify_self(&self, located: &String) -> Result<()> {
-        values_validator_path(&self.from)?;
-        values_validator_path(&self.to)?;
+        values_validator_path(&self.from).map_err(|e| {
+            anyhow!("Error(Copy):Failed to validate field 'from' as valid path : {e}")
+        })?;
+        values_validator_path(&self.to).map_err(|e| {
+            anyhow!("Error(Copy):Failed to validate field 'to' as valid path : {e}")
+        })?;
         common_wild_match_verify(&self.from, &self.to, located)?;
         // 检查 to 是否包含通配符
         if contains_wild_match(&self.to) {

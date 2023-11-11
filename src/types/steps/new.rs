@@ -96,7 +96,8 @@ impl Interpretable for StepNew {
 
 impl Verifiable for StepNew {
     fn verify_self(&self, _: &String) -> Result<()> {
-        values_validator_path(&self.at)?;
+        values_validator_path(&self.at)
+            .map_err(|e| anyhow!("Error(New):Failed to validate field 'at' as valid path : {e}"))?;
         // 检查 at 是否包含通配符
         if contains_wild_match(&self.at) {
             return Err(anyhow!(

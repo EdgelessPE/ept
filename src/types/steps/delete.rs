@@ -97,7 +97,9 @@ impl Interpretable for StepDelete {
 
 impl Verifiable for StepDelete {
     fn verify_self(&self, _: &String) -> Result<()> {
-        values_validator_path(&self.at)?;
+        values_validator_path(&self.at).map_err(|e| {
+            anyhow!("Error(Delete):Failed to validate field 'at' as valid path : {e}")
+        })?;
 
         Ok(())
     }

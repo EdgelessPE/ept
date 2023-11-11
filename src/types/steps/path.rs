@@ -274,7 +274,9 @@ impl Interpretable for StepPath {
 
 impl Verifiable for StepPath {
     fn verify_self(&self, _: &String) -> Result<()> {
-        values_validator_path(&self.record)
+        values_validator_path(&self.record).map_err(|e| {
+            anyhow!("Error(Path):Failed to validate field 'record' as valid path : {e}")
+        })
     }
 }
 

@@ -165,13 +165,15 @@ impl Verifiable for StepExecute {
     fn verify_self(&self, _: &String) -> Result<()> {
         // 校验 pwd 为合法路径
         if let Some(pwd) = &self.pwd {
-            values_validator_path(pwd)?;
+            values_validator_path(pwd).map_err(|e| {
+                anyhow!("Error(Execute):Failed to validate field 'pwd' as valid path : {e}")
+            })?;
         }
 
         // 禁止出现 :/
         let formatted_cmd = format_path(&self.command);
         if formatted_cmd.contains(":/") {
-            return Err(anyhow!("Error:Absolute path in '{formatted_cmd}' is not allowed (keyword ':/' detected), use proper inner values instead"));
+            return Err(anyhow!("Error(Execute):Absolute path in '{formatted_cmd}' is not allowed (keyword ':/' detected), use proper inner values instead"));
         }
 
         // 校验 wait 枚举值
