@@ -29,9 +29,12 @@ lazy_static! {
 pub struct StepRename {
     /// 目标路径，支持相对路径和绝对路径。
     //# `from = "./config.toml.example"`
+    //@ 是合法路径
+    //@ 不包含通配符
     pub from: String,
     /// 新的名称。
     //# `to = "config.toml"`
+    //@ 是合法的文件名或文件夹名而非路径
     pub to: String,
 }
 

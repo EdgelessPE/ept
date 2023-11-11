@@ -30,6 +30,7 @@ pub struct StepPath {
     //# # 添加文件夹到 PATH 变量
     //# record = "./bin"
     //# ```
+    //@ 是合法路径
     pub record: String,
     /// 别名，仅对可执行文件生效，缺省为原文件名。
     //# `alias = "code.exe"`

@@ -26,6 +26,7 @@ pub struct StepNew {
     //# # 创建文件夹
     //# at = "${Desktop}/Microsoft/"
     //# ```
+    //@ 是合法路径
     pub at: String,
     /// 是否覆盖，缺省为 false。
     //# `overwrite = "true"`

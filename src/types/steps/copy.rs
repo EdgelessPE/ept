@@ -30,9 +30,12 @@ pub struct StepCopy {
     //# # 绝对路径通配符写法
     //# from = "${SystemDrive}/Windows/system32/*.dll"
     //# ```
+    //@ 是合法路径
+    //@ 符合通配符用法
     pub from: String,
     /// 目标路径，支持相对路径和绝对路径。
     //# `to = "./config"`
+    //@ 是合法路径
     pub to: String,
     /// 是否覆盖，缺省为 `false`。
     //# `overwrite = true`

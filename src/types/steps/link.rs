@@ -111,6 +111,7 @@ fn update_start_menu() {
 pub struct StepLink {
     /// 源文件路径，支持相对路径和绝对路径。
     //# `source_file = "code.exe"`
+    //@ 是合法路径
     pub source_file: String,
     /// 快捷方式名称，支持使用 `FOLDER/NAME` 的模式表示在创建位置的文件夾中放置快捷方式。
     //# ```toml
@@ -120,6 +121,9 @@ pub struct StepLink {
     //# # 在文件夹中创建快捷方式
     //# target_name = "Microsoft/Visual Studio Code"
     //# ```
+    //@ 符合模式 `NAME` 或 `FOLDER/NAME`
+    //@ 不包含 `..`
+    //@ 不以 `.lnk` 结尾
     pub target_name: Option<String>,
     /// 快捷方式的启动参数。
     //# `target_args = "--debug"`

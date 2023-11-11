@@ -20,7 +20,7 @@ function fieldRenderer(
     : "";
   const demoText = field.demo ? `\n* 示例：${field.demo}` : "";
   const rulesText = field.rules?.length
-    ? "\n" + field.rules.map((rule) => `* ${rule}`).join("\n")
+    ? "\n* 校验规则：\n" + field.rules.map((rule) => `  * ${rule}`).join("\n")
     : "";
   return `${"#".repeat(titleLevel)} ${field.name}
 ${field.type.optional ? "<Tag>可选</Tag> " : ""}${field.wiki ?? ""}

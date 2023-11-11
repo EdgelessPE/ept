@@ -16,9 +16,11 @@ use std::{thread::sleep, time::Duration};
 pub struct StepWait {
     /// 等待的时长，单位为 ms。
     //# `timeout = "3000"`
+    //@ 不超过 30min（1800000ms）
     pub timeout: u64,
     /// 若满足指定条件则提前结束等待，该条件会在等待过程中每 500ms 检查一次。
     //# `break_if = 'Exist("${Desktop}/Visual Studio Code.lnk")'`
+    //@ 是合法的条件
     pub break_if: Option<String>,
 }
 

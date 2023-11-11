@@ -19,10 +19,15 @@ import { Tag } from "../../components/tag.tsx"
   # 绝对路径通配符写法
   from = "${SystemDrive}/Windows/system32/*.dll"
   ``` 
+* 校验规则：
+  * 是合法路径
+  * 符合通配符用法
 #### to
 目标路径，支持相对路径和绝对路径。
 * 类型：`String`  
 * 示例：`to = "./config"` 
+* 校验规则：
+  * 是合法路径
 #### overwrite
 <Tag>可选</Tag> 是否覆盖，缺省为 `false`。
 * 类型：`bool`  
@@ -41,6 +46,9 @@ import { Tag } from "../../components/tag.tsx"
   # 绝对路径通配符写法
   at = "${AppData}/vscode/*.txt"
   ``` 
+* 校验规则：
+  * 是合法路径
+  * 符合通配符用法
 #### force
 <Tag>可选</Tag> 是否强制删除，缺省为 `false`。
 * 类型：`bool`  
@@ -52,10 +60,15 @@ import { Tag } from "../../components/tag.tsx"
 需要执行的命令，使用终端为 cmd。
 * 类型：`String`  
 * 示例：`command = "./installer.exe /S"` 
+* 校验规则：
+  * 是有效的 POSIX 命令
+  * 不得出现绝对路径（使用[内置变量](/nep/workflow/2-context.html#内置变量)）
 #### pwd
 <Tag>可选</Tag> 执行目录，缺省为包安装目录。
 * 类型：`String`  
 * 示例：`pwd = "${AppData}/Microsoft"` 
+* 校验规则：
+  * 是合法路径
 #### call_installer
 <Tag>可选</Tag> 当前命令的语义是否为正在调用安装器，缺省为 `false`；请务必正确指定此项，因为这会影响包权限、工作流静态检查等行为。
 * 类型：`bool`  
@@ -75,9 +88,11 @@ import { Tag } from "../../components/tag.tsx"
 杀死某个进程。
 ### 字段
 #### target
-进程名称，大小写敏感且必须以 `.exe` 结尾。
+进程名称，注意大小写敏感。
 * 类型：`String`  
-* 示例：`target = "code.exe"`  
+* 示例：`target = "code.exe"` 
+* 校验规则：
+  * 以 `.exe` 结尾 
 ## Link
 创建快捷方式。
 ### 字段
@@ -85,6 +100,8 @@ import { Tag } from "../../components/tag.tsx"
 源文件路径，支持相对路径和绝对路径。
 * 类型：`String`  
 * 示例：`source_file = "code.exe"` 
+* 校验规则：
+  * 是合法路径
 #### target_name
 <Tag>可选</Tag> 快捷方式名称，支持使用 `FOLDER/NAME` 的模式表示在创建位置的文件夾中放置快捷方式。
 * 类型：`String`  
@@ -96,6 +113,10 @@ import { Tag } from "../../components/tag.tsx"
   # 在文件夹中创建快捷方式
   target_name = "Microsoft/Visual Studio Code"
   ``` 
+* 校验规则：
+  * 符合模式 `NAME` 或 `FOLDER/NAME`
+  * 不包含 `..`
+  * 不以 `.lnk` 结尾
 #### target_args
 <Tag>可选</Tag> 快捷方式的启动参数。
 * 类型：`String`  
@@ -137,10 +158,15 @@ import { Tag } from "../../components/tag.tsx"
   # 绝对路径通配符写法
   from = "${Desktop}/Visual Studio Code.lnk"
   ``` 
+* 校验规则：
+  * 是合法路径
+  * 符合通配符用法
 #### to
 目标路径，支持相对路径和绝对路径。
 * 类型：`String`  
 * 示例：`to = "./bin"` 
+* 校验规则：
+  * 是合法路径
 #### overwrite
 <Tag>可选</Tag> 是否覆盖，缺省为 `false`。
 * 类型：`bool`  
@@ -159,6 +185,8 @@ import { Tag } from "../../components/tag.tsx"
   # 创建文件夹
   at = "${Desktop}/Microsoft/"
   ``` 
+* 校验规则：
+  * 是合法路径
 #### overwrite
 <Tag>可选</Tag> 是否覆盖，缺省为 false。
 * 类型：`bool`  
@@ -179,6 +207,8 @@ import { Tag } from "../../components/tag.tsx"
   # 添加文件夹到 PATH 变量
   record = "./bin"
   ``` 
+* 校验规则：
+  * 是合法路径
 #### alias
 <Tag>可选</Tag> 别名，仅对可执行文件生效，缺省为原文件名。
 * 类型：`String`  
@@ -192,10 +222,15 @@ import { Tag } from "../../components/tag.tsx"
 目标路径，支持相对路径和绝对路径。
 * 类型：`String`  
 * 示例：`from = "./config.toml.example"` 
+* 校验规则：
+  * 是合法路径
+  * 不包含通配符
 #### to
 新的名称。
 * 类型：`String`  
-* 示例：`to = "config.toml"`  
+* 示例：`to = "config.toml"` 
+* 校验规则：
+  * 是合法的文件名或文件夹名而非路径 
 ## Toast
 弹出消息通知。
 ### 字段
@@ -214,7 +249,11 @@ import { Tag } from "../../components/tag.tsx"
 等待的时长，单位为 ms。
 * 类型：`u64`  
 * 示例：`timeout = "3000"` 
+* 校验规则：
+  * 不超过 30min（1800000ms）
 #### break_if
 <Tag>可选</Tag> 若满足指定条件则提前结束等待，该条件会在等待过程中每 500ms 检查一次。
 * 类型：`String`  
-* 示例：`break_if = 'Exist("${Desktop}/Visual Studio Code.lnk")'`  
+* 示例：`break_if = 'Exist("${Desktop}/Visual Studio Code.lnk")'` 
+* 校验规则：
+  * 是合法的条件 

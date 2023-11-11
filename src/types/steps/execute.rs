@@ -1,3 +1,4 @@
+use crate::executor::{values_replacer, values_validator_path};
 use crate::types::interpretable::Interpretable;
 use crate::types::mixed_fs::MixedFS;
 use crate::types::permissions::{Generalizable, Permission, PermissionKey, PermissionLevel};
@@ -19,9 +20,12 @@ use std::time::Instant;
 pub struct StepExecute {
     /// 需要执行的命令，使用终端为 cmd。
     //# `command = "./installer.exe /S"`
+    //@ 是有效的 POSIX 命令
+    //@ 不得出现绝对路径（使用[内置变量](/nep/workflow/2-context.html#内置变量)）
     pub command: String,
     /// 执行目录，缺省为包安装目录。
     //# `pwd = "${AppData}/Microsoft"`
+    //@ 是合法路径
     pub pwd: Option<String>,
     /// 当前命令的语义是否为正在调用安装器，缺省为 `false`；请务必正确指定此项，因为这会影响包权限、工作流静态检查等行为。
     //# `call_installer = true`
@@ -58,8 +62,11 @@ impl TStep for StepExecute {
             self.command = format!("\"{c}\"", c = &self.command);
         }
 
+        // 解释内置变量
+        let command_str = values_replacer(self.command, cx.exit_code, &cx.located);
+
         // 解析命令传入
-        let cmd = c.args(split_command(&self.command)?);
+        let cmd = c.args(split_command(&command_str)?);
 
         // 指定工作目录
         let workshop = self.pwd.unwrap_or(cx.located.to_owned());
@@ -72,16 +79,10 @@ impl TStep for StepExecute {
         let wait = self.wait.unwrap_or("Sync".to_string());
         if wait == "Sync".to_string() {
             // 同步执行并收集结果
-            log!(
-                "Info(Execute):Running sync command '{cmd}' in '{workshop}'",
-                cmd = self.command,
-            );
+            log!("Info(Execute):Running sync command '{command_str}' in '{workshop}'");
             let start_instant = Instant::now();
             let output = cmd.output().map_err(|err| {
-                anyhow!(
-                    "Error(Execute):Command '{cmd}' execution failed : {err}",
-                    cmd = self.command,
-                )
+                anyhow!("Error(Execute):Command '{command_str}' execution failed : {err}")
             })?;
 
             // 如果在调用安装器，检查是否过快退出
@@ -99,15 +100,11 @@ impl TStep for StepExecute {
             match output.status.code() {
                 Some(val) => {
                     if val == 0 {
-                        log!(
-                            "{level}(Execute):Command '{cmd}' {hint}, output :",
-                            cmd = self.command
-                        );
+                        log!("{level}(Execute):Command '{command_str}' {hint}, output :");
                         println!("{output}", output = read_console(output.stdout));
                     } else {
                         log!(
-                            "Error(Execute):Failed command '{cmd}' {hint}, output(code={val}) : \n{o}",
-                            cmd = self.command,
+                            "Error(Execute):Failed command '{command_str}' {hint}, output(code={val}) : \n{o}",
                             o = read_console(output.stderr)
                         );
                         println!("{output}", output = read_console(output.stdout));
@@ -115,27 +112,17 @@ impl TStep for StepExecute {
                     Ok(val)
                 }
                 None => Err(anyhow!(
-                    "Error(Execute):Command '{cmd}' terminated by outer signal",
-                    cmd = self.command
+                    "Error(Execute):Command '{command_str}' terminated by outer signal"
                 )),
             }
         } else {
             // 异步执行
-            log!(
-                "Info(Execute):Running async command('{wait}') '{cmd}' in '{workshop}'",
-                cmd = self.command,
-            );
+            log!("Info(Execute):Running async command('{wait}') '{command_str}' in '{workshop}'");
             let handler = cmd.spawn().map_err(|e| {
-                anyhow!(
-                    "Error(Execute):Command '{cmd}' spawn failed : {e}",
-                    cmd = self.command
-                )
+                anyhow!("Error(Execute):Command '{command_str}' spawn failed : {e}")
             })?;
-            cx.async_execution_handlers.push((
-                self.command,
-                handler,
-                wait == "Abandon".to_string(),
-            ));
+            cx.async_execution_handlers
+                .push((command_str, handler, wait == "Abandon".to_string()));
 
             Ok(0)
         }
@@ -177,6 +164,12 @@ impl Interpretable for StepExecute {
 
 impl Verifiable for StepExecute {
     fn verify_self(&self, _: &String) -> Result<()> {
+        // 校验 pwd 为合法路径
+        if let Some(pwd) = &self.pwd {
+            values_validator_path(pwd)?;
+        }
+
+        // 校验命令前进行路径格式化
         let formatted_cmd = format_path(&self.command);
 
         // 禁止出现 :/

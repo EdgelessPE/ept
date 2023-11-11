@@ -29,6 +29,8 @@ pub struct StepDelete {
     //# # 绝对路径通配符写法
     //# at = "${AppData}/vscode/*.txt"
     //# ```
+    //@ 是合法路径
+    //@ 符合通配符用法
     pub at: String,
     /// 是否强制删除，缺省为 `false`。
     //# `force = "true"`
