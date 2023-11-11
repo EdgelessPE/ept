@@ -4,6 +4,7 @@ use crate::types::package::GlobalPackage;
 use crate::types::steps::Step;
 use crate::types::verifiable::Verifiable;
 use crate::types::workflow::WorkflowNode;
+use crate::utils::is_starts_with_inner_value;
 use crate::{log, log_ok_last, p2s};
 use anyhow::{anyhow, Result};
 use std::fs::read_dir;
@@ -16,6 +17,18 @@ fn get_manifest(flow: Vec<WorkflowNode>, fs: &mut MixedFS) -> Vec<String> {
     for node in flow {
         manifest.append(&mut node.body.get_manifest(fs));
     }
+    debug_assert!(manifest.clone().into_iter().fold(true, |state, cur| {
+        if !state {
+            state
+        } else {
+            if is_starts_with_inner_value(&cur) {
+                log!("Error:Fatal:Got absolute manifest '{cur}'");
+                false
+            } else {
+                true
+            }
+        }
+    }));
     manifest
 }
 
