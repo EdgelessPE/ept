@@ -1,4 +1,4 @@
-use crate::executor::{values_replacer, values_validator_path};
+use crate::executor::values_validator_path;
 use crate::types::interpretable::Interpretable;
 use crate::types::mixed_fs::MixedFS;
 use crate::types::permissions::{Generalizable, Permission, PermissionKey, PermissionLevel};
@@ -62,8 +62,7 @@ impl TStep for StepExecute {
             self.command = format!("\"{c}\"", c = &self.command);
         }
 
-        // 解释内置变量
-        let command_str = values_replacer(self.command, cx.exit_code, &cx.located);
+        let command_str = self.command;
 
         // 解析命令传入
         let cmd = c.args(split_command(&command_str)?);
@@ -169,10 +168,8 @@ impl Verifiable for StepExecute {
             values_validator_path(pwd)?;
         }
 
-        // 校验命令前进行路径格式化
-        let formatted_cmd = format_path(&self.command);
-
         // 禁止出现 :/
+        let formatted_cmd = format_path(&self.command);
         if formatted_cmd.contains(":/") {
             return Err(anyhow!("Error:Absolute path in '{formatted_cmd}' is not allowed (keyword ':/' detected), use proper inner values instead"));
         }
