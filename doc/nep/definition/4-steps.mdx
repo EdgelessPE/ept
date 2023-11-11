@@ -10,7 +10,7 @@ import { Tag } from "../../components/tag.tsx"
 ### 字段
 #### from
 源路径，支持相对路径和绝对路径，支持使用通配符。
-* 类型：`String` 
+* 类型：`String`  
 * 示例：
   ```toml
   # 相对路径写法
@@ -21,18 +21,18 @@ import { Tag } from "../../components/tag.tsx"
   ``` 
 #### to
 目标路径，支持相对路径和绝对路径。
-* 类型：`String` 
+* 类型：`String`  
 * 示例：`to = "./config"` 
 #### overwrite
 <Tag>可选</Tag> 是否覆盖，缺省为 `false`。
-* 类型：`bool` 
+* 类型：`bool`  
 * 示例：`overwrite = true`  
 ## Delete
 删除文件/文件夹。
 ### 字段
 #### at
 删除目标路径，支持相对路径和绝对路径，支持使用通配符。
-* 类型：`String` 
+* 类型：`String`  
 * 示例：
   ```toml
   # 相对路径写法
@@ -43,50 +43,51 @@ import { Tag } from "../../components/tag.tsx"
   ``` 
 #### force
 <Tag>可选</Tag> 是否强制删除，缺省为 `false`。
-* 类型：`bool` 
+* 类型：`bool`  
 * 示例：`force = "true"`  
 ## Execute
 执行自定义命令
 ### 字段
 #### command
 需要执行的命令，使用终端为 cmd。
-* 类型：`String` 
+* 类型：`String`  
 * 示例：`command = "./installer.exe /S"` 
 #### pwd
 <Tag>可选</Tag> 执行目录，缺省为包安装目录。
-* 类型：`String` 
+* 类型：`String`  
 * 示例：`pwd = "${AppData}/Microsoft"` 
 #### call_installer
 <Tag>可选</Tag> 当前命令的语义是否为正在调用安装器，缺省为 `false`；请务必正确指定此项，因为这会影响包权限、工作流静态检查等行为。
-* 类型：`bool` 
+* 类型：`bool`  
 * 示例：`call_installer = true` 
 #### wait
-<Tag>可选</Tag> 枚举值：`Sync` `Delay` `Abandon`，缺省为 `Sync`。
+<Tag>可选</Tag> 命令等待策略。
 
-:::tip
 `Sync`：同步等待命令执行完成后该步骤才会结束；
+
 `Delay`：异步执行命令并立即完成当前步骤；在当前工作流执行完成时等待该命令执行结束，然后才会结束工作流；
+
 `Abandon`：异步执行命令并立即完成当前步骤；在当前工作流执行完成时若此命令还未结束则直接强行停止此命令。
-:::
-* 类型：`String` 
+* 类型：`String 枚举` 
+* 有效值：`Sync` `Delay` `Abandon` ，缺省值：`Sync` 
 * 示例：`wait = "Delay"`  
 ## Kill
 杀死某个进程。
 ### 字段
 #### target
 进程名称，大小写敏感且必须以 `.exe` 结尾。
-* 类型：`String` 
+* 类型：`String`  
 * 示例：`target = "code.exe"`  
 ## Link
 创建快捷方式。
 ### 字段
 #### source_file
 源文件路径，支持相对路径和绝对路径。
-* 类型：`String` 
+* 类型：`String`  
 * 示例：`source_file = "code.exe"` 
 #### target_name
 <Tag>可选</Tag> 快捷方式名称，支持使用 `FOLDER/NAME` 的模式表示在创建位置的文件夾中放置快捷方式。
-* 类型：`String` 
+* 类型：`String`  
 * 示例：
   ```toml
   # 创建快捷方式
@@ -97,15 +98,16 @@ import { Tag } from "../../components/tag.tsx"
   ``` 
 #### target_args
 <Tag>可选</Tag> 快捷方式的启动参数。
-* 类型：`String` 
+* 类型：`String`  
 * 示例：`target_args = "--debug"` 
 #### target_icon
 <Tag>可选</Tag> 快捷方式图标。
-* 类型：`String` 
+* 类型：`String`  
 * 示例：`target_icon = "./icons/code.ico"` 
 #### at
-<Tag>可选</Tag> 创建位置，是一个枚举值数组，枚举值： `Desktop` `StartMenu`。
-* 类型：`Vec<String>` 
+<Tag>可选</Tag> 创建位置。
+* 类型：`Vec<String 枚举>` 
+* 元素有效值：`Desktop` `StartMenu` ，缺省值：`["Desktop"]` 
 * 示例：`at = ["Desktop", "StartMenu"]`  
 ### 反向步骤
 删除生成的快捷方式。
@@ -114,18 +116,19 @@ import { Tag } from "../../components/tag.tsx"
 ### 字段
 #### msg
 日志内容。
-* 类型：`String` 
+* 类型：`String`  
 * 示例：`msg = "VSCode installed successfully, workflow exit."` 
 #### level
-<Tag>可选</Tag> 日志级别，枚举值：`Debug` `Info` `Warning` `Error` `Success`，缺省为 `Info`。
-* 类型：`String` 
+<Tag>可选</Tag> 日志级别。
+* 类型：`String 枚举` 
+* 有效值：`Debug` `Info` `Warning` `Error` `Success` ，缺省值：`Info` 
 * 示例：`level = "Success"`  
 ## Move
 移动文件/文件夹。
 ### 字段
 #### from
 源路径，支持相对路径和绝对路径，支持使用通配符。
-* 类型：`String` 
+* 类型：`String`  
 * 示例：
   ```toml
   # 相对路径写法
@@ -136,18 +139,18 @@ import { Tag } from "../../components/tag.tsx"
   ``` 
 #### to
 目标路径，支持相对路径和绝对路径。
-* 类型：`String` 
+* 类型：`String`  
 * 示例：`to = "./bin"` 
 #### overwrite
 <Tag>可选</Tag> 是否覆盖，缺省为 `false`。
-* 类型：`bool` 
+* 类型：`bool`  
 * 示例：`overwrite = "true"`  
 ## New
 新建文件/文件夹。
 ### 字段
 #### at
 新建位置，以 `/` 结尾表示新建一个文件夹。
-* 类型：`String` 
+* 类型：`String`  
 * 示例：
   ```toml
   # 创建空文件
@@ -158,7 +161,7 @@ import { Tag } from "../../components/tag.tsx"
   ``` 
 #### overwrite
 <Tag>可选</Tag> 是否覆盖，缺省为 false。
-* 类型：`bool` 
+* 类型：`bool`  
 * 示例：`overwrite = "true"`  
 ## Path
 将可执行文件/文件夹暴露到 PATH 中：
@@ -167,7 +170,7 @@ import { Tag } from "../../components/tag.tsx"
 ### 字段
 #### record
 记录值，支持可执行文件/文件夾，支持相对路径和绝对路径。
-* 类型：`String` 
+* 类型：`String`  
 * 示例：
   ```toml
   # 创建可执行文件入口
@@ -178,7 +181,7 @@ import { Tag } from "../../components/tag.tsx"
   ``` 
 #### alias
 <Tag>可选</Tag> 别名，仅对可执行文件生效，缺省为原文件名。
-* 类型：`String` 
+* 类型：`String`  
 * 示例：`alias = "code.exe"`  
 ### 反向步骤
 删除生成的可执行文件入口或从 PATH 变量中移除目录。
@@ -187,31 +190,31 @@ import { Tag } from "../../components/tag.tsx"
 ### 字段
 #### from
 目标路径，支持相对路径和绝对路径。
-* 类型：`String` 
+* 类型：`String`  
 * 示例：`from = "./config.toml.example"` 
 #### to
 新的名称。
-* 类型：`String` 
+* 类型：`String`  
 * 示例：`to = "config.toml"`  
 ## Toast
 弹出消息通知。
 ### 字段
 #### title
 消息标题。
-* 类型：`String` 
+* 类型：`String`  
 * 示例：`title = "你好 Nep"` 
 #### content
 消息内容。
-* 类型：`String` 
+* 类型：`String`  
 * 示例：`content = "Hello Nep"`  
 ## Wait
 等待一个指定的时间。
 ### 字段
 #### timeout
 等待的时长，单位为 ms。
-* 类型：`u64` 
+* 类型：`u64`  
 * 示例：`timeout = "3000"` 
 #### break_if
 <Tag>可选</Tag> 若满足指定条件则提前结束等待，该条件会在等待过程中每 500ms 检查一次。
-* 类型：`String` 
+* 类型：`String`  
 * 示例：`break_if = 'Exist("${Desktop}/Visual Studio Code.lnk")'`  

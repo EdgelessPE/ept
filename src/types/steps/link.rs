@@ -121,14 +121,15 @@ pub struct StepLink {
     //# target_name = "Microsoft/Visual Studio Code"
     //# ```
     pub target_name: Option<String>,
-    //# `target_args = "--debug"`
     /// 快捷方式的启动参数。
+    //# `target_args = "--debug"`
     pub target_args: Option<String>,
-    //# `target_icon = "./icons/code.ico"`
     /// 快捷方式图标。
+    //# `target_icon = "./icons/code.ico"`
     pub target_icon: Option<String>,
+    /// 创建位置。
+    //* Desktop StartMenu | ["Desktop"]
     //# `at = ["Desktop", "StartMenu"]`
-    /// 创建位置，是一个枚举值数组，枚举值： `Desktop` `StartMenu`。
     pub at: Option<Vec<String>>,
 }
 

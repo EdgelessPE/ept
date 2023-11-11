@@ -86,6 +86,11 @@ const COMMENTS_DEFINITION: Array<{
     startsWith: ["//@ "],
     renderer: (stack) => (stack.length > 0 ? stack.join("\n") : undefined),
   },
+  {
+    key: "enums",
+    startsWith: ["//* "],
+    renderer: (stack) => (stack.length > 0 ? stack.join(" ") : undefined),
+  },
 ];
 
 // 匹配代码块并解析注释

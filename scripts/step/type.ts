@@ -7,6 +7,10 @@ export interface StepInfo {
     type: {
       identifier: string;
       optional: boolean;
+      enums?: {
+        values: string[];
+        default?: string;
+      };
     };
     wiki?: string;
     demo?: string;

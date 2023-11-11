@@ -26,13 +26,12 @@ pub struct StepExecute {
     /// 当前命令的语义是否为正在调用安装器，缺省为 `false`；请务必正确指定此项，因为这会影响包权限、工作流静态检查等行为。
     //# `call_installer = true`
     pub call_installer: Option<bool>,
-    /// 枚举值：`Sync` `Delay` `Abandon`，缺省为 `Sync`。
-    /// :::tip
+    /// 命令等待策略。
     /// `Sync`：同步等待命令执行完成后该步骤才会结束；
     /// `Delay`：异步执行命令并立即完成当前步骤；在当前工作流执行完成时等待该命令执行结束，然后才会结束工作流；
     /// `Abandon`：异步执行命令并立即完成当前步骤；在当前工作流执行完成时若此命令还未结束则直接强行停止此命令。
-    /// :::
     //# `wait = "Delay"`
+    //* Sync Delay Abandon | Sync
     pub wait: Option<String>,
 }
 

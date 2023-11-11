@@ -14,7 +14,8 @@ pub struct StepLog {
     /// 日志内容。
     //# `msg = "VSCode installed successfully, workflow exit."`
     pub msg: String,
-    /// 日志级别，枚举值：`Debug` `Info` `Warning` `Error` `Success`，缺省为 `Info`。
+    /// 日志级别。
+    //*  Debug Info Warning Error Success | Info
     //# `level = "Success"`
     pub level: Option<String>,
 }

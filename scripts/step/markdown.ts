@@ -4,13 +4,27 @@ function fieldRenderer(
   field: StepInfo["fields"][number],
   titleLevel: number,
 ): string {
+  const identifier = field.type.enums
+    ? field.type.identifier.replace("String", "String 枚举")
+    : field.type.identifier;
+  const typeText = `* 类型：\`${identifier}\``;
+  const enumText = field.type.enums
+    ? `
+* ${identifier.includes("Vec") ? "元素" : ""}有效值：${field.type.enums.values
+        .map((v) => `\`${v}\``)
+        .join(" ")} ${
+        field.type.enums.default
+          ? `，缺省值：\`${field.type.enums.default}\``
+          : ""
+      }`
+    : "";
   const demoText = field.demo ? `\n* 示例：${field.demo}` : "";
   const rulesText = field.rules?.length
     ? "\n" + field.rules.map((rule) => `* ${rule}`).join("\n")
     : "";
   return `${"#".repeat(titleLevel)} ${field.name}
 ${field.type.optional ? "<Tag>可选</Tag> " : ""}${field.wiki ?? ""}
-* 类型：\`${field.type.identifier}\` ${demoText} ${rulesText}`;
+${typeText} ${enumText} ${demoText} ${rulesText}`;
 }
 
 function stepRenderer(

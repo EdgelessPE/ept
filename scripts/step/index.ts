@@ -19,7 +19,23 @@ function formatField({
   wiki,
   demo,
   extra,
+  enums,
 }: CommonFieldInfo): StepInfo["fields"][number] {
+  const getEnums = (
+    line: string | undefined,
+  ): StepInfo["fields"][number]["type"]["enums"] => {
+    if (!line) {
+      return undefined;
+    }
+    const [a, defaultValue] = line.split("|");
+    return {
+      values: a
+        .split(" ")
+        .filter((v) => !!v)
+        .map((val) => val.trim()),
+      default: defaultValue.trim(),
+    };
+  };
   const m = declaration.match(/(\w+):\s?([\w<>()]+)/);
   if (m) {
     const [, name, rawType] = m;
@@ -29,6 +45,7 @@ function formatField({
       type: {
         optional,
         identifier: optional ? rawType.slice(7, -1) : rawType,
+        enums: getEnums(enums),
       },
       wiki,
       demo,
