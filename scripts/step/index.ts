@@ -4,6 +4,8 @@ import { parseFilePath } from "../utils";
 import path from "path";
 import { getCommentsInBlock, splitBlock } from "../block";
 import { type StepInfo } from "./type";
+import { writeWiki } from "../writer";
+import { stepsRenderer } from "./markdown";
 
 function getExtra(file: string): StepInfo["extra"] {
   // TODO:添加更多字段
@@ -43,7 +45,7 @@ export function genStepsWiki(
   top: Top,
   { srcDir }: { srcDir: string },
   toFileName: string,
-): StepInfo[] {
+) {
   const dir = parseFilePath(srcDir);
   const fileNames = fs
     .readdirSync(dir)
@@ -70,6 +72,12 @@ export function genStepsWiki(
       extra,
     });
   }
-  // console.log(JSON.stringify(steps, null, 2));
-  return steps;
+  writeWiki(
+    {
+      ...top,
+      imports: ['import { Tag } from "../../components/tag.tsx"'],
+      content: stepsRenderer(steps, { titleLevel: 1 }),
+    },
+    toFileName,
+  );
 }

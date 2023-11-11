@@ -117,7 +117,7 @@ pub struct StepLink {
     pub target_args: Option<String>,
     /// 快捷方式图标。
     pub target_icon: Option<String>,
-    /// 创建位置，是一个枚举值数组，枚举值： "Desktop" | "StartMenu"。
+    /// 创建位置，是一个枚举值数组，枚举值： `Desktop` `StartMenu`。
     pub at: Option<Vec<String>>,
 }
 

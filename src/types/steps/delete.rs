@@ -23,7 +23,7 @@ use serde::{Deserialize, Serialize};
 pub struct StepDelete {
     /// 删除目标路径，支持相对路径和绝对路径，支持使用通配符。
     pub at: String,
-    /// 是否强制删除，缺省为 false。
+    /// 是否强制删除，缺省为 `false`。
     pub force: Option<bool>,
 }
 

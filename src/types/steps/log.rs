@@ -13,7 +13,7 @@ use super::TStep;
 pub struct StepLog {
     /// 日志内容。
     pub msg: String,
-    /// 日志级别，枚举值："Debug" | "Info" | "Warning" | "Error" | "Success"，缺省为 "Info"。
+    /// 日志级别，枚举值：`Debug` `Info` `Warning` `Error` `Success`，缺省为 `Info`。
     pub level: Option<String>,
 }
 

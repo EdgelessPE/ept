@@ -22,7 +22,7 @@ pub struct StepMove {
     pub from: String,
     /// 目标路径，支持相对路径和绝对路径。
     pub to: String,
-    /// 是否覆盖，缺省为 false。
+    /// 是否覆盖，缺省为 `false`。
     pub overwrite: Option<bool>,
 }
 
