@@ -22,8 +22,11 @@ use std::path::PathBuf;
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct StepCopy {
+    /// 源路径，支持相对路径和绝对路径，支持使用通配符。
     pub from: String,
+    /// 目标路径，支持相对路径和绝对路径。
     pub to: String,
+    /// 是否覆盖，缺省为 false。
     pub overwrite: Option<bool>,
 }
 
@@ -127,6 +130,7 @@ fn copy(
 
 impl TStep for StepCopy {
     fn run(self, cx: &mut WorkflowContext) -> Result<i32> {
+        //- 复制文件/文件夹。
         let overwrite = self.overwrite.unwrap_or(false);
         if contains_wild_match(&self.from) {
             for from in parse_wild_match(self.from, &cx.located)? {

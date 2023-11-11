@@ -21,7 +21,9 @@ use force_delete_win::force_delete_file_folder;
 use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct StepDelete {
+    /// 删除目标路径，支持相对路径和绝对路径，支持使用通配符。
     pub at: String,
+    /// 是否强制删除，缺省为 false。
     pub force: Option<bool>,
 }
 
@@ -50,6 +52,7 @@ fn delete(target: &String, force: bool) -> Result<()> {
 
 impl TStep for StepDelete {
     fn run(self, cx: &mut WorkflowContext) -> Result<i32> {
+        //- 删除文件/文件夹。
         let force = self.force.unwrap_or(false);
         if contains_wild_match(&self.at) {
             for target in parse_wild_match(self.at, &cx.located)? {

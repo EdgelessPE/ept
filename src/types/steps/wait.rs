@@ -14,12 +14,15 @@ use std::time::Instant;
 use std::{thread::sleep, time::Duration};
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct StepWait {
+    /// 等待的时长，单位为 ms。
     pub timeout: u64,
+    /// 若满足指定条件则提前结束等待，该条件会在等待过程中每 500ms 检查一次。
     pub break_if: Option<String>,
 }
 
 impl TStep for StepWait {
     fn run(self, cx: &mut WorkflowContext) -> Result<i32> {
+        //- 等待一个指定的时间。
         let d = Duration::from_millis(self.timeout);
         let step_d = Duration::from_millis(500);
 

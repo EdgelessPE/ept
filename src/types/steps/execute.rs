@@ -17,14 +17,22 @@ use std::time::Instant;
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct StepExecute {
+    /// 需要执行的命令，使用终端为 cmd。
     pub command: String,
+    /// 执行目录，缺省为包安装目录。
     pub pwd: Option<String>,
+    /// 当前命令的语义是否为正在调用安装器；请务必正确指定此项，因为这会影响包权限、工作流静态检查等行为。
     pub call_installer: Option<bool>,
+    /// 枚举值："Sync" | "Delay" | "Abandon"。
+    /// `Sync`：同步等待命令执行完成后该步骤才会结束；
+    /// `Delay`：异步执行命令并立即完成当前步骤；在当前工作流执行完成时等待该命令执行结束，然后才会结束工作流；
+    /// `Abandon`：异步执行命令并立即完成当前步骤；在当前工作流执行完成时若此命令还未结束则直接强行停止此命令。
     pub wait: Option<String>,
 }
 
 impl TStep for StepExecute {
     fn run(mut self, cx: &mut WorkflowContext) -> Result<i32> {
+        //- 执行自定义命令
         // 配置终端
         let launch_terminal = if cfg!(target_os = "windows") {
             ("cmd", "/c")

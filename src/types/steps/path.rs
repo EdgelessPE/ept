@@ -22,7 +22,9 @@ use winreg::{enums::*, RegKey};
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct StepPath {
+    /// 记录值，支持可执行文件/目录，支持相对路径和绝对路径。
     pub record: String,
+    /// 别名，仅对可执行文件生效，缺省为原文件名。
     pub alias: Option<String>,
 }
 
@@ -134,6 +136,9 @@ fn set_system_path(record: &String, is_add: bool) -> Result<bool> {
 
 impl TStep for StepPath {
     fn run(self, cx: &mut WorkflowContext) -> Result<i32> {
+        //- 将可执行文件/文件夹暴露到 PATH 目录中。
+        //- 若指定一个可执行文件，则会在统一管理的 bin 目录中创建一个入口；
+        //- 若指定一个文件夹，则会将其添加到 PATH 变量中。
         // 解析 bin 绝对路径
         let bin_path = get_path_bin()?;
         let bin_abs = p2s!(bin_path);
@@ -193,6 +198,7 @@ impl TStep for StepPath {
         Ok(0)
     }
     fn reverse_run(self, cx: &mut WorkflowContext) -> Result<()> {
+        //- 删除生成的可执行文件入口或从 PATH 变量中移除目录。
         // 解析 bin 绝对路径
         let bin_path = get_path_bin()?;
         let bin_abs = p2s!(bin_path);

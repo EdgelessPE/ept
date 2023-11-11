@@ -27,7 +27,9 @@ lazy_static! {
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct StepRename {
+    /// 目标路径，支持相对路径和绝对路径。
     pub from: String,
+    /// 新的名称。
     pub to: String,
 }
 
@@ -69,6 +71,7 @@ fn rename(from: &String, to: &String, located: &String) -> Result<()> {
 
 impl TStep for StepRename {
     fn run(self, cx: &mut crate::types::workflow::WorkflowContext) -> Result<i32> {
+        //- 重命名文件/文件夹。
         rename(&self.from, &self.to, &cx.located)?;
         Ok(0)
     }

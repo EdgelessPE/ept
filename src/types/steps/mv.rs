@@ -18,8 +18,11 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct StepMove {
+    /// 源路径，支持相对路径和绝对路径，支持使用通配符。
     pub from: String,
+    /// 目标路径，支持相对路径和绝对路径。
     pub to: String,
+    /// 是否覆盖，缺省为 false。
     pub overwrite: Option<bool>,
 }
 
@@ -51,6 +54,7 @@ fn mv(
 
 impl TStep for StepMove {
     fn run(self, cx: &mut WorkflowContext) -> Result<i32> {
+        //- 移动文件/文件夹。
         let overwrite = self.overwrite.unwrap_or(false);
         if contains_wild_match(&self.from) {
             for from in parse_wild_match(self.from, &cx.located)? {

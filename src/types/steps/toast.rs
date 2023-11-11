@@ -14,12 +14,15 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct StepToast {
+    /// 消息标题。
     pub title: String,
+    /// 消息内容。
     pub content: String,
 }
 
 impl TStep for StepToast {
     fn run(self, _: &mut WorkflowContext) -> Result<i32> {
+        //- 弹出消息通知。
         Notification::new()
             .appname("ept")
             .summary(&self.title)

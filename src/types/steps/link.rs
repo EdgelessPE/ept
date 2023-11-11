@@ -109,10 +109,15 @@ fn update_start_menu() {
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct StepLink {
+    /// 源文件路径，支持相对路径和绝对路径。
     pub source_file: String,
+    /// 快捷方式名称，支持使用 `FOLDER/NAME` 的模式表示在创建位置的目录中放置快捷方式。
     pub target_name: Option<String>,
+    /// 快捷方式的启动参数。
     pub target_args: Option<String>,
+    /// 快捷方式图标。
     pub target_icon: Option<String>,
+    /// 创建位置，是一个枚举值数组，枚举值： "Desktop" | "StartMenu"。
     pub at: Option<Vec<String>>,
 }
 
@@ -127,6 +132,7 @@ impl StepLink {
 
 impl TStep for StepLink {
     fn run(self, cx: &mut WorkflowContext) -> anyhow::Result<i32> {
+        //- 创建快捷方式。
         // 确定 target_name
         let target_name = self.get_target_name();
 
@@ -167,6 +173,7 @@ impl TStep for StepLink {
         Ok(0)
     }
     fn reverse_run(self, _: &mut WorkflowContext) -> Result<()> {
+        //- 删除生成的快捷方式。
         let set: HashSet<String> =
             HashSet::from_iter(self.at.clone().unwrap_or(vec!["Desktop".to_string()]));
         let target_name = self.get_target_name();

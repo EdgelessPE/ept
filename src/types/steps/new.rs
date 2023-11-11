@@ -18,7 +18,9 @@ use crate::types::interpretable::Interpretable;
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct StepNew {
+    /// 新建位置，以 `/` 结尾表示新建一个目录。
     pub at: String,
+    /// 是否覆盖，缺省为 false。
     pub overwrite: Option<bool>,
 }
 
@@ -37,6 +39,7 @@ fn new_dir(at: &String) -> Result<()> {
 
 impl TStep for StepNew {
     fn run(self, _: &mut WorkflowContext) -> Result<i32> {
+        //- 新建文件/文件夹。
         // 检测是否存在
         let p = Path::new(&self.at);
         if p.exists() {

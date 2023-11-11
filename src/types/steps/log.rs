@@ -11,12 +11,15 @@ use super::TStep;
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct StepLog {
-    pub level: Option<String>,
+    /// 日志内容。
     pub msg: String,
+    /// 日志级别，枚举值："Debug" | "Info" | "Warning" | "Error" | "Success"，缺省为 "Info"。
+    pub level: Option<String>,
 }
 
 impl TStep for StepLog {
     fn run(self, _: &mut WorkflowContext) -> Result<i32> {
+        //- 打印日志。
         let level = self.level.unwrap_or("Info".to_string());
         log!("{level}(Log):{m}", m = self.msg);
         Ok(0)
