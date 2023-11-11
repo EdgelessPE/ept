@@ -26,7 +26,7 @@ import { Tag } from "../../components/tag.tsx"
 #### overwrite
 <Tag>可选</Tag> 是否覆盖，缺省为 `false`。
 * 类型：`bool` 
-* 示例：`overwrite = true` 
+* 示例：`overwrite = true`  
 ## Delete
 删除文件/文件夹。
 ### 字段
@@ -44,7 +44,7 @@ import { Tag } from "../../components/tag.tsx"
 #### force
 <Tag>可选</Tag> 是否强制删除，缺省为 `false`。
 * 类型：`bool` 
-* 示例：`force = "true"` 
+* 示例：`force = "true"`  
 ## Execute
 执行自定义命令
 ### 字段
@@ -69,14 +69,14 @@ import { Tag } from "../../components/tag.tsx"
 `Abandon`：异步执行命令并立即完成当前步骤；在当前工作流执行完成时若此命令还未结束则直接强行停止此命令。
 :::
 * 类型：`String` 
-* 示例：`wait = "Delay"` 
+* 示例：`wait = "Delay"`  
 ## Kill
 杀死某个进程。
 ### 字段
 #### target
 进程名称，大小写敏感且必须以 `.exe` 结尾。
 * 类型：`String` 
-* 示例：`target = "code.exe"` 
+* 示例：`target = "code.exe"`  
 ## Link
 创建快捷方式。
 ### 字段
@@ -106,7 +106,9 @@ import { Tag } from "../../components/tag.tsx"
 #### at
 <Tag>可选</Tag> 创建位置，是一个枚举值数组，枚举值： `Desktop` `StartMenu`。
 * 类型：`Vec<String>` 
-* 示例：`at = ["Desktop", "StartMenu"]` 
+* 示例：`at = ["Desktop", "StartMenu"]`  
+### 反向步骤
+删除生成的快捷方式。
 ## Log
 打印日志。
 ### 字段
@@ -117,7 +119,7 @@ import { Tag } from "../../components/tag.tsx"
 #### level
 <Tag>可选</Tag> 日志级别，枚举值：`Debug` `Info` `Warning` `Error` `Success`，缺省为 `Info`。
 * 类型：`String` 
-* 示例：`level = "Success"` 
+* 示例：`level = "Success"`  
 ## Move
 移动文件/文件夹。
 ### 字段
@@ -139,7 +141,7 @@ import { Tag } from "../../components/tag.tsx"
 #### overwrite
 <Tag>可选</Tag> 是否覆盖，缺省为 `false`。
 * 类型：`bool` 
-* 示例：`overwrite = "true"` 
+* 示例：`overwrite = "true"`  
 ## New
 新建文件/文件夹。
 ### 字段
@@ -157,7 +159,7 @@ import { Tag } from "../../components/tag.tsx"
 #### overwrite
 <Tag>可选</Tag> 是否覆盖，缺省为 false。
 * 类型：`bool` 
-* 示例：`overwrite = "true"` 
+* 示例：`overwrite = "true"`  
 ## Path
 将可执行文件/文件夹暴露到 PATH 中：
 若指定一个可执行文件，则会在统一管理的 bin 目录中创建一个入口；
@@ -177,7 +179,9 @@ import { Tag } from "../../components/tag.tsx"
 #### alias
 <Tag>可选</Tag> 别名，仅对可执行文件生效，缺省为原文件名。
 * 类型：`String` 
-* 示例：`alias = "code.exe"` 
+* 示例：`alias = "code.exe"`  
+### 反向步骤
+删除生成的可执行文件入口或从 PATH 变量中移除目录。
 ## Rename
 重命名文件/文件夹。
 ### 字段
@@ -188,7 +192,7 @@ import { Tag } from "../../components/tag.tsx"
 #### to
 新的名称。
 * 类型：`String` 
-* 示例：`to = "config.toml"` 
+* 示例：`to = "config.toml"`  
 ## Toast
 弹出消息通知。
 ### 字段
@@ -199,7 +203,7 @@ import { Tag } from "../../components/tag.tsx"
 #### content
 消息内容。
 * 类型：`String` 
-* 示例：`content = "Hello Nep"` 
+* 示例：`content = "Hello Nep"`  
 ## Wait
 等待一个指定的时间。
 ### 字段
@@ -210,4 +214,4 @@ import { Tag } from "../../components/tag.tsx"
 #### break_if
 <Tag>可选</Tag> 若满足指定条件则提前结束等待，该条件会在等待过程中每 500ms 检查一次。
 * 类型：`String` 
-* 示例：`break_if = 'Exist("${Desktop}/Visual Studio Code.lnk")'` 
+* 示例：`break_if = 'Exist("${Desktop}/Visual Studio Code.lnk")'`  

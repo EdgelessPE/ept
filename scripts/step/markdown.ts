@@ -17,10 +17,15 @@ function stepRenderer(
   info: StepInfo,
   { titleLevel }: { titleLevel: number },
 ): string {
+  const reverseText = info.extra.reverseRun
+    ? `\n${"#".repeat(titleLevel + 1)} 反向步骤\n${info.extra.reverseRun}`
+    : "";
   return `${"#".repeat(titleLevel)} ${info.name}
 ${info.extra.run}
 ${"#".repeat(titleLevel + 1)} 字段
-${info.fields.map((field) => fieldRenderer(field, titleLevel + 2)).join("\n")}`;
+${info.fields
+  .map((field) => fieldRenderer(field, titleLevel + 2))
+  .join("\n")} ${reverseText}`;
 }
 export function stepsRenderer(
   infos: StepInfo[],
