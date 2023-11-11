@@ -132,6 +132,7 @@ impl TStep for StepExecute {
     fn get_manifest(&self, _fs: &mut MixedFS) -> Vec<String> {
         let mut manifest = Vec::new();
 
+        //@ 若命令调用相对路径的安装包，则该安装包进入装箱单
         // 调用相对路径的安装包
         if self.call_installer.unwrap_or(false) {
             if let Ok(sp_command) = split_command(&self.command) {

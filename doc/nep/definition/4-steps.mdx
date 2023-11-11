@@ -85,6 +85,8 @@ import { Tag } from "../../components/tag.tsx"
 * 类型：`String 枚举` 
 * 有效值：`Sync` `Delay` `Abandon` ，缺省值：`Sync` 
 * 示例：`wait = "Delay"`  
+### 装箱单
+* 若命令调用相对路径的安装包，则该安装包进入装箱单
 ## Kill
 杀死某个进程。
 ### 字段
@@ -133,6 +135,8 @@ import { Tag } from "../../components/tag.tsx"
 * 示例：`at = ["Desktop", "StartMenu"]`  
 ### 反向步骤
 删除生成的快捷方式。
+### 装箱单
+* 若 `source_file` 指向一个相对路径，则该路径进入装箱单
 ## Log
 打印日志。
 ### 字段
@@ -218,6 +222,8 @@ import { Tag } from "../../components/tag.tsx"
 * 示例：`alias = "code.exe"`  
 ### 反向步骤
 删除生成的可执行文件入口或从 PATH 变量中移除目录。
+### 装箱单
+* 若 `record` 指向一个相对路径，则该路径进入装箱单
 ## Rename
 重命名文件/文件夹。
 ### 字段

@@ -12,6 +12,10 @@ function getExtra(file: string): StepInfo["extra"] {
   return {
     run: getCommentsInBlock({ file, startsWith: "fn run" }).wiki ?? "",
     reverseRun: getCommentsInBlock({ file, startsWith: "fn reverse_run" }).wiki,
+    manifest: getCommentsInBlock({
+      file,
+      startsWith: "fn get_manifest",
+    }).extra?.split("\n"),
   };
 }
 function formatField({

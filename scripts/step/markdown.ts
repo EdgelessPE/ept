@@ -34,12 +34,17 @@ function stepRenderer(
   const reverseText = info.extra.reverseRun
     ? `\n${"#".repeat(titleLevel + 1)} 反向步骤\n${info.extra.reverseRun}`
     : "";
+  const manifestText = info.extra.manifest
+    ? `\n${"#".repeat(titleLevel + 1)} 装箱单\n${info.extra.manifest
+        .map((item) => `* ${item}`)
+        .join("\n")}`
+    : "";
   return `${"#".repeat(titleLevel)} ${info.name}
 ${info.extra.run}
 ${"#".repeat(titleLevel + 1)} 字段
 ${info.fields
   .map((field) => fieldRenderer(field, titleLevel + 2))
-  .join("\n")} ${reverseText}`;
+  .join("\n")} ${reverseText}${manifestText}`;
 }
 export function stepsRenderer(
   infos: StepInfo[],

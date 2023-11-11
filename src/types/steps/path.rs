@@ -5,6 +5,7 @@ use crate::types::mixed_fs::MixedFS;
 use crate::types::permissions::{Generalizable, Permission, PermissionKey, PermissionLevel};
 use crate::types::verifiable::Verifiable;
 use crate::types::workflow::WorkflowContext;
+use crate::utils::is_starts_with_inner_value;
 use crate::utils::{get_path_bin, path::parse_relative_path_with_located, term::ask_yn};
 use crate::{log, p2s};
 use anyhow::{anyhow, Result};
@@ -256,7 +257,12 @@ impl TStep for StepPath {
         Ok(())
     }
     fn get_manifest(&self, _fs: &mut MixedFS) -> Vec<String> {
-        vec![self.record.to_owned()]
+        //@ 若 `record` 指向一个相对路径，则该路径进入装箱单
+        if !is_starts_with_inner_value(&self.record) {
+            vec![self.record.to_owned()]
+        } else {
+            Vec::new()
+        }
     }
 }
 

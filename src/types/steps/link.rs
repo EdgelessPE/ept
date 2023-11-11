@@ -6,6 +6,7 @@ use crate::types::permissions::{Generalizable, Permission, PermissionKey, Permis
 use crate::types::workflow::WorkflowContext;
 use crate::utils::env::{env_desktop, env_start_menu};
 use crate::utils::fs::{count_sub_files, try_recycle};
+use crate::utils::is_starts_with_inner_value;
 use crate::{
     log, p2s, types::verifiable::Verifiable, utils::path::parse_relative_path_with_located,
 };
@@ -203,7 +204,12 @@ impl TStep for StepLink {
         Ok(())
     }
     fn get_manifest(&self, _fs: &mut MixedFS) -> Vec<String> {
-        vec![self.source_file.to_owned()]
+        //@ 若 `source_file` 指向一个相对路径，则该路径进入装箱单
+        if !is_starts_with_inner_value(&self.source_file) {
+            vec![self.source_file.to_owned()]
+        } else {
+            Vec::new()
+        }
     }
 }
 
@@ -224,7 +230,9 @@ impl Interpretable for StepLink {
 
 impl Verifiable for StepLink {
     fn verify_self(&self, _: &String) -> Result<()> {
-        values_validator_path(&self.source_file)?;
+        values_validator_path(&self.source_file).map_err(|e| {
+            anyhow!("Error(Link):Failed to validate field 'source_file' as valid path : {e}")
+        })?;
         if let Some(target_name) = &self.target_name {
             if !TARGET_RE.is_match(&target_name) {
                 return Err(anyhow!(
