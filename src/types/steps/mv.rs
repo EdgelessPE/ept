@@ -32,6 +32,7 @@ pub struct StepMove {
     /// 目标路径，支持相对路径和绝对路径。
     //# `to = "./bin"`
     //@ 是合法路径
+    //@ 不包含通配符
     pub to: String,
     /// 是否覆盖，缺省为 `false`。
     //# `overwrite = "true"`

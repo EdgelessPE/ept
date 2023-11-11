@@ -27,6 +27,7 @@ pub struct StepNew {
     //# at = "${Desktop}/Microsoft/"
     //# ```
     //@ 是合法路径
+    //@ 不包含通配符
     pub at: String,
     /// 是否覆盖，缺省为 false。
     //# `overwrite = "true"`

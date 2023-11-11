@@ -36,6 +36,7 @@ pub struct StepCopy {
     /// 目标路径，支持相对路径和绝对路径。
     //# `to = "./config"`
     //@ 是合法路径
+    //@ 不包含通配符
     pub to: String,
     /// 是否覆盖，缺省为 `false`。
     //# `overwrite = true`
@@ -198,7 +199,16 @@ impl Verifiable for StepCopy {
     fn verify_self(&self, located: &String) -> Result<()> {
         values_validator_path(&self.from)?;
         values_validator_path(&self.to)?;
-        common_wild_match_verify(&self.from, &self.to, located)
+        common_wild_match_verify(&self.from, &self.to, located)?;
+        // 检查 to 是否包含通配符
+        if contains_wild_match(&self.to) {
+            return Err(anyhow!(
+                "Error(Copy):Field 'to' shouldn't contain wild match : '{to}'",
+                to = &self.to
+            ));
+        }
+
+        Ok(())
     }
 }
 
