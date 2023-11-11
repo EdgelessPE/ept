@@ -209,6 +209,29 @@ impl Generalizable for StepExecute {
 }
 
 #[test]
+fn test_execute_validate() {
+    let located = String::new();
+
+    let res = StepExecute {
+        command: "${AppData}/Installer.exe /S".to_string(),
+        pwd: None,
+        call_installer: Some(true),
+        wait: None,
+    }
+    .verify_self(&located);
+    assert!(res.is_ok());
+
+    let res = StepExecute {
+        command: "C:/Windows/Installer.exe /S".to_string(),
+        pwd: None,
+        call_installer: Some(true),
+        wait: None,
+    }
+    .verify_self(&located);
+    assert!(res.is_err());
+}
+
+#[test]
 fn test_execute_manifest() {
     let mut fs = MixedFS::new("examples/Dism++/Dism++".to_string());
 

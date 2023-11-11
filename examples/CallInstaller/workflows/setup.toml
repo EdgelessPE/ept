@@ -3,3 +3,9 @@ name = "Call Installer"
 step = "Execute"
 command = "Installer.exe /S"
 call_installer = true
+
+[install_2]
+name = "Call Installer 2"
+step = "Execute"
+command = "${AppData}/Installer.exe /S"
+call_installer = true
