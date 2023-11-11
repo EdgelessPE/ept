@@ -23,10 +23,19 @@ use std::path::PathBuf;
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct StepCopy {
     /// 源路径，支持相对路径和绝对路径，支持使用通配符。
+    //# ```toml
+    //# # 相对路径写法
+    //# from = "./examples/config.toml"
+    //#
+    //# # 绝对路径通配符写法
+    //# from = "${SystemDrive}/Windows/system32/*.dll"
+    //# ```
     pub from: String,
     /// 目标路径，支持相对路径和绝对路径。
+    //# `to = "./config"`
     pub to: String,
     /// 是否覆盖，缺省为 `false`。
+    //# `overwrite = true`
     pub overwrite: Option<bool>,
 }
 

@@ -22,8 +22,16 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct StepDelete {
     /// 删除目标路径，支持相对路径和绝对路径，支持使用通配符。
+    //# ```toml
+    //# # 相对路径写法
+    //# at = "./eula.txt"
+    //#
+    //# # 绝对路径通配符写法
+    //# at = "${AppData}/vscode/*.txt"
+    //# ```
     pub at: String,
     /// 是否强制删除，缺省为 `false`。
+    //# `force = "true"`
     pub force: Option<bool>,
 }
 

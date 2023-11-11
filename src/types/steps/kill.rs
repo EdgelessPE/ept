@@ -18,6 +18,7 @@ use sysinfo::{ProcessExt, System, SystemExt};
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct StepKill {
     /// 进程名称，大小写敏感且必须以 `.exe` 结尾。
+    //# `target = "code.exe"`
     pub target: String,
 }
 

@@ -22,9 +22,17 @@ use winreg::{enums::*, RegKey};
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct StepPath {
-    /// 记录值，支持可执行文件/目录，支持相对路径和绝对路径。
+    /// 记录值，支持可执行文件/文件夾，支持相对路径和绝对路径。
+    //# ```toml
+    //# # 创建可执行文件入口
+    //# record = "visual-studio-code.exe"
+    //#
+    //# # 添加文件夹到 PATH 变量
+    //# record = "./bin"
+    //# ```
     pub record: String,
     /// 别名，仅对可执行文件生效，缺省为原文件名。
+    //# `alias = "code.exe"`
     pub alias: Option<String>,
 }
 
@@ -136,7 +144,7 @@ fn set_system_path(record: &String, is_add: bool) -> Result<bool> {
 
 impl TStep for StepPath {
     fn run(self, cx: &mut WorkflowContext) -> Result<i32> {
-        //- 将可执行文件/文件夹暴露到 PATH 目录中。
+        //- 将可执行文件/文件夹暴露到 PATH 中：
         //- 若指定一个可执行文件，则会在统一管理的 bin 目录中创建一个入口；
         //- 若指定一个文件夹，则会将其添加到 PATH 变量中。
         // 解析 bin 绝对路径

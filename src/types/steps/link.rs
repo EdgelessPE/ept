@@ -110,13 +110,24 @@ fn update_start_menu() {
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct StepLink {
     /// 源文件路径，支持相对路径和绝对路径。
+    //# `source_file = "code.exe"`
     pub source_file: String,
-    /// 快捷方式名称，支持使用 `FOLDER/NAME` 的模式表示在创建位置的目录中放置快捷方式。
+    /// 快捷方式名称，支持使用 `FOLDER/NAME` 的模式表示在创建位置的文件夾中放置快捷方式。
+    //# ```toml
+    //# # 创建快捷方式
+    //# target_name = "Visual Studio Code"
+    //#
+    //# # 在文件夹中创建快捷方式
+    //# target_name = "Microsoft/Visual Studio Code"
+    //# ```
     pub target_name: Option<String>,
+    //# `target_args = "--debug"`
     /// 快捷方式的启动参数。
     pub target_args: Option<String>,
+    //# `target_icon = "./icons/code.ico"`
     /// 快捷方式图标。
     pub target_icon: Option<String>,
+    //# `at = ["Desktop", "StartMenu"]`
     /// 创建位置，是一个枚举值数组，枚举值： `Desktop` `StartMenu`。
     pub at: Option<Vec<String>>,
 }

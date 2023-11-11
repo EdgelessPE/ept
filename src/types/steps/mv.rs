@@ -19,10 +19,19 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct StepMove {
     /// 源路径，支持相对路径和绝对路径，支持使用通配符。
+    //# ```toml
+    //# # 相对路径写法
+    //# from = "./runtime/lib.dll"
+    //#
+    //# # 绝对路径通配符写法
+    //# from = "${Desktop}/Visual Studio Code.lnk"
+    //# ```
     pub from: String,
     /// 目标路径，支持相对路径和绝对路径。
+    //# `to = "./bin"`
     pub to: String,
     /// 是否覆盖，缺省为 `false`。
+    //# `overwrite = "true"`
     pub overwrite: Option<bool>,
 }
 

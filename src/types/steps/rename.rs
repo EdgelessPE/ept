@@ -28,8 +28,10 @@ lazy_static! {
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct StepRename {
     /// 目标路径，支持相对路径和绝对路径。
+    //# `from = "./config.toml.example"`
     pub from: String,
     /// 新的名称。
+    //# `to = "config.toml"`
     pub to: String,
 }
 

@@ -15,8 +15,10 @@ use std::{thread::sleep, time::Duration};
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct StepWait {
     /// 等待的时长，单位为 ms。
+    //# `timeout = "3000"`
     pub timeout: u64,
     /// 若满足指定条件则提前结束等待，该条件会在等待过程中每 500ms 检查一次。
+    //# `break_if = 'Exist("${Desktop}/Visual Studio Code.lnk")'`
     pub break_if: Option<String>,
 }
 

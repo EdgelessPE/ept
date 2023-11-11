@@ -4,7 +4,7 @@ function fieldRenderer(
   field: StepInfo["fields"][number],
   titleLevel: number,
 ): string {
-  const demoText = field.demo ? `\n* 示例：\`${field.demo}\`` : "";
+  const demoText = field.demo ? `\n* 示例：${field.demo}` : "";
   const rulesText = field.rules?.length
     ? "\n" + field.rules.map((rule) => `* ${rule}`).join("\n")
     : "";

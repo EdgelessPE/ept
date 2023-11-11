@@ -18,9 +18,17 @@ use crate::types::interpretable::Interpretable;
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct StepNew {
-    /// 新建位置，以 `/` 结尾表示新建一个目录。
+    /// 新建位置，以 `/` 结尾表示新建一个文件夹。
+    //# ```toml
+    //# # 创建空文件
+    //# at = "./empty.txt"
+    //#
+    //# # 创建文件夹
+    //# at = "${Desktop}/Microsoft/"
+    //# ```
     pub at: String,
     /// 是否覆盖，缺省为 false。
+    //# `overwrite = "true"`
     pub overwrite: Option<bool>,
 }
 

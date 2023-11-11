@@ -15,8 +15,10 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct StepToast {
     /// 消息标题。
+    //# `title = "你好 Nep"`
     pub title: String,
     /// 消息内容。
+    //# `content = "Hello Nep"`
     pub content: String,
 }
 

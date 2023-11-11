@@ -12,8 +12,10 @@ use super::TStep;
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct StepLog {
     /// 日志内容。
+    //# `msg = "VSCode installed successfully, workflow exit."`
     pub msg: String,
     /// 日志级别，枚举值：`Debug` `Info` `Warning` `Error` `Success`，缺省为 `Info`。
+    //# `level = "Success"`
     pub level: Option<String>,
 }
 
