@@ -6,6 +6,7 @@ import { getCommentsInBlock, splitBlock } from "../block";
 import { type StepInfo } from "./type";
 import { writeWiki } from "../writer";
 import { stepsRenderer } from "./markdown";
+import { parsePermission } from "./permission";
 
 function getExtra(file: string): StepInfo["extra"] {
   // TODO:添加更多字段
@@ -16,6 +17,7 @@ function getExtra(file: string): StepInfo["extra"] {
       file,
       startsWith: "fn get_manifest",
     }).extra?.split("\n"),
+    permissions: parsePermission(file),
   };
 }
 function formatField({
