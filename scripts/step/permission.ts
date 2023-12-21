@@ -6,6 +6,27 @@ import { getCommentsInBlock } from "../block";
 const REGEX_PERMISSION_BLOCK =
   /Permission {\s*key: ([^,]+),\s*level: ([^,]+),\s*targets: ([^,]+),\s*[^}]+/gm;
 
+function parser(
+  type: "key" | "level" | "targets",
+  { raw, text }: { text: string; raw: boolean },
+) {
+  if (!raw) {
+    return text;
+  }
+  switch (type) {
+    case "key":
+      return text.split("::")[1];
+    case "level":
+      if (text.includes("judge_perm_level")) {
+        return `根据目标路径决定`;
+      } else {
+        return text.split("::")[1];
+      }
+    case "targets":
+      return text.split(".")[1];
+  }
+}
+
 // 分割 Permission 申明，返回原始申明语句
 function splitPermissions(file: string) {
   const filePath = parseFilePath(file);
@@ -73,10 +94,12 @@ function splitPermissions(file: string) {
       if (t.endsWith(",")) {
         t = t.slice(0, -1);
       }
-      return {
-        text: t.split(": ")[1].trim(),
+
+      const [type, text] = t.split(": ").map((t) => t.trim());
+      return parser(type as "key" | "level" | "targets", {
+        text,
         raw,
-      };
+      });
     });
     return {
       key,
