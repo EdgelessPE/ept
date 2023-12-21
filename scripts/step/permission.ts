@@ -47,11 +47,20 @@ function splitPermissions(file: string) {
   return m.map((text) => {
     const sp = text.split("\n");
     const [key, level, targets, scene] = sp.slice(1).map((_t) => {
-      const t = _t.trim();
+      let t = _t.trim();
       if (!t) return undefined;
+      let raw = true;
       if (t.startsWith("//@")) {
-        return t.replace("//@", "").trim();
-      } else return t.split(": ")[1].trim().slice(0, -1);
+        t = t.replace("//@", "").trim();
+        raw = false;
+      }
+      if (t.endsWith(",")) {
+        t = t.slice(0, -1);
+      }
+      return {
+        text: t.split(": ")[1].trim(),
+        raw,
+      };
     });
     return {
       key,
