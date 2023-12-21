@@ -30,7 +30,7 @@ pub struct StepNew {
     //@ 不包含通配符
     pub at: String,
     /// 是否覆盖，缺省为 false。
-    //# `overwrite = "true"`
+    //# `overwrite = true`
     pub overwrite: Option<bool>,
 }
 

@@ -102,10 +102,10 @@ impl Generalizable for StepWait {
             let mut cond_permissions = get_permissions_from_conditions(vec![cond.to_owned()])?;
             permissions.append(&mut cond_permissions);
         }
-        //@ key: 由 break_if 条件语句产生
-        //@ level: 由 break_if 条件语句产生
-        //@ targets: 由 break_if 条件语句产生
-        //@ scene: 配置了 break_if 时
+        //@ key: 由 `break_if` 条件语句产生
+        //@ level: 由 `break_if` 条件语句产生
+        //@ targets: 由 `break_if` 条件语句产生
+        //@ scene: 配置了 `break_if` 时
 
         Ok(permissions)
     }

@@ -263,14 +263,14 @@ impl Generalizable for StepLink {
                 //@ key: link_desktop
                 //@ level: Normal
                 //@ targets: 快捷方式名称，target_name 或由路径自动生成
-                //@ scene: at 中包含 "Desktop" 时
+                //@ scene: `at` 中包含 `"Desktop"` 时
                 keys.push(PermissionKey::link_desktop)
             }
             if ats.contains(&"StartMenu".to_string()) {
                 //@ key: link_startmenu
                 //@ level: Normal
                 //@ targets: 快捷方式名称，target_name 或由路径自动生成
-                //@ scene: at 中包含 "StartMenu" 时
+                //@ scene: `at` 中包含 `"StartMenu"` 时
                 keys.push(PermissionKey::link_startmenu)
             }
         } else {

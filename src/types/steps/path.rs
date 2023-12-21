@@ -295,14 +295,14 @@ impl Generalizable for StepPath {
                 key: PermissionKey::path_entrances,
                 level: PermissionLevel::Normal,
                 targets: vec![self.record.to_owned()],
-                //@ scene: record 指向文件
+                //@ scene: `record` 指向文件
             }
         } else {
             Permission {
                 key: PermissionKey::path_dirs,
                 level: PermissionLevel::Important,
                 targets: vec![self.record.to_owned()],
-                //@ scene: record 指向目录
+                //@ scene: `record` 指向目录
             }
         };
         Ok(vec![node])

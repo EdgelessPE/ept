@@ -20,7 +20,7 @@ use std::time::Instant;
 pub struct StepExecute {
     /// 需要执行的命令，使用终端为 cmd。
     //# `command = "./installer.exe /S"`
-    //@ 是有效的 POSIX 命令
+    //@ 符合 POSIX 命令格式
     //@ 不得出现绝对路径（使用[内置变量](/nep/workflow/2-context.html#内置变量)）
     pub command: String,
     /// 执行目录，缺省为包安装目录。
@@ -196,14 +196,14 @@ impl Generalizable for StepExecute {
                 key: PermissionKey::execute_installer,
                 level: PermissionLevel::Important,
                 targets: vec![self.command.to_owned()],
-                //@ scene: call_installer 为 true
+                //@ scene: `call_installer` 为 `true`
             }
         } else {
             Permission {
                 key: PermissionKey::execute_custom,
                 level: PermissionLevel::Sensitive,
                 targets: vec![self.command.to_owned()],
-                //@ scene: call_installer 为 false （缺省）
+                //@ scene: `call_installer` 为 `false` （缺省）
             }
         };
         Ok(vec![node])
