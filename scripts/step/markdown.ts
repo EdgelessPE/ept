@@ -75,5 +75,5 @@ export function stepsRenderer(
 ) {
   return `${infos
     .map((info) => stepRenderer(info, { titleLevel: titleLevel + 1 }))
-    .join("\n")}`;
+    .join("\n---\n")}`;
 }

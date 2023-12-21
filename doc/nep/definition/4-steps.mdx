@@ -41,6 +41,7 @@ import { Tag } from "../../components/tag.tsx"
 * 类型：[fs_write](/nep/definition/3-permissions.html#fs_write)
 * 等级：根据目标路径决定
 * 目标：取字段 `to` 的值
+---
 ## Delete
 删除文件/文件夹。
 ### 字段
@@ -66,6 +67,7 @@ import { Tag } from "../../components/tag.tsx"
 * 类型：[fs_write](/nep/definition/3-permissions.html#fs_write)
 * 等级：根据目标路径决定
 * 目标：取字段 `at` 的值
+---
 ## Execute
 执行自定义命令
 ### 字段
@@ -109,6 +111,7 @@ import { Tag } from "../../components/tag.tsx"
 * 等级：[Sensitive](/nep/definition/3-permissions.html#sensitive)
 * 目标：取字段 `command` 的值
 * 场景：call_installer 为 false （缺省）
+---
 ## Kill
 杀死某个进程。
 ### 字段
@@ -122,6 +125,7 @@ import { Tag } from "../../components/tag.tsx"
 * 类型：[process_kill](/nep/definition/3-permissions.html#process_kill)
 * 等级：[Sensitive](/nep/definition/3-permissions.html#sensitive)
 * 目标：取字段 `target` 的值
+---
 ## Link
 创建快捷方式。
 ### 字段
@@ -173,6 +177,7 @@ import { Tag } from "../../components/tag.tsx"
 * 等级：[Normal](/nep/definition/3-permissions.html#normal)
 * 目标：快捷方式名称，target_name 或由路径自动生成
 * 场景：at 中包含 "StartMenu" 时
+---
 ## Log
 打印日志。
 ### 字段
@@ -187,6 +192,7 @@ import { Tag } from "../../components/tag.tsx"
 * 示例：`level = "Success"`  
 ### 权限
 无权限
+---
 ## Move
 移动文件/文件夹。
 ### 字段
@@ -223,6 +229,7 @@ import { Tag } from "../../components/tag.tsx"
 * 类型：[fs_write](/nep/definition/3-permissions.html#fs_write)
 * 等级：根据目标路径决定
 * 目标：取字段 `to` 的值
+---
 ## New
 新建文件/文件夹。
 ### 字段
@@ -248,6 +255,7 @@ import { Tag } from "../../components/tag.tsx"
 * 类型：[fs_write](/nep/definition/3-permissions.html#fs_write)
 * 等级：根据目标路径决定
 * 目标：取字段 `at` 的值
+---
 ## Path
 将可执行文件/文件夹暴露到 PATH 中：
 若指定一个可执行文件，则会在统一管理的 bin 目录中创建一个入口；
@@ -284,6 +292,7 @@ import { Tag } from "../../components/tag.tsx"
 * 等级：[Important](/nep/definition/3-permissions.html#important)
 * 目标：取字段 `record` 的值
 * 场景：record 指向目录
+---
 ## Rename
 重命名文件/文件夹。
 ### 字段
@@ -304,6 +313,7 @@ import { Tag } from "../../components/tag.tsx"
 * 类型：[fs_write](/nep/definition/3-permissions.html#fs_write)
 * 等级：根据目标路径决定
 * 目标：取字段 `from` 的值
+---
 ## Toast
 弹出消息通知。
 ### 字段
@@ -319,6 +329,7 @@ import { Tag } from "../../components/tag.tsx"
 * 类型：[notify_toast](/nep/definition/3-permissions.html#notify_toast)
 * 等级：[Normal](/nep/definition/3-permissions.html#normal)
 * 目标：取字段 `title` 的值
+---
 ## Wait
 等待一个指定的时间。
 ### 字段
