@@ -196,14 +196,14 @@ impl Generalizable for StepExecute {
                 key: PermissionKey::execute_installer,
                 level: PermissionLevel::Important,
                 targets: vec![self.command.to_owned()],
-                //@ call_installer 为 true
+                //@ scene: call_installer 为 true
             }
         } else {
             Permission {
                 key: PermissionKey::execute_custom,
                 level: PermissionLevel::Sensitive,
                 targets: vec![self.command.to_owned()],
-                //@ call_installer 为 false （缺省）
+                //@ scene: call_installer 为 false （缺省）
             }
         };
         Ok(vec![node])
