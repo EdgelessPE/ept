@@ -11,7 +11,9 @@ function parser(
   { raw, text }: { text: string; raw: boolean },
 ) {
   if (!raw) {
-    return text;
+    return text.match(/^\w+$/)
+      ? `[${text}](/nep/definition/3-permissions.html#${text})`
+      : text;
   }
   const later = text.split("::")[1];
   switch (type) {

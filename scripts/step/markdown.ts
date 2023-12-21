@@ -27,6 +27,23 @@ ${field.type.optional ? "<Tag>可选</Tag> " : ""}${field.wiki ?? ""}
 ${typeText} ${enumText} ${demoText} ${rulesText}`;
 }
 
+function permissionRenderer({
+  key,
+  level,
+  targets,
+  scene,
+}: {
+  key: string;
+  level: string;
+  targets: string;
+  scene?: string;
+}) {
+  const sceneText = scene ? `\n* 场景：${scene}` : "";
+  return `* 类型：${key}
+* 等级：${level}
+* 目标：${targets}${sceneText}`;
+}
+
 function stepRenderer(
   info: StepInfo,
   { titleLevel }: { titleLevel: number },
@@ -44,7 +61,13 @@ ${info.extra.run}
 ${"#".repeat(titleLevel + 1)} 字段
 ${info.fields
   .map((field) => fieldRenderer(field, titleLevel + 2))
-  .join("\n")} ${reverseText}${manifestText}`;
+  .join("\n")} ${reverseText}${manifestText}
+${"#".repeat(titleLevel + 1)} 权限
+${
+  info.extra.permissions?.length
+    ? `${info.extra.permissions.map(permissionRenderer).join("\n<br/>\n")}`
+    : "无权限"
+}`;
 }
 export function stepsRenderer(
   infos: StepInfo[],
