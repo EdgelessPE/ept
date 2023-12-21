@@ -101,12 +101,12 @@ import { Tag } from "../../components/tag.tsx"
 * 若命令调用相对路径的安装包，则该安装包进入装箱单
 ### 权限
 * 类型：[execute_installer](/nep/definition/3-permissions.html#execute_installer)
-* 等级：[Important](/nep/definition/3-permissions.html#Important)
+* 等级：[Important](/nep/definition/3-permissions.html#important)
 * 目标：取字段 `command` 的值
 * 场景：call_installer 为 true
 <br/>
 * 类型：[execute_custom](/nep/definition/3-permissions.html#execute_custom)
-* 等级：[Sensitive](/nep/definition/3-permissions.html#Sensitive)
+* 等级：[Sensitive](/nep/definition/3-permissions.html#sensitive)
 * 目标：取字段 `command` 的值
 * 场景：call_installer 为 false （缺省）
 ## Kill
@@ -120,7 +120,7 @@ import { Tag } from "../../components/tag.tsx"
   * 以 `.exe` 结尾 
 ### 权限
 * 类型：[process_kill](/nep/definition/3-permissions.html#process_kill)
-* 等级：[Sensitive](/nep/definition/3-permissions.html#Sensitive)
+* 等级：[Sensitive](/nep/definition/3-permissions.html#sensitive)
 * 目标：取字段 `target` 的值
 ## Link
 创建快捷方式。
@@ -165,12 +165,12 @@ import { Tag } from "../../components/tag.tsx"
 * 若 `source_file` 指向一个相对路径，则该路径进入装箱单
 ### 权限
 * 类型：[link_desktop](/nep/definition/3-permissions.html#link_desktop)
-* 等级：[Normal](/nep/definition/3-permissions.html#Normal)
+* 等级：[Normal](/nep/definition/3-permissions.html#normal)
 * 目标：快捷方式名称，target_name 或由路径自动生成
 * 场景：at 中包含 "Desktop" 时
 <br/>
 * 类型：[link_startmenu](/nep/definition/3-permissions.html#link_startmenu)
-* 等级：[Normal](/nep/definition/3-permissions.html#Normal)
+* 等级：[Normal](/nep/definition/3-permissions.html#normal)
 * 目标：快捷方式名称，target_name 或由路径自动生成
 * 场景：at 中包含 "StartMenu" 时
 ## Log
@@ -276,12 +276,12 @@ import { Tag } from "../../components/tag.tsx"
 * 若 `record` 指向一个相对路径，则该路径进入装箱单
 ### 权限
 * 类型：[path_entrances](/nep/definition/3-permissions.html#path_entrances)
-* 等级：[Normal](/nep/definition/3-permissions.html#Normal)
+* 等级：[Normal](/nep/definition/3-permissions.html#normal)
 * 目标：取字段 `record` 的值
 * 场景：record 指向文件
 <br/>
 * 类型：[path_dirs](/nep/definition/3-permissions.html#path_dirs)
-* 等级：[Important](/nep/definition/3-permissions.html#Important)
+* 等级：[Important](/nep/definition/3-permissions.html#important)
 * 目标：取字段 `record` 的值
 * 场景：record 指向目录
 ## Rename
@@ -317,7 +317,7 @@ import { Tag } from "../../components/tag.tsx"
 * 示例：`content = "Hello Nep"`  
 ### 权限
 * 类型：[notify_toast](/nep/definition/3-permissions.html#notify_toast)
-* 等级：[Normal](/nep/definition/3-permissions.html#Normal)
+* 等级：[Normal](/nep/definition/3-permissions.html#normal)
 * 目标：取字段 `title` 的值
 ## Wait
 等待一个指定的时间。

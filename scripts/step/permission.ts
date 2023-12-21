@@ -12,18 +12,18 @@ function parser(
 ) {
   if (!raw) {
     return text.match(/^\w+$/)
-      ? `[${text}](/nep/definition/3-permissions.html#${text})`
+      ? `[${text}](/nep/definition/3-permissions.html#${text.toLowerCase()})`
       : text;
   }
   const later = text.split("::")[1];
   switch (type) {
     case "key":
-      return `[${later}](/nep/definition/3-permissions.html#${later})`;
+      return `[${later}](/nep/definition/3-permissions.html#${later.toLowerCase()})`;
     case "level":
       if (text.includes("judge_perm_level")) {
         return `根据目标路径决定`;
       } else {
-        return `[${later}](/nep/definition/3-permissions.html#${later})`;
+        return `[${later}](/nep/definition/3-permissions.html#${later.toLowerCase()})`;
       }
     case "targets":
       return `取字段 \`${text.split(".")[1]}\` 的值`;
