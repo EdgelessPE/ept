@@ -13,17 +13,18 @@ function parser(
   if (!raw) {
     return text;
   }
+  const later = text.split("::")[1];
   switch (type) {
     case "key":
-      return text.split("::")[1];
+      return `[${later}](/nep/definition/3-permissions.html#${later})`;
     case "level":
       if (text.includes("judge_perm_level")) {
         return `根据目标路径决定`;
       } else {
-        return text.split("::")[1];
+        return `[${later}](/nep/definition/3-permissions.html#${later})`;
       }
     case "targets":
-      return text.split(".")[1];
+      return `取字段 \`${text.split(".")[1]}\` 的值`;
   }
 }
 
