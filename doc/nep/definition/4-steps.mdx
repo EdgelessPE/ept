@@ -33,6 +33,14 @@ import { Tag } from "../../components/tag.tsx"
 <Tag>可选</Tag> 是否覆盖，缺省为 `false`。
 * 类型：`bool`  
 * 示例：`overwrite = true`  
+### 权限
+* 类型：[fs_read](/nep/definition/3-permissions.html#fs_read)
+* 等级：根据目标路径决定
+* 目标：取字段 `from` 的值
+<br/>
+* 类型：[fs_write](/nep/definition/3-permissions.html#fs_write)
+* 等级：根据目标路径决定
+* 目标：取字段 `to` 的值
 ## Delete
 删除文件/文件夹。
 ### 字段
@@ -54,6 +62,10 @@ import { Tag } from "../../components/tag.tsx"
 <Tag>可选</Tag> 是否强制删除，缺省为 `false`。
 * 类型：`bool`  
 * 示例：`force = "true"`  
+### 权限
+* 类型：[fs_write](/nep/definition/3-permissions.html#fs_write)
+* 等级：根据目标路径决定
+* 目标：取字段 `at` 的值
 ## Execute
 执行自定义命令
 ### 字段
@@ -87,6 +99,16 @@ import { Tag } from "../../components/tag.tsx"
 * 示例：`wait = "Delay"`  
 ### 装箱单
 * 若命令调用相对路径的安装包，则该安装包进入装箱单
+### 权限
+* 类型：[execute_installer](/nep/definition/3-permissions.html#execute_installer)
+* 等级：[Important](/nep/definition/3-permissions.html#Important)
+* 目标：取字段 `command` 的值
+* 场景：call_installer 为 true
+<br/>
+* 类型：[execute_custom](/nep/definition/3-permissions.html#execute_custom)
+* 等级：[Sensitive](/nep/definition/3-permissions.html#Sensitive)
+* 目标：取字段 `command` 的值
+* 场景：call_installer 为 false （缺省）
 ## Kill
 杀死某个进程。
 ### 字段
@@ -96,6 +118,10 @@ import { Tag } from "../../components/tag.tsx"
 * 示例：`target = "code.exe"` 
 * 校验规则：
   * 以 `.exe` 结尾 
+### 权限
+* 类型：[process_kill](/nep/definition/3-permissions.html#process_kill)
+* 等级：[Sensitive](/nep/definition/3-permissions.html#Sensitive)
+* 目标：取字段 `target` 的值
 ## Link
 创建快捷方式。
 ### 字段
@@ -137,6 +163,16 @@ import { Tag } from "../../components/tag.tsx"
 删除生成的快捷方式。
 ### 装箱单
 * 若 `source_file` 指向一个相对路径，则该路径进入装箱单
+### 权限
+* 类型：[link_desktop](/nep/definition/3-permissions.html#link_desktop)
+* 等级：[Normal](/nep/definition/3-permissions.html#Normal)
+* 目标：快捷方式名称，target_name 或由路径自动生成
+* 场景：at 中包含 "Desktop" 时
+<br/>
+* 类型：[link_startmenu](/nep/definition/3-permissions.html#link_startmenu)
+* 等级：[Normal](/nep/definition/3-permissions.html#Normal)
+* 目标：快捷方式名称，target_name 或由路径自动生成
+* 场景：at 中包含 "StartMenu" 时
 ## Log
 打印日志。
 ### 字段
@@ -149,6 +185,8 @@ import { Tag } from "../../components/tag.tsx"
 * 类型：`String 枚举` 
 * 有效值：`Debug` `Info` `Warning` `Error` `Success` ，缺省值：`Info` 
 * 示例：`level = "Success"`  
+### 权限
+无权限
 ## Move
 移动文件/文件夹。
 ### 字段
@@ -177,6 +215,14 @@ import { Tag } from "../../components/tag.tsx"
 <Tag>可选</Tag> 是否覆盖，缺省为 `false`。
 * 类型：`bool`  
 * 示例：`overwrite = "true"`  
+### 权限
+* 类型：[fs_write](/nep/definition/3-permissions.html#fs_write)
+* 等级：根据目标路径决定
+* 目标：取字段 `from` 的值
+<br/>
+* 类型：[fs_write](/nep/definition/3-permissions.html#fs_write)
+* 等级：根据目标路径决定
+* 目标：取字段 `to` 的值
 ## New
 新建文件/文件夹。
 ### 字段
@@ -198,6 +244,10 @@ import { Tag } from "../../components/tag.tsx"
 <Tag>可选</Tag> 是否覆盖，缺省为 false。
 * 类型：`bool`  
 * 示例：`overwrite = "true"`  
+### 权限
+* 类型：[fs_write](/nep/definition/3-permissions.html#fs_write)
+* 等级：根据目标路径决定
+* 目标：取字段 `at` 的值
 ## Path
 将可执行文件/文件夹暴露到 PATH 中：
 若指定一个可执行文件，则会在统一管理的 bin 目录中创建一个入口；
@@ -224,6 +274,16 @@ import { Tag } from "../../components/tag.tsx"
 删除生成的可执行文件入口或从 PATH 变量中移除目录。
 ### 装箱单
 * 若 `record` 指向一个相对路径，则该路径进入装箱单
+### 权限
+* 类型：[path_entrances](/nep/definition/3-permissions.html#path_entrances)
+* 等级：[Normal](/nep/definition/3-permissions.html#Normal)
+* 目标：取字段 `record` 的值
+* 场景：record 指向文件
+<br/>
+* 类型：[path_dirs](/nep/definition/3-permissions.html#path_dirs)
+* 等级：[Important](/nep/definition/3-permissions.html#Important)
+* 目标：取字段 `record` 的值
+* 场景：record 指向目录
 ## Rename
 重命名文件/文件夹。
 ### 字段
@@ -240,6 +300,10 @@ import { Tag } from "../../components/tag.tsx"
 * 示例：`to = "config.toml"` 
 * 校验规则：
   * 是合法的文件名或文件夹名而非路径 
+### 权限
+* 类型：[fs_write](/nep/definition/3-permissions.html#fs_write)
+* 等级：根据目标路径决定
+* 目标：取字段 `from` 的值
 ## Toast
 弹出消息通知。
 ### 字段
@@ -251,6 +315,10 @@ import { Tag } from "../../components/tag.tsx"
 消息内容。
 * 类型：`String`  
 * 示例：`content = "Hello Nep"`  
+### 权限
+* 类型：[notify_toast](/nep/definition/3-permissions.html#notify_toast)
+* 等级：[Normal](/nep/definition/3-permissions.html#Normal)
+* 目标：取字段 `title` 的值
 ## Wait
 等待一个指定的时间。
 ### 字段
@@ -266,3 +334,8 @@ import { Tag } from "../../components/tag.tsx"
 * 示例：`break_if = 'Exist("${Desktop}/Visual Studio Code.lnk")'` 
 * 校验规则：
   * 是合法的条件 
+### 权限
+* 类型：由 break_if 条件语句产生
+* 等级：由 break_if 条件语句产生
+* 目标：由 break_if 条件语句产生
+* 场景：配置了 break_if 时
