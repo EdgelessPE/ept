@@ -1,6 +1,7 @@
 import { parseFilePath } from "../utils";
 import fs from "fs";
 import type { StepInfo } from "./type";
+import { getCommentsInBlock } from "../block";
 
 const REGEX_PERMISSION_BLOCK =
   /Permission {\s*key: ([^,]+),\s*level: ([^,]+),\s*targets: ([^,]+),\s*[^}]+/gm;
@@ -40,9 +41,24 @@ function splitPermissions(file: string) {
   const implBlockText = lines.slice(startIndex, endIndex).join("\n");
 
   // 匹配 Permission 结构体
-  const m = implBlockText.match(REGEX_PERMISSION_BLOCK);
+  let m: string[] | null = implBlockText.match(REGEX_PERMISSION_BLOCK);
   if (!m) {
-    return null;
+    const comments = getCommentsInBlock({
+      file,
+      startsWith: "impl Generalizable for Step",
+    }).extra;
+    if (!comments) return [];
+    m = comments
+      .split("key: ")
+      .filter(Boolean)
+      .map((t) => {
+        const normalLines = `key: ${t}`
+          .split("\n")
+          .filter(Boolean)
+          .map((line) => `//@ ${line}`)
+          .join("\n");
+        return `\n${normalLines}`;
+      });
   }
   return m.map((text) => {
     const sp = text.split("\n");
