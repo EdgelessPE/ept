@@ -1,5 +1,3 @@
-import type { PermissionLevel } from "../context/type";
-
 export interface StepInfo {
   name: string;
   fields: Array<{
@@ -22,8 +20,8 @@ export interface StepInfo {
     manifest?: string[];
     permissions?: Array<{
       key: string;
-      level: PermissionLevel;
-      targets: string[];
+      level: string;
+      targets: string;
       scene?: string;
     }>;
   };

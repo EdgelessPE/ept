@@ -1,7 +1,7 @@
 import { parseFilePath } from "../utils";
 import fs from "fs";
-import type { StepInfo } from "./type";
 import { getCommentsInBlock } from "../block";
+import { type StepInfo } from "./type";
 
 const REGEX_PERMISSION_BLOCK =
   /Permission {\s*key: ([^,]+),\s*level: ([^,]+),\s*targets: ([^,]+),\s*[^}]+/gm;
@@ -28,8 +28,9 @@ function parser(
   }
 }
 
-// 分割 Permission 申明，返回原始申明语句
-function splitPermissions(file: string) {
+export function parsePermission(
+  file: string,
+): StepInfo["extra"]["permissions"] {
   const filePath = parseFilePath(file);
   if (!fs.existsSync(filePath)) {
     throw new Error(`Error:Failed to open file '${filePath}'`);
@@ -86,7 +87,7 @@ function splitPermissions(file: string) {
     const sp = text.split("\n");
     const [key, level, targets, scene] = sp.slice(1).map((_t) => {
       let t = _t.trim();
-      if (!t) return undefined;
+      if (!t) return "";
       let raw = true;
       if (t.startsWith("//@")) {
         t = t.replace("//@", "").trim();
@@ -109,13 +110,4 @@ function splitPermissions(file: string) {
       scene,
     };
   });
-}
-
-export function parsePermission(
-  file: string,
-): StepInfo["extra"]["permissions"] {
-  const splitRes = splitPermissions(file);
-  console.log(splitRes);
-
-  return [];
 }
