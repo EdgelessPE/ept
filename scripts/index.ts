@@ -49,7 +49,7 @@ genContextWiki(
       {
         name: "ExitCode",
         level: "Normal",
-        wiki: "上一步骤的退出码，**类型为整数**。",
+        wiki: "上一步骤的退出码，**类型为整数**。若步骤被正常执行则其值为 0，否则不为 0。",
         demoValue: 0,
       },
       {
