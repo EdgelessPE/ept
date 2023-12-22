@@ -8,7 +8,7 @@
 
 “权限等级”字段表示该内置变量对应路径在访问时所需要的[权限](/nep/ability/1-permission)等级。
 ### ExitCode
-上一步骤的退出码，**类型为整数**。
+上一步骤的退出码，**类型为整数**。若步骤被正常执行则其值为 0，否则不为 0。
 * 权限等级：[`Normal`](/nep/definition/3-permissions#normal)
 * 示例值：`0` 
 * 示例：
