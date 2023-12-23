@@ -4,6 +4,7 @@ import { structRenderer } from "./markdown";
 import { writeWiki } from "../writer";
 import { splitBlock } from "../block";
 import { type Top } from "../type";
+import { parseTypeDeclaration } from "../utils";
 
 // 读取 Rust 中的某个 struct，分析出所有字段信息
 function parseStruct(fileInfo: FileInfo): FieldInfo[] {
@@ -21,22 +22,15 @@ function parseStruct(fileInfo: FileInfo): FieldInfo[] {
 
   return splittedBlock.map(({ wiki, declaration, demo }) => {
     // 解析字段名和类型
-    const m = declaration.match(/(\w+):\s?([\w<>()]+)/);
-    if (m) {
-      const [, name, rawType] = m;
+    const parsedDecl = parseTypeDeclaration(declaration);
+    if (parsedDecl) {
+      const { identifier, optional, name } = parsedDecl;
       const enumValues = enumValuesMap[name];
-      const type: FieldInfo["type"] =
-        rawType.startsWith("Option<") && rawType.endsWith(">")
-          ? {
-              identifier: rawType.slice(7, -1),
-              optional: true,
-              enum: enumValues,
-            }
-          : {
-              identifier: rawType,
-              optional: false,
-              enum: enumValues,
-            };
+      const type: FieldInfo["type"] = {
+        identifier,
+        optional,
+        enum: enumValues,
+      };
       if (enumValues) {
         if (type.identifier !== "String") {
           throw new Error(

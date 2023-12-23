@@ -14,8 +14,13 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct WorkflowHeader {
-    pub name: Option<String>, // 解析时如果没有提供 name 则人为赋 key 的 sentence case
+    /// 步骤名称，缺省使用步骤键的 sentence case
+    pub name: Option<String>,
+    /// 步骤类型
+    //@ 必须是[步骤](/nep/definition/4-steps.html)定义中的一种值
     pub step: String,
+    /// 步骤执行条件
+    //@ 是合法的条件
     pub c_if: Option<String>,
 }
 

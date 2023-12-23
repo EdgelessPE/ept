@@ -2,6 +2,7 @@ import { genStructsWiki } from "./struct";
 import { genContextWiki } from "./context";
 import { genPermissionsWiki } from "./permission";
 import { genStepsWiki } from "./step";
+import { genWorkflowWiki } from "./workflow";
 
 genStructsWiki(
   {
@@ -94,3 +95,10 @@ genStepsWiki(
   },
   "4-steps",
 );
+genWorkflowWiki({
+  file: "@/types/workflow.rs",
+  top: {
+    title: "工作流",
+    description: "在步骤上附加的公共工作流字段定义。",
+  },
+});
