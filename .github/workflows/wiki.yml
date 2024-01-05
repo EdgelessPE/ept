@@ -6,9 +6,17 @@ on:
     paths:
       - "doc/**"
       - ".github/workflows/**"
+  workflow_dispatch:
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
   serve:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       # 获取仓库源码
