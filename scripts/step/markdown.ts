@@ -66,7 +66,7 @@ ${"#".repeat(titleLevel + 1)} 权限
 ${
   info.extra.permissions?.length
     ? `${info.extra.permissions.map(permissionRenderer).join("\n<br/>\n")}`
-    : "无权限"
+    : "无需权限\n"
 }`;
 }
 export function stepsRenderer(
