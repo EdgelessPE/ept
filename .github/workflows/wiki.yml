@@ -1,10 +1,11 @@
-name: Serve-next
+name: Deploy Wiki
 
 on:
   push:
     branches: [develop]
     paths:
       - "doc/**"
+      - ".github/workflows/**"
 
 jobs:
   serve:
