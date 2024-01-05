@@ -6,6 +6,7 @@ on:
     paths:
       - "doc/**"
       - ".github/workflows/wiki.yml"
+      - "./package.json"
   workflow_dispatch:
 
 permissions:
