@@ -5,7 +5,7 @@ on:
     branches: [develop]
     paths:
       - "doc/**"
-      - ".github/workflows/**"
+      - ".github/workflows/wiki.yml"
   workflow_dispatch:
 
 permissions:
