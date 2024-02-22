@@ -20,6 +20,7 @@ use std::time::Instant;
 pub struct StepExecute {
     /// 需要执行的命令，使用终端为 cmd。
     //# `command = "./installer.exe /S"`
+    //@ 不得出现反斜杠（\），需使用正斜杠代替
     //@ 符合 POSIX 命令格式
     //@ 不得出现绝对路径（使用[内置变量](/nep/workflow/2-context.html#内置变量)）
     pub command: String,
@@ -164,6 +165,11 @@ impl Interpretable for StepExecute {
 
 impl Verifiable for StepExecute {
     fn verify_self(&self, _: &String) -> Result<()> {
+        // 不得出现反斜杠
+        if self.command.contains("\\") {
+            return Err(anyhow!("Error(Execute):Backslash (\\) in '{cmd}' is not allowed, use forward slash (/) instead",cmd=&self.command));
+        }
+
         // 校验 pwd 为合法路径
         if let Some(pwd) = &self.pwd {
             values_validator_path(pwd).map_err(|e| {
