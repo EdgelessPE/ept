@@ -31,10 +31,14 @@
     "lint-staged": "^14.0.1",
     "pinst": "^3.0.0",
     "prettier": "^3.0.3",
+    "simple-git-hooks": "^2.9.0",
     "ts-node": "^10.9.1",
     "ts-results": "^3.3.0"
   },
   "lint-staged": {
     "*.ts": "eslint --fix"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "npx lint-staged"
   }
 }
