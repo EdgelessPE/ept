@@ -103,10 +103,10 @@ impl ExSemVer {
 
         // 使用小数点分割
         let s: Vec<&str> = clear_text.split(".").collect();
-        if s.len() != 4 {
+        let length = s.len();
+        if length != 3 && length != 4 {
             return Err(anyhow!(
-                "Error:Can't parse '{text}' as extended semver : expected 4 fields, got {len} ",
-                len = s.len()
+                "Error:Can't parse '{text}' as extended semver : expected 3 or 4 fields, got {length} "
             ));
         }
 
@@ -119,7 +119,7 @@ impl ExSemVer {
         let major = s[0].parse::<u64>()?;
         let minor = s[1].parse::<u64>()?;
         let patch = s[2].parse::<u64>()?;
-        let reserved = s[3].parse::<u64>()?;
+        let reserved = s.get(3).unwrap_or(&"0").parse::<u64>()?;
 
         Ok(ExSemVer {
             major,
@@ -261,7 +261,8 @@ fn test_ex_semver() {
     assert_eq!(v1.to_string(), String::from("1.2.3.4"));
     assert_eq!(format!("{v2}"), "1.2.3.4".to_string());
 
-    assert!(ExSemVer::parse(&"1.12.3".to_string()).is_err());
+    assert!(ExSemVer::parse(&"1.12".to_string()).is_err());
+    assert!(ExSemVer::parse(&"1.12.3".to_string()).is_ok());
     assert!(ExSemVer::parse(&"1.12.3.9.0".to_string()).is_err());
 
     let v1 = ExSemVer::parse(&"1.2.3.4".to_string()).unwrap();
@@ -337,9 +338,13 @@ fn test_ex_semver() {
         "1.12.3.4-beta.2.edgeless+blake456".to_string()
     );
 
-    assert!(ExSemVer::parse(&"1.12.3-alpha".to_string()).is_err());
-    assert!(ExSemVer::parse(&"1.12.3-alpha-beta".to_string()).is_err());
-    assert!(ExSemVer::parse(&"1.12.3+alpha-beta".to_string()).is_err());
+    assert!(ExSemVer::parse(&"1.12.3-alpha".to_string()).is_ok());
+    assert!(ExSemVer::parse(&"1.12.3-alpha-beta".to_string()).is_ok());
+    assert!(ExSemVer::parse(&"1.12.3+alpha-beta".to_string()).is_ok());
+
+    assert!(ExSemVer::parse(&"1.12-alpha".to_string()).is_err());
+    assert!(ExSemVer::parse(&"1.12-alpha-beta".to_string()).is_err());
+    assert!(ExSemVer::parse(&"1.12+alpha-beta".to_string()).is_err());
 
     // 测试 pre 与 build比较关系
     let arr: Vec<ExSemVer> = vec![
