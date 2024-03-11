@@ -23,7 +23,7 @@ use winreg::{enums::*, RegKey};
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct StepPath {
-    /// 记录值，支持可执行文件/文件夾，支持相对路径和绝对路径。
+    /// 记录值，支持可执行文件/文件夹，支持相对路径和绝对路径。
     //# ```toml
     //# # 创建可执行文件入口
     //# record = "visual-studio-code.exe"

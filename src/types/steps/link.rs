@@ -114,7 +114,7 @@ pub struct StepLink {
     //# `source_file = "code.exe"`
     //@ 是合法路径
     pub source_file: String,
-    /// 快捷方式名称，支持使用 `FOLDER/NAME` 的模式表示在创建位置的文件夾中放置快捷方式。
+    /// 快捷方式名称，支持使用 `FOLDER/NAME` 的模式表示在创建位置的文件夹中放置快捷方式。
     //# ```toml
     //# # 创建快捷方式
     //# target_name = "Visual Studio Code"
