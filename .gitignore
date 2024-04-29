@@ -34,3 +34,4 @@ dist-ssr
 *.sln
 *.sw?
 doc_build
+tarpaulin-report.html
