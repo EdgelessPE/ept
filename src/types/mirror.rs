@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::utils::mirror::filter_service_from_meta;
 use anyhow::Result;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
@@ -111,4 +113,26 @@ impl Verifiable for MirrorHello {
 
         Ok(())
     }
+}
+
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
+pub struct MirrorPkgSoftware {
+    pub timestamp: u64,
+    pub url_template: String,
+    pub tree: HashMap<String, Vec<TreeItem>>,
+}
+
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
+pub struct TreeItem {
+    pub name: String,
+    pub releases: Vec<MirrorPkgSoftwareRelease>,
+}
+
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
+pub struct MirrorPkgSoftwareRelease {
+    pub file_name: String,
+    pub size: u64,
+    pub timestamp: u64,
+    pub integrity: Option<String>,
+    // meta 和 permissions 在这里被省略
 }

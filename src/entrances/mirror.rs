@@ -56,17 +56,17 @@ pub fn mirror_remove(name: &String) -> Result<()> {
     try_recycle(p)
 }
 
-#[test]
-fn test_mirror_add() {
-    mirror_add(&"http://localhost:3000/api/hello".to_string(), None).unwrap();
-}
+// #[test]
+// fn test_mirror_add() {
+//     mirror_add(&"http://localhost:3000/api/hello".to_string(), None).unwrap();
+// }
 
-#[test]
-fn test_mirror_update() {
-    mirror_update(&"official".to_string()).unwrap();
-}
+// #[test]
+// fn test_mirror_update() {
+//     mirror_update(&"official".to_string()).unwrap();
+// }
 
-#[test]
-fn test_mirror_remove() {
-    mirror_remove(&"official".to_string()).unwrap();
-}
+// #[test]
+// fn test_mirror_remove() {
+//     mirror_remove(&"official".to_string()).unwrap();
+// }

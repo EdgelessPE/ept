@@ -1,7 +1,8 @@
 #[macro_use]
 extern crate lazy_static;
 extern crate tar;
-
+#[macro_use]
+extern crate tantivy;
 mod ca;
 mod compression;
 mod entrances;
