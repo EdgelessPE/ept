@@ -1,7 +1,5 @@
 use anyhow::{anyhow, Result};
 use fs_extra::file::read_to_string;
-use serde_json::Value;
-use std::collections::HashMap;
 use std::path::PathBuf;
 use tantivy::collector::TopDocs;
 use tantivy::query::QueryParser;
@@ -19,6 +17,9 @@ use crate::{
     },
     utils::get_path_mirror,
 };
+
+use super::fs::ensure_dir_exist;
+use super::fs::try_recycle;
 
 // 读取 meta
 pub fn read_local_mirror_meta(name: &String) -> Result<(MirrorHello, PathBuf)> {
@@ -49,20 +50,30 @@ pub fn filter_service_from_meta(hello: MirrorHello, key: ServiceKeys) -> Result<
 fn get_schema() -> Result<Schema> {
     let mut schema_builder = Schema::builder();
     schema_builder.add_text_field("name", TEXT | STORED);
+    schema_builder.add_text_field("scope", TEXT | STORED);
     Ok(schema_builder.build())
 }
 
 // 为包构建索引
 pub fn build_index_for_mirror(content: MirrorPkgSoftware, dir: PathBuf) -> Result<()> {
     let schema = get_schema()?;
+    if dir.exists() {
+        try_recycle(&dir)?;
+    }
+    ensure_dir_exist(&dir)?;
     let index = Index::create_in_dir(&dir, schema.clone())?;
     let mut index_writer = index.writer(50_000_000)?;
     let name = schema.get_field("name")?;
-    index_writer
-        .add_document(doc!(
-          name => "Visual Studio Code",
-        ))
-        .map_err(|e| anyhow!("Error:Failed to add document to index writer : '{e}'"))?;
+    let scope = schema.get_field("scope")?;
+    for (scope_str, node) in content.tree.iter() {
+        for item in node {
+            let name_str = &item.name;
+            index_writer.add_document(doc!(
+              name => name_str.as_str(),
+              scope => scope_str.as_str()
+            ))?;
+        }
+    }
     index_writer.commit()?;
 
     Ok(())
@@ -83,6 +94,7 @@ pub fn search_index_for_mirror(text: &String, dir: PathBuf) -> Result<()> {
     let query = query_parser.parse_query(text)?;
     let top_docs = searcher.search(&query, &TopDocs::with_limit(10))?;
 
+    println!("Result for {text}:");
     for (_score, doc_address) in top_docs {
         let retrieved_doc: TantivyDocument = searcher.doc(doc_address)?;
         println!("{retrieved_doc:#?}");
@@ -94,11 +106,7 @@ pub fn search_index_for_mirror(text: &String, dir: PathBuf) -> Result<()> {
 #[test]
 fn test_build_index_for_mirror() {
     build_index_for_mirror(
-        MirrorPkgSoftware {
-            timestamp: 0,
-            url_template: String::new(),
-            tree: HashMap::new(),
-        },
+        MirrorPkgSoftware::_demo(),
         get_path_mirror().unwrap().join("official").join("index"),
     )
     .unwrap();
@@ -106,9 +114,9 @@ fn test_build_index_for_mirror() {
 
 #[test]
 fn test_search_index_for_mirror() {
-    search_index_for_mirror(
-        &"Code".to_string(),
-        get_path_mirror().unwrap().join("official").join("index"),
-    )
-    .unwrap();
+    let p = get_path_mirror().unwrap().join("official").join("index");
+    search_index_for_mirror(&"Visual Studio Code".to_string(), p.clone()).unwrap();
+    search_index_for_mirror(&"Code".to_string(), p.clone()).unwrap();
+    search_index_for_mirror(&"micro".to_string(), p.clone()).unwrap();
+    search_index_for_mirror(&"chrome".to_string(), p.clone()).unwrap();
 }

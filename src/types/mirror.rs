@@ -1,4 +1,7 @@
-use std::collections::HashMap;
+use std::{
+    collections::HashMap,
+    time::{Duration, SystemTime, UNIX_EPOCH},
+};
 
 use crate::utils::mirror::filter_service_from_meta;
 use anyhow::Result;
@@ -117,9 +120,49 @@ impl Verifiable for MirrorHello {
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct MirrorPkgSoftware {
-    pub timestamp: u64,
+    pub timestamp: u128,
     pub url_template: String,
     pub tree: HashMap<String, Vec<TreeItem>>,
+}
+
+impl MirrorPkgSoftware {
+    pub fn _demo() -> Self {
+        let mut tree = HashMap::new();
+        tree.insert(
+            "Microsoft".to_string(),
+            vec![TreeItem {
+                name: "Visual Studio Code".to_string(),
+                releases: vec![MirrorPkgSoftwareRelease {
+                    file_name: "VSCode_1.85.1.0_Cno.nep".to_string(),
+                    size: 94245376,
+                    timestamp: 1704554724,
+                    integrity: None,
+                }],
+            }],
+        );
+        tree.insert(
+            "Google".to_string(),
+            vec![TreeItem {
+                name: "Chrome".to_string(),
+                releases: vec![MirrorPkgSoftwareRelease {
+                    file_name: "Chrome_120.0.6099.200_Cno.nep".to_string(),
+                    size: 133763072,
+                    timestamp: 1704554608,
+                    integrity: None,
+                }],
+            }],
+        );
+        Self {
+            timestamp: SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_micros(),
+            url_template:
+                "http:/localhost:3000/api/redirect?path=/nep/{scope}/{software}/{fileName}"
+                    .to_string(),
+            tree,
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
