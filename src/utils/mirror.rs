@@ -48,24 +48,22 @@ pub fn filter_service_from_meta(hello: MirrorHello, key: ServiceKeys) -> Result<
     }
 }
 
-fn get_schema() -> Result<Schema> {
+fn get_schema() -> Result<(Schema, Field, Field)> {
     let mut schema_builder = Schema::builder();
-    schema_builder.add_text_field("name", TEXT | STORED);
-    schema_builder.add_text_field("scope", TEXT | STORED);
-    Ok(schema_builder.build())
+    let name = schema_builder.add_text_field("name", TEXT | STORED);
+    let scope = schema_builder.add_text_field("scope", TEXT | STORED);
+    Ok((schema_builder.build(), name, scope))
 }
 
 // 为包构建索引
 pub fn build_index_for_mirror(content: MirrorPkgSoftware, dir: PathBuf) -> Result<()> {
-    let schema = get_schema()?;
+    let (schema, name, scope) = get_schema()?;
     if dir.exists() {
         try_recycle(&dir)?;
     }
     ensure_dir_exist(&dir)?;
     let index = Index::create_in_dir(&dir, schema.clone())?;
     let mut index_writer = index.writer(50_000_000)?;
-    let name = schema.get_field("name")?;
-    let scope = schema.get_field("scope")?;
     for (scope_str, node) in content.tree.iter() {
         for item in node {
             let name_str = &item.name;
@@ -82,9 +80,7 @@ pub fn build_index_for_mirror(content: MirrorPkgSoftware, dir: PathBuf) -> Resul
 
 // 从索引中搜索内容
 pub fn search_index_for_mirror(text: &String, dir: PathBuf) -> Result<Vec<SearchResult>> {
-    let schema = get_schema()?;
-    let name = schema.get_field("name")?;
-    let scope = schema.get_field("scope")?;
+    let (_schema, name, scope) = get_schema()?;
 
     let index = Index::open_in_dir(&dir)?;
     let reader = index
