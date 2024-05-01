@@ -7,6 +7,7 @@ pub mod command;
 pub mod conditions;
 pub mod env;
 pub mod fs;
+pub mod mirror;
 pub mod path;
 pub mod process;
 pub mod random;

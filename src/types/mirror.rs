@@ -9,6 +9,7 @@ pub enum Locale {
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum ServiceKeys {
+    Hello,
     EptToolchain,
     PkgSoftware,
 }
@@ -73,6 +74,7 @@ impl Serialize for ServiceKeys {
         S: Serializer,
     {
         let s = match self {
+            ServiceKeys::Hello => "HELLO",
             ServiceKeys::EptToolchain => "EPT_TOOLCHAIN",
             ServiceKeys::PkgSoftware => "PKG_SOFTWARE",
         };
@@ -87,6 +89,7 @@ impl<'de> Deserialize<'de> for ServiceKeys {
     {
         let s = String::deserialize(deserializer)?;
         match s.as_str() {
+            "HELLO" => Ok(ServiceKeys::Hello),
             "EPT_TOOLCHAIN" => Ok(ServiceKeys::EptToolchain),
             "PKG_SOFTWARE" => Ok(ServiceKeys::PkgSoftware),
             _ => Err(serde::de::Error::custom("invalid service key")),
