@@ -9,6 +9,7 @@ use tantivy::ReloadPolicy;
 
 use toml::from_str;
 
+use crate::types::mirror::SearchResult;
 use crate::{
     p2s,
     types::{
@@ -80,9 +81,10 @@ pub fn build_index_for_mirror(content: MirrorPkgSoftware, dir: PathBuf) -> Resul
 }
 
 // 从索引中搜索内容
-pub fn search_index_for_mirror(text: &String, dir: PathBuf) -> Result<()> {
+pub fn search_index_for_mirror(text: &String, dir: PathBuf) -> Result<Vec<SearchResult>> {
     let schema = get_schema()?;
     let name = schema.get_field("name")?;
+    let scope = schema.get_field("scope")?;
 
     let index = Index::open_in_dir(&dir)?;
     let reader = index
@@ -94,13 +96,23 @@ pub fn search_index_for_mirror(text: &String, dir: PathBuf) -> Result<()> {
     let query = query_parser.parse_query(text)?;
     let top_docs = searcher.search(&query, &TopDocs::with_limit(10))?;
 
-    println!("Result for {text}:");
+    let mut arr = Vec::new();
     for (_score, doc_address) in top_docs {
-        let retrieved_doc: TantivyDocument = searcher.doc(doc_address)?;
-        println!("{retrieved_doc:#?}");
+        let res: TantivyDocument = searcher.doc(doc_address)?;
+        let name_str = res.get_first(name);
+        let scope_str = res.get_first(scope);
+        if name_str.is_none() || scope_str.is_none() {
+            return Err(anyhow!(
+                "Error:Failed to restore name or scope from index '{res:?}'"
+            ));
+        }
+        arr.push(SearchResult {
+            name: name_str.unwrap().as_str().unwrap_or("").to_string(),
+            scope: scope_str.unwrap().as_str().unwrap_or("").to_string(),
+        })
     }
 
-    Ok(())
+    Ok(arr)
 }
 
 #[test]
@@ -115,8 +127,6 @@ fn test_build_index_for_mirror() {
 #[test]
 fn test_search_index_for_mirror() {
     let p = get_path_mirror().unwrap().join("official").join("index");
-    search_index_for_mirror(&"Visual Studio Code".to_string(), p.clone()).unwrap();
-    search_index_for_mirror(&"Code".to_string(), p.clone()).unwrap();
-    search_index_for_mirror(&"micro".to_string(), p.clone()).unwrap();
-    search_index_for_mirror(&"chrome".to_string(), p.clone()).unwrap();
+    let r = search_index_for_mirror(&"Code".to_string(), p.clone()).unwrap();
+    println!("{r:#?}");
 }

@@ -141,6 +141,18 @@ impl MirrorPkgSoftware {
             }],
         );
         tree.insert(
+            "github".to_string(),
+            vec![TreeItem {
+                name: "Visual Studio Code Portable".to_string(),
+                releases: vec![MirrorPkgSoftwareRelease {
+                    file_name: "VSCode_1.85.1.0_Cno.nep".to_string(),
+                    size: 94245376,
+                    timestamp: 1704554724,
+                    integrity: None,
+                }],
+            }],
+        );
+        tree.insert(
             "Google".to_string(),
             vec![TreeItem {
                 name: "Chrome".to_string(),
@@ -178,4 +190,9 @@ pub struct MirrorPkgSoftwareRelease {
     pub timestamp: u64,
     pub integrity: Option<String>,
     // meta 和 permissions 在这里被省略
+}
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
+pub struct SearchResult {
+    pub name: String,
+    pub scope: String,
 }
