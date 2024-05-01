@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use anyhow::{anyhow, Result};
 use fs_extra::file::read_to_string;
 use toml::from_str;
@@ -9,15 +11,16 @@ use crate::{
 };
 
 // 读取 meta
-pub fn read_local_mirror_meta(name: &String) -> Result<MirrorHello> {
-    let p = get_path_mirror()?.join(name).join("meta.toml");
+pub fn read_local_mirror_meta(name: &String) -> Result<(MirrorHello, PathBuf)> {
+    let dir_path = get_path_mirror()?.join(name);
+    let p = dir_path.join("meta.toml");
     if !p.exists() {
         return Err(anyhow!("Error:Mirror '{name}' hasn't been added"));
     }
     let text = read_to_string(&p)?;
     let meta: MirrorHello = from_str(&text)
         .map_err(|e| anyhow!("Error:Invalid meta content at '{fp}' : {e}", fp = p2s!(p)))?;
-    Ok(meta)
+    Ok((meta, dir_path))
 }
 
 // 从 meta 中筛选出服务，返回的第一个参数是拼接了 root_url 后的路径

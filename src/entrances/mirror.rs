@@ -7,7 +7,7 @@ use toml::{to_string_pretty, Value};
 use crate::{
     types::mirror::{MirrorHello, ServiceKeys},
     utils::{
-        fs::ensure_dir_exist,
+        fs::{ensure_dir_exist, try_recycle},
         get_path_mirror,
         mirror::{filter_service_from_meta, read_local_mirror_meta},
     },
@@ -36,11 +36,18 @@ pub fn mirror_add(url: &String, should_match_name: Option<String>) -> Result<()>
 
 pub fn mirror_update(name: &String) -> Result<()> {
     // 读取 meta 文件
-    let meta = read_local_mirror_meta(name)?;
+    let (meta, _) = read_local_mirror_meta(name)?;
     // 筛选出 hello 服务
     let (hello_path, _) = filter_service_from_meta(meta, ServiceKeys::Hello)?;
     // 调用 add
     mirror_add(&hello_path, Some(name.to_string()))
+}
+
+pub fn mirror_remove(name: &String) -> Result<()> {
+    // 获取 meta.toml 路径
+    let (_, p) = read_local_mirror_meta(name)?;
+    // 移除目录
+    try_recycle(p)
 }
 
 #[test]
@@ -51,4 +58,9 @@ fn test_mirror_add() {
 #[test]
 fn test_mirror_update() {
     mirror_update(&"official".to_string()).unwrap();
+}
+
+#[test]
+fn test_mirror_remove() {
+    mirror_remove(&"official".to_string()).unwrap();
 }
