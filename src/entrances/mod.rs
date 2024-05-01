@@ -4,6 +4,7 @@ mod info;
 mod install;
 mod list;
 mod meta;
+mod mirror;
 mod pack;
 mod uninstall;
 mod update;

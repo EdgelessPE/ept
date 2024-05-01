@@ -110,6 +110,10 @@ pub fn get_path_bin() -> Result<PathBuf> {
     ensure_exist(parse_relative_path_with_base(&"bin".to_string())?)
 }
 
+pub fn get_path_mirror() -> Result<PathBuf> {
+    ensure_exist(parse_relative_path_with_base(&"mirror".to_string())?)
+}
+
 pub fn get_system_drive() -> Result<String> {
     let root = var("SystemRoot")?;
     Ok(root[0..2].to_string())

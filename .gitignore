@@ -35,3 +35,4 @@ dist-ssr
 *.sw?
 doc_build
 tarpaulin-report.html
+.husky
