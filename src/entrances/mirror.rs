@@ -5,7 +5,10 @@ use reqwest::blocking::get;
 use toml::{to_string_pretty, Value};
 
 use crate::{
-    types::mirror::{MirrorHello, ServiceKeys},
+    types::{
+        mirror::{MirrorHello, ServiceKeys},
+        verifiable::Verifiable,
+    },
     utils::{
         fs::{ensure_dir_exist, try_recycle},
         get_path_mirror,
@@ -23,6 +26,9 @@ pub fn mirror_add(url: &String, should_match_name: Option<String>) -> Result<()>
             return Err(anyhow!("Error:Mirror has changed its registry name (from '{n}' to '{m}'), use 'ept mirror remove {n}' to remove the old mirror first",m=res.name));
         }
     }
+
+    // 校验
+    res.verify_self(&"".to_string())?;
 
     // 写 mirror 目录
     let p = get_path_mirror()?.join(&res.name);
@@ -44,7 +50,7 @@ pub fn mirror_update(name: &String) -> Result<()> {
 }
 
 pub fn mirror_remove(name: &String) -> Result<()> {
-    // 获取 meta.toml 路径
+    // 获取目录路径
     let (_, p) = read_local_mirror_meta(name)?;
     // 移除目录
     try_recycle(p)

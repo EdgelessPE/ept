@@ -1,4 +1,8 @@
+use crate::utils::mirror::filter_service_from_meta;
+use anyhow::Result;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
+
+use super::verifiable::Verifiable;
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Locale {
@@ -94,5 +98,17 @@ impl<'de> Deserialize<'de> for ServiceKeys {
             "PKG_SOFTWARE" => Ok(ServiceKeys::PkgSoftware),
             _ => Err(serde::de::Error::custom("invalid service key")),
         }
+    }
+}
+
+impl Verifiable for MirrorHello {
+    fn verify_self(&self, _located: &String) -> Result<()> {
+        // 必须有 hello 服务
+        let hello_res = filter_service_from_meta(self.clone(), ServiceKeys::Hello);
+        if let Err(e) = hello_res {
+            return Err(e);
+        }
+
+        Ok(())
     }
 }

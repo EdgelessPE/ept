@@ -6,7 +6,10 @@ use toml::from_str;
 
 use crate::{
     p2s,
-    types::mirror::{MirrorHello, Service, ServiceKeys},
+    types::{
+        mirror::{MirrorHello, Service, ServiceKeys},
+        verifiable::Verifiable,
+    },
     utils::get_path_mirror,
 };
 
@@ -20,6 +23,7 @@ pub fn read_local_mirror_meta(name: &String) -> Result<(MirrorHello, PathBuf)> {
     let text = read_to_string(&p)?;
     let meta: MirrorHello = from_str(&text)
         .map_err(|e| anyhow!("Error:Invalid meta content at '{fp}' : {e}", fp = p2s!(p)))?;
+    meta.verify_self(&"".to_string())?;
     Ok((meta, dir_path))
 }
 
