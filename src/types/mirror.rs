@@ -120,7 +120,7 @@ impl Verifiable for MirrorHello {
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct MirrorPkgSoftware {
-    pub timestamp: u128,
+    pub timestamp: u64,
     pub url_template: String,
     pub tree: HashMap<String, Vec<TreeItem>>,
 }
@@ -171,7 +171,7 @@ impl MirrorPkgSoftware {
             timestamp: SystemTime::now()
                 .duration_since(UNIX_EPOCH)
                 .unwrap()
-                .as_micros(),
+                .as_micros() as u64,
             url_template:
                 "http:/localhost:3000/api/redirect?path=/nep/{scope}/{software}/{fileName}"
                     .to_string(),

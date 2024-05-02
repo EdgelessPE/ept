@@ -26,7 +26,7 @@ use super::fs::try_recycle;
 // 读取 meta
 pub fn read_local_mirror_meta(name: &String) -> Result<(MirrorHello, PathBuf)> {
     let dir_path = get_path_mirror()?.join(name);
-    let p = dir_path.join("meta.toml");
+    let p = dir_path.join("hello.toml");
     if !p.exists() {
         return Err(anyhow!("Error:Mirror '{name}' hasn't been added"));
     }

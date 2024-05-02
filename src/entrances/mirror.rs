@@ -6,13 +6,16 @@ use toml::{to_string_pretty, Value};
 
 use crate::{
     types::{
-        mirror::{MirrorHello, SearchResult, ServiceKeys},
+        mirror::{MirrorHello, MirrorPkgSoftware, SearchResult, ServiceKeys},
         verifiable::Verifiable,
     },
     utils::{
         fs::{ensure_dir_exist, read_sub_dir, try_recycle},
         get_path_mirror,
-        mirror::{filter_service_from_meta, read_local_mirror_meta, search_index_for_mirror},
+        mirror::{
+            build_index_for_mirror, filter_service_from_meta, read_local_mirror_meta,
+            search_index_for_mirror,
+        },
     },
 };
 
@@ -30,12 +33,22 @@ pub fn mirror_add(url: &String, should_match_name: Option<String>) -> Result<()>
     // 校验
     res.verify_self(&"".to_string())?;
 
-    // 写 mirror 目录
+    // 写 hello.toml
     let p = get_path_mirror()?.join(&res.name);
     ensure_dir_exist(&p)?;
-    let value = Value::try_from(res)?;
+    let value = Value::try_from(res.clone())?;
     let text = to_string_pretty(&value)?;
-    write(p.join("meta.toml"), text)?;
+    write(p.join("hello.toml"), text)?;
+
+    // 请求软件包列表
+    let (ps_url, _) = filter_service_from_meta(res, ServiceKeys::PkgSoftware)?;
+    let pkg_software_res: MirrorPkgSoftware = get(&ps_url)?.json()?;
+
+    // 更新索引并写 pkg-software.toml
+    build_index_for_mirror(pkg_software_res.clone(), p.join("index"))?;
+    let value = Value::try_from(pkg_software_res.clone())?;
+    let text = to_string_pretty(&value)?;
+    write(p.join("pkg-software.toml"), text)?;
 
     Ok(())
 }
