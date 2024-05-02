@@ -95,16 +95,20 @@ pub fn search_index_for_mirror(text: &String, dir: PathBuf) -> Result<Vec<Search
     let mut arr = Vec::new();
     for (_score, doc_address) in top_docs {
         let res: TantivyDocument = searcher.doc(doc_address)?;
-        let name_str = res.get_first(name);
-        let scope_str = res.get_first(scope);
-        if name_str.is_none() || scope_str.is_none() {
-            return Err(anyhow!(
-                "Error:Failed to restore name or scope from index '{res:?}'"
-            ));
-        }
+        let read_field = |field: Field| {
+            let str = res.get_first(field);
+            if str.is_none() {}
+            if let Some(s) = str {
+                Ok(s.as_str().unwrap_or("").to_string())
+            } else {
+                Err(anyhow!(
+                    "Error:Failed to restore name or scope from index '{res:?}'"
+                ))
+            }
+        };
         arr.push(SearchResult {
-            name: name_str.unwrap().as_str().unwrap_or("").to_string(),
-            scope: scope_str.unwrap().as_str().unwrap_or("").to_string(),
+            name: read_field(name)?,
+            scope: read_field(scope)?,
             from_mirror: None,
         })
     }
