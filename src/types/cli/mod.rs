@@ -52,6 +52,12 @@ pub enum Action {
         package_name: String,
     },
 
+    /// Search a package
+    Search {
+        /// Keyword
+        keyword: String,
+    },
+
     /// Pack a directory content into nep
     Pack {
         /// Source directory ready to be packed

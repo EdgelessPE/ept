@@ -80,32 +80,6 @@ pub fn mirror_remove(name: &String) -> Result<()> {
     try_recycle(p)
 }
 
-pub fn mirror_search(text: &String) -> Result<Vec<SearchResult>> {
-    // 扫描出所有的镜像源目录
-    let root = get_path_mirror()?;
-    let mirror_dirs = read_sub_dir(&root)?;
-    if mirror_dirs.len() == 0 {
-        return Err(anyhow!("Error:No mirror added yet"));
-    }
-
-    // 添加扫描结果
-    let mut arr = Vec::new();
-    for mirror_name in mirror_dirs {
-        let search_res = search_index_for_mirror(text, root.join(&mirror_name).join("index"))?;
-        let mut mapped: Vec<SearchResult> = search_res
-            .iter()
-            .map(|raw| {
-                let mut node = raw.to_owned();
-                node.from_mirror = Some(mirror_name.clone());
-                node
-            })
-            .collect();
-        arr.append(&mut mapped);
-    }
-
-    Ok(arr)
-}
-
 // #[test]
 // fn test_mirror_add() {
 //     mirror_add(&"http://localhost:3000/api/hello".to_string(), None).unwrap();
@@ -119,10 +93,4 @@ pub fn mirror_search(text: &String) -> Result<Vec<SearchResult>> {
 // #[test]
 // fn test_mirror_remove() {
 //     mirror_remove(&"official".to_string()).unwrap();
-// }
-
-// #[test]
-// fn test_mirror_search() {
-//     let res=mirror_search(&"code".to_string()).unwrap();
-//     println!("{res:#?}");
 // }

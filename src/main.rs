@@ -32,7 +32,7 @@ fn router(action: Action) -> Result<String> {
 
     use types::cli::ActionMirror;
 
-    use crate::entrances::{mirror_add, mirror_remove, mirror_update, mirror_update_all};
+    use crate::entrances::{mirror_add, mirror_remove, mirror_update, mirror_update_all, search};
     let verify_signature = envmnt::get_or("OFFLINE", "false") == String::from("false");
 
     // 匹配入口
@@ -43,6 +43,23 @@ fn router(action: Action) -> Result<String> {
             .map(|_| format!("Success:Package '{package}' updated successfully")),
         Action::Uninstall { package_name } => uninstall(&package_name)
             .map(|_| format!("Success:Package '{package_name}' uninstalled successfully")),
+        Action::Search { keyword } => search(&keyword).map(|results| {
+            let len = results.len();
+            let res: String =
+                results
+                    .into_iter()
+                    .fold(format!("\nFound {len} results:\n"), |acc, node| {
+                        return acc
+                            + &format!(
+                                "  {scope}/{name} ({version})   mirror:{mirror}\n",
+                                name = node.name,
+                                version = node.version,
+                                scope = node.scope,
+                                mirror = node.from_mirror.unwrap_or("".to_string())
+                            );
+                    });
+            res
+        }),
         Action::Info { package_name } => info(None, &package_name).map(|res| format!("{res:#?}")),
         Action::List => list().map(|list| {
             if list.len() == 0 {
