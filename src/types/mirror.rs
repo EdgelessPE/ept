@@ -73,7 +73,7 @@ impl<'de> Deserialize<'de> for Locale {
             "zh-CN" => Ok(Locale::ZhCn),
             "en-US" => Ok(Locale::EnUs),
             "Multi" => Ok(Locale::Multi),
-            _ => Err(serde::de::Error::custom("invalid locale variant")),
+            _ => Err(serde::de::Error::custom("Error:Invalid locale variant")),
         }
     }
 }
@@ -101,7 +101,7 @@ impl<'de> Deserialize<'de> for ServiceKeys {
             "HELLO" => Ok(ServiceKeys::Hello),
             "EPT_TOOLCHAIN" => Ok(ServiceKeys::EptToolchain),
             "PKG_SOFTWARE" => Ok(ServiceKeys::PkgSoftware),
-            _ => Err(serde::de::Error::custom("invalid service key")),
+            _ => Err(serde::de::Error::custom("Error:Invalid service key")),
         }
     }
 }

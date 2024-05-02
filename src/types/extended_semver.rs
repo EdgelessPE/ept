@@ -379,7 +379,8 @@ impl<'de> Deserialize<'de> for ExSemVer {
         D: Deserializer<'de>,
     {
         let s = String::deserialize(deserializer)?;
-        Self::parse(&s).map_err(|e| serde::de::Error::custom(format!("Error:Invalid semver '{s}'")))
+        Self::parse(&s)
+            .map_err(|e| serde::de::Error::custom(format!("Error:Invalid semver '{s}' : {e}")))
     }
 }
 impl Serialize for ExSemVer {
