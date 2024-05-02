@@ -16,6 +16,7 @@ mod utils;
 
 use anyhow::{anyhow, Result};
 
+use colored::Colorize;
 use entrances::meta;
 use std::fs::write;
 use std::process::exit;
@@ -51,11 +52,15 @@ fn router(action: Action) -> Result<String> {
                     .fold(format!("\nFound {len} results:\n"), |acc, node| {
                         return acc
                             + &format!(
-                                "  {scope}/{name} ({version})   mirror:{mirror}\n",
+                                "  {scope}/{name} ({version})   {mirror}\n",
                                 name = node.name,
                                 version = node.version,
                                 scope = node.scope,
-                                mirror = node.from_mirror.unwrap_or("".to_string())
+                                mirror = node
+                                    .from_mirror
+                                    .unwrap_or("".to_string())
+                                    .as_str()
+                                    .truecolor(100, 100, 100)
                             );
                     });
             res
