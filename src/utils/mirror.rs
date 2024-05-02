@@ -175,6 +175,32 @@ fn test_filter_release() {
     ];
     let res = filter_release(arr, None).unwrap();
     assert_eq!(res.version.to_string(), "1.86.1.0".to_string());
+
+    let arr = vec![
+        MirrorPkgSoftwareRelease {
+            file_name: "Chrome_120.0.6099.200_Cno.nep".to_string(),
+            version: ExSemVer::parse(&"120.0.6099.200".to_string()).unwrap(),
+            size: 133763072,
+            timestamp: 1704554608,
+            integrity: None,
+        },
+        MirrorPkgSoftwareRelease {
+            file_name: "Chrome_121.0.6099.200_Cno.nep".to_string(),
+            version: ExSemVer::parse(&"121.0.6099.200".to_string()).unwrap(),
+            size: 133763072,
+            timestamp: 1704554608,
+            integrity: None,
+        },
+        MirrorPkgSoftwareRelease {
+            file_name: "Chrome_122.0.6099.200_Cno.nep".to_string(),
+            version: ExSemVer::parse(&"122.0.6099.200".to_string()).unwrap(),
+            size: 133763072,
+            timestamp: 1704554608,
+            integrity: None,
+        },
+    ];
+    let res = filter_release(arr, Some("121".to_string())).unwrap();
+    assert_eq!(res.version.to_string(), "121.0.6099.200".to_string());
 }
 
 // #[test]
