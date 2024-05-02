@@ -199,5 +199,6 @@ pub struct MirrorPkgSoftwareRelease {
 pub struct SearchResult {
     pub name: String,
     pub scope: String,
+    pub version: String,
     pub from_mirror: Option<String>,
 }

@@ -136,6 +136,12 @@ impl ExSemVer {
     }
 }
 
+impl Default for ExSemVer {
+    fn default() -> Self {
+        Self::_new(0, 0, 0, 0, Prerelease::EMPTY, BuildMetadata::EMPTY)
+    }
+}
+
 impl From<semver::Version> for ExSemVer {
     fn from(sv: semver::Version) -> Self {
         let semver_instance = sv.clone();

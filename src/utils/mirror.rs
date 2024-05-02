@@ -9,6 +9,7 @@ use tantivy::ReloadPolicy;
 
 use toml::from_str;
 
+use crate::types::extended_semver::ExSemVer;
 use crate::types::mirror::SearchResult;
 use crate::{
     p2s,
@@ -48,16 +49,17 @@ pub fn filter_service_from_meta(hello: MirrorHello, key: ServiceKeys) -> Result<
     }
 }
 
-fn get_schema() -> Result<(Schema, Field, Field)> {
+fn get_schema() -> Result<(Schema, Field, Field, Field)> {
     let mut schema_builder = Schema::builder();
     let name = schema_builder.add_text_field("name", TEXT | STORED);
     let scope = schema_builder.add_text_field("scope", TEXT | STORED);
-    Ok((schema_builder.build(), name, scope))
+    let version = schema_builder.add_text_field("version", TEXT | STORED);
+    Ok((schema_builder.build(), name, scope, version))
 }
 
 // 为包构建索引
 pub fn build_index_for_mirror(content: MirrorPkgSoftware, dir: PathBuf) -> Result<()> {
-    let (schema, name, scope) = get_schema()?;
+    let (schema, name, scope, version) = get_schema()?;
     if dir.exists() {
         try_recycle(&dir)?;
     }
@@ -66,10 +68,21 @@ pub fn build_index_for_mirror(content: MirrorPkgSoftware, dir: PathBuf) -> Resul
     let mut index_writer = index.writer(50_000_000)?;
     for (scope_str, node) in content.tree.iter() {
         for item in node {
-            let name_str = &item.name;
+            // 筛选出最高版本号
+            let mut versions: Vec<ExSemVer> = item
+                .releases
+                .iter()
+                .map(|node| {
+                    ExSemVer::parse(&node.version.to_owned().unwrap_or("0.0.0".to_string()))
+                        .unwrap_or_default()
+                })
+                .collect();
+            versions.sort();
+            let latest_version = versions.last().unwrap().to_string();
             index_writer.add_document(doc!(
-              name => name_str.as_str(),
-              scope => scope_str.as_str()
+              name => item.name.as_str(),
+              scope => scope_str.as_str(),
+              version => latest_version.as_str()
             ))?;
         }
     }
@@ -80,7 +93,7 @@ pub fn build_index_for_mirror(content: MirrorPkgSoftware, dir: PathBuf) -> Resul
 
 // 从索引中搜索内容
 pub fn search_index_for_mirror(text: &String, dir: PathBuf) -> Result<Vec<SearchResult>> {
-    let (_schema, name, scope) = get_schema()?;
+    let (_schema, name, scope, version) = get_schema()?;
 
     let index = Index::open_in_dir(&dir)?;
     let reader = index
@@ -107,6 +120,7 @@ pub fn search_index_for_mirror(text: &String, dir: PathBuf) -> Result<Vec<Search
         arr.push(SearchResult {
             name: read_field(name)?,
             scope: read_field(scope)?,
+            version: read_field(version)?,
             from_mirror: None,
         })
     }
