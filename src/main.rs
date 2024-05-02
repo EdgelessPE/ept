@@ -29,6 +29,10 @@ use crate::entrances::{
 #[cfg(not(tarpaulin_include))]
 fn router(action: Action) -> Result<String> {
     // 环境变量读取
+
+    use types::cli::ActionMirror;
+
+    use crate::entrances::{mirror_add, mirror_remove, mirror_update, mirror_update_all};
     let verify_signature = envmnt::get_or("OFFLINE", "false") == String::from("false");
 
     // 匹配入口
@@ -86,6 +90,27 @@ fn router(action: Action) -> Result<String> {
             ActionConfig::Init => config_init()
                 .map(|location| format!("Success:Initial config stored at '{location}'")),
             ActionConfig::Which => config_which(),
+        },
+        Action::Mirror { operation } => match operation {
+            ActionMirror::Add { url } => {
+                mirror_add(&url, None).map(|name| format!("Success:Mirror '{name}' has been added"))
+            }
+            ActionMirror::Update { name } => {
+                if let Some(n) = name {
+                    mirror_update(&n)
+                        .map(|name| format!("Success:Index of mirror '{name}' has been updated"))
+                } else {
+                    mirror_update_all().map(|names| {
+                        format!(
+                            "Success:Index of mirrors '({name})' has been updated",
+                            name = names.join(", ")
+                        )
+                    })
+                }
+            }
+            ActionMirror::Remove { name } => {
+                mirror_remove(&name).map(|_| format!("Success:Mirror '{name}' has been removed"))
+            }
         },
     }
 }

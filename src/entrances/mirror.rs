@@ -19,14 +19,15 @@ use crate::{
     },
 };
 
-pub fn mirror_add(url: &String, should_match_name: Option<String>) -> Result<()> {
+pub fn mirror_add(url: &String, should_match_name: Option<String>) -> Result<String> {
     // 请求 url
     let res: MirrorHello = get(url)?.json()?;
+    let mirror_name = res.name.clone();
 
     // 检查名称是否符合
     if let Some(n) = should_match_name {
-        if res.name != n {
-            return Err(anyhow!("Error:Mirror has changed its registry name (from '{n}' to '{m}'), use 'ept mirror remove {n}' to remove the old mirror first",m=res.name));
+        if mirror_name != n {
+            return Err(anyhow!("Error:Mirror has changed its registry name (from '{n}' to '{mirror_name}'), use 'ept mirror remove {n}' to remove the old mirror first"));
         }
     }
 
@@ -34,7 +35,7 @@ pub fn mirror_add(url: &String, should_match_name: Option<String>) -> Result<()>
     res.verify_self(&"".to_string())?;
 
     // 写 hello.toml
-    let p = get_path_mirror()?.join(&res.name);
+    let p = get_path_mirror()?.join(&mirror_name);
     ensure_dir_exist(&p)?;
     let value = Value::try_from(res.clone())?;
     let text = to_string_pretty(&value)?;
@@ -50,16 +51,26 @@ pub fn mirror_add(url: &String, should_match_name: Option<String>) -> Result<()>
     let text = to_string_pretty(&value)?;
     write(p.join("pkg-software.toml"), text)?;
 
-    Ok(())
+    Ok(mirror_name)
 }
 
-pub fn mirror_update(name: &String) -> Result<()> {
+pub fn mirror_update(name: &String) -> Result<String> {
     // 读取 meta 文件
     let (meta, _) = read_local_mirror_hello(name)?;
     // 筛选出 hello 服务
     let (hello_path, _) = filter_service_from_meta(meta, ServiceKeys::Hello)?;
     // 调用 add
     mirror_add(&hello_path, Some(name.to_string()))
+}
+
+pub fn mirror_update_all() -> Result<Vec<String>> {
+    let p = get_path_mirror()?;
+    let mut names = Vec::new();
+    for name in read_sub_dir(&p)? {
+        let n = mirror_update(&name)?;
+        names.push(n);
+    }
+    Ok(names)
 }
 
 pub fn mirror_remove(name: &String) -> Result<()> {

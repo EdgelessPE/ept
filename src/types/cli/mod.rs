@@ -1,6 +1,7 @@
 mod config;
-
+mod mirror;
 pub use self::config::ActionConfig;
+pub use self::mirror::ActionMirror;
 use clap::{Parser, Subcommand};
 
 /// [Alpha] Edgeless Package Tool (ept) for Edgeless Next-Generation Packages (nep)
@@ -79,9 +80,15 @@ pub enum Action {
     /// Clean temporary or illegal files
     Clean,
 
-    /// Manage ept config files
+    /// Manage ept config
     Config {
         #[command(subcommand)]
         operation: ActionConfig,
+    },
+
+    /// Manage nep mirrors
+    Mirror {
+        #[command(subcommand)]
+        operation: ActionMirror,
     },
 }
