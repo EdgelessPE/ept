@@ -1,6 +1,6 @@
 use std::{
     collections::HashMap,
-    time::{Duration, SystemTime, UNIX_EPOCH},
+    time::{SystemTime, UNIX_EPOCH},
 };
 
 use crate::utils::mirror::filter_service_from_meta;

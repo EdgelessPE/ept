@@ -101,9 +101,7 @@ pub fn search_index_for_mirror(text: &String, dir: PathBuf) -> Result<Vec<Search
             if let Some(s) = str {
                 Ok(s.as_str().unwrap_or("").to_string())
             } else {
-                Err(anyhow!(
-                    "Error:Failed to restore name or scope from index '{res:?}'"
-                ))
+                Err(anyhow!("Error:Failed to restore data from index '{res:?}'"))
             }
         };
         arr.push(SearchResult {
