@@ -134,7 +134,7 @@ impl MirrorPkgSoftware {
                 name: "Visual Studio Code".to_string(),
                 releases: vec![MirrorPkgSoftwareRelease {
                     file_name: "VSCode_1.85.1.0_Cno.nep".to_string(),
-                    version: Some("1.85.1.0".to_string()),
+                    version: ("1.85.1.0".to_string()),
                     size: 94245376,
                     timestamp: 1704554724,
                     integrity: None,
@@ -147,7 +147,7 @@ impl MirrorPkgSoftware {
                 name: "Visual Studio Code Portable".to_string(),
                 releases: vec![MirrorPkgSoftwareRelease {
                     file_name: "VSCode_1.85.1.0_Cno.nep".to_string(),
-                    version: Some("1.85.1.0".to_string()),
+                    version: ("1.85.1.0".to_string()),
                     size: 94245376,
                     timestamp: 1704554724,
                     integrity: None,
@@ -160,7 +160,7 @@ impl MirrorPkgSoftware {
                 name: "Chrome".to_string(),
                 releases: vec![MirrorPkgSoftwareRelease {
                     file_name: "Chrome_120.0.6099.200_Cno.nep".to_string(),
-                    version: Some("120.0.6099.200".to_string()),
+                    version: ("120.0.6099.200".to_string()),
                     size: 133763072,
                     timestamp: 1704554608,
                     integrity: None,
@@ -189,7 +189,7 @@ pub struct TreeItem {
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct MirrorPkgSoftwareRelease {
     pub file_name: String,
-    pub version: Option<String>,
+    pub version: String,
     pub size: u64,
     pub timestamp: u64,
     pub integrity: Option<String>,

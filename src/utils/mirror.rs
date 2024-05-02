@@ -10,6 +10,7 @@ use tantivy::ReloadPolicy;
 use toml::from_str;
 
 use crate::types::extended_semver::ExSemVer;
+use crate::types::mirror::MirrorPkgSoftwareRelease;
 use crate::types::mirror::SearchResult;
 use crate::{
     p2s,
@@ -72,10 +73,7 @@ pub fn build_index_for_mirror(content: MirrorPkgSoftware, dir: PathBuf) -> Resul
             let mut versions: Vec<ExSemVer> = item
                 .releases
                 .iter()
-                .map(|node| {
-                    ExSemVer::parse(&node.version.to_owned().unwrap_or("0.0.0".to_string()))
-                        .unwrap_or_default()
-                })
+                .map(|node| ExSemVer::parse(&node.version).unwrap_or_default())
                 .collect();
             versions.sort();
             let latest_version = versions.last().unwrap().to_string();
@@ -126,6 +124,52 @@ pub fn search_index_for_mirror(text: &String, dir: PathBuf) -> Result<Vec<Search
     }
 
     Ok(arr)
+}
+
+// 如果没有提供 semver matcher 则返回最大版本
+pub fn filter_release(
+    mut releases: Vec<MirrorPkgSoftwareRelease>,
+    _semver_matcher: Option<String>,
+) -> Result<MirrorPkgSoftwareRelease> {
+    releases.sort_by(|a, b| {
+        let aev = ExSemVer::parse(&a.version).unwrap();
+        let bev = ExSemVer::parse(&b.version).unwrap();
+        bev.cmp(&aev)
+    });
+    if let Some(f) = releases.first() {
+        Ok(f.to_owned())
+    } else {
+        Err(anyhow!("Error:No releases matched"))
+    }
+}
+
+#[test]
+fn test_filter_release() {
+    let arr = vec![
+        MirrorPkgSoftwareRelease {
+            file_name: "VSCode_1.85.1.0_Cno.nep".to_string(),
+            version: "1.85.1.0".to_string(),
+            size: 94245376,
+            timestamp: 1704554724,
+            integrity: None,
+        },
+        MirrorPkgSoftwareRelease {
+            file_name: "VSCode_1.85.2.0_Cno.nep".to_string(),
+            version: "1.85.2.0".to_string(),
+            size: 94245376,
+            timestamp: 1704554724,
+            integrity: None,
+        },
+        MirrorPkgSoftwareRelease {
+            file_name: "VSCode_1.86.1.0_Cno.nep".to_string(),
+            version: "1.86.1.0".to_string(),
+            size: 94245376,
+            timestamp: 1704554724,
+            integrity: None,
+        },
+    ];
+    let res = filter_release(arr, None).unwrap();
+    assert_eq!(res.version, "1.86.1.0".to_string());
 }
 
 // #[test]
