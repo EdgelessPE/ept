@@ -5,6 +5,7 @@ pub mod arch;
 pub mod cfg;
 pub mod command;
 pub mod conditions;
+pub mod download;
 pub mod env;
 pub mod fs;
 pub mod mirror;
