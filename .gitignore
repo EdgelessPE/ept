@@ -36,3 +36,4 @@ dist-ssr
 doc_build
 tarpaulin-report.html
 .husky
+*.iso
