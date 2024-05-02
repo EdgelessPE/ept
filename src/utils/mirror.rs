@@ -25,17 +25,33 @@ use super::fs::ensure_dir_exist;
 use super::fs::try_recycle;
 
 // 读取 meta
-pub fn read_local_mirror_meta(name: &String) -> Result<(MirrorHello, PathBuf)> {
+pub fn read_local_mirror_hello(name: &String) -> Result<(MirrorHello, PathBuf)> {
     let dir_path = get_path_mirror()?.join(name);
     let p = dir_path.join("hello.toml");
     if !p.exists() {
         return Err(anyhow!("Error:Mirror '{name}' hasn't been added"));
     }
     let text = read_to_string(&p)?;
-    let meta: MirrorHello = from_str(&text)
-        .map_err(|e| anyhow!("Error:Invalid meta content at '{fp}' : {e}", fp = p2s!(p)))?;
-    meta.verify_self(&"".to_string())?;
-    Ok((meta, dir_path))
+    let hello: MirrorHello = from_str(&text)
+        .map_err(|e| anyhow!("Error:Invalid hello content at '{fp}' : {e}", fp = p2s!(p)))?;
+    hello.verify_self(&"".to_string())?;
+    Ok((hello, dir_path))
+}
+
+// 读取 pkg-software
+pub fn read_local_mirror_pkg_software(name: &String) -> Result<MirrorPkgSoftware> {
+    let p = get_path_mirror()?.join(name).join("pkg-software.toml");
+    if !p.exists() {
+        return Err(anyhow!("Error:Mirror '{name}' hasn't been added"));
+    }
+    let text = read_to_string(&p)?;
+    let pkg_software: MirrorPkgSoftware = from_str(&text).map_err(|e| {
+        anyhow!(
+            "Error:Invalid pkg software content at '{fp}' : {e}",
+            fp = p2s!(p)
+        )
+    })?;
+    Ok(pkg_software)
 }
 
 // 从 meta 中筛选出服务，返回的第一个参数是拼接了 root_url 后的路径

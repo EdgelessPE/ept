@@ -13,7 +13,7 @@ use crate::{
         fs::{ensure_dir_exist, read_sub_dir, try_recycle},
         get_path_mirror,
         mirror::{
-            build_index_for_mirror, filter_service_from_meta, read_local_mirror_meta,
+            build_index_for_mirror, filter_service_from_meta, read_local_mirror_hello,
             search_index_for_mirror,
         },
     },
@@ -55,7 +55,7 @@ pub fn mirror_add(url: &String, should_match_name: Option<String>) -> Result<()>
 
 pub fn mirror_update(name: &String) -> Result<()> {
     // 读取 meta 文件
-    let (meta, _) = read_local_mirror_meta(name)?;
+    let (meta, _) = read_local_mirror_hello(name)?;
     // 筛选出 hello 服务
     let (hello_path, _) = filter_service_from_meta(meta, ServiceKeys::Hello)?;
     // 调用 add
@@ -64,7 +64,7 @@ pub fn mirror_update(name: &String) -> Result<()> {
 
 pub fn mirror_remove(name: &String) -> Result<()> {
     // 获取目录路径
-    let (_, p) = read_local_mirror_meta(name)?;
+    let (_, p) = read_local_mirror_hello(name)?;
     // 移除目录
     try_recycle(p)
 }

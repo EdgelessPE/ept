@@ -7,9 +7,15 @@ use crate::{
     parsers::parse_package,
     types::{
         info::{Info, InfoDiff},
+        mirror::TreeItem,
         package::GlobalPackage,
     },
-    utils::{get_path_apps, path::find_scope_with_name_locally},
+    utils::{
+        fs::read_sub_dir,
+        get_path_apps, get_path_mirror,
+        mirror::{filter_release, read_local_mirror_pkg_software},
+        path::find_scope_with_name_locally,
+    },
 };
 
 use super::utils::validator::installed_validator;
@@ -35,6 +41,26 @@ pub fn info_local(scope: &String, package_name: &String) -> Result<(GlobalPackag
     Ok((global.clone(), local))
 }
 
+pub fn info_online(scope: &String, package_name: &String) -> Result<TreeItem> {
+    // 遍历 mirror 目录，读出软件包树并进行查找
+    let p = get_path_mirror()?;
+    let mirror_names = read_sub_dir(&p)?;
+    for name in mirror_names {
+        let pkg_software = read_local_mirror_pkg_software(&name)?;
+        if let Some(entry) = pkg_software.tree.get(scope) {
+            for item in entry {
+                if &item.name == package_name {
+                    return Ok(item.to_owned());
+                }
+            }
+        }
+    }
+
+    Err(anyhow!(
+        "Error:Package '{package_name}' in scope '{scope}' not found"
+    ))
+}
+
 pub fn info(scope: Option<String>, package_name: &String) -> Result<Info> {
     // 查找 scope
     let scope = scope.unwrap_or(find_scope_with_name_locally(package_name)?);
@@ -58,6 +84,15 @@ pub fn info(scope: Option<String>, package_name: &String) -> Result<Info> {
         info.software = global.software;
     }
 
+    // 在线检查
+    if let Ok(item) = info_online(&scope, package_name) {
+        let latest = filter_release(item.releases, None)?;
+        info.online = Some(InfoDiff {
+            version: latest.version.to_string(),
+            authors: Vec::new(),
+        })
+    }
+
     // 检查到底有没有这个包
     if info.local.is_some() || info.online.is_some() {
         Ok(info)
@@ -66,10 +101,12 @@ pub fn info(scope: Option<String>, package_name: &String) -> Result<Info> {
     }
 }
 
-#[test]
-fn test_info() {
-    // let res = info(Some("Microsoft".to_string()), &"VSCode".to_string()).unwrap();
-    // println!("{res:#?}");
-    // let res = info(None, &"vscode".to_string()).unwrap();
-    // println!("{res:#?}");
-}
+// #[test]
+// fn test_info() {
+// use crate::utils::test::_ensure_testing_vscode,
+// _ensure_testing_vscode();
+// let res = info(Some("Microsoft".to_string()), &"VSCode".to_string()).unwrap();
+// println!("{res:#?}");
+// let res = info(None, &"vscode".to_string()).unwrap();
+// println!("{res:#?}");
+// }
