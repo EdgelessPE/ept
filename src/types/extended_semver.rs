@@ -1,5 +1,6 @@
 use anyhow::{anyhow, Error, Result};
 use semver::{BuildMetadata, Prerelease};
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::cmp::Ordering::{Equal, Greater, Less};
 use std::fmt;
 use std::{cmp::Ordering, str::FromStr};
@@ -369,5 +370,24 @@ fn test_ex_semver() {
 
     for i in 0..arr.len() - 1 {
         assert!(arr[i] < arr[i + 1]);
+    }
+}
+
+impl<'de> Deserialize<'de> for ExSemVer {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let s = String::deserialize(deserializer)?;
+        Self::parse(&s).map_err(|e| serde::de::Error::custom(format!("Error:Invalid semver '{s}'")))
+    }
+}
+impl Serialize for ExSemVer {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let s = self.to_string();
+        serializer.serialize_str(&s)
     }
 }

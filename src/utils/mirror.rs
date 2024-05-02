@@ -1,5 +1,6 @@
 use anyhow::{anyhow, Result};
 use fs_extra::file::read_to_string;
+use semver::VersionReq;
 use std::path::PathBuf;
 use tantivy::collector::TopDocs;
 use tantivy::query::QueryParser;
@@ -9,7 +10,6 @@ use tantivy::ReloadPolicy;
 
 use toml::from_str;
 
-use crate::types::extended_semver::ExSemVer;
 use crate::types::mirror::MirrorPkgSoftwareRelease;
 use crate::types::mirror::SearchResult;
 use crate::{
@@ -70,17 +70,12 @@ pub fn build_index_for_mirror(content: MirrorPkgSoftware, dir: PathBuf) -> Resul
     for (scope_str, node) in content.tree.iter() {
         for item in node {
             // 筛选出最高版本号
-            let mut versions: Vec<ExSemVer> = item
-                .releases
-                .iter()
-                .map(|node| ExSemVer::parse(&node.version).unwrap_or_default())
-                .collect();
-            versions.sort();
-            let latest_version = versions.last().unwrap().to_string();
+            let releases = item.releases.to_owned();
+            let latest = filter_release(releases, None)?.version.to_string();
             index_writer.add_document(doc!(
               name => item.name.as_str(),
               scope => scope_str.as_str(),
-              version => latest_version.as_str()
+              version => latest.as_str(),
             ))?;
         }
     }
@@ -128,15 +123,24 @@ pub fn search_index_for_mirror(text: &String, dir: PathBuf) -> Result<Vec<Search
 
 // 如果没有提供 semver matcher 则返回最大版本
 pub fn filter_release(
-    mut releases: Vec<MirrorPkgSoftwareRelease>,
-    _semver_matcher: Option<String>,
+    releases: Vec<MirrorPkgSoftwareRelease>,
+    semver_matcher: Option<String>,
 ) -> Result<MirrorPkgSoftwareRelease> {
-    releases.sort_by(|a, b| {
-        let aev = ExSemVer::parse(&a.version).unwrap();
-        let bev = ExSemVer::parse(&b.version).unwrap();
-        bev.cmp(&aev)
-    });
-    if let Some(f) = releases.first() {
+    // 筛选 matcher
+    let mut arr = if let Some(matcher_str) = semver_matcher {
+        let matcher = VersionReq::parse(&matcher_str)
+            .map_err(|e| anyhow!("Error:Invalid semver matcher '{matcher_str}' : {e}"))?;
+        let res_arr: Vec<MirrorPkgSoftwareRelease> = releases
+            .iter()
+            .filter(|node| matcher.matches(&node.version.semver_instance))
+            .cloned()
+            .collect();
+        res_arr
+    } else {
+        releases
+    };
+    arr.sort_by(|a, b| b.version.cmp(&a.version));
+    if let Some(f) = arr.first() {
         Ok(f.to_owned())
     } else {
         Err(anyhow!("Error:No releases matched"))
@@ -145,31 +149,32 @@ pub fn filter_release(
 
 #[test]
 fn test_filter_release() {
+    use crate::types::extended_semver::ExSemVer;
     let arr = vec![
         MirrorPkgSoftwareRelease {
             file_name: "VSCode_1.85.1.0_Cno.nep".to_string(),
-            version: "1.85.1.0".to_string(),
-            size: 94245376,
-            timestamp: 1704554724,
-            integrity: None,
-        },
-        MirrorPkgSoftwareRelease {
-            file_name: "VSCode_1.85.2.0_Cno.nep".to_string(),
-            version: "1.85.2.0".to_string(),
+            version: ExSemVer::parse(&"1.85.1.0".to_string()).unwrap(),
             size: 94245376,
             timestamp: 1704554724,
             integrity: None,
         },
         MirrorPkgSoftwareRelease {
             file_name: "VSCode_1.86.1.0_Cno.nep".to_string(),
-            version: "1.86.1.0".to_string(),
+            version: ExSemVer::parse(&"1.86.1.0".to_string()).unwrap(),
+            size: 94245376,
+            timestamp: 1704554724,
+            integrity: None,
+        },
+        MirrorPkgSoftwareRelease {
+            file_name: "VSCode_1.85.2.0_Cno.nep".to_string(),
+            version: ExSemVer::parse(&"1.85.2.0".to_string()).unwrap(),
             size: 94245376,
             timestamp: 1704554724,
             integrity: None,
         },
     ];
     let res = filter_release(arr, None).unwrap();
-    assert_eq!(res.version, "1.86.1.0".to_string());
+    assert_eq!(res.version.to_string(), "1.86.1.0".to_string());
 }
 
 // #[test]
