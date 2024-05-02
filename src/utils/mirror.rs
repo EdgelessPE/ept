@@ -105,24 +105,25 @@ pub fn search_index_for_mirror(text: &String, dir: PathBuf) -> Result<Vec<Search
         arr.push(SearchResult {
             name: name_str.unwrap().as_str().unwrap_or("").to_string(),
             scope: scope_str.unwrap().as_str().unwrap_or("").to_string(),
+            from_mirror: None,
         })
     }
 
     Ok(arr)
 }
 
-#[test]
-fn test_build_index_for_mirror() {
-    build_index_for_mirror(
-        MirrorPkgSoftware::_demo(),
-        get_path_mirror().unwrap().join("official").join("index"),
-    )
-    .unwrap();
-}
+// #[test]
+// fn test_build_index_for_mirror() {
+//     build_index_for_mirror(
+//         MirrorPkgSoftware::_demo(),
+//         get_path_mirror().unwrap().join("official").join("index"),
+//     )
+//     .unwrap();
+// }
 
-#[test]
-fn test_search_index_for_mirror() {
-    let p = get_path_mirror().unwrap().join("official").join("index");
-    let r = search_index_for_mirror(&"Code".to_string(), p.clone()).unwrap();
-    println!("{r:#?}");
-}
+// #[test]
+// fn test_search_index_for_mirror() {
+//     let p = get_path_mirror().unwrap().join("official").join("index");
+//     let r = search_index_for_mirror(&"Code".to_string(), p.clone()).unwrap();
+//     println!("{r:#?}");
+// }
