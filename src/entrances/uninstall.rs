@@ -33,11 +33,15 @@ fn get_manifest(flow: Vec<WorkflowNode>) -> Vec<String> {
     manifest
 }
 
-pub fn uninstall(package_name: &String) -> Result<()> {
+pub fn uninstall(scope: Option<String>, package_name: &String) -> Result<()> {
     log!("Info:Preparing to uninstall '{package_name}'");
 
     // 解析 scope
-    let scope = find_scope_with_name_locally(package_name)?;
+    let scope = if let Some(s) = scope {
+        s
+    } else {
+        find_scope_with_name_locally(package_name)?
+    };
 
     // 解析安装路径
     let app_path = get_path_apps(&scope, package_name, false)?;
@@ -179,6 +183,6 @@ fn test_uninstall() {
     .run(&mut cx)
     .unwrap();
 
-    uninstall(&"Notepad".to_string()).unwrap();
+    uninstall(None, &"Notepad".to_string()).unwrap();
     assert!(!std::path::Path::new(&pwd).exists());
 }

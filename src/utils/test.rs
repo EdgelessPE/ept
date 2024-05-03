@@ -9,7 +9,7 @@ pub fn _ensure_testing_vscode() -> String {
 
 pub fn _ensure_testing_vscode_uninstalled() {
     if crate::entrances::info_local(&"Microsoft".to_string(), &"VSCode".to_string()).is_ok() {
-        crate::uninstall(&"VSCode".to_string()).unwrap();
+        crate::uninstall(Some("Microsoft".to_string()), &"VSCode".to_string()).unwrap();
     }
 }
 
@@ -23,8 +23,9 @@ pub fn _ensure_testing(scope: &str, name: &str) -> String {
 }
 
 pub fn _ensure_testing_uninstalled(scope: &str, name: &str) {
-    if crate::entrances::info_local(&scope.to_string(), &name.to_string()).is_ok() {
-        crate::uninstall(&name.to_string()).unwrap();
+    let s = scope.to_string();
+    if crate::entrances::info_local(&s, &name.to_string()).is_ok() {
+        crate::uninstall(Some(s), &name.to_string()).unwrap();
     }
 }
 

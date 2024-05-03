@@ -48,8 +48,8 @@ pub enum Action {
 
     /// Uninstall a package with package name
     Uninstall {
-        /// Package name
-        package_name: String,
+        /// Package matcher, expect pattern (SCOPE/)NAME
+        package_matcher: String,
     },
 
     /// Search a package

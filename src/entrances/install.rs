@@ -149,7 +149,7 @@ fn test_install() {
 
     // 卸载
     if crate::entrances::info_local(&"Microsoft".to_string(), &"VSCode".to_string()).is_ok() {
-        crate::uninstall(&"VSCode".to_string()).unwrap();
+        crate::uninstall(Some("Microsoft".to_string()), &"VSCode".to_string()).unwrap();
     }
 
     // 打包并安装
@@ -171,7 +171,7 @@ fn test_install() {
         install_using_package(&"./test/VSCode_1.75.0.0_Cno (1).nep".to_string(), true).is_err()
     );
 
-    crate::uninstall(&"VSCode".to_string()).unwrap();
+    crate::uninstall(None, &"VSCode".to_string()).unwrap();
 
     assert!(!shortcut_path.exists());
     assert!(!entry1_path.exists() || entry2_path.exists());
@@ -197,13 +197,13 @@ fn test_install() {
 
     // 提供指定的主程序后安装成功
     std::fs::write(desktop_call_path, "114514").unwrap();
-    crate::uninstall(&"CallInstaller".to_string()).unwrap();
+    crate::uninstall(None, &"CallInstaller".to_string()).unwrap();
     copy_dir("examples/CallInstaller", "test/CallInstaller2").unwrap();
     install_using_package(&"test/CallInstaller2".to_string(), false).unwrap();
 
     // 清理
     std::fs::remove_file(desktop_call_path).unwrap();
-    crate::uninstall(&"CallInstaller".to_string()).unwrap();
+    crate::uninstall(None, &"CallInstaller".to_string()).unwrap();
 }
 
 #[test]
@@ -282,7 +282,7 @@ fn test_reg_entry() {
     );
 
     // 执行卸载
-    crate::entrances::uninstall(&"RegEntry".to_string()).unwrap();
+    crate::entrances::uninstall(None, &"RegEntry".to_string()).unwrap();
 
     // 断言 flag 的存在
     assert!(flag_path.exists());

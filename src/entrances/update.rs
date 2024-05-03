@@ -60,7 +60,7 @@ pub fn update_using_package(source_file: &String, verify_signature: bool) -> Res
             return Err(anyhow!("Error:Update canceled by user"));
         }
         // 卸载
-        uninstall(&local_package.package.name)?;
+        uninstall(Some(local_software.scope), &local_package.package.name)?;
         // 安装
         return install_using_package(source_file, verify_signature);
     }
@@ -138,7 +138,7 @@ fn test_update_using_package() {
 
     // 卸载
     if crate::entrances::info_local(&"Microsoft".to_string(), &"VSCode".to_string()).is_ok() {
-        crate::uninstall(&"VSCode".to_string()).unwrap();
+        crate::uninstall(Some("Microsoft".to_string()), &"VSCode".to_string()).unwrap();
     }
 
     // 安装旧版本
@@ -182,5 +182,5 @@ fn test_update_using_package() {
     assert!(new_ico.exists());
 
     // 卸载
-    crate::uninstall(&"VSCode".to_string()).unwrap();
+    crate::uninstall(None, &"VSCode".to_string()).unwrap();
 }

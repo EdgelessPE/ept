@@ -45,8 +45,15 @@ fn router(action: Action) -> Result<String> {
             .map(|_| format!("Success:Package '{package}' installed successfully")),
         Action::Update { package } => update_using_package(&package, verify_signature)
             .map(|_| format!("Success:Package '{package}' updated successfully")),
-        Action::Uninstall { package_name } => uninstall(&package_name)
-            .map(|_| format!("Success:Package '{package_name}' uninstalled successfully")),
+        Action::Uninstall { package_matcher } => {
+            let parse_res = parse_package_matcher(&package_matcher, true, true)?;
+            uninstall(parse_res.scope, &parse_res.name).map(|_| {
+                format!(
+                    "Success:Package '{name}' uninstalled successfully",
+                    name = parse_res.name
+                )
+            })
+        }
         Action::Search { keyword } => search(&keyword).map(|results| {
             let len = results.len();
             let res: String =
