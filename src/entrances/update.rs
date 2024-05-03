@@ -7,7 +7,7 @@ use crate::{
     p2s,
     parsers::{parse_author, parse_workflow},
     types::extended_semver::ExSemVer,
-    utils::{fs::move_or_copy, get_path_apps, term::ask_yn},
+    utils::{download::download, fs::move_or_copy, get_path_apps, get_path_temp, term::ask_yn},
 };
 use crate::{log, log_ok_last};
 
@@ -128,6 +128,16 @@ pub fn update_using_package(source_file: &String, verify_signature: bool) -> Res
     clean_temp(source_file)?;
 
     Ok(())
+}
+
+pub fn update_using_url(url: &String, verify_signature: bool) -> Result<()> {
+    // 下载文件到临时目录
+    let temp_dir = get_path_temp(&"download".to_string(), true, false)?;
+    let p = temp_dir.join("downloaded.nep");
+    download(url, &p)?;
+
+    // 更新
+    update_using_package(&p2s!(p), verify_signature)
 }
 
 #[test]
