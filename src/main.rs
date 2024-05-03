@@ -33,7 +33,10 @@ fn router(action: Action) -> Result<String> {
 
     use types::cli::ActionMirror;
 
-    use crate::entrances::{mirror_add, mirror_remove, mirror_update, mirror_update_all, search};
+    use crate::{
+        entrances::{mirror_add, mirror_remove, mirror_update, mirror_update_all, search},
+        utils::term::parse_package_matcher,
+    };
     let verify_signature = envmnt::get_or("OFFLINE", "false") == String::from("false");
 
     // 匹配入口
@@ -65,7 +68,10 @@ fn router(action: Action) -> Result<String> {
                     });
             res
         }),
-        Action::Info { package_name } => info(None, &package_name).map(|res| format!("{res:#?}")),
+        Action::Info { package_matcher } => {
+            let parse_res = parse_package_matcher(&package_matcher)?;
+            info(parse_res.scope, &parse_res.name).map(|res| format!("{res:#?}"))
+        }
         Action::List => list().map(|list| {
             if list.len() == 0 {
                 return "No installed package".to_string();

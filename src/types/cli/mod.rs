@@ -66,10 +66,10 @@ pub enum Action {
         into_file: Option<String>,
     },
 
-    /// Query package information (locally in current version)
+    /// Query package information
     Info {
-        /// Package name
-        package_name: String,
+        /// Package matcher, expect pattern (SCOPE/)NAME
+        package_matcher: String,
     },
 
     /// List information of installed packages

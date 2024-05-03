@@ -63,7 +63,11 @@ pub fn info_online(scope: &String, package_name: &String) -> Result<TreeItem> {
 
 pub fn info(scope: Option<String>, package_name: &String) -> Result<Info> {
     // 查找 scope
-    let scope = scope.unwrap_or(find_scope_with_name_locally(package_name)?);
+    let scope = if let Some(s) = scope {
+        s
+    } else {
+        find_scope_with_name_locally(package_name)?
+    };
 
     // 创建结果结构体
     let mut info = Info {
