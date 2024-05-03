@@ -8,7 +8,8 @@ use super::{
     utils::validator::installed_validator,
 };
 use crate::utils::{
-    fs::move_or_copy, is_qa_mode, path::parse_relative_path_with_located, term::ask_yn,
+    download::download_nep, fs::move_or_copy, is_qa_mode, path::parse_relative_path_with_located,
+    term::ask_yn,
 };
 use crate::{
     entrances::{info, update_using_package},
@@ -124,9 +125,7 @@ pub fn install_using_package(source_file: &String, verify_signature: bool) -> Re
 
 pub fn install_using_url(url: &String, verify_signature: bool) -> Result<()> {
     // 下载文件到临时目录
-    let temp_dir = get_path_temp(&"download".to_string(), true, false)?;
-    let p = temp_dir.join("downloaded.nep");
-    download(url, &p)?;
+    let p = download_nep(url)?;
 
     // 安装
     install_using_package(&p2s!(p), verify_signature)
