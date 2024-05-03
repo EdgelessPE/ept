@@ -7,9 +7,12 @@ use super::{
     utils::package::{clean_temp, unpack_nep},
     utils::validator::installed_validator,
 };
-use crate::entrances::{info, update_using_package};
 use crate::utils::{
     fs::move_or_copy, is_qa_mode, path::parse_relative_path_with_located, term::ask_yn,
+};
+use crate::{
+    entrances::{info, update_using_package},
+    utils::{download::download, get_path_temp, random::random_short_string},
 };
 use crate::{executor::workflow_executor, parsers::parse_workflow, utils::get_path_apps};
 use crate::{log, log_ok_last, p2s};
@@ -118,6 +121,26 @@ pub fn install_using_package(source_file: &String, verify_signature: bool) -> Re
 
     Ok(())
 }
+
+pub fn install_using_url(url: &String, verify_signature: bool) -> Result<()> {
+    // 下载文件到临时目录
+    let temp_dir = get_path_temp(&"download".to_string(), true, false)?;
+    let p = temp_dir.join("downloaded.nep");
+    download(url, &p)?;
+
+    // 安装
+    install_using_package(&p2s!(p), verify_signature)
+}
+
+// #[test]
+// fn test_install_using_url() {
+//     install_using_url(
+//         &"http:/localhost:3000/api/redirect?path=/nep/Google/Chrome/Chrome_120.0.6099.200_Cno.nep"
+//             .to_string(),
+//         false,
+//     )
+//     .unwrap();
+// }
 
 #[test]
 fn test_install() {

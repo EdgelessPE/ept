@@ -4,8 +4,11 @@ use reqwest::blocking::Client;
 use std::cmp::min;
 use std::fs::File;
 use std::io::{Read, Write};
+use std::path::{Path, PathBuf};
 
-pub fn download(url: &String, at: &String) -> Result<()> {
+use crate::p2s;
+
+pub fn download(url: &String, at: &PathBuf) -> Result<()> {
     log!("Info:Start downloading '{url}'");
     // 创建进度条
     let pb = ProgressBar::new(0);
@@ -23,7 +26,7 @@ pub fn download(url: &String, at: &String) -> Result<()> {
     pb.set_length(content_length);
 
     // 创建文件以写入数据
-    let mut file = File::create(at)?;
+    let mut file = File::create(&at)?;
 
     let mut buf = vec![0; 1024];
     let mut downloaded = 0;
@@ -42,7 +45,7 @@ pub fn download(url: &String, at: &String) -> Result<()> {
     }
     // 下载完成，清除进度条
     pb.finish_and_clear();
-    log!("Info:Downloaded file stored at '{at}'");
+    log!("Info:Downloaded file stored at '{at}'", at = p2s!(at));
 
     Ok(())
 }
