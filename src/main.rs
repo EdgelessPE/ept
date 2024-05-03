@@ -69,7 +69,7 @@ fn router(action: Action) -> Result<String> {
             res
         }),
         Action::Info { package_matcher } => {
-            let parse_res = parse_package_matcher(&package_matcher)?;
+            let parse_res = parse_package_matcher(&package_matcher, true, true)?;
             info(parse_res.scope, &parse_res.name).map(|res| format!("{res:#?}"))
         }
         Action::List => list().map(|list| {

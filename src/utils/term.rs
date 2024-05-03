@@ -31,7 +31,11 @@ pub fn read_console(v: Vec<u8>) -> String {
     String::from_utf8_lossy(&v).to_string()
 }
 
-pub fn parse_package_matcher(text: &String) -> Result<PackageMatcher> {
+pub fn parse_package_matcher(
+    text: &String,
+    deny_mirror: bool,
+    deny_version_matcher: bool,
+) -> Result<PackageMatcher> {
     if text.len() == 0 {
         return Err(anyhow!("Error:Empty input text"));
     }
@@ -43,6 +47,9 @@ pub fn parse_package_matcher(text: &String) -> Result<PackageMatcher> {
     };
     // 分割 @ 并解析 VersionReq
     let lhs = if text.contains("@") {
+        if deny_version_matcher {
+            return Err(anyhow!("Error:Version matcher not allowed"));
+        }
         let sp: Vec<&str> = text.split("@").collect();
         if sp.len() != 2 {
             return Err(anyhow!(
@@ -76,6 +83,9 @@ pub fn parse_package_matcher(text: &String) -> Result<PackageMatcher> {
         res.scope = Some(scope.to_string())
     }
     if let Some(mirror) = sp.get(2) {
+        if deny_mirror {
+            return Err(anyhow!("Error:Mirror specifier not allowed"));
+        }
         res.mirror = Some(mirror.to_string())
     }
 
@@ -93,7 +103,7 @@ fn test_ask_yn() {
 #[test]
 fn test_parse_package_matcher() {
     assert_eq!(
-        parse_package_matcher(&"VSCode".to_string()).unwrap(),
+        parse_package_matcher(&"VSCode".to_string(), false, false).unwrap(),
         PackageMatcher {
             name: "VSCode".to_string(),
             scope: None,
@@ -102,7 +112,7 @@ fn test_parse_package_matcher() {
         }
     );
     assert_eq!(
-        parse_package_matcher(&"VSCode@1.0.0".to_string()).unwrap(),
+        parse_package_matcher(&"VSCode@1.0.0".to_string(), false, false).unwrap(),
         PackageMatcher {
             name: "VSCode".to_string(),
             scope: None,
@@ -111,7 +121,7 @@ fn test_parse_package_matcher() {
         }
     );
     assert_eq!(
-        parse_package_matcher(&"Microsoft/VSCode@^1.1.0".to_string()).unwrap(),
+        parse_package_matcher(&"Microsoft/VSCode@^1.1.0".to_string(), false, false).unwrap(),
         PackageMatcher {
             name: "VSCode".to_string(),
             scope: Some("Microsoft".to_string()),
@@ -120,7 +130,12 @@ fn test_parse_package_matcher() {
         }
     );
     assert_eq!(
-        parse_package_matcher(&"Official/Microsoft/VSCode@\">=0.1.0\"".to_string()).unwrap(),
+        parse_package_matcher(
+            &"Official/Microsoft/VSCode@\">=0.1.0\"".to_string(),
+            false,
+            false
+        )
+        .unwrap(),
         PackageMatcher {
             name: "VSCode".to_string(),
             scope: Some("Microsoft".to_string()),
@@ -128,4 +143,8 @@ fn test_parse_package_matcher() {
             version_req: Some(VersionReq::parse(">=0.1.0").unwrap())
         }
     );
+
+    // 测试 deny
+    assert!(parse_package_matcher(&"Official/Microsoft/VSCode".to_string(), true, false).is_err());
+    assert!(parse_package_matcher(&"VSCode@\">=0.1.0\"".to_string(), false, true).is_err());
 }
