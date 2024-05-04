@@ -21,7 +21,10 @@ pub fn download(url: &String, at: &PathBuf) -> Result<()> {
     let client = Client::new();
 
     // 发送 GET 请求
-    let mut response = client.get(url).send()?;
+    let mut response = client
+        .get(url)
+        .send()
+        .map_err(|e| anyhow!("Error:Failed to request url '{url}' : {e}"))?;
 
     // 尝试获取内容长度
     let content_length = response.content_length().unwrap_or(0);

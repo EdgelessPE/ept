@@ -11,7 +11,7 @@ use super::{
     },
 };
 use crate::{
-    entrances::{info, update_using_package},
+    entrances::{info, update_using_package, update_using_package_matcher},
     utils::{
         download::{download, fill_url_template},
         get_path_temp,
@@ -147,6 +147,21 @@ pub fn install_using_package_matcher(
     matcher: PackageMatcher,
     verify_signature: bool,
 ) -> Result<()> {
+    // 查找 scope
+    let scope = if let Some(s) = matcher.scope.clone() {
+        s
+    } else {
+        find_scope_with_name_locally(&matcher.name)?
+    };
+    // 检查对应包名有没有被安装过
+    if let Ok((_, diff)) = info_local(&scope, &matcher.name) {
+        log!(
+            "Warning:Package '{name}' has been installed({ver}), switch to update entrance",
+            name = matcher.name,
+            ver = diff.version,
+        );
+        return update_using_package_matcher(matcher, verify_signature);
+    }
     // 解析 url
     let url = get_url_with_version_req(matcher)?;
     // 执行安装

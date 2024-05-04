@@ -11,16 +11,19 @@ use crate::{
         download::{download, download_nep},
         fs::move_or_copy,
         get_path_apps, get_path_temp,
-        mirror::get_url_with_version_req,
+        mirror::{filter_release, get_url_with_version_req},
+        path::find_scope_with_name_locally,
         term::ask_yn,
     },
 };
 use crate::{log, log_ok_last};
 
 use super::{
-    info_local, install_using_package, uninstall,
-    utils::package::{clean_temp, unpack_nep},
-    utils::validator::installed_validator,
+    info_local, info_online, install_using_package, uninstall,
+    utils::{
+        package::{clean_temp, unpack_nep},
+        validator::installed_validator,
+    },
 };
 
 fn same_authors(a: &Vec<String>, b: &Vec<String>) -> bool {
@@ -145,6 +148,25 @@ pub fn update_using_url(url: &String, verify_signature: bool) -> Result<()> {
 }
 
 pub fn update_using_package_matcher(matcher: PackageMatcher, verify_signature: bool) -> Result<()> {
+    // 查找 scope
+    let scope = if let Some(s) = matcher.scope.clone() {
+        s
+    } else {
+        find_scope_with_name_locally(&matcher.name)?
+    };
+    // 检查对应包名有没有被安装过
+    let (_global, local_diff) = info_local(&scope, &matcher.name).map_err(|_| {
+        anyhow!(
+            "Error:Package '{name}' hasn't been installed, use 'ept install \"{name}\"' instead",
+            name = &matcher.name,
+        )
+    })?;
+    // 检查包的版本号是否允许升级
+    let (online_item, _url_template) = info_online(&scope, &matcher.name, matcher.mirror.clone())?;
+    let selected_release = filter_release(online_item.releases, matcher.version_req.clone())?;
+    if selected_release.version <= ExSemVer::parse(&local_diff.version)? {
+        return Err(anyhow!("Error:Package '{name}' has been up to date ({local_version}), can't update to the version of given package ({fresh_version})",name=matcher.name,local_version=&local_diff.version,fresh_version=&selected_release.version));
+    }
     // 解析 url
     let url = get_url_with_version_req(matcher)?;
     // 执行安装
