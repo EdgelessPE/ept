@@ -23,7 +23,7 @@ use crate::{
 use crate::{executor::workflow_executor, parsers::parse_workflow, utils::get_path_apps};
 use crate::{log, log_ok_last, p2s};
 use crate::{
-    types::PackageMatcher,
+    types::matcher::PackageMatcher,
     utils::{
         download::download_nep, fs::move_or_copy, is_qa_mode,
         path::parse_relative_path_with_located, term::ask_yn,

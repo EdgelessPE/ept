@@ -6,7 +6,7 @@ use crate::{
     executor::workflow_executor,
     p2s,
     parsers::{parse_author, parse_workflow},
-    types::{extended_semver::ExSemVer, PackageMatcher},
+    types::{extended_semver::ExSemVer, matcher::PackageMatcher},
     utils::{
         download::{download, download_nep},
         fs::move_or_copy,

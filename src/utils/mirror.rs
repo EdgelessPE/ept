@@ -11,9 +11,9 @@ use tantivy::ReloadPolicy;
 use toml::from_str;
 
 use crate::entrances::info_online;
+use crate::types::matcher::PackageMatcher;
 use crate::types::mirror::MirrorPkgSoftwareRelease;
 use crate::types::mirror::SearchResult;
-use crate::types::PackageMatcher;
 use crate::{
     p2s,
     types::{

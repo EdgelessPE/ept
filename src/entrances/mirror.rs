@@ -45,6 +45,9 @@ pub fn mirror_add(url: &String, should_match_name: Option<String>) -> Result<Str
     let (ps_url, _) = filter_service_from_meta(res, ServiceKeys::PkgSoftware)?;
     let pkg_software_res: MirrorPkgSoftware = get(&ps_url)?.json()?;
 
+    // 校验
+    pkg_software_res.verify_self(&"".to_string())?;
+
     // 更新索引并写 pkg-software.toml
     build_index_for_mirror(pkg_software_res.clone(), p.join("index"))?;
     let value = Value::try_from(pkg_software_res.clone())?;

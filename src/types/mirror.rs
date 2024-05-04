@@ -3,7 +3,7 @@ use std::{
     time::{SystemTime, UNIX_EPOCH},
 };
 
-use crate::utils::mirror::filter_service_from_meta;
+use crate::utils::{download::fill_url_template, mirror::filter_service_from_meta};
 use anyhow::Result;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
@@ -123,6 +123,18 @@ pub struct MirrorPkgSoftware {
     pub timestamp: u64,
     pub url_template: String,
     pub tree: HashMap<String, Vec<TreeItem>>,
+}
+
+impl Verifiable for MirrorPkgSoftware {
+    fn verify_self(&self, _located: &String) -> Result<()> {
+        // 检查 url 模板
+        let str = String::new();
+        if let Err(e) = fill_url_template(&self.url_template, &str, &str, &str) {
+            return Err(e);
+        }
+
+        Ok(())
+    }
 }
 
 impl MirrorPkgSoftware {

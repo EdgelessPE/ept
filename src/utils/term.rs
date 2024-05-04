@@ -1,4 +1,4 @@
-use crate::types::PackageMatcher;
+use crate::types::matcher::PackageMatcher;
 use crate::utils::is_confirm_mode;
 use anyhow::{anyhow, Result};
 use encoding::all::GBK;

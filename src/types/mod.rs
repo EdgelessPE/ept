@@ -5,6 +5,7 @@ pub mod cli;
 pub mod extended_semver;
 pub mod info;
 pub mod interpretable;
+pub mod matcher;
 pub mod meta;
 pub mod mirror;
 pub mod mixed_fs;
@@ -16,11 +17,3 @@ pub mod steps;
 pub mod uninstall_reg_entry;
 pub mod verifiable;
 pub mod workflow;
-
-#[derive(Clone, Debug, PartialEq)]
-pub struct PackageMatcher {
-    pub name: String,
-    pub scope: Option<String>,
-    pub mirror: Option<String>,
-    pub version_req: Option<VersionReq>,
-}
