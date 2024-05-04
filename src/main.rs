@@ -35,7 +35,7 @@ fn router(action: Action) -> Result<String> {
 
     use crate::{
         entrances::{mirror_add, mirror_remove, mirror_update, mirror_update_all, search},
-        utils::term::parse_package_matcher,
+        types::matcher::PackageMatcher,
     };
     let verify_signature = envmnt::get_or("OFFLINE", "false") == String::from("false");
 
@@ -46,7 +46,7 @@ fn router(action: Action) -> Result<String> {
         Action::Update { package } => update_using_package(&package, verify_signature)
             .map(|_| format!("Success:Package '{package}' updated successfully")),
         Action::Uninstall { package_matcher } => {
-            let parse_res = parse_package_matcher(&package_matcher, true, true)?;
+            let parse_res = PackageMatcher::parse(&package_matcher, true, true)?;
             uninstall(parse_res.scope, &parse_res.name).map(|_| {
                 format!(
                     "Success:Package '{name}' uninstalled successfully",
@@ -76,7 +76,7 @@ fn router(action: Action) -> Result<String> {
             res
         }),
         Action::Info { package_matcher } => {
-            let parse_res = parse_package_matcher(&package_matcher, true, true)?;
+            let parse_res = PackageMatcher::parse(&package_matcher, true, true)?;
             info(parse_res.scope, &parse_res.name).map(|res| format!("{res:#?}"))
         }
         Action::List => list().map(|list| {
