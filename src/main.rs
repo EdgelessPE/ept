@@ -34,17 +34,41 @@ fn router(action: Action) -> Result<String> {
     use types::cli::ActionMirror;
 
     use crate::{
-        entrances::{mirror_add, mirror_remove, mirror_update, mirror_update_all, search},
-        types::matcher::PackageMatcher,
+        entrances::{
+            install_using_package_matcher, install_using_url, mirror_add, mirror_remove,
+            mirror_update, mirror_update_all, search, update_using_package_matcher,
+            update_using_url,
+        },
+        types::matcher::{PackageInputEnum, PackageMatcher},
     };
     let verify_signature = envmnt::get_or("OFFLINE", "false") == String::from("false");
 
     // 匹配入口
     match action {
-        Action::Install { package } => install_using_package(&package, verify_signature)
-            .map(|_| format!("Success:Package '{package}' installed successfully")),
-        Action::Update { package } => update_using_package(&package, verify_signature)
-            .map(|_| format!("Success:Package '{package}' updated successfully")),
+        Action::Install { package } => {
+            let res = match PackageInputEnum::parse(package.clone(), false, false)? {
+                PackageInputEnum::PackageMatcher(matcher) => {
+                    install_using_package_matcher(matcher, verify_signature)
+                }
+                PackageInputEnum::Url(url) => install_using_url(&url, verify_signature),
+                PackageInputEnum::LocalPath(source_file) => {
+                    install_using_package(&source_file, verify_signature)
+                }
+            };
+            res.map(|_| format!("Success:Package '{package}' installed successfully"))
+        }
+        Action::Update { package } => {
+            let res = match PackageInputEnum::parse(package.clone(), false, false)? {
+                PackageInputEnum::PackageMatcher(matcher) => {
+                    update_using_package_matcher(matcher, verify_signature)
+                }
+                PackageInputEnum::Url(url) => update_using_url(&url, verify_signature),
+                PackageInputEnum::LocalPath(source_file) => {
+                    update_using_package(&source_file, verify_signature)
+                }
+            };
+            res.map(|_| format!("Success:Package '{package}' updated successfully"))
+        }
         Action::Uninstall { package_matcher } => {
             let parse_res = PackageMatcher::parse(&package_matcher, true, true)?;
             uninstall(parse_res.scope, &parse_res.name).map(|_| {

@@ -5,7 +5,7 @@ use anyhow::{anyhow, Result};
 
 lazy_static! {
     static ref PACKAGE_MATCHER_REGEX: Regex =
-        Regex::new(r"^([^/]+/)?([^/]+/)?[^/@]+(@[\w\.-]+)?$").unwrap();
+        Regex::new(r"^(([^/]+/)?[^/]+/)?[^/@]+(@[\w\.-]+)?$").unwrap();
     static ref URL_REGEX: Regex = Regex::new(
         r"^(?:([A-Za-z]+):)?(\/{0,3})([0-9.\-A-Za-z]+)
         (?::(\d+))?(?:\/([^?#]*))?(?:\?([^#]*))?(?:#(.*))?$"

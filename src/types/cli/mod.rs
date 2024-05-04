@@ -34,15 +34,15 @@ pub struct Args {
 
 #[derive(Subcommand, Debug)]
 pub enum Action {
-    /// Install a package with path (locally in current version)
+    /// Install a package with path
     Install {
-        /// Package path (or package name in future versions)
+        /// Package matcher（expect pattern ((MIRROR/)SCOPE/)NAME(@SEMVER)）or Nep package url or Nep package local path
         package: String,
     },
 
-    /// Update a package with path (locally in current version)
+    /// Update a package with path
     Update {
-        /// Package path (or package name in future versions)
+        /// Package matcher（expect pattern ((MIRROR/)SCOPE/)NAME(@SEMVER)）or Nep package url or Nep package local path
         package: String,
     },
 
