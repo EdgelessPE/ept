@@ -3,20 +3,32 @@ use std::fs::remove_dir_all;
 use std::path::Path;
 
 use super::{
+    info::info_online,
     info_local,
-    utils::package::{clean_temp, unpack_nep},
-    utils::validator::installed_validator,
-};
-use crate::utils::{
-    download::download_nep, fs::move_or_copy, is_qa_mode, path::parse_relative_path_with_located,
-    term::ask_yn,
+    utils::{
+        package::{clean_temp, unpack_nep},
+        validator::installed_validator,
+    },
 };
 use crate::{
     entrances::{info, update_using_package},
-    utils::{download::download, get_path_temp, random::random_short_string},
+    utils::{
+        download::{download, fill_url_template},
+        get_path_temp,
+        mirror::{filter_release, get_url_with_version_req},
+        path::find_scope_with_name_locally,
+        random::random_short_string,
+    },
 };
 use crate::{executor::workflow_executor, parsers::parse_workflow, utils::get_path_apps};
 use crate::{log, log_ok_last, p2s};
+use crate::{
+    types::PackageMatcher,
+    utils::{
+        download::download_nep, fs::move_or_copy, is_qa_mode,
+        path::parse_relative_path_with_located, term::ask_yn,
+    },
+};
 
 pub fn install_using_package(source_file: &String, verify_signature: bool) -> Result<()> {
     log!("Info:Preparing to install with package '{source_file}'");
@@ -129,6 +141,16 @@ pub fn install_using_url(url: &String, verify_signature: bool) -> Result<()> {
 
     // 安装
     install_using_package(&p2s!(p), verify_signature)
+}
+
+pub fn install_using_package_matcher(
+    matcher: PackageMatcher,
+    verify_signature: bool,
+) -> Result<()> {
+    // 解析 url
+    let url = get_url_with_version_req(matcher)?;
+    // 执行安装
+    install_using_url(&url, verify_signature)
 }
 
 // #[test]

@@ -41,17 +41,35 @@ pub fn info_local(scope: &String, package_name: &String) -> Result<(GlobalPackag
     Ok((global.clone(), local))
 }
 
-pub fn info_online(scope: &String, package_name: &String) -> Result<TreeItem> {
-    // 遍历 mirror 目录，读出软件包树并进行查找
-    let p = get_path_mirror()?;
-    let mirror_names = read_sub_dir(&p)?;
-    for name in mirror_names {
-        let pkg_software = read_local_mirror_pkg_software(&name)?;
+// 第二个参数为 URL 模板
+pub fn info_online(
+    scope: &String,
+    package_name: &String,
+    mirror: Option<String>,
+) -> Result<(TreeItem, String)> {
+    // 定义匹配函数
+    let item_matcher = |mirror_name: &String| {
+        let pkg_software = read_local_mirror_pkg_software(mirror_name)?;
         if let Some(entry) = pkg_software.tree.get(scope) {
             for item in entry {
                 if &item.name == package_name {
-                    return Ok(item.to_owned());
+                    return Ok((item.to_owned(), pkg_software.url_template));
                 }
+            }
+        }
+        Err(anyhow!(
+            "Error:Can't find such package in mirror '{mirror_name}'"
+        ))
+    };
+    if let Some(mirror_name) = mirror {
+        return item_matcher(&mirror_name);
+    } else {
+        // 遍历 mirror 目录，读出软件包树并进行查找
+        let p = get_path_mirror()?;
+        let mirror_names = read_sub_dir(&p)?;
+        for name in mirror_names {
+            if let Ok(res) = item_matcher(&name) {
+                return Ok(res);
             }
         }
     }
@@ -89,7 +107,7 @@ pub fn info(scope: Option<String>, package_name: &String) -> Result<Info> {
     }
 
     // 在线检查
-    if let Ok(item) = info_online(&scope, package_name) {
+    if let Ok((item, _)) = info_online(&scope, package_name, None) {
         let latest = filter_release(item.releases, None)?;
         info.online = Some(InfoDiff {
             version: latest.version.to_string(),

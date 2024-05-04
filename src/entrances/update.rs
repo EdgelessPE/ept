@@ -6,11 +6,12 @@ use crate::{
     executor::workflow_executor,
     p2s,
     parsers::{parse_author, parse_workflow},
-    types::extended_semver::ExSemVer,
+    types::{extended_semver::ExSemVer, PackageMatcher},
     utils::{
         download::{download, download_nep},
         fs::move_or_copy,
         get_path_apps, get_path_temp,
+        mirror::get_url_with_version_req,
         term::ask_yn,
     },
 };
@@ -141,6 +142,13 @@ pub fn update_using_url(url: &String, verify_signature: bool) -> Result<()> {
 
     // 更新
     update_using_package(&p2s!(p), verify_signature)
+}
+
+pub fn update_using_package_matcher(matcher: PackageMatcher, verify_signature: bool) -> Result<()> {
+    // 解析 url
+    let url = get_url_with_version_req(matcher)?;
+    // 执行安装
+    update_using_url(&url, verify_signature)
 }
 
 #[test]

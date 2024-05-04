@@ -10,8 +10,10 @@ use tantivy::ReloadPolicy;
 
 use toml::from_str;
 
+use crate::entrances::info_online;
 use crate::types::mirror::MirrorPkgSoftwareRelease;
 use crate::types::mirror::SearchResult;
+use crate::types::PackageMatcher;
 use crate::{
     p2s,
     types::{
@@ -21,8 +23,10 @@ use crate::{
     utils::get_path_mirror,
 };
 
+use super::download::fill_url_template;
 use super::fs::ensure_dir_exist;
 use super::fs::try_recycle;
+use super::path::find_scope_with_name_locally;
 
 // 读取 meta
 pub fn read_local_mirror_hello(name: &String) -> Result<(MirrorHello, PathBuf)> {
@@ -140,12 +144,10 @@ pub fn search_index_for_mirror(text: &String, dir: PathBuf) -> Result<Vec<Search
 // 如果没有提供 semver matcher 则返回最大版本
 pub fn filter_release(
     releases: Vec<MirrorPkgSoftwareRelease>,
-    semver_matcher: Option<String>,
+    semver_matcher: Option<VersionReq>,
 ) -> Result<MirrorPkgSoftwareRelease> {
     // 筛选 matcher
-    let mut arr = if let Some(matcher_str) = semver_matcher {
-        let matcher = VersionReq::parse(&matcher_str)
-            .map_err(|e| anyhow!("Error:Invalid semver matcher '{matcher_str}' : {e}"))?;
+    let mut arr = if let Some(matcher) = semver_matcher {
         let res_arr: Vec<MirrorPkgSoftwareRelease> = releases
             .iter()
             .filter(|node| matcher.matches(&node.version.semver_instance))
@@ -161,6 +163,28 @@ pub fn filter_release(
     } else {
         Err(anyhow!("Error:No releases matched"))
     }
+}
+
+// 通过匹配 VersionReq 解析出包的 url
+pub fn get_url_with_version_req(matcher: PackageMatcher) -> Result<String> {
+    // 查找 scope
+    let scope = if let Some(s) = matcher.scope {
+        s
+    } else {
+        find_scope_with_name_locally(&matcher.name)?
+    };
+    // 拿到 info online
+    let (info, url_template) = info_online(&scope, &matcher.name, matcher.mirror)?;
+    // 匹配版本
+    let matched_release = filter_release(info.releases, matcher.version_req)?;
+    // 填充模板获取 url
+    let url = fill_url_template(
+        &url_template,
+        &scope,
+        &info.name,
+        &matched_release.file_name,
+    )?;
+    Ok(url)
 }
 
 #[test]
@@ -215,7 +239,7 @@ fn test_filter_release() {
             integrity: None,
         },
     ];
-    let res = filter_release(arr, Some("121".to_string())).unwrap();
+    let res = filter_release(arr, Some(VersionReq::parse("121").unwrap())).unwrap();
     assert_eq!(res.version.to_string(), "121.0.6099.200".to_string());
 }
 

@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use indicatif::{ProgressBar, ProgressState, ProgressStyle};
 use reqwest::blocking::Client;
 use std::cmp::min;
@@ -59,6 +59,37 @@ pub fn download_nep(url: &String) -> Result<PathBuf> {
     download(url, &p)?;
 
     Ok(p)
+}
+
+pub fn fill_url_template(
+    url_template: &String,
+    scope: &String,
+    software: &String,
+    file_name: &String,
+) -> Result<String> {
+    let mut res = url_template.clone();
+    if res.contains("{scope}") {
+        res = res.replace("{scope}", scope);
+    } else {
+        return Err(anyhow!(
+            "Error:Invalid url template '{url_template}' : missing field 'scope'"
+        ));
+    }
+    if res.contains("{software}") {
+        res = res.replace("{software}", software);
+    } else {
+        return Err(anyhow!(
+            "Error:Invalid url template '{url_template}' : missing field 'software'"
+        ));
+    }
+    if res.contains("{file_name}") {
+        res = res.replace("{file_name}", file_name);
+    } else {
+        return Err(anyhow!(
+            "Error:Invalid url template '{url_template}' : missing field 'file_name'"
+        ));
+    }
+    Ok(res)
 }
 
 // #[test]
