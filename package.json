@@ -15,26 +15,26 @@
   },
   "dependencies": {
     "react": "^18.2.0",
-    "rspress": "^1.9.3",
+    "rspress": "^1.19.1",
     "typescript": "*"
   },
   "devDependencies": {
-    "@modern-js/tsconfig": "2.30.0",
+    "@modern-js/tsconfig": "2.49.2",
     "@types/jest": "^29",
     "@types/node": "^20.6.5",
     "@typescript-eslint/eslint-plugin": "^6.4.0",
     "eslint": "^8.0.1",
     "eslint-config-prettier": "^9.0.0",
-    "eslint-config-standard-with-typescript": "^39.1.1",
+    "eslint-config-love": "^47.0.0",
     "eslint-plugin-import": "^2.25.2",
     "eslint-plugin-n": "^15.0.0 || ^16.0.0 ",
     "eslint-plugin-prettier": "^5.0.1",
     "eslint-plugin-promise": "^6.0.0",
-    "lint-staged": "^14.0.1",
+    "lint-staged": "^15.2.2",
     "pinst": "^3.0.0",
-    "prettier": "^3.0.3",
-    "simple-git-hooks": "^2.9.0",
-    "ts-node": "^10.9.1",
+    "prettier": "^3.2.5",
+    "simple-git-hooks": "^2.11.1",
+    "ts-node": "^10.9.2",
     "ts-results": "^3.3.0"
   },
   "lint-staged": {
