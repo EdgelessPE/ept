@@ -15,7 +15,7 @@ mod types;
 mod utils;
 
 use anyhow::{anyhow, Result};
-
+use clap::Parser;
 use colored::Colorize;
 use entrances::meta;
 use std::fs::write;
@@ -26,6 +26,7 @@ use crate::entrances::config::{config_get, config_init, config_list, config_set,
 use crate::entrances::{
     clean, info, install_using_package, list, pack, uninstall, update_using_package,
 };
+use crate::utils::launch_clean;
 
 #[cfg(not(tarpaulin_include))]
 fn router(action: Action) -> Result<String> {
@@ -176,21 +177,17 @@ fn router(action: Action) -> Result<String> {
 
 #[cfg(not(tarpaulin_include))]
 fn main() {
-    use clap::Parser;
-
-    use crate::utils::launch_clean;
-
-    let args = Args::parse();
+    // 清理缓存
+    launch_clean().unwrap();
 
     // 配置环境变量
+    let args = Args::parse();
     if args.qa {
         envmnt::set("QA", "true");
     }
     if args.debug || args.qa || cfg!(debug_assertions) {
         log!("Warning:Debug mode enabled");
         envmnt::set("DEBUG", "true");
-    } else {
-        launch_clean().unwrap();
     }
     if args.offline {
         log!("Warning:Offline mode enabled, ept couldn't guarantee security or integrality of packages");

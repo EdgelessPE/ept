@@ -123,7 +123,7 @@ pub fn is_starts_with_inner_value(p: &String) -> bool {
 
 pub fn launch_clean() -> Result<()> {
     // 删除 temp 目录
-    let p = parse_relative_path_with_base(&"temp".to_string())?;
+    let p = parse_bare_temp()?;
     if p.exists() {
         try_recycle(p)?;
     }
