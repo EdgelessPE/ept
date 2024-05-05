@@ -179,6 +179,19 @@ impl MirrorPkgSoftware {
                 }],
             }],
         );
+        tree.insert(
+            "360极速浏览器X".to_string(),
+            vec![TreeItem {
+                name: "Chrome".to_string(),
+                releases: vec![MirrorPkgSoftwareRelease {
+                    file_name: "360极速浏览器X_22.1.1073.64_Cno.nep".to_string(),
+                    version: ExSemVer::parse(&"22.1.1073.64".to_string()).unwrap(),
+                    size: 192179712,
+                    timestamp: 1704554110,
+                    integrity: None,
+                }],
+            }],
+        );
         Self {
             timestamp: SystemTime::now()
                 .duration_since(UNIX_EPOCH)
