@@ -48,7 +48,7 @@ pub fn update_using_package(
     let (local_package, local_diff) =
         info_local(&fresh_software.scope, &fresh_package.package.name).map_err(|_| {
             anyhow!(
-                "Error:Package '{name}' hasn't been installed, use 'ept install \"{source_file}\"' instead",
+                "Error:Package '{name}' hasn't been installed, use 'ept install' instead",
                 name = &fresh_package.package.name,
             )
         })?;
@@ -161,7 +161,7 @@ pub fn update_using_package_matcher(
     // 检查对应包名有没有被安装过
     let (_global, local_diff) = info_local(&scope, &package_name).map_err(|_| {
         anyhow!(
-            "Error:Package '{name}' hasn't been installed, use 'ept install \"{name}\"' instead",
+            "Error:Package '{name}' hasn't been installed, use 'ept install' instead",
             name = package_name
         )
     })?;
