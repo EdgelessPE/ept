@@ -3,14 +3,11 @@ use semver::VersionReq;
 
 use anyhow::{anyhow, Result};
 
+use crate::utils::is_url;
+
 lazy_static! {
     static ref PACKAGE_MATCHER_REGEX: Regex =
         Regex::new(r"^(([^/]+/)?[^/]+/)?[^/@]+(@[\w\.-]+)?$").unwrap();
-    static ref URL_REGEX: Regex = Regex::new(
-        r"^(?:([A-Za-z]+):)?(\/{0,3})([0-9.\-A-Za-z]+)
-        (?::(\d+))?(?:\/([^?#]*))?(?:\?([^#]*))?(?:#(.*))?$"
-    )
-    .unwrap();
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -90,7 +87,7 @@ pub enum PackageInputEnum {
 impl PackageInputEnum {
     pub fn parse(text: String, deny_mirror: bool, deny_version_matcher: bool) -> Result<Self> {
         // 使用正则匹配
-        if URL_REGEX.is_match(&text) {
+        if is_url(&text) {
             return Ok(PackageInputEnum::Url(text));
         }
         if PACKAGE_MATCHER_REGEX.is_match(&text) {
