@@ -1,5 +1,4 @@
 use anyhow::{anyhow, Result};
-use info::info_online;
 use std::fs::remove_dir_all;
 use std::path::Path;
 
@@ -12,11 +11,7 @@ use super::{
 };
 use crate::{
     entrances::{info, update_using_package, update_using_package_matcher},
-    types::extended_semver::ExSemVer,
-    utils::{
-        mirror::{filter_release, get_url_with_version_req},
-        path::find_scope_with_name,
-    },
+    utils::{mirror::get_url_with_version_req, path::find_scope_with_name},
 };
 use crate::{executor::workflow_executor, parsers::parse_workflow, utils::get_path_apps};
 use crate::{log, log_ok_last, p2s};
@@ -154,11 +149,6 @@ pub fn install_using_package_matcher(
     };
     // 检查对应包名有没有被安装过
     if let Ok((_, diff)) = info_local(&scope, &matcher.name) {
-        let (online_item, _) = info_online(&scope, &matcher.name, None)?;
-        let selected_release = filter_release(online_item.releases, matcher.version_req.clone())?;
-        if selected_release.version <= ExSemVer::parse(&diff.version)? {
-            return Err(anyhow!("Error:Package '{name}' has been up to date ({local_version}), can't update to the version of online package ({fresh_version})",name=matcher.name,local_version=diff.version,fresh_version=selected_release.version.to_string()));
-        }
         log!(
             "Warning:Package '{name}' has been installed({ver}), switch to update entrance",
             name = matcher.name,
