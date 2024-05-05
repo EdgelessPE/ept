@@ -12,7 +12,7 @@ use crate::{
         fs::move_or_copy,
         get_path_apps, get_path_temp,
         mirror::{filter_release, get_url_with_version_req},
-        path::find_scope_with_name_locally,
+        path::find_scope_with_name,
         term::ask_yn,
     },
 };
@@ -152,7 +152,7 @@ pub fn update_using_package_matcher(matcher: PackageMatcher, verify_signature: b
     let scope = if let Some(s) = matcher.scope.clone() {
         s
     } else {
-        find_scope_with_name_locally(&matcher.name)?
+        find_scope_with_name(&matcher.name)?
     };
     // 检查对应包名有没有被安装过
     let (_global, local_diff) = info_local(&scope, &matcher.name).map_err(|_| {

@@ -16,7 +16,7 @@ use crate::{
         download::{download, fill_url_template},
         get_path_temp,
         mirror::{filter_release, get_url_with_version_req},
-        path::find_scope_with_name_locally,
+        path::find_scope_with_name,
         random::random_short_string,
     },
 };
@@ -151,7 +151,7 @@ pub fn install_using_package_matcher(
     let scope = if let Some(s) = matcher.scope.clone() {
         s
     } else {
-        find_scope_with_name_locally(&matcher.name)?
+        find_scope_with_name(&matcher.name)?
     };
     // 检查对应包名有没有被安装过
     if let Ok((_, diff)) = info_local(&scope, &matcher.name) {

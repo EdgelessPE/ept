@@ -17,7 +17,7 @@ use crate::{
         workflow::{WorkflowContext, WorkflowNode},
     },
     utils::{
-        get_bare_apps, get_path_apps, path::find_scope_with_name_locally, process::kill_with_name,
+        get_bare_apps, get_path_apps, path::find_scope_with_name, process::kill_with_name,
         reg_entry::get_reg_entry, term::ask_yn,
     },
 };
@@ -40,7 +40,7 @@ pub fn uninstall(scope: Option<String>, package_name: &String) -> Result<()> {
     let scope = if let Some(s) = scope {
         s
     } else {
-        find_scope_with_name_locally(package_name)?
+        find_scope_with_name(package_name)?
     };
 
     // 解析安装路径

@@ -11,7 +11,7 @@ use crate::{
         package::GlobalPackage,
         permissions::{Generalizable, Permission, PermissionKey, PermissionLevel},
     },
-    utils::{get_path_apps, path::find_scope_with_name_locally},
+    utils::{get_path_apps, path::find_scope_with_name},
 };
 use anyhow::{anyhow, Result};
 
@@ -35,7 +35,7 @@ fn find_meta_target(
     }
 
     // 作为名称使用，在本地已安装列表中搜索
-    if let Ok(scope) = find_scope_with_name_locally(input) {
+    if let Ok(scope) = find_scope_with_name(input) {
         let path = get_path_apps(&scope, input, false)?;
         let (pkg, _) = info_local(&scope, input)?;
         installed_validator(&p2s!(path))?;

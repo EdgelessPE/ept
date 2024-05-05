@@ -26,7 +26,7 @@ use crate::{
 use super::download::fill_url_template;
 use super::fs::ensure_dir_exist;
 use super::fs::try_recycle;
-use super::path::find_scope_with_name_locally;
+use super::path::find_scope_with_name;
 
 // 读取 meta
 pub fn read_local_mirror_hello(name: &String) -> Result<(MirrorHello, PathBuf)> {
@@ -171,7 +171,7 @@ pub fn get_url_with_version_req(matcher: PackageMatcher) -> Result<String> {
     let scope = if let Some(s) = matcher.scope {
         s
     } else {
-        find_scope_with_name_locally(&matcher.name)?
+        find_scope_with_name(&matcher.name)?
     };
     // 拿到 info online
     let (info, url_template) = info_online(&scope, &matcher.name, matcher.mirror)?;

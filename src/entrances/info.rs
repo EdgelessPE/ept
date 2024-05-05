@@ -14,7 +14,7 @@ use crate::{
         fs::read_sub_dir,
         get_path_apps, get_path_mirror,
         mirror::{filter_release, read_local_mirror_pkg_software},
-        path::find_scope_with_name_locally,
+        path::find_scope_with_name,
     },
 };
 
@@ -84,7 +84,7 @@ pub fn info(scope: Option<String>, package_name: &String) -> Result<Info> {
     let scope = if let Some(s) = scope {
         s
     } else {
-        find_scope_with_name_locally(package_name)?
+        find_scope_with_name(package_name)?
     };
 
     // 创建结果结构体

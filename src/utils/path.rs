@@ -4,7 +4,10 @@ use std::path::{Path, PathBuf};
 
 use crate::{p2s, utils::cfg::get_config};
 
-use super::{format_path, fs::read_sub_dir, get_bare_apps};
+use super::{
+    format_path, fs::read_sub_dir, get_bare_apps, get_path_mirror,
+    mirror::read_local_mirror_pkg_software,
+};
 
 pub fn split_parent(raw: &String, located: &String) -> (PathBuf, String) {
     // 解析为绝对路径
@@ -58,7 +61,7 @@ pub fn parse_relative_path_with_located(relative: &String, located: &String) -> 
 }
 
 /// name 大小写不敏感
-pub fn find_scope_with_name_locally(name: &String) -> Result<String> {
+fn find_scope_with_name_locally(name: &String) -> Result<String> {
     let app_dir = get_bare_apps()?;
     for scope in read_sub_dir(app_dir.clone())? {
         for dir_name in read_sub_dir(app_dir.join(&scope))? {
@@ -68,6 +71,31 @@ pub fn find_scope_with_name_locally(name: &String) -> Result<String> {
         }
     }
     Err(anyhow!("Error:Can't find scope for '{name}'"))
+}
+
+fn find_scope_with_name_online(name: &String) -> Result<String> {
+    // 遍历 mirrors
+    let p = get_path_mirror()?;
+    let mirror_names = read_sub_dir(&p)?;
+    for mirror_name in mirror_names {
+        let pkg_software = read_local_mirror_pkg_software(&mirror_name)?;
+        for (scope, tree) in pkg_software.tree {
+            for node in tree {
+                if &node.name == name {
+                    return Ok(scope);
+                }
+            }
+        }
+    }
+    Err(anyhow!("Error:Can't find scope for '{name}'"))
+}
+
+pub fn find_scope_with_name(name: &String) -> Result<String> {
+    let local_res = find_scope_with_name_locally(name);
+    if local_res.is_ok() {
+        return local_res;
+    }
+    find_scope_with_name_online(name)
 }
 
 #[test]
