@@ -63,7 +63,8 @@ pub fn install_using_package(source_file: &String, verify_signature: bool) -> Re
             name = package.name,
             ver = diff.version,
         );
-        return update_using_package(source_file, verify_signature);
+        update_using_package(source_file, verify_signature)?;
+        return Ok(());
     }
 
     // 解析最终安装位置
@@ -153,7 +154,8 @@ pub fn install_using_package_matcher(
             name = matcher.name,
             ver = diff.version,
         );
-        return update_using_package_matcher(matcher, verify_signature);
+        update_using_package_matcher(matcher, verify_signature)?;
+        return Ok(());
     }
     // 解析 url
     let url = get_url_with_version_req(matcher)?;

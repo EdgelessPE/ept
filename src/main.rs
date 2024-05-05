@@ -67,7 +67,9 @@ fn router(action: Action) -> Result<String> {
                     update_using_package(&source_file, verify_signature)
                 }
             };
-            res.map(|_| format!("Success:Package '{package}' updated successfully"))
+            res.map(|(from, to)| {
+                format!("Success:Package '{package}' updated successfully from {from} to {to}")
+            })
         }
         Action::Uninstall { package_matcher } => {
             let parse_res = PackageMatcher::parse(&package_matcher, true, true)?;

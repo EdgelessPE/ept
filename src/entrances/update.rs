@@ -33,7 +33,10 @@ fn same_authors(a: &Vec<String>, b: &Vec<String>) -> bool {
     ai.eq(bi)
 }
 
-pub fn update_using_package(source_file: &String, verify_signature: bool) -> Result<()> {
+pub fn update_using_package(
+    source_file: &String,
+    verify_signature: bool,
+) -> Result<(String, String)> {
     log!("Info:Preparing to update with package '{source_file}'");
 
     // 解包
@@ -53,7 +56,8 @@ pub fn update_using_package(source_file: &String, verify_signature: bool) -> Res
 
     // 确认是否允许升级
     let local_version = ExSemVer::from_str(&local_diff.version)?;
-    let fresh_version = ExSemVer::from_str(&fresh_package.package.version)?;
+    let fresh_version_str = fresh_package.package.version.clone();
+    let fresh_version = ExSemVer::from_str(&fresh_version_str)?;
     if local_version >= fresh_version {
         return Err(anyhow!("Error:Package '{name}' has been up to date ({local_version}), can't update to the version of given package ({fresh_version})",name=fresh_package.package.name));
     }
@@ -71,7 +75,8 @@ pub fn update_using_package(source_file: &String, verify_signature: bool) -> Res
         // 卸载
         uninstall(Some(local_software.scope), &local_package.package.name)?;
         // 安装
-        return install_using_package(source_file, verify_signature);
+        install_using_package(source_file, verify_signature)?;
+        return Ok((local_diff.version, fresh_package.package.version));
     }
 
     let located = get_path_apps(&local_software.scope, &local_package.package.name, true)?;
@@ -136,10 +141,10 @@ pub fn update_using_package(source_file: &String, verify_signature: bool) -> Res
     // 清理临时文件夹
     clean_temp(source_file)?;
 
-    Ok(())
+    Ok((local_diff.version, fresh_version_str))
 }
 
-pub fn update_using_url(url: &String, verify_signature: bool) -> Result<()> {
+pub fn update_using_url(url: &String, verify_signature: bool) -> Result<(String, String)> {
     // 下载文件到临时目录
     let p = download_nep(url)?;
 
@@ -147,7 +152,10 @@ pub fn update_using_url(url: &String, verify_signature: bool) -> Result<()> {
     update_using_package(&p2s!(p), verify_signature)
 }
 
-pub fn update_using_package_matcher(matcher: PackageMatcher, verify_signature: bool) -> Result<()> {
+pub fn update_using_package_matcher(
+    matcher: PackageMatcher,
+    verify_signature: bool,
+) -> Result<(String, String)> {
     // 查找 scope
     let scope = if let Some(s) = matcher.scope.clone() {
         s
