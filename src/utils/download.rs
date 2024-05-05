@@ -8,7 +8,7 @@ use std::path::PathBuf;
 
 use crate::p2s;
 
-use super::get_path_temp;
+use super::allocate_path_temp;
 
 pub fn download(url: &String, at: &PathBuf) -> Result<()> {
     log!("Info:Start downloading '{url}'");
@@ -57,7 +57,7 @@ pub fn download(url: &String, at: &PathBuf) -> Result<()> {
 
 pub fn download_nep(url: &String) -> Result<PathBuf> {
     // 下载文件到临时目录
-    let temp_dir = get_path_temp(&"download".to_string(), true, false)?;
+    let temp_dir = allocate_path_temp(&"download".to_string(), false)?;
     let p = temp_dir.join("downloaded.nep");
     download(url, &p)?;
 

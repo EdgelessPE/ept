@@ -21,7 +21,7 @@ use anyhow::{anyhow, Result};
 use regex::Regex;
 
 use std::env::var;
-use std::fs::{create_dir_all, remove_dir_all};
+use std::fs::create_dir_all;
 use std::path::PathBuf;
 
 use self::fs::try_recycle;
@@ -90,17 +90,9 @@ pub fn parse_bare_temp() -> Result<PathBuf> {
     parse_relative_path_with_base(&"temp".to_string())
 }
 
-pub fn get_path_temp(name: &String, keep_clear: bool, sub_dir: bool) -> Result<PathBuf> {
+pub fn allocate_path_temp(name: &String, sub_dir: bool) -> Result<PathBuf> {
     let random_name = name.to_owned() + "_" + &random_short_string();
     let p = parse_relative_path_with_base(&"temp".to_string())?.join(random_name);
-    if keep_clear && p.exists() {
-        remove_dir_all(p.clone()).map_err(|_| {
-            anyhow!(
-                "Error:Can't keep temp directory '{dir}' clear, manually delete it then try again",
-                dir = p2s!(p.as_os_str())
-            )
-        })?;
-    }
     if sub_dir {
         ensure_exist(p.join("Outer"))?;
         ensure_exist(p.join("Inner"))?;

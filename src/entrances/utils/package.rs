@@ -18,21 +18,21 @@ use crate::{
     parsers::{fast_parse_signature, parse_author, parse_package, parse_signature},
     signature::{fast_verify, verify},
     types::package::GlobalPackage,
-    utils::{fs::copy_dir, get_path_temp, is_debug_mode},
+    utils::{allocate_path_temp, fs::copy_dir, is_debug_mode},
 };
 use crate::{log, log_ok_last};
 
 /// 根据源文件路径创建临时目录
-fn get_temp_dir_path(source_file: &String, keep_clear: bool) -> Result<PathBuf> {
+fn get_temp_dir_path(source_file: &String) -> Result<PathBuf> {
     let file_stem = p2s!(Path::new(source_file).file_stem().unwrap());
-    let temp_dir_path = get_path_temp(&file_stem, keep_clear, true)?;
+    let temp_dir_path = allocate_path_temp(&file_stem, true)?;
 
     Ok(temp_dir_path)
 }
 
 /// 清理临时目录(会判断 debug)
 pub fn clean_temp(source_file: &String) -> Result<()> {
-    let temp_dir_path = get_temp_dir_path(source_file, false)?;
+    let temp_dir_path = get_temp_dir_path(source_file)?;
     if !is_debug_mode() {
         log!("Info:Cleaning...");
         let clean_res = remove_dir_all(&temp_dir_path);
@@ -65,7 +65,7 @@ pub fn unpack_nep(source: &String, verify_signature: bool) -> Result<(PathBuf, G
             let global = parse_package(&p2s!(package_path), source, false)?;
 
             // 复制到临时目录
-            let temp_path = get_path_temp(&global.package.name, true, false)?;
+            let temp_path = allocate_path_temp(&global.package.name, false)?;
             copy_dir(source_path, &temp_path)?;
 
             return Ok((temp_path, global));
@@ -104,7 +104,7 @@ fn normal_unpack_nep(
     verify_signature: bool,
 ) -> Result<(PathBuf, GlobalPackage)> {
     // 创建临时目录
-    let temp_dir_path = get_temp_dir_path(source_file, true)?;
+    let temp_dir_path = get_temp_dir_path(source_file)?;
     let temp_dir_outer_path = temp_dir_path.join("Outer");
     let temp_dir_inner_path = temp_dir_path.join("Inner");
 
@@ -178,7 +178,7 @@ fn fast_unpack_nep(
     verify_signature: bool,
 ) -> Result<(PathBuf, GlobalPackage)> {
     // 创建临时目录
-    let temp_dir_path = get_temp_dir_path(source_file, true)?;
+    let temp_dir_path = get_temp_dir_path(source_file)?;
     let temp_dir_inner_path = temp_dir_path.join("Inner");
 
     // 读取外包，生成 hashmap

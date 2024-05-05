@@ -3,7 +3,7 @@ use crate::entrances::verify::verify;
 use crate::parsers::parse_author;
 use crate::signature::sign;
 use crate::types::{signature::Signature, signature::SignatureNode};
-use crate::utils::{get_path_temp, is_debug_mode, term::ask_yn};
+use crate::utils::{allocate_path_temp, is_debug_mode, term::ask_yn};
 use crate::{log, log_ok_last, p2s};
 use anyhow::{anyhow, Result};
 use std::fs::{remove_dir_all, write};
@@ -39,7 +39,7 @@ pub fn pack(source_dir: &String, into_file: Option<String>, need_sign: bool) -> 
     }
 
     // 创建临时目录
-    let temp_dir_path = get_path_temp(&file_stem, true, false)?;
+    let temp_dir_path = allocate_path_temp(&file_stem, false)?;
 
     // 生成内包
     log!("Info:Compressing inner package...");
