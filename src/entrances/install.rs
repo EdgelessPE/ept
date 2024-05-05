@@ -3,7 +3,6 @@ use std::fs::remove_dir_all;
 use std::path::Path;
 
 use super::{
-    info::info_online,
     info_local,
     utils::{
         package::{clean_temp, unpack_nep},
@@ -12,13 +11,7 @@ use super::{
 };
 use crate::{
     entrances::{info, update_using_package, update_using_package_matcher},
-    utils::{
-        download::{download, fill_url_template},
-        get_path_temp,
-        mirror::{filter_release, get_url_with_version_req},
-        path::find_scope_with_name,
-        random::random_short_string,
-    },
+    utils::{mirror::get_url_with_version_req, path::find_scope_with_name},
 };
 use crate::{executor::workflow_executor, parsers::parse_workflow, utils::get_path_apps};
 use crate::{log, log_ok_last, p2s};

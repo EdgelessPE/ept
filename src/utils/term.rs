@@ -1,9 +1,6 @@
-use crate::types::matcher::PackageMatcher;
 use crate::utils::is_confirm_mode;
-use anyhow::{anyhow, Result};
 use encoding::all::GBK;
 use encoding::{DecoderTrap, Encoding};
-use semver::VersionReq;
 use std::io::stdin;
 
 pub fn ask_yn() -> bool {

@@ -8,9 +8,9 @@ use crate::{
     parsers::{parse_author, parse_workflow},
     types::{extended_semver::ExSemVer, matcher::PackageMatcher},
     utils::{
-        download::{download, download_nep},
+        download::download_nep,
         fs::move_or_copy,
-        get_path_apps, get_path_temp,
+        get_path_apps,
         mirror::{filter_release, get_url_with_version_req},
         path::find_scope_with_name,
         term::ask_yn,

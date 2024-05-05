@@ -1,5 +1,3 @@
-use semver::VersionReq;
-
 pub mod author;
 pub mod cli;
 pub mod extended_semver;

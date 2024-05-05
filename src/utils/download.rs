@@ -4,7 +4,7 @@ use reqwest::blocking::Client;
 use std::cmp::min;
 use std::fs::File;
 use std::io::{Read, Write};
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use crate::p2s;
 

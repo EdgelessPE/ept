@@ -6,16 +6,13 @@ use toml::{to_string_pretty, Value};
 
 use crate::{
     types::{
-        mirror::{MirrorHello, MirrorPkgSoftware, SearchResult, ServiceKeys},
+        mirror::{MirrorHello, MirrorPkgSoftware, ServiceKeys},
         verifiable::Verifiable,
     },
     utils::{
         fs::{ensure_dir_exist, read_sub_dir, try_recycle},
         get_path_mirror,
-        mirror::{
-            build_index_for_mirror, filter_service_from_meta, read_local_mirror_hello,
-            search_index_for_mirror,
-        },
+        mirror::{build_index_for_mirror, filter_service_from_meta, read_local_mirror_hello},
     },
 };
 
