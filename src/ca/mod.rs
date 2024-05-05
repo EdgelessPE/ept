@@ -1,30 +1,13 @@
-use anyhow::{anyhow, Result};
-use std::{fs::read_to_string, path::Path};
+use anyhow::Result;
 
 // 返回：（公钥，私钥）
 pub fn get_own_pair() -> Result<(String, String)> {
-    check()?;
-    let public_file = read_to_string("./keys/public.pem")?;
-    let private_file = read_to_string("./keys/private.key")?;
+    let public_file = include_str!("../../keys/public.pem").to_string();
+    let private_file = include_str!("../../keys/private.key").to_string();
     Ok((public_file, private_file))
 }
 
 pub fn query_others_public(_email: &String) -> Result<String> {
-    check()?;
-    let public_file = read_to_string("./keys/public.pem")?;
+    let public_file = include_str!("../../keys/public.pem").to_string();
     Ok(public_file)
-}
-
-fn check() -> Result<()> {
-    let manifest = vec!["./keys/public.pem", "./keys/private.key"];
-    for file_name in manifest {
-        let p = Path::new(&file_name);
-        if !p.exists() {
-            return Err(anyhow!(
-                "Error:Missing '{file_name}', please place 'keys' folder in current dir"
-            ));
-        }
-    }
-
-    Ok(())
 }
