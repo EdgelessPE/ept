@@ -111,10 +111,10 @@ fn test_parse_wild_match() {
     use std::env::current_dir;
     let located = p2s!(current_dir().unwrap());
     assert!(
-        parse_wild_match("*.lock".to_string(), &located)
+        parse_wild_match("*.yaml".to_string(), &located)
             .unwrap()
             .len()
-            == 2
+            == 1
     );
     assert!(
         parse_wild_match("src/*.rs".to_string(), &located)

@@ -4,12 +4,14 @@
   "license": "MPL-2.0",
   "scripts": {
     "dev": "rspress dev",
-    "build": "yarn gen && rspress build",
+    "build": "pnpm gen && rspress build",
     "preview": "rspress preview",
     "gen": "ts-node ./scripts/index.ts",
     "lint": "eslint --fix scripts/**",
     "prepack": "pinst --disable",
-    "postpack": "pinst --enable"
+    "postpack": "pinst --enable",
+    "rust:ut": "cargo test -- --test-threads 1",
+    "rust:ut:coverage": "cargo tarpaulin -o html --exclude-files test/** --exclude-files node_modules/** && start tarpaulin-report.html"
   },
   "dependencies": {
     "react": "^18.2.0",
