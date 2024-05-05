@@ -7,7 +7,7 @@ use std::{
 };
 
 use anyhow::{anyhow, Result};
-use sysinfo::{System, SystemExt};
+use sysinfo::System;
 use tar::Archive;
 
 use crate::{

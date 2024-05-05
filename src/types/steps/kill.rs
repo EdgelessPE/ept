@@ -13,7 +13,7 @@ use crate::{
 };
 use anyhow::{Ok, Result};
 use serde::{Deserialize, Serialize};
-use sysinfo::{ProcessExt, System, SystemExt};
+use sysinfo::System;
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct StepKill {

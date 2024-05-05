@@ -1,4 +1,4 @@
-use sysinfo::{ProcessExt, System, SystemExt};
+use sysinfo::System;
 
 pub fn kill_with_name(name: &String) -> bool {
     let s = System::new_all();
