@@ -32,12 +32,13 @@ use crate::utils::launch_clean;
 fn router(action: Action) -> Result<String> {
     // 环境变量读取
 
+    use chrono::DateTime;
     use types::cli::ActionMirror;
 
     use crate::{
         entrances::{
-            install_using_package_matcher, install_using_url, mirror_add, mirror_remove,
-            mirror_update, mirror_update_all, search, update_using_package_matcher,
+            install_using_package_matcher, install_using_url, mirror_add, mirror_list,
+            mirror_remove, mirror_update, mirror_update_all, search, update_using_package_matcher,
             update_using_url,
         },
         types::matcher::{PackageInputEnum, PackageMatcher},
@@ -108,7 +109,7 @@ fn router(action: Action) -> Result<String> {
         }
         Action::List => list().map(|list| {
             if list.len() == 0 {
-                return "No installed package".to_string();
+                return "Info:No installed package".to_string();
             }
             let res: String =
                 list.into_iter()
@@ -166,6 +167,27 @@ fn router(action: Action) -> Result<String> {
                             name = names.join(", ")
                         )
                     })
+                }
+            }
+            ActionMirror::List => {
+                let res = mirror_list()?;
+                if res.len() > 0 {
+                    let str: String = res.into_iter().fold(
+                        String::from("\nAdded mirrors:\n"),
+                        |acc, (name, time)| {
+                            let date_time: DateTime<chrono::Local> = time.into();
+                            let time_str = date_time.format("%Y-%m-%d %H:%M:%S").to_string();
+                            let update_str = format!("updated at {time_str}");
+                            return acc
+                                + &format!(
+                                    "  {name}    {str}\n",
+                                    str = update_str.as_str().truecolor(100, 100, 100)
+                                );
+                        },
+                    );
+                    Ok(str)
+                } else {
+                    Ok("Info:No mirror added".to_string())
                 }
             }
             ActionMirror::Remove { name } => {

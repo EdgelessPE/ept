@@ -17,4 +17,6 @@ pub enum ActionMirror {
         /// Mirror name
         name: String,
     },
+    /// List added mirrors
+    List,
 }

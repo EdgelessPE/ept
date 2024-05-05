@@ -1,4 +1,7 @@
-use std::fs::write;
+use std::{
+    fs::{metadata, write},
+    time::SystemTime,
+};
 
 use anyhow::{anyhow, Result};
 use reqwest::blocking::get;
@@ -16,6 +19,7 @@ use crate::{
     },
 };
 
+// 返回远程镜像源申明的名称
 pub fn mirror_add(url: &String, should_match_name: Option<String>) -> Result<String> {
     // 请求 url
     let res: MirrorHello = get(url)?.json()?;
@@ -63,6 +67,18 @@ pub fn mirror_update(name: &String) -> Result<String> {
     mirror_add(&hello_path, Some(name.to_string()))
 }
 
+pub fn mirror_list() -> Result<Vec<(String, SystemTime)>> {
+    let p = get_path_mirror()?;
+    let mut res = Vec::new();
+    for name in read_sub_dir(&p)? {
+        let file_path = p.join(&name).join("hello.toml");
+        let time = metadata(file_path)?.modified()?;
+
+        res.push((name, time));
+    }
+    Ok(res)
+}
+
 pub fn mirror_update_all() -> Result<Vec<String>> {
     let p = get_path_mirror()?;
     let mut names = Vec::new();
@@ -88,6 +104,12 @@ pub fn mirror_remove(name: &String) -> Result<()> {
 // #[test]
 // fn test_mirror_update() {
 //     mirror_update(&"official".to_string()).unwrap();
+// }
+
+// #[test]
+// fn test_mirror_list() {
+//     let res = mirror_list().unwrap();
+//     println!("{res:#?}")
 // }
 
 // #[test]
