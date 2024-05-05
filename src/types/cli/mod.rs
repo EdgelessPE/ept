@@ -34,19 +34,19 @@ pub struct Args {
 
 #[derive(Subcommand, Debug)]
 pub enum Action {
-    /// Install a package with path
+    /// Install a package
     Install {
         /// Package matcher（expect pattern ((MIRROR/)SCOPE/)NAME(@SEMVER)）or Nep package url or Nep package local path
         package: String,
     },
 
-    /// Update a package with path
+    /// Update a package
     Update {
         /// Package matcher（expect pattern ((MIRROR/)SCOPE/)NAME(@SEMVER)）or Nep package url or Nep package local path
         package: String,
     },
 
-    /// Uninstall a package with package name
+    /// Uninstall a package
     Uninstall {
         /// Package matcher, expect pattern (SCOPE/)NAME
         package_matcher: String,
@@ -58,15 +58,7 @@ pub enum Action {
         keyword: String,
     },
 
-    /// Pack a directory content into nep
-    Pack {
-        /// Source directory ready to be packed
-        source_dir: String,
-        /// (Optional) Store packed nep at
-        into_file: Option<String>,
-    },
-
-    /// Query package information
+    /// Query a package
     Info {
         /// Package matcher, expect pattern (SCOPE/)NAME
         package_matcher: String,
@@ -83,8 +75,13 @@ pub enum Action {
         save_at: Option<String>,
     },
 
-    /// Clean temporary or illegal files
-    Clean,
+    /// Pack a directory content into nep
+    Pack {
+        /// Source directory ready to be packed
+        source_dir: String,
+        /// (Optional) Store packed nep at
+        into_file: Option<String>,
+    },
 
     /// Manage ept config
     Config {
@@ -97,4 +94,7 @@ pub enum Action {
         #[command(subcommand)]
         operation: ActionMirror,
     },
+
+    /// Clean temporary or illegal files
+    Clean,
 }
