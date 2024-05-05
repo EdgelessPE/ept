@@ -76,7 +76,11 @@ fn find_scope_with_name_locally(name: &String, scope: Option<String>) -> Result<
         }
     }
 
-    Err(anyhow!("Error:Can't find scope for '{name}'"))
+    Err(if let Some(s) = scope {
+        anyhow!("Error:Can't locate '{name}' with scope '{s}'")
+    } else {
+        anyhow!("Error:Can't find scope for '{name}'")
+    })
 }
 
 fn find_scope_with_name_online(name: &String, scope: Option<String>) -> Result<(String, String)> {
@@ -97,7 +101,11 @@ fn find_scope_with_name_online(name: &String, scope: Option<String>) -> Result<(
             }
         }
     }
-    Err(anyhow!("Error:Can't find scope for '{name}'"))
+    Err(if let Some(s) = scope {
+        anyhow!("Error:Can't locate '{name}' with scope '{s}'")
+    } else {
+        anyhow!("Error:Can't find scope for '{name}'")
+    })
 }
 
 pub fn find_scope_with_name(name: &String, scope: Option<String>) -> Result<(String, String)> {
