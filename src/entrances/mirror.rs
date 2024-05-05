@@ -21,6 +21,12 @@ use crate::{
 
 // 返回远程镜像源申明的名称
 pub fn mirror_add(url: &String, should_match_name: Option<String>) -> Result<String> {
+    // 以 / 结尾则会自动加上 /api/hello
+    let url = if url.ends_with("/") {
+        format!("{url}api/hello")
+    } else {
+        url.to_string()
+    };
     // 请求 url
     let res: MirrorHello = get(url)?.json()?;
     let mirror_name = res.name.clone();
@@ -98,7 +104,7 @@ pub fn mirror_remove(name: &String) -> Result<()> {
 
 // #[test]
 // fn test_mirror_add() {
-//     mirror_add(&"http://localhost:3000/api/hello".to_string(), None).unwrap();
+//     mirror_add(&"http://localhost:3000/".to_string(), None).unwrap();
 // }
 
 // #[test]
