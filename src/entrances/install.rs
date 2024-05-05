@@ -141,17 +141,13 @@ pub fn install_using_package_matcher(
     matcher: PackageMatcher,
     verify_signature: bool,
 ) -> Result<()> {
-    // 查找 scope
-    let scope = if let Some(s) = matcher.scope.clone() {
-        s
-    } else {
-        find_scope_with_name(&matcher.name)?
-    };
+    // 查找 scope 并使用 scope 更新纠正大小写
+    let (scope, package_name) = find_scope_with_name(&matcher.name, matcher.scope.clone())?;
     // 检查对应包名有没有被安装过
-    if let Ok((_, diff)) = info_local(&scope, &matcher.name) {
+    if let Ok((_, diff)) = info_local(&scope, &package_name) {
         log!(
             "Warning:Package '{name}' has been installed({ver}), switch to update entrance",
-            name = matcher.name,
+            name = package_name,
             ver = diff.version,
         );
         update_using_package_matcher(matcher, verify_signature)?;

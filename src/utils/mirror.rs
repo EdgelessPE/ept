@@ -167,14 +167,10 @@ pub fn filter_release(
 
 // 通过匹配 VersionReq 解析出包的 url
 pub fn get_url_with_version_req(matcher: PackageMatcher) -> Result<String> {
-    // 查找 scope
-    let scope = if let Some(s) = matcher.scope {
-        s
-    } else {
-        find_scope_with_name(&matcher.name)?
-    };
+    // 查找 scope 并使用 scope 更新纠正大小写
+    let (scope, package_name) = find_scope_with_name(&matcher.name, matcher.scope)?;
     // 拿到 info online
-    let (info, url_template) = info_online(&scope, &matcher.name, matcher.mirror)?;
+    let (info, url_template) = info_online(&scope, &package_name, matcher.mirror)?;
     // 匹配版本
     let matched_release = filter_release(info.releases, matcher.version_req)?;
     // 填充模板获取 url

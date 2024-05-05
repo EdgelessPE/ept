@@ -126,11 +126,9 @@ fn router(action: Action) -> Result<String> {
             into_file,
         } => pack(&source_dir, into_file, verify_signature)
             .map(|location| format!("Success:Package has been stored at '{location}'")),
-        Action::Meta {
-            source_package,
-            save_at,
-        } => {
-            let res = meta(&source_package, verify_signature)?;
+        Action::Meta { package, save_at } => {
+            let package_input_enum = PackageInputEnum::parse(package, true, true)?;
+            let res = meta(package_input_enum, verify_signature)?;
             let text = serde_json::to_string_pretty(&res)
                 .map_err(|e| anyhow!("Error:Failed to deserialize result : {e}"))?;
             if let Some(into) = save_at {

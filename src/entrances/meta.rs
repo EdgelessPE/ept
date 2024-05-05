@@ -7,6 +7,7 @@ use crate::{
     p2s,
     parsers::parse_workflow,
     types::{
+        matcher::PackageInputEnum,
         meta::MetaResult,
         package::GlobalPackage,
         permissions::{Generalizable, Permission, PermissionKey, PermissionLevel},
@@ -23,31 +24,39 @@ use super::{
 
 // 返回 (临时目录，工作流所在目录，全局包)
 fn find_meta_target(
-    input: &String,
+    input: PackageInputEnum,
     verify_signature: bool,
 ) -> Result<(PathBuf, PathBuf, GlobalPackage)> {
-    // 作为路径使用，可以是一个包或者已经解包的目录
-    let p = Path::new(input);
-    if p.exists() {
-        let (path, pkg) = unpack_nep(input, verify_signature)?;
-        verify(&p2s!(path))?;
-        return Ok((path.clone(), path.join("workflows"), pkg));
-    }
-
-    // 作为名称使用，在本地已安装列表中搜索
-    if let Ok(scope) = find_scope_with_name(input) {
-        let path = get_path_apps(&scope, input, false)?;
-        let (pkg, _) = info_local(&scope, input)?;
-        installed_validator(&p2s!(path))?;
-        return Ok((path.clone(), path.join(".nep_context/workflows"), pkg));
+    match input {
+        PackageInputEnum::LocalPath(local_path) => {
+            // 作为路径使用，可以是一个包或者已经解包的目录
+            let p = Path::new(&local_path);
+            if p.exists() {
+                let (path, pkg) = unpack_nep(&local_path, verify_signature)?;
+                verify(&p2s!(path))?;
+                return Ok((path.clone(), path.join("workflows"), pkg));
+            }
+        }
+        PackageInputEnum::PackageMatcher(matcher) => {
+            // 作为名称使用，在本地已安装列表中搜索
+            if let Ok((scope, package_name)) = find_scope_with_name(&matcher.name, matcher.scope) {
+                let path = get_path_apps(&scope, &package_name, false)?;
+                let (pkg, _) = info_local(&scope, &package_name)?;
+                installed_validator(&p2s!(path))?;
+                return Ok((path.clone(), path.join(".nep_context/workflows"), pkg));
+            }
+        }
+        PackageInputEnum::Url(_) => {
+            return Err(anyhow!("Error:URL is not acceptable"));
+        }
     }
 
     Err(anyhow!(
-        "Error:Failed to find meta by '{input}', input valid path or installed package name"
+        "Error:Failed to find meta by input, input valid path or installed package matcher"
     ))
 }
 
-pub fn meta(input: &String, verify_signature: bool) -> Result<MetaResult> {
+pub fn meta(input: PackageInputEnum, verify_signature: bool) -> Result<MetaResult> {
     // 解包
     let (temp_dir_inner_path, workflow_path, global) = find_meta_target(input, verify_signature)?;
     let temp_dir = p2s!(temp_dir_inner_path);
@@ -114,8 +123,13 @@ pub fn meta(input: &String, verify_signature: bool) -> Result<MetaResult> {
 
 #[test]
 fn test_meta() {
+    use crate::types::matcher::PackageMatcher;
     envmnt::set("CONFIRM", "true");
-    let res = meta(&"examples/PermissionsTest".to_string(), false).unwrap();
+    let res = meta(
+        PackageInputEnum::LocalPath("examples/PermissionsTest".to_string()),
+        false,
+    )
+    .unwrap();
     let mut sorted_permissions: Vec<Permission> = res
         .permissions
         .into_iter()
@@ -210,6 +224,15 @@ fn test_meta() {
 
     // 从本地安装中生成 meta
     crate::utils::test::_ensure_testing_vscode();
-    meta(&"VSCode".to_string(), false).unwrap();
+    meta(
+        PackageInputEnum::PackageMatcher(PackageMatcher {
+            name: "VSCode".to_string(),
+            scope: None,
+            mirror: None,
+            version_req: None,
+        }),
+        false,
+    )
+    .unwrap();
     crate::utils::test::_ensure_testing_vscode_uninstalled();
 }

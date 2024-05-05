@@ -77,8 +77,8 @@ pub enum Action {
 
     /// Get meta data of given package
     Meta {
-        /// Source package
-        source_package: String,
+        /// Package matcher, expect pattern (SCOPE/)NAME or Nep package local path
+        package: String,
         /// (Optional) Save meta report at
         save_at: Option<String>,
     },

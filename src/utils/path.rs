@@ -61,28 +61,38 @@ pub fn parse_relative_path_with_located(relative: &String, located: &String) -> 
 }
 
 /// name 大小写不敏感
-fn find_scope_with_name_locally(name: &String) -> Result<String> {
+fn find_scope_with_name_locally(name: &String, scope: Option<String>) -> Result<(String, String)> {
+    let scope_input_str = scope.clone().unwrap_or("".to_string());
     let app_dir = get_bare_apps()?;
-    for scope in read_sub_dir(app_dir.clone())? {
-        for dir_name in read_sub_dir(app_dir.join(&scope))? {
+
+    for scope_dir_name in read_sub_dir(app_dir.clone())? {
+        if scope.is_some() && scope_dir_name.to_lowercase() != scope_input_str.to_lowercase() {
+            continue;
+        }
+        for dir_name in read_sub_dir(app_dir.join(&scope_dir_name))? {
             if dir_name.to_ascii_lowercase() == name.to_ascii_lowercase() {
-                return Ok(scope);
+                return Ok((scope_dir_name, dir_name));
             }
         }
     }
+
     Err(anyhow!("Error:Can't find scope for '{name}'"))
 }
 
-fn find_scope_with_name_online(name: &String) -> Result<String> {
+fn find_scope_with_name_online(name: &String, scope: Option<String>) -> Result<(String, String)> {
+    let scope_input_str = scope.clone().unwrap_or("".to_string());
     // 遍历 mirrors
     let p = get_path_mirror()?;
     let mirror_names = read_sub_dir(&p)?;
     for mirror_name in mirror_names {
         let pkg_software = read_local_mirror_pkg_software(&mirror_name)?;
-        for (scope, tree) in pkg_software.tree {
+        for (scope_real_name, tree) in pkg_software.tree {
+            if scope.is_some() && scope_real_name.to_lowercase() != scope_input_str.to_lowercase() {
+                continue;
+            }
             for node in tree {
-                if &node.name == name {
-                    return Ok(scope);
+                if node.name.to_lowercase() == name.to_lowercase() {
+                    return Ok((scope_real_name, node.name));
                 }
             }
         }
@@ -90,12 +100,12 @@ fn find_scope_with_name_online(name: &String) -> Result<String> {
     Err(anyhow!("Error:Can't find scope for '{name}'"))
 }
 
-pub fn find_scope_with_name(name: &String) -> Result<String> {
-    let local_res = find_scope_with_name_locally(name);
+pub fn find_scope_with_name(name: &String, scope: Option<String>) -> Result<(String, String)> {
+    let local_res = find_scope_with_name_locally(name, scope.clone());
     if local_res.is_ok() {
         return local_res;
     }
-    find_scope_with_name_online(name)
+    find_scope_with_name_online(name, scope)
 }
 
 #[test]

@@ -36,15 +36,11 @@ fn get_manifest(flow: Vec<WorkflowNode>) -> Vec<String> {
 pub fn uninstall(scope: Option<String>, package_name: &String) -> Result<()> {
     log!("Info:Preparing to uninstall '{package_name}'");
 
-    // 解析 scope
-    let scope = if let Some(s) = scope {
-        s
-    } else {
-        find_scope_with_name(package_name)?
-    };
+    // 查找 scope 并使用 scope 更新纠正大小写
+    let (scope, package_name) = find_scope_with_name(package_name, scope)?;
 
     // 解析安装路径
-    let app_path = get_path_apps(&scope, package_name, false)?;
+    let app_path = get_path_apps(&scope, &package_name, false)?;
     if !app_path.exists() {
         return Err(anyhow!("Error:Can't find package '{package_name}'"));
     }

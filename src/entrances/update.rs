@@ -156,24 +156,20 @@ pub fn update_using_package_matcher(
     matcher: PackageMatcher,
     verify_signature: bool,
 ) -> Result<(String, String)> {
-    // 查找 scope
-    let scope = if let Some(s) = matcher.scope.clone() {
-        s
-    } else {
-        find_scope_with_name(&matcher.name)?
-    };
+    // 查找 scope 并使用 scope 更新纠正大小写
+    let (scope, package_name) = find_scope_with_name(&matcher.name, matcher.scope.clone())?;
     // 检查对应包名有没有被安装过
-    let (_global, local_diff) = info_local(&scope, &matcher.name).map_err(|_| {
+    let (_global, local_diff) = info_local(&scope, &package_name).map_err(|_| {
         anyhow!(
             "Error:Package '{name}' hasn't been installed, use 'ept install \"{name}\"' instead",
-            name = &matcher.name,
+            name = package_name
         )
     })?;
     // 检查包的版本号是否允许升级
-    let (online_item, _url_template) = info_online(&scope, &matcher.name, matcher.mirror.clone())?;
+    let (online_item, _url_template) = info_online(&scope, &package_name, matcher.mirror.clone())?;
     let selected_release = filter_release(online_item.releases, matcher.version_req.clone())?;
     if selected_release.version <= ExSemVer::parse(&local_diff.version)? {
-        return Err(anyhow!("Error:Package '{name}' has been up to date ({local_version}), can't update to the version of given package ({fresh_version})",name=matcher.name,local_version=&local_diff.version,fresh_version=&selected_release.version));
+        return Err(anyhow!("Error:Package '{name}' has been up to date ({local_version}), can't update to the version of given package ({fresh_version})",name=package_name,local_version=&local_diff.version,fresh_version=&selected_release.version));
     }
     // 解析 url
     let url = get_url_with_version_req(matcher)?;

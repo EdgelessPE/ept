@@ -80,12 +80,8 @@ pub fn info_online(
 }
 
 pub fn info(scope: Option<String>, package_name: &String) -> Result<Info> {
-    // 查找 scope
-    let scope = if let Some(s) = scope {
-        s
-    } else {
-        find_scope_with_name(package_name)?
-    };
+    // 查找 scope 并使用 scope 更新纠正大小写
+    let (scope, package_name) = find_scope_with_name(package_name, scope)?;
 
     // 创建结果结构体
     let mut info = Info {
@@ -98,16 +94,16 @@ pub fn info(scope: Option<String>, package_name: &String) -> Result<Info> {
     };
 
     // 扫描本地安装目录
-    let local_path = get_path_apps(&scope, package_name, false)?;
+    let local_path = get_path_apps(&scope, &package_name, false)?;
     if local_path.exists() {
-        let (global, local) = info_local(&scope, package_name)?;
+        let (global, local) = info_local(&scope, &package_name)?;
         info.license = global.package.license;
         info.local = Some(local);
         info.software = global.software;
     }
 
     // 在线检查
-    if let Ok((item, _)) = info_online(&scope, package_name, None) {
+    if let Ok((item, _)) = info_online(&scope, &package_name, None) {
         let latest = filter_release(item.releases, None)?;
         info.online = Some(InfoDiff {
             version: latest.version.to_string(),
