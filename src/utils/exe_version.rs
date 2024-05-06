@@ -60,6 +60,12 @@ fn get_32_version<P: AsRef<Path>>(file_path: P) -> Result<String> {
 }
 
 pub fn get_exe_version<P: AsRef<Path>>(file_path: P) -> Result<String> {
+    let path = file_path.as_ref();
+    if !path.exists() {
+        return Err(anyhow!(
+            "Error:Failed to get version : file '{path:?}' not exist"
+        ));
+    }
     let try_get = get_32_version(&file_path);
     let res = if try_get.is_ok() {
         try_get.unwrap()

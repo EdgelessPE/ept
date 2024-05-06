@@ -1,10 +1,13 @@
 use crate::parsers::{parse_package, parse_workflow};
+use crate::types::extended_semver::ExSemVer;
 use crate::types::mixed_fs::MixedFS;
 use crate::types::package::GlobalPackage;
 use crate::types::steps::Step;
 use crate::types::verifiable::Verifiable;
 use crate::types::workflow::WorkflowNode;
+use crate::utils::exe_version::get_exe_version;
 use crate::utils::is_starts_with_inner_value;
+use crate::utils::path::parse_relative_path_with_located;
 use crate::{log, log_ok_last, p2s};
 use anyhow::{anyhow, Result};
 use std::fs::read_dir;
@@ -92,7 +95,7 @@ pub fn verify(source_dir: &String) -> Result<GlobalPackage> {
         }
 
         // 必须提供绝对路径的 main_program
-        if let Some(mp) = software.main_program {
+        if let Some(mp) = software.main_program.clone() {
             if !Path::new(&mp).is_absolute() {
                 return Err(anyhow!("Error:Field 'main_program' in table 'software' should starts with inner value when workflow 'setup.toml' includes 'Execute' step with 'call_installer' field, got '{mp}'"));
             }
@@ -121,6 +124,31 @@ pub fn verify(source_dir: &String) -> Result<GlobalPackage> {
     let setup_manifest = get_manifest(setup_flow, &mut fs);
     manifest_validator(&pkg_content_path, setup_manifest, &mut fs)?;
     log_ok_last!("Info:Checking manifest...");
+
+    // 如果显式提供了相对路径的主程序，检查该主程序是否可以正常读取版本号
+    if let Some(mp) = software.main_program {
+        if !mp.starts_with("${") && Path::new(&mp).is_relative() {
+            let mp_path = parse_relative_path_with_located(
+                &format!("{name}/{mp}", name = global.package.name),
+                source_dir,
+            );
+            log!("mp_path{mp_path:?} {source_dir}");
+            let read_res = get_exe_version(mp_path);
+            if let Ok(version) = read_res {
+                // 与申明的版本号进行比较，仅要求 semver 部分相等即可
+                let d_ver = ExSemVer::parse(&global.package.version)?;
+                let r_ver = ExSemVer::parse(&version)?;
+                if d_ver.semver_instance != r_ver.semver_instance {
+                    return Err(anyhow!("Error:The version declared ({dv}) is inconsistent with the version obtained by the read main program ({version}), consider remove field 'software.main_program'",dv=&global.package.version));
+                }
+            } else {
+                return Err(anyhow!(
+                    "Error:Failed to read version of main program '{mp}', consider remove field 'software.main_program' : {e}",
+                    e = read_res.unwrap_err()
+                ));
+            }
+        }
+    }
 
     Ok(global)
 }
