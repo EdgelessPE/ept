@@ -46,8 +46,10 @@ fn update_ver_with_main_program(
     located: &String,
     package_path: &Path,
 ) -> Result<()> {
+    // 解释内置变量
+    let interpreted_main_program = values_replacer(main_program.to_string(), 0, located);
     // 获取主程序相对路径
-    let file_path = parse_relative_path_with_located(main_program, &located);
+    let file_path = parse_relative_path_with_located(&interpreted_main_program, &located);
 
     // 读取主程序版本号
     let exe_file_str = p2s!(file_path);
@@ -201,6 +203,14 @@ fn test_update_main_program() {
     )
     .unwrap();
     assert!(pkg.package.version == "10.1.1002.0".to_string());
+
+    update_ver_with_main_program(
+        &mut pkg,
+        &"${SystemDrive}/Windows/notepad.exe".to_string(),
+        &"examples/Dism++/Dism++".to_string(),
+        &Path::new("test/nul.toml"),
+    )
+    .unwrap();
 }
 
 #[test]
