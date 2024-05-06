@@ -18,10 +18,9 @@ jobs:
   test:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
         with: 
-          override: true
           components: tarpaulin
       - uses: Swatinem/rust-cache@v2.6.2
       - name: Build
