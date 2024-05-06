@@ -172,9 +172,18 @@ pub fn update_using_package_matcher(
         return Err(anyhow!("Error:Package '{name}' has been up to date ({local_version}), can't update to the version of given package ({fresh_version})",name=package_name,local_version=&local_diff.version,fresh_version=&selected_release.version));
     }
     // 解析 url
-    let url = get_url_with_version_req(matcher)?;
-    // 执行安装
-    update_using_url(&url, verify_signature)
+    let (url, target_release) = get_url_with_version_req(matcher)?;
+    // 执行更新
+    log!(
+        "Info:Ready to update from '{from}' to '{to}', continue? (y/n)",
+        from = local_diff.version,
+        to = target_release.version
+    );
+    if ask_yn() {
+        update_using_url(&url, verify_signature)
+    } else {
+        Err(anyhow!("Error:Operation canceled by user"))
+    }
 }
 
 #[test]

@@ -154,9 +154,17 @@ pub fn install_using_package_matcher(
         return Ok(());
     }
     // 解析 url
-    let url = get_url_with_version_req(matcher)?;
+    let (url, target_release) = get_url_with_version_req(matcher)?;
     // 执行安装
-    install_using_url(&url, verify_signature)
+    log!(
+        "Info:Ready to install '{scope}/{package_name} ({v})', continue? (y/n)",
+        v = target_release.version
+    );
+    if ask_yn() {
+        install_using_url(&url, verify_signature)
+    } else {
+        Err(anyhow!("Error:Operation canceled by user"))
+    }
 }
 
 // #[test]
