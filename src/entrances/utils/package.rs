@@ -187,10 +187,21 @@ fn fast_unpack_nep(
         File::open(source_file).map_err(|e| anyhow!("Error:Can't open '{source_file}' : {e}"))?;
     let mut outer_tar = Archive::new(outer_file);
     let mut outer_map = HashMap::new();
-    for entry in outer_tar.entries()? {
-        let mut entry = entry?;
-        let name = p2s!(entry.path()?);
-        let mut buffer = Vec::with_capacity(entry.header().size()? as usize);
+    for entry in outer_tar
+        .entries()
+        .map_err(|e| anyhow!("Error:Failed to traverse file as tar : {e}"))?
+    {
+        let mut entry = entry.map_err(|e| anyhow!("Error:Failed to get tar file entry : {e}"))?;
+        let name = p2s!(entry
+            .path()
+            .map_err(|e| anyhow!("Error:Failed to get tar file path : {e}"))?);
+        let mut buffer = Vec::with_capacity(
+            entry
+                .header()
+                .size()
+                .map_err(|e| anyhow!("Error:Failed to get tar file size : {e}"))?
+                as usize,
+        );
         entry.read_to_end(&mut buffer)?;
         outer_map.insert(name, buffer);
     }
