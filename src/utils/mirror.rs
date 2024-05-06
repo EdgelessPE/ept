@@ -147,7 +147,9 @@ pub fn filter_release(
     semver_matcher: Option<VersionReq>,
 ) -> Result<MirrorPkgSoftwareRelease> {
     // 筛选 matcher
+    let mut req_str = "".to_string();
     let mut arr = if let Some(matcher) = semver_matcher {
+        req_str = matcher.to_string();
         let res_arr: Vec<MirrorPkgSoftwareRelease> = releases
             .iter()
             .filter(|node| matcher.matches(&node.version.semver_instance))
@@ -155,13 +157,20 @@ pub fn filter_release(
             .collect();
         res_arr
     } else {
-        releases
+        releases.clone()
     };
     arr.sort_by(|a, b| b.version.cmp(&a.version));
     if let Some(f) = arr.first() {
         Ok(f.to_owned())
     } else {
-        Err(anyhow!("Error:No releases matched"))
+        let versions: Vec<String> = releases
+            .iter()
+            .map(|node| node.version.to_string())
+            .collect();
+        Err(anyhow!(
+            "Error:No releases matched with req '{req_str}', available versions : '{v}'",
+            v = versions.join(", ")
+        ))
     }
 }
 
