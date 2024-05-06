@@ -16,6 +16,7 @@
         "HWND",
         "indicatif",
         "Inflector",
+        "lcov",
         "LPARAM",
         "minwindef",
         "mslnk",
