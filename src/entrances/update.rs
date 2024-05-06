@@ -175,7 +175,7 @@ pub fn update_using_package_matcher(
     let (url, target_release) = get_url_with_version_req(matcher)?;
     // 执行更新
     log!(
-        "Info:Ready to update from '{from}' to '{to}', continue? (y/n)",
+        "Info:Ready to update '{scope}/{package_name}' from '{from}' to '{to}', continue? (y/n)",
         from = local_diff.version,
         to = target_release.version
     );
