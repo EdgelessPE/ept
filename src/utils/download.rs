@@ -11,7 +11,9 @@ use crate::p2s;
 use super::allocate_path_temp;
 
 pub fn download(url: &String, at: &PathBuf) -> Result<()> {
+    let url = url.replace("+", "%2B");
     log!("Info:Start downloading '{url}'");
+
     // 创建进度条
     let pb = ProgressBar::new(0);
     pb.set_style(ProgressStyle::with_template("{spinner:.green} [{elapsed_precise}] [{wide_bar:.cyan/blue}] {bytes}/{total_bytes} ({eta})")
@@ -22,7 +24,7 @@ pub fn download(url: &String, at: &PathBuf) -> Result<()> {
 
     // 发送 GET 请求
     let mut response = client
-        .get(url)
+        .get(&url)
         .send()
         .map_err(|e| anyhow!("Error:Failed to request url '{url}' : {e}"))?;
 
