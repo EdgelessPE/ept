@@ -39,7 +39,7 @@ jobs:
 
       # 安装依赖
       - name: Install dependencies
-        run: pnpm install
+        run: npm i pnpm@8 --global && pnpm install
 
       # 构建 Wiki
       - name: Run scripts
