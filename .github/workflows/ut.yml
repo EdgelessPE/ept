@@ -23,4 +23,8 @@ jobs:
       - name: Build
         run: cargo build
       - name: Run tests
-        run: cargo test -- --test-threads 1
+        run: npm run rust:ut:xml
+      - name: Code Coverage Summary
+        uses: irongut/CodeCoverageSummary@v1.3.0
+        with:
+          filename: cobertura.xml

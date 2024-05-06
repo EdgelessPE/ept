@@ -11,7 +11,8 @@
     "prepack": "pinst --disable",
     "postpack": "pinst --enable",
     "rust:ut": "cargo test -- --test-threads 1",
-    "rust:ut:coverage": "cargo tarpaulin -o html --exclude-files test/** --exclude-files node_modules/** && start tarpaulin-report.html"
+    "rust:ut:html": "cargo tarpaulin -o html --exclude-files test/** --exclude-files node_modules/** && start tarpaulin-report.html",
+    "rust:ut:xml": "cargo tarpaulin -o xml --exclude-files test/** --exclude-files node_modules/**"
   },
   "dependencies": {
     "react": "^18.3.1",
