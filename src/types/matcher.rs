@@ -7,7 +7,7 @@ use crate::utils::is_url;
 
 lazy_static! {
     static ref PACKAGE_MATCHER_REGEX: Regex =
-        Regex::new(r"^(([^/]+/)?[^/]+/)?[^/@]+(@[\w\.-]+)?$").unwrap();
+        Regex::new(r"^(([^/]+/)?[^/]+/)?[^/@]+(@[\^\*\w\.-]+)?$").unwrap();
 }
 
 #[derive(Clone, Debug, PartialEq)]
