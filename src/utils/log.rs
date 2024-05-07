@@ -11,9 +11,9 @@ lazy_static! {
 }
 
 fn gen_log(msg: &String, replace_head: Option<String>) -> Option<String> {
-    for cap in RE.captures_iter(msg) {
+    if let Some(cap) = RE.captures_iter(msg).next() {
         if cap.len() != 4 {
-            break;
+            return Some(msg.clone());
         }
 
         let head = replace_head.unwrap_or(cap[1].to_string());

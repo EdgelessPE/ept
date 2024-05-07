@@ -8,9 +8,9 @@ lazy_static! {
 }
 
 pub fn parse_author(raw: &String) -> Result<Author> {
-    for cap in RE.captures_iter(raw) {
+    if let Some(cap) = RE.captures_iter(raw).next() {
         if cap.len() != 4 {
-            break;
+            return Err(anyhow!("Error:Can't parse '{raw}' as valid author"));
         }
         return Ok(Author {
             name: cap[1].to_string(),
