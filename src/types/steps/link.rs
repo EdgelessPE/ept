@@ -30,7 +30,7 @@ lazy_static! {
 // 返回的第二参数表示是否创建了父目录
 fn parse_target(name: &String, base: &String) -> Result<(String, bool)> {
     // 匹配 target_name 模式
-    let sp: Vec<&str> = name.split("/").collect();
+    let sp: Vec<&str> = name.split('/').collect();
     let length = sp.len();
     let (lnk_folder_opt, lnk_name) = if length > 2 {
         return Err(anyhow!(
@@ -38,11 +38,11 @@ fn parse_target(name: &String, base: &String) -> Result<(String, bool)> {
         ));
     } else if length == 2 {
         (
-            Some(sp.get(0).unwrap().to_string()),
+            Some(sp.first().unwrap().to_string()),
             sp.get(1).unwrap().to_string(),
         )
     } else {
-        (None, sp.get(0).unwrap().to_string())
+        (None, sp.first().unwrap().to_string())
     };
 
     // 解析目标位置
@@ -234,7 +234,7 @@ impl Verifiable for StepLink {
             anyhow!("Error(Link):Failed to validate field 'source_file' as valid path : {e}")
         })?;
         if let Some(target_name) = &self.target_name {
-            if !TARGET_RE.is_match(&target_name) {
+            if !TARGET_RE.is_match(target_name) {
                 return Err(anyhow!(
                     "Error(Link):Invalid field 'target_name', expect 'NAME' or 'FOLDER/NAME', got '{target_name}'"
                 ));

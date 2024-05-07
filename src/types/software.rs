@@ -115,7 +115,7 @@ impl Verifiable for Software {
         let mut alias = self
             .alias
             .to_owned()
-            .unwrap_or(Vec::new())
+            .unwrap_or_default()
             .into_iter()
             .map(|tag| ("alias", tag))
             .collect();
@@ -133,7 +133,7 @@ impl Verifiable for Software {
 
             Ok(())
         };
-        for tag in self.tags.to_owned().unwrap_or(Vec::new()) {
+        for tag in self.tags.to_owned().unwrap_or_default() {
             tag_checker(&tag)?;
         }
 

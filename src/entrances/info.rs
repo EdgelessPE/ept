@@ -66,7 +66,7 @@ pub fn info_online(
     } else {
         // 遍历 mirror 目录，读出软件包树并进行查找
         let p = get_path_mirror()?;
-        let mirror_names = read_sub_dir(&p)?;
+        let mirror_names = read_sub_dir(p)?;
         for name in mirror_names {
             if let Ok(res) = item_matcher(&name) {
                 return Ok(res);

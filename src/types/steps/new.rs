@@ -65,7 +65,7 @@ impl TStep for StepNew {
         }
 
         // 分流处理
-        if self.at.ends_with("/") {
+        if self.at.ends_with('/') {
             new_dir(&self.at)?
         } else {
             new_file(&self.at)?

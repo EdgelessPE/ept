@@ -7,7 +7,7 @@ use wildmatch::WildMatch;
 use super::path::split_parent;
 
 pub fn contains_wild_match(raw: &String) -> bool {
-    raw.contains("*") || raw.contains("?")
+    raw.contains('*') || raw.contains('?')
 }
 
 /// 返回 Ok(bool) 表示路径有效，bool 表示是否使用到了通配符；返回 Err(e) 表示使用方式非法
@@ -53,7 +53,6 @@ pub fn parse_wild_match(raw: String, located: &String) -> Result<Vec<PathBuf>> {
                 p = p2s!(parent)
             )
         })?
-        .into_iter()
         .filter_map(|entry_res| {
             if let Ok(entry) = entry_res {
                 let file_name = p2s!(entry.file_name());
@@ -73,7 +72,7 @@ pub fn parse_wild_match(raw: String, located: &String) -> Result<Vec<PathBuf>> {
         .collect();
 
     // 判断是否存在匹配的内容
-    if res.len() > 0 {
+    if !res.is_empty() {
         Ok(res)
     } else {
         Err(anyhow!("Error:Wild match path '{raw}' matched nothing"))
@@ -88,7 +87,7 @@ pub fn common_wild_match_verify(from: &String, to: &String, located: &String) ->
             "Error:Field 'to' shouldn't contain wild match : '{to}'"
         ));
     }
-    if contains_wild_match(from) && !to.ends_with("/") {
+    if contains_wild_match(from) && !to.ends_with('/') {
         return Err(anyhow!(
             "Error:Field 'to' should end with '/' when field 'from' contains wild match"
         ));

@@ -109,10 +109,7 @@ impl<'de> Deserialize<'de> for ServiceKeys {
 impl Verifiable for MirrorHello {
     fn verify_self(&self, _located: &String) -> Result<()> {
         // 必须有 hello 服务
-        let hello_res = filter_service_from_meta(self.clone(), ServiceKeys::Hello);
-        if let Err(e) = hello_res {
-            return Err(e);
-        }
+        let _hello_res = filter_service_from_meta(self.clone(), ServiceKeys::Hello)?;
 
         Ok(())
     }
@@ -129,9 +126,7 @@ impl Verifiable for MirrorPkgSoftware {
     fn verify_self(&self, _located: &String) -> Result<()> {
         // 检查 url 模板
         let str = String::new();
-        if let Err(e) = fill_url_template(&self.url_template, &str, &str, &str) {
-            return Err(e);
-        }
+        fill_url_template(&self.url_template, &str, &str, &str)?;
 
         Ok(())
     }

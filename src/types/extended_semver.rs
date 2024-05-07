@@ -7,11 +7,11 @@ use std::{cmp::Ordering, str::FromStr};
 
 fn split_pre_build(raw: &String) -> (String, String) {
     // 分割 -
-    let sp: Vec<&str> = raw.split("-").collect();
+    let sp: Vec<&str> = raw.split('-').collect();
     let clear = sp[0].to_string();
 
     // 分割 +
-    let sp: Vec<&str> = clear.split("+").collect();
+    let sp: Vec<&str> = clear.split('+').collect();
     let clear = sp[0].to_string();
 
     // 根据 clear 长度拆出 pre 和 build 部分
@@ -103,7 +103,7 @@ impl ExSemVer {
         let (clear_text, pre_build) = split_pre_build(text);
 
         // 使用小数点分割
-        let s: Vec<&str> = clear_text.split(".").collect();
+        let s: Vec<&str> = clear_text.split('.').collect();
         let length = s.len();
         if length != 3 && length != 4 {
             return Err(anyhow!(
@@ -161,7 +161,7 @@ impl From<semver::Version> for ExSemVer {
 impl FromStr for ExSemVer {
     type Err = Error;
     fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
-        return ExSemVer::parse(&String::from(s));
+        ExSemVer::parse(&String::from(s))
     }
 }
 
@@ -182,9 +182,7 @@ impl PartialEq for ExSemVer {
 impl PartialOrd for ExSemVer {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         let res = self.semver_instance.partial_cmp(&other.semver_instance);
-        if res.is_none() {
-            return None;
-        }
+        res?;
         match res {
             Some(Equal) => self.reserved.partial_cmp(&other.reserved),
             _ => res,

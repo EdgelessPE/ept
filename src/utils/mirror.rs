@@ -108,7 +108,7 @@ pub fn build_index_for_mirror(content: MirrorPkgSoftware, dir: PathBuf) -> Resul
 pub fn search_index_for_mirror(text: &String, dir: PathBuf) -> Result<Vec<SearchResult>> {
     let (_schema, name, scope, version) = get_schema()?;
 
-    let index = Index::open_in_dir(&dir)?;
+    let index = Index::open_in_dir(dir)?;
     let reader = index
         .reader_builder()
         .reload_policy(ReloadPolicy::OnCommitWithDelay)
@@ -123,7 +123,6 @@ pub fn search_index_for_mirror(text: &String, dir: PathBuf) -> Result<Vec<Search
         let res: TantivyDocument = searcher.doc(doc_address)?;
         let read_field = |field: Field| {
             let str = res.get_first(field);
-            if str.is_none() {}
             if let Some(s) = str {
                 Ok(s.as_str().unwrap_or("").to_string())
             } else {

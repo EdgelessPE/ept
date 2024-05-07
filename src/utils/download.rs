@@ -11,7 +11,7 @@ use crate::p2s;
 use super::allocate_path_temp;
 
 pub fn download(url: &String, at: &PathBuf) -> Result<()> {
-    let url = url.replace("+", "%2B");
+    let url = url.replace('+', "%2B");
     log!("Info:Start downloading '{url}'");
 
     // 创建进度条
@@ -33,7 +33,7 @@ pub fn download(url: &String, at: &PathBuf) -> Result<()> {
     pb.set_length(content_length);
 
     // 创建文件以写入数据
-    let mut file = File::create(&at)?;
+    let mut file = File::create(at)?;
 
     let mut buf = vec![0; 1024];
     let mut downloaded = 0;

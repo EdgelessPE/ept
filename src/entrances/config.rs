@@ -131,7 +131,7 @@ fn test_config() {
     // 测试 set
     let mut new_cfg = answer_cfg_init.clone();
     let new_base = "C:/Users/Public/Music".to_string();
-    new_cfg.local.base = new_base.clone();
+    new_cfg.local.base.clone_from(&new_base);
     assert!(config_set(
         &"local".to_string(),
         &"base".to_string(),

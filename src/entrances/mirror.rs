@@ -22,7 +22,7 @@ use crate::{
 // 返回远程镜像源申明的名称
 pub fn mirror_add(url: &String, should_match_name: Option<String>) -> Result<String> {
     // 以 / 结尾则会自动加上 /api/hello
-    let url = if url.ends_with("/") {
+    let url = if url.ends_with('/') {
         format!("{url}api/hello")
     } else {
         url.to_string()
@@ -50,7 +50,7 @@ pub fn mirror_add(url: &String, should_match_name: Option<String>) -> Result<Str
 
     // 请求软件包列表
     let (ps_url, _) = filter_service_from_meta(res, ServiceKeys::PkgSoftware)?;
-    let pkg_software_res: MirrorPkgSoftware = get(&ps_url)?.json()?;
+    let pkg_software_res: MirrorPkgSoftware = get(ps_url)?.json()?;
 
     // 校验
     pkg_software_res.verify_self(&"".to_string())?;
@@ -88,7 +88,7 @@ pub fn mirror_list() -> Result<Vec<(String, SystemTime)>> {
 pub fn mirror_update_all() -> Result<Vec<String>> {
     let p = get_path_mirror()?;
     let mut names = Vec::new();
-    for name in read_sub_dir(&p)? {
+    for name in read_sub_dir(p)? {
         let n = mirror_update(&name)?;
         names.push(n);
     }

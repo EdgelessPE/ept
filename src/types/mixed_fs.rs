@@ -29,7 +29,7 @@ pub struct MixedFS {
 fn is_match_wild_match_set(path: &String, set: &HashSet<String>) -> bool {
     for wild_match_path in set.clone() {
         let wm = WildMatch::new(&wild_match_path);
-        if wm.matches(&path) {
+        if wm.matches(path) {
             return true;
         }
     }
@@ -90,7 +90,7 @@ impl MixedFS {
         // 特殊处理 New 的逻辑
         if from.is_empty() {
             let path = path.to_owned();
-            if path.ends_with("/") {
+            if path.ends_with('/') {
                 self.a_add_wild_match(path + "*");
                 return;
             } else {
@@ -105,7 +105,7 @@ impl MixedFS {
         if !is_starts_with_inner_value(&from) {
             if contains_wild_match(&from) {
                 // 直接根据真实文件系统拓展 from，拼接到 MixedFS 内
-                for exact_path in parse_wild_match(from, &self.located).unwrap_or(Vec::new()) {
+                for exact_path in parse_wild_match(from, &self.located).unwrap_or_default() {
                     let exact_from = p2s!(exact_path);
                     let merged_path = merge_path(&exact_from, path.clone());
                     if exact_path.is_dir() {
@@ -122,8 +122,8 @@ impl MixedFS {
         }
 
         // 两个之一为目录，直接添加通配记录
-        if path.ends_with("/") || from.ends_with("/") {
-            let to_insert = if path.ends_with("/") {
+        if path.ends_with('/') || from.ends_with('/') {
+            let to_insert = if path.ends_with('/') {
                 path + "*"
             } else {
                 path + "/*"
@@ -143,7 +143,7 @@ impl MixedFS {
         }
         let path = format_path(path);
         if contains_wild_match(&path) {
-            for exact_path in parse_wild_match(path, &self.located).unwrap_or(Vec::new()) {
+            for exact_path in parse_wild_match(path, &self.located).unwrap_or_default() {
                 let str = p2s!(exact_path);
                 let str = &str[format_path(&self.located).len()..str.len()];
                 self.a_remove(str.to_string());
@@ -156,8 +156,8 @@ impl MixedFS {
             }
 
             // 判断是文件夹还是文件
-            if path.ends_with("/") || Path::new(&path).is_dir() {
-                let path = if path.ends_with("/") {
+            if path.ends_with('/') || Path::new(&path).is_dir() {
+                let path = if path.ends_with('/') {
                     path + "*"
                 } else {
                     path + "/*"

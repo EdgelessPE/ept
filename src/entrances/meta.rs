@@ -88,7 +88,7 @@ pub fn meta(input: PackageInputEnum, verify_signature: bool) -> Result<MetaResul
     let mut map: HashMap<(PermissionLevel, PermissionKey), HashSet<String>> = HashMap::new();
     for node in total_workflow {
         for perm in node.generalize_permissions()? {
-            let entry = map.entry((perm.level, perm.key)).or_insert(HashSet::new());
+            let entry = map.entry((perm.level, perm.key)).or_default();
             for target in perm.targets {
                 entry.insert(target);
             }

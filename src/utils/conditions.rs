@@ -55,7 +55,7 @@ fn capture_function_info(conditions: &Vec<String>) -> Result<Vec<(String, String
         }
 
         // 执行
-        eval_boolean_with_context(&cond, &context)
+        eval_boolean_with_context(cond, &context)
             .map_err(|e| anyhow!("Error:Failed to execute expression '{cond}' : {e}"))?;
     }
 

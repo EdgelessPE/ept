@@ -157,7 +157,7 @@ fn test_condition_eval() {
         located,
     )
     .unwrap();
-    assert_eq!(r2, false);
+    assert!(!r2);
 
     let r3 = condition_eval(
         &String::from("\"${SystemDrive}\"==\"C:\" && SystemDrive==\"C:\""),
@@ -184,7 +184,7 @@ fn test_condition_eval() {
     assert!(r5);
 
     let r6 = condition_eval(&String::from("Exist(\"./src/main.ts\")"), 0, located).unwrap();
-    assert_eq!(r6, false);
+    assert!(!r6);
 
     let r7 = condition_eval(
         &String::from("Exist(\"${AppData}\") && IsDirectory(\"${SystemDrive}/Windows\")"),

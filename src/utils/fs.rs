@@ -9,7 +9,7 @@ use std::{
 pub fn try_recycle<P: AsRef<Path>>(path: P) -> Result<()> {
     let p = path.as_ref();
     let str = p2s!(p);
-    if let Err(e) = trash::delete(&p) {
+    if let Err(e) = trash::delete(p) {
         log!("Warning:Failed to recycle '{str}' : {e}, try removing it");
         if p.is_dir() {
             remove_dir_all(p).map_err(|e| anyhow!("Error:Failed to delete directory '{str}' : {e}"))
@@ -29,7 +29,6 @@ pub fn read_sub_dir<P: AsRef<Path>>(path: P) -> Result<Vec<String>> {
                 p = p2s!(path.as_ref().as_os_str())
             )
         })?
-        .into_iter()
         .filter_map(|entry_res| {
             if let Ok(entry) = entry_res {
                 if !entry.path().is_dir() {
@@ -64,7 +63,6 @@ where
                 p = p2s!(path.as_ref().as_os_str())
             )
         })?
-        .into_iter()
         .filter_map(|entry_res| {
             if let Ok(entry) = entry_res {
                 if entry.path().is_file() {

@@ -23,7 +23,7 @@ impl EvalFunction for IsInstalled {
     fn get_closure(_: String) -> Function {
         Function::new(move |val| {
             let arg = ensure_arg(val)?;
-            let sp: Vec<&str> = arg.split("/").collect();
+            let sp: Vec<&str> = arg.split('/').collect();
             if sp.len() != 2 {
                 return Err(error::EvalexprError::CustomMessage(format!(
                     "Invalid argument '{arg}' : expect 'SCOPE/NAME', e.g. 'Microsoft/VSCode'"

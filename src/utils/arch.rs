@@ -24,7 +24,7 @@ pub fn get_arch() -> Result<SysArch> {
 
     #[allow(unreachable_code)]
     {
-        return Err(anyhow!("Error:Failed to get current system arch, that's amazing that you seems to be running a magic Windows OS"));
+        Err(anyhow!("Error:Failed to get current system arch, that's amazing that you seems to be running a magic Windows OS"))
     }
 }
 

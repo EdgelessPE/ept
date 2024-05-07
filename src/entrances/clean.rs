@@ -4,7 +4,6 @@ use std::{
     fs::{read_dir, remove_dir_all, remove_file},
     path::Path,
 };
-use trash;
 
 use crate::{
     log, log_ok_last, p2s,
@@ -109,7 +108,7 @@ pub fn clean() -> Result<()> {
     }
 
     // 尝试移动到回收站
-    if clean_list.len() > 0 {
+    if !clean_list.is_empty() {
         log!("Info:Trash list :");
         println!("{clean_list:#?}");
         let tip = format!(

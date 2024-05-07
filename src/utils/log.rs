@@ -40,7 +40,7 @@ fn gen_log(msg: &String, replace_head: Option<String>) -> Option<String> {
             return Some(format!("{c_head} {m}", m = &cap[3]));
         }
     }
-    return Some(format!("{msg}"));
+    Some(msg.to_string())
 }
 
 pub fn fn_log(msg: String) {

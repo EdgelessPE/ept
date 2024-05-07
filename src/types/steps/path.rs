@@ -73,7 +73,7 @@ fn conflict_resolver(bin_abs: &String, stem: &String, scope: &String) -> String 
 // 配置系统 PATH 变量；返回的 bool 表示是否发送了全局广播
 fn set_system_path(record: &String, is_add: bool) -> Result<bool> {
     // 转换 record 为反斜杠
-    let record = record.replace("/", r"\");
+    let record = record.replace('/', r"\");
     let record_str = record.as_str();
 
     // 打开 HKEY_CURRENT_USER\Environment
@@ -86,7 +86,7 @@ fn set_system_path(record: &String, is_add: bool) -> Result<bool> {
     let origin_text: String = table.get_value("Path").unwrap_or(String::new());
 
     // 拆分 Path 为数组
-    let mut origin_arr: Vec<&str> = origin_text.split(";").collect();
+    let mut origin_arr: Vec<&str> = origin_text.split(';').collect();
 
     // 检查给定的值是否已经存在
     let is_exist = origin_arr.contains(&record_str);
@@ -99,23 +99,15 @@ fn set_system_path(record: &String, is_add: bool) -> Result<bool> {
         } else {
             origin_arr.push(record_str);
         }
+    } else if is_exist {
+        origin_arr.retain(|x| x != &record_str);
     } else {
-        if is_exist {
-            origin_arr = origin_arr
-                .into_iter()
-                .filter(|x| x != &record_str)
-                .collect();
-        } else {
-            log!("Warning(Path):Ignoring due to record '{record_str}' not exist in PATH");
-            return Ok(false);
-        }
+        log!("Warning(Path):Ignoring due to record '{record_str}' not exist in PATH");
+        return Ok(false);
     }
 
     // 生成新字符串
-    let new_arr: Vec<&str> = origin_arr
-        .into_iter()
-        .filter(|x| x.to_owned() != "")
-        .collect();
+    let new_arr: Vec<&str> = origin_arr.into_iter().filter(|x| !x.is_empty()).collect();
     let new_text = new_arr.join(";");
     log!("Debug(Path):Save register with '{new_text}'");
 
@@ -155,7 +147,7 @@ impl TStep for StepPath {
 
         // 创建 bin 目录
         if !bin_path.exists() {
-            create_dir(bin_path.to_owned())?;
+            create_dir(&bin_path)?;
         }
 
         // 添加系统 PATH 变量
@@ -168,7 +160,7 @@ impl TStep for StepPath {
 
         // 解析目标绝对路径
         let abs_target_path = parse_relative_path_with_located(&self.record, &cx.located);
-        let abs_target_str = p2s!(abs_target_path).replace("/", r"\");
+        let abs_target_str = p2s!(abs_target_path).replace('/', r"\");
 
         // 处理为目录的情况
         if abs_target_path.is_dir() {
@@ -215,12 +207,12 @@ impl TStep for StepPath {
 
         // 创建 bin 目录
         if !bin_path.exists() {
-            create_dir(bin_path.to_owned())?;
+            create_dir(&bin_path)?;
         }
 
         // 解析目标绝对路径
         let abs_target_path = parse_relative_path_with_located(&self.record, &cx.located);
-        let abs_target_str = p2s!(abs_target_path).replace("/", r"\");
+        let abs_target_str = p2s!(abs_target_path).replace('/', r"\");
 
         // 处理为目录的情况
         if abs_target_path.is_dir() {
@@ -290,7 +282,7 @@ impl Generalizable for StepPath {
     fn generalize_permissions(&self) -> Result<Vec<Permission>> {
         // 检查是否有拓展名且不以 / 結尾，以此判断添加的是目录还是单文件
         let p = Path::new(&self.record);
-        let node = if p.extension().is_some() && !self.record.ends_with("/") {
+        let node = if p.extension().is_some() && !self.record.ends_with('/') {
             Permission {
                 key: PermissionKey::path_entrances,
                 level: PermissionLevel::Normal,

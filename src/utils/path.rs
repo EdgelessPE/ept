@@ -87,7 +87,7 @@ fn find_scope_with_name_online(name: &String, scope: Option<String>) -> Result<(
     let scope_input_str = scope.clone().unwrap_or("".to_string());
     // 遍历 mirrors
     let p = get_path_mirror()?;
-    let mirror_names = read_sub_dir(&p)?;
+    let mirror_names = read_sub_dir(p)?;
     for mirror_name in mirror_names {
         let pkg_software = read_local_mirror_pkg_software(&mirror_name)?;
         for (scope_real_name, tree) in pkg_software.tree {

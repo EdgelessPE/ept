@@ -5,16 +5,12 @@ use std::io::stdin;
 
 pub fn ask_yn() -> bool {
     if is_confirm_mode() {
-        return true;
+        true
     } else {
         let mut input = String::new();
         let term_in = stdin();
         term_in.read_line(&mut input).unwrap();
-        if &input[0..1] == "y" {
-            true
-        } else {
-            false
-        }
+        &input[0..1] == "y"
     }
 }
 

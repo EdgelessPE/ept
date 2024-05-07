@@ -60,7 +60,7 @@ pub fn get_reg_entry(entry_id: &String) -> UninstallRegEntry {
 
             return UninstallRegEntry {
                 version,
-                uninstall_string: uninstall_string.map(|str| str.replace("\\", "/")),
+                uninstall_string: uninstall_string.map(|str| str.replace('\\', "/")),
             };
         }
     }

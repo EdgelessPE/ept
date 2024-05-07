@@ -29,8 +29,8 @@ fn test_is_alive_with_name() {
     assert!(res);
 
     let res = is_alive_with_name(&"Cargo.exe".to_string());
-    assert_eq!(res, false);
+    assert!(!res);
 
     let res = is_alive_with_name(&"cargo".to_string());
-    assert_eq!(res, false);
+    assert!(!res);
 }

@@ -23,13 +23,11 @@ fn get_manifest(flow: Vec<WorkflowNode>, fs: &mut MixedFS) -> Vec<String> {
     debug_assert!(manifest.clone().into_iter().fold(true, |state, cur| {
         if !state {
             state
+        } else if is_starts_with_inner_value(&cur) {
+            log!("Error:Fatal:Got absolute manifest '{cur}'");
+            false
         } else {
-            if is_starts_with_inner_value(&cur) {
-                log!("Error:Fatal:Got absolute manifest '{cur}'");
-                false
-            } else {
-                true
-            }
+            true
         }
     }));
     manifest

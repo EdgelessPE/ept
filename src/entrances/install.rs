@@ -237,10 +237,7 @@ fn test_install() {
     assert!(!cx_path.exists());
 
     // 准备测试 main_program 校验
-    crate::utils::test::_ensure_testing_uninstalled(
-        &"Microsoft".to_string(),
-        &"CallInstaller".to_string(),
-    );
+    crate::utils::test::_ensure_testing_uninstalled("Microsoft", "CallInstaller");
     let binding = crate::utils::env::env_desktop() + "/Call.exe";
     let desktop_call_path = Path::new(&binding);
     if desktop_call_path.exists() {
@@ -298,7 +295,7 @@ fn test_reg_entry() {
 
     // 替换并写注册表
     let raw_reg_text = std::fs::read_to_string("examples/RegEntry/RegEntry/add_reg.reg").unwrap();
-    let replaced = raw_reg_text.replace("${CUR_DIR}", &cur_dir.replace(r"\", r"\\"));
+    let replaced = raw_reg_text.replace("${CUR_DIR}", &cur_dir.replace('\\', r"\\"));
     let write_path = cur_dir_pb.join("test/_add_reg_entry.reg");
     std::fs::write(&write_path, replaced).unwrap();
 

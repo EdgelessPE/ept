@@ -35,7 +35,7 @@ lazy_static! {
 #[macro_export]
 macro_rules! p2s {
     ($x:expr) => {
-        crate::utils::format_path(&$x.to_string_lossy().to_string())
+        $crate::utils::format_path(&$x.to_string_lossy().to_string())
     };
 }
 
@@ -47,23 +47,23 @@ fn ensure_exist(p: PathBuf) -> Result<PathBuf> {
 }
 
 pub fn is_debug_mode() -> bool {
-    envmnt::get_or("DEBUG", "false") == String::from("true")
+    envmnt::get_or("DEBUG", "false") == *"true"
 }
 
 pub fn is_qa_mode() -> bool {
-    envmnt::get_or("QA", "false") == String::from("true")
+    envmnt::get_or("QA", "false") == *"true"
 }
 
 pub fn is_confirm_mode() -> bool {
-    envmnt::get_or("CONFIRM", "false") == String::from("true")
+    envmnt::get_or("CONFIRM", "false") == *"true"
 }
 
 pub fn is_strict_mode() -> bool {
-    envmnt::get_or("STRICT", "false") == String::from("true")
+    envmnt::get_or("STRICT", "false") == *"true"
 }
 
 pub fn format_path(raw: &String) -> String {
-    let tmp = raw.replace(r"\", "/");
+    let tmp = raw.replace('\\', "/");
     if tmp.starts_with("./") {
         tmp[2..].to_string()
     } else {

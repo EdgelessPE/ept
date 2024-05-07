@@ -9,7 +9,7 @@ pub fn search(text: &String) -> Result<Vec<SearchResult>> {
     // 扫描出所有的镜像源目录
     let root = get_path_mirror()?;
     let mirror_dirs = read_sub_dir(&root)?;
-    if mirror_dirs.len() == 0 {
+    if mirror_dirs.is_empty() {
         return Err(anyhow!("Error:No mirror added yet"));
     }
 
@@ -28,7 +28,7 @@ pub fn search(text: &String) -> Result<Vec<SearchResult>> {
         arr.append(&mut mapped);
     }
 
-    if arr.len() == 0 {
+    if arr.is_empty() {
         Err(anyhow!("Error:No result found with keyword '{text}'"))
     } else {
         Ok(arr)

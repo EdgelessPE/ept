@@ -62,7 +62,7 @@ pub fn parse_target_for_copy(
     }
 
     // 如果 from 以 / 结尾但不是目录则报错
-    if from.ends_with("/") && !from_path.is_dir() {
+    if from.ends_with('/') && !from_path.is_dir() {
         return Err(anyhow!("Error({step_name}):Field 'from' ends with '/' but doesn't refer to a directory : '{from}'"));
     }
 
@@ -76,7 +76,7 @@ pub fn parse_target_for_copy(
     // 如果 from 是文件夹，则 to 直接视为文件夹
     if from_path.is_dir() {
         ensure_dir_exist(to_path.parent().unwrap())?;
-        return Ok((to_path.to_path_buf(), false));
+        Ok((to_path.to_path_buf(), false))
     } else {
         // 此时拷贝的内容为文件，需要确定 to 的性质然后决定是否需要拼接文件名
 
@@ -95,7 +95,7 @@ pub fn parse_target_for_copy(
         }
 
         // 从字面规则判断 to 是否为文件夹
-        if to.ends_with("/") {
+        if to.ends_with('/') {
             // 此时 from 是文件，说明 to 指向的是父目录，因此进行拼接
             let file_name = from_path.file_name().unwrap();
             ensure_dir_exist(&to_path)?;
@@ -104,7 +104,7 @@ pub fn parse_target_for_copy(
 
         // 兜底，表示 to 是文件路径
         ensure_dir_exist(to_path.parent().unwrap())?;
-        return Ok((to_path.to_path_buf(), true));
+        Ok((to_path.to_path_buf(), true))
     }
 }
 

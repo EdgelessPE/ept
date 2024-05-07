@@ -12,7 +12,7 @@ use std::path::Path;
 
 fn get_temp_tar(zstd_file: &Path) -> String {
     let stem = p2s!(zstd_file.file_stem().unwrap());
-    return p2s!(zstd_file.with_file_name(&stem));
+    p2s!(zstd_file.with_file_name(stem))
 }
 
 #[test]

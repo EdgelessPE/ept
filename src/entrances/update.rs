@@ -27,8 +27,8 @@ use super::{
 };
 
 fn same_authors(a: &Vec<String>, b: &Vec<String>) -> bool {
-    let ai = a.into_iter().map(|raw| parse_author(raw).unwrap());
-    let bi = b.into_iter().map(|raw| parse_author(raw).unwrap());
+    let ai = a.iter().map(|raw| parse_author(raw).unwrap());
+    let bi = b.iter().map(|raw| parse_author(raw).unwrap());
 
     ai.eq(bi)
 }
@@ -119,14 +119,12 @@ pub fn update_using_package(
         let update_workflow = parse_workflow(&p2s!(update_path))?;
         workflow_executor(update_workflow, p2s!(located), fresh_package)?;
         log_ok_last!("Info:Running update workflow...");
-    } else {
-        if run_remove {
-            // 没有升级但是跑了一遍卸载，需要重新跑一遍 setup
-            log!("Info:Running setup workflow...");
-            let setup_workflow = parse_workflow(&p2s!(update_path.with_file_name("setup.toml")))?;
-            workflow_executor(setup_workflow, p2s!(located), fresh_package)?;
-            log_ok_last!("Info:Running setup workflow...");
-        }
+    } else if run_remove {
+        // 没有升级但是跑了一遍卸载，需要重新跑一遍 setup
+        log!("Info:Running setup workflow...");
+        let setup_workflow = parse_workflow(&p2s!(update_path.with_file_name("setup.toml")))?;
+        workflow_executor(setup_workflow, p2s!(located), fresh_package)?;
+        log_ok_last!("Info:Running setup workflow...");
     }
 
     // 保存上下文

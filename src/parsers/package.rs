@@ -49,7 +49,7 @@ fn update_ver_with_main_program(
     // 解释内置变量
     let interpreted_main_program = values_replacer(main_program.to_string(), 0, located);
     // 获取主程序相对路径
-    let file_path = parse_relative_path_with_located(&interpreted_main_program, &located);
+    let file_path = parse_relative_path_with_located(&interpreted_main_program, located);
 
     // 读取主程序版本号
     let exe_file_str = p2s!(file_path);
@@ -119,7 +119,7 @@ pub fn parse_package(
     for (i, raw) in pkg.package.authors.clone().into_iter().enumerate() {
         let author = parse_author(&raw)?;
         // 第一作者必须提供邮箱
-        if i == 0 && author.email == None {
+        if i == 0 && author.email.is_none() {
             return Err(anyhow!("Error:Can't validate package.toml : first author '{name}' in field 'package.authors' should have email (e.g. \"Cno <cno@edgeless.top>\")",name=author.name));
         }
     }
@@ -132,7 +132,7 @@ pub fn parse_package(
     }
 
     // 解释
-    let interpreter = |raw: String| values_replacer(raw, 0, &located);
+    let interpreter = |raw: String| values_replacer(raw, 0, located);
     let mut pkg = pkg.interpret(interpreter);
 
     // 跟随主程序 exe 文件版本号或是注册表入口 ID 更新版本号
@@ -199,16 +199,16 @@ fn test_update_main_program() {
         &mut pkg,
         &software.main_program.unwrap(),
         &"examples/Dism++/Dism++".to_string(),
-        &Path::new("test/nul.toml"),
+        Path::new("test/nul.toml"),
     )
     .unwrap();
-    assert!(pkg.package.version == "10.1.1002.0".to_string());
+    assert!(pkg.package.version == *"10.1.1002.0");
 
     update_ver_with_main_program(
         &mut pkg,
         &"${SystemDrive}/Windows/notepad.exe".to_string(),
         &"examples/Dism++/Dism++".to_string(),
-        &Path::new("test/nul.toml"),
+        Path::new("test/nul.toml"),
     )
     .unwrap();
 }

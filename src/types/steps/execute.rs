@@ -58,7 +58,7 @@ impl TStep for StepExecute {
         let cmd_p = Path::new(&self.command);
         if cmd_p.exists()
             && cmd_p.is_absolute()
-            && !(self.command.starts_with("\"") || self.command.ends_with("\""))
+            && !(self.command.starts_with('"') || self.command.ends_with('"'))
         {
             self.command = format!("\"{c}\"", c = &self.command);
         }
@@ -77,7 +77,7 @@ impl TStep for StepExecute {
 
         // 异步执行分流
         let wait = self.wait.unwrap_or("Sync".to_string());
-        if wait == "Sync".to_string() {
+        if wait == *"Sync" {
             // 同步执行并收集结果
             log!("Info(Execute):Running sync command '{command_str}' in '{workshop}'");
             let start_instant = Instant::now();
@@ -122,7 +122,7 @@ impl TStep for StepExecute {
                 anyhow!("Error(Execute):Command '{command_str}' spawn failed : {e}")
             })?;
             cx.async_execution_handlers
-                .push((command_str, handler, wait == "Abandon".to_string()));
+                .push((command_str, handler, wait == *"Abandon"));
 
             Ok(0)
         }
@@ -137,7 +137,7 @@ impl TStep for StepExecute {
         // 调用相对路径的安装包
         if self.call_installer.unwrap_or(false) {
             if let Ok(sp_command) = split_command(&self.command) {
-                if let Some(exe) = sp_command.get(0) {
+                if let Some(exe) = sp_command.first() {
                     if !is_starts_with_inner_value(exe) {
                         manifest.push(exe.to_owned());
                     }
@@ -166,7 +166,7 @@ impl Interpretable for StepExecute {
 impl Verifiable for StepExecute {
     fn verify_self(&self, _: &String) -> Result<()> {
         // 不得出现反斜杠
-        if self.command.contains("\\") {
+        if self.command.contains('\\') {
             return Err(anyhow!("Error(Execute):Backslash (\\) in '{cmd}' is not allowed, use forward slash (/) instead",cmd=&self.command));
         }
 

@@ -86,7 +86,7 @@ impl Cfg {
         let from = Self::use_which()?;
         let value = Value::try_from(other)?;
         let text = to_string_pretty(&value)?;
-        write(from, &text)?;
+        write(from, text)?;
         Ok(())
     }
 }

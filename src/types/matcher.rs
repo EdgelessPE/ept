@@ -20,7 +20,7 @@ pub struct PackageMatcher {
 
 impl PackageMatcher {
     pub fn parse(text: &String, deny_mirror: bool, deny_version_matcher: bool) -> Result<Self> {
-        if text.len() == 0 {
+        if text.is_empty() {
             return Err(anyhow!("Error:Empty input text"));
         }
         let mut res = PackageMatcher {
@@ -30,18 +30,18 @@ impl PackageMatcher {
             version_req: None,
         };
         // 分割 @ 并解析 VersionReq
-        let lhs = if text.contains("@") {
+        let lhs = if text.contains('@') {
             if deny_version_matcher {
                 return Err(anyhow!("Error:Version matcher not allowed"));
             }
-            let sp: Vec<&str> = text.split("@").collect();
+            let sp: Vec<&str> = text.split('@').collect();
             if sp.len() != 2 {
                 return Err(anyhow!(
                     "Error:Invalid package matcher : there can be at most one '@', got {len}",
                     len = sp.len() - 1
                 ));
             }
-            let t = sp.get(0).unwrap();
+            let t = sp.first().unwrap();
             let str = sp.get(1).unwrap();
             res.version_req =
                 Some(VersionReq::parse(str.trim_matches('"')).map_err(|e| {
@@ -53,14 +53,14 @@ impl PackageMatcher {
         };
 
         // 分割 lhs
-        let mut sp: Vec<&str> = lhs.split("/").collect();
+        let mut sp: Vec<&str> = lhs.split('/').collect();
         if sp.len() > 3 {
             return Err(anyhow!(
                 "Error:Invalid package key '{text}', expect pattern '(MIRROR/)(SCOPE/)NAME'"
             ));
         }
         sp.reverse();
-        if let Some(name) = sp.get(0) {
+        if let Some(name) = sp.first() {
             res.name = name.to_string()
         }
         if let Some(scope) = sp.get(1) {

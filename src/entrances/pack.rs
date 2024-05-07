@@ -43,7 +43,7 @@ pub fn pack(source_dir: &String, into_file: Option<String>, need_sign: bool) -> 
 
     // 生成内包
     log!("Info:Compressing inner package...");
-    let inner_path_str = p2s!(temp_dir_path.join(&(file_stem.clone() + ".tar.zst")));
+    let inner_path_str = p2s!(temp_dir_path.join(file_stem.clone() + ".tar.zst"));
     compress(source_dir, &inner_path_str)?;
     log_ok_last!("Info:Compressing inner package...");
 
@@ -64,7 +64,7 @@ pub fn pack(source_dir: &String, into_file: Option<String>, need_sign: bool) -> 
         },
     };
     let text = toml::to_string_pretty(&signature_struct)?;
-    write(sign_file_path, &text)?;
+    write(sign_file_path, text)?;
     if need_sign {
         log_ok_last!("Info:Signing inner package...");
     } else {

@@ -104,7 +104,7 @@ pub fn values_validator_path(raw: &String) -> Result<()> {
 
     // 如果以一个近似内置变量的名称打头，但是又不存在这个内置变量则阻止
     if is_starts_with_inner_value(raw)
-        && (collection.len() == 0 || !raw.starts_with(&collection[0]))
+        && (collection.is_empty() || !raw.starts_with(&collection[0]))
     {
         return Err(anyhow!(
             "Error:Shouldn't start with an unknown inner value in '{raw}'"
@@ -113,7 +113,7 @@ pub fn values_validator_path(raw: &String) -> Result<()> {
 
     // 阻止使用一个以上的 env 变量
     let first_elem = collection
-        .get(0)
+        .first()
         .map(|s| s.to_owned())
         .unwrap_or("".to_string());
     let env_hash_set: HashSet<String> = HashSet::from_iter(get_arr(false));

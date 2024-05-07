@@ -43,7 +43,7 @@ impl Verifiable for Package {
         };
 
         // name 不能包含下划线
-        if self.name.contains("_") {
+        if self.name.contains('_') {
             return Err(err_wrapper(anyhow!(
                 "field 'name' shouldn't contain underline (_), got '{n}'",
                 n = &self.name

@@ -43,7 +43,7 @@ fn router(action: Action) -> Result<String> {
         },
         types::matcher::{PackageInputEnum, PackageMatcher},
     };
-    let verify_signature = envmnt::get_or("OFFLINE", "false") == String::from("false");
+    let verify_signature = envmnt::get_or("OFFLINE", "false") == *"false";
 
     // 匹配入口
     match action {
@@ -88,18 +88,17 @@ fn router(action: Action) -> Result<String> {
                 results
                     .into_iter()
                     .fold(format!("\nFound {len} results:\n"), |acc, node| {
-                        return acc
-                            + &format!(
-                                "  {scope}/{name} ({version})   {mirror}\n",
-                                name = node.name,
-                                version = node.version,
-                                scope = node.scope,
-                                mirror = node
-                                    .from_mirror
-                                    .unwrap_or("".to_string())
-                                    .as_str()
-                                    .truecolor(100, 100, 100)
-                            );
+                        acc + &format!(
+                            "  {scope}/{name} ({version})   {mirror}\n",
+                            name = node.name,
+                            version = node.version,
+                            scope = node.scope,
+                            mirror = node
+                                .from_mirror
+                                .unwrap_or("".to_string())
+                                .as_str()
+                                .truecolor(100, 100, 100)
+                        )
                     });
             res
         }),
@@ -108,18 +107,17 @@ fn router(action: Action) -> Result<String> {
             info(parse_res.scope, &parse_res.name).map(|res| format!("{res:#?}"))
         }
         Action::List => list().map(|list| {
-            if list.len() == 0 {
+            if list.is_empty() {
                 return "Info:No installed package".to_string();
             }
             let res: String =
                 list.into_iter()
                     .fold(String::from("\nInstalled packages:\n"), |acc, node| {
-                        return acc
-                            + &format!(
-                                "  {name}    {version}\n",
-                                name = node.name,
-                                version = node.local.unwrap().version
-                            );
+                        acc + &format!(
+                            "  {name}    {version}\n",
+                            name = node.name,
+                            version = node.local.unwrap().version
+                        )
                     });
             res
         }),
@@ -136,13 +134,13 @@ fn router(action: Action) -> Result<String> {
             if let Some(into) = save_at {
                 write(&into, text)
                     .map_err(|e| anyhow!("Error:Failed to write to '{into}' : {e}"))?;
-                return Ok(format!("Success:Meta report saved at '{into}'"));
+                Ok(format!("Success:Meta report saved at '{into}'"))
             } else {
-                return Ok(text);
+                Ok(text)
             }
         }
 
-        Action::Clean => clean().map(|_| format!("Success:Cleaned")),
+        Action::Clean => clean().map(|_| "Success:Cleaned".to_string()),
         Action::Config { operation } => match operation {
             ActionConfig::Set { table, key, value } => config_set(&table, &key, &value)
                 .map(|_| format!("Success:Config value of '{key}' has been set to '{value}'")),
@@ -171,18 +169,17 @@ fn router(action: Action) -> Result<String> {
             }
             ActionMirror::List => {
                 let res = mirror_list()?;
-                if res.len() > 0 {
+                if !res.is_empty() {
                     let str: String = res.into_iter().fold(
                         String::from("\nAdded mirrors:\n"),
                         |acc, (name, time)| {
                             let date_time: DateTime<chrono::Local> = time.into();
                             let time_str = date_time.format("%Y-%m-%d %H:%M:%S").to_string();
                             let update_str = format!("updated at {time_str}");
-                            return acc
-                                + &format!(
-                                    "  {name}    {str}\n",
-                                    str = update_str.as_str().truecolor(100, 100, 100)
-                                );
+                            acc + &format!(
+                                "  {name}    {str}\n",
+                                str = update_str.as_str().truecolor(100, 100, 100)
+                            )
                         },
                     );
                     Ok(str)
