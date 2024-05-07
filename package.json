@@ -8,8 +8,7 @@
     "preview": "rspress preview",
     "gen": "ts-node ./scripts/index.ts",
     "lint": "eslint --fix scripts/**/*",
-    "prepack": "pinst --disable",
-    "postpack": "pinst --enable",
+    "prepare": "npx simple-git-hooks",
     "rust:ut": "cargo test -- --test-threads 1",
     "rust:ut:html": "cargo tarpaulin -o html --exclude-files test/** --exclude-files node_modules/** && start tarpaulin-report.html",
     "rust:ut:xml": "cargo tarpaulin -o xml --exclude-files test/** --exclude-files node_modules/**"
@@ -33,14 +32,10 @@
     "eslint-plugin-prettier": "^5.1.3",
     "eslint-plugin-promise": "^6.1.1",
     "lint-staged": "^15.2.2",
-    "pinst": "^3.0.0",
     "prettier": "^3.2.5",
     "simple-git-hooks": "^2.11.1",
     "ts-node": "^10.9.2",
     "ts-results": "^3.3.0"
-  },
-  "lint-staged": {
-    "*.ts": "eslint --fix"
   },
   "simple-git-hooks": {
     "pre-commit": "npx lint-staged"
