@@ -11,7 +11,7 @@ fn slice_to_array_64<T>(slice: &[T]) -> Result<&[T; 64]> {
     }
 }
 
-pub fn sign_with_ecdsa(private_key: &String, digest: &String) -> Result<String> {
+pub fn sign_with_ecdsa(private_key: &str, digest: &String) -> Result<String> {
     let private = SecretKey::from_pem(private_key)?;
     let signature = private.sign(digest.as_bytes(), Some(Noise::generate()));
     let signature_base64 = general_purpose::STANDARD.encode(signature);
@@ -19,7 +19,7 @@ pub fn sign_with_ecdsa(private_key: &String, digest: &String) -> Result<String> 
     Ok(signature_base64)
 }
 
-pub fn verify_with_ecdsa(public_key: &String, digest: &String, signature: &String) -> Result<bool> {
+pub fn verify_with_ecdsa(public_key: &str, digest: &String, signature: &String) -> Result<bool> {
     let public = PublicKey::from_pem(public_key)?;
     let signature_decoded = general_purpose::STANDARD.decode(signature)?;
     let arr = slice_to_array_64(&signature_decoded[..])?;

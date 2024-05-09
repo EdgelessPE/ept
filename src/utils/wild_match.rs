@@ -6,7 +6,7 @@ use wildmatch::WildMatch;
 
 use super::path::split_parent;
 
-pub fn contains_wild_match(raw: &String) -> bool {
+pub fn contains_wild_match(raw: &str) -> bool {
     raw.contains('*') || raw.contains('?')
 }
 

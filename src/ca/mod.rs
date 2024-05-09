@@ -7,7 +7,7 @@ pub fn get_own_pair() -> Result<(String, String)> {
     Ok((public_file, private_file))
 }
 
-pub fn query_others_public(_email: &String) -> Result<String> {
+pub fn query_others_public(_email: &str) -> Result<String> {
     let public_file = include_str!("../../keys/public.pem").to_string();
     Ok(public_file)
 }

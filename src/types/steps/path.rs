@@ -71,7 +71,7 @@ fn conflict_resolver(bin_abs: &String, stem: &String, scope: &String) -> String 
 }
 
 // 配置系统 PATH 变量；返回的 bool 表示是否发送了全局广播
-fn set_system_path(record: &String, is_add: bool) -> Result<bool> {
+fn set_system_path(record: &str, is_add: bool) -> Result<bool> {
     // 转换 record 为反斜杠
     let record = record.replace('/', r"\");
     let record_str = record.as_str();

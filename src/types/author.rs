@@ -14,7 +14,4 @@ impl PartialEq for Author {
         }
         self.name == other.name
     }
-    fn ne(&self, other: &Self) -> bool {
-        !self.eq(other)
-    }
 }

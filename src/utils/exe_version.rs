@@ -66,13 +66,14 @@ pub fn get_exe_version<P: AsRef<Path>>(file_path: P) -> Result<String> {
             "Error:Failed to get version : file '{path:?}' not exist"
         ));
     }
-    let try_get = get_32_version(&file_path);
-    let res = if try_get.is_ok() {
-        try_get.unwrap()
-    } else {
-        get_64_version(file_path)?
-    };
-    Ok(res)
+    if let Ok(res) = get_32_version(&file_path) {
+        return Ok(res);
+    }
+    if let Ok(res) = get_64_version(&file_path) {
+        return Ok(res);
+    }
+
+    Err(anyhow!("Error:Can't read version of '{path:?}'"))
 }
 
 #[test]

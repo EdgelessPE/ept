@@ -9,7 +9,7 @@ use super::{
     mirror::read_local_mirror_pkg_software,
 };
 
-pub fn split_parent(raw: &String, located: &String) -> (PathBuf, String) {
+pub fn split_parent(raw: &str, located: &String) -> (PathBuf, String) {
     // 解析为绝对路径
     let abs_path = parse_relative_path_with_located(raw, located);
 
@@ -26,7 +26,7 @@ pub fn split_parent(raw: &String, located: &String) -> (PathBuf, String) {
 }
 
 /// 使用配置文件中指定的 base 解析相对路径
-pub fn parse_relative_path_with_base(relative: &String) -> Result<PathBuf> {
+pub fn parse_relative_path_with_base(relative: &str) -> Result<PathBuf> {
     let relative = format_path(relative);
     let path = Path::new(&relative);
 
@@ -46,7 +46,7 @@ pub fn parse_relative_path_with_base(relative: &String) -> Result<PathBuf> {
 }
 
 /// 使用给定的 located 解析相对路径
-pub fn parse_relative_path_with_located(relative: &String, located: &String) -> PathBuf {
+pub fn parse_relative_path_with_located(relative: &str, located: &String) -> PathBuf {
     // debug_assert!(Path::new(located).is_absolute());
     debug_assert!(Path::new(located).exists());
 

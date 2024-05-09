@@ -26,7 +26,7 @@ pub struct MixedFS {
 }
 
 // 输入的 path 来自 manifest，不会携带通配符
-fn is_match_wild_match_set(path: &String, set: &HashSet<String>) -> bool {
+fn is_match_wild_match_set(path: &str, set: &HashSet<String>) -> bool {
     for wild_match_path in set.clone() {
         let wm = WildMatch::new(&wild_match_path);
         if wm.matches(path) {
@@ -78,7 +78,7 @@ impl MixedFS {
         self.to_remove_wild_match.insert(path);
     }
 
-    pub fn add(&mut self, path: &String, from: &String) {
+    pub fn add(&mut self, path: &String, from: &str) {
         debug_assert!(!contains_wild_match(path));
         if is_starts_with_inner_value(path) {
             return;
@@ -137,7 +137,7 @@ impl MixedFS {
         self.a_add_wild_match(with_wm_end);
         self.a_add(path);
     }
-    pub fn remove(&mut self, path: &String) {
+    pub fn remove(&mut self, path: &str) {
         if is_starts_with_inner_value(path) {
             return;
         }
@@ -169,7 +169,7 @@ impl MixedFS {
         }
     }
 
-    pub fn exists(&self, path: &String) -> bool {
+    pub fn exists(&self, path: &str) -> bool {
         if is_starts_with_inner_value(path) {
             return true;
         }
@@ -202,40 +202,37 @@ fn test_mixed_fs() {
     let mut mfs = MixedFS::new(base.clone());
 
     // 基础判断能力
-    assert!(!mfs.exists(&"./1.txt".to_string()));
-    assert!(mfs.exists(&"Cargo.toml".to_string()));
+    assert!(!mfs.exists("./1.txt"));
+    assert!(mfs.exists("Cargo.toml"));
 
     // 增删指定文件
-    mfs.add(&"./1.txt".to_string(), &"./backup/1.txt".to_string());
-    mfs.remove(&"config.toml".to_string());
+    mfs.add(&"./1.txt".to_string(), "./backup/1.txt");
+    mfs.remove("config.toml");
 
-    assert!(mfs.exists(&"1.txt".to_string()));
-    assert!(!mfs.exists(&"./backup/1.txt".to_string()));
-    assert!(!mfs.exists(&"config.toml".to_string()));
+    assert!(mfs.exists("1.txt"));
+    assert!(!mfs.exists("./backup/1.txt"));
+    assert!(!mfs.exists("config.toml"));
 
     // 增删通配文件
-    mfs.add(&"./c/".to_string(), &"./src/types/*.rs".to_string());
-    mfs.remove(&"./src/main?rs".to_string());
+    mfs.add(&"./c/".to_string(), "./src/types/*.rs");
+    mfs.remove("./src/main?rs");
 
-    assert!(mfs.exists(&"c/mod.rs".to_string()));
-    assert!(mfs.exists(&"src/types/mod.rs".to_string()));
-    assert!(!mfs.exists(&"./src/main.rs".to_string()));
+    assert!(mfs.exists("c/mod.rs"));
+    assert!(mfs.exists("src/types/mod.rs"));
+    assert!(!mfs.exists("./src/main.rs"));
 
     // 指定文件与通配文件冲突
-    mfs.remove(&"./c/mixed_fs.rs".to_string());
+    mfs.remove("./c/mixed_fs.rs");
 
-    assert!(mfs.exists(&"c/mod.rs".to_string()));
-    assert!(!mfs.exists(&"c/mixed_fs.rs".to_string()));
+    assert!(mfs.exists("c/mod.rs"));
+    assert!(!mfs.exists("c/mixed_fs.rs"));
 
     // 增删指定目录
-    mfs.add(
-        &"./233".to_string(),
-        &"${AppData}/Edgeless/ept/".to_string(),
-    );
-    mfs.remove(&"target".to_string());
+    mfs.add(&"./233".to_string(), "${AppData}/Edgeless/ept/");
+    mfs.remove("target");
 
-    assert!(mfs.exists(&"233/whats.ts".to_string()));
-    assert!(!mfs.exists(&"./target/debug/ept.exe".to_string()));
+    assert!(mfs.exists("233/whats.ts"));
+    assert!(!mfs.exists("./target/debug/ept.exe"));
 
     // 增删通配目录(暂不支持复杂操作)
     // mfs.add(&"./234/".to_string(), &"./src/util?".to_string());

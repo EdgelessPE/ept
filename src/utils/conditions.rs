@@ -217,7 +217,7 @@ fn test_condition() {
 }
 
 // 检查用户是否在字符串外面用了模板内置变量 ${} 的写法
-pub fn check_proper_template_inner_value(condition: &String) -> bool {
+pub fn check_proper_template_inner_value(condition: &str) -> bool {
     // 当前指针是否在字符串内部
     let mut inside_string_flag = false;
 
@@ -236,22 +236,14 @@ pub fn check_proper_template_inner_value(condition: &String) -> bool {
 
 #[test]
 fn test_check_proper_template_inner_value() {
+    assert!(check_proper_template_inner_value("Arch==\"X64\""));
     assert!(check_proper_template_inner_value(
-        &"Arch==\"X64\"".to_string()
-    ));
-    assert!(check_proper_template_inner_value(
-        &"Arch==\"X64\" && \"${SystemDrive}/Windows\"==\"C:/Windows\"".to_string()
+        "Arch==\"X64\" && \"${SystemDrive}/Windows\"==\"C:/Windows\""
     ));
     assert!(check_proper_template_inner_value(
-        &"\"${ExitCode}\"==\"114514\"".to_string()
+        "\"${ExitCode}\"==\"114514\""
     ));
-    assert!(!check_proper_template_inner_value(
-        &"${Arch}==X64".to_string()
-    ));
-    assert!(!check_proper_template_inner_value(
-        &"$\"{Arch}\"==X64".to_string()
-    ));
-    assert!(!check_proper_template_inner_value(
-        &"${Arch}==X64".to_string()
-    ));
+    assert!(!check_proper_template_inner_value("${Arch}==X64"));
+    assert!(!check_proper_template_inner_value("$\"{Arch}\"==X64"));
+    assert!(!check_proper_template_inner_value("${Arch}==X64"));
 }

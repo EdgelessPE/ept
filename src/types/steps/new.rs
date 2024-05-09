@@ -77,7 +77,7 @@ impl TStep for StepNew {
         Ok(())
     }
     fn get_manifest(&self, fs: &mut MixedFS) -> Vec<String> {
-        fs.add(&self.at, &"".to_string());
+        fs.add(&self.at, "");
         Vec::new()
     }
 }

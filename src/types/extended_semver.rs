@@ -5,7 +5,7 @@ use std::cmp::Ordering::{Equal, Greater, Less};
 use std::fmt;
 use std::{cmp::Ordering, str::FromStr};
 
-fn split_pre_build(raw: &String) -> (String, String) {
+fn split_pre_build(raw: &str) -> (String, String) {
     // 分割 -
     let sp: Vec<&str> = raw.split('-').collect();
     let clear = sp[0].to_string();
@@ -23,39 +23,39 @@ fn split_pre_build(raw: &String) -> (String, String) {
 #[test]
 fn test_split_pre_build() {
     assert_eq!(
-        split_pre_build(&"1.0.0.0".to_string()),
+        split_pre_build("1.0.0.0"),
         ("1.0.0.0".to_string(), "".to_string())
     );
     assert_eq!(
-        split_pre_build(&"1.0.0.0-alpha".to_string()),
+        split_pre_build("1.0.0.0-alpha"),
         ("1.0.0.0".to_string(), "-alpha".to_string())
     );
     assert_eq!(
-        split_pre_build(&"1.2.0.0-alpha.1".to_string()),
+        split_pre_build("1.2.0.0-alpha.1"),
         ("1.2.0.0".to_string(), "-alpha.1".to_string())
     );
     assert_eq!(
-        split_pre_build(&"1.0.0.0-alpha.beta".to_string()),
+        split_pre_build("1.0.0.0-alpha.beta"),
         ("1.0.0.0".to_string(), "-alpha.beta".to_string())
     );
     assert_eq!(
-        split_pre_build(&"1.0.0.0-beta".to_string()),
+        split_pre_build("1.0.0.0-beta"),
         ("1.0.0.0".to_string(), "-beta".to_string())
     );
     assert_eq!(
-        split_pre_build(&"1.0.0.0-beta.2".to_string()),
+        split_pre_build("1.0.0.0-beta.2"),
         ("1.0.0.0".to_string(), "-beta.2".to_string())
     );
     assert_eq!(
-        split_pre_build(&"1.0.0.0-beta.11+build114514".to_string()),
+        split_pre_build("1.0.0.0-beta.11+build114514"),
         ("1.0.0.0".to_string(), "-beta.11+build114514".to_string())
     );
     assert_eq!(
-        split_pre_build(&"1.0.0.0-rc.1".to_string()),
+        split_pre_build("1.0.0.0-rc.1"),
         ("1.0.0.0".to_string(), "-rc.1".to_string())
     );
     assert_eq!(
-        split_pre_build(&"1.0.0.0+BLAKE1919810".to_string()),
+        split_pre_build("1.0.0.0+BLAKE1919810"),
         ("1.0.0.0".to_string(), "+BLAKE1919810".to_string())
     );
 }
@@ -173,9 +173,6 @@ impl PartialEq for ExSemVer {
         } else {
             res
         }
-    }
-    fn ne(&self, other: &Self) -> bool {
-        !self.eq(other)
     }
 }
 

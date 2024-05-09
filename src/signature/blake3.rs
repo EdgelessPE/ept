@@ -19,7 +19,7 @@ pub fn compute_hash_blake3(from_file: &String) -> Result<String> {
     Ok(hash)
 }
 
-pub fn fast_compute_hash_blake3(raw: &Vec<u8>) -> Result<String> {
+pub fn fast_compute_hash_blake3(raw: &[u8]) -> Result<String> {
     let hash = hash(raw);
     let hash = hash.to_hex().to_string();
     log!("Debug:Got blake3 hash : '{hash}'");
@@ -30,23 +30,23 @@ fn try_into_memmap_file(file: &File) -> anyhow::Result<Option<io::Cursor<memmap2
     let metadata = file.metadata()?;
     let file_size = metadata.len();
 
-    Ok(if !metadata.is_file() {
-        None
-    } else if file_size > isize::max_value() as u64 {
-        None
-    } else if file_size == 0 {
-        None
-    } else if file_size < 16 * 1024 {
-        None
-    } else {
-        let mmap = unsafe {
-            memmap2::MmapOptions::new()
-                .len(file_size as usize)
-                .map(file)?
-        };
+    Ok(
+        if !metadata.is_file()
+            || file_size > isize::max_value() as u64
+            || file_size == 0
+            || file_size < 16 * 1024
+        {
+            None
+        } else {
+            let mmap = unsafe {
+                memmap2::MmapOptions::new()
+                    .len(file_size as usize)
+                    .map(file)?
+            };
 
-        Some(io::Cursor::new(mmap))
-    })
+            Some(io::Cursor::new(mmap))
+        },
+    )
 }
 
 fn copy_wide(mut reader: impl io::Read, hasher: &mut blake3::Hasher) -> io::Result<u64> {

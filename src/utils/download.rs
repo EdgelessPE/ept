@@ -10,7 +10,7 @@ use crate::p2s;
 
 use super::allocate_path_temp;
 
-pub fn download(url: &String, at: &PathBuf) -> Result<()> {
+pub fn download(url: &str, at: &PathBuf) -> Result<()> {
     let url = url.replace('+', "%2B");
     log!("Info:Start downloading '{url}'");
 
@@ -57,7 +57,7 @@ pub fn download(url: &String, at: &PathBuf) -> Result<()> {
     Ok(())
 }
 
-pub fn download_nep(url: &String) -> Result<PathBuf> {
+pub fn download_nep(url: &str) -> Result<PathBuf> {
     // 下载文件到临时目录
     let temp_dir = allocate_path_temp(&"download".to_string(), false)?;
     let p = temp_dir.join("downloaded.nep");
@@ -68,9 +68,9 @@ pub fn download_nep(url: &String) -> Result<PathBuf> {
 
 pub fn fill_url_template(
     url_template: &String,
-    scope: &String,
-    software: &String,
-    file_name: &String,
+    scope: &str,
+    software: &str,
+    file_name: &str,
 ) -> Result<String> {
     let mut res = url_template.clone();
     if res.contains("{scope}") {

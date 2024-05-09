@@ -105,7 +105,7 @@ pub fn build_index_for_mirror(content: MirrorPkgSoftware, dir: PathBuf) -> Resul
 }
 
 // 从索引中搜索内容
-pub fn search_index_for_mirror(text: &String, dir: PathBuf) -> Result<Vec<SearchResult>> {
+pub fn search_index_for_mirror(text: &str, dir: PathBuf) -> Result<Vec<SearchResult>> {
     let (_schema, name, scope, version) = get_schema()?;
 
     let index = Index::open_in_dir(dir)?;

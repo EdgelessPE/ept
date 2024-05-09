@@ -78,7 +78,7 @@ impl Interpretable for StepWait {
 impl Verifiable for StepWait {
     fn verify_self(&self, located: &String) -> Result<()> {
         // timeout 时间应当小于等于 30min
-        if &self.timeout > &(30 * 60 * 1000) {
+        if self.timeout > (30 * 60 * 1000) {
             return Err(anyhow!(
                 "Error:Timeout should not be longer than 30 min, got '{}'",
                 &self.timeout

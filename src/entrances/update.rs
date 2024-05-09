@@ -26,7 +26,7 @@ use super::{
     },
 };
 
-fn same_authors(a: &Vec<String>, b: &Vec<String>) -> bool {
+fn same_authors(a: &[String], b: &[String]) -> bool {
     let ai = a.iter().map(|raw| parse_author(raw).unwrap());
     let bi = b.iter().map(|raw| parse_author(raw).unwrap());
 
@@ -142,7 +142,7 @@ pub fn update_using_package(
     Ok((local_diff.version, fresh_version_str))
 }
 
-pub fn update_using_url(url: &String, verify_signature: bool) -> Result<(String, String)> {
+pub fn update_using_url(url: &str, verify_signature: bool) -> Result<(String, String)> {
     // 下载文件到临时目录
     let p = download_nep(url)?;
 

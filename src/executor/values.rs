@@ -28,7 +28,7 @@ macro_rules! define_values {
         }
 
         // 支持虚假的模板字符串
-        pub fn values_replacer(raw:String, exit_code: i32, located: &String)->String{
+        pub fn values_replacer(raw:String, exit_code: i32, located: &str)->String{
             raw
             .replace("${ExitCode}",&exit_code.to_string())
             .replace("${DefaultLocation}",located)
@@ -49,8 +49,8 @@ macro_rules! define_values {
             context.set_value("DefaultLocation".to_string(),Value::String(located.to_owned())).unwrap();
         }
 
-        pub fn match_value_permission(value:&String)->Result<PermissionLevel>{
-            let perm=match value.as_str() {
+        pub fn match_value_permission(value:&str)->Result<PermissionLevel>{
+            let perm=match value {
                 $($key=>$perm,)*
                 _=>PermissionLevel::Normal,
             };

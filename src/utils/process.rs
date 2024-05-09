@@ -1,6 +1,6 @@
 use sysinfo::System;
 
-pub fn kill_with_name(name: &String) -> bool {
+pub fn kill_with_name(name: &str) -> bool {
     let s = System::new_all();
     let mut res = true;
     for process in s.processes_by_exact_name(name) {
@@ -11,7 +11,7 @@ pub fn kill_with_name(name: &String) -> bool {
     res
 }
 
-pub fn is_alive_with_name(name: &String) -> bool {
+pub fn is_alive_with_name(name: &str) -> bool {
     let s = System::new_all();
     let mut processes = s.processes_by_exact_name(name);
     processes.next().is_some()
@@ -25,12 +25,12 @@ fn test_kill_with_name() {
 
 #[test]
 fn test_is_alive_with_name() {
-    let res = is_alive_with_name(&"cargo.exe".to_string());
+    let res = is_alive_with_name("cargo.exe");
     assert!(res);
 
-    let res = is_alive_with_name(&"Cargo.exe".to_string());
+    let res = is_alive_with_name("Cargo.exe");
     assert!(!res);
 
-    let res = is_alive_with_name(&"cargo".to_string());
+    let res = is_alive_with_name("cargo");
     assert!(!res);
 }

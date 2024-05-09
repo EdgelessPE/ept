@@ -10,11 +10,11 @@ use evalexpr::*;
 
 macro_rules! def_eval_functions {
     ($($x:ident),*) => {
-        pub fn set_context_with_function(context: &mut HashMapContext,located: &String) {
+        pub fn set_context_with_function(context: &mut HashMapContext,located: &str) {
             $(
                 context.set_function(
                     stringify!($x).to_string(),
-                    $x::get_closure(located.clone()),
+                    $x::get_closure(located.to_string()),
                 ).unwrap();
              )*
         }

@@ -129,7 +129,7 @@ pub fn install_using_package(source_file: &String, verify_signature: bool) -> Re
     Ok(())
 }
 
-pub fn install_using_url(url: &String, verify_signature: bool) -> Result<()> {
+pub fn install_using_url(url: &str, verify_signature: bool) -> Result<()> {
     // 下载文件到临时目录
     let p = download_nep(url)?;
 

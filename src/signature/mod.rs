@@ -15,7 +15,7 @@ pub fn sign(target_file: &String) -> Result<String> {
     sign_with_ecdsa(&private, &digest)
 }
 
-pub fn verify(target_file: &String, package_signer: &String, signature: &String) -> Result<bool> {
+pub fn verify(target_file: &String, package_signer: &str, signature: &String) -> Result<bool> {
     // 查询公钥
     let public = query_others_public(package_signer)?;
     // 计算 blake3 摘要值
@@ -24,7 +24,7 @@ pub fn verify(target_file: &String, package_signer: &String, signature: &String)
     verify_with_ecdsa(&public, &digest, signature)
 }
 
-pub fn fast_verify(raw: &Vec<u8>, package_signer: &String, signature: &String) -> Result<bool> {
+pub fn fast_verify(raw: &[u8], package_signer: &str, signature: &String) -> Result<bool> {
     // 查询公钥
     let public = query_others_public(package_signer)?;
     // 计算 blake3 摘要值

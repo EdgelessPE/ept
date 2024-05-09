@@ -39,7 +39,7 @@ pub struct StepRename {
 }
 
 // 将to的文件名替代拼接到from末尾
-fn concat_to(to: &String, from: &String, located: &String) -> String {
+fn concat_to(to: &String, from: &str, located: &String) -> String {
     let (parent, _) = split_parent(from, located);
     p2s!(parent.join(to))
 }

@@ -1,6 +1,7 @@
 use anyhow::Result;
 
 pub trait Verifiable {
+    #![allow(clippy::ptr_arg)]
     fn verify_self(&self, located: &String) -> Result<()>;
 }
 
