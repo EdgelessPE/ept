@@ -176,10 +176,10 @@ impl PartialEq for ExSemVer {
     }
 }
 
+#[allow(clippy::non_canonical_partial_ord_impl)]
 impl PartialOrd for ExSemVer {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         let res = self.semver_instance.partial_cmp(&other.semver_instance);
-        res?;
         match res {
             Some(Equal) => self.reserved.partial_cmp(&other.reserved),
             _ => res,
@@ -201,13 +201,7 @@ impl PartialOrd for ExSemVer {
 
 impl Ord for ExSemVer {
     fn cmp(&self, other: &Self) -> Ordering {
-        if *self < *other {
-            Less
-        } else if *self == *other {
-            Equal
-        } else {
-            Greater
-        }
+        self.partial_cmp(other).unwrap()
     }
     fn max(self, other: Self) -> Self {
         match self.cmp(&other) {

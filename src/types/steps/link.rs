@@ -31,18 +31,18 @@ lazy_static! {
 fn parse_target(name: &String, base: &String) -> Result<(String, bool)> {
     // 匹配 target_name 模式
     let sp: Vec<&str> = name.split('/').collect();
-    let length = sp.len();
-    let (lnk_folder_opt, lnk_name) = if length > 2 {
-        return Err(anyhow!(
-            "Error(Link):Invalid field 'target_name', expect 'NAME' or 'FOLDER/NAME', got '{name}'"
-        ));
-    } else if length == 2 {
-        (
+
+    let (lnk_folder_opt, lnk_name) = match sp.len().cmp(&2) {
+        std::cmp::Ordering::Greater => {
+            return Err(anyhow!(
+                "Error(Link):Invalid field 'target_name', expect 'NAME' or 'FOLDER/NAME', got '{name}'",
+            ));
+        }
+        std::cmp::Ordering::Equal => (
             Some(sp.first().unwrap().to_string()),
             sp.get(1).unwrap().to_string(),
-        )
-    } else {
-        (None, sp.first().unwrap().to_string())
+        ),
+        std::cmp::Ordering::Less => (None, sp.first().unwrap().to_string()),
     };
 
     // 解析目标位置

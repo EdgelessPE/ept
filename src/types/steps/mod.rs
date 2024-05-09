@@ -43,6 +43,7 @@ macro_rules! def_enum_step {
     ($($x:ident),*) => {
 
         #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
+        #[allow(clippy::enum_variant_names)]
         pub enum Step {
             $( $x($x) ),*
         }
