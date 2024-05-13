@@ -17,8 +17,8 @@ dependencies:
 
 devDependencies:
   '@modern-js/tsconfig':
-    specifier: 2.49.2
-    version: 2.49.2
+    specifier: 2.49.3
+    version: 2.49.3
   '@rspress/plugin-shiki':
     specifier: ^1.20.1
     version: 1.20.1
@@ -290,8 +290,8 @@ packages:
       react: 18.3.1
     dev: false
 
-  /@modern-js/tsconfig@2.49.2:
-    resolution: {integrity: sha512-8/0xp+mgo5vfMX4CC8XBNJRDhBDisvoa4BAUFhn1pJ2igOC5/TNWSjrGu/6KtcmzFnS1xzjs2PTeoL+3T845dQ==}
+  /@modern-js/tsconfig@2.49.3:
+    resolution: {integrity: sha512-uE15h9wnWWDsShxua8NxDDImYCa2gvw6R8WI7MI8+fJ0nw1Tp7drWbnPwf5ffi43gdNtgFPcqk+wMRe6htHXIg==}
     dev: true
 
   /@modern-js/utils@2.49.2:
