@@ -20,8 +20,8 @@ devDependencies:
     specifier: 2.49.2
     version: 2.49.2
   '@rspress/plugin-shiki':
-    specifier: ^1.20.1
-    version: 1.20.1
+    specifier: ^1.21.1
+    version: 1.21.1
   '@types/jest':
     specifier: ^29.5.12
     version: 29.5.12
@@ -666,11 +666,11 @@ packages:
       medium-zoom: 1.1.0
     dev: false
 
-  /@rspress/plugin-shiki@1.20.1:
-    resolution: {integrity: sha512-an/a6TArMpYpD/tkkY+RW3VxxiPEHBlQW5Wd5IP5G66vCc9HBVbRfmP9ZN5D21J2/n0ww5/6OlkEGshPqdSvsQ==}
+  /@rspress/plugin-shiki@1.21.1:
+    resolution: {integrity: sha512-mGR2VK5rRjJS7TnVAz8zoXi1/my6h88yEh+O485N8xOGofbJkYbo4lE0BK/frYXjxIM6wFSoxPIokJF9ML7Rsg==}
     engines: {node: '>=14.17.6'}
     dependencies:
-      '@rspress/shared': 1.20.1
+      '@rspress/shared': 1.21.1
       hast-util-from-html: 2.0.1
       shiki: 0.14.5
       unist-util-visit: 5.0.0
@@ -696,6 +696,18 @@ packages:
       fs-extra: 11.2.0
       gray-matter: 4.0.3
       unified: 10.1.2
+    dev: false
+
+  /@rspress/shared@1.21.1:
+    resolution: {integrity: sha512-jT0GTG15q1+F1uoXlCykxQXf4D7pfFJsyMUzeemGqcM1pmGJZypQli2gvdCdjaz1cR6qPY0fDOfxs5Vf4MISTg==}
+    dependencies:
+      '@rsbuild/core': 0.6.13
+      chalk: 4.1.2
+      execa: 5.1.1
+      fs-extra: 11.2.0
+      gray-matter: 4.0.3
+      unified: 10.1.2
+    dev: true
 
   /@rspress/theme-default@1.20.1:
     resolution: {integrity: sha512-azmMtns82u3XCkKylYyikm6wjKYede0jmlH+CyNqtDV9WGP0pntpysCsvSxCiEsVsi6+dwDbp8EsGCVsw4m34A==}
