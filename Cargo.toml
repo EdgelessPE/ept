@@ -46,7 +46,7 @@ toml = { version = "0.8.12", features = ["preserve_order"] }
 trash = "4.1.1"
 ts-rs = "8.1.0"
 which = "6.0.1"
-wildmatch = "2.3.3"
+wildmatch = "2.3.4"
 zstd = "0.13.1"
 
 [target.'cfg(windows)'.dependencies]
