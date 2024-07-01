@@ -43,7 +43,7 @@ sysinfo = "0.30.12"
 tantivy = "0.22.0"
 tar = "0.4.40"
 toml = { version = "0.8.13", features = ["preserve_order"] }
-trash = "4.1.1"
+trash = "5.0.0"
 ts-rs = "8.1.0"
 which = "6.0.1"
 wildmatch = "2.3.4"
