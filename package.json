@@ -16,7 +16,7 @@
   "dependencies": {
     "react": "^18.3.1",
     "rspress": "^1.25.2",
-    "typescript": "^5.4.5"
+    "typescript": "^5.5.2"
   },
   "devDependencies": {
     "@modern-js/tsconfig": "2.54.2",
