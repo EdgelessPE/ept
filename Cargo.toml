@@ -41,7 +41,7 @@ strum = "0.26.2"
 strum_macros = "0.26.4"
 sysinfo = "0.30.12"
 tantivy = "0.22.0"
-tar = "0.4.40"
+tar = "0.4.41"
 toml = { version = "0.8.13", features = ["preserve_order"] }
 trash = "4.1.1"
 ts-rs = "8.1.0"
