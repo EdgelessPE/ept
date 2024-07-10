@@ -19,8 +19,8 @@ importers:
         version: 5.5.2
     devDependencies:
       '@modern-js/tsconfig':
-        specifier: 2.54.5
-        version: 2.54.5
+        specifier: 2.54.6
+        version: 2.54.6
       '@rspress/plugin-shiki':
         specifier: ^1.25.1
         version: 1.25.1
@@ -181,8 +181,8 @@ packages:
     peerDependencies:
       react: '>=16'
 
-  '@modern-js/tsconfig@2.54.5':
-    resolution: {integrity: sha512-LmaPQqPpMxxBAmjpRo2pdfOe0Q8oXg/DffaPucRI3NbO+pw+BBPjGKO1wsqcPHdlrPz0vE5+slAgqceF5IpH2Q==}
+  '@modern-js/tsconfig@2.54.6':
+    resolution: {integrity: sha512-fUXN6rpE5rinJ3qTljn8HNutaOPT3lUUaXPMOSdG+/ROHgnC1PX+hgpvMIh+bXrDUrZrNmVJQ/C7iwKNdyU+KQ==}
 
   '@modern-js/utils@2.54.5':
     resolution: {integrity: sha512-pSczSIGLPc7rckMLIvq/gwM+8/mBv9P9OoAPrPbLrog1EZ+MvM4d4eDGx9m3HH4GR0liSAtTuY9qbvUGwUisoQ==}
@@ -3180,7 +3180,7 @@ snapshots:
       '@types/react': 18.3.1
       react: 18.3.1
 
-  '@modern-js/tsconfig@2.54.5': {}
+  '@modern-js/tsconfig@2.54.6': {}
 
   '@modern-js/utils@2.54.5':
     dependencies:
