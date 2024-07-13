@@ -212,7 +212,7 @@ fn main() {
         log!("Warning:Offline mode enabled, ept couldn't guarantee security or integrality of packages");
         envmnt::set("OFFLINE", "true");
     }
-    if args.yes {
+    if args.qa || args.yes {
         log!("Warning:Confirmation mode enabled");
         envmnt::set("CONFIRM", "true");
     }
