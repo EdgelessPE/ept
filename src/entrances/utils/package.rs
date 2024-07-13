@@ -121,12 +121,8 @@ fn normal_unpack_nep(
     let inner_pkg_str = outer_validator(&temp_dir_outer_str, &signature_struct.raw_name_stem)?;
     if verify_signature {
         log!("Info:Verifying package signature...");
-        if signature_struct.signature.is_some() {
-            let check_res = verify(
-                &inner_pkg_str,
-                &signature_struct.signer,
-                &signature_struct.signature.unwrap(),
-            )?;
+        if let Some(sign) = signature_struct.signature {
+            let check_res = verify(&inner_pkg_str, &signature_struct.signer, &sign)?;
             if !check_res {
                 return Err(anyhow!(
                     "Error:Failed to verify package signature, this package may have been hacked"
@@ -218,12 +214,8 @@ fn fast_unpack_nep(
         .unwrap();
     if verify_signature {
         log!("Info:Verifying package signature...");
-        if signature_struct.signature.is_some() {
-            let check_res = fast_verify(
-                inner_pkg_raw,
-                &signature_struct.signer,
-                &signature_struct.signature.unwrap(),
-            )?;
+        if let Some(sign) = signature_struct.signature {
+            let check_res = fast_verify(inner_pkg_raw, &signature_struct.signer, &sign)?;
             if !check_res {
                 return Err(anyhow!(
                     "Error:Failed to verify package signature, this package may have been hacked"

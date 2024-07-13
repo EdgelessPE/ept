@@ -72,9 +72,10 @@ pub fn workflow_executor(
         let name = flow_node.header.name.unwrap();
         log!("Debug:Start step '{name}'");
         // 解释节点条件，判断是否需要跳过执行
-        let c_if = flow_node.header.c_if;
-        if c_if.is_some() && !condition_eval(&c_if.unwrap(), cx.exit_code, &located)? {
-            continue;
+        if let Some(c_if) = flow_node.header.c_if {
+            if !condition_eval(&c_if, cx.exit_code, &located)? {
+                continue;
+            }
         }
 
         // 创建变量解释器

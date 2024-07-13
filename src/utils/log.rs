@@ -45,8 +45,7 @@ fn gen_log(msg: &String, replace_head: Option<String>) -> Option<String> {
 
 pub fn fn_log(msg: String) {
     let g = gen_log(&msg, None);
-    if g.is_some() {
-        let content = g.unwrap();
+    if let Some(content) = g {
         envmnt::set("LAST_LOG", &msg);
         TERM.write_line(&content).unwrap();
     }
@@ -54,8 +53,7 @@ pub fn fn_log(msg: String) {
 
 pub fn fn_log_ok_last(msg: String) {
     let g = gen_log(&format!("{msg}   {ok}", ok = "ok".green()), None);
-    if g.is_some() {
-        let content = g.unwrap();
+    if let Some(content) = g {
         let last_log = envmnt::get_or("LAST_LOG", "");
         if last_log == msg {
             TERM.move_cursor_up(1).unwrap();

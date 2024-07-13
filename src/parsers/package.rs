@@ -136,26 +136,26 @@ pub fn parse_package(
     let mut pkg = pkg.interpret(interpreter);
 
     // 跟随主程序 exe 文件版本号或是注册表入口 ID 更新版本号
-    if need_update_main_program && software.main_program.is_some() {
-        if let Err(e) = update_ver_with_main_program(
-            &mut pkg,
-            &software.main_program.unwrap(),
-            located,
-            package_path,
-        ) {
-            log!(
-                "Warning:Failed to update main program version for '{name}' : {e}",
-                name = pkg.package.name,
-            );
+    if need_update_main_program {
+        if let Some(main_program) = software.main_program {
+            if let Err(e) =
+                update_ver_with_main_program(&mut pkg, &main_program, located, package_path)
+            {
+                log!(
+                    "Warning:Failed to update main program version for '{name}' : {e}",
+                    name = pkg.package.name,
+                );
+            }
         }
     }
-    if need_update_main_program && software.registry_entry.is_some() {
-        let registry_entry = software.registry_entry.unwrap();
-        if let Err(e) = update_ver_with_reg_entry(&mut pkg, &registry_entry, package_path) {
-            log!(
+    if need_update_main_program {
+        if let Some(registry_entry) = software.registry_entry {
+            if let Err(e) = update_ver_with_reg_entry(&mut pkg, &registry_entry, package_path) {
+                log!(
                 "Warning:Failed to update main program version for '{name}' with reg entry '{registry_entry}' : {e}",
                 name = pkg.package.name,
             );
+            }
         }
     }
 
