@@ -1,9 +1,11 @@
+use std::path::Path;
+
 use regex::Regex;
 use semver::VersionReq;
 
-use anyhow::{anyhow, Result};
+use anyhow::{anyhow, Ok, Result};
 
-use crate::utils::is_url;
+use crate::utils::{format_path, is_url};
 
 lazy_static! {
     static ref PACKAGE_MATCHER_REGEX: Regex =
@@ -86,17 +88,26 @@ pub enum PackageInputEnum {
 
 impl PackageInputEnum {
     pub fn parse(text: String, deny_mirror: bool, deny_version_matcher: bool) -> Result<Self> {
-        // 使用正则匹配
+        // 判断是否为 URL
         if is_url(&text) {
             return Ok(PackageInputEnum::Url(text));
         }
+
+        // 如果本地存在该路径，则作为路径处理
+        let p = Path::new(&text);
+        if p.exists() {
+            return Ok(PackageInputEnum::LocalPath(format_path(&text)));
+        }
+
+        // 使用正则匹配 PackageMatcher
         if PACKAGE_MATCHER_REGEX.is_match(&text) {
             let m = PackageMatcher::parse(&text, deny_mirror, deny_version_matcher)?;
             return Ok(PackageInputEnum::PackageMatcher(m));
         }
 
-        // 兜底，作为本地路径
-        Ok(PackageInputEnum::LocalPath(text))
+        Err(anyhow!(
+            "Error:Failed to parse '{text}' as valid package input"
+        ))
     }
 }
 
@@ -147,4 +158,39 @@ fn test_parse_package_matcher() {
     // 测试 deny
     assert!(PackageMatcher::parse(&"Official/Microsoft/VSCode".to_string(), true, false).is_err());
     assert!(PackageMatcher::parse(&"VSCode@\">=0.1.0\"".to_string(), false, true).is_err());
+}
+
+#[test]
+fn test_parse_package_input_enum() {
+    assert_eq!(
+        PackageInputEnum::parse(
+            "https://nep.edgeless.top/static/test.nep".to_string(),
+            false,
+            false
+        )
+        .unwrap(),
+        PackageInputEnum::Url("https://nep.edgeless.top/static/test.nep".to_string())
+    );
+    assert_eq!(
+        PackageInputEnum::parse(".\\Cargo.lock".to_string(), false, false).unwrap(),
+        PackageInputEnum::LocalPath("Cargo.lock".to_string())
+    );
+    assert_eq!(
+        PackageInputEnum::parse("VSCode".to_string(), false, false).unwrap(),
+        PackageInputEnum::PackageMatcher(PackageMatcher {
+            name: "VSCode".to_string(),
+            scope: None,
+            mirror: None,
+            version_req: None
+        })
+    );
+    assert_eq!(
+        PackageInputEnum::parse("VSCode@1.1.4".to_string(), false, false).unwrap(),
+        PackageInputEnum::PackageMatcher(PackageMatcher {
+            name: "VSCode".to_string(),
+            scope: None,
+            mirror: None,
+            version_req: Some(VersionReq::parse("1.1.4").unwrap())
+        })
+    );
 }
