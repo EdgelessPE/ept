@@ -160,10 +160,14 @@ fn router(action: Action) -> Result<String> {
                         .map(|name| format!("Success:Index of mirror '{name}' has been updated"))
                 } else {
                     mirror_update_all().map(|names| {
-                        format!(
-                            "Success:Index of mirrors '({name})' has been updated",
-                            name = names.join(", ")
-                        )
+                        if names.is_empty() {
+                            "Warning:No mirror has been added".to_string()
+                        } else {
+                            format!(
+                                "Success:Index of mirrors '({name})' has been updated",
+                                name = names.join(", ")
+                            )
+                        }
                     })
                 }
             }
