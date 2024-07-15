@@ -27,7 +27,7 @@ fn update_pkg_version(
     let current_ver = ExSemVer::parse(&pkg.package.version)?;
 
     // 判断是否更新
-    if read_ver.semver_instance != current_ver.semver_instance {
+    if read_ver.semver_instance > current_ver.semver_instance {
         log!(
             "Warning:Updated '{name}' version from '{current_ver}' to '{read_ver}' according to {according_to}",
             name = pkg.package.name
