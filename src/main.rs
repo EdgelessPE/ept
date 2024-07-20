@@ -127,6 +127,7 @@ fn router(action: Action) -> Result<String> {
         } => pack(&source_dir, into_file, verify_signature)
             .map(|location| format!("Success:Package has been stored at '{location}'")),
         Action::Meta { package, save_at } => {
+            envmnt::set("NO_WARNING", "true");
             let package_input_enum = PackageInputEnum::parse(package, true, true)?;
             let res = meta(package_input_enum, verify_signature)?;
             let text = serde_json::to_string_pretty(&res)

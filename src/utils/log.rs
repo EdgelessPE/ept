@@ -2,7 +2,7 @@ use colored::Colorize;
 use console::Term;
 use regex::Regex;
 
-use super::is_debug_mode;
+use super::{is_debug_mode, is_no_warning_mode};
 
 lazy_static! {
     static ref RE: Regex =
@@ -19,6 +19,9 @@ fn gen_log(msg: &String, replace_head: Option<String>) -> Option<String> {
         let head = replace_head.unwrap_or(cap[1].to_string());
         let head = head.as_str();
         if head == "Debug" && !is_debug_mode() {
+            return None;
+        }
+        if head == "Warning" && is_no_warning_mode() {
             return None;
         }
         let c_head = match head {
