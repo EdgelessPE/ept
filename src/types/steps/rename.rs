@@ -67,10 +67,14 @@ fn rename(from: &String, to: &String, located: &String) -> Result<()> {
     }
 
     // 执行重命名
-    std::fs::rename(from, &final_to).map_err(|e| {
+    std::fs::rename(&from_path, &final_to).map_err(|e| {
         anyhow!("Error(Rename):Error:Failed to rename '{from}' to '{final_to}' : {e}")
     })?;
 
+    log!(
+        "Info(Rename):Renamed '{from}' to '{final_to}'",
+        from = p2s!(from_path)
+    );
     Ok(())
 }
 
