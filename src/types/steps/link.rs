@@ -181,10 +181,12 @@ impl TStep for StepLink {
             HashSet::from_iter(self.at.clone().unwrap_or(vec!["Desktop".to_string()]));
         if set.contains("Desktop") {
             create_shortcut(&sl, &target_name, &env_desktop())?;
+            log!("Info(Link):Added shortcut '{target_name}' to desktop");
         }
         if set.contains("StartMenu") {
             create_shortcut(&sl, &target_name, &env_start_menu())?;
             update_start_menu();
+            log!("Info(Link):Added shortcut '{target_name}' to start menu");
         }
 
         Ok(0)

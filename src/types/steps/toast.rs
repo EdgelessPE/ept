@@ -1,4 +1,5 @@
 use super::TStep;
+use crate::log;
 use crate::types::interpretable::Interpretable;
 use crate::types::permissions::PermissionKey;
 use crate::types::steps::Permission;
@@ -37,6 +38,11 @@ impl TStep for StepToast {
                     c = self.content
                 )
             })?;
+        log!(
+            "Log(Toast):Sent toast with title : '{t}', content : '{c}'",
+            t = self.title,
+            c = self.content
+        );
         Ok(0)
     }
     fn reverse_run(self, _: &mut WorkflowContext) -> Result<()> {

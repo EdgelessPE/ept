@@ -56,6 +56,7 @@ fn delete(target: &String, force: bool) -> Result<()> {
             Err(anyhow!("Error(Delete):Failed to delete '{target}' : '{e}', enable field 'force' to try shredding"))
         }
     } else {
+        log!("Log(Delete):Deleted '{target}' by moving to recycle bin");
         Ok(())
     }
 }

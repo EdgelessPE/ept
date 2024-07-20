@@ -138,6 +138,7 @@ fn copy(
         copy_dir(from, &to_path)?;
     }
 
+    log!("Info(Copy):Copied '{from}' to '{to}'", to = p2s!(to_path));
     Ok(())
 }
 

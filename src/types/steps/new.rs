@@ -66,9 +66,11 @@ impl TStep for StepNew {
 
         // 分流处理
         if self.at.ends_with('/') {
-            new_dir(&self.at)?
+            new_dir(&self.at)?;
+            log!("Info(New):Created directory '{at}'", at = self.at);
         } else {
-            new_file(&self.at)?
+            new_file(&self.at)?;
+            log!("Info(New):Created file '{at}'", at = self.at);
         }
 
         Ok(0)

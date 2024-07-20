@@ -62,7 +62,10 @@ fn mv(
             "Error:Failed to move file from '{from}' to '{to_str}' : {e}",
             to_str = p2s!(to_path)
         )
-    })
+    })?;
+
+    log!("Info(Move):Moved '{from}' to '{to}'", to = p2s!(to_path));
+    Ok(())
 }
 
 impl TStep for StepMove {

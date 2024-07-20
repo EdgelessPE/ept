@@ -54,6 +54,7 @@ impl TStep for StepWait {
                 };
             }
         } else {
+            log!("Info(Wait):Start to wait for '{}' ms...", self.timeout);
             sleep(d);
         }
         Ok(0)
