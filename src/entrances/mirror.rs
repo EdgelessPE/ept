@@ -21,6 +21,7 @@ use crate::{
         mirror::{build_index_for_mirror, filter_service_from_meta, read_local_mirror_hello},
     },
 };
+
 // 返回远程镜像源申明的名称
 pub fn mirror_add(url: &String, should_match_name: Option<String>) -> Result<String> {
     // 尝试解析为 URL 对象
@@ -144,7 +145,57 @@ pub fn mirror_remove(name: &String) -> Result<()> {
 }
 
 #[test]
+fn test_mirror() {
+    use crate::utils::test::_run_mirror_mock_server;
+    use std::fs::{remove_dir_all, rename};
+    use std::thread::sleep;
+    use std::time::Duration;
+
+    // 备份原有的镜像文件夹
+    let origin_p = get_path_mirror().unwrap();
+    let bak_p = origin_p.parent().unwrap().join("mirror_bak");
+    let has_origin_mirror = origin_p.exists();
+    if has_origin_mirror {
+        if bak_p.exists() {
+            remove_dir_all(&origin_p).unwrap();
+        } else {
+            rename(&origin_p, &bak_p).unwrap();
+        }
+    }
+    assert!(mirror_list().unwrap().is_empty());
+
+    // 启动 mock 服务器
+    let mock_url = _run_mirror_mock_server();
+
+    // 测试添加
+    mirror_add(&mock_url, None).unwrap();
+
+    // 测试列出
+    let ls = mirror_list().unwrap();
+    assert_eq!(ls.len(), 1);
+    let (name, old_update_time) = ls.first().unwrap();
+    assert_eq!(name, "mock-server");
+
+    // 测试更新
+    sleep(Duration::from_micros(100));
+    mirror_update(&"mock-server".to_string()).unwrap();
+    let ls = mirror_list().unwrap();
+    let (_, new_update_time) = ls.first().unwrap();
+    assert!(new_update_time.duration_since(*old_update_time).unwrap() > Duration::from_micros(50));
+
+    // 测试移除
+    mirror_remove(&"mock-server".to_string()).unwrap();
+    assert!(mirror_list().unwrap().is_empty());
+
+    // 还原原有的镜像文件夹
+    if has_origin_mirror {
+        remove_dir_all(&origin_p).unwrap();
+        rename(&bak_p, &origin_p).unwrap();
+    }
+}
+#[test]
 fn test_auto_mirror_update_all() {
+    use crate::utils::test::_run_mirror_mock_server;
     use std::fs::{remove_dir_all, rename};
     use std::thread::sleep;
     use std::time::Duration;
