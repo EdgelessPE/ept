@@ -10,7 +10,7 @@ use url::Url;
 
 use crate::utils::cfg::Cfg;
 use crate::{
-    log,
+    log, log_ok_last,
     types::{
         mirror::{MirrorHello, MirrorPkgSoftware, ServiceKeys},
         verifiable::Verifiable,
@@ -129,8 +129,9 @@ pub fn auto_mirror_update_all(cfg: &Cfg) -> Result<bool> {
         .into_iter()
         .find(|(_, modified_time)| now.duration_since(*modified_time).unwrap() > duration_cfg);
     if res.is_some() {
+        log!("Info:Automatically updating mirror index...");
         mirror_update_all()?;
-        log!("Info:Mirror index updated automatically");
+        log_ok_last!("Info:Automatically updating mirror index...");
         Ok(true)
     } else {
         Ok(false)
