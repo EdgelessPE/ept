@@ -3,5 +3,6 @@
     "jsx": "react-jsx",
     "esModuleInterop": true,
     "strictNullChecks": true
-  }
+  },
+  "exclude": ["node_modules"]
 }

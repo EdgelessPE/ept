@@ -7,7 +7,7 @@
     "build": "pnpm gen && rspress build",
     "preview": "rspress preview",
     "gen": "ts-node ./scripts/index.ts",
-    "lint": "eslint --fix scripts/**/*",
+    "lint": "eslint --fix scripts/**/* bindings/**/*",
     "prepare": "npx simple-git-hooks && rustup component add clippy",
     "rust:ut": "cargo test -- --test-threads 1",
     "rust:ut:html": "cargo tarpaulin -o html --exclude-files test/** --exclude-files node_modules/** && start tarpaulin-report.html",
