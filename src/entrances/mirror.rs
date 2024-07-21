@@ -6,6 +6,7 @@ use std::{
 use anyhow::{anyhow, Result};
 use reqwest::blocking::get;
 use toml::{to_string_pretty, Value};
+use url::Url;
 
 use crate::{
     types::{
@@ -21,12 +22,17 @@ use crate::{
 
 // 返回远程镜像源申明的名称
 pub fn mirror_add(url: &String, should_match_name: Option<String>) -> Result<String> {
-    // 以 / 结尾则会自动加上 /api/hello
-    let url = if url.ends_with('/') {
-        format!("{url}api/hello")
+    // 尝试解析为 URL 对象
+    let parsed_url =
+        Url::parse(url).map_err(|e| anyhow!("Error:Failed to parse '{url}' as valid URL : {e}"))?;
+
+    // 没有路径则会自动加上 /api/hello
+    let url = if parsed_url.path().is_empty() {
+        parsed_url.join("/api/hello").unwrap().to_string()
     } else {
         url.to_string()
     };
+
     // 请求 url
     let res: MirrorHello = get(url)?.json()?;
     let mirror_name = res.name.clone();
