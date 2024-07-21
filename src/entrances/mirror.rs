@@ -130,6 +130,7 @@ pub fn auto_mirror_update_all(cfg: &Cfg) -> Result<bool> {
         .find(|(_, modified_time)| now.duration_since(*modified_time).unwrap() > duration_cfg);
     if res.is_some() {
         mirror_update_all()?;
+        log!("Info:Mirror index updated automatically");
         Ok(true)
     } else {
         Ok(false)

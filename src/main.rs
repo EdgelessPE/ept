@@ -24,8 +24,10 @@ use std::process::exit;
 use self::types::cli::{Action, ActionConfig, Args};
 use crate::entrances::config::{config_get, config_init, config_list, config_set, config_which};
 use crate::entrances::{
-    clean, info, install_using_package, list, pack, uninstall, update_using_package,
+    auto_mirror_update_all, clean, info, install_using_package, list, pack, uninstall,
+    update_using_package,
 };
+use crate::utils::cfg::get_config;
 use crate::utils::launch_clean;
 
 #[cfg(not(tarpaulin_include))]
@@ -43,6 +45,7 @@ fn router(action: Action) -> Result<String> {
         },
         types::matcher::{PackageInputEnum, PackageMatcher},
     };
+    let cfg = get_config();
     let verify_signature = envmnt::get_or("OFFLINE", "false") == *"false";
 
     // 匹配入口
@@ -50,6 +53,7 @@ fn router(action: Action) -> Result<String> {
         Action::Install { package } => {
             let res = match PackageInputEnum::parse(package.clone(), false, false)? {
                 PackageInputEnum::PackageMatcher(matcher) => {
+                    auto_mirror_update_all(&cfg)?;
                     install_using_package_matcher(matcher, verify_signature)
                 }
                 PackageInputEnum::Url(url) => install_using_url(&url, verify_signature),
@@ -62,6 +66,7 @@ fn router(action: Action) -> Result<String> {
         Action::Update { package } => {
             let res = match PackageInputEnum::parse(package.clone(), false, false)? {
                 PackageInputEnum::PackageMatcher(matcher) => {
+                    auto_mirror_update_all(&cfg)?;
                     update_using_package_matcher(matcher, verify_signature)
                 }
                 PackageInputEnum::Url(url) => update_using_url(&url, verify_signature),
@@ -82,27 +87,31 @@ fn router(action: Action) -> Result<String> {
                 )
             })
         }
-        Action::Search { keyword } => search(&keyword).map(|results| {
-            let len = results.len();
-            let res: String =
-                results
-                    .into_iter()
-                    .fold(format!("\nFound {len} results:\n"), |acc, node| {
-                        acc + &format!(
-                            "  {scope}/{name} ({version})   {mirror}\n",
-                            name = node.name,
-                            version = node.version,
-                            scope = node.scope,
-                            mirror = node
-                                .from_mirror
-                                .unwrap_or("".to_string())
-                                .as_str()
-                                .truecolor(100, 100, 100)
-                        )
-                    });
-            res
-        }),
+        Action::Search { keyword } => {
+            auto_mirror_update_all(&cfg)?;
+            search(&keyword).map(|results| {
+                let len = results.len();
+                let res: String =
+                    results
+                        .into_iter()
+                        .fold(format!("\nFound {len} results:\n"), |acc, node| {
+                            acc + &format!(
+                                "  {scope}/{name} ({version})   {mirror}\n",
+                                name = node.name,
+                                version = node.version,
+                                scope = node.scope,
+                                mirror = node
+                                    .from_mirror
+                                    .unwrap_or("".to_string())
+                                    .as_str()
+                                    .truecolor(100, 100, 100)
+                            )
+                        });
+                res
+            })
+        }
         Action::Info { package_matcher } => {
+            auto_mirror_update_all(&cfg)?;
             let parse_res = PackageMatcher::parse(&package_matcher, true, true)?;
             info(parse_res.scope, &parse_res.name).map(|res| format!("{res:#?}"))
         }
@@ -125,7 +134,7 @@ fn router(action: Action) -> Result<String> {
             source_dir,
             into_file,
         } => pack(&source_dir, into_file, verify_signature)
-            .map(|location| format!("Success:Package has been stored at '{location}'")),
+            .map(|location| format!("Success:Package stored at '{location}'")),
         Action::Meta { package, save_at } => {
             envmnt::set("NO_WARNING", "true");
             let package_input_enum = PackageInputEnum::parse(package, true, true)?;
@@ -144,7 +153,7 @@ fn router(action: Action) -> Result<String> {
         Action::Clean => clean().map(|_| "Success:Cleaned".to_string()),
         Action::Config { operation } => match operation {
             ActionConfig::Set { table, key, value } => config_set(&table, &key, &value)
-                .map(|_| format!("Success:Config value of '{key}' has been set to '{value}'")),
+                .map(|_| format!("Success:Config value of '{key}' set to '{value}'")),
             ActionConfig::Get { table, key } => config_get(&table, &key),
             ActionConfig::List => config_list(),
             ActionConfig::Init => config_init()
@@ -153,19 +162,19 @@ fn router(action: Action) -> Result<String> {
         },
         Action::Mirror { operation } => match operation {
             ActionMirror::Add { url } => {
-                mirror_add(&url, None).map(|name| format!("Success:Mirror '{name}' has been added"))
+                mirror_add(&url, None).map(|name| format!("Success:Mirror '{name}' added"))
             }
             ActionMirror::Update { name } => {
                 if let Some(n) = name {
                     mirror_update(&n)
-                        .map(|name| format!("Success:Index of mirror '{name}' has been updated"))
+                        .map(|name| format!("Success:Index of mirror '{name}' updated"))
                 } else {
                     mirror_update_all().map(|names| {
                         if names.is_empty() {
                             "Warning:No mirror has been added".to_string()
                         } else {
                             format!(
-                                "Success:Index of mirrors '({name})' has been updated",
+                                "Success:Index of mirrors '({name})' updated",
                                 name = names.join(", ")
                             )
                         }
@@ -193,7 +202,7 @@ fn router(action: Action) -> Result<String> {
                 }
             }
             ActionMirror::Remove { name } => {
-                mirror_remove(&name).map(|_| format!("Success:Mirror '{name}' has been removed"))
+                mirror_remove(&name).map(|_| format!("Success:Mirror '{name}' removed"))
             }
         },
     }
