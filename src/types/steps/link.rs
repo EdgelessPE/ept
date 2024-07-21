@@ -148,7 +148,7 @@ impl StepLink {
 }
 
 impl TStep for StepLink {
-    fn run(self, cx: &mut WorkflowContext) -> anyhow::Result<i32> {
+    fn run(self, cx: &mut WorkflowContext) -> Result<i32> {
         //- 创建快捷方式。
         // 确定 target_name
         let target_name = self.get_target_name();

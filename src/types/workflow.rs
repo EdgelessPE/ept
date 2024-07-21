@@ -119,7 +119,7 @@ impl Generalizable for WorkflowNode {
 }
 
 impl Verifiable for WorkflowNode {
-    fn verify_self(&self, located: &String) -> anyhow::Result<()> {
+    fn verify_self(&self, located: &String) -> Result<()> {
         self.header.verify_self(located)?;
         self.body.verify_self(located)
     }

@@ -26,13 +26,13 @@ pub fn fast_compute_hash_blake3(raw: &[u8]) -> Result<String> {
     Ok(hash)
 }
 
-fn try_into_memmap_file(file: &File) -> anyhow::Result<Option<io::Cursor<memmap2::Mmap>>> {
+fn try_into_memmap_file(file: &File) -> Result<Option<io::Cursor<memmap2::Mmap>>> {
     let metadata = file.metadata()?;
     let file_size = metadata.len();
 
     Ok(
         if !metadata.is_file()
-            || file_size > isize::max_value() as u64
+            || file_size > isize::MAX as u64
             || file_size == 0
             || file_size < 16 * 1024
         {
@@ -49,7 +49,7 @@ fn try_into_memmap_file(file: &File) -> anyhow::Result<Option<io::Cursor<memmap2
     )
 }
 
-fn copy_wide(mut reader: impl io::Read, hasher: &mut blake3::Hasher) -> io::Result<u64> {
+fn copy_wide(mut reader: impl io::Read, hasher: &mut Hasher) -> io::Result<u64> {
     let mut buffer = [0; 65536];
     let mut total = 0;
     loop {

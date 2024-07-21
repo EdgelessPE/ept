@@ -206,7 +206,7 @@ fn test_install() {
     }
 
     // 卸载
-    if crate::entrances::info_local(&"Microsoft".to_string(), &"VSCode".to_string()).is_ok() {
+    if info_local(&"Microsoft".to_string(), &"VSCode".to_string()).is_ok() {
         crate::uninstall(Some("Microsoft".to_string()), &"VSCode".to_string()).unwrap();
     }
 
@@ -241,7 +241,7 @@ fn test_install() {
     let binding = crate::utils::env::env_desktop() + "/Call.exe";
     let desktop_call_path = Path::new(&binding);
     if desktop_call_path.exists() {
-        std::fs::remove_file(desktop_call_path).unwrap();
+        remove_file(desktop_call_path).unwrap();
     }
 
     // 安装 CallInstaller，预期会因为不存在主程序 ${Desktop}/Call.exe 而安装失败
@@ -257,7 +257,7 @@ fn test_install() {
     install_using_package(&"test/CallInstaller2".to_string(), false).unwrap();
 
     // 清理
-    std::fs::remove_file(desktop_call_path).unwrap();
+    remove_file(desktop_call_path).unwrap();
     crate::uninstall(None, &"CallInstaller".to_string()).unwrap();
 }
 

@@ -53,8 +53,8 @@ pub fn unpack_nep(source: &String, verify_signature: bool) -> Result<(PathBuf, G
     // 处理输入目录的情况
     let source_path = Path::new(source);
     if source_path.is_dir() {
-        if verify_signature {
-            return Err(anyhow!("Error:Given path refers to a directory, use '--offline' flag to process as develop directory"));
+        return if verify_signature {
+            Err(anyhow!("Error:Given path refers to a directory, use '--offline' flag to process as develop directory"))
         } else {
             // 检查是否为合法的输入目录
             inner_validator(source)?;
@@ -68,8 +68,8 @@ pub fn unpack_nep(source: &String, verify_signature: bool) -> Result<(PathBuf, G
             let temp_path = allocate_path_temp(&global.package.name, false)?;
             copy_dir(source_path, &temp_path)?;
 
-            return Ok((temp_path, global));
-        }
+            Ok((temp_path, global))
+        };
     }
 
     // 检查文件大小

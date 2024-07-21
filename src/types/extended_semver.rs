@@ -185,17 +185,17 @@ impl PartialOrd for ExSemVer {
             _ => res,
         }
     }
-    fn ge(&self, other: &Self) -> bool {
-        matches!(self.partial_cmp(other), Some(Greater | Equal))
-    }
-    fn gt(&self, other: &Self) -> bool {
-        matches!(self.partial_cmp(other), Some(Greater))
+    fn lt(&self, other: &Self) -> bool {
+        matches!(self.partial_cmp(other), Some(Less))
     }
     fn le(&self, other: &Self) -> bool {
         matches!(self.partial_cmp(other), Some(Less | Equal))
     }
-    fn lt(&self, other: &Self) -> bool {
-        matches!(self.partial_cmp(other), Some(Less))
+    fn gt(&self, other: &Self) -> bool {
+        matches!(self.partial_cmp(other), Some(Greater))
+    }
+    fn ge(&self, other: &Self) -> bool {
+        matches!(self.partial_cmp(other), Some(Greater | Equal))
     }
 }
 
@@ -205,14 +205,14 @@ impl Ord for ExSemVer {
     }
     fn max(self, other: Self) -> Self {
         match self.cmp(&other) {
-            Ordering::Less | Ordering::Equal => other,
-            Ordering::Greater => self,
+            Less | Equal => other,
+            Greater => self,
         }
     }
     fn min(self, other: Self) -> Self {
         match self.cmp(&other) {
-            Ordering::Less | Ordering::Equal => self,
-            Ordering::Greater => other,
+            Less | Equal => self,
+            Greater => other,
         }
     }
     fn clamp(self, min: Self, max: Self) -> Self {
@@ -271,7 +271,7 @@ fn test_ex_semver() {
 
     let v1 = ExSemVer::parse(&"114.514.1919.810".to_string()).unwrap();
     let v2 = ExSemVer::parse(&"114.514.1919.810".to_string()).unwrap();
-    assert!(v1 == v2);
+    assert_eq!(v1, v2);
 
     let v1 = ExSemVer::parse(&"1.2.3.10".to_string()).unwrap();
     let v2 = ExSemVer::parse(&"1.2.3.2".to_string()).unwrap();

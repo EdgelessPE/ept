@@ -163,8 +163,8 @@ fn test_uninstall() {
     use crate::types::steps::TStep;
     envmnt::set("CONFIRM", "true");
     let pwd = crate::utils::test::_ensure_testing("Microsoft", "Notepad");
-    let mut cx = crate::types::workflow::WorkflowContext::_demo();
-    crate::types::steps::StepExecute {
+    let mut cx = WorkflowContext::_demo();
+    StepExecute {
         command: "notepad.exe".to_string(),
         pwd: Some(pwd.clone()),
         call_installer: None,
@@ -180,5 +180,5 @@ fn test_uninstall() {
     .unwrap();
 
     uninstall(None, &"Notepad".to_string()).unwrap();
-    assert!(!std::path::Path::new(&pwd).exists());
+    assert!(!Path::new(&pwd).exists());
 }

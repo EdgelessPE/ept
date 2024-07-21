@@ -202,7 +202,7 @@ fn test_update_main_program() {
         Path::new("test/nul.toml"),
     )
     .unwrap();
-    assert!(pkg.package.version == *"10.1.1002.0");
+    assert_eq!(pkg.package.version, *"10.1.1002.0");
 
     update_ver_with_main_program(
         &mut pkg,

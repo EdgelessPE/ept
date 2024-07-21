@@ -9,7 +9,7 @@
     #[derive(Serialize, Deserialize, Clone, Debug)]
     pub struct StepCustom {
         pub FIELD: TYPE,
-        ...
+        // ...
     }
     ```
 3. 为`StepCustom`实现`TStep`特性

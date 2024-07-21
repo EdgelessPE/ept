@@ -191,7 +191,7 @@ fn test_update_using_package() {
     crate::utils::test::_ensure_clear_test_dir();
 
     // 卸载
-    if crate::entrances::info_local(&"Microsoft".to_string(), &"VSCode".to_string()).is_ok() {
+    if info_local(&"Microsoft".to_string(), &"VSCode".to_string()).is_ok() {
         crate::uninstall(Some("Microsoft".to_string()), &"VSCode".to_string()).unwrap();
     }
 

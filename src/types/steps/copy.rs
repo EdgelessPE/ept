@@ -82,16 +82,16 @@ pub fn parse_target_for_copy(
 
         // 如果 to 已存在则直接进行判断
         if to_path.exists() {
-            if to_path.is_file() {
-                return Ok((to_path.to_path_buf(), true));
+            return if to_path.is_file() {
+                Ok((to_path.to_path_buf(), true))
             } else if to_path.is_dir() {
                 let file_name = from_path.file_name().unwrap();
-                return Ok((to_path.join(file_name).to_path_buf(), true));
+                Ok((to_path.join(file_name).to_path_buf(), true))
             } else {
-                return Err(anyhow!(
+                Err(anyhow!(
                     "Error({step_name}):Field 'to' refers to a existing abnormal target : '{to}'"
-                ));
-            }
+                ))
+            };
         }
 
         // 从字面规则判断 to 是否为文件夹

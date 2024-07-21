@@ -15,11 +15,11 @@ lazy_static! {
     static ref RESOURCE_REGEX: Regex = Regex::new(r"^[^/]+/[^/]+$").unwrap();
 }
 
-pub fn ensure_arg(val: &Value) -> std::result::Result<String, error::EvalexprError> {
+pub fn ensure_arg(val: &Value) -> std::result::Result<String, EvalexprError> {
     if let Value::String(str) = val {
         Ok(str.to_string())
     } else {
-        Err(error::EvalexprError::ExpectedString {
+        Err(EvalexprError::ExpectedString {
             actual: val.clone(),
         })
     }

@@ -45,12 +45,12 @@ fn conflict_resolver(bin_abs: &String, stem: &String, scope: &String) -> String 
     // 检查入口文件冲突
     if Path::new(&origin).exists() {
         log!("Warning(Path):Entrance '{stem}.cmd' already exists in '{bin_abs}', overwrite? (y/n)");
-        if ask_yn() {
-            return origin;
+        return if ask_yn() {
+            origin
         } else {
             log!("Warning(Path):Renamed entrance to '{scope}-{stem}.cmd, use '{scope}-{stem}' instead to call this program later");
-            return scoped;
-        }
+            scoped
+        };
     }
 
     // 检查系统全局 PATH 冲突
@@ -58,13 +58,13 @@ fn conflict_resolver(bin_abs: &String, stem: &String, scope: &String) -> String 
     if let Ok(res) = which_res {
         let output = p2s!(res);
         log!("Warning(Path):Command '{stem}' already exists at '{output}', rename to '{scope}-{stem}'? (y/n)");
-        if ask_yn() {
+        return if ask_yn() {
             log!("Warning(Path):Renamed entrance to '{scope}-{stem}.cmd, use '{scope}-{stem}' instead to call this program later");
-            return scoped;
+            scoped
         } else {
             log!("Warning(Path):You may need to rename '{origin}' to access the newly installed program. If do so, don't run 'ept clean' since the renamed entrance would be cleaned");
-            return origin;
-        }
+            origin
+        };
     }
 
     origin

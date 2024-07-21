@@ -33,15 +33,15 @@ fn gen_log(msg: &String, replace_head: Option<String>) -> Option<String> {
             _ => head.white(),
         };
 
-        if cap.get(2).is_some() {
-            return Some(format!(
+        return if cap.get(2).is_some() {
+            Some(format!(
                 "  {c_head}{s} {m}",
                 s = cap[2].truecolor(100, 100, 100),
                 m = &cap[3]
-            ));
+            ))
         } else {
-            return Some(format!("{c_head} {m}", m = &cap[3]));
-        }
+            Some(format!("{c_head} {m}", m = &cap[3]))
+        };
     }
     Some(msg.to_string())
 }

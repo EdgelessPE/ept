@@ -9,7 +9,7 @@ use toml::Value;
 fn get_toml_value(table: &String, key: &String) -> Result<(Value, Value)> {
     let cfg = get_config();
     // 序列化为 toml 对象
-    let toml = toml::Value::try_from(cfg)?;
+    let toml = Value::try_from(cfg)?;
     // 读 table
     let tab = toml
         .get(table)
@@ -117,7 +117,7 @@ fn test_config() {
         let mut default_cfg = Cfg::default();
         default_cfg.local.base = "C:/Users/Public/Videos".to_string();
         let text = toml::to_string_pretty(&default_cfg).unwrap();
-        std::fs::write("config.toml", text).unwrap();
+        fs::write("config.toml", text).unwrap();
         None
     };
 
