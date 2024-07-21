@@ -21,7 +21,6 @@ use crate::{
         mirror::{build_index_for_mirror, filter_service_from_meta, read_local_mirror_hello},
     },
 };
-
 // 返回远程镜像源申明的名称
 pub fn mirror_add(url: &String, should_match_name: Option<String>) -> Result<String> {
     // 尝试解析为 URL 对象
@@ -146,16 +145,29 @@ pub fn mirror_remove(name: &String) -> Result<()> {
 
 #[test]
 fn test_auto_mirror_update_all() {
+    use std::fs::{remove_dir_all, rename};
     use std::thread::sleep;
     use std::time::Duration;
+
     let cfg = Cfg::default();
 
-    // 确保存在一个镜像且被更新过
-    if mirror_list().unwrap().is_empty() {
-        mirror_add(&"https://registry.edgeless.top".to_string(), None).unwrap();
-    } else {
-        mirror_update_all().unwrap();
+    // 备份原有的镜像文件夹
+    let origin_p = get_path_mirror().unwrap();
+    let bak_p = origin_p.parent().unwrap().join("mirror_bak");
+    let has_origin_mirror = origin_p.exists();
+    if has_origin_mirror {
+        if bak_p.exists() {
+            remove_dir_all(&origin_p).unwrap();
+        } else {
+            rename(&origin_p, &bak_p).unwrap();
+        }
     }
+    assert!(mirror_list().unwrap().is_empty());
+
+    // 启动 mock 服务器
+    let mock_url = _run_mirror_mock_server();
+
+    mirror_add(&mock_url, None).unwrap();
 
     // 使用默认的 1d 过期配置，不会导致更新
     assert!(!auto_mirror_update_all(&cfg).unwrap());
@@ -166,6 +178,12 @@ fn test_auto_mirror_update_all() {
     sleep(Duration::from_secs(2));
 
     assert!(auto_mirror_update_all(&short_cfg).unwrap());
+
+    // 还原原有的镜像文件夹
+    if has_origin_mirror {
+        remove_dir_all(&origin_p).unwrap();
+        rename(&bak_p, &origin_p).unwrap();
+    }
 }
 
 // #[test]

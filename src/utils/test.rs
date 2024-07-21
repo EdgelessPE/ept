@@ -1,4 +1,5 @@
 use crate::types::matcher::PackageMatcher;
+use httpmock::prelude::*;
 
 pub fn _ensure_testing_vscode() -> String {
     if crate::entrances::info_local(&"Microsoft".to_string(), &"VSCode".to_string()).is_err() {
@@ -57,4 +58,65 @@ pub fn _ensure_clear_test_dir() {
         std::fs::remove_dir_all("test").unwrap();
     }
     std::fs::create_dir_all("test").unwrap();
+}
+
+pub fn _run_mirror_mock_server() -> String {
+    let mock_server = MockServer::start();
+    let root_url = format!("http://{}", mock_server.address());
+
+    mock_server.mock(|when, then| {
+        when.method("GET").path("/api/hello");
+        then.status(200)
+            .header("Content-Type", "application/json")
+            .json_body(serde_json::json!({ "name": "mock-server",
+    "locale": "zh-CN",
+    "description": "Mocked nep mirror",
+    "maintainer": "Edgeless",
+    "protocol": "1.0.0",
+    "root_url": root_url,
+    "service": [
+        {
+            "key": "HELLO",
+            "path": "/api/hello"
+        },
+        {
+            "key": "PKG_SOFTWARE",
+            "path": "/api/pkg/software"
+        }
+    ],
+    "property": {
+        "deploy_region": "zh-CN",
+        "proxy_storage": true,
+        "upload_bandwidth": 1000,
+        "sync_interval": 0
+    } }));
+    });
+
+    mock_server.mock(|when, then| {
+        when.method("GET")
+            .path("/api/pkg/software");
+        then.status(200)
+            .header("Content-Type", "application/json")
+            .json_body(serde_json::json!({
+    "tree": {
+        "Microsoft": [
+            {
+                "name": "VSCode",
+                "releases": [
+                    {
+                        "file_name": "VSCode_1.85.1.0_Cno.nep",
+                        "version": "1.85.1.0",
+                        "size": 94245376,
+                        "timestamp": 1704554724
+                    }
+                ]
+            }
+        ]
+    },
+    "timestamp": 1704554724,
+    "url_template": "{root_url}/api/redirect?path=/nep/{scope}/{software}/{file_name}".to_string().replace("{root_url}",&root_url)
+}));
+    });
+
+    root_url
 }

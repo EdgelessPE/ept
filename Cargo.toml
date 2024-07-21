@@ -32,7 +32,7 @@ notify-rust = "4.11.0"
 path-clean = "1.0.1"
 rand = "0.8.5"
 regex = "1.10.5"
-reqwest = { version = "0.12.4", features = ["blocking","json"] }
+reqwest = { version = "0.12.4", features = ["blocking", "json"] }
 rustyline = "14.0.0"
 semver = "1.0.23"
 serde = { version = "1.0.204", features = ["derive"] }
@@ -50,6 +50,7 @@ url = "2.5.2"
 which = "6.0.1"
 wildmatch = "2.3.4"
 zstd = "0.13.2"
+httpmock = "0.7.0"
 
 [target.'cfg(windows)'.dependencies]
 mslnk = "0.1.8"
