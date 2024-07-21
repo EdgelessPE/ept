@@ -9,6 +9,7 @@ use toml::{to_string_pretty, Value};
 use url::Url;
 
 use crate::{
+    log,
     types::{
         mirror::{MirrorHello, MirrorPkgSoftware, ServiceKeys},
         verifiable::Verifiable,
@@ -32,7 +33,7 @@ pub fn mirror_add(url: &String, should_match_name: Option<String>) -> Result<Str
     } else {
         url.to_string()
     };
-    println!("Fetching '{url}'...");
+    log!("Info:Fetching '{url}'...");
 
     // 请求 url
     let res: MirrorHello = get(&url)
