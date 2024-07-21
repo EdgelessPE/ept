@@ -6,6 +6,7 @@ use std::{
 
 use anyhow::{anyhow, Result};
 use dirs::home_dir;
+use humantime::parse_duration;
 use serde::{Deserialize, Serialize};
 use toml::{from_str, to_string_pretty, Value};
 
@@ -16,8 +17,13 @@ pub struct Local {
     pub base: String,
 }
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
+pub struct Online {
+    pub mirror_update_interval: String,
+}
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct Cfg {
     pub local: Local,
+    pub online: Online,
 }
 
 const FILE_NAME: &str = "config.toml";
@@ -33,6 +39,9 @@ impl Cfg {
         Self {
             local: Local {
                 base: p2s!(USER_DIR),
+            },
+            online: Online {
+                mirror_update_interval: "1d".to_string(),
             },
         }
     }
@@ -107,6 +116,9 @@ impl Verifiable for Cfg {
                 base = self.local.base
             ));
         }
+
+        // mirror_update_interval 可解析
+        parse_duration(&self.online.mirror_update_interval).map_err(|e| anyhow!("Error:Failed to parse field 'online.mirror_update_interval' as valid time span : '{e}', e.g. '5d' '14m54s'"))?;
 
         Ok(())
     }
