@@ -27,14 +27,20 @@ pub fn mirror_add(url: &String, should_match_name: Option<String>) -> Result<Str
         Url::parse(url).map_err(|e| anyhow!("Error:Failed to parse '{url}' as valid URL : {e}"))?;
 
     // 没有路径则会自动加上 /api/hello
-    let url = if parsed_url.path().is_empty() {
+    let url = if parsed_url.path() == "/" {
         parsed_url.join("/api/hello").unwrap().to_string()
     } else {
         url.to_string()
     };
+    println!("Fetching '{url}'...");
 
     // 请求 url
-    let res: MirrorHello = get(url)?.json()?;
+    let res: MirrorHello = get(&url)
+        .map_err(|e| anyhow!("Error:Failed to fetch '{url}' : {e}"))?
+        .json()
+        .map_err(|e| {
+            anyhow!("Error:Failed to decode response as valid hello content from '{url}' : {e}")
+        })?;
     let mirror_name = res.name.clone();
 
     // 检查名称是否符合
