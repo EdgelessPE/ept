@@ -98,7 +98,7 @@ export function genStepsWiki(
   writeWiki(
     {
       ...top,
-      imports: ['import { Tag } from "../../components/tag.tsx"'],
+      imports: ['import Tag from "../../components/tag.tsx"'],
       content: stepsRenderer(steps, { titleLevel: 1 }),
     },
     toFileName,

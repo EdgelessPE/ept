@@ -84,7 +84,7 @@ export function genStructsWiki(
     {
       title: top.title,
       imports: needImportTag
-        ? ['import { Tag } from "../../components/tag.tsx"']
+        ? ['import Tag from "../../components/tag.tsx"']
         : undefined,
       description: top.description,
       content: structWikiTexts.map((node) => node.text).join("\n\n"),
