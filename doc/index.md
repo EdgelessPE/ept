@@ -3,8 +3,8 @@ pageType: home
 
 hero:
   name: ept
-  text: 基于 Nep 规范打造
-  tagline: 新一代 Windows 包管理解决方案
+  text: 新一代 Windows 包管理解决方案
+  tagline: 基于 Nep 规范打造
   actions:
     - theme: brand
       text: 快速开始
