@@ -34,7 +34,7 @@ pub fn mirror_add(url: &String, should_match_name: Option<String>) -> Result<Str
     } else {
         url.to_string()
     };
-    log!("Info:Hand shaking with '{url}'...");
+    log!("Debug:Hand shaking with '{url}'...");
 
     // 请求 url
     let res: MirrorHello = get(&url)
@@ -64,7 +64,7 @@ pub fn mirror_add(url: &String, should_match_name: Option<String>) -> Result<Str
 
     // 请求软件包列表
     let (ps_url, _) = filter_service_from_meta(res, ServiceKeys::PkgSoftware)?;
-    log!("Info:Fetching software list from '{ps_url}'...");
+    log!("Debug:Fetching software list from '{ps_url}'...");
     let pkg_software_res: MirrorPkgSoftware = get(&ps_url)
         .map_err(|e| anyhow!("Error:Failed to fetch '{ps_url}' : {e}"))?
         .json()

@@ -97,9 +97,9 @@ fn router(action: Action) -> Result<String> {
                         .fold(format!("\nFound {len} results:\n"), |acc, node| {
                             acc + &format!(
                                 "  {scope}/{name} ({version})   {mirror}\n",
-                                name = node.name,
+                                name = node.name.cyan().bold(),
                                 version = node.version,
-                                scope = node.scope,
+                                scope = node.scope.cyan().italic(),
                                 mirror = node
                                     .from_mirror
                                     .unwrap_or("".to_string())
@@ -122,9 +122,16 @@ fn router(action: Action) -> Result<String> {
             let res: String =
                 list.into_iter()
                     .fold(String::from("\nInstalled packages:\n"), |acc, node| {
+                        let update_tip = if let Some(online_diff) = node.online {
+                            format!("  ↑ {ver} ", ver = online_diff.version)
+                                .green()
+                                .to_string()
+                        } else {
+                            String::new()
+                        };
                         acc + &format!(
-                            "  {name}    {version}\n",
-                            name = node.name,
+                            "  {name}    {version}{update_tip}\n",
+                            name = node.name.cyan().bold(),
                             version = node.local.unwrap().version
                         )
                     });
