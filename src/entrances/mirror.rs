@@ -152,6 +152,8 @@ pub fn mirror_remove(name: &String) -> Result<()> {
 
 #[test]
 fn test_mirror() {
+    envmnt::set("DEBUG", "true");
+    use crate::entrances::search;
     use crate::utils::test::_run_mirror_mock_server;
     use std::fs::{remove_dir_all, rename};
     use std::thread::sleep;
@@ -170,6 +172,9 @@ fn test_mirror() {
     }
     assert!(mirror_list().unwrap().is_empty());
 
+    // 此时搜不到内容
+    assert!(search(&"vscode".to_string()).is_err());
+
     // 启动 mock 服务器
     let mock_url = _run_mirror_mock_server();
 
@@ -181,6 +186,19 @@ fn test_mirror() {
     assert_eq!(ls.len(), 1);
     let (name, old_update_time) = ls.first().unwrap();
     assert_eq!(name, "mock-server");
+
+    // 测试搜索
+    let search_res = search(&"vscode".to_string()).unwrap();
+    assert_eq!(
+        search_res,
+        vec![crate::types::mirror::SearchResult {
+            name: "VSCode".to_string(),
+            scope: "Microsoft".to_string(),
+            version: "1.85.1.0".to_string(),
+            from_mirror: Some("mock-server".to_string()),
+        }]
+    );
+    assert!(search(&"microsoft".to_string()).is_err());
 
     // 测试更新
     sleep(Duration::from_micros(100));
