@@ -24,7 +24,7 @@ use std::process::exit;
 use self::types::cli::{Action, ActionConfig, Args};
 use crate::entrances::config::{config_get, config_init, config_list, config_set, config_which};
 use crate::entrances::{
-    auto_mirror_update_all, clean, info, install_using_package, list, pack, uninstall,
+    auto_mirror_update_all, clean, info, install_using_package, list, pack, uninstall, update_all,
     update_using_package,
 };
 use crate::utils::cfg::get_config;
@@ -64,19 +64,33 @@ fn router(action: Action) -> Result<String> {
             res.map(|_| format!("Success:Package '{package}' installed successfully"))
         }
         Action::Update { package } => {
-            let res = match PackageInputEnum::parse(package.clone(), false, false)? {
-                PackageInputEnum::PackageMatcher(matcher) => {
-                    auto_mirror_update_all(&cfg)?;
-                    update_using_package_matcher(matcher, verify_signature)
-                }
-                PackageInputEnum::Url(url) => update_using_url(&url, verify_signature),
-                PackageInputEnum::LocalPath(source_file) => {
-                    update_using_package(&source_file, verify_signature)
-                }
-            };
-            res.map(|(from, to)| {
-                format!("Success:Package '{package}' updated successfully from {from} to {to}")
-            })
+            if let Some(package) = package {
+                let res = match PackageInputEnum::parse(package.clone(), false, false)? {
+                    PackageInputEnum::PackageMatcher(matcher) => {
+                        auto_mirror_update_all(&cfg)?;
+                        update_using_package_matcher(matcher, verify_signature)
+                    }
+                    PackageInputEnum::Url(url) => update_using_url(&url, verify_signature),
+                    PackageInputEnum::LocalPath(source_file) => {
+                        update_using_package(&source_file, verify_signature)
+                    }
+                };
+                res.map(|(from, to)| {
+                    format!("Success:Package '{package}' updated successfully from {from} to {to}")
+                })
+            } else {
+                update_all(verify_signature).map(|(success_count, failure_count)| {
+                    if failure_count == 0 {
+                        if success_count == 0 {
+                            "Info:No updatable packages".to_string()
+                        } else {
+                            format!("Success:Updated {success_count} packages")
+                        }
+                    } else {
+                        format!("Error:{failure_count} packages failed to be updated and {success_count} packages updated successfully")
+                    }
+                })
+            }
         }
         Action::Uninstall { package_matcher } => {
             let parse_res = PackageMatcher::parse(&package_matcher, true, true)?;
@@ -96,7 +110,7 @@ fn router(action: Action) -> Result<String> {
                         .into_iter()
                         .fold(format!("\nFound {len} results:\n"), |acc, node| {
                             acc + &format!(
-                                "  {scope}/{name} ({version})   {mirror}\n",
+                                "  {scope}/{name}    ({version})   {mirror}\n",
                                 name = node.name.cyan().bold(),
                                 version = node.version,
                                 scope = node.scope.cyan().italic(),
@@ -130,7 +144,8 @@ fn router(action: Action) -> Result<String> {
                             String::new()
                         };
                         acc + &format!(
-                            "  {name}    {version}{update_tip}\n",
+                            "  {scope}/{name}    ({version}{update_tip})\n",
+                            scope = node.software.unwrap().scope.cyan().italic(),
                             name = node.name.cyan().bold(),
                             version = node.local.unwrap().version
                         )

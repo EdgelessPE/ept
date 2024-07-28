@@ -1,7 +1,11 @@
-use std::{fs::remove_dir_all, str::FromStr};
-
-use anyhow::{anyhow, Result};
-
+use super::{
+    info_local, info_online, install_using_package, list, uninstall,
+    utils::{
+        package::{clean_temp, unpack_nep},
+        validator::installed_validator,
+    },
+};
+use crate::types::info::UpdateInfo;
 use crate::{
     executor::workflow_executor,
     p2s,
@@ -17,14 +21,8 @@ use crate::{
     },
 };
 use crate::{log, log_ok_last};
-
-use super::{
-    info_local, info_online, install_using_package, uninstall,
-    utils::{
-        package::{clean_temp, unpack_nep},
-        validator::installed_validator,
-    },
-};
+use anyhow::{anyhow, Result};
+use std::{fs::remove_dir_all, str::FromStr};
 
 fn same_authors(a: &[String], b: &[String]) -> bool {
     let ai = a.iter().map(|raw| parse_author(raw).unwrap());
@@ -182,6 +180,75 @@ pub fn update_using_package_matcher(
     } else {
         Err(anyhow!("Error:Operation canceled by user"))
     }
+}
+
+pub fn update_all(verify_signature: bool) -> Result<(i32, i32)> {
+    // 遍历 list 结果，生成更新列表
+    let list_res = list()?;
+    let update_list: Vec<UpdateInfo> = list_res
+        .iter()
+        .filter_map(|node| {
+            let node = node.to_owned();
+            // 对比版本号
+            let local_version = node.local?.version;
+            let online_version = node.online?.version;
+            let local_instance = ExSemVer::parse(&local_version).ok()?;
+            let online_instance = ExSemVer::parse(&online_version).ok()?;
+            if local_instance >= online_instance {
+                return None;
+            }
+
+            Some(UpdateInfo {
+                name: node.name.to_owned(),
+                scope: node.software?.scope,
+                local_version,
+                online_version,
+            })
+        })
+        .collect();
+    let count = update_list.len();
+
+    // 打印并确认更新
+    if update_list.is_empty() {
+        return Ok((0, 0));
+    } else {
+        let tip = update_list
+            .iter()
+            .fold(String::from("\nUpdatable packages:\n"), |acc, node| {
+                acc + &format!("{node}")
+            });
+        println!("{tip}");
+        log!("Info:Ready to update those {count} packages, continue? (y/n)");
+        if !ask_yn() {
+            return Err(anyhow!("Error:Operation canceled by user"));
+        }
+    }
+
+    // 依次更新
+    let mut success_count = 0;
+    let mut failure_count = 0;
+    envmnt::set("CONFIRM", "true");
+    for info in update_list {
+        let res = update_using_package_matcher(
+            PackageMatcher {
+                name: info.name.clone(),
+                scope: Some(info.scope.clone()),
+                mirror: None,
+                version_req: None,
+            },
+            verify_signature,
+        );
+        if let Err(e) = res {
+            failure_count += 1;
+            log!("{}", info.format_failure(e));
+        } else {
+            success_count += 1;
+            log!("{}", info.format_success());
+        }
+    }
+    envmnt::set("CONFIRM", "false");
+
+    Ok((success_count, failure_count))
 }
 
 #[test]

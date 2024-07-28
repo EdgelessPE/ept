@@ -24,4 +24,6 @@ pub use self::mirror::{
 pub use self::pack::pack;
 pub use self::search::search;
 pub use self::uninstall::uninstall;
-pub use self::update::{update_using_package, update_using_package_matcher, update_using_url};
+pub use self::update::{
+    update_all, update_using_package, update_using_package_matcher, update_using_url,
+};

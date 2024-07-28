@@ -40,10 +40,10 @@ pub enum Action {
         package: String,
     },
 
-    /// Update a package
+    /// Update all updatable packages or a specified package
     Update {
         /// Package matcher（expect pattern ((MIRROR/)SCOPE/)NAME(@SEMVER)）or Nep package url or Nep package local path
-        package: String,
+        package: Option<String>,
     },
 
     /// Uninstall a package
