@@ -75,9 +75,7 @@ fn router(action: Action) -> Result<String> {
                         update_using_package(&source_file, verify_signature)
                     }
                 };
-                res.map(|(from, to)| {
-                    format!("Success:Package '{package}' updated successfully from {from} to {to}")
-                })
+                res.map(|info| info.format_success())
             } else {
                 update_all(verify_signature).map(|(success_count, failure_count)| {
                     if failure_count == 0 {

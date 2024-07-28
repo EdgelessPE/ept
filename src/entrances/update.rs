@@ -31,25 +31,20 @@ fn same_authors(a: &[String], b: &[String]) -> bool {
     ai.eq(bi)
 }
 
-pub fn update_using_package(
-    source_file: &String,
-    verify_signature: bool,
-) -> Result<(String, String)> {
+pub fn update_using_package(source_file: &String, verify_signature: bool) -> Result<UpdateInfo> {
     log!("Info:Preparing to update with package '{source_file}'");
 
     // 解包
     let (temp_dir_inner_path, fresh_package) = unpack_nep(source_file, verify_signature)?;
     let fresh_software = fresh_package.software.clone().unwrap();
+    let name = fresh_package.package.name.clone();
+    let fresh_scope = fresh_software.scope;
 
     // 确认包是否已安装
     log!("Info:Resolving package...");
-    let (local_package, local_diff) =
-        info_local(&fresh_software.scope, &fresh_package.package.name).map_err(|_| {
-            anyhow!(
-                "Error:Package '{name}' hasn't been installed, use 'ept install' instead",
-                name = &fresh_package.package.name,
-            )
-        })?;
+    let (local_package, local_diff) = info_local(&fresh_scope, &name).map_err(|_| {
+        anyhow!("Error:Package '{name}' hasn't been installed, use 'ept install' instead",)
+    })?;
     let local_software = local_package.software.clone().unwrap();
 
     // 确认是否允许升级
@@ -57,7 +52,7 @@ pub fn update_using_package(
     let fresh_version_str = fresh_package.package.version.clone();
     let fresh_version = ExSemVer::from_str(&fresh_version_str)?;
     if local_version >= fresh_version {
-        return Err(anyhow!("Error:Package '{name}' has been up to date ({local_version}), can't update to the version of given package ({fresh_version})",name=fresh_package.package.name));
+        return Err(anyhow!("Error:Package '{name}' has been up to date ({local_version}), can't update to the version of given package ({fresh_version})"));
     }
 
     // 确认作者是否一致
@@ -74,10 +69,15 @@ pub fn update_using_package(
         uninstall(Some(local_software.scope), &local_package.package.name)?;
         // 安装
         install_using_package(source_file, verify_signature)?;
-        return Ok((local_diff.version, fresh_package.package.version));
+        return Ok(UpdateInfo {
+            name,
+            scope: fresh_scope,
+            from_version: local_diff.version,
+            to_version: fresh_package.package.version,
+        });
     }
 
-    let located = get_path_apps(&local_software.scope, &local_package.package.name, true)?;
+    let located = get_path_apps(&local_software.scope, &name, true)?;
     log_ok_last!("Info:Resolving package...");
 
     // 执行旧的 remove 工作流
@@ -103,10 +103,7 @@ pub fn update_using_package(
 
     // 移动程序至 apps 目录
     log!("Info:Deploying files...");
-    move_or_copy(
-        temp_dir_inner_path.join(&fresh_package.package.name),
-        located.clone(),
-    )?;
+    move_or_copy(temp_dir_inner_path.join(&name), located.clone())?;
     log_ok_last!("Info:Deploying files...");
 
     // 检查有无 update 工作流
@@ -137,10 +134,15 @@ pub fn update_using_package(
     // 清理临时文件夹
     clean_temp(source_file)?;
 
-    Ok((local_diff.version, fresh_version_str))
+    Ok(UpdateInfo {
+        name,
+        scope: fresh_scope,
+        from_version: local_diff.version,
+        to_version: fresh_version_str,
+    })
 }
 
-pub fn update_using_url(url: &str, verify_signature: bool) -> Result<(String, String)> {
+pub fn update_using_url(url: &str, verify_signature: bool) -> Result<UpdateInfo> {
     // 下载文件到临时目录
     let p = download_nep(url)?;
 
@@ -151,7 +153,7 @@ pub fn update_using_url(url: &str, verify_signature: bool) -> Result<(String, St
 pub fn update_using_package_matcher(
     matcher: PackageMatcher,
     verify_signature: bool,
-) -> Result<(String, String)> {
+) -> Result<UpdateInfo> {
     // 查找 scope 并使用 scope 更新纠正大小写
     let (scope, package_name) = find_scope_with_name(&matcher.name, matcher.scope.clone())?;
     // 检查对应包名有没有被安装过
@@ -201,8 +203,8 @@ pub fn update_all(verify_signature: bool) -> Result<(i32, i32)> {
             Some(UpdateInfo {
                 name: node.name.to_owned(),
                 scope: node.software?.scope,
-                local_version,
-                online_version,
+                from_version: local_version,
+                to_version: online_version,
             })
         })
         .collect();

@@ -25,8 +25,8 @@ pub struct InfoDiff {
 pub struct UpdateInfo {
     pub name: String,
     pub scope: String,
-    pub local_version: String,
-    pub online_version: String,
+    pub from_version: String,
+    pub to_version: String,
 }
 impl Display for UpdateInfo {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -35,8 +35,8 @@ impl Display for UpdateInfo {
             "  {scope}/{name}    ({from_version} → {to_version})",
             scope = &self.scope.cyan().italic(),
             name = &self.name.cyan().bold(),
-            from_version = &self.local_version.yellow(),
-            to_version = &self.online_version.green()
+            from_version = &self.from_version.yellow(),
+            to_version = &self.to_version.green()
         )
     }
 }
@@ -47,8 +47,8 @@ impl UpdateInfo {
             "Success:Package '{scope}/{name}' updated successfully from {from_ver} to {to_ver}",
             scope = &self.scope,
             name = &self.name,
-            from_ver = &self.local_version,
-            to_ver = &self.online_version
+            from_ver = &self.from_version,
+            to_ver = &self.to_version
         )
     }
     pub fn format_failure(&self, e: Error) -> String {
@@ -56,8 +56,8 @@ impl UpdateInfo {
             "Error:Failed to update '{scope}/{name}' from {from_ver} to {to_ver} : {e}",
             scope = &self.scope,
             name = &self.name,
-            from_ver = &self.local_version,
-            to_ver = &self.online_version
+            from_ver = &self.from_version,
+            to_ver = &self.to_version
         )
     }
 }
