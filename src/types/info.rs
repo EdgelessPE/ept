@@ -28,6 +28,7 @@ pub struct UpdateInfo {
     pub from_version: String,
     pub to_version: String,
 }
+
 impl Display for UpdateInfo {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         writeln!(
@@ -60,4 +61,17 @@ impl UpdateInfo {
             to_ver = &self.to_version
         )
     }
+}
+
+#[test]
+fn test_update_info() {
+    let info = UpdateInfo {
+        name: "Visual Studio Code".to_string(),
+        scope: "Microsoft".to_string(),
+        from_version: "1.0.0".to_string(),
+        to_version: "2.0.0".to_string(),
+    };
+    println!("{}", info);
+    println!("{}", info.format_success());
+    println!("{}", info.format_failure(Error::msg("test error")));
 }

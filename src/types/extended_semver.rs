@@ -261,13 +261,21 @@ fn test_ex_semver() {
     assert!(ExSemVer::parse(&"1.12.3".to_string()).is_ok());
     assert!(ExSemVer::parse(&"1.12.3.9.0".to_string()).is_err());
 
+    let v1 = ExSemVer::default();
+    let v2 = ExSemVer::parse(&"0.0.0.0".to_string()).unwrap();
+    assert!(v1 == v2);
+
     let v1 = ExSemVer::parse(&"1.2.3.4".to_string()).unwrap();
     let v2 = ExSemVer::parse(&"1.3.3.1".to_string()).unwrap();
     assert!(v1 < v2);
+    assert_eq!(v1.clone().max(v2.clone()), v2);
+    assert_eq!(v1.clone().min(v2.clone()), v1);
+    assert_eq!(v2.clone().max(v1.clone()), v2);
+    assert_eq!(v2.clone().min(v1.clone()), v1);
 
     let v1 = ExSemVer::parse(&"9.114.2.1".to_string()).unwrap();
     let v2 = ExSemVer::parse(&"10.0.0.0".to_string()).unwrap();
-    assert!(v1 < v2);
+    assert!(v1 <= v2);
 
     let v1 = ExSemVer::parse(&"114.514.1919.810".to_string()).unwrap();
     let v2 = ExSemVer::parse(&"114.514.1919.810".to_string()).unwrap();
@@ -286,6 +294,10 @@ fn test_ex_semver() {
     assert_eq!(v2, v3);
 
     // 带 pre 和 build
+    let v1 = ExSemVer::parse(&"1.2.3.4-alpha".to_string()).unwrap();
+    let v2 = ExSemVer::parse(&"1.2.3.4-beta".to_string()).unwrap();
+    assert!(v1 != v2);
+
     let v1 = ExSemVer::parse(&"1.2.3.4-alpha.2.turing".to_string()).unwrap();
     assert_eq!(
         v1,
@@ -325,9 +337,13 @@ fn test_ex_semver() {
         )
     );
 
+    // v1 < v3 < v2
     assert!(v1 < v3);
     assert!(v1 < v2);
     assert!(v2 > v3);
+    assert_eq!(v3.clone().clamp(v1.clone(), v2.clone()), v3);
+    assert_eq!(v1.clone().clamp(v3.clone(), v2.clone()), v3);
+    assert_eq!(v2.clone().clamp(v1.clone(), v3.clone()), v3);
 
     assert_eq!(
         format!("{v3}"),
