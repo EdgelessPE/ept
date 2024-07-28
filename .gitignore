@@ -34,5 +34,7 @@ dist-ssr
 *.sw?
 doc_build
 tarpaulin-report.html
+cobertura.xml
+build_rs_cov.profraw
 .husky
 *.iso
