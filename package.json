@@ -23,7 +23,7 @@
     "@rspress/plugin-shiki": "^1.26.1",
     "@types/jest": "^29.5.12",
     "@types/node": "^22.0.0",
-    "@typescript-eslint/eslint-plugin": "^7.16.1",
+    "@typescript-eslint/eslint-plugin": "^7.17.0",
     "eslint": "^8.57.0",
     "eslint-config-love": "^57.0.0",
     "eslint-config-prettier": "^9.1.0",
