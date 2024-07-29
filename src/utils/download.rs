@@ -105,3 +105,10 @@ pub fn fill_url_template(
 //     )
 //     .unwrap();
 // }
+
+#[test]
+fn test_download_nep() {
+    let url = crate::utils::test::_run_mirror_mock_server();
+    let path = download_nep(&format!("{url}/api/hello")).unwrap();
+    assert!(path.exists()&&path.metadata().unwrap().len()==350);
+}
