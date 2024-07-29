@@ -8,6 +8,9 @@ use std::{
 
 pub fn try_recycle<P: AsRef<Path>>(path: P) -> Result<()> {
     let p = path.as_ref();
+    if !p.exists() {
+        return Ok(());
+    }
     let str = p2s!(p);
     if let Err(e) = trash::delete(p) {
         log!("Warning:Failed to recycle '{str}' : {e}, try removing it");

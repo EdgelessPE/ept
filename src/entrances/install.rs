@@ -11,7 +11,7 @@ use super::{
 };
 use crate::{
     entrances::{info, update_using_package, update_using_package_matcher},
-    utils::{mirror::get_url_with_version_req, path::find_scope_with_name},
+    utils::{fs::try_recycle, mirror::get_url_with_version_req, path::find_scope_with_name},
 };
 use crate::{executor::workflow_executor, parsers::parse_workflow, utils::get_path_apps};
 use crate::{log, log_ok_last, p2s};
@@ -354,6 +354,7 @@ fn test_reg_entry() {
 
 #[test]
 fn test_install_with_matcher() {
+    use semver::VersionReq;
     envmnt::set("CONFIRM", "true");
     // 替换测试镜像源
     let custom_mirror_ctx = crate::utils::test::_mount_custom_mirror();
@@ -397,6 +398,45 @@ fn test_install_with_matcher() {
             .version
             == *"1.75.4.0"
     );
+
+    // 手动升版本号
+    try_recycle("test/VSCode").unwrap();
+    crate::utils::fs::copy_dir("examples/VSCode", "test/VSCode").unwrap();
+    let mut pkg = crate::parsers::parse_package(
+        &"test/VSCode/package.toml".to_string(),
+        &"test/VSCode".to_string(),
+        false,
+    )
+    .unwrap();
+    pkg.package.version = "1.75.4.1".to_string();
+    let text = toml::to_string_pretty(&pkg).unwrap();
+    std::fs::write("test/VSCode/package.toml", text).unwrap();
+
+    // 重新打包一个更高版本的
+    crate::pack(
+        &"./test/VSCode".to_string(),
+        Some(
+            static_path
+                .join("VSCode_1.85.1.0_Cno.nep")
+                .to_string_lossy()
+                .to_string(),
+        ),
+        true,
+    )
+    .unwrap();
+
+    // 执行更新
+    crate::entrances::update_using_package_matcher(
+        PackageMatcher {
+            name: "vscode".to_string(),
+            scope: Some("microsoFT".to_string()),
+            mirror: Some("mock-server".to_string()),
+            version_req: Some(VersionReq::parse("^1.81").unwrap()),
+        },
+        false,
+    )
+    .unwrap();
+
     crate::utils::test::_ensure_testing_vscode_uninstalled();
 
     // 关闭文件服务器
