@@ -22,7 +22,7 @@
     "@modern-js/tsconfig": "2.56.0",
     "@rspress/plugin-shiki": "^1.26.1",
     "@types/jest": "^29.5.12",
-    "@types/node": "^20.14.10",
+    "@types/node": "^22.0.0",
     "@typescript-eslint/eslint-plugin": "^7.16.1",
     "eslint": "^8.57.0",
     "eslint-config-love": "^57.0.0",
