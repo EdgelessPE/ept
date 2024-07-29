@@ -193,7 +193,7 @@ impl MirrorPkgSoftware {
                 .unwrap()
                 .as_micros() as u64,
             url_template:
-                "http:/localhost:3000/api/redirect?path=/nep/{scope}/{software}/{fileName}"
+                "http:/localhost:3000/api/redirect?path=/nep/{scope}/{software}/{file_name}"
                     .to_string(),
             tree,
         }
@@ -225,7 +225,7 @@ pub struct SearchResult {
 
 #[test]
 fn test_mirror_pkg_software() {
-    assert!(MirrorPkgSoftware::_demo()
+    MirrorPkgSoftware::_demo()
         .verify_self(&"".to_string())
-        .is_ok())
+        .unwrap()
 }

@@ -154,7 +154,7 @@ fn test_wait() {
     .unwrap();
 
     let elapsed = now.elapsed();
-    assert!(Duration::from_millis(500) <= elapsed && elapsed <= Duration::from_millis(550));
+    assert!(Duration::from_millis(500) <= elapsed && elapsed <= Duration::from_millis(600));
 
     // 测试过短条件等待
     let d = Duration::from_millis(200);

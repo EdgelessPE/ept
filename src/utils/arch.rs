@@ -68,8 +68,8 @@ fn test_parse_arch() {
     assert_eq!(parse_arch(&"x64".to_string()).unwrap(), SysArch::X64);
     assert_eq!(parse_arch(&"X86".to_string()).unwrap(), SysArch::X86);
     assert_eq!(parse_arch(&"x86".to_string()).unwrap(), SysArch::X86);
-    assert_eq!(parse_arch(&"AMD64".to_string()).unwrap(), SysArch::ARM64);
-    assert_eq!(parse_arch(&"amd64".to_string()).unwrap(), SysArch::ARM64);
+    assert_eq!(parse_arch(&"ARM64".to_string()).unwrap(), SysArch::ARM64);
+    assert_eq!(parse_arch(&"aRm64".to_string()).unwrap(), SysArch::ARM64);
     assert!(parse_arch(&"RISC".to_string()).is_err());
 }
 
