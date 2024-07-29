@@ -146,6 +146,9 @@ pub fn filter_release(
     semver_matcher: Option<VersionReq>,
 ) -> Result<MirrorPkgSoftwareRelease> {
     // 筛选 matcher
+    let matcher_str = semver_matcher
+        .clone()
+        .map_or_else(|| "None".to_string(), |m| m.to_string());
     let mut req_str = "".to_string();
     let mut arr = if let Some(matcher) = semver_matcher {
         req_str = matcher.to_string();
@@ -160,6 +163,10 @@ pub fn filter_release(
     };
     arr.sort_by(|a, b| b.version.cmp(&a.version));
     if let Some(f) = arr.first() {
+        log!(
+            "Debug:Matched version '{}' with matcher '{matcher_str}'",
+            f.version.to_string()
+        );
         Ok(f.to_owned())
     } else {
         let versions: Vec<String> = releases

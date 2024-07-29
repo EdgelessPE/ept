@@ -1,3 +1,4 @@
+use anyhow::anyhow;
 use colored::Colorize;
 use console::Term;
 use regex::Regex;
@@ -13,6 +14,7 @@ lazy_static! {
 fn gen_log(msg: &String, replace_head: Option<String>) -> Option<String> {
     if let Some(cap) = RE.captures_iter(msg).next() {
         if cap.len() != 4 {
+            debug_assert!(false);
             return Some(msg.clone());
         }
 
@@ -30,7 +32,10 @@ fn gen_log(msg: &String, replace_head: Option<String>) -> Option<String> {
             "Warning" => head.bright_yellow(),
             "Error" => head.bright_red(),
             "Success" => head.bright_green(),
-            _ => head.white(),
+            head => {
+                debug_assert!(false);
+                head.white()
+            }
         };
 
         return if cap.get(2).is_some() {
