@@ -1,5 +1,7 @@
 use crate::types::matcher::PackageMatcher;
+use anyhow::anyhow;
 use httpmock::prelude::*;
+use which::which;
 
 pub fn _ensure_testing_vscode() -> String {
     if crate::entrances::info_local(&"Microsoft".to_string(), &"VSCode".to_string()).is_err() {
@@ -119,4 +121,21 @@ pub fn _run_mirror_mock_server() -> String {
     });
 
     root_url
+}
+
+pub fn _run_static_file_server() -> (String, std::process::Child) {
+    let port = "1919";
+    // 检查 miniserve 是否已安装
+    which("miniserve")
+        .map_err(|_| anyhow!("Error:Bin 'miniserve' not installed"))
+        .unwrap();
+    // 启动 miniserve 服务器
+    let handler = std::process::Command::new("cmd")
+        .args(["/c", "miniserve", "test", "-p", port])
+        .stdout(std::process::Stdio::null())
+        .spawn()
+        .map_err(|e| anyhow!("Error:Failed to spawn miniserve : {e}"))
+        .unwrap();
+
+    (format!("http://localhost:{port}"), handler)
 }

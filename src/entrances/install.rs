@@ -184,6 +184,9 @@ fn test_install() {
     envmnt::set("CONFIRM", "true");
     crate::utils::test::_ensure_clear_test_dir();
 
+    // 启动文件服务器
+    let (addr, mut handler) = crate::utils::test::_run_static_file_server();
+
     // 校验路径
     let shortcut_path = dirs::desktop_dir().unwrap().join("Visual Studio Code.lnk");
     let entry1_path = crate::utils::get_path_bin().unwrap().join("Code.cmd");
@@ -259,6 +262,7 @@ fn test_install() {
     // 清理
     remove_file(desktop_call_path).unwrap();
     crate::uninstall(None, &"CallInstaller".to_string()).unwrap();
+    handler.kill().unwrap();
 }
 
 #[test]
