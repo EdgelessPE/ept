@@ -222,3 +222,10 @@ pub struct SearchResult {
     pub version: String,
     pub from_mirror: Option<String>,
 }
+
+#[test]
+fn test_mirror_pkg_software() {
+    assert!(MirrorPkgSoftware::_demo()
+        .verify_self(&"".to_string())
+        .is_ok())
+}

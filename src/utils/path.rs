@@ -38,10 +38,10 @@ pub fn parse_relative_path_with_base(relative: &str) -> Result<PathBuf> {
     }
     .clean();
 
-    log!(
-        "Debug:Parse relative path '{relative}' into '{p}'",
-        p = p2s!(absolute_path)
-    );
+    // log!(
+    //     "Debug:Parse relative path '{relative}' into '{p}'",
+    //     p = p2s!(absolute_path)
+    // );
     Ok(absolute_path)
 }
 

@@ -29,7 +29,7 @@ pub fn get_arch() -> Result<SysArch> {
 }
 
 fn parse_arch(text: &String) -> Result<SysArch> {
-    match text.as_str() {
+    match text.to_uppercase().as_str() {
         "X64" => Ok(SysArch::X64),
         "X86" => Ok(SysArch::X86),
         "ARM64" => Ok(SysArch::ARM64),
@@ -59,5 +59,44 @@ pub fn is_current_arch_match(pkg_arch: &String) -> Result<()> {
         Err(anyhow!(
             "Error:Package arch '{pkg_arch}' doesn't match current os arch '{sys_arch:?}'"
         ))
+    }
+}
+
+#[test]
+fn test_parse_arch() {
+    assert_eq!(parse_arch(&"X64".to_string()).unwrap(), SysArch::X64);
+    assert_eq!(parse_arch(&"x64".to_string()).unwrap(), SysArch::X64);
+    assert_eq!(parse_arch(&"X86".to_string()).unwrap(), SysArch::X86);
+    assert_eq!(parse_arch(&"x86".to_string()).unwrap(), SysArch::X86);
+    assert_eq!(parse_arch(&"AMD64".to_string()).unwrap(), SysArch::ARM64);
+    assert_eq!(parse_arch(&"amd64".to_string()).unwrap(), SysArch::ARM64);
+    assert!(parse_arch(&"RISC".to_string()).is_err());
+}
+
+#[test]
+fn test_is_current_arch_match() {
+    let cur_arch = get_arch().unwrap();
+    let cur_arch_str = cur_arch.to_string();
+    assert!(is_current_arch_match(&cur_arch_str).is_ok());
+
+    #[cfg(target_arch = "x86")]
+    {
+        assert!(is_current_arch_match(&"X64".to_string()).is_err());
+        assert!(is_current_arch_match(&"x86".to_string()).is_ok());
+        assert!(is_current_arch_match(&"ARM64".to_string()).is_err());
+    }
+
+    #[cfg(target_arch = "x86_64")]
+    {
+        assert!(is_current_arch_match(&"x64".to_string()).is_ok());
+        assert!(is_current_arch_match(&"X86".to_string()).is_ok());
+        assert!(is_current_arch_match(&"ARM64".to_string()).is_err());
+    }
+
+    #[cfg(target_arch = "aarch64")]
+    {
+        assert!(is_current_arch_match(&"x64".to_string()).is_ok());
+        assert!(is_current_arch_match(&"X86".to_string()).is_ok());
+        assert!(is_current_arch_match(&"arm64".to_string()).is_ok());
     }
 }
