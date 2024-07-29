@@ -184,9 +184,6 @@ fn test_install() {
     envmnt::set("CONFIRM", "true");
     crate::utils::test::_ensure_clear_test_dir();
 
-    // 启动文件服务器
-    let (addr, mut handler) = crate::utils::test::_run_static_file_server();
-
     // 校验路径
     let shortcut_path = dirs::desktop_dir().unwrap().join("Visual Studio Code.lnk");
     let entry1_path = crate::utils::get_path_bin().unwrap().join("Code.cmd");
@@ -262,7 +259,6 @@ fn test_install() {
     // 清理
     remove_file(desktop_call_path).unwrap();
     crate::uninstall(None, &"CallInstaller".to_string()).unwrap();
-    handler.kill().unwrap();
 }
 
 #[test]
@@ -354,4 +350,58 @@ fn test_reg_entry() {
         .open_subkey(r"Software\Microsoft\Windows\CurrentVersion\Uninstall")
         .unwrap();
     node.delete_subkey("_RegEntry").unwrap();
+}
+
+#[test]
+fn test_install_with_matcher() {
+    envmnt::set("CONFIRM", "true");
+    // 替换测试镜像源
+    let custom_mirror_ctx = crate::utils::test::_mount_custom_mirror();
+
+    // 启动文件服务器
+    let (_, mut handler) = crate::utils::test::_run_static_file_server();
+
+    // 打包出一个 VSCode_1.85.1.0_Cno
+    let static_path = Path::new("test/static");
+    if !static_path.exists() {
+        std::fs::create_dir_all(static_path).unwrap();
+    }
+    crate::pack(
+        &"./examples/VSCode".to_string(),
+        Some(
+            static_path
+                .join("VSCode_1.85.1.0_Cno.nep")
+                .to_string_lossy()
+                .to_string(),
+        ),
+        true,
+    )
+    .unwrap();
+
+    // 执行安装
+    crate::utils::test::_ensure_testing_vscode_uninstalled();
+    install_using_package_matcher(
+        PackageMatcher {
+            name: "vscode".to_string(),
+            scope: None,
+            mirror: None,
+            version_req: None,
+        },
+        false,
+    )
+    .unwrap();
+    assert!(
+        info_local(&"Microsoft".to_string(), &"VSCode".to_string())
+            .unwrap()
+            .1
+            .version
+            == *"1.75.4.0"
+    );
+    crate::utils::test::_ensure_testing_vscode_uninstalled();
+
+    // 关闭文件服务器
+    handler.kill().unwrap();
+
+    // 换回原镜像源
+    crate::utils::test::_unmount_custom_mirror(custom_mirror_ctx);
 }

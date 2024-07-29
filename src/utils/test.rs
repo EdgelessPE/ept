@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use crate::types::matcher::PackageMatcher;
 use anyhow::anyhow;
 use httpmock::prelude::*;
@@ -116,7 +118,7 @@ pub fn _run_mirror_mock_server() -> String {
         ]
     },
     "timestamp": 1704554724,
-    "url_template": "{root_url}/api/redirect?path=/nep/{scope}/{software}/{file_name}".to_string().replace("{root_url}",&root_url)
+    "url_template": "http://localhost:19191/static/{file_name}?scope={scope}&software={software}".to_string()
 }));
     });
 
@@ -124,7 +126,7 @@ pub fn _run_mirror_mock_server() -> String {
 }
 
 pub fn _run_static_file_server() -> (String, std::process::Child) {
-    let port = "1919";
+    let port = "19191";
     // 检查 miniserve 是否已安装
     which("miniserve")
         .map_err(|_| anyhow!("Error:Bin 'miniserve' not installed"))
@@ -138,4 +140,39 @@ pub fn _run_static_file_server() -> (String, std::process::Child) {
         .unwrap();
 
     (format!("http://localhost:{port}"), handler)
+}
+
+pub fn _mount_custom_mirror() -> (bool, PathBuf, PathBuf) {
+    use crate::entrances::mirror_add;
+    use crate::utils::get_path_mirror;
+    use std::fs::{remove_dir_all, rename};
+
+    // 备份原有的镜像文件夹
+    let origin_p = get_path_mirror().unwrap();
+    let bak_p = origin_p.parent().unwrap().join("mirror_bak");
+    let has_origin_mirror = origin_p.exists();
+    if has_origin_mirror {
+        if bak_p.exists() {
+            remove_dir_all(&origin_p).unwrap();
+        } else {
+            rename(&origin_p, &bak_p).unwrap();
+        }
+    }
+
+    // 启动 mock 服务器
+    let mock_url = _run_mirror_mock_server();
+
+    // 添加镜像
+    mirror_add(&mock_url, None).unwrap();
+    (has_origin_mirror, origin_p, bak_p)
+}
+
+pub fn _unmount_custom_mirror(tup: (bool, PathBuf, PathBuf)) {
+    use std::fs::{remove_dir_all, rename};
+    let (has_origin_mirror, origin_p, bak_p) = tup;
+    // 还原原有的镜像文件夹
+    if has_origin_mirror {
+        remove_dir_all(&origin_p).unwrap();
+        rename(&bak_p, &origin_p).unwrap();
+    }
 }

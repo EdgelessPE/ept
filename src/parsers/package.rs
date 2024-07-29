@@ -234,7 +234,7 @@ fn test_parse_package() {
             name: "VSCode".to_string(),
             description: "Visual Studio Code".to_string(),
             template: "Software".to_string(),
-            version: "22.1.0.1".to_string(),
+            version: "1.75.4.0".to_string(),
             authors: vec![
                 "Cno <dsyourshy@qq.com>".to_string(),
                 "Microsoft".to_string(),
