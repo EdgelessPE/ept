@@ -281,7 +281,7 @@ fn test_update_using_package() {
         false,
     )
     .unwrap();
-    pkg.package.version = "22.1.0.2".to_string();
+    pkg.package.version = "1.75.4.1".to_string();
     let text = toml::to_string_pretty(&pkg).unwrap();
     std::fs::write("test/VSCode/package.toml", text).unwrap();
 
