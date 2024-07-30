@@ -24,7 +24,7 @@ use winapi::um::winuser::{
 };
 
 lazy_static! {
-    static ref TARGET_RE: Regex = Regex::new(r"^(([^/]+)/)?([^/]+)$").unwrap();
+    static ref TARGET_RE: Regex = Regex::new(r"^(([^/\\]+)/)?([^/\\]+)$").unwrap();
 }
 
 // 返回的第二参数表示是否创建了父目录
@@ -74,10 +74,7 @@ fn delete_shortcut(name: &String, base: &String) -> Result<()> {
     try_recycle(&target)?;
     if parent {
         let parent_path = Path::new(&target).parent().unwrap();
-        if count_sub_files(parent_path, |name| {
-            name.ends_with(".lnk") || name.ends_with(".LNK")
-        })? == 0
-        {
+        if count_sub_files(parent_path, |_| true)? == 0 {
             if let Err(e) = try_recycle(parent_path) {
                 log!(
                     "Warning(Link):Failed to delete empty shortcut directory '{p}' : {e}",
@@ -307,7 +304,7 @@ fn test_link() {
     };
     step.verify_self(&String::from("./examples/VSCode/VSCode"))
         .unwrap();
-    step.run(&mut cx).unwrap();
+    step.clone().run(&mut cx).unwrap();
 
     let desktop_path = dirs::desktop_dir().unwrap().join("ms_ept_test/VSC.lnk");
     let desktop_folder_path = dirs::desktop_dir().unwrap().join("ms_ept_test");
@@ -316,9 +313,12 @@ fn test_link() {
     assert!(desktop_path.exists());
     assert!(start_path.exists());
 
-    remove_file(desktop_path).unwrap();
+    // 反向工作流清理
+    step.reverse_run(&mut cx).unwrap();
+    assert!(!desktop_path.exists());
+    // assert!(!desktop_folder_path.exists());
+    assert!(!start_path.exists());
     remove_dir(desktop_folder_path).unwrap();
-    remove_file(start_path).unwrap();
 
     // 缺省状态
     StepLink {
@@ -347,4 +347,86 @@ fn test_link() {
     let desktop_path = dirs::desktop_dir().unwrap().join("vsc.lnk");
     assert!(desktop_path.exists());
     remove_file(desktop_path).unwrap();
+}
+
+#[test]
+fn test_link_corelation() {
+    let mut mixed_fs = MixedFS::new("".to_string());
+    // 装箱单
+    assert_eq!(
+        StepLink {
+            source_file: String::from("examples/VSCode/VSCode/Code.exe"),
+            target_name: Some("vsc".to_string()),
+            target_args: None,
+            target_icon: None,
+            at: None,
+        }
+        .get_manifest(&mut mixed_fs),
+        vec![String::from("examples/VSCode/VSCode/Code.exe")]
+    );
+    assert!(StepLink {
+        source_file: String::from("${AppData}/VSCode/VSCode/Code.exe"),
+        target_name: Some("vsc".to_string()),
+        target_args: None,
+        target_icon: None,
+        at: None,
+    }
+    .get_manifest(&mut mixed_fs)
+    .is_empty());
+
+    // 校验
+    assert!(StepLink {
+        source_file: String::from("examples/VSCode/VSCode/Code.exe"),
+        target_name: Some("vsc".to_string()),
+        target_args: None,
+        target_icon: None,
+        at: None,
+    }
+    .verify_self(&"".to_string())
+    .is_ok());
+    assert!(StepLink {
+        source_file: String::from("examples/VSCode/VSCode/Code.exe"),
+        target_name: Some("ms/vsc".to_string()),
+        target_args: None,
+        target_icon: None,
+        at: None,
+    }
+    .verify_self(&"".to_string())
+    .is_ok());
+    assert!(StepLink {
+        source_file: String::from("examples/VSCode/VSCode/Code.exe"),
+        target_name: Some("vsc/12/34".to_string()),
+        target_args: None,
+        target_icon: None,
+        at: None,
+    }
+    .verify_self(&"".to_string())
+    .is_err());
+    assert!(StepLink {
+        source_file: String::from("examples/VSCode/VSCode/Code.exe"),
+        target_name: Some("ms\\123/vsc".to_string()),
+        target_args: None,
+        target_icon: None,
+        at: None,
+    }
+    .verify_self(&"".to_string())
+    .is_err());
+    assert!(StepLink {
+        source_file: String::from("examples/VSCode/VSCode/Code.exe"),
+        target_name: Some("vsc/../../windows".to_string()),
+        target_args: None,
+        target_icon: None,
+        at: None,
+    }
+    .verify_self(&"".to_string())
+    .is_err());
+    assert!(StepLink {
+        source_file: String::from("examples/VSCode/VSCode/Code.exe"),
+        target_name: Some("vsc.lnk".to_string()),
+        target_args: None,
+        target_icon: None,
+        at: None,
+    }
+    .verify_self(&"".to_string())
+    .is_err());
 }
