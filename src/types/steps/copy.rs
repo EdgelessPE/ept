@@ -304,4 +304,100 @@ fn test_copy() {
     .run(&mut cx)
     .unwrap();
     assert!(Path::new("test/keys/keys/public.pem").exists());
+
+    // 不存在的源文件
+    assert!(StepCopy {
+        from: "src/114514.rs".to_string(),
+        to: "test/114514.rs".to_string(),
+        overwrite: None
+    }
+    .run(&mut cx)
+    .is_err());
+
+    // 如果 from 以 / 结尾但不是目录则报错
+    assert!(StepCopy {
+        from: "src/main.rs/".to_string(),
+        to: "test/man.rs".to_string(),
+        overwrite: None
+    }
+    .run(&mut cx)
+    .is_err());
+
+    // 覆盖模式
+    let to_path = Path::new("test/1.rs");
+    assert!(to_path.exists());
+    assert!(to_path.metadata().unwrap().len() < 10240);
+    StepCopy {
+        from: "Cargo.lock".to_string(),
+        to: "test/1.rs".to_string(),
+        overwrite: Some(true),
+    }
+    .run(&mut cx)
+    .unwrap();
+    assert!(to_path.exists());
+    assert!(to_path.metadata().unwrap().len() > 10240);
+
+    StepCopy {
+        from: "src/types/author.rs".to_string(),
+        to: "test/1.rs".to_string(),
+        overwrite: Some(false),
+    }
+    .run(&mut cx)
+    .unwrap();
+    assert!(to_path.exists());
+    assert!(to_path.metadata().unwrap().len() > 10240);
+}
+
+#[test]
+fn test_copy_corelation() {
+    // 反向工作流
+    let mut cx = WorkflowContext::_demo();
+    StepCopy {
+        from: "src/types/author.rs".to_string(),
+        to: "test/1.rs".to_string(),
+        overwrite: None,
+    }
+    .reverse_run(&mut cx)
+    .unwrap();
+
+    // 变量解释
+    assert_eq!(
+        StepCopy {
+            from: "${Home}".to_string(),
+            to: "${Desktop}".to_string(),
+            overwrite: None
+        }
+        .interpret(|s| s
+            .replace("${Home}", "C:/Users/Nep")
+            .replace("${Desktop}", "C:/Users/Nep/Desktop")),
+        StepCopy {
+            from: "C:/Users/Nep".to_string(),
+            to: "C:/Users/Nep/Desktop".to_string(),
+            overwrite: None
+        }
+    );
+
+    // 校验
+    assert!(StepCopy {
+        from: "C:/Users/Desktop".to_string(),
+        to: "${Desktop}".to_string(),
+        overwrite: None
+    }
+    .verify_self(&"".to_string())
+    .is_err());
+
+    assert!(StepCopy {
+        from: "${Home}".to_string(),
+        to: "C:/Users/Nep/Desktop".to_string(),
+        overwrite: None
+    }
+    .verify_self(&"".to_string())
+    .is_err());
+    assert!(StepCopy {
+        from: "${Home}".to_string(),
+        to: "${Desktop}/*".to_string(),
+        overwrite: None
+    }
+    .verify_self(&"".to_string())
+    .is_err());
 }
