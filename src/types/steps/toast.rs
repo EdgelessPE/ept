@@ -94,3 +94,35 @@ fn test_toast() {
     .run(&mut cx)
     .unwrap();
 }
+
+#[test]
+fn test_toast_corelation() {
+    use crate::types::workflow::WorkflowContext;
+    let mut cx = WorkflowContext::_demo();
+    let mut mixed_fs = MixedFS::new("".to_string());
+
+    // 反向工作流
+    StepToast {
+        title: "测试标题😘".to_string(),
+        content: "Hey, love from ept\n你好，爱来自乙烯丙烯三元聚合物".to_string(),
+    }
+    .reverse_run(&mut cx)
+    .unwrap();
+
+    // 装箱单
+    assert!(StepToast {
+        title: "测试标题😘".to_string(),
+        content: "Hey, love from ept\n你好，爱来自乙烯丙烯三元聚合物".to_string(),
+    }
+    .get_manifest(&mut mixed_fs)
+    .is_empty());
+
+    // 解释
+    assert_eq!(StepToast{
+        title:"${Home}".to_string(),
+        content:"${SystemDrive}".to_string()
+    }.interpret(|s|s.replace("${Home}", "C:/Users/Nep").replace("${SystemDrive}", "C:")),StepToast{
+        title:"C:/Users/Nep".to_string(),
+        content:"C:".to_string()
+    })
+}
