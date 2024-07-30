@@ -173,6 +173,6 @@ pub fn _unmount_custom_mirror(tup: (bool, PathBuf, PathBuf)) {
     // 还原原有的镜像文件夹
     if has_origin_mirror {
         remove_dir_all(&origin_p).unwrap();
-        rename(&bak_p, &origin_p).unwrap();
+        rename(bak_p, &origin_p).unwrap();
     }
 }

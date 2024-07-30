@@ -11,7 +11,7 @@ use super::{
 };
 use crate::{
     entrances::{info, update_using_package, update_using_package_matcher},
-    utils::{fs::try_recycle, mirror::get_url_with_version_req, path::find_scope_with_name},
+    utils::{mirror::get_url_with_version_req, path::find_scope_with_name},
 };
 use crate::{executor::workflow_executor, parsers::parse_workflow, utils::get_path_apps};
 use crate::{log, log_ok_last, p2s};
@@ -400,7 +400,7 @@ fn test_install_with_matcher() {
     );
 
     // 手动升版本号
-    try_recycle("test/VSCode").unwrap();
+    crate::utils::fs::try_recycle("test/VSCode").unwrap();
     crate::utils::fs::copy_dir("examples/VSCode", "test/VSCode").unwrap();
     let mut pkg = crate::parsers::parse_package(
         &"test/VSCode/package.toml".to_string(),

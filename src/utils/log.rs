@@ -1,4 +1,3 @@
-use anyhow::anyhow;
 use colored::Colorize;
 use console::Term;
 use regex::Regex;
