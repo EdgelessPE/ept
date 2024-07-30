@@ -168,6 +168,28 @@ fn test_copy() {
     assert!(Path::new("test/1.rs").exists());
     assert!(!Path::new("test/src/types/steps/mv.rs").exists());
 
+    // 文件-隐式跳过文件
+    StepMove {
+        from: "test/src/types/steps/copy.rs".to_string(),
+        to: "test/1.rs".to_string(),
+        overwrite: None,
+    }
+    .run(&mut cx)
+    .unwrap();
+    assert!(Path::new("test/1.rs").exists());
+    assert!(Path::new("test/src/types/steps/copy.rs").exists());
+
+    // 文件-显式跳过文件
+    StepMove {
+        from: "test/src/types/steps/copy.rs".to_string(),
+        to: "test/1.rs".to_string(),
+        overwrite: Some(false),
+    }
+    .run(&mut cx)
+    .unwrap();
+    assert!(Path::new("test/1.rs").exists());
+    assert!(Path::new("test/src/types/steps/copy.rs").exists());
+
     // 文件-不存在目录
     StepMove {
         from: "test/src/types/extended_semver.rs".to_string(),
@@ -267,4 +289,59 @@ fn test_copy() {
     .unwrap();
     assert!(Path::new("test/keys/keys/public.pem").exists());
     assert!(!Path::new("test/src/keys/public.pem").exists());
+}
+
+#[test]
+fn test_move_corelation() {
+    let mut cx = WorkflowContext::_demo();
+
+    // 反向工作流
+    StepMove {
+        from: "test/src/types/author.rs".to_string(),
+        to: "test/1.rs".to_string(),
+        overwrite: None,
+    }
+    .reverse_run(&mut cx)
+    .unwrap();
+
+    // 变量解释
+    assert_eq!(
+        StepMove {
+            from: "${Home}".to_string(),
+            to: "${Desktop}".to_string(),
+            overwrite: None
+        }
+        .interpret(|s| s
+            .replace("${Home}", "C:/Users/Nep")
+            .replace("${Desktop}", "C:/Users/Nep/Desktop")),
+        StepMove {
+            from: "C:/Users/Nep".to_string(),
+            to: "C:/Users/Nep/Desktop".to_string(),
+            overwrite: None
+        }
+    );
+
+    // 校验
+    assert!(StepMove {
+        from: "C:/Users/Desktop".to_string(),
+        to: "${Desktop}".to_string(),
+        overwrite: None
+    }
+    .verify_self(&"".to_string())
+    .is_err());
+
+    assert!(StepMove {
+        from: "${Home}".to_string(),
+        to: "C:/Users/Nep/Desktop".to_string(),
+        overwrite: None
+    }
+    .verify_self(&"".to_string())
+    .is_err());
+    assert!(StepMove {
+        from: "${Home}".to_string(),
+        to: "${Desktop}/*".to_string(),
+        overwrite: None
+    }
+    .verify_self(&"".to_string())
+    .is_err());
 }
