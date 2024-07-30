@@ -48,7 +48,7 @@ pub fn parse_relative_path_with_base(relative: &str) -> Result<PathBuf> {
 /// 使用给定的 located 解析相对路径
 pub fn parse_relative_path_with_located(relative: &str, located: &String) -> PathBuf {
     // debug_assert!(Path::new(located).is_absolute());
-    debug_assert!(Path::new(located).exists());
+    debug_assert!(located.clone() == "" || Path::new(located).exists());
 
     let relative = format_path(relative);
     let located = format_path(located);

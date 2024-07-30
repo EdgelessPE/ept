@@ -205,13 +205,6 @@ impl Verifiable for StepCopy {
             anyhow!("Error(Copy):Failed to validate field 'to' as valid path : {e}")
         })?;
         common_wild_match_verify(&self.from, &self.to, located)?;
-        // 检查 to 是否包含通配符
-        if contains_wild_match(&self.to) {
-            return Err(anyhow!(
-                "Error(Copy):Field 'to' shouldn't contain wild match : '{to}'",
-                to = &self.to
-            ));
-        }
 
         Ok(())
     }
