@@ -77,3 +77,30 @@ fn test_log() {
     step.verify_self(&String::from("./")).unwrap();
     step.run(&mut cx).unwrap();
 }
+
+#[test]
+fn test_log_corelation() {
+    let mut cx = WorkflowContext::_demo();
+    let mut mixed_fs = MixedFS::new("".to_string());
+    // 反向工作流
+    StepLog {
+        level: Some(String::from("Info")),
+        msg: String::from("Hello nep!"),
+    }
+    .reverse_run(&mut cx)
+    .unwrap();
+
+    // 装箱单
+    assert!(StepLog {
+        level: Some(String::from("Info")),
+        msg: String::from("Hello nep!"),
+    }
+    .get_manifest(&mut mixed_fs)
+    .is_empty());
+
+    // 权限
+    assert!(StepLog {
+        level: Some(String::from("Info")),
+        msg: String::from("Hello nep!"),
+    }.generalize_permissions().unwrap().is_empty());
+}
