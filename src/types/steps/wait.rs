@@ -37,7 +37,10 @@ impl TStep for StepWait {
             } else {
                 let start_instant = Instant::now();
                 // 每 500ms 检查一次条件是否成立
-                log!("Info(Wait):Waiting with break condition '{cond}'...");
+                log!(
+                    "Info(Wait):Waiting for '{}' ms with break condition '{cond}'...",
+                    self.timeout
+                );
                 loop {
                     sleep(step_d);
                     if start_instant.elapsed() >= d
@@ -119,23 +122,36 @@ fn test_wait() {
     let mut cx = WorkflowContext::_demo();
 
     // 测试普通等待
-    let d = Duration::from_millis(3000);
+    let d = Duration::from_millis(1000);
     let now = Instant::now();
 
     StepWait {
-        timeout: 3000,
+        timeout: 1000,
         break_if: None,
     }
     .run(&mut cx)
     .unwrap();
     assert!(now.elapsed() >= d);
 
-    // 测试恒假等待
-    let d = Duration::from_secs(5);
+    // 测试小于 500ms 的普通等待
     let now = Instant::now();
 
     StepWait {
-        timeout: 5000,
+        timeout: 200,
+        break_if: None,
+    }
+    .run(&mut cx)
+    .unwrap();
+    assert!(
+        Duration::from_millis(200) <= now.elapsed() && now.elapsed() <= Duration::from_millis(300)
+    );
+
+    // 测试恒假等待
+    let d = Duration::from_secs(2);
+    let now = Instant::now();
+
+    StepWait {
+        timeout: 2000,
         break_if: Some("Exist(\"${ExitCode}.err\")".to_string()),
     }
     .run(&mut cx)
@@ -168,4 +184,73 @@ fn test_wait() {
     .unwrap();
     let e = now.elapsed();
     assert!(e >= d && e <= Duration::from_millis(500));
+}
+
+#[test]
+fn test_wait_corelation() {
+    let mut cx = WorkflowContext::_demo();
+    let mut mixed_fs = MixedFS::new("".to_string());
+    // 反向工作流
+    StepWait {
+        timeout: 1000,
+        break_if: None,
+    }
+    .reverse_run(&mut cx)
+    .unwrap();
+
+    // 装箱单
+    assert!(StepWait {
+        timeout: 1000,
+        break_if: None,
+    }
+    .get_manifest(&mut mixed_fs)
+    .is_empty());
+
+    // 解释
+    assert_eq!(
+        StepWait {
+            timeout: 100,
+            break_if: None
+        }
+        .interpret(|s| s.replace("${Home}", "C:/Users/Nep")),
+        StepWait {
+            timeout: 100,
+            break_if: None
+        }
+    );
+
+    // 校验
+    assert!(StepWait {
+        timeout: 30 * 60 * 1000,
+        break_if: Some("ExitCode == 1".to_string())
+    }
+    .verify_self(&"".to_string())
+    .is_ok());
+    assert!(StepWait {
+        timeout: 30 * 60 * 1000 + 1,
+        break_if: None
+    }
+    .verify_self(&"".to_string())
+    .is_err());
+    assert!(StepWait {
+        timeout: 100,
+        break_if: Some("Exit == 0".to_string())
+    }
+    .verify_self(&"".to_string())
+    .is_err());
+
+    // 生成权限
+    assert_eq!(
+        StepWait {
+            timeout: 100,
+            break_if: Some("Exist(\"${SystemDrive}:/test\")".to_string())
+        }
+        .generalize_permissions()
+        .unwrap(),
+        vec![Permission {
+            key: crate::types::permissions::PermissionKey::fs_read,
+            level: crate::types::permissions::PermissionLevel::Sensitive,
+            targets: vec!["${SystemDrive}:/test".to_string()]
+        }]
+    );
 }
