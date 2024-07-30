@@ -238,6 +238,9 @@ fn main() {
     // 清理缓存
     launch_clean().unwrap();
 
+    // 启用虚拟终端
+    colored::control::set_virtual_terminal(true).unwrap();
+
     // 配置环境变量
     let args = Args::parse();
     if args.qa {
