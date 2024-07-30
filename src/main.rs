@@ -35,7 +35,7 @@ fn router(action: Action) -> Result<String> {
     // 环境变量读取
 
     use chrono::DateTime;
-    use types::cli::ActionMirror;
+    use types::{cli::ActionMirror, extended_semver::ExSemVer};
 
     use crate::{
         entrances::{
@@ -134,18 +134,23 @@ fn router(action: Action) -> Result<String> {
             let res: String =
                 list.into_iter()
                     .fold(String::from("\nInstalled packages:\n"), |acc, node| {
+                        let local_ver = node.local.unwrap().version;
                         let update_tip = if let Some(online_diff) = node.online {
-                            format!("  ↑ {ver} ", ver = online_diff.version)
-                                .green()
-                                .to_string()
+                            let online_ver = online_diff.version;
+                            if ExSemVer::parse(&online_ver).unwrap()
+                                > ExSemVer::parse(&local_ver).unwrap()
+                            {
+                                format!("  ↑ {online_ver}").green().to_string()
+                            } else {
+                                String::new()
+                            }
                         } else {
                             String::new()
                         };
                         acc + &format!(
-                            "  {scope}/{name}    ({version}{update_tip})\n",
+                            "  {scope}/{name}    ({local_ver}{update_tip})\n",
                             scope = node.software.unwrap().scope.cyan().italic(),
                             name = node.name.cyan().bold(),
-                            version = node.local.unwrap().version
                         )
                     });
             res

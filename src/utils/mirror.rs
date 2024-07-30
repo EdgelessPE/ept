@@ -164,8 +164,9 @@ pub fn filter_release(
     arr.sort_by(|a, b| b.version.cmp(&a.version));
     if let Some(f) = arr.first() {
         log!(
-            "Debug:Matched version '{}' with matcher '{matcher_str}'",
-            f.version.to_string()
+            "Debug:Matched version '{}' ('{}') with matcher '{matcher_str}'",
+            f.version.to_string(),
+            f.file_name
         );
         Ok(f.to_owned())
     } else {
