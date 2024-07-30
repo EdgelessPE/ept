@@ -318,7 +318,9 @@ fn test_link() {
     assert!(!desktop_path.exists());
     // assert!(!desktop_folder_path.exists());
     assert!(!start_path.exists());
-    remove_dir(desktop_folder_path).unwrap();
+    if desktop_folder_path.exists() {
+        remove_dir(desktop_folder_path).unwrap();
+    }
 
     // 缺省状态
     StepLink {
