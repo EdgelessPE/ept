@@ -161,6 +161,14 @@ fn test_rename() {
     assert!(Path::new("test/src/types/1.rs").exists());
     assert!(!Path::new("test/src/types/author.rs").exists());
 
+    // 不存在的文件
+    assert!(StepRename {
+        from: "test/src/types/author.rs".to_string(),
+        to: "1.rs".to_string(),
+    }
+    .run(&mut cx)
+    .is_err());
+
     // 文件覆盖
     StepRename {
         from: "test/src/types/info.rs".to_string(),
@@ -199,4 +207,89 @@ fn test_rename() {
     .unwrap();
     assert!(Path::new("test/source/tools/steps/rename.rs").exists());
     assert!(!Path::new("test/source/types/steps/rename.rs").exists());
+}
+
+#[test]
+fn test_rename_corelation() {
+    let mut cx = crate::types::workflow::WorkflowContext::_demo();
+
+    // 反向工作流
+    StepRename {
+        from: "test/src/types/author.rs".to_string(),
+        to: "test/1.rs".to_string(),
+    }
+    .reverse_run(&mut cx)
+    .unwrap();
+
+    // 变量解释
+    assert_eq!(
+        StepRename {
+            from: "${Home}".to_string(),
+            to: "${Desktop}".to_string(),
+        }
+        .interpret(|s| s
+            .replace("${Home}", "C:/Users/Nep")
+            .replace("${Desktop}", "C:/Users/Nep/Desktop")),
+        StepRename {
+            from: "C:/Users/Nep".to_string(),
+            to: "C:/Users/Nep/Desktop".to_string(),
+        }
+    );
+
+    // 校验
+    assert!(StepRename {
+        from: "./bin".to_string(),
+        to: "temp".to_string(),
+    }
+    .verify_self(&"".to_string())
+    .is_ok());
+    assert!(StepRename {
+        from: "./bin.exe".to_string(),
+        to: "temp".to_string(),
+    }
+    .verify_self(&"".to_string())
+    .is_ok());
+    assert!(StepRename {
+        from: "./bin.exe".to_string(),
+        to: "temp/".to_string(),
+    }
+    .verify_self(&"".to_string())
+    .is_err());
+    assert!(StepRename {
+        from: "./bin/*".to_string(),
+        to: "temp".to_string(),
+    }
+    .verify_self(&"".to_string())
+    .is_err());
+    assert!(StepRename {
+        from: "./bin".to_string(),
+        to: "${Desktop}".to_string(),
+    }
+    .verify_self(&"".to_string())
+    .is_err());
+    assert!(StepRename {
+        from: "bin".to_string(),
+        to: "${OtherDesktop}".to_string(),
+    }
+    .verify_self(&"".to_string())
+    .is_err());
+    assert!(StepRename {
+        from: "C:/Users/Desktop".to_string(),
+        to: "${Desktop}".to_string(),
+    }
+    .verify_self(&"".to_string())
+    .is_err());
+
+    assert!(StepRename {
+        from: "${Home}".to_string(),
+        to: "C:/Users/Nep/Desktop".to_string(),
+    }
+    .verify_self(&"".to_string())
+    .is_err());
+    assert!(StepRename {
+        from: "${Home}".to_string(),
+        to: "${Desktop}/*".to_string(),
+    }
+    .verify_self(&"".to_string())
+    .is_err());
 }
