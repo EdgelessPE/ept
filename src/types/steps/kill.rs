@@ -1,5 +1,3 @@
-use std::ptr::replace;
-
 use super::TStep;
 use crate::types::interpretable::Interpretable;
 use crate::types::permissions::PermissionKey;
@@ -143,17 +141,25 @@ fn test_kill_corelation() {
     .is_empty());
 
     // 解释
-    assert_eq!(StepKill {
-        target: "${Home}".to_string(),
-    }.interpret(|s|s.replace("${Home}", "C:/Users/Nep")),StepKill {
-        target: "${Home}".to_string(),
-    });
+    assert_eq!(
+        StepKill {
+            target: "${Home}".to_string(),
+        }
+        .interpret(|s| s.replace("${Home}", "C:/Users/Nep")),
+        StepKill {
+            target: "${Home}".to_string(),
+        }
+    );
 
     // 校验
     assert!(StepKill {
         target: "code.exe".to_string(),
-    }.verify_self(&"".to_string()).is_ok());
+    }
+    .verify_self(&"".to_string())
+    .is_ok());
     assert!(StepKill {
         target: "code".to_string(),
-    }.verify_self(&"".to_string()).is_ok());
+    }
+    .verify_self(&"".to_string())
+    .is_ok());
 }
