@@ -129,7 +129,9 @@ fn test_new() {
     use std::path::Path;
     envmnt::set("DEBUG", "true");
     let mut cx = WorkflowContext::_demo();
-    crate::utils::test::_ensure_clear_test_dir();
+    if Path::new("test").exists() {
+        std::fs::remove_dir_all("test").unwrap();
+    }
 
     // 创建目录和文件
     StepNew {
@@ -165,4 +167,60 @@ fn test_new() {
     .run(&mut cx)
     .unwrap();
     assert!(Path::new("test/1.txt").exists());
+}
+
+#[test]
+fn test_new_corelation() {
+    let mut cx = WorkflowContext::_demo();
+    let mut mixed_fs = MixedFS::new("".to_string());
+
+    // 反向工作流
+    StepNew {
+        at: "test/1.rs".to_string(),
+        overwrite: None,
+    }
+    .reverse_run(&mut cx)
+    .unwrap();
+
+    // 装箱单
+    assert!(StepNew {
+        at: "${Home}/test".to_string(),
+        overwrite: None,
+    }
+    .get_manifest(&mut mixed_fs)
+    .is_empty());
+
+    // 变量解释
+    assert_eq!(
+        StepNew {
+            at: "${Home}".to_string(),
+            overwrite: None,
+        }
+        .interpret(|s| s.replace("${Home}", "C:/Users/Nep")),
+        StepNew {
+            at: "C:/Users/Nep".to_string(),
+            overwrite: None,
+        }
+    );
+
+    // 校验
+    assert!(StepNew {
+        at: "C:/Users/Desktop".to_string(),
+        overwrite: None,
+    }
+    .verify_self(&"".to_string())
+    .is_err());
+    assert!(StepNew {
+        at: "C:/Users/Desktop/*".to_string(),
+        overwrite: None,
+    }
+    .verify_self(&"".to_string())
+    .is_err());
+
+    assert!(StepNew {
+        at: "${OtherDesktop}".to_string(),
+        overwrite: None,
+    }
+    .verify_self(&"".to_string())
+    .is_err());
 }
