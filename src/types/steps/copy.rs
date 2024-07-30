@@ -373,6 +373,20 @@ fn test_copy_corelation() {
 
     // 校验
     assert!(StepCopy {
+        from: "./bin".to_string(),
+        to: "${Desktop}".to_string(),
+        overwrite: None
+    }
+    .verify_self(&"".to_string())
+    .is_ok());
+    assert!(StepCopy {
+        from: "bin".to_string(),
+        to: "${OtherDesktop}".to_string(),
+        overwrite: None
+    }
+    .verify_self(&"".to_string())
+    .is_err());
+    assert!(StepCopy {
         from: "C:/Users/Desktop".to_string(),
         to: "${Desktop}".to_string(),
         overwrite: None

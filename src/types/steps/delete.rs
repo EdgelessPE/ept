@@ -40,7 +40,8 @@ pub struct StepDelete {
 fn delete(target: &String, force: bool) -> Result<()> {
     let p = Path::new(target);
     if !p.exists() {
-        return Err(anyhow!("Error(Delete):Target '{target}' not exist"));
+        log!("Warning(Delete):Target '{target}' not exist, skip deleting");
+        return Ok(());
     }
     if let Err(e) = try_recycle(p) {
         if force {
@@ -144,6 +145,14 @@ fn test_delete() {
     .unwrap();
     assert!(!Path::new("test/src/utils/mod.rs").exists());
 
+    // 删除不存在的文件
+    StepDelete {
+        at: "test/src/utils/mod.rs".to_string(),
+        force: Some(true),
+    }
+    .run(&mut cx)
+    .unwrap();
+
     // 普通通配删除
     StepDelete {
         at: "test/src/types/steps/*.rs".to_string(),
@@ -164,4 +173,54 @@ fn test_delete() {
     .unwrap();
     assert!(!Path::new("test/src/entrances/utils/mod.rs").exists());
     assert!(!Path::new("test/src/entrances/install.rs").exists());
+}
+
+#[test]
+fn test_delete_corelation() {
+    let mut cx = WorkflowContext::_demo();
+    let mut mixed_fs = MixedFS::new("".to_string());
+
+    // 反向工作流
+    StepDelete {
+        at: "test/1.rs".to_string(),
+        force: None,
+    }
+    .reverse_run(&mut cx)
+    .unwrap();
+
+    // 装箱单
+    assert!(StepDelete {
+        at: "${Home}/test".to_string(),
+        force: None,
+    }
+    .get_manifest(&mut mixed_fs)
+    .is_empty());
+
+    // 变量解释
+    assert_eq!(
+        StepDelete {
+            at: "${Home}".to_string(),
+            force: None,
+        }
+        .interpret(|s| s.replace("${Home}", "C:/Users/Nep")),
+        StepDelete {
+            at: "C:/Users/Nep".to_string(),
+            force: None,
+        }
+    );
+
+    // 校验
+    assert!(StepDelete {
+        at: "C:/Users/Desktop".to_string(),
+        force: None,
+    }
+    .verify_self(&"".to_string())
+    .is_err());
+
+    assert!(StepDelete {
+        at: "${OtherDesktop}".to_string(),
+        force: None,
+    }
+    .verify_self(&"".to_string())
+    .is_err());
 }

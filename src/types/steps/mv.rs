@@ -323,6 +323,20 @@ fn test_move_corelation() {
 
     // 校验
     assert!(StepMove {
+        from: "./bin".to_string(),
+        to: "${Desktop}".to_string(),
+        overwrite: None
+    }
+    .verify_self(&"".to_string())
+    .is_ok());
+    assert!(StepMove {
+        from: "bin".to_string(),
+        to: "${OtherDesktop}".to_string(),
+        overwrite: None
+    }
+    .verify_self(&"".to_string())
+    .is_err());
+    assert!(StepMove {
         from: "C:/Users/Desktop".to_string(),
         to: "${Desktop}".to_string(),
         overwrite: None
