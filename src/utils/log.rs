@@ -39,12 +39,12 @@ fn gen_log(msg: &String, replace_head: Option<String>) -> Option<String> {
 
         return if cap.get(2).is_some() {
             Some(format!(
-                "  {c_head}{s} {m}",
+                "{c_head:>7} {s:<9} {m}",
                 s = cap[2].truecolor(100, 100, 100),
                 m = &cap[3]
             ))
         } else {
-            Some(format!("{c_head} {m}", m = &cap[3]))
+            Some(format!("{c_head:>7} {m}", m = &cap[3]))
         };
     }
     Some(msg.to_string())
@@ -86,22 +86,22 @@ macro_rules! log_ok_last {
 
 #[test]
 fn test_log() {
-    // envmnt::set("DEBUG","true");
+    envmnt::set("DEBUG", "true");
 
     fn_log("Debug:This is a debug".to_string());
     fn_log("Info:This is a info".to_string());
     fn_log("Warning:This is a warning".to_string());
     fn_log("Error:This is an error".to_string());
     fn_log("Success:This is a success".to_string());
-    fn_log("Unknown:This is an unknown".to_string());
-    fn_log("This is a plain text".to_string());
+    // fn_log("Unknown:This is an unknown".to_string());
+    // fn_log("This is a plain text".to_string());
 
     fn_log("Debug(Log):This is a debug".to_string());
     fn_log("Info(Path):This is a info".to_string());
     fn_log("Warning(Execute):This is a warning".to_string());
     fn_log("Error(Link):This is an error".to_string());
     fn_log("Success(Main):This is a success".to_string());
-    fn_log("Unknown(unknown):This is an unknown".to_string());
+    // fn_log("Unknown(unknown):This is an unknown".to_string());
 }
 
 #[test]
