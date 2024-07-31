@@ -10,6 +10,7 @@
         "chrono",
         "Chuyu",
         "clippy",
+        "dialoguer",
         "Dism",
         "envmnt",
         "Evalexpr",

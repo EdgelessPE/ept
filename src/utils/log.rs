@@ -6,11 +6,11 @@ use super::{is_debug_mode, is_no_warning_mode};
 
 lazy_static! {
     static ref RE: Regex =
-        Regex::new(r"(Debug|Info|Warning|Error|Success)(\(\w+\))?:(.+)").unwrap();
+        Regex::new(r"(Question|Debug|Info|Warning|Error|Success)(\(\w+\))?:(.+)").unwrap();
     static ref TERM: Term = Term::stdout();
 }
 
-fn gen_log(msg: &String, replace_head: Option<String>) -> Option<String> {
+pub fn gen_log(msg: &String, replace_head: Option<String>) -> Option<String> {
     if let Some(cap) = RE.captures_iter(msg).next() {
         if cap.len() != 4 {
             debug_assert!(false);
@@ -26,6 +26,7 @@ fn gen_log(msg: &String, replace_head: Option<String>) -> Option<String> {
             return None;
         }
         let c_head = match head {
+            "Question" => head.bright_purple(),
             "Debug" => head.truecolor(50, 50, 50),
             "Info" => head.bright_blue(),
             "Warning" => head.bright_yellow(),
@@ -39,12 +40,12 @@ fn gen_log(msg: &String, replace_head: Option<String>) -> Option<String> {
 
         return if cap.get(2).is_some() {
             Some(format!(
-                "{c_head:>7} {s:<9} {m}",
+                "{c_head:>8} {s:<9} {m}",
                 s = cap[2].truecolor(100, 100, 100),
                 m = &cap[3]
             ))
         } else {
-            Some(format!("{c_head:>7} {m}", m = &cap[3]))
+            Some(format!("{c_head:>8} {m}", m = &cap[3]))
         };
     }
     Some(msg.to_string())
@@ -88,6 +89,7 @@ macro_rules! log_ok_last {
 fn test_log() {
     envmnt::set("DEBUG", "true");
 
+    fn_log("Question:This is a question".to_string());
     fn_log("Debug:This is a debug".to_string());
     fn_log("Info:This is a info".to_string());
     fn_log("Warning:This is a warning".to_string());
@@ -96,6 +98,7 @@ fn test_log() {
     // fn_log("Unknown:This is an unknown".to_string());
     // fn_log("This is a plain text".to_string());
 
+    fn_log("Question(Ask):This is a question".to_string());
     fn_log("Debug(Log):This is a debug".to_string());
     fn_log("Info(Path):This is a info".to_string());
     fn_log("Warning(Execute):This is a warning".to_string());

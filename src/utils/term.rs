@@ -1,16 +1,19 @@
 use crate::utils::is_confirm_mode;
+use dialoguer::Confirm;
 use encoding::all::GBK;
 use encoding::{DecoderTrap, Encoding};
-use std::io::stdin;
+
+use super::log::gen_log;
 
 pub fn ask_yn() -> bool {
     if is_confirm_mode() {
         true
     } else {
-        let mut input = String::new();
-        let term_in = stdin();
-        term_in.read_line(&mut input).unwrap();
-        &input[0..1] == "y"
+        Confirm::new()
+            .with_prompt(gen_log(&"Question:Do you like 玩游戏?".to_string(), None).unwrap())
+            .default(true)
+            .interact()
+            .unwrap()
     }
 }
 
@@ -27,7 +30,5 @@ pub fn read_console(v: Vec<u8>) -> String {
 #[test]
 fn test_ask_yn() {
     envmnt::set("CONFIRM", "true");
-    log!("Warning:Please select? (y/n)");
-    let res = ask_yn();
-    assert!(res);
+    assert!(ask_yn());
 }
