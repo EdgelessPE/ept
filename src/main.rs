@@ -179,7 +179,7 @@ fn router(action: Action) -> Result<String> {
             if count == 0 {
                 "Info:No trash found".to_string()
             } else {
-                format!("Success:{count} trash found and cleaned")
+                format!("Success:{count} trashes found and cleaned")
             }
         }),
 
