@@ -45,7 +45,7 @@ fn conflict_resolver(bin_abs: &String, stem: &String, scope: &String) -> String 
     // 检查入口文件冲突
     if Path::new(&origin).exists() {
         return if ask_yn_in_step(
-            "Step",
+            "Path",
             format!("Entrance '{stem}.cmd' already exists in '{bin_abs}', overwrite?"),
             false,
         ) {
@@ -61,7 +61,7 @@ fn conflict_resolver(bin_abs: &String, stem: &String, scope: &String) -> String 
     if let Ok(res) = which_res {
         let output = p2s!(res);
         return if ask_yn_in_step(
-            "Step",
+            "Path",
             format!("Command '{stem}' already exists at '{output}', rename to '{scope}-{stem}'?"),
             false,
         ) {

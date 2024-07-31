@@ -48,7 +48,7 @@ pub fn install_using_package(source_file: &String, verify_signature: bool) -> Re
             && p.exists()
             && !ask_yn(
                 format!(
-                    "'{name}' has been installed at '{installed}', continue?",
+                    "Package '{name}' has been installed at '{installed}', continue?",
                     name = package.name
                 ),
                 false,
