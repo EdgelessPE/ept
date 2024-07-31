@@ -24,13 +24,11 @@ fn ask_yn_impl(prompt: String, default_value: bool) -> bool {
 }
 
 pub fn ask_yn(prompt: String, default_value: bool) -> bool {
-    println!("prompt: {prompt}");
     debug_assert!(prompt.as_bytes().first().unwrap().is_ascii_uppercase() && prompt.ends_with('?'));
     ask_yn_impl(prompt, default_value)
 }
 
 pub fn ask_yn_in_step(step_name: &str, prompt: String, default_value: bool) -> bool {
-    println!("prompt({step_name}): {prompt}");
     debug_assert!(prompt.as_bytes().first().unwrap().is_ascii_uppercase() && prompt.ends_with('?'));
     ask_yn_impl(
         format!("{:<9} {prompt}", step_name.truecolor(100, 100, 100)),
