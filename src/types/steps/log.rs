@@ -102,5 +102,8 @@ fn test_log_corelation() {
     assert!(StepLog {
         level: Some(String::from("Info")),
         msg: String::from("Hello nep!"),
-    }.generalize_permissions().unwrap().is_empty());
+    }
+    .generalize_permissions()
+    .unwrap()
+    .is_empty());
 }

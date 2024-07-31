@@ -118,11 +118,17 @@ fn test_toast_corelation() {
     .is_empty());
 
     // 解释
-    assert_eq!(StepToast{
-        title:"${Home}".to_string(),
-        content:"${SystemDrive}".to_string()
-    }.interpret(|s|s.replace("${Home}", "C:/Users/Nep").replace("${SystemDrive}", "C:")),StepToast{
-        title:"C:/Users/Nep".to_string(),
-        content:"C:".to_string()
-    })
+    assert_eq!(
+        StepToast {
+            title: "${Home}".to_string(),
+            content: "${SystemDrive}".to_string()
+        }
+        .interpret(|s| s
+            .replace("${Home}", "C:/Users/Nep")
+            .replace("${SystemDrive}", "C:")),
+        StepToast {
+            title: "C:/Users/Nep".to_string(),
+            content: "C:".to_string()
+        }
+    )
 }

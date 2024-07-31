@@ -132,7 +132,22 @@ fn test_parse_wild_match() {
 
 #[test]
 fn test_common_wild_match_verify() {
-    assert!(common_wild_match_verify(&"./src/*".to_string(), &"./test/".to_string(), &"".to_string()).is_ok());
-    assert!(common_wild_match_verify(&"./src/*".to_string(), &"./test/*".to_string(), &"".to_string()).is_err());
-    assert!(common_wild_match_verify(&"./src/*".to_string(), &"./test".to_string(), &"".to_string()).is_err());
+    assert!(common_wild_match_verify(
+        &"./src/*".to_string(),
+        &"./test/".to_string(),
+        &"".to_string()
+    )
+    .is_ok());
+    assert!(common_wild_match_verify(
+        &"./src/*".to_string(),
+        &"./test/*".to_string(),
+        &"".to_string()
+    )
+    .is_err());
+    assert!(common_wild_match_verify(
+        &"./src/*".to_string(),
+        &"./test".to_string(),
+        &"".to_string()
+    )
+    .is_err());
 }
