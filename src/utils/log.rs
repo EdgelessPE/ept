@@ -10,7 +10,7 @@ lazy_static! {
     static ref TERM: Term = Term::stdout();
 }
 
-pub fn gen_log(msg: &String, replace_head: Option<String>) -> Option<String> {
+fn gen_log(msg: &String, replace_head: Option<String>) -> Option<String> {
     if let Some(cap) = RE.captures_iter(msg).next() {
         if cap.len() != 4 {
             debug_assert!(false);

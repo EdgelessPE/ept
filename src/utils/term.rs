@@ -1,20 +1,34 @@
 use crate::utils::is_confirm_mode;
+use colored::Colorize;
 use dialoguer::Confirm;
 use encoding::all::GBK;
 use encoding::{DecoderTrap, Encoding};
 
-use super::log::gen_log;
-
-pub fn ask_yn() -> bool {
+pub fn ask_yn(prompt: String, default_value: bool) -> bool {
+    debug_assert!(prompt.as_bytes().first().unwrap().is_ascii_uppercase() && prompt.ends_with('?'));
     if is_confirm_mode() {
         true
     } else {
         Confirm::new()
-            .with_prompt(gen_log(&"Question:Do you like 玩游戏?".to_string(), None).unwrap())
-            .default(true)
+            .with_prompt(format!(
+                "{:>8} {prompt}",
+                if default_value {
+                    "Question".truecolor(103, 58, 183)
+                } else {
+                    "Question".truecolor(255, 87, 34)
+                }
+            ))
+            .default(default_value)
             .interact()
             .unwrap()
     }
+}
+
+pub fn ask_yn_in_step(step_name: &str, prompt: String, default_value: bool) -> bool {
+    ask_yn(
+        format!("{:<9} {prompt}", step_name.truecolor(100, 100, 100)),
+        default_value,
+    )
 }
 
 pub fn read_console(v: Vec<u8>) -> String {
@@ -30,5 +44,5 @@ pub fn read_console(v: Vec<u8>) -> String {
 #[test]
 fn test_ask_yn() {
     envmnt::set("CONFIRM", "true");
-    assert!(ask_yn());
+    assert!(ask_yn("Do you like 玩游戏?".to_string(), true));
 }

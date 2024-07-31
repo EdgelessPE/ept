@@ -117,8 +117,10 @@ pub fn clean() -> Result<()> {
         );
         log!("{tip}");
         if let Err(e) = trash::delete_all(clean_list.clone()) {
-            log!("Warning:Failed to move some files to recycle bin : {e}, force delete all? (y/n)");
-            if ask_yn() {
+            if ask_yn(
+                format!("Failed to move some files to recycle bin : {e}, force delete all?"),
+                true,
+            ) {
                 clean_list.into_iter().for_each(|p| {
                     let name = p2s!(p);
                     let res = if p.is_dir() {

@@ -6,7 +6,7 @@ use crate::types::permissions::{Generalizable, Permission, PermissionKey, Permis
 use crate::types::verifiable::Verifiable;
 use crate::types::workflow::WorkflowContext;
 use crate::utils::is_starts_with_inner_value;
-use crate::utils::{get_path_bin, path::parse_relative_path_with_located, term::ask_yn};
+use crate::utils::{get_path_bin, path::parse_relative_path_with_located, term::ask_yn_in_step};
 use crate::{log, p2s};
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
@@ -44,8 +44,11 @@ fn conflict_resolver(bin_abs: &String, stem: &String, scope: &String) -> String 
 
     // 检查入口文件冲突
     if Path::new(&origin).exists() {
-        log!("Warning(Path):Entrance '{stem}.cmd' already exists in '{bin_abs}', overwrite? (y/n)");
-        return if ask_yn() {
+        return if ask_yn_in_step(
+            "Step",
+            format!("Entrance '{stem}.cmd' already exists in '{bin_abs}', overwrite?"),
+            false,
+        ) {
             origin
         } else {
             log!("Warning(Path):Renamed entrance to '{scope}-{stem}.cmd, use '{scope}-{stem}' instead to call this program later");
@@ -57,8 +60,11 @@ fn conflict_resolver(bin_abs: &String, stem: &String, scope: &String) -> String 
     let which_res = which(stem);
     if let Ok(res) = which_res {
         let output = p2s!(res);
-        log!("Warning(Path):Command '{stem}' already exists at '{output}', rename to '{scope}-{stem}'? (y/n)");
-        return if ask_yn() {
+        return if ask_yn_in_step(
+            "Step",
+            format!("Command '{stem}' already exists at '{output}', rename to '{scope}-{stem}'?"),
+            false,
+        ) {
             log!("Warning(Path):Renamed entrance to '{scope}-{stem}.cmd, use '{scope}-{stem}' instead to call this program later");
             scoped
         } else {

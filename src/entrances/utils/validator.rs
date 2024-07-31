@@ -6,7 +6,7 @@ use std::{
 
 use crate::{
     executor::values_validator_path,
-    log, p2s,
+    p2s,
     types::mixed_fs::MixedFS,
     utils::{term::ask_yn, wild_match::contains_wild_match},
 };
@@ -40,8 +40,10 @@ pub fn manifest_validator(base: &String, manifest: Vec<String>, fs: &mut MixedFS
     if !missing_list.is_empty() {
         let items: Vec<String> = missing_list.into_iter().collect();
         if fs.var_warn_manifest {
-            log!("Warning:May missing these flow items '{items:?}' in '{base}', continue? (y/n)");
-            if !ask_yn() {
+            if !ask_yn(
+                format!("May missing these flow items '{items:?}' in '{base}', continue?"),
+                false,
+            ) {
                 return Err(anyhow!("Error:Operation canceled by user"));
             }
         } else {

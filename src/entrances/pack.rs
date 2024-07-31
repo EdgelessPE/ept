@@ -30,11 +30,8 @@ pub fn pack(source_dir: &String, into_file: Option<String>, need_sign: bool) -> 
             return Err(anyhow!(
                 "Error:Target '{into_file}' is a existing directory"
             ));
-        } else {
-            log!("Warning:Overwrite the existing file '{into_file}'? (y/n)");
-            if !ask_yn() {
-                return Err(anyhow!("Error:Pack canceled by user"));
-            }
+        } else if !ask_yn(format!("Overwrite the existing file '{into_file}'?"), false) {
+            return Err(anyhow!("Error:Pack canceled by user"));
         }
     }
 

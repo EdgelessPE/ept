@@ -61,8 +61,7 @@ pub fn update_using_package(source_file: &String, verify_signature: bool) -> Res
         &fresh_package.package.authors,
     ) {
         // 需要卸载然后重新安装
-        log!("Warning:The given package is not the same as the author of the installed package (local:{la:?}, given:{fa:?}), uninstall the installed package first? (y/n)",la=local_package.package.authors,fa=fresh_package.package.authors);
-        if !ask_yn() {
+        if !ask_yn(format!("The given package is not the same as the author of the installed package (local:{:?}, given:{:?}), uninstall the installed package first?",local_package.package.authors,fresh_package.package.authors),true) {
             return Err(anyhow!("Error:Update canceled by user"));
         }
         // 卸载
@@ -172,12 +171,14 @@ pub fn update_using_package_matcher(
     // 解析 url
     let (url, target_release) = get_url_with_version_req(matcher)?;
     // 执行更新
-    log!(
-        "Info:Ready to update '{scope}/{package_name}' from '{from}' to '{to}', continue? (y/n)",
-        from = local_diff.version,
-        to = target_release.version
-    );
-    if ask_yn() {
+    if ask_yn(
+        format!(
+            "Ready to update '{scope}/{package_name}' from '{from}' to '{to}', continue?",
+            from = local_diff.version,
+            to = target_release.version
+        ),
+        true,
+    ) {
         update_using_url(&url, verify_signature)
     } else {
         Err(anyhow!("Error:Operation canceled by user"))
@@ -220,8 +221,10 @@ pub fn update_all(verify_signature: bool) -> Result<(i32, i32)> {
                 acc + &format!("{node}")
             });
         println!("{tip}");
-        log!("Info:Ready to update those {count} packages, continue? (y/n)");
-        if !ask_yn() {
+        if !ask_yn(
+            format!("Ready to update those {count} packages, continue?"),
+            true,
+        ) {
             return Err(anyhow!("Error:Operation canceled by user"));
         }
     }

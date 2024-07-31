@@ -106,41 +106,43 @@ pub fn uninstall(scope: Option<String>, package_name: &String) -> Result<()> {
     // 删除 app 目录
     log!("Info:Cleaning...");
     let try_rm_res = remove_dir_all(&app_str);
-    if try_rm_res.is_err() {
-        log!("Warning:Can't clean the directory completely, try killing the related processes? (y/n)");
-        if ask_yn() {
-            // 拿到装箱单，生成基础暗杀名单
-            let setup_manifest = get_manifest(setup_flow);
-            let mut hit_list: HashSet<String> = HashSet::from_iter(setup_manifest);
+    if try_rm_res.is_err()
+        && ask_yn(
+            "Can't clean the directory completely, try killing the related processes?".to_string(),
+            true,
+        )
+    {
+        // 拿到装箱单，生成基础暗杀名单
+        let setup_manifest = get_manifest(setup_flow);
+        let mut hit_list: HashSet<String> = HashSet::from_iter(setup_manifest);
 
-            // 加入主程序
-            if let Some(mp) = global.software.unwrap().main_program {
-                if let Some(file_name) = Path::new(&mp).file_name() {
-                    hit_list.insert(file_name.to_string_lossy().to_string());
+        // 加入主程序
+        if let Some(mp) = global.software.unwrap().main_program {
+            if let Some(file_name) = Path::new(&mp).file_name() {
+                hit_list.insert(file_name.to_string_lossy().to_string());
+            }
+        }
+
+        // 杀死其中列出的 exe 程序
+        for name in hit_list {
+            if name.ends_with(".exe") {
+                if kill_with_name(&name) {
+                    log!("Warning:Killed process '{name}'");
+                } else {
+                    log!("Warning:Failed to kill process '{name}'");
                 }
             }
+        }
 
-            // 杀死其中列出的 exe 程序
-            for name in hit_list {
-                if name.ends_with(".exe") {
-                    if kill_with_name(&name) {
-                        log!("Warning:Killed process '{name}'");
-                    } else {
-                        log!("Warning:Failed to kill process '{name}'");
-                    }
-                }
-            }
+        // 延时
+        sleep(Duration::from_secs(3));
 
-            // 延时
-            sleep(Duration::from_secs(3));
-
-            // 再次尝试删除
-            let try_rm_res = remove_dir_all(&app_str);
-            if try_rm_res.is_err() {
-                log!(
-                    "Warning:Can't clean the directory still, please delete '{app_str}' manually later"
-                );
-            }
+        // 再次尝试删除
+        let try_rm_res = remove_dir_all(&app_str);
+        if try_rm_res.is_err() {
+            log!(
+                "Warning:Can't clean the directory still, please delete '{app_str}' manually later"
+            );
         }
     }
 

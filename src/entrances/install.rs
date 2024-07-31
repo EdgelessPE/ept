@@ -44,14 +44,17 @@ pub fn install_using_package(source_file: &String, verify_signature: bool) -> Re
     // 使用绝对路径的 main_program 字段，检查是否已经全局安装过该软件
     if let Some(installed) = &software.main_program {
         let p = Path::new(installed);
-        if p.is_absolute() && p.exists() {
-            log!(
-                "Warning:'{name}' has been installed at '{installed}', continue? (y/n)",
-                name = package.name
-            );
-            if !ask_yn() {
-                return Err(anyhow!("Error:Operation canceled by user"));
-            }
+        if p.is_absolute()
+            && p.exists()
+            && !ask_yn(
+                format!(
+                    "'{name}' has been installed at '{installed}', continue?",
+                    name = package.name
+                ),
+                false,
+            )
+        {
+            return Err(anyhow!("Error:Operation canceled by user"));
         }
     }
 
@@ -156,11 +159,13 @@ pub fn install_using_package_matcher(
     // 解析 url
     let (url, target_release) = get_url_with_version_req(matcher)?;
     // 执行安装
-    log!(
-        "Info:Ready to install '{scope}/{package_name} ({v})', continue? (y/n)",
-        v = target_release.version
-    );
-    if ask_yn() {
+    if ask_yn(
+        format!(
+            "Ready to install '{scope}/{package_name} ({v})', continue?",
+            v = target_release.version
+        ),
+        true,
+    ) {
         install_using_url(&url, verify_signature)
     } else {
         Err(anyhow!("Error:Operation canceled by user"))
