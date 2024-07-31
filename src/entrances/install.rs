@@ -161,7 +161,7 @@ pub fn install_using_package_matcher(
     // 执行安装
     if ask_yn(
         format!(
-            "Ready to install '{scope}/{package_name} ({v})', continue?",
+            "Ready to install '{scope}/{package_name}' ({v}), continue?",
             v = target_release.version
         ),
         true,

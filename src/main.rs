@@ -175,7 +175,14 @@ fn router(action: Action) -> Result<String> {
             }
         }
 
-        Action::Clean => clean().map(|_| "Success:Cleaned".to_string()),
+        Action::Clean => clean().map(|count| {
+            if count == 0 {
+                "Info:No trash found".to_string()
+            } else {
+                format!("Success:{count} trash found and cleaned")
+            }
+        }),
+
         Action::Config { operation } => match operation {
             ActionConfig::Set { table, key, value } => config_set(&table, &key, &value)
                 .map(|_| format!("Success:Config value of '{key}' set to '{value}'")),

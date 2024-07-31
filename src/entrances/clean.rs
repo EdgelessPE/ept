@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use std::{
     collections::HashSet,
     fs::{read_dir, remove_dir_all, remove_file},
@@ -30,7 +30,7 @@ fn get_valid_entrances(setup: Vec<WorkflowNode>) -> Vec<String> {
         .collect()
 }
 
-pub fn clean() -> Result<()> {
+pub fn clean() -> Result<usize> {
     let mut clean_list = Vec::new();
     let mut valid_entrances = HashSet::new();
 
@@ -108,9 +108,13 @@ pub fn clean() -> Result<()> {
     }
 
     // 尝试移动到回收站
+    let clean_list_len = clean_list.len();
     if !clean_list.is_empty() {
         log!("Info:Trash list :");
         println!("{clean_list:#?}");
+        if !ask_yn(format!("Clean those {clean_list_len} trashes?"), true) {
+            return Err(anyhow!("Error:Operation cancelled by user"));
+        }
         let tip = format!(
             "Info:Moving {num} trashes to recycle bin...",
             num = clean_list.len()
@@ -136,11 +140,9 @@ pub fn clean() -> Result<()> {
         } else {
             log_ok_last!("{tip}");
         }
-    } else {
-        log!("Info:No trash found");
     }
 
-    Ok(())
+    Ok(clean_list_len)
 }
 
 #[test]
