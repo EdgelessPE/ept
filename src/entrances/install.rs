@@ -407,15 +407,7 @@ fn test_install_with_matcher() {
     // 手动升版本号
     crate::utils::fs::try_recycle("test/VSCode").unwrap();
     crate::utils::fs::copy_dir("examples/VSCode", "test/VSCode").unwrap();
-    let mut pkg = crate::parsers::parse_package(
-        &"test/VSCode/package.toml".to_string(),
-        &"test/VSCode".to_string(),
-        false,
-    )
-    .unwrap();
-    pkg.package.version = "1.75.4.1".to_string();
-    let text = toml::to_string_pretty(&pkg).unwrap();
-    std::fs::write("test/VSCode/package.toml", text).unwrap();
+    crate::utils::test::_modify_installed_package_version("test/VSCode", "1.75.4.1");
 
     // 重新打包一个更高版本的
     crate::pack(

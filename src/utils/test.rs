@@ -176,3 +176,13 @@ pub fn _unmount_custom_mirror(tup: (bool, PathBuf, PathBuf)) {
         rename(bak_p, &origin_p).unwrap();
     }
 }
+
+pub fn _modify_installed_package_version(dir: &str, to_version: &str) {
+    let dir = dir.to_string();
+    let pkg_path = format!("{dir}/package.toml");
+    let version = to_version.to_string();
+    let mut pkg = crate::parsers::parse_package(&pkg_path, &dir, false).unwrap();
+    pkg.package.version = version;
+    let text = toml::to_string_pretty(&pkg).unwrap();
+    std::fs::write(pkg_path, text).unwrap();
+}
