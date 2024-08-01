@@ -34,9 +34,8 @@ use crate::utils::launch_clean;
 fn router(action: Action) -> Result<String> {
     // 环境变量读取
 
-    use chrono::DateTime;
     use types::{cli::ActionMirror, extended_semver::ExSemVer};
-    use utils::fmt_print::fmt_package_line;
+    use utils::fmt_print::{fmt_mirror_line, fmt_package_line};
 
     use crate::{
         entrances::{
@@ -213,18 +212,11 @@ fn router(action: Action) -> Result<String> {
             ActionMirror::List => {
                 let res = mirror_list()?;
                 if !res.is_empty() {
-                    let str: String = res.into_iter().fold(
-                        String::from("\nAdded mirrors:\n"),
-                        |acc, (name, time)| {
-                            let date_time: DateTime<chrono::Local> = time.into();
-                            let time_str = date_time.format("%Y-%m-%d %H:%M:%S").to_string();
-                            let update_str = format!("updated at {time_str}");
-                            acc + &format!(
-                                "  {name}    {str}\n",
-                                str = update_str.as_str().truecolor(100, 100, 100)
-                            )
-                        },
-                    );
+                    let str: String = res
+                        .into_iter()
+                        .fold(String::from("\nAdded mirrors:\n"), |acc, (name, time)| {
+                            acc + &fmt_mirror_line(name, time)
+                        });
                     Ok(str)
                 } else {
                     Ok("Info:No mirror added".to_string())
