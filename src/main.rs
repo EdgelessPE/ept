@@ -36,6 +36,7 @@ fn router(action: Action) -> Result<String> {
 
     use chrono::DateTime;
     use types::{cli::ActionMirror, extended_semver::ExSemVer};
+    use utils::fmt_print::fmt_package_line;
 
     use crate::{
         entrances::{
@@ -107,16 +108,11 @@ fn router(action: Action) -> Result<String> {
                     results
                         .into_iter()
                         .fold(format!("\nFound {len} results:\n"), |acc, node| {
-                            acc + &format!(
-                                "  {scope}/{name}    ({version})   {mirror}\n",
-                                name = node.name.cyan().bold(),
-                                version = node.version,
-                                scope = node.scope.cyan().italic(),
-                                mirror = node
-                                    .from_mirror
-                                    .unwrap_or("".to_string())
-                                    .as_str()
-                                    .truecolor(100, 100, 100)
+                            acc + &fmt_package_line(
+                                node.scope,
+                                node.name,
+                                node.version,
+                                node.from_mirror,
                             )
                         });
                 res
@@ -147,10 +143,11 @@ fn router(action: Action) -> Result<String> {
                         } else {
                             String::new()
                         };
-                        acc + &format!(
-                            "  {scope}/{name}    ({local_ver}{update_tip})\n",
-                            scope = node.software.unwrap().scope.cyan().italic(),
-                            name = node.name.cyan().bold(),
+                        acc + &fmt_package_line(
+                            node.software.unwrap().scope,
+                            node.name,
+                            format!("{local_ver}{update_tip}"),
+                            None,
                         )
                     });
             res
