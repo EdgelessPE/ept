@@ -7,6 +7,7 @@ pub mod command;
 pub mod conditions;
 pub mod download;
 pub mod env;
+pub mod fmt_print;
 pub mod fs;
 pub mod mirror;
 pub mod path;

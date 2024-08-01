@@ -2,7 +2,10 @@ use colored::Colorize;
 use console::Term;
 use regex::Regex;
 
-use super::{is_debug_mode, is_no_warning_mode};
+use super::{
+    fmt_print::{fmt_log, fmt_log_in_step},
+    is_debug_mode, is_no_warning_mode,
+};
 
 lazy_static! {
     static ref RE: Regex =
@@ -39,13 +42,9 @@ fn gen_log(msg: &String, replace_head: Option<String>) -> Option<String> {
         };
 
         return if cap.get(2).is_some() {
-            Some(format!(
-                "{c_head:>8} {s:<9} {m}",
-                s = cap[2].truecolor(100, 100, 100),
-                m = &cap[3]
-            ))
+            Some(fmt_log_in_step(&cap[2], c_head, &cap[3]))
         } else {
-            Some(format!("{c_head:>8} {m}", m = &cap[3]))
+            Some(fmt_log(c_head, &cap[3]))
         };
     }
     Some(msg.to_string())
