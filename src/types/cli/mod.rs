@@ -4,7 +4,7 @@ pub use self::config::ActionConfig;
 pub use self::mirror::ActionMirror;
 use clap::{Parser, Subcommand};
 
-/// [Alpha] Edgeless Package Tool (ept) for Edgeless Next-Generation Packages (nep)
+/// Edgeless Package Tool (ept) for Next-Generation Edgeless Packages (nep)
 #[derive(Parser, Debug)]
 #[command(version)]
 pub struct Args {
@@ -34,7 +34,8 @@ pub struct Args {
 
 #[derive(Subcommand, Debug)]
 pub enum Action {
-    /// Install a package
+    /// Install a package [alias 'i' 'add']
+    #[clap(aliases = &["i", "add"])]
     Install {
         /// Package matcher（expect pattern ((MIRROR/)SCOPE/)NAME(@SEMVER)）or Nep package url or Nep package local path
         package: String,
@@ -46,7 +47,8 @@ pub enum Action {
         package: Option<String>,
     },
 
-    /// Uninstall a package
+    /// Uninstall a package [alias 'remove']
+    #[clap(alias = "remove")]
     Uninstall {
         /// Package matcher, expect pattern (SCOPE/)NAME
         package_matcher: String,
@@ -64,7 +66,8 @@ pub enum Action {
         package_matcher: String,
     },
 
-    /// List information of installed packages
+    /// List information of installed packages [alias 'ls']
+    #[clap(alias = "ls")]
     List,
 
     /// Get meta data of given package
