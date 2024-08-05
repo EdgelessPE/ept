@@ -3,7 +3,7 @@ use sysinfo::System;
 pub fn kill_with_name(name: &str) -> bool {
     let s = System::new_all();
     let mut res = true;
-    for process in s.processes_by_exact_name(name) {
+    for process in s.processes_by_exact_name(name.as_ref()) {
         if !process.kill() {
             res = false;
         }
@@ -13,7 +13,7 @@ pub fn kill_with_name(name: &str) -> bool {
 
 pub fn is_alive_with_name(name: &str) -> bool {
     let s = System::new_all();
-    let mut processes = s.processes_by_exact_name(name);
+    let mut processes = s.processes_by_exact_name(name.as_ref());
     processes.next().is_some()
 }
 

@@ -27,7 +27,7 @@ fn kill(target: &String) -> Result<()> {
     let s = System::new_all();
     let mut count_suc = 0;
     let mut count_fail = 0;
-    for process in s.processes_by_exact_name(target) {
+    for process in s.processes_by_exact_name(target.as_ref()) {
         if process.kill() {
             count_suc += 1;
         } else {
