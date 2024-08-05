@@ -194,7 +194,7 @@ fn test_mirror() {
         vec![crate::types::mirror::SearchResult {
             name: "VSCode".to_string(),
             scope: "Microsoft".to_string(),
-            version: "1.85.1.0".to_string(),
+            version: "1.75.4.2".to_string(),
             from_mirror: Some("mock-server".to_string()),
         }]
     );

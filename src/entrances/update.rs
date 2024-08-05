@@ -300,3 +300,66 @@ fn test_update_using_package() {
     // 卸载
     crate::uninstall(None, &"VSCode".to_string()).unwrap();
 }
+
+#[test]
+fn test_update_all() {
+    let tup = crate::utils::test::_mount_custom_mirror();
+    let (_, mut handler) = crate::utils::test::_run_static_file_server();
+    envmnt::set("DEBUG", "true");
+    envmnt::set("CONFIRM", "true");
+    crate::utils::test::_ensure_clear_test_dir();
+
+    // 确保已卸载
+    crate::utils::test::_ensure_testing_vscode_uninstalled();
+    crate::utils::test::_ensure_testing_uninstalled("Microsoft", "Notepad");
+
+    // 生成旧的 Notepad 包
+    crate::utils::fs::copy_dir("examples/Notepad", "test/Notepad").unwrap();
+    crate::utils::test::_modify_installed_package_version("test/Notepad", "22.0.0.0");
+
+    // 安装旧版本
+    install_using_package(&"examples/VSCode".to_string(), false).unwrap();
+    install_using_package(&"test/Notepad".to_string(), false).unwrap();
+
+    // 生成新包
+    crate::utils::fs::copy_dir("examples/VSCode", "test/VSCode").unwrap();
+    crate::utils::test::_modify_installed_package_version("test/VSCode", "1.75.4.2");
+    crate::pack(
+        &"./test/VSCode".to_string(),
+        Some("./test/VSCode_1.75.4.2_Cno.nep".to_string()),
+        false,
+    )
+    .unwrap();
+    crate::pack(
+        &"./examples/Notepad".to_string(),
+        Some("./test/Notepad_22.1.0.0_Cno.nep".to_string()),
+        false,
+    )
+    .unwrap();
+
+    // 更新全部
+    let (_, failure_count) = update_all(false).unwrap();
+    assert_eq!(failure_count, 0);
+    assert!(
+        info_local(&"Microsoft".to_string(), &"VSCode".to_string())
+            .unwrap()
+            .1
+            .version
+            == *"1.75.4.2"
+    );
+    assert!(
+        info_local(&"Microsoft".to_string(), &"Notepad".to_string())
+            .unwrap()
+            .1
+            .version
+            == *"22.1.0.0"
+    );
+
+    // 卸载
+    crate::utils::test::_ensure_testing_vscode_uninstalled();
+    crate::utils::test::_ensure_testing_uninstalled("Microsoft", "Notepad");
+
+    // 清理测试服务器
+    handler.kill().unwrap();
+    crate::utils::test::_unmount_custom_mirror(tup);
+}

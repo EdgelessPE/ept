@@ -367,7 +367,7 @@ fn test_install_with_matcher() {
     // 启动文件服务器
     let (_, mut handler) = crate::utils::test::_run_static_file_server();
 
-    // 打包出一个 VSCode_1.85.1.0_Cno
+    // 打包出一个 VSCode_1.75.4.2_Cno
     let static_path = Path::new("test/static");
     if !static_path.exists() {
         std::fs::create_dir_all(static_path).unwrap();
@@ -376,7 +376,7 @@ fn test_install_with_matcher() {
         &"./examples/VSCode".to_string(),
         Some(
             static_path
-                .join("VSCode_1.85.1.0_Cno.nep")
+                .join("VSCode_1.75.4.2_Cno.nep")
                 .to_string_lossy()
                 .to_string(),
         ),
@@ -414,7 +414,7 @@ fn test_install_with_matcher() {
         &"./test/VSCode".to_string(),
         Some(
             static_path
-                .join("VSCode_1.85.1.0_Cno.nep")
+                .join("VSCode_1.75.4.2_Cno.nep")
                 .to_string_lossy()
                 .to_string(),
         ),
@@ -428,7 +428,7 @@ fn test_install_with_matcher() {
             name: "vscode".to_string(),
             scope: Some("microsoFT".to_string()),
             mirror: Some("mock-server".to_string()),
-            version_req: Some(VersionReq::parse("^1.81").unwrap()),
+            version_req: Some(VersionReq::parse("^1.75").unwrap()),
         },
         false,
     )

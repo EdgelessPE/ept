@@ -108,8 +108,8 @@ pub fn _run_mirror_mock_server() -> String {
                 "name": "VSCode",
                 "releases": [
                     {
-                        "file_name": "VSCode_1.85.1.0_Cno.nep",
-                        "version": "1.85.1.0",
+                        "file_name": "VSCode_1.75.4.2_Cno.nep",
+                        "version": "1.75.4.2",
                         "size": 94245376,
                         "timestamp": 1704554724
                     }
