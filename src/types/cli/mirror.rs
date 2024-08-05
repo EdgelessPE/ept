@@ -7,7 +7,8 @@ pub enum ActionMirror {
         /// Mirror url
         url: String,
     },
-    /// Update mirror index
+    /// Update mirror index [alias 'up']
+    #[clap(alias = "up")]
     Update {
         /// (Optional) Mirror name, update all if not provided
         name: Option<String>,

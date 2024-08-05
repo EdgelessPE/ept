@@ -10,7 +10,8 @@ pub enum ActionConfig {
     },
     /// Print the value for a given 'key' in 'table'
     Get { table: String, key: String },
-    /// Displays the current configuration
+    /// Displays the current configuration [alias 'ls']
+    #[clap(alias = "ls")]
     List,
     /// Initialize config file
     Init,

@@ -41,14 +41,15 @@ pub enum Action {
         package: String,
     },
 
-    /// Update all updatable packages or a specified package
+    /// Update all updatable packages or a specified package [alias 'up']
+    #[clap(alias = "up")]
     Update {
         /// Package matcher（expect pattern ((MIRROR/)SCOPE/)NAME(@SEMVER)）or Nep package url or Nep package local path
         package: Option<String>,
     },
 
-    /// Uninstall a package [alias 'remove']
-    #[clap(alias = "remove")]
+    /// Uninstall a package [alias 'remove' 'rm']
+    #[clap(aliases = &["remove","rm"])]
     Uninstall {
         /// Package matcher, expect pattern (SCOPE/)NAME
         package_matcher: String,
