@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use std::fs::{create_dir_all, remove_dir_all, File};
 use std::path::Path;
 use tar::{Archive, Builder};
@@ -19,7 +19,8 @@ pub fn release_tar(source: &String, into: &String) -> Result<()> {
 }
 
 pub fn pack_tar(source: &String, store_at: &String) -> Result<()> {
-    let file = File::create(store_at)?;
+    let file = File::create(store_at)
+        .map_err(|e| anyhow!("Error:Failed to create file at '{store_at}' : {e}"))?;
     let mut archive = Builder::new(file);
     archive.append_dir_all(".", source)?;
     archive.finish()?;

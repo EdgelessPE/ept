@@ -324,15 +324,16 @@ fn test_update_all() {
     // 生成新包
     crate::utils::fs::copy_dir("examples/VSCode", "test/VSCode").unwrap();
     crate::utils::test::_modify_installed_package_version("test/VSCode", "1.75.4.2");
+    std::fs::create_dir("test/static").unwrap();
     crate::pack(
         &"./test/VSCode".to_string(),
-        Some("./test/VSCode_1.75.4.2_Cno.nep".to_string()),
+        Some("./test/static/VSCode_1.75.4.2_Cno.nep".to_string()),
         false,
     )
     .unwrap();
     crate::pack(
         &"./examples/Notepad".to_string(),
-        Some("./test/Notepad_22.1.0.0_Cno.nep".to_string()),
+        Some("./test/static/Notepad_22.1.0.0_Cno.nep".to_string()),
         false,
     )
     .unwrap();
