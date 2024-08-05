@@ -285,6 +285,25 @@ fn test_unpack_nep() {
 }
 
 #[test]
+fn test_normal_unpack_nep() {
+    if cfg!(debug_assertions) {
+        log!("Warning:Debug mode enabled");
+        envmnt::set("DEBUG", "true");
+    }
+    crate::utils::test::_ensure_clear_test_dir();
+
+    crate::pack(
+        &"./examples/VSCode".to_string(),
+        Some("./test/VSCode_1.75.0.0_Cno.nep".to_string()),
+        true,
+    )
+    .unwrap();
+
+    let res = normal_unpack_nep(&"./test/VSCode_1.75.0.0_Cno.nep".to_string(), true).unwrap();
+    println!("{res:#?}");
+}
+
+#[test]
 fn test_fast_unpack_nep() {
     if cfg!(debug_assertions) {
         log!("Warning:Debug mode enabled");
@@ -303,35 +322,35 @@ fn test_fast_unpack_nep() {
     println!("{res:#?}");
 }
 
-#[test]
-fn benchmark_fast_unpack_nep() {
-    envmnt::set("DEBUG", "true");
-    // 准备带有一定体积的包
-    crate::utils::test::_ensure_clear_test_dir();
+// #[test]
+// fn benchmark_fast_unpack_nep() {
+//     envmnt::set("DEBUG", "true");
+//     // 准备带有一定体积的包
+//     crate::utils::test::_ensure_clear_test_dir();
 
-    crate::pack(
-        &"examples/Dism++".to_string(),
-        Some("./test/Dism++_10.1.1002.1_Cno.nep".to_string()),
-        true,
-    )
-    .unwrap();
+//     crate::pack(
+//         &"examples/Dism++".to_string(),
+//         Some("./test/Dism++_10.1.1002.1_Cno.nep".to_string()),
+//         true,
+//     )
+//     .unwrap();
 
-    use std::time::Instant;
-    let normal = Instant::now();
-    for _ in 0..10 {
-        unpack_nep(&"./test/Dism++_10.1.1002.1_Cno.nep".to_string(), true).unwrap();
-    }
+//     use std::time::Instant;
+//     let normal = Instant::now();
+//     for _ in 0..10 {
+//         normal_unpack_nep(&"./test/Dism++_10.1.1002.1_Cno.nep".to_string(), true).unwrap();
+//     }
 
-    let fast = Instant::now();
-    for _ in 0..10 {
-        fast_unpack_nep(&"./test/Dism++_10.1.1002.1_Cno.nep".to_string(), true).unwrap();
-    }
-    println!(
-        "Normal unpack cost {n}ms, fast unpack cost {f}ms",
-        n = normal.elapsed().as_millis(),
-        f = fast.elapsed().as_millis()
-    );
-}
+//     let fast = Instant::now();
+//     for _ in 0..10 {
+//         fast_unpack_nep(&"./test/Dism++_10.1.1002.1_Cno.nep".to_string(), true).unwrap();
+//     }
+//     println!(
+//         "Normal unpack cost {n}ms, fast unpack cost {f}ms",
+//         n = normal.elapsed().as_millis(),
+//         f = fast.elapsed().as_millis()
+//     );
+// }
 
 #[test]
 fn test_bad_package() {
@@ -357,7 +376,8 @@ fn test_bad_package() {
         false,
     )
     .unwrap();
-    assert!(unpack_nep(&"./test/UnSig++_10.1.1002.1_Cno.nep".to_string(), true).is_err());
+    assert!(normal_unpack_nep(&"./test/UnSig++_10.1.1002.1_Cno.nep".to_string(), true).is_err());
+    assert!(fast_unpack_nep(&"./test/UnSig++_10.1.1002.1_Cno.nep".to_string(), true).is_err());
 
     // 被篡改的签名
     copy_dir("test/Normal", "test/BadSig").unwrap();
@@ -373,7 +393,8 @@ fn test_bad_package() {
         &"test/BadSig++_10.1.1002.1_Cno.nep".to_string(),
     )
     .unwrap();
-    assert!(unpack_nep(&"test/BadSig++_10.1.1002.1_Cno.nep".to_string(), true).is_err());
+    assert!(normal_unpack_nep(&"test/BadSig++_10.1.1002.1_Cno.nep".to_string(), true).is_err());
+    assert!(fast_unpack_nep(&"test/BadSig++_10.1.1002.1_Cno.nep".to_string(), true).is_err());
 
     // 缺失签名文件
     copy_dir("test/Normal", "test/NoSig").unwrap();
@@ -383,7 +404,8 @@ fn test_bad_package() {
         &"test/NoSig++_10.1.1002.1_Cno.nep".to_string(),
     )
     .unwrap();
-    assert!(unpack_nep(&"test/NoSig++_10.1.1002.1_Cno.nep".to_string(), true).is_err());
+    assert!(normal_unpack_nep(&"test/NoSig++_10.1.1002.1_Cno.nep".to_string(), true).is_err());
+    assert!(fast_unpack_nep(&"test/NoSig++_10.1.1002.1_Cno.nep".to_string(), true).is_err());
 
     // 错误的打包者
     copy_dir("test/Normal", "test/BadAuth").unwrap();
@@ -396,5 +418,6 @@ fn test_bad_package() {
         &"test/BadAuth++_10.1.1002.1_Cno.nep".to_string(),
     )
     .unwrap();
-    assert!(unpack_nep(&"test/BadAuth++_10.1.1002.1_Cno.nep".to_string(), true).is_err());
+    assert!(normal_unpack_nep(&"test/BadAuth++_10.1.1002.1_Cno.nep".to_string(), true).is_err());
+    assert!(fast_unpack_nep(&"test/BadAuth++_10.1.1002.1_Cno.nep".to_string(), true).is_err());
 }

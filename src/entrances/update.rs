@@ -263,9 +263,7 @@ fn test_update_using_package() {
     crate::utils::test::_ensure_clear_test_dir();
 
     // 卸载
-    if info_local(&"Microsoft".to_string(), &"VSCode".to_string()).is_ok() {
-        crate::uninstall(Some("Microsoft".to_string()), &"VSCode".to_string()).unwrap();
-    }
+    crate::utils::test::_ensure_testing_vscode_uninstalled();
 
     // 安装旧版本
     crate::pack(
