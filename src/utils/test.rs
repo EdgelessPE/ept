@@ -114,6 +114,17 @@ pub fn _run_mirror_mock_server() -> String {
                         "timestamp": 1704554724
                     }
                 ]
+            },
+            {
+                "name": "Notepad",
+                "releases": [
+                    {
+                        "file_name": "Notepad_22.1.0.0_Cno.nep",
+                        "version": "22.1.0.0",
+                        "size": 94245376,
+                        "timestamp": 1704554724
+                    }
+                ]
             }
         ]
     },
