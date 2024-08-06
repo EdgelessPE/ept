@@ -147,7 +147,61 @@ pub fn clean() -> Result<usize> {
 
 #[test]
 fn test_clean() {
-    // TODO:创建环境，完善 clean 单测
+    use crate::utils::fs::copy_dir;
+    use std::fs::{copy, create_dir_all, write};
     envmnt::set("CONFIRM", "true");
+
+    // 安装 vscode
+    crate::utils::test::_ensure_testing_vscode();
+    let bin_path = get_path_bin().unwrap();
+    let (vscode_entrance_name, another_entrance_name) =
+        if bin_path.join("Microsoft-Code.cmd").exists() {
+            ("Microsoft-Code.cmd", "Code.cmd")
+        } else {
+            ("Code.cmd", "Microsoft-Code.cmd")
+        };
+    let vscode_entrance_path = bin_path.join(vscode_entrance_name);
+    assert!(vscode_entrance_path.exists());
+
+    // 创建几个无效的入口文件
+    copy(&vscode_entrance_path, bin_path.join("invalid.cmd")).unwrap();
+    copy(&vscode_entrance_path, bin_path.join("Microsoft-Code.bat")).unwrap();
+    copy(
+        &vscode_entrance_path,
+        bin_path.join("Microsoft-VisualStudio.cmd"),
+    )
+    .unwrap();
+    copy(&vscode_entrance_path, bin_path.join(another_entrance_name)).unwrap();
+
+    // 在 apps 目录中添加无效文件
+    let apps_path = get_bare_apps().unwrap();
+    let fake_scope_foo = apps_path.join("FakeScopeFoo");
+    let fake_scope_bar = apps_path.join("FakeScopeBar");
+    let fake_scope_foz = apps_path.join("FakeScopeFoz");
+    let fake_bar_software = fake_scope_bar.join("Dism++");
+    create_dir_all(&fake_scope_foo).unwrap();
+    create_dir_all(&fake_scope_bar).unwrap();
+    create_dir_all(&fake_scope_foz).unwrap();
+    copy_dir("examples/Dism++", &fake_bar_software).unwrap();
+    write(apps_path.join("README.md"), "# What can I say").unwrap();
+    write(fake_scope_foz.join("README.md"), "# Man!").unwrap();
+
+    // 执行清理
     clean().unwrap();
+
+    // 断言清理结果
+    assert!(!bin_path.join("invalid.cmd").exists());
+    assert!(!bin_path.join("Microsoft-Code.bat").exists());
+    assert!(!bin_path.join("Microsoft-VisualStudio.cmd").exists());
+    assert!(bin_path.join(another_entrance_name).exists());
+    assert!(!fake_scope_foo.exists());
+    assert!(!fake_scope_bar.exists());
+    assert!(!fake_scope_foz.exists());
+    assert!(!fake_bar_software.exists());
+    assert!(!apps_path.join("README.md").exists());
+    assert!(!fake_scope_foz.join("README.md").exists());
+
+    // 卸载 vscode
+    crate::utils::test::_ensure_testing_vscode_uninstalled();
+    assert!(!bin_path.join(another_entrance_name).exists());
 }
