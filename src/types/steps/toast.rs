@@ -10,8 +10,8 @@ use crate::types::{
     workflow::WorkflowContext,
 };
 use anyhow::{anyhow, Ok, Result};
-use notify_rust::Notification;
 use serde::{Deserialize, Serialize};
+use winrt_notification::{Duration, Sound, Toast};
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct StepToast {
@@ -26,10 +26,11 @@ pub struct StepToast {
 impl TStep for StepToast {
     fn run(self, _: &mut WorkflowContext) -> Result<i32> {
         //- 弹出消息通知。
-        Notification::new()
-            .appname("ept")
-            .summary(&self.title)
-            .body(&self.content)
+        Toast::new(Toast::POWERSHELL_APP_ID)
+            .title(&self.title)
+            .text1(&self.content)
+            .sound(Some(Sound::SMS))
+            .duration(Duration::Short)
             .show()
             .map_err(|e| {
                 anyhow!(
@@ -38,6 +39,7 @@ impl TStep for StepToast {
                     c = self.content
                 )
             })?;
+
         log!(
             "Log(Toast):Sent toast with title : '{t}', content : '{c}'",
             t = self.title,
