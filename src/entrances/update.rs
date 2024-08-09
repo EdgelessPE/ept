@@ -5,7 +5,6 @@ use super::{
         validator::installed_validator,
     },
 };
-use crate::types::info::UpdateInfo;
 use crate::{
     executor::workflow_executor,
     p2s,
@@ -20,6 +19,7 @@ use crate::{
         term::ask_yn,
     },
 };
+use crate::{executor::workflow_reverse_executor, types::info::UpdateInfo};
 use crate::{log, log_ok_last};
 use anyhow::{anyhow, Result};
 use std::{fs::remove_dir_all, str::FromStr};
@@ -79,20 +79,28 @@ pub fn update_using_package(source_file: &String, verify_signature: bool) -> Res
     let located = get_path_apps(&local_software.scope, &name, true)?;
     log_ok_last!("Info:Resolving package...");
 
-    // 执行旧的 remove 工作流
+    // 如果旧包有 remove 且新包没有 update 则执行旧包的 remove
     let remove_path = located
         .join(".nep_context")
         .join("workflows")
         .join("remove.toml");
-    let run_remove = if remove_path.exists() {
+    let update_path = temp_dir_inner_path.join("workflows").join("update.toml");
+    if remove_path.exists() && !update_path.exists() {
         log!("Info:Running remove workflow...");
         let remove_workflow = parse_workflow(&p2s!(remove_path))?;
-        workflow_executor(remove_workflow, p2s!(located), local_package)?;
+        workflow_executor(remove_workflow, p2s!(located), local_package.clone())?;
         log_ok_last!("Info:Running remove workflow...");
-        true
-    } else {
-        false
     };
+
+    // 逆向执行安装工作流
+    let setup_path = located
+        .join(".nep_context")
+        .join("workflows")
+        .join("setup.toml");
+    let setup_workflow = parse_workflow(&p2s!(setup_path))?;
+    log!("Info:Running reverse setup workflow...");
+    workflow_reverse_executor(setup_workflow, p2s!(located), local_package)?;
+    log_ok_last!("Info:Running reverse setup workflow...");
 
     // 移除旧的 app 目录
     // TODO:尽可能提前检查占用，避免无法删除
@@ -105,16 +113,15 @@ pub fn update_using_package(source_file: &String, verify_signature: bool) -> Res
     move_or_copy(temp_dir_inner_path.join(&name), located.clone())?;
     log_ok_last!("Info:Deploying files...");
 
-    // 检查有无 update 工作流
-    let update_path = temp_dir_inner_path.join("workflows").join("update.toml");
+    // 执行新包的 update，如果没有则执行新包的 setup
     if update_path.exists() {
         // 执行 update 工作流
         log!("Info:Running update workflow...");
         let update_workflow = parse_workflow(&p2s!(update_path))?;
         workflow_executor(update_workflow, p2s!(located), fresh_package)?;
         log_ok_last!("Info:Running update workflow...");
-    } else if run_remove {
-        // 没有升级但是跑了一遍卸载，需要重新跑一遍 setup
+    } else {
+        // 执行 setup 工作流
         log!("Info:Running setup workflow...");
         let setup_workflow = parse_workflow(&p2s!(update_path.with_file_name("setup.toml")))?;
         workflow_executor(setup_workflow, p2s!(located), fresh_package)?;
@@ -362,4 +369,68 @@ fn test_update_all() {
     // 清理测试服务器
     handler.kill().unwrap();
     crate::utils::test::_unmount_custom_mirror(tup);
+}
+
+#[test]
+fn test_update_workflow_executions() {
+    assert!(crate::utils::wild_match::parse_wild_match(
+        "vsc*.lnk".to_string(),
+        &crate::utils::env::env_desktop()
+    )
+    .is_err());
+    envmnt::set("CONFIRM", "true");
+    // (旧包类型，新包类型，更新后断言存在的文件)
+    let test_arr = vec![
+        (0, 0, vec!["vsc0-setup-1.75.4.1"]),
+        // (0, 1, vec![]),
+        // (0, 2, vec![]),
+        // (0, 3, vec![]),
+        // (1, 0, vec![]),
+        // (1, 1, vec![]),
+        // (1, 2, vec![]),
+        // (1, 3, vec![]),
+        // (2, 0, vec![]),
+        // (2, 1, vec![]),
+        // (2, 2, vec![]),
+        // (2, 3, vec![]),
+        // (3, 0, vec![]),
+        // (3, 1, vec![]),
+        // (3, 2, vec![]),
+        // (3, 3, vec![]),
+    ];
+
+    for (old_type, new_type, assert_files) in test_arr {
+        // 卸载
+        crate::utils::test::_ensure_testing_vscode_uninstalled();
+
+        // 安装旧版本
+        crate::entrances::install_using_package(
+            &format!("examples/UpdateSuit/VSCode{old_type}"),
+            false,
+        )
+        .unwrap();
+        assert!(std::path::Path::new(&crate::utils::env::env_desktop())
+            .join(format!("vsc{old_type}-setup-1.75.4.0.lnk"))
+            .exists());
+
+        // 更新
+        let source_file = crate::utils::test::_fork_example_with_version(
+            &format!("examples/UpdateSuit/VSCode{new_type}"),
+            "1.75.4.1",
+        );
+        crate::entrances::update_using_package(&source_file, false).unwrap();
+
+        // 断言仅存在指定文件
+        for file in assert_files {
+            let p = std::path::Path::new(&crate::utils::env::env_desktop())
+                .join(&format!("{file}.lnk"));
+            assert!(p.exists());
+            std::fs::remove_file(p).unwrap();
+        }
+        assert!(crate::utils::wild_match::parse_wild_match(
+            "vsc*.lnk".to_string(),
+            &crate::utils::env::env_desktop()
+        )
+        .is_err());
+    }
 }
