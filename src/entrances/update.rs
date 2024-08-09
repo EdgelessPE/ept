@@ -77,6 +77,7 @@ pub fn update_using_package(source_file: &String, verify_signature: bool) -> Res
     }
 
     let located = get_path_apps(&local_software.scope, &name, true)?;
+    let located_str = p2s!(located);
     log_ok_last!("Info:Resolving package...");
 
     // 如果旧包有 remove 且新包没有 update 则执行旧包的 remove
@@ -88,7 +89,7 @@ pub fn update_using_package(source_file: &String, verify_signature: bool) -> Res
     if remove_path.exists() && !update_path.exists() {
         log!("Info:Running remove workflow...");
         let remove_workflow = parse_workflow(&p2s!(remove_path))?;
-        workflow_executor(remove_workflow, p2s!(located), local_package.clone())?;
+        workflow_executor(remove_workflow, located_str.clone(), local_package.clone())?;
         log_ok_last!("Info:Running remove workflow...");
     };
 
@@ -99,7 +100,7 @@ pub fn update_using_package(source_file: &String, verify_signature: bool) -> Res
         .join("setup.toml");
     let setup_workflow = parse_workflow(&p2s!(setup_path))?;
     log!("Info:Running reverse setup workflow...");
-    workflow_reverse_executor(setup_workflow, p2s!(located), local_package)?;
+    workflow_reverse_executor(setup_workflow, located_str.clone(), local_package)?;
     log_ok_last!("Info:Running reverse setup workflow...");
 
     // 移除旧的 app 目录
@@ -118,13 +119,13 @@ pub fn update_using_package(source_file: &String, verify_signature: bool) -> Res
         // 执行 update 工作流
         log!("Info:Running update workflow...");
         let update_workflow = parse_workflow(&p2s!(update_path))?;
-        workflow_executor(update_workflow, p2s!(located), fresh_package)?;
+        workflow_executor(update_workflow, located_str.clone(), fresh_package)?;
         log_ok_last!("Info:Running update workflow...");
     } else {
         // 执行 setup 工作流
         log!("Info:Running setup workflow...");
         let setup_workflow = parse_workflow(&p2s!(update_path.with_file_name("setup.toml")))?;
-        workflow_executor(setup_workflow, p2s!(located), fresh_package)?;
+        workflow_executor(setup_workflow, located_str.clone(), fresh_package)?;
         log_ok_last!("Info:Running setup workflow...");
     }
 
@@ -134,7 +135,7 @@ pub fn update_using_package(source_file: &String, verify_signature: bool) -> Res
 
     // 检查更新是否完整
     log!("Info:Validating update...");
-    installed_validator(&p2s!(located))?;
+    installed_validator(&located_str)?;
     log_ok_last!("Info:Validating update...");
 
     // 清理临时文件夹
