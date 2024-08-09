@@ -2,4 +2,4 @@
 name = "Create shortcut"
 step = "Link"
 source_file = "vsc-launcher.exe"
-target_name = "vsc1-remove"
+target_name = "vsc1-remove-${PackageVersion}"
