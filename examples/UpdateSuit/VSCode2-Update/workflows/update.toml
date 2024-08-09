@@ -1,0 +1,5 @@
+[create_shortcut]
+name = "Create shortcut"
+step = "Link"
+source_file = "vsc-launcher.exe"
+target_name = "vsc2-update"
