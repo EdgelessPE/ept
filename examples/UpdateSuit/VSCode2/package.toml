@@ -9,7 +9,7 @@ template = "Software"
 # 版本号
 version = "1.75.4.0"
 # 打包者/作者
-authors = ["Cno <dsyourshy@qq.com>","Microsoft"]
+authors = ["J3rry <dsyourshy@qq.com>","Microsoft"]
 # 许可证缩写或链接（可选）
 license = "MIT"
 description = "Visual Studio Code"

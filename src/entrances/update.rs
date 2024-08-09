@@ -399,7 +399,7 @@ fn test_update_workflow_executions() {
     ];
 
     for (old_type, new_type, assert_files) in test_arr {
-        log!("Info:Testing {old_type} -> {new_type}");
+        log!("Info:Testing updating {old_type} -> {new_type}");
         // 卸载
         crate::utils::test::_ensure_testing_vscode_uninstalled();
 
@@ -437,4 +437,34 @@ fn test_update_workflow_executions() {
             std::fs::remove_file(remove_lnk).unwrap()
         }
     }
+}
+
+#[test]
+fn test_update_with_different_author() {
+    envmnt::set("CONFIRM", "true");
+    let desktop = crate::utils::env::env_desktop();
+    assert!(crate::utils::wild_match::parse_wild_match("vsc*.lnk".to_string(), &desktop).is_err());
+    let desktop_path = std::path::Path::new(&desktop);
+
+    // 卸载
+    crate::utils::test::_ensure_testing_vscode_uninstalled();
+
+    // 安装旧版本
+    crate::entrances::install_using_package(&"examples/UpdateSuit/VSCode3".to_string(), false)
+        .unwrap();
+    assert!(desktop_path.join("vsc3-setup-1.75.4.0.lnk").exists());
+
+    // 安装新版本
+    let source_file = crate::utils::test::_fork_example_with_version("examples/VSCode", "1.75.4.2");
+    crate::entrances::install_using_package(&source_file, false).unwrap();
+
+    // 断言是先卸载再安装的
+    assert!(!desktop_path.join("vsc3-setup-1.75.4.0.lnk").exists());
+    assert!(!desktop_path.join("vsc3-update-1.75.4.0.lnk").exists());
+    assert!(desktop_path.join("vsc3-remove-1.75.4.0.lnk").exists());
+    assert!(desktop_path.join("Visual Studio Code.lnk").exists());
+
+    // 卸载
+    std::fs::remove_file(desktop_path.join("vsc3-remove-1.75.4.0.lnk")).unwrap();
+    crate::utils::test::_ensure_testing_vscode_uninstalled();
 }

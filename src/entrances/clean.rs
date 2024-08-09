@@ -152,6 +152,7 @@ fn test_clean() {
     envmnt::set("CONFIRM", "true");
 
     // 安装 vscode
+    crate::utils::test::_ensure_testing_vscode_uninstalled();
     crate::utils::test::_ensure_testing_vscode();
     let bin_path = get_path_bin().unwrap();
     let (vscode_entrance_name, another_entrance_name) =
