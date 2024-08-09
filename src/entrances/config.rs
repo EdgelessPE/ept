@@ -33,27 +33,27 @@ pub fn config_set(table: &String, key: &String, value: &String) -> Result<()> {
         Value::String(_) => {
             table[key] = Value::String(value.to_owned());
         }
-        Value::Boolean(_) => {
-            let bool_value = value
-                .parse()
-                .map_err(|_| anyhow!("Can't parse '${value}' as valid bool value"))
-                .map_err(err_wrapper)?;
-            table[key] = Value::Boolean(bool_value);
-        }
-        Value::Integer(_) => {
-            let int_value = value
-                .parse()
-                .map_err(|_| anyhow!("Can't parse '${value}' as valid integer value"))
-                .map_err(err_wrapper)?;
-            table[key] = Value::Integer(int_value);
-        }
-        Value::Float(_) => {
-            let float_value = value
-                .parse()
-                .map_err(|_| anyhow!("Can't parse '${value}' as valid float value"))
-                .map_err(err_wrapper)?;
-            table[key] = Value::Float(float_value);
-        }
+        // Value::Boolean(_) => {
+        //     let bool_value = value
+        //         .parse()
+        //         .map_err(|_| anyhow!("Can't parse '${value}' as valid bool value"))
+        //         .map_err(err_wrapper)?;
+        //     table[key] = Value::Boolean(bool_value);
+        // }
+        // Value::Integer(_) => {
+        //     let int_value = value
+        //         .parse()
+        //         .map_err(|_| anyhow!("Can't parse '${value}' as valid integer value"))
+        //         .map_err(err_wrapper)?;
+        //     table[key] = Value::Integer(int_value);
+        // }
+        // Value::Float(_) => {
+        //     let float_value = value
+        //         .parse()
+        //         .map_err(|_| anyhow!("Can't parse '${value}' as valid float value"))
+        //         .map_err(err_wrapper)?;
+        //     table[key] = Value::Float(float_value);
+        // }
         _ => {
             return Err(err_wrapper(anyhow!("This type is not supported for cli configuration, modify the configuration file manually")));
         }
