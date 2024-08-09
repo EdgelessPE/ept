@@ -28,20 +28,29 @@ lazy_static! {
     static ref DEFAULT_LOCATION: String = p2s!(get_bare_apps().unwrap());
 }
 
-pub fn get_eval_context(exit_code: i32, located: &String) -> HashMapContext {
+pub fn get_eval_context(
+    exit_code: i32,
+    located: &String,
+    package_version: &String,
+) -> HashMapContext {
     let mut context = HashMapContext::new();
     set_context_with_constant_values(&mut context);
-    set_context_with_mutable_values(&mut context, exit_code, located);
+    set_context_with_mutable_values(&mut context, exit_code, located, package_version);
     set_context_with_function(&mut context, located);
     context
 }
 
 // 执行条件以判断是否成立
-pub fn condition_eval(condition: &String, exit_code: i32, located: &String) -> Result<bool> {
+pub fn condition_eval(
+    condition: &String,
+    exit_code: i32,
+    located: &String,
+    package_version: &String,
+) -> Result<bool> {
     // 装饰变量与函数
     let condition_with_values_interpreted =
-        values_replacer(condition.to_owned(), exit_code, located);
-    let context = get_eval_context(exit_code, located);
+        values_replacer(condition.to_owned(), exit_code, located, package_version);
+    let context = get_eval_context(exit_code, located, package_version);
 
     // 执行 eval
     eval_boolean_with_context(&condition_with_values_interpreted, &context).map_err(|res| {
@@ -65,6 +74,7 @@ pub fn workflow_executor(
     }
 
     // 准备上下文
+    let package_version = pkg.package.version.clone();
     let mut cx = WorkflowContext::new(&located, pkg);
 
     // 遍历流节点
@@ -73,14 +83,15 @@ pub fn workflow_executor(
         log!("Debug:Start step '{name}'");
         // 解释节点条件，判断是否需要跳过执行
         if let Some(c_if) = flow_node.header.c_if {
-            if !condition_eval(&c_if, cx.exit_code, &located)? {
+            if !condition_eval(&c_if, cx.exit_code, &located, &package_version)? {
                 continue;
             }
         }
 
         // 创建变量解释器
         let cur_exit_code = cx.exit_code;
-        let interpreter = |raw: String| values_replacer(raw, cur_exit_code, &located);
+        let interpreter =
+            |raw: String| values_replacer(raw, cur_exit_code, &located, &package_version);
 
         // 匹配步骤类型以调用步骤解释器
         let exec_res = flow_node.body.run(&mut cx, interpreter);
@@ -117,6 +128,7 @@ pub fn workflow_reverse_executor(
     located: String,
     pkg: GlobalPackage,
 ) -> Result<()> {
+    let package_version = pkg.package.version.clone();
     let mut cx = WorkflowContext::new(&located, pkg);
 
     // 遍历流节点
@@ -124,7 +136,7 @@ pub fn workflow_reverse_executor(
         let name = flow_node.header.name.unwrap();
         log!("Debug:Start reverse step '{name}'");
         // 创建变量解释器，ExitCode 始终置 0
-        let interpreter = |raw: String| values_replacer(raw, 0, &located);
+        let interpreter = |raw: String| values_replacer(raw, 0, &located, &package_version);
         // 匹配步骤类型以调用逆向步骤解释器
         let exec_res = flow_node.body.reverse_run(&mut cx, interpreter);
 
@@ -145,9 +157,10 @@ pub fn workflow_reverse_executor(
 fn test_condition_eval() {
     let located = &String::from("./examples/VSCode");
     let r1 = condition_eval(
-        &String::from("\"${ExitCode}\"==\"114\" && ExitCode==114"),
+        &String::from("\"${ExitCode}\"==\"114\" && ExitCode==114 && \"${PackageVersion}\"==\"1.0.0.0\" && PackageVersion==\"1.0.0.0\""),
         114,
         located,
+        &"1.0.0.0".to_string(),
     )
     .unwrap();
     assert!(r1);
@@ -156,6 +169,7 @@ fn test_condition_eval() {
         &String::from("\"${ExitCode}\"!=\"114\" || ExitCode==514"),
         114,
         located,
+        &"1.0.0.0".to_string(),
     )
     .unwrap();
     assert!(!r2);
@@ -164,6 +178,7 @@ fn test_condition_eval() {
         &String::from("\"${SystemDrive}\"==\"C:\" && SystemDrive==\"C:\""),
         0,
         located,
+        &"1.0.0.0".to_string(),
     )
     .unwrap();
     assert!(r3);
@@ -172,6 +187,7 @@ fn test_condition_eval() {
         &String::from("\"${DefaultLocation}\"==\"./unknown/VSCode\""),
         0,
         located,
+        &"1.0.0.0".to_string(),
     )
     .unwrap();
     assert!(!r4);
@@ -180,17 +196,25 @@ fn test_condition_eval() {
         &String::from("Exist(\"src/main.rs\") && IsDirectory(\"src\")"),
         0,
         &String::from("./"),
+        &"1.0.0.0".to_string(),
     )
     .unwrap();
     assert!(r5);
 
-    let r6 = condition_eval(&String::from("Exist(\"./src/main.ts\")"), 0, located).unwrap();
+    let r6 = condition_eval(
+        &String::from("Exist(\"./src/main.ts\")"),
+        0,
+        located,
+        &"1.0.0.0".to_string(),
+    )
+    .unwrap();
     assert!(!r6);
 
     let r7 = condition_eval(
         &String::from("Exist(\"${AppData}\") && IsDirectory(\"${SystemDrive}/Windows\")"),
         0,
         located,
+        &"1.0.0.0".to_string(),
     )
     .unwrap();
     assert!(r7);

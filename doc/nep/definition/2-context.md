@@ -16,6 +16,15 @@
     # 条件字段中使用
     if = 'ExitCode==0'
     ```
+### PackageVersion
+当前包的版本号
+* 权限等级：[`Normal`](/nep/definition/3-permissions#normal)
+* 示例值：`1.0.0.0` 
+* 示例：
+    ```toml
+    # 条件字段中使用
+    if = 'PackageVersion=="1.0.0.0"'
+    ```
 ### DefaultLocation
 当前包的默认安装位置
 * 权限等级：[`Normal`](/nep/definition/3-permissions#normal)

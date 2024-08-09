@@ -45,7 +45,7 @@ impl Generalizable for WorkflowHeader {
 impl Verifiable for WorkflowHeader {
     fn verify_self(&self, located: &String) -> Result<()> {
         // 校验条件
-        verify_conditions(self.get_conditions(), located)
+        verify_conditions(self.get_conditions(), located, &"1.0.0.0".to_string())
     }
 }
 

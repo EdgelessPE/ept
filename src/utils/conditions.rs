@@ -34,7 +34,7 @@ fn capture_function_info(conditions: &Vec<String>) -> Result<Vec<(String, String
     let res = Arc::new(Mutex::new(Vec::new()));
     for cond in conditions {
         // 初始化上下文
-        let mut context = get_eval_context(0, &"".to_string());
+        let mut context = get_eval_context(0, &"".to_string(), &"0.0.0.0".to_string());
 
         // 迭代函数信息，创建收集闭包
         for name in info_arr.clone() {
@@ -76,7 +76,11 @@ pub fn get_permissions_from_conditions(conditions: Vec<String>) -> Result<Vec<Pe
     Ok(permissions)
 }
 
-pub fn verify_conditions(conditions: Vec<String>, located: &String) -> Result<()> {
+pub fn verify_conditions(
+    conditions: Vec<String>,
+    located: &String,
+    package_version: &String,
+) -> Result<()> {
     // 检查模板字符串用法
     for cond in &conditions {
         if !check_proper_template_inner_value(cond) {
@@ -94,7 +98,7 @@ pub fn verify_conditions(conditions: Vec<String>, located: &String) -> Result<()
 
     // 对条件进行 eval 校验
     for cond in conditions {
-        condition_eval(&cond, 0, located)
+        condition_eval(&cond, 0, located, package_version)
             .map_err(|e| anyhow!("Error:Failed to validate condition '{cond}' : {e}"))?;
     }
 
@@ -107,6 +111,7 @@ fn test_condition() {
 
     let conditions: Vec<String> = vec![
         "\"${ExitCode}\"==114",
+        "PackageVersion==\"1.0.0.0\"",
         "\"${SystemDrive}\"==\"C:\"",
         "\"${DefaultLocation}\"==\"./unknown/VSCode\"",
         "Exist(\"src/main.rs\") && IsDirectory(\"src\")",
@@ -119,7 +124,7 @@ fn test_condition() {
     .collect();
 
     // verify_conditions
-    verify_conditions(conditions.clone(), &located).unwrap();
+    verify_conditions(conditions.clone(), &located, &"1.0.0.0".to_string()).unwrap();
 
     // capture_function_info
     let res = capture_function_info(&conditions.clone()).unwrap();

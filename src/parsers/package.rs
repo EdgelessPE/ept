@@ -47,7 +47,8 @@ fn update_ver_with_main_program(
     package_path: &Path,
 ) -> Result<()> {
     // 解释内置变量
-    let interpreted_main_program = values_replacer(main_program.to_string(), 0, located);
+    let interpreted_main_program =
+        values_replacer(main_program.to_string(), 0, located, &pkg.package.version);
     // 获取主程序相对路径
     let file_path = parse_relative_path_with_located(&interpreted_main_program, located);
 
@@ -132,7 +133,8 @@ pub fn parse_package(
     }
 
     // 解释
-    let interpreter = |raw: String| values_replacer(raw, 0, located);
+    let package_version = pkg.package.version.clone();
+    let interpreter = |raw: String| values_replacer(raw, 0, located, &package_version);
     let mut pkg = pkg.interpret(interpreter);
 
     // 跟随主程序 exe 文件版本号或是注册表入口 ID 更新版本号

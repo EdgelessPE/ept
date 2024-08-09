@@ -44,13 +44,19 @@ impl TStep for StepWait {
                 loop {
                     sleep(step_d);
                     if start_instant.elapsed() >= d
-                        || condition_eval(&cond, cx.exit_code, &cx.located)?
+                        || condition_eval(
+                            &cond,
+                            cx.exit_code,
+                            &cx.located,
+                            &cx.pkg.package.version,
+                        )?
                     {
                         break;
                     }
                 }
                 // 最终检查一次条件并配置 ExitCode
-                return if condition_eval(&cond, cx.exit_code, &cx.located)? {
+                return if condition_eval(&cond, cx.exit_code, &cx.located, &cx.pkg.package.version)?
+                {
                     Ok(0)
                 } else {
                     Ok(1)
@@ -91,7 +97,7 @@ impl Verifiable for StepWait {
 
         // 校验跳出条件
         if let Some(cond) = &self.break_if {
-            verify_conditions(vec![cond.to_owned()], located)?;
+            verify_conditions(vec![cond.to_owned()], located, &"1.0.0.0".to_string())?;
         }
 
         Ok(())

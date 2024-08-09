@@ -22,15 +22,17 @@ macro_rules! define_values {
             let mut arr=vec![$($key.to_string()),*];
             if extra{
                 arr.push("${ExitCode}".to_string());
+                arr.push("${PackageVersion}".to_string());
                 arr.push("${DefaultLocation}".to_string());
             }
             arr
         }
 
         // 支持虚假的模板字符串
-        pub fn values_replacer(raw:String, exit_code: i32, located: &str)->String{
+        pub fn values_replacer(raw:String, exit_code: i32, located: &str,package_version:&str)->String{
             raw
             .replace("${ExitCode}",&exit_code.to_string())
+            .replace("${PackageVersion}",package_version)
             .replace("${DefaultLocation}",located)
             $(.replace($key,&$val))*
         }
@@ -44,8 +46,9 @@ macro_rules! define_values {
             )*
         }
 
-        pub fn set_context_with_mutable_values(context: &mut HashMapContext, exit_code: i32, located: &String){
+        pub fn set_context_with_mutable_values(context: &mut HashMapContext, exit_code: i32, located: &String,package_version:&String){
             context.set_value("ExitCode".to_string(),Value::Int(exit_code.into())).unwrap();
+            context.set_value("PackageVersion".to_string(),Value::String(package_version.to_owned())).unwrap();
             context.set_value("DefaultLocation".to_string(),Value::String(located.to_owned())).unwrap();
         }
 

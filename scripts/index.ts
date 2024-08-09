@@ -54,6 +54,12 @@ genContextWiki(
         demoValue: 0,
       },
       {
+        name: "PackageVersion",
+        level: "Normal",
+        wiki: "当前包的版本号",
+        demoValue: "1.0.0.0",
+      },
+      {
         name: "DefaultLocation",
         level: "Normal",
         wiki: "当前包的默认安装位置",
