@@ -276,7 +276,7 @@ fn test_update_using_package() {
 
     // 手动更新版本号
     crate::utils::fs::copy_dir("examples/VSCode", "test/VSCode").unwrap();
-    crate::utils::test::_modify_installed_package_version("test/VSCode", "1.75.4.1");
+    crate::utils::test::_modify_package_dir_version("test/VSCode", "1.75.4.1");
 
     // 更新文件
     let old_ico = get_path_apps(&"Microsoft".to_string(), &"VSCode".to_string(), false)
@@ -315,18 +315,17 @@ fn test_update_all() {
 
     // 生成旧的 Notepad 包
     crate::utils::fs::copy_dir("examples/Notepad", "test/Notepad").unwrap();
-    crate::utils::test::_modify_installed_package_version("test/Notepad", "22.0.0.0");
+    crate::utils::test::_modify_package_dir_version("test/Notepad", "22.0.0.0");
 
     // 安装旧版本
     install_using_package(&"examples/VSCode".to_string(), false).unwrap();
     install_using_package(&"test/Notepad".to_string(), false).unwrap();
 
     // 生成新包
-    crate::utils::fs::copy_dir("examples/VSCode", "test/VSCode").unwrap();
-    crate::utils::test::_modify_installed_package_version("test/VSCode", "1.75.4.2");
+    let source_dir = crate::utils::test::_fork_example_with_version("examples/VSCode", "1.75.4.2");
     std::fs::create_dir("test/static").unwrap();
     crate::pack(
-        &"./test/VSCode".to_string(),
+        &source_dir,
         Some("./test/static/VSCode_1.75.4.2_Cno.nep".to_string()),
         false,
     )

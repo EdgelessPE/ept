@@ -405,13 +405,11 @@ fn test_install_with_matcher() {
     );
 
     // 手动升版本号
-    crate::utils::fs::try_recycle("test/VSCode").unwrap();
-    crate::utils::fs::copy_dir("examples/VSCode", "test/VSCode").unwrap();
-    crate::utils::test::_modify_installed_package_version("test/VSCode", "1.75.4.1");
+    let source_dir = crate::utils::test::_fork_example_with_version("examples/VSCode", "1.75.4.1");
 
     // 重新打包一个更高版本的
     crate::pack(
-        &"./test/VSCode".to_string(),
+        &source_dir,
         Some(
             static_path
                 .join("VSCode_1.75.4.2_Cno.nep")
