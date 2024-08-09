@@ -15,3 +15,47 @@ impl PartialEq for Author {
         self.name == other.name
     }
 }
+
+#[test]
+fn test_author_eq() {
+    assert_eq!(
+        Author {
+            name: "Cno".to_string(),
+            email: None
+        },
+        Author {
+            name: "Cno".to_string(),
+            email: Some("dsyourshy@qq.com".to_string())
+        }
+    );
+    assert_ne!(
+        Author {
+            name: "Cno".to_string(),
+            email: Some("j3rry@qq.com".to_string())
+        },
+        Author {
+            name: "Cno".to_string(),
+            email: Some("dsyourshy@qq.com".to_string())
+        }
+    );
+    assert_eq!(
+        Author {
+            name: "J3rry".to_string(),
+            email: Some("dsyourshy@qq.com".to_string())
+        },
+        Author {
+            name: "Cno".to_string(),
+            email: Some("dsyourshy@qq.com".to_string())
+        }
+    );
+    assert_ne!(
+        Author {
+            name: "Cno".to_string(),
+            email: None
+        },
+        Author {
+            name: "J3rry".to_string(),
+            email: None
+        }
+    );
+}

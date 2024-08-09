@@ -9,7 +9,7 @@ use crate::{
     executor::workflow_executor,
     p2s,
     parsers::{parse_author, parse_workflow},
-    types::{extended_semver::ExSemVer, matcher::PackageMatcher},
+    types::{author::Author, extended_semver::ExSemVer, matcher::PackageMatcher},
     utils::{
         download::download_nep,
         fs::move_or_copy,
@@ -25,10 +25,10 @@ use anyhow::{anyhow, Result};
 use std::{fs::remove_dir_all, str::FromStr};
 
 fn same_authors(a: &[String], b: &[String]) -> bool {
-    let ai = a.iter().map(|raw| parse_author(raw).unwrap());
-    let bi = b.iter().map(|raw| parse_author(raw).unwrap());
+    let ai: Vec<Author> = a.iter().map(|raw| parse_author(raw).unwrap()).collect();
+    let bi: Vec<Author> = b.iter().map(|raw| parse_author(raw).unwrap()).collect();
 
-    ai.eq(bi)
+    ai.eq(&bi)
 }
 
 pub fn update_using_package(source_file: &String, verify_signature: bool) -> Result<UpdateInfo> {
@@ -264,6 +264,21 @@ pub fn update_all(verify_signature: bool) -> Result<(i32, i32)> {
 }
 
 #[test]
+fn test_same_author() {
+    assert!(same_authors(
+        &["J3rry <j3rry@qq.com>".to_string(), "Microsoft".to_string()],
+        &["J3rry <j3rry@qq.com>".to_string(), "Microsoft".to_string()]
+    ));
+    assert!(!same_authors(
+        &["J3rry <j3rry@qq.com>".to_string(), "Microsoft".to_string()],
+        &[
+            "J3rry <dsyourshy@qq.com>".to_string(),
+            "Microsoft".to_string()
+        ]
+    ));
+}
+
+#[test]
 fn test_update_using_package() {
     envmnt::set("DEBUG", "true");
     envmnt::set("CONFIRM", "true");
@@ -456,11 +471,17 @@ fn test_update_with_different_author() {
 
     // 安装新版本
     let source_file = crate::utils::test::_fork_example_with_version("examples/VSCode", "1.75.4.2");
-    crate::entrances::install_using_package(&source_file, false).unwrap();
+    std::fs::copy(
+        "examples/UpdateSuit/VSCode2/workflows/update.toml",
+        std::path::Path::new(&source_file).join("workflows/update.toml"),
+    )
+    .unwrap();
+    update_using_package(&source_file, false).unwrap();
 
     // 断言是先卸载再安装的
     assert!(!desktop_path.join("vsc3-setup-1.75.4.0.lnk").exists());
     assert!(!desktop_path.join("vsc3-update-1.75.4.0.lnk").exists());
+    assert!(!desktop_path.join("vsc2-update-1.75.4.2.lnk").exists());
     assert!(desktop_path.join("vsc3-remove-1.75.4.0.lnk").exists());
     assert!(desktop_path.join("Visual Studio Code.lnk").exists());
 
