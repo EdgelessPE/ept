@@ -373,33 +373,33 @@ fn test_update_all() {
 
 #[test]
 fn test_update_workflow_executions() {
-    assert!(crate::utils::wild_match::parse_wild_match(
-        "vsc*.lnk".to_string(),
-        &crate::utils::env::env_desktop()
-    )
-    .is_err());
+    use std::path::Path;
+    let desktop = crate::utils::env::env_desktop();
+    assert!(crate::utils::wild_match::parse_wild_match("vsc*.lnk".to_string(), &desktop).is_err());
     envmnt::set("CONFIRM", "true");
+
     // (旧包类型，新包类型，更新后断言存在的文件)
     let test_arr = vec![
         (0, 0, vec!["vsc0-setup-1.75.4.1"]),
-        // (0, 1, vec![]),
-        // (0, 2, vec![]),
-        // (0, 3, vec![]),
-        // (1, 0, vec![]),
-        // (1, 1, vec![]),
-        // (1, 2, vec![]),
-        // (1, 3, vec![]),
-        // (2, 0, vec![]),
-        // (2, 1, vec![]),
-        // (2, 2, vec![]),
-        // (2, 3, vec![]),
-        // (3, 0, vec![]),
-        // (3, 1, vec![]),
-        // (3, 2, vec![]),
-        // (3, 3, vec![]),
+        (0, 1, vec!["vsc1-setup-1.75.4.1"]),
+        (0, 2, vec!["vsc2-update-1.75.4.1"]),
+        (0, 3, vec!["vsc3-update-1.75.4.1"]),
+        (1, 0, vec!["vsc1-remove-1.75.4.0", "vsc0-setup-1.75.4.1"]),
+        (1, 1, vec!["vsc1-remove-1.75.4.0", "vsc1-setup-1.75.4.1"]),
+        (1, 2, vec!["vsc2-update-1.75.4.1"]),
+        (1, 3, vec!["vsc3-update-1.75.4.1"]),
+        (2, 0, vec!["vsc0-setup-1.75.4.1"]),
+        (2, 1, vec!["vsc1-setup-1.75.4.1"]),
+        (2, 2, vec!["vsc2-update-1.75.4.1"]),
+        (2, 3, vec!["vsc3-update-1.75.4.1"]),
+        (3, 0, vec!["vsc3-remove-1.75.4.0", "vsc0-setup-1.75.4.1"]),
+        (3, 1, vec!["vsc3-remove-1.75.4.0", "vsc1-setup-1.75.4.1"]),
+        (3, 2, vec!["vsc2-update-1.75.4.1"]),
+        (3, 3, vec!["vsc3-update-1.75.4.1"]),
     ];
 
     for (old_type, new_type, assert_files) in test_arr {
+        log!("Info:Testing {old_type} -> {new_type}");
         // 卸载
         crate::utils::test::_ensure_testing_vscode_uninstalled();
 
@@ -409,7 +409,7 @@ fn test_update_workflow_executions() {
             false,
         )
         .unwrap();
-        assert!(std::path::Path::new(&crate::utils::env::env_desktop())
+        assert!(Path::new(&desktop)
             .join(format!("vsc{old_type}-setup-1.75.4.0.lnk"))
             .exists());
 
@@ -422,15 +422,19 @@ fn test_update_workflow_executions() {
 
         // 断言仅存在指定文件
         for file in assert_files {
-            let p = std::path::Path::new(&crate::utils::env::env_desktop())
-                .join(&format!("{file}.lnk"));
+            let p = Path::new(&desktop).join(&format!("{file}.lnk"));
             assert!(p.exists());
             std::fs::remove_file(p).unwrap();
         }
-        assert!(crate::utils::wild_match::parse_wild_match(
-            "vsc*.lnk".to_string(),
-            &crate::utils::env::env_desktop()
-        )
-        .is_err());
+        assert!(
+            crate::utils::wild_match::parse_wild_match("vsc*.lnk".to_string(), &desktop).is_err()
+        );
+
+        // 卸载
+        crate::utils::test::_ensure_testing_vscode_uninstalled();
+        let remove_lnk = Path::new(&desktop).join(&format!("vsc{new_type}-remove-1.75.4.1.lnk"));
+        if remove_lnk.exists() {
+            std::fs::remove_file(remove_lnk).unwrap()
+        }
     }
 }

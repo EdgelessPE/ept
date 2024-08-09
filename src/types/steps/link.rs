@@ -65,7 +65,7 @@ fn create_shortcut(sl: &ShellLink, name: &String, base: &String) -> Result<()> {
     let (target, _) = parse_target(name, base)?;
     sl.create_lnk(&target)
         .map_err(|err| anyhow!("Error(Link):Can't create shortcut {target} : {err}"))?;
-    log!("Info(Link):Added shortcut '{target}'");
+    log!("Info(Link):Created shortcut at '{target}'");
     Ok(())
 }
 
@@ -177,13 +177,13 @@ impl TStep for StepLink {
         let set: HashSet<String> =
             HashSet::from_iter(self.at.clone().unwrap_or(vec!["Desktop".to_string()]));
         if set.contains("Desktop") {
+            log!("Info(Link):Adding shortcut '{target_name}' to desktop");
             create_shortcut(&sl, &target_name, &env_desktop())?;
-            log!("Info(Link):Added shortcut '{target_name}' to desktop");
         }
         if set.contains("StartMenu") {
+            log!("Info(Link):Adding shortcut '{target_name}' to start menu");
             create_shortcut(&sl, &target_name, &env_start_menu())?;
             update_start_menu();
-            log!("Info(Link):Added shortcut '{target_name}' to start menu");
         }
 
         Ok(0)
