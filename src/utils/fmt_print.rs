@@ -18,7 +18,7 @@ pub fn fmt_package_line(
 ) -> String {
     format!(
         "  {:>20}/{:<50} {:<20} {}\n",
-        scope.cyan().italic(),
+        scope.black().italic(),
         name.cyan().bold(),
         format!("({version})"),
         mirror.unwrap_or_default().as_str().black()
