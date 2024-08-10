@@ -7,7 +7,6 @@ use tantivy::query::QueryParser;
 use tantivy::schema::*;
 use tantivy::Index;
 use tantivy::ReloadPolicy;
-
 use toml::from_str;
 
 use crate::entrances::info_online;
@@ -72,10 +71,22 @@ pub fn filter_service_from_meta(hello: MirrorHello, key: ServiceKeys) -> Result<
 
 fn get_schema() -> Result<(Schema, Field, Field, Field)> {
     let mut schema_builder = Schema::builder();
-    let name = schema_builder.add_text_field("name", TEXT | STORED);
-    let scope = schema_builder.add_text_field("scope", TEXT | STORED);
-    let version = schema_builder.add_text_field("version", TEXT | STORED);
+    let opt = TextOptions::default()
+        .set_indexing_options(
+            TextFieldIndexing::default()
+                .set_tokenizer("jieba")
+                .set_index_option(IndexRecordOption::WithFreqsAndPositions),
+        )
+        .set_stored();
+    let name = schema_builder.add_text_field("name", opt.clone());
+    let scope = schema_builder.add_text_field("scope", opt.clone());
+    let version = schema_builder.add_text_field("version", opt);
     Ok((schema_builder.build(), name, scope, version))
+}
+
+fn register_tokenizer(index: &mut Index) {
+    let tokenizer = tantivy_jieba::JiebaTokenizer {};
+    index.tokenizers().register("jieba", tokenizer);
 }
 
 // 为包构建索引
@@ -85,7 +96,8 @@ pub fn build_index_for_mirror(content: MirrorPkgSoftware, dir: PathBuf) -> Resul
         try_recycle(&dir)?;
     }
     ensure_dir_exist(&dir)?;
-    let index = Index::create_in_dir(&dir, schema.clone())?;
+    let mut index = Index::create_in_dir(&dir, schema.clone())?;
+    register_tokenizer(&mut index);
     let mut index_writer = index.writer(50_000_000)?;
     for (scope_str, node) in content.tree.iter() {
         for item in node {
@@ -108,7 +120,8 @@ pub fn build_index_for_mirror(content: MirrorPkgSoftware, dir: PathBuf) -> Resul
 pub fn search_index_for_mirror(text: &str, dir: PathBuf) -> Result<Vec<SearchResult>> {
     let (_schema, name, scope, version) = get_schema()?;
 
-    let index = Index::open_in_dir(dir)?;
+    let mut index = Index::open_in_dir(dir)?;
+    register_tokenizer(&mut index);
     let reader = index
         .reader_builder()
         .reload_policy(ReloadPolicy::OnCommitWithDelay)
