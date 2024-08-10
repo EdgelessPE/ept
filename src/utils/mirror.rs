@@ -5,6 +5,7 @@ use std::path::PathBuf;
 use tantivy::collector::TopDocs;
 use tantivy::query::QueryParser;
 use tantivy::schema::*;
+use tantivy::tokenizer::*;
 use tantivy::Index;
 use tantivy::ReloadPolicy;
 use toml::from_str;
@@ -86,7 +87,12 @@ fn get_schema() -> Result<(Schema, Field, Field, Field)> {
 
 fn register_tokenizer(index: &mut Index) {
     let tokenizer = tantivy_jieba::JiebaTokenizer {};
-    index.tokenizers().register("jieba", tokenizer);
+    let analyzer = TextAnalyzer::builder(tokenizer)
+        .filter(RemoveLongFilter::limit(40))
+        .filter(LowerCaser)
+        .filter(Stemmer::default())
+        .build();
+    index.tokenizers().register("jieba", analyzer);
 }
 
 // 为包构建索引
