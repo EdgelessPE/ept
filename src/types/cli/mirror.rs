@@ -13,7 +13,8 @@ pub enum ActionMirror {
         /// (Optional) Mirror name, update all if not provided
         name: Option<String>,
     },
-    /// Remove mirror
+    /// Remove mirror [alias 'rm']
+    #[clap(alias = "rm")]
     Remove {
         /// Mirror name
         name: String,
