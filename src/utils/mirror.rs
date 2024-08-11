@@ -138,6 +138,10 @@ pub fn search_index_for_mirror(
         .reload_policy(ReloadPolicy::OnCommitWithDelay)
         .try_into()?;
     let searcher = reader.searcher();
+    log!(
+        "Debug:Searching index for '{text}' ({})",
+        if is_regex { "regex" } else { "text" }
+    );
     let top_docs = if is_regex {
         let query = RegexQuery::from_pattern(text, name)
             .map_err(|e| anyhow!("Error:Invalid regex : {e}"))?;
