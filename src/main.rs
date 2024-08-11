@@ -61,7 +61,9 @@ fn router(action: Action) -> Result<String> {
                     install_using_package(&source_file, verify_signature)
                 }
             };
-            res.map(|_| format!("Success:Package '{package}' installed successfully"))
+            res.map(|(scope, name)| {
+                format!("Success:Package '{scope}/{name}' installed successfully")
+            })
         }
         Action::Update { package } => {
             if let Some(package) = package {
@@ -92,11 +94,8 @@ fn router(action: Action) -> Result<String> {
         }
         Action::Uninstall { package_matcher } => {
             let parse_res = PackageMatcher::parse(&package_matcher, true, true)?;
-            uninstall(parse_res.scope, &parse_res.name).map(|_| {
-                format!(
-                    "Success:Package '{name}' uninstalled successfully",
-                    name = parse_res.name
-                )
+            uninstall(parse_res.scope, &parse_res.name).map(|(scope, name)| {
+                format!("Success:Package '{scope}/{name}' uninstalled successfully")
             })
         }
         Action::Search { keyword, regex } => {

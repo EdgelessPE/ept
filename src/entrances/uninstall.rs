@@ -33,7 +33,7 @@ fn get_manifest(flow: Vec<WorkflowNode>) -> Vec<String> {
     manifest
 }
 
-pub fn uninstall(scope: Option<String>, package_name: &String) -> Result<()> {
+pub fn uninstall(scope: Option<String>, package_name: &String) -> Result<(String, String)> {
     log!("Info:Preparing to uninstall '{package_name}'");
 
     // 查找 scope 并使用 scope 更新纠正大小写
@@ -50,11 +50,12 @@ pub fn uninstall(scope: Option<String>, package_name: &String) -> Result<()> {
     if let Err(e) = installed_validator(&app_str) {
         // 简单的删除目录
         log!("Warning:Incomplete folder found, simply perform a deletion : {e}");
-        return remove_dir_all(&app_str).map_err(|e| {
+        remove_dir_all(&app_str).map_err(|e| {
             anyhow!(
                 "Warning:Can't clean the directory, please delete '{app_str}' manually later : {e}"
             )
-        });
+        })?;
+        return Ok((scope, package_name));
     }
 
     // 读入 package.toml
@@ -154,7 +155,7 @@ pub fn uninstall(scope: Option<String>, package_name: &String) -> Result<()> {
 
     log_ok_last!("Info:Cleaning...");
 
-    Ok(())
+    Ok((scope, package_name))
 }
 
 #[test]

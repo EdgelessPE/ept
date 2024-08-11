@@ -23,7 +23,10 @@ use crate::{
     },
 };
 
-pub fn install_using_package(source_file: &String, verify_signature: bool) -> Result<()> {
+pub fn install_using_package(
+    source_file: &String,
+    verify_signature: bool,
+) -> Result<(String, String)> {
     log!("Info:Preparing to install with package '{source_file}'");
 
     // 解包
@@ -66,8 +69,8 @@ pub fn install_using_package(source_file: &String, verify_signature: bool) -> Re
             name = package.name,
             ver = diff.version,
         );
-        update_using_package(source_file, verify_signature)?;
-        return Ok(());
+        let res = update_using_package(source_file, verify_signature)?;
+        return Ok((res.scope, res.name));
     }
 
     // 解析最终安装位置
@@ -117,22 +120,22 @@ pub fn install_using_package(source_file: &String, verify_signature: bool) -> Re
         }
     }
     // 执行一次 info
-    if let Err(e) = info(Some(software.scope.clone()), &package.name) {
-        return Err(anyhow!(
+    info(Some(software.scope.clone()), &package.name).map_err(|e| {
+        anyhow!(
             "Error:Validating failed : failed to get info of '{scope}/{name}' : {e}",
             scope = software.scope,
             name = package.name
-        ));
-    }
+        )
+    })?;
     log_ok_last!("Info:Validating setup...");
 
     // 清理临时文件夹
     clean_temp(source_file)?;
 
-    Ok(())
+    Ok((software.scope, package.name))
 }
 
-pub fn install_using_url(url: &str, verify_signature: bool) -> Result<()> {
+pub fn install_using_url(url: &str, verify_signature: bool) -> Result<(String, String)> {
     // 下载文件到临时目录
     let p = download_nep(url)?;
 
@@ -143,7 +146,7 @@ pub fn install_using_url(url: &str, verify_signature: bool) -> Result<()> {
 pub fn install_using_package_matcher(
     matcher: PackageMatcher,
     verify_signature: bool,
-) -> Result<()> {
+) -> Result<(String, String)> {
     // 查找 scope 并使用 scope 更新纠正大小写
     let (scope, package_name) = find_scope_with_name(&matcher.name, matcher.scope.clone())?;
     // 检查对应包名有没有被安装过
@@ -153,8 +156,8 @@ pub fn install_using_package_matcher(
             name = package_name,
             ver = diff.version,
         );
-        update_using_package_matcher(matcher, verify_signature)?;
-        return Ok(());
+        let res = update_using_package_matcher(matcher, verify_signature)?;
+        return Ok((res.scope, res.name));
     }
     // 解析 url
     let (url, target_release) = get_url_with_version_req(matcher)?;
