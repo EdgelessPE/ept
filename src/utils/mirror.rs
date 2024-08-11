@@ -4,6 +4,7 @@ use semver::VersionReq;
 use std::path::PathBuf;
 use tantivy::collector::TopDocs;
 use tantivy::query::QueryParser;
+use tantivy::query::RegexQuery;
 use tantivy::schema::*;
 use tantivy::tokenizer::*;
 use tantivy::Index;
@@ -123,7 +124,11 @@ pub fn build_index_for_mirror(content: MirrorPkgSoftware, dir: PathBuf) -> Resul
 }
 
 // 从索引中搜索内容
-pub fn search_index_for_mirror(text: &str, dir: PathBuf) -> Result<Vec<SearchResult>> {
+pub fn search_index_for_mirror(
+    text: &str,
+    dir: PathBuf,
+    is_regex: bool,
+) -> Result<Vec<SearchResult>> {
     let (_schema, name, scope, version) = get_schema()?;
 
     let mut index = Index::open_in_dir(dir)?;
@@ -133,9 +138,14 @@ pub fn search_index_for_mirror(text: &str, dir: PathBuf) -> Result<Vec<SearchRes
         .reload_policy(ReloadPolicy::OnCommitWithDelay)
         .try_into()?;
     let searcher = reader.searcher();
-    let query_parser = QueryParser::for_index(&index, vec![name]);
-    let query = query_parser.parse_query(text)?;
-    let top_docs = searcher.search(&query, &TopDocs::with_limit(10))?;
+    let top_docs = if is_regex {
+        let query = RegexQuery::from_pattern(text, name)?;
+        searcher.search(&query, &TopDocs::with_limit(10))?
+    } else {
+        let query_parser = QueryParser::for_index(&index, vec![name]);
+        let query = query_parser.parse_query(text)?;
+        searcher.search(&query, &TopDocs::with_limit(10))?
+    };
 
     let mut arr = Vec::new();
     for (_score, doc_address) in top_docs {

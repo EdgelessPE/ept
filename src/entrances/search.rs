@@ -6,7 +6,7 @@ use crate::{
     utils::{fs::read_sub_dir, get_path_mirror, mirror::search_index_for_mirror},
 };
 
-pub fn search(text: &String) -> Result<Vec<SearchResult>> {
+pub fn search(text: &String, is_regex: bool) -> Result<Vec<SearchResult>> {
     // 扫描出所有的镜像源目录
     let root = get_path_mirror()?;
     let mirror_dirs = read_sub_dir(&root)?;
@@ -18,7 +18,8 @@ pub fn search(text: &String) -> Result<Vec<SearchResult>> {
     let mut arr = Vec::new();
     for mirror_name in mirror_dirs {
         log!("Debug:Searching for '{text}' in mirror '{mirror_name}'");
-        let search_res = search_index_for_mirror(text, root.join(&mirror_name).join("index"))?;
+        let search_res =
+            search_index_for_mirror(text, root.join(&mirror_name).join("index"), is_regex)?;
         let mut mapped: Vec<SearchResult> = search_res
             .iter()
             .map(|raw| {

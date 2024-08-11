@@ -173,7 +173,7 @@ fn test_mirror() {
     assert!(mirror_list().unwrap().is_empty());
 
     // 此时搜不到内容
-    assert!(search(&"vscode".to_string()).is_err());
+    assert!(search(&"vscode".to_string(), false).is_err());
 
     // 启动 mock 服务器
     let mock_url = _run_mirror_mock_server();
@@ -188,17 +188,17 @@ fn test_mirror() {
     assert_eq!(name, "mock-server");
 
     // 测试搜索
-    let search_res = search(&"vscode".to_string()).unwrap();
-    assert_eq!(
-        search_res,
-        vec![crate::types::mirror::SearchResult {
-            name: "VSCode".to_string(),
-            scope: "Microsoft".to_string(),
-            version: "1.75.4.2".to_string(),
-            from_mirror: Some("mock-server".to_string()),
-        }]
-    );
-    assert!(search(&"microsoft".to_string()).is_err());
+    let expected_res = vec![crate::types::mirror::SearchResult {
+        name: "VSCode".to_string(),
+        scope: "Microsoft".to_string(),
+        version: "1.75.4.2".to_string(),
+        from_mirror: Some("mock-server".to_string()),
+    }];
+    let search_res = search(&"vscode".to_string(), false).unwrap();
+    assert_eq!(search_res, expected_res);
+    let search_res = search(&r"vs\w+".to_string(), true).unwrap();
+    assert_eq!(search_res, expected_res);
+    assert!(search(&"microsoft".to_string(), false).is_err());
 
     // 测试更新
     sleep(Duration::from_micros(100));

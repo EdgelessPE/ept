@@ -59,6 +59,9 @@ pub enum Action {
     Search {
         /// Keyword
         keyword: String,
+        /// Use keyword as a regular expression, e.g. ept search -r '^vscode$'
+        #[arg(short, long)]
+        regex: bool,
     },
 
     /// Query a package

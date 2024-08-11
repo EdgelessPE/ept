@@ -99,9 +99,9 @@ fn router(action: Action) -> Result<String> {
                 )
             })
         }
-        Action::Search { keyword } => {
+        Action::Search { keyword, regex } => {
             auto_mirror_update_all(&cfg)?;
-            search(&keyword).map(|results| {
+            search(&keyword, regex).map(|results| {
                 let len = results.len();
                 let res: String =
                     results
