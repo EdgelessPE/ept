@@ -139,7 +139,8 @@ pub fn search_index_for_mirror(
         .try_into()?;
     let searcher = reader.searcher();
     let top_docs = if is_regex {
-        let query = RegexQuery::from_pattern(text, name)?;
+        let query = RegexQuery::from_pattern(text, name)
+            .map_err(|e| anyhow!("Error:Invalid regex : {e}"))?;
         searcher.search(&query, &TopDocs::with_limit(10))?
     } else {
         let query_parser = QueryParser::for_index(&index, vec![name]);
