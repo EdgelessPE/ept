@@ -59,7 +59,7 @@ pub enum Action {
     Search {
         /// Keyword
         keyword: String,
-        /// Use keyword as a regular expression, e.g. ept search -r '^vscode$'
+        /// Use keyword as a regular expression, e.g. ept search -r 'vsc\w+'
         #[arg(short, long)]
         regex: bool,
     },
