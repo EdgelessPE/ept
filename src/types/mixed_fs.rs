@@ -207,11 +207,11 @@ fn test_mixed_fs() {
 
     // 增删指定文件
     mfs.add(&"./1.txt".to_string(), "./backup/1.txt");
-    mfs.remove("config.toml");
+    mfs.remove("Cargo.toml");
 
     assert!(mfs.exists("1.txt"));
     assert!(!mfs.exists("./backup/1.txt"));
-    assert!(!mfs.exists("config.toml"));
+    assert!(!mfs.exists("Cargo.toml"));
 
     // 增删通配文件
     mfs.add(&"./c/".to_string(), "./src/types/*.rs");

@@ -7,7 +7,7 @@
 *.zst
 *.nep
 *.log
-/config.toml
+/eptrc.toml
 /test
 /bindings
 

@@ -104,20 +104,20 @@ fn test_config() {
     fn checker(answer: Cfg) {
         let cfg = get_config();
         assert_eq!(answer, cfg);
-        let toml = fs::read_to_string("config.toml").unwrap();
+        let toml = fs::read_to_string("eptrc.toml").unwrap();
         let file_cfg: Cfg = toml::from_str(&toml).unwrap();
         assert_eq!(file_cfg, answer);
     }
 
-    // 先保存当前目录下 config.toml 的现场
-    let scene_opt = if Path::new("config.toml").exists() {
-        Some(fs::read_to_string("config.toml").unwrap())
+    // 先保存当前目录下 eptrc.toml 的现场
+    let scene_opt = if Path::new("eptrc.toml").exists() {
+        Some(fs::read_to_string("eptrc.toml").unwrap())
     } else {
         // 如果没有必须新建一个，不然默认会在用户目录里面新建配置文件
         let mut default_cfg = Cfg::default();
         default_cfg.local.base = "C:/Users/Public/Videos".to_string();
         let text = toml::to_string_pretty(&default_cfg).unwrap();
-        fs::write("config.toml", text).unwrap();
+        fs::write("eptrc.toml", text).unwrap();
         None
     };
 
@@ -149,7 +149,7 @@ fn test_config() {
     assert_eq!(config_list().unwrap(), format!("{new_cfg:#?}"));
 
     // 测试 which
-    assert_eq!(config_which().unwrap(), "config.toml".to_string());
+    assert_eq!(config_which().unwrap(), "eptrc.toml".to_string());
 
     // 还原现场
     if let Some(text) = scene_opt {
@@ -157,6 +157,6 @@ fn test_config() {
         let cfg: Cfg = toml::from_str(&text).unwrap();
         set_config(cfg).unwrap();
     } else {
-        fs::remove_file("config.toml").unwrap();
+        fs::remove_file("eptrc.toml").unwrap();
     }
 }

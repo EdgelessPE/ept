@@ -26,7 +26,7 @@ pub struct Cfg {
     pub online: Online,
 }
 
-const FILE_NAME: &str = "config.toml";
+const FILE_NAME: &str = "eptrc.toml";
 
 lazy_static! {
     static ref CUR_DIR: PathBuf = Path::new("./").to_path_buf();
