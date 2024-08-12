@@ -22,8 +22,8 @@ importers:
         specifier: 2.56.2
         version: 2.56.2
       '@rspress/plugin-shiki':
-        specifier: ^1.27.0
-        version: 1.27.0
+        specifier: ^1.27.1
+        version: 1.27.1
       '@types/jest':
         specifier: ^29.5.12
         version: 29.5.12
@@ -448,8 +448,8 @@ packages:
     peerDependencies:
       '@rspress/runtime': ^1.0.2
 
-  '@rspress/plugin-shiki@1.27.0':
-    resolution: {integrity: sha512-3LKAeaI+VSKWpCkPxxEpaxef0XTu+ZWNjxL9llhfrX8JuWmhUhzgiN/i4GkvSf/cCBKpWGCtANXup5gn77Ho1A==}
+  '@rspress/plugin-shiki@1.27.1':
+    resolution: {integrity: sha512-OBaEafoZvTyQ07Ro85UWlgWgwmSkZndHxoTqFO0XaXehJ2P0zjPjF9OnGOcNesK9xQO7+xwASrR9VQZx177Ztw==}
     engines: {node: '>=14.17.6'}
 
   '@rspress/runtime@1.26.2':
@@ -459,8 +459,8 @@ packages:
   '@rspress/shared@1.26.2':
     resolution: {integrity: sha512-4+31CHKgJ4bf894livwqR1KjhbWGccMhe+BfOJuaPv840GLEW3ehchpqWO3Gpty7GFDWA33rtPGqC+Oj1Mr8AQ==}
 
-  '@rspress/shared@1.27.0':
-    resolution: {integrity: sha512-YQvpVC7bcKrKQgElSgiEmF4X7wP4PZH7Y9OEqYf6lU+gRHbAKgZbecDoVUjwGU+d/mPDeoc5Y9Y7fq1uE67oOw==}
+  '@rspress/shared@1.27.1':
+    resolution: {integrity: sha512-6C3JDqQ3XFsNA3OYYIpgFhHMHdhubPmYMfJev7721+5g9DO6CbmFROHmQKM02wswLdA3/Nc+zstaE8kHtCvoxg==}
 
   '@rspress/theme-default@1.26.2':
     resolution: {integrity: sha512-NpVo2zPwYuIML5ka1S7jbktTWXOQmagvtujtzPFIPxaEmYdVRu+6mNSxmBzXnby9zjlpwntz4JYzOjF69mE06Q==}
@@ -3580,9 +3580,9 @@ snapshots:
       '@rspress/runtime': 1.26.2
       medium-zoom: 1.1.0
 
-  '@rspress/plugin-shiki@1.27.0':
+  '@rspress/plugin-shiki@1.27.1':
     dependencies:
-      '@rspress/shared': 1.27.0
+      '@rspress/shared': 1.27.1
       hast-util-from-html: 2.0.1
       shiki: 0.14.5
       unist-util-visit: 5.0.0
@@ -3604,7 +3604,7 @@ snapshots:
       gray-matter: 4.0.3
       unified: 10.1.2
 
-  '@rspress/shared@1.27.0':
+  '@rspress/shared@1.27.1':
     dependencies:
       '@rsbuild/core': 1.0.1-beta.9
       chalk: 5.3.0
@@ -4121,7 +4121,7 @@ snapshots:
 
   browserslist@4.23.2:
     dependencies:
-      caniuse-lite: 1.0.30001643
+      caniuse-lite: 1.0.30001649
       electron-to-chromium: 1.4.832
       node-releases: 2.0.14
       update-browserslist-db: 1.1.0(browserslist@4.23.2)
