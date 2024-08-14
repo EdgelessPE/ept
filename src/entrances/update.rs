@@ -166,8 +166,7 @@ pub fn update_using_package_matcher(
     // 检查对应包名有没有被安装过
     let (_global, local_diff) = info_local(&scope, &package_name).map_err(|_| {
         anyhow!(
-            "Error:Package '{name}' hasn't been installed, use 'ept install' instead",
-            name = package_name
+            "Error:Package '{scope}/{package_name}' hasn't been installed, use 'ept install' instead",
         )
     })?;
     // 检查包的版本号是否允许升级

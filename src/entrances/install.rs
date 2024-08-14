@@ -152,8 +152,7 @@ pub fn install_using_package_matcher(
     // 检查对应包名有没有被安装过
     if let Ok((_, diff)) = info_local(&scope, &package_name) {
         log!(
-            "Warning:Package '{name}' has been installed({ver}), switch to update entrance",
-            name = package_name,
+            "Warning:Package '{scope}/{package_name}' has been installed({ver}), will be switched to update entrance",
             ver = diff.version,
         );
         let res = update_using_package_matcher(matcher, verify_signature)?;
