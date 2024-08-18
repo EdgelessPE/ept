@@ -3,11 +3,12 @@ use std::fmt::Display;
 use anyhow::{anyhow, Result};
 
 use crate::{
-    entrances::{info_local, info_online},
+    entrances::{auto_mirror_update_all, info_local, info_online},
     types::{extended_semver::ExSemVer, matcher::PackageInputEnum},
 };
 
 use super::{
+    cfg::get_config,
     mirror::{filter_release, get_url_with_version_req},
     path::find_scope_with_name,
 };
@@ -46,8 +47,9 @@ impl Display for ParseInputResEnum {
     }
 }
 
-pub fn parse_install_input(packages: Vec<String>) -> Result<Vec<ParseInputResEnum>> {
+pub fn parse_install_inputs(packages: Vec<String>) -> Result<Vec<ParseInputResEnum>> {
     let mut res: Vec<ParseInputResEnum> = Vec::new();
+    let mut mirror_updated = false;
     for p in packages {
         // 首先解析输入类型
         match PackageInputEnum::parse(p, false, false)? {
@@ -57,6 +59,12 @@ pub fn parse_install_input(packages: Vec<String>) -> Result<Vec<ParseInputResEnu
             }
             // 如果是 PackageMatcher，则解析信息
             PackageInputEnum::PackageMatcher(matcher) => {
+                // 更新镜像源
+                if !mirror_updated {
+                    let cfg = get_config();
+                    auto_mirror_update_all(&cfg)?;
+                    mirror_updated = true;
+                }
                 // 查找 scope 并使用 scope 更新纠正大小写
                 let (scope, package_name) =
                     find_scope_with_name(&matcher.name, matcher.scope.clone())?;
@@ -79,8 +87,9 @@ pub fn parse_install_input(packages: Vec<String>) -> Result<Vec<ParseInputResEnu
     Ok(res)
 }
 
-pub fn parse_update_input(packages: Vec<String>) -> Result<Vec<ParseInputResEnum>> {
+pub fn parse_update_inputs(packages: Vec<String>) -> Result<Vec<ParseInputResEnum>> {
     let mut res: Vec<ParseInputResEnum> = Vec::new();
+    let mut mirror_updated = false;
     for p in packages {
         // 首先解析输入类型
         match PackageInputEnum::parse(p, false, false)? {
@@ -90,6 +99,12 @@ pub fn parse_update_input(packages: Vec<String>) -> Result<Vec<ParseInputResEnum
             }
             // 如果是 PackageMatcher，则解析信息
             PackageInputEnum::PackageMatcher(matcher) => {
+                // 更新镜像源
+                if !mirror_updated {
+                    let cfg = get_config();
+                    auto_mirror_update_all(&cfg)?;
+                    mirror_updated = true;
+                }
                 // 查找 scope 并使用 scope 更新纠正大小写
                 let (scope, package_name) =
                     find_scope_with_name(&matcher.name, matcher.scope.clone())?;

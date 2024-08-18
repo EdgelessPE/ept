@@ -14,7 +14,9 @@ mod verify;
 
 pub use self::clean::clean;
 pub use self::info::{info, info_local, info_online};
-pub use self::install::{install_using_package, install_using_package_matcher, install_using_url};
+pub use self::install::{
+    install_using_package, install_using_parsed,
+};
 pub use self::list::list;
 pub use self::meta::meta;
 pub use self::mirror::{
@@ -25,5 +27,5 @@ pub use self::pack::pack;
 pub use self::search::search;
 pub use self::uninstall::uninstall;
 pub use self::update::{
-    update_all, update_using_package, update_using_package_matcher, update_using_url,
+    update_all, update_using_package, update_using_package_matcher, update_using_parsed,
 };

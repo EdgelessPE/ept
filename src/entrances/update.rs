@@ -1,5 +1,5 @@
 use super::{
-    info_local, info_online, install_using_package, list, uninstall,
+    info_local, install_using_package, list, uninstall,
     utils::{
         package::{clean_temp, unpack_nep},
         validator::installed_validator,
@@ -9,13 +9,12 @@ use crate::{
     executor::workflow_executor,
     p2s,
     parsers::{parse_author, parse_workflow},
-    types::{author::Author, extended_semver::ExSemVer, matcher::PackageMatcher},
+    types::{author::Author, extended_semver::ExSemVer},
     utils::{
         download::download_nep,
         fs::move_or_copy,
         get_path_apps,
-        mirror::{filter_release, get_url_with_version_req},
-        path::find_scope_with_name,
+        parse_inputs::{parse_update_inputs, ParseInputResEnum},
         term::ask_yn,
     },
 };
@@ -157,39 +156,36 @@ pub fn update_using_url(url: &str, verify_signature: bool) -> Result<UpdateInfo>
     update_using_package(&p2s!(p), verify_signature)
 }
 
-pub fn update_using_package_matcher(
-    matcher: PackageMatcher,
-    verify_signature: bool,
-) -> Result<UpdateInfo> {
-    // 查找 scope 并使用 scope 更新纠正大小写
-    let (scope, package_name) = find_scope_with_name(&matcher.name, matcher.scope.clone())?;
-    // 检查对应包名有没有被安装过
-    let (_global, local_diff) = info_local(&scope, &package_name).map_err(|_| {
-        anyhow!(
-            "Error:Package '{scope}/{package_name}' hasn't been installed, use 'ept install' instead",
-        )
-    })?;
-    // 检查包的版本号是否允许升级
-    let (online_item, _url_template) = info_online(&scope, &package_name, matcher.mirror.clone())?;
-    let selected_release = filter_release(online_item.releases, matcher.version_req.clone())?;
-    if selected_release.version <= ExSemVer::parse(&local_diff.version)? {
-        return Err(anyhow!("Error:Package '{name}' has been up to date ({local_version}), can't update to the version of given package ({fresh_version})",name=package_name,local_version=&local_diff.version,fresh_version=&selected_release.version));
-    }
-    // 解析 url
-    let (url, target_release) = get_url_with_version_req(matcher)?;
+pub fn update_using_package_matcher(matcher: String, verify_signature: bool) -> Result<UpdateInfo> {
+    // 解析
+    let parsed = parse_update_inputs(vec![matcher])?;
     // 执行更新
-    if ask_yn(
-        format!(
-            "Ready to update '{scope}/{package_name}' from '{from}' to '{to}', continue?",
-            from = local_diff.version,
-            to = target_release.version
-        ),
-        true,
-    ) {
-        update_using_url(&url, verify_signature)
+    if let ParseInputResEnum::PackageMatcher(p) = parsed.first().unwrap() {
+        update_using_url(&p.download_url, verify_signature)
     } else {
-        Err(anyhow!("Error:Operation canceled by user"))
+        Err(anyhow!(
+            "Error:Fatal:Input matcher can't be parsed as package matcher"
+        ))
     }
+}
+
+pub fn update_using_parsed(
+    parsed: Vec<ParseInputResEnum>,
+    verify_signature: bool,
+) -> Result<Vec<UpdateInfo>> {
+    let mut arr = Vec::new();
+    for parsed in parsed {
+        let res = match parsed {
+            ParseInputResEnum::LocalPath(p) => update_using_package(&p, false)?,
+            ParseInputResEnum::Url(u) => update_using_url(&u, false)?,
+            ParseInputResEnum::PackageMatcher(p) => {
+                update_using_url(&p.download_url, verify_signature)?
+            }
+        };
+        println!("{}", res.format_success());
+        arr.push(res);
+    }
+    Ok(arr)
 }
 
 pub fn update_all(verify_signature: bool) -> Result<(i32, i32)> {
@@ -224,8 +220,8 @@ pub fn update_all(verify_signature: bool) -> Result<(i32, i32)> {
     } else {
         let tip = update_list
             .iter()
-            .fold(String::from("\nUpdatable packages:\n"), |acc, node| {
-                acc + &format!("{node}")
+            .fold("\nUpdatable packages:\n".to_string(), |acc, node| {
+                acc + &node.to_string()
             });
         println!("{tip}");
         if !ask_yn(
@@ -241,15 +237,8 @@ pub fn update_all(verify_signature: bool) -> Result<(i32, i32)> {
     let mut failure_count = 0;
     envmnt::set("CONFIRM", "true");
     for info in update_list {
-        let res = update_using_package_matcher(
-            PackageMatcher {
-                name: info.name.clone(),
-                scope: Some(info.scope.clone()),
-                mirror: None,
-                version_req: None,
-            },
-            verify_signature,
-        );
+        let res =
+            update_using_package_matcher(format!("{}/{}", info.name, info.scope), verify_signature);
         if let Err(e) = res {
             failure_count += 1;
             log!("{}", info.format_failure(e));

@@ -37,18 +37,18 @@ pub enum Action {
     /// Install a package [alias 'i' 'add']
     #[clap(aliases = &["i", "add"])]
     Install {
-        /// Package matcher（expect pattern ((MIRROR/)SCOPE/)NAME(@SEMVER)）or Nep package url or Nep package local path
-        package: String,
+        /// Package matchers（expect pattern ((MIRROR/)SCOPE/)NAME(@SEMVER)）or Nep package url or Nep package local path
+        packages: Vec<String>,
     },
 
     /// Update all updatable packages or a specified package [alias 'up']
     #[clap(alias = "up")]
     Update {
-        /// Package matcher（expect pattern ((MIRROR/)SCOPE/)NAME(@SEMVER)）or Nep package url or Nep package local path
-        package: Option<String>,
+        /// Package matchers（expect pattern ((MIRROR/)SCOPE/)NAME(@SEMVER)）or Nep package url or Nep package local path
+        packages: Option<Vec<String>>,
     },
 
-    /// Uninstall a package [alias 'remove' 'rm']
+    /// Uninstall packages [alias 'remove' 'rm']
     #[clap(aliases = &["remove","rm"])]
     Uninstall {
         /// Package matcher, expect pattern (SCOPE/)NAME
