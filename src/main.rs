@@ -43,8 +43,7 @@ fn router(action: Action) -> Result<String> {
 
     use crate::{
         entrances::{
-            mirror_add, mirror_list,
-            mirror_remove, mirror_update, mirror_update_all, search,
+            mirror_add, mirror_list, mirror_remove, mirror_update, mirror_update_all, search,
         },
         types::matcher::{PackageInputEnum, PackageMatcher},
     };
@@ -128,9 +127,9 @@ fn router(action: Action) -> Result<String> {
                         .into_iter()
                         .fold(format!("\nFound {len} results:\n"), |acc, node| {
                             acc + &fmt_package_line(
-                                node.scope,
-                                node.name,
-                                node.version,
+                                &node.scope,
+                                &node.name,
+                                &node.version,
                                 node.from_mirror,
                             )
                         });
@@ -163,9 +162,9 @@ fn router(action: Action) -> Result<String> {
                             String::new()
                         };
                         acc + &fmt_package_line(
-                            node.software.unwrap().scope,
-                            node.name,
-                            format!("{local_ver}{update_tip}"),
+                            &node.software.unwrap().scope,
+                            &node.name,
+                            &format!("{local_ver}{update_tip}"),
                             None,
                         )
                     });
@@ -235,7 +234,7 @@ fn router(action: Action) -> Result<String> {
                     let str: String = res
                         .into_iter()
                         .fold(String::from("\nAdded mirrors:\n"), |acc, (name, time)| {
-                            acc + &fmt_mirror_line(name, time)
+                            acc + &fmt_mirror_line(&name, time)
                         });
                     Ok(str)
                 } else {

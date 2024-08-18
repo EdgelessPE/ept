@@ -5,6 +5,7 @@ use anyhow::{anyhow, Result};
 use crate::{
     entrances::{auto_mirror_update_all, info_local, info_online},
     types::{extended_semver::ExSemVer, matcher::PackageInputEnum},
+    utils::fmt_print::fmt_package_line,
 };
 
 use super::{
@@ -38,12 +39,13 @@ impl Display for ParseInputResEnum {
                     p.target_version.to_owned()
                 };
                 format!(
-                    "{:>12}: {}/{}    ({})",
-                    "Package", p.scope, p.name, version_tip
+                    "{:>12}: {}",
+                    "Package",
+                    fmt_package_line(&p.scope, &p.name, &version_tip, None)
                 )
             }
         };
-        writeln!(f, "{line}")
+        write!(f, "{line}")
     }
 }
 
@@ -68,9 +70,13 @@ pub fn parse_install_inputs(packages: Vec<String>) -> Result<Vec<ParseInputResEn
                 // 查找 scope 并使用 scope 更新纠正大小写
                 let (scope, package_name) =
                     find_scope_with_name(&matcher.name, matcher.scope.clone())?;
-                // 检查对应包名有没有被安装过
+                // 检查对应包名有没有被安装过，如果安装过就作为 update 解析
                 if let Ok((_, diff)) = info_local(&scope, &package_name) {
                     log!("Warning:Package '{scope}/{package_name}' has been installed({ver}), would be switched to update entrance",ver = diff.version);
+                    let mut update_parsed =
+                        parse_update_inputs(vec![format!("{scope}/{package_name}")])?;
+                    res.append(&mut update_parsed);
+                    continue;
                 }
                 // 解析 url
                 let (url, target_release) = get_url_with_version_req(matcher)?;
@@ -125,7 +131,7 @@ pub fn parse_update_inputs(packages: Vec<String>) -> Result<Vec<ParseInputResEnu
                 res.push(ParseInputResEnum::PackageMatcher(ParsePackageInputRes {
                     name: package_name,
                     scope,
-                    current_version: None,
+                    current_version: Some(local_diff.version),
                     target_version: target_release.version.to_string(),
                     download_url: url,
                 }))

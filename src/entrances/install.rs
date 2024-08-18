@@ -9,20 +9,16 @@ use super::{
         validator::installed_validator,
     },
 };
+use crate::utils::{
+    download::download_nep, fs::move_or_copy, is_qa_mode, path::parse_relative_path_with_located,
+    term::ask_yn,
+};
 use crate::{
     entrances::{info, update_using_package},
-    utils::{
-        parse_inputs::{parse_install_inputs, ParseInputResEnum},
-    },
+    utils::parse_inputs::{parse_install_inputs, ParseInputResEnum},
 };
 use crate::{executor::workflow_executor, parsers::parse_workflow, utils::get_path_apps};
 use crate::{log, log_ok_last, p2s};
-use crate::{
-    utils::{
-        download::download_nep, fs::move_or_copy, is_qa_mode,
-        path::parse_relative_path_with_located, term::ask_yn,
-    },
-};
 
 pub fn install_using_package(
     source_file: &String,
@@ -144,7 +140,7 @@ pub fn install_using_url(url: &str, verify_signature: bool) -> Result<(String, S
     install_using_package(&p2s!(p), verify_signature)
 }
 
-pub fn install_using_package_matcher(
+pub fn _install_using_package_matcher(
     matcher: String,
     verify_signature: bool,
 ) -> Result<(String, String)> {
@@ -166,6 +162,7 @@ pub fn install_using_parsed(
 ) -> Result<Vec<(String, String)>> {
     let mut arr = Vec::new();
     for parsed in parsed {
+        log!("Info:Start installing {}", parsed.to_string());
         let (scope, name) = match parsed {
             ParseInputResEnum::LocalPath(p) => install_using_package(&p, false)?,
             ParseInputResEnum::Url(u) => install_using_url(&u, false)?,
@@ -173,7 +170,7 @@ pub fn install_using_parsed(
                 install_using_url(&p.download_url, verify_signature)?
             }
         };
-        println!("Success:Package '{scope}/{name}' installed successfully");
+        log!("Success:Package '{scope}/{name}' installed successfully");
         arr.push((scope, name));
     }
     Ok(arr)
@@ -366,7 +363,6 @@ fn test_reg_entry() {
 
 #[test]
 fn test_install_with_matcher() {
-    
     envmnt::set("CONFIRM", "true");
     // 替换测试镜像源
     let custom_mirror_ctx = crate::utils::test::_mount_custom_mirror();
@@ -393,7 +389,7 @@ fn test_install_with_matcher() {
 
     // 执行安装
     crate::utils::test::_ensure_testing_vscode_uninstalled();
-    install_using_package_matcher("vscode".to_string(), false).unwrap();
+    _install_using_package_matcher("vscode".to_string(), false).unwrap();
     assert!(
         info_local(&"Microsoft".to_string(), &"VSCode".to_string())
             .unwrap()
@@ -419,7 +415,8 @@ fn test_install_with_matcher() {
     .unwrap();
 
     // 执行更新
-    crate::entrances::update_using_package_matcher("microsoFT/vscode".to_string(), false).unwrap();
+    crate::entrances::update::update_using_package_matcher("microsoFT/vscode".to_string(), false)
+        .unwrap();
 
     crate::utils::test::_ensure_testing_vscode_uninstalled();
 

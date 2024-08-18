@@ -10,12 +10,7 @@ pub fn fmt_log_in_step(step: &str, head: ColoredString, msg: &str) -> String {
     format!("{head:>8} {s:<9} {msg}", s = step.black())
 }
 
-pub fn fmt_package_line(
-    scope: String,
-    name: String,
-    version: String,
-    mirror: Option<String>,
-) -> String {
+pub fn fmt_package_line(scope: &str, name: &str, version: &str, mirror: Option<String>) -> String {
     format!(
         "  {:>20}/{:<50} {:<20} {}\n",
         scope.black().italic(),
@@ -25,7 +20,7 @@ pub fn fmt_package_line(
     )
 }
 
-pub fn fmt_mirror_line(name: String, updated_at: SystemTime) -> String {
+pub fn fmt_mirror_line(name: &str, updated_at: SystemTime) -> String {
     let date_time: DateTime<chrono::Local> = updated_at.into();
     let time_str = date_time.format("%Y-%m-%d %H:%M:%S").to_string();
     let update_str = format!("updated at {time_str}");
@@ -41,15 +36,7 @@ fn test_fmt() {
     );
     print!(
         "{}",
-        fmt_package_line(
-            "Scope".to_string(),
-            "Name".to_string(),
-            "1.1.4.5".to_string(),
-            Some("mock-server".to_string()),
-        )
+        fmt_package_line("Scope", "Name", "1.1.4.5", Some("mock-server".to_string()),)
     );
-    print!(
-        "{}",
-        fmt_mirror_line("mock-server".to_string(), SystemTime::now())
-    );
+    print!("{}", fmt_mirror_line("mock-server", SystemTime::now()));
 }

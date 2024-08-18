@@ -9,6 +9,7 @@
     "gen": "ts-node ./scripts/index.ts",
     "lint": "eslint --fix scripts/**/* bindings/**/*",
     "prepare": "npx simple-git-hooks && rustup component add clippy",
+    "rust:lint":"cargo fmt && cargo clippy --fix --allow-dirty --allow-staged",
     "rust:ut": "cargo test -- --test-threads 1",
     "rust:ut:html": "cargo tarpaulin -o html --exclude-files test/** --exclude-files node_modules/** && start tarpaulin-report.html",
     "rust:ut:xml": "cargo tarpaulin -o xml --exclude-files test/** --exclude-files node_modules/**"
