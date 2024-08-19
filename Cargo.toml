@@ -57,7 +57,7 @@ config = "0.14.0"
 [target.'cfg(windows)'.dependencies]
 mslnk = "0.1.8"
 pelite = "0.10.0"
-vc-ltl = "5.0.9"
+vc-ltl = "5.1.1"
 winapi = { version = "0.3.9", features = ["winuser", "minwindef"] }
 winreg = "0.52.0"
 winrt-notification = "0.5.1"
