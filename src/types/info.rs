@@ -45,7 +45,7 @@ impl Display for UpdateInfo {
 impl UpdateInfo {
     pub fn format_success(&self) -> String {
         format!(
-            "Success:Package '{scope}/{name}' updated successfully from {from_ver} to {to_ver}",
+            "Success:Package '{scope}/{name}' updated successfully from '{from_ver}' to '{to_ver}'",
             scope = &self.scope,
             name = &self.name,
             from_ver = &self.from_version,
@@ -54,7 +54,7 @@ impl UpdateInfo {
     }
     pub fn format_failure(&self, e: Error) -> String {
         format!(
-            "Error:Failed to update '{scope}/{name}' from {from_ver} to {to_ver} : {e}",
+            "Error:Failed to update '{scope}/{name}' from '{from_ver}' to '{to_ver}' : {e}",
             scope = &self.scope,
             name = &self.name,
             from_ver = &self.from_version,

@@ -72,8 +72,14 @@ fn router(action: Action) -> Result<String> {
                 return Err(anyhow!("Error:Operation canceled by user"));
             }
             // 执行
-            install_using_parsed(parsed, verify_signature)
-                .map(|arr| format!("Success:{} packages installed successfully", arr.len()))
+            install_using_parsed(parsed, verify_signature).map(|arr| {
+                let length = arr.len();
+                if length == 1 {
+                    String::new()
+                } else {
+                    format!("Success:{length} packages installed successfully")
+                }
+            })
         }
         Action::Update { packages } => {
             if let Some(packages) = packages {
@@ -96,8 +102,14 @@ fn router(action: Action) -> Result<String> {
                     return Err(anyhow!("Error:Operation canceled by user"));
                 }
                 // 执行
-                update_using_parsed(parsed, verify_signature)
-                    .map(|arr| format!("Success:{} packages updated successfully", arr.len()))
+                update_using_parsed(parsed, verify_signature).map(|arr| {
+                    let length = arr.len();
+                    if length == 1 {
+                        String::new()
+                    } else {
+                        format!("Success:{length} packages updated successfully")
+                    }
+                })
             } else {
                 update_all(verify_signature).map(|(success_count, failure_count)| {
                     if failure_count == 0 {
@@ -137,9 +149,11 @@ fn router(action: Action) -> Result<String> {
                 })?;
                 log!("{tip}");
             }
-            Ok(format!(
-                "Success:{length} packages uninstalled successfully"
-            ))
+            Ok(if length == 1 {
+                String::new()
+            } else {
+                format!("Success:{length} packages uninstalled successfully")
+            })
         }
         Action::Search { keyword, regex } => {
             auto_mirror_update_all(&cfg)?;
@@ -304,7 +318,10 @@ fn main() {
     // 使用路由器匹配入口
     let res = router(args.action);
     if res.is_ok() {
-        log!("{msg}", msg = res.unwrap());
+        let msg = res.unwrap();
+        if !msg.is_empty() {
+            log!("{msg}");
+        }
         exit(0);
     } else {
         log!("{msg}", msg = res.unwrap_err());
