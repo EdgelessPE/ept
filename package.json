@@ -20,7 +20,7 @@
     "typescript": "^5.5.4"
   },
   "devDependencies": {
-    "@modern-js/tsconfig": "2.56.2",
+    "@modern-js/tsconfig": "2.58.1",
     "@rspress/plugin-shiki": "^1.27.0",
     "@types/jest": "^29.5.12",
     "@types/node": "^22.0.0",
