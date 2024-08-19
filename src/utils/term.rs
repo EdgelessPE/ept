@@ -15,6 +15,7 @@ fn get_question_head(default_value: bool) -> ColoredString {
 
 fn ask_yn_impl(prompt: String, default_value: bool) -> bool {
     if is_confirm_mode() {
+        log!("{prompt} (confirmed)");
         true
     } else {
         Confirm::new()

@@ -239,7 +239,7 @@ pub fn update_all(verify_signature: bool) -> Result<(i32, i32)> {
     envmnt::set("CONFIRM", "true");
     for info in update_list {
         let res =
-            update_using_package_matcher(format!("{}/{}", info.name, info.scope), verify_signature);
+            update_using_package_matcher(format!("{}/{}", info.scope, info.name), verify_signature);
         if let Err(e) = res {
             failure_count += 1;
             log!("{}", info.format_failure(e));
