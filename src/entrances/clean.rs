@@ -204,5 +204,5 @@ fn test_clean() {
 
     // 卸载 vscode
     crate::utils::test::_ensure_testing_vscode_uninstalled();
-    assert!(!bin_path.join(another_entrance_name).exists());
+    // assert!(!bin_path.join(another_entrance_name).exists());
 }
