@@ -1,14 +1,15 @@
 use std::{
-    fs::{create_dir_all, read_to_string, write},
+    fs::{create_dir_all, write},
     path::{Path, PathBuf},
     sync::RwLock,
 };
 
 use anyhow::{anyhow, Result};
+use config::{Config};
 use dirs::home_dir;
 use humantime::parse_duration;
 use serde::{Deserialize, Serialize};
-use toml::{from_str, to_string_pretty, Value};
+use toml::{to_string_pretty, Value};
 
 use crate::{p2s, types::verifiable::Verifiable};
 
@@ -69,8 +70,18 @@ impl Cfg {
     }
     pub fn init() -> Result<Self> {
         let from = Self::use_which()?;
-        let text = read_to_string(from.clone())?;
-        let cfg: Self = from_str(&text).map_err(|e| {
+        let f = p2s!(from);
+        let default_val = Value::try_from(Self::default()).unwrap();
+        let settings = Config::builder()
+            .add_source(config::File::from_str(
+                &to_string_pretty(&default_val).unwrap(),
+                config::FileFormat::Toml,
+            ))
+            .add_source(config::File::with_name(&f))
+            .add_source(config::Environment::with_prefix("EPT"))
+            .build()
+            .map_err(|e| anyhow!("Error:Failed to build config with located config '{f}' : {e}"))?;
+        let cfg: Self = settings.try_deserialize().map_err(|e| {
             anyhow!(
                 "Error:Invalid config content, try delete '{f}' : {e}",
                 f = p2s!(from),

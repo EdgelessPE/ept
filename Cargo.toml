@@ -52,6 +52,7 @@ zstd = "0.13.2"
 httpmock = "0.7.0"
 dialoguer = "0.11.0"
 tantivy-jieba = "0.11.0"
+config = "0.14.0"
 
 [target.'cfg(windows)'.dependencies]
 mslnk = "0.1.8"
