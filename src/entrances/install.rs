@@ -9,19 +9,16 @@ use super::{
         validator::installed_validator,
     },
 };
+use crate::utils::{
+    download::download_nep, fs::move_or_copy, is_qa_mode, path::parse_relative_path_with_located,
+    term::ask_yn,
+};
 use crate::{
-    entrances::{info, update_using_package, update_using_package_matcher},
-    utils::{mirror::get_url_with_version_req, path::find_scope_with_name},
+    entrances::{info, update_using_package},
+    utils::parse_inputs::{parse_install_inputs, ParseInputResEnum},
 };
 use crate::{executor::workflow_executor, parsers::parse_workflow, utils::get_path_apps};
 use crate::{log, log_ok_last, p2s};
-use crate::{
-    types::matcher::PackageMatcher,
-    utils::{
-        download::download_nep, fs::move_or_copy, is_qa_mode,
-        path::parse_relative_path_with_located, term::ask_yn,
-    },
-};
 
 pub fn install_using_package(
     source_file: &String,
@@ -143,36 +140,40 @@ pub fn install_using_url(url: &str, verify_signature: bool) -> Result<(String, S
     install_using_package(&p2s!(p), verify_signature)
 }
 
-pub fn install_using_package_matcher(
-    matcher: PackageMatcher,
+pub fn _install_using_package_matcher(
+    matcher: String,
     verify_signature: bool,
 ) -> Result<(String, String)> {
-    // 查找 scope 并使用 scope 更新纠正大小写
-    let (scope, package_name) = find_scope_with_name(&matcher.name, matcher.scope.clone())?;
-    // 检查对应包名有没有被安装过
-    if let Ok((_, diff)) = info_local(&scope, &package_name) {
-        log!(
-            "Warning:Package '{name}' has been installed({ver}), switch to update entrance",
-            name = package_name,
-            ver = diff.version,
-        );
-        let res = update_using_package_matcher(matcher, verify_signature)?;
-        return Ok((res.scope, res.name));
-    }
-    // 解析 url
-    let (url, target_release) = get_url_with_version_req(matcher)?;
+    // 解析
+    let parsed = parse_install_inputs(vec![matcher])?;
     // 执行安装
-    if ask_yn(
-        format!(
-            "Ready to install '{scope}/{package_name}' ({v}), continue?",
-            v = target_release.version
-        ),
-        true,
-    ) {
-        install_using_url(&url, verify_signature)
+    if let ParseInputResEnum::PackageMatcher(p) = parsed.first().unwrap() {
+        install_using_url(&p.download_url, verify_signature)
     } else {
-        Err(anyhow!("Error:Operation canceled by user"))
+        Err(anyhow!(
+            "Error:Fatal:Input matcher can't be parsed as package matcher"
+        ))
     }
+}
+
+pub fn install_using_parsed(
+    parsed: Vec<ParseInputResEnum>,
+    verify_signature: bool,
+) -> Result<Vec<(String, String)>> {
+    let mut arr = Vec::new();
+    for parsed in parsed {
+        log!("Info:Start installing {}", parsed.to_string());
+        let (scope, name) = match parsed {
+            ParseInputResEnum::LocalPath(p) => install_using_package(&p, false)?,
+            ParseInputResEnum::Url(u) => install_using_url(&u, false)?,
+            ParseInputResEnum::PackageMatcher(p) => {
+                install_using_url(&p.download_url, verify_signature)?
+            }
+        };
+        log!("Success:Package '{scope}/{name}' installed successfully");
+        arr.push((scope, name));
+    }
+    Ok(arr)
 }
 
 // #[test]
@@ -362,7 +363,6 @@ fn test_reg_entry() {
 
 #[test]
 fn test_install_with_matcher() {
-    use semver::VersionReq;
     envmnt::set("CONFIRM", "true");
     // 替换测试镜像源
     let custom_mirror_ctx = crate::utils::test::_mount_custom_mirror();
@@ -389,16 +389,7 @@ fn test_install_with_matcher() {
 
     // 执行安装
     crate::utils::test::_ensure_testing_vscode_uninstalled();
-    install_using_package_matcher(
-        PackageMatcher {
-            name: "vscode".to_string(),
-            scope: None,
-            mirror: None,
-            version_req: None,
-        },
-        false,
-    )
-    .unwrap();
+    _install_using_package_matcher("vscode".to_string(), false).unwrap();
     assert!(
         info_local(&"Microsoft".to_string(), &"VSCode".to_string())
             .unwrap()
@@ -424,16 +415,8 @@ fn test_install_with_matcher() {
     .unwrap();
 
     // 执行更新
-    crate::entrances::update_using_package_matcher(
-        PackageMatcher {
-            name: "vscode".to_string(),
-            scope: Some("microsoFT".to_string()),
-            mirror: Some("mock-server".to_string()),
-            version_req: Some(VersionReq::parse("^1.75").unwrap()),
-        },
-        false,
-    )
-    .unwrap();
+    crate::entrances::update::update_using_package_matcher("microsoFT/vscode".to_string(), false)
+        .unwrap();
 
     crate::utils::test::_ensure_testing_vscode_uninstalled();
 

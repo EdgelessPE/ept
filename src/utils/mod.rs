@@ -10,6 +10,7 @@ pub mod env;
 pub mod fmt_print;
 pub mod fs;
 pub mod mirror;
+pub mod parse_inputs;
 pub mod path;
 pub mod process;
 pub mod random;

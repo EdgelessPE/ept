@@ -25,7 +25,6 @@ use self::types::cli::{Action, ActionConfig, Args};
 use crate::entrances::config::{config_get, config_init, config_list, config_set, config_which};
 use crate::entrances::{
     auto_mirror_update_all, clean, info, install_using_package, list, pack, uninstall, update_all,
-    update_using_package,
 };
 use crate::utils::cfg::get_config;
 use crate::utils::launch_clean;
@@ -34,14 +33,17 @@ use crate::utils::launch_clean;
 fn router(action: Action) -> Result<String> {
     // 环境变量读取
 
+    use entrances::{install_using_parsed, update_using_parsed};
     use types::{cli::ActionMirror, extended_semver::ExSemVer};
-    use utils::fmt_print::{fmt_mirror_line, fmt_package_line};
+    use utils::{
+        fmt_print::{fmt_mirror_line, fmt_package_line},
+        parse_inputs::{parse_install_inputs, parse_update_inputs},
+        term::ask_yn,
+    };
 
     use crate::{
         entrances::{
-            install_using_package_matcher, install_using_url, mirror_add, mirror_list,
-            mirror_remove, mirror_update, mirror_update_all, search, update_using_package_matcher,
-            update_using_url,
+            mirror_add, mirror_list, mirror_remove, mirror_update, mirror_update_all, search,
         },
         types::matcher::{PackageInputEnum, PackageMatcher},
     };
@@ -50,34 +52,52 @@ fn router(action: Action) -> Result<String> {
 
     // 匹配入口
     match action {
-        Action::Install { package } => {
-            let res = match PackageInputEnum::parse(package.clone(), false, false)? {
-                PackageInputEnum::PackageMatcher(matcher) => {
-                    auto_mirror_update_all(&cfg)?;
-                    install_using_package_matcher(matcher, verify_signature)
-                }
-                PackageInputEnum::Url(url) => install_using_url(&url, verify_signature),
-                PackageInputEnum::LocalPath(source_file) => {
-                    install_using_package(&source_file, verify_signature)
-                }
-            };
-            res.map(|(scope, name)| {
-                format!("Success:Package '{scope}/{name}' installed successfully")
-            })
+        Action::Install { packages } => {
+            // 解析输入
+            let parsed = parse_install_inputs(packages)?;
+            // 询问是否执行
+            let tip = &parsed
+                .iter()
+                .fold("\nTarget packages:\n".to_string(), |acc, node| {
+                    acc + &node.to_string()
+                });
+            println!("{tip}");
+            if !ask_yn(
+                format!(
+                    "Ready to install those {} packages, continue?",
+                    parsed.len()
+                ),
+                true,
+            ) {
+                return Err(anyhow!("Error:Operation canceled by user"));
+            }
+            // 执行
+            install_using_parsed(parsed, verify_signature)
+                .map(|arr| format!("Success:{} packages installed successfully", arr.len()))
         }
-        Action::Update { package } => {
-            if let Some(package) = package {
-                let res = match PackageInputEnum::parse(package.clone(), false, false)? {
-                    PackageInputEnum::PackageMatcher(matcher) => {
-                        auto_mirror_update_all(&cfg)?;
-                        update_using_package_matcher(matcher, verify_signature)
-                    }
-                    PackageInputEnum::Url(url) => update_using_url(&url, verify_signature),
-                    PackageInputEnum::LocalPath(source_file) => {
-                        update_using_package(&source_file, verify_signature)
-                    }
-                };
-                res.map(|info| info.format_success())
+        Action::Update { packages } => {
+            if let Some(packages) = packages {
+                // 解析输入
+                let parsed = parse_update_inputs(packages)?;
+                // 询问是否执行
+                let tip = &parsed
+                    .iter()
+                    .fold("\nTarget packages:\n".to_string(), |acc, node| {
+                        acc + &node.to_string()
+                    });
+                println!("{tip}");
+                if !ask_yn(
+                    format!(
+                        "Ready to update with those {} packages, continue?",
+                        parsed.len()
+                    ),
+                    true,
+                ) {
+                    return Err(anyhow!("Error:Operation canceled by user"));
+                }
+                // 执行
+                update_using_parsed(parsed, verify_signature)
+                    .map(|arr| format!("Success:{} packages updated successfully", arr.len()))
             } else {
                 update_all(verify_signature).map(|(success_count, failure_count)| {
                     if failure_count == 0 {
@@ -107,9 +127,9 @@ fn router(action: Action) -> Result<String> {
                         .into_iter()
                         .fold(format!("\nFound {len} results:\n"), |acc, node| {
                             acc + &fmt_package_line(
-                                node.scope,
-                                node.name,
-                                node.version,
+                                &node.scope,
+                                &node.name,
+                                &node.version,
                                 node.from_mirror,
                             )
                         });
@@ -142,9 +162,9 @@ fn router(action: Action) -> Result<String> {
                             String::new()
                         };
                         acc + &fmt_package_line(
-                            node.software.unwrap().scope,
-                            node.name,
-                            format!("{local_ver}{update_tip}"),
+                            &node.software.unwrap().scope,
+                            &node.name,
+                            &format!("{local_ver}{update_tip}"),
                             None,
                         )
                     });
@@ -214,7 +234,7 @@ fn router(action: Action) -> Result<String> {
                     let str: String = res
                         .into_iter()
                         .fold(String::from("\nAdded mirrors:\n"), |acc, (name, time)| {
-                            acc + &fmt_mirror_line(name, time)
+                            acc + &fmt_mirror_line(&name, time)
                         });
                     Ok(str)
                 } else {
