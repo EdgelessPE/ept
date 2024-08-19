@@ -5,7 +5,7 @@ use std::{
 };
 
 use anyhow::{anyhow, Result};
-use config::{Config};
+use config::Config;
 use dirs::home_dir;
 use humantime::parse_duration;
 use serde::{Deserialize, Serialize};
