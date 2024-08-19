@@ -4,12 +4,16 @@ use anyhow::{anyhow, Result};
 
 use crate::{
     entrances::{auto_mirror_update_all, info_local, info_online},
-    types::{extended_semver::ExSemVer, matcher::PackageInputEnum},
+    types::{
+        extended_semver::ExSemVer,
+        matcher::{PackageInputEnum, PackageMatcher},
+    },
     utils::fmt_print::fmt_package_line,
 };
 
 use super::{
     cfg::get_config,
+    get_path_apps,
     mirror::{filter_release, get_url_with_version_req},
     path::find_scope_with_name,
 };
@@ -139,4 +143,32 @@ pub fn parse_update_inputs(packages: Vec<String>) -> Result<Vec<ParseInputResEnu
         };
     }
     Ok(res)
+}
+
+pub fn parse_uninstall_inputs(packages: Vec<String>) -> Result<Vec<(String, String, String)>> {
+    let mut arr = Vec::new();
+    for p in packages {
+        // 简单校验是否可以卸载
+        let parse_res = PackageMatcher::parse(&p, true, true)?;
+
+        // 查找 scope 并使用 scope 更新纠正大小写
+        let (scope, package_name) = find_scope_with_name(&parse_res.name, parse_res.scope)?;
+
+        // 解析安装路径
+        let app_path = get_path_apps(&scope, &package_name, false)?;
+        if !app_path.exists() {
+            return Err(anyhow!("Error:Package '{p}' not installed"));
+        }
+
+        // 查询版本号
+        let version = if let Ok((_, local_diff)) = info_local(&scope, &package_name) {
+            local_diff.version
+        } else {
+            "broken".to_string()
+        };
+
+        arr.push((scope, package_name, version));
+    }
+
+    Ok(arr)
 }

@@ -42,7 +42,7 @@ pub fn uninstall(scope: Option<String>, package_name: &String) -> Result<(String
     // 解析安装路径
     let app_path = get_path_apps(&scope, &package_name, false)?;
     if !app_path.exists() {
-        return Err(anyhow!("Error:Can't find package '{package_name}'"));
+        return Err(anyhow!("Error:Package '{package_name}' not installed"));
     }
     let app_str = p2s!(app_path);
 

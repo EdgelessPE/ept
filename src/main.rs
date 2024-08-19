@@ -37,7 +37,7 @@ fn router(action: Action) -> Result<String> {
     use types::{cli::ActionMirror, extended_semver::ExSemVer};
     use utils::{
         fmt_print::{fmt_mirror_line, fmt_package_line},
-        parse_inputs::{parse_install_inputs, parse_update_inputs},
+        parse_inputs::{parse_install_inputs, parse_uninstall_inputs, parse_update_inputs},
         term::ask_yn,
     };
 
@@ -112,11 +112,34 @@ fn router(action: Action) -> Result<String> {
                 })
             }
         }
-        Action::Uninstall { package_matcher } => {
-            let parse_res = PackageMatcher::parse(&package_matcher, true, true)?;
-            uninstall(parse_res.scope, &parse_res.name).map(|(scope, name)| {
-                format!("Success:Package '{scope}/{name}' uninstalled successfully")
-            })
+        Action::Uninstall { package_matchers } => {
+            // 解析输入
+            let parsed = parse_uninstall_inputs(package_matchers)?;
+            // 询问是否执行
+            let tip = &parsed.iter().fold(
+                "\nTarget packages:\n".to_string(),
+                |acc, (scope, name, version)| acc + &fmt_package_line(scope, name, version, None),
+            );
+            println!("{tip}");
+            if !ask_yn(
+                format!(
+                    "Ready to uninstall those {} packages, continue?",
+                    parsed.len()
+                ),
+                true,
+            ) {
+                return Err(anyhow!("Error:Operation canceled by user"));
+            }
+            let length = parsed.len();
+            for (scope, name, _) in parsed {
+                let tip = uninstall(Some(scope), &name).map(|(scope, name)| {
+                    format!("Success:Package '{scope}/{name}' uninstalled successfully")
+                })?;
+                log!("{tip}");
+            }
+            Ok(format!(
+                "Success:{length} packages uninstalled successfully"
+            ))
         }
         Action::Search { keyword, regex } => {
             auto_mirror_update_all(&cfg)?;

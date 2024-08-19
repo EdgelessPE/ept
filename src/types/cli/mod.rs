@@ -52,7 +52,7 @@ pub enum Action {
     #[clap(aliases = &["remove","rm"])]
     Uninstall {
         /// Package matcher, expect pattern (SCOPE/)NAME
-        package_matcher: String,
+        package_matchers: Vec<String>,
     },
 
     /// Search a package
