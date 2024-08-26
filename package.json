@@ -21,7 +21,7 @@
   },
   "devDependencies": {
     "@modern-js/tsconfig": "2.58.1",
-    "@rspress/plugin-shiki": "^1.28.0",
+    "@rspress/plugin-shiki": "^1.28.1",
     "@types/jest": "^29.5.12",
     "@types/node": "^22.4.1",
     "@typescript-eslint/eslint-plugin": "^7.17.0",
