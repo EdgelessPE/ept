@@ -55,15 +55,8 @@ pub fn mirror_add(url: &String, should_match_name: Option<String>) -> Result<Str
     // 校验
     res.verify_self(&"".to_string())?;
 
-    // 写 hello.toml
-    let p = get_path_mirror()?.join(&mirror_name);
-    ensure_dir_exist(&p)?;
-    let value = Value::try_from(res.clone())?;
-    let text = to_string_pretty(&value)?;
-    write(p.join("hello.toml"), text)?;
-
     // 请求软件包列表
-    let (ps_url, _) = filter_service_from_meta(res, ServiceKeys::PkgSoftware)?;
+    let (ps_url, _) = filter_service_from_meta(res.clone(), ServiceKeys::PkgSoftware)?;
     log!("Debug:Fetching software list from '{ps_url}'...");
     let pkg_software_res: MirrorPkgSoftware = get(&ps_url)
         .map_err(|e| anyhow!("Error:Failed to fetch '{ps_url}' : {e}"))?
@@ -78,10 +71,17 @@ pub fn mirror_add(url: &String, should_match_name: Option<String>) -> Result<Str
     pkg_software_res.verify_self(&"".to_string())?;
 
     // 更新索引并写 pkg-software.toml
+    let p = get_path_mirror()?.join(&mirror_name);
     build_index_for_mirror(pkg_software_res.clone(), p.join("index"))?;
     let value = Value::try_from(pkg_software_res.clone())?;
     let text = to_string_pretty(&value)?;
     write(p.join("pkg-software.toml"), text)?;
+
+    // [defer] 写 hello.toml
+    ensure_dir_exist(&p)?;
+    let value = Value::try_from(res)?;
+    let text = to_string_pretty(&value)?;
+    write(p.join("hello.toml"), text)?;
 
     Ok(mirror_name)
 }
