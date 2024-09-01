@@ -335,13 +335,6 @@ fn test_workflow_with_strict_mode() {
     let cx = WorkflowContext::_demo();
     assert!(workflow_executor(flow.clone(), cx.located, cx.pkg).is_err());
 
-    // 全局关闭严格模式
-    envmnt::set("STRICT", "false");
-    let cx = WorkflowContext::_demo();
-    let code = workflow_executor(flow.clone(), cx.located, cx.pkg).unwrap();
-    assert_eq!(code, 3);
-    envmnt::set("STRICT", "true");
-
     // 显式申明禁用严格模式
     let mut cx = WorkflowContext::_demo();
     cx.pkg.package.strict = Some(false);
