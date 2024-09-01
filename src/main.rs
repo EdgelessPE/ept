@@ -310,10 +310,6 @@ fn main() {
         log!("Warning:Confirmation mode enabled");
         envmnt::set("CONFIRM", "true");
     }
-    if args.strict {
-        log!("Warning:Strict mode enabled");
-        envmnt::set("STRICT", "true");
-    }
 
     // 使用路由器匹配入口
     let res = router(args.action);

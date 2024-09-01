@@ -10,7 +10,7 @@ use crate::{
         package::GlobalPackage,
         workflow::{WorkflowContext, WorkflowNode},
     },
-    utils::{arch::is_current_arch_match, get_bare_apps, get_system_drive, is_strict_mode},
+    utils::{arch::is_current_arch_match, get_bare_apps, get_system_drive},
 };
 
 pub use self::functions::{
@@ -58,13 +58,13 @@ pub fn condition_eval(
     })
 }
 
-// 执行工作流
+// 执行工作流，返回最后一个步骤的退出码
 pub fn workflow_executor(
     flow: Vec<WorkflowNode>,
     located: String,
     pkg: GlobalPackage,
 ) -> Result<i32> {
-    let strict_mode = is_strict_mode();
+    let strict_mode = pkg.package.strict.unwrap_or(true);
 
     // 检查包架构是否与当前架构相同
     if let Some(software) = &pkg.software {
@@ -223,13 +223,7 @@ fn test_condition_eval() {
 #[test]
 fn test_workflow_executor() {
     envmnt::set("DEBUG", "true");
-    use crate::types::steps::{
-        Step,
-        StepExecute,
-        // StepLink,
-        StepLog,
-        // StepPath,
-    };
+    use crate::types::steps::{Step, StepExecute, StepLog};
     use crate::types::workflow::{WorkflowHeader, WorkflowNode};
     let cx = WorkflowContext::_demo();
     let wf1 = vec![
@@ -258,17 +252,6 @@ fn test_workflow_executor() {
                 ignore_exit_code: None,
             }),
         },
-        // WorkflowNode {
-        //     header: WorkflowHeader {
-        //         name: "Fix".to_string(),
-        //         step: "Try fix".to_string(),
-        //         c_if: Some(String::from("${ExitCode}==3")),
-        //     },
-        //     body: Step::StepLink(StepLink {
-        //         source_file: "D:/CnoRPS/Edgeless Hub/edgeless-hub.exe".to_string(),
-        //         target_name: "Old hub".to_string(),
-        //     }),
-        // },
         WorkflowNode {
             header: WorkflowHeader {
                 name: Some("Exist".to_string()),
@@ -282,27 +265,6 @@ fn test_workflow_executor() {
                 msg: "桌面路径：${Desktop}，应用路径：${DefaultLocation}".to_string(),
             }),
         },
-        // WorkflowNode {
-        //     header: WorkflowHeader {
-        //         name: "Exist".to_string(),
-        //         step: "If exist".to_string(),
-        //         c_if: Some("Exist(\"${ProgramFiles_X64}/nodejs/node.exe\") && IsDirectory(\"${Desktop}/Projects\") && Exist(\"./Cargo.lock\")".to_string()),
-        //     },
-        //     body: Step::StepLog(StepLog {
-        //         level: "Warning".to_string(),
-        //         msg: "桌面路径：${Desktop}，应用路径：${DefaultLocation}".to_string(),
-        //     }),
-        // },
-        // WorkflowNode {
-        //     header: WorkflowHeader {
-        //         name: "Path".to_string(),
-        //         step: "Create path".to_string(),
-        //         c_if: None,
-        //     },
-        //     body: Step::StepPath(StepPath {
-        //         record: "D:/CnoRPS/chfsgui.exe".to_string(),
-        //     }),
-        // },
     ];
     let r1 = workflow_executor(wf1, cx.located, cx.pkg).unwrap();
     assert_eq!(r1, 3);
@@ -343,5 +305,46 @@ fn test_workflow_executor_interpreter() {
         },
     ];
     let cx = WorkflowContext::_demo();
-    workflow_executor(flow, cx.located, cx.pkg).unwrap();
+    let code = workflow_executor(flow, cx.located, cx.pkg).unwrap();
+    assert_eq!(code, 0);
+}
+
+#[test]
+fn test_workflow_with_strict_mode() {
+    use crate::types::{
+        steps::{Step, StepExecute},
+        workflow::{WorkflowHeader, WorkflowNode},
+    };
+
+    let flow = vec![WorkflowNode {
+        header: WorkflowHeader {
+            name: Some("Throw".to_string()),
+            step: "Try throw".to_string(),
+            c_if: Some(String::from("${ExitCode}==0")),
+        },
+        body: Step::StepExecute(StepExecute {
+            command: "exit 3".to_string(),
+            pwd: None,
+            call_installer: None,
+            wait: None,
+            ignore_exit_code: None,
+        }),
+    }];
+
+    // 默认情况下是严格模式
+    let cx = WorkflowContext::_demo();
+    assert!(workflow_executor(flow.clone(), cx.located, cx.pkg).is_err());
+
+    // 全局关闭严格模式
+    envmnt::set("STRICT", "false");
+    let cx = WorkflowContext::_demo();
+    let code = workflow_executor(flow.clone(), cx.located, cx.pkg).unwrap();
+    assert_eq!(code, 3);
+    envmnt::set("STRICT", "true");
+
+    // 显式申明禁用严格模式
+    let mut cx = WorkflowContext::_demo();
+    cx.pkg.package.strict = Some(false);
+    let code = workflow_executor(flow.clone(), cx.located, cx.pkg).unwrap();
+    assert_eq!(code, 3);
 }

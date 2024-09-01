@@ -34,6 +34,9 @@ pub struct Package {
     /// 包图标 URL。
     //# `icon = "https://code.visualstudio.com/favicon.ico"`
     pub icon: Option<String>,
+    /// 是否使用严格模式，缺省为 false
+    //# `strict = true`
+    pub strict: Option<bool>,
 }
 
 impl Verifiable for Package {
@@ -89,6 +92,7 @@ impl GlobalPackage {
                 authors: vec!["Cno".to_string()],
                 license: None,
                 icon: None,
+                strict: None,
             },
             software: Some(Software {
                 scope: "Edgeless".to_string(),

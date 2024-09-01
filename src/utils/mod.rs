@@ -60,10 +60,6 @@ pub fn is_confirm_mode() -> bool {
     envmnt::get_or("CONFIRM", "false") == *"true"
 }
 
-pub fn is_strict_mode() -> bool {
-    envmnt::get_or("STRICT", "false") == *"true"
-}
-
 pub fn is_no_warning_mode() -> bool {
     envmnt::get_or("NO_WARNING", "false") == *"true"
 }

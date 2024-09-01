@@ -14,10 +14,6 @@ pub struct Args {
     #[arg(short, long)]
     pub yes: bool,
 
-    /// Strict mode, throw immediately when a workflow step goes wrong
-    #[arg(short, long)]
-    pub strict: bool,
-
     /// (Dangerous) Disable online Edgeless CA to skip signature signing or verifying
     #[arg(long)]
     pub offline: bool,

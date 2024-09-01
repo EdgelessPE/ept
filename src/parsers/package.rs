@@ -243,6 +243,7 @@ fn test_parse_package() {
             ],
             license: Some("MIT".to_string()),
             icon: None,
+            strict: None,
         },
         software: Some(crate::types::software::Software {
             scope: "Microsoft".to_string(),
