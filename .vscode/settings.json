@@ -16,6 +16,7 @@
         "envmnt",
         "eptrc",
         "Evalexpr",
+        "exitcode",
         "Freqs",
         "hkcu",
         "HKEY",

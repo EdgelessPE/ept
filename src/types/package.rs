@@ -34,8 +34,13 @@ pub struct Package {
     /// 包图标 URL。
     //# `icon = "https://code.visualstudio.com/favicon.ico"`
     pub icon: Option<String>,
-    /// 是否使用严格模式，缺省为 false
-    //# `strict = true`
+    /// 是否使用严格模式，缺省为`true`。
+    /// 启用严格模式时，如果某一步骤出错则工作流会立即停止执行并报告错误；否则工作流只会对错误进行警告然后继续运行后续步骤。
+    ///
+    /// :::warning
+    /// 注意如果希望使用内置变量[`ExitCode`](/nep/definition/2-context#exitcode)，请将`strict`设置为`false`。
+    /// :::
+    //# `strict = false`
     pub strict: Option<bool>,
 }
 

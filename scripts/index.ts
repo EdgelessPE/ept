@@ -50,7 +50,7 @@ genContextWiki(
       {
         name: "ExitCode",
         level: "Normal",
-        wiki: "上一步骤的退出码，**类型为整数**。若步骤被正常执行则其值为 0，否则不为 0。",
+        wiki: ":::warning\n默认状态下工作流会以[严格模式](/nep/definition/1-package#strict)执行，因此需要在`package.toml`中显式申明关闭严格模式后才能正常使用此内置变量。\n\n**使用此变量并不符合最佳实践，请尽可能减少使用。**\n:::\n\n上一步骤的退出码，**类型为整数**。若步骤被正常执行则其值为 0，否则不为 0。",
         demoValue: 0,
       },
       {

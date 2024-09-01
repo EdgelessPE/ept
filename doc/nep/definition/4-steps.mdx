@@ -99,7 +99,11 @@ import Tag from "../../components/tag.tsx"
 `Abandon`：异步执行命令并立即完成当前步骤；在当前工作流执行完成时若此命令还未结束则直接强行停止此命令。
 * 类型：`String 枚举` 
 * 有效值：`Sync` `Delay` `Abandon` ，缺省值：`Sync` 
-* 示例：`wait = "Delay"`  
+* 示例：`wait = "Delay"` 
+#### ignore_exit_code
+<Tag>可选</Tag> 是否忽略退出码，缺省则当退出码不为 0 时步骤失败。
+* 类型：`bool`  
+* 示例：`ignore_exit_code = true`  
 ### 装箱单
 * 若命令调用相对路径的安装包，则该安装包进入装箱单
 ### 权限
