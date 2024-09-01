@@ -266,8 +266,7 @@ fn test_workflow_executor() {
             }),
         },
     ];
-    let r1 = workflow_executor(wf1, cx.located, cx.pkg).unwrap();
-    assert_eq!(r1, 3);
+    assert!(workflow_executor(wf1, cx.located, cx.pkg).is_err());
 }
 
 #[test]
@@ -304,7 +303,8 @@ fn test_workflow_executor_interpreter() {
             }),
         },
     ];
-    let cx = WorkflowContext::_demo();
+    let mut cx = WorkflowContext::_demo();
+    cx.pkg.package.strict = Some(false);
     let code = workflow_executor(flow, cx.located, cx.pkg).unwrap();
     assert_eq!(code, 0);
 }
