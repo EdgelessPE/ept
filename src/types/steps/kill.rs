@@ -103,6 +103,7 @@ fn test_kill() {
         pwd: Some("test".to_string()),
         call_installer: None,
         wait: Some("Abandon".to_string()),
+        ignore_exit_code: None,
     }
     .run(&mut cx)
     .unwrap();

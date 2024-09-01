@@ -38,6 +38,9 @@ pub struct StepExecute {
     //# `wait = "Delay"`
     //* Sync Delay Abandon | Sync
     pub wait: Option<String>,
+    /// 是否忽略退出码，缺省则当退出码不为 0 时步骤失败。
+    //# `ignore_exit_code = true`
+    pub ignore_exit_code: Option<bool>,
 }
 
 impl TStep for StepExecute {
@@ -97,19 +100,27 @@ impl TStep for StepExecute {
             };
 
             // 处理退出码
+            let ignore_exit_code = self.ignore_exit_code.unwrap_or(false);
             match output.status.code() {
                 Some(val) => {
                     if val == 0 {
                         log!("{level}(Execute):Command '{command_str}' {hint}, output :");
-                        println!("{output}", output = read_console(output.stdout));
+                        println!("{}", read_console(output.stdout));
                     } else {
-                        log!(
-                            "Error(Execute):Failed command '{command_str}' {hint}, output(code={val}) : \n{o}",
-                            o = read_console(output.stderr)
-                        );
-                        println!("{output}", output = read_console(output.stdout));
+                        if ignore_exit_code {
+                            log!(
+                                "Warning(Execute):Ignoring error from failed command '{command_str}' {hint}, output(code={val}) : \n{o}",
+                                o = read_console(output.stderr)
+                            );
+                        } else {
+                            log!(
+                                "Error(Execute):Failed command '{command_str}' {hint}, output(code={val}) : \n{o}",
+                                o = read_console(output.stderr)
+                            );
+                        }
+                        println!("{}", read_console(output.stdout));
                     }
-                    Ok(val)
+                    Ok(if ignore_exit_code { 0 } else { val })
                 }
                 None => Err(anyhow!(
                     "Error(Execute):Command '{command_str}' terminated by outer signal"
@@ -159,6 +170,7 @@ impl Interpretable for StepExecute {
             pwd: self.pwd.map(interpreter),
             call_installer: self.call_installer,
             wait: self.wait,
+            ignore_exit_code: self.ignore_exit_code,
         }
     }
 }
@@ -225,6 +237,7 @@ fn test_execute_validate() {
         pwd: None,
         call_installer: Some(true),
         wait: None,
+        ignore_exit_code: None,
     }
     .verify_self(&located);
     assert!(res.is_ok());
@@ -234,6 +247,7 @@ fn test_execute_validate() {
         pwd: None,
         call_installer: Some(true),
         wait: None,
+        ignore_exit_code: None,
     }
     .verify_self(&located);
     assert!(res.is_err());
@@ -248,6 +262,7 @@ fn test_execute_manifest() {
         pwd: None,
         call_installer: Some(true),
         wait: None,
+        ignore_exit_code: None,
     }
     .get_manifest(&mut fs);
     assert_eq!(manifest, vec!["./Dism++x64.exe".to_string()]);
@@ -257,6 +272,7 @@ fn test_execute_manifest() {
         pwd: None,
         call_installer: Some(true),
         wait: None,
+        ignore_exit_code: None,
     }
     .get_manifest(&mut fs);
     assert_eq!(manifest, vec!["./Dism++x64.exe".to_string()]);
@@ -266,6 +282,7 @@ fn test_execute_manifest() {
         pwd: None,
         call_installer: Some(true),
         wait: None,
+        ignore_exit_code:None,
     }
     .get_manifest(&mut fs);
     assert!(manifest.is_empty());
@@ -280,6 +297,7 @@ fn test_execute() {
         pwd: None,
         call_installer: None,
         wait: None,
+        ignore_exit_code: None,
     }
     .run(&mut cx)
     .unwrap();
@@ -290,6 +308,7 @@ fn test_execute() {
         pwd: Some("./src".to_string()),
         call_installer: None,
         wait: None,
+        ignore_exit_code: None,
     }
     .run(&mut cx)
     .unwrap();
@@ -300,6 +319,18 @@ fn test_execute() {
         pwd: None,
         call_installer: None,
         wait: None,
+        ignore_exit_code: None,
+    }
+    .run(&mut cx)
+    .unwrap();
+    assert_eq!(res, 2);
+
+    let res = StepExecute {
+        command: "exit 2".to_string(),
+        pwd: None,
+        call_installer: None,
+        wait: None,
+        ignore_exit_code: Some(false),
     }
     .run(&mut cx)
     .unwrap();
@@ -310,6 +341,18 @@ fn test_execute() {
         pwd: None,
         call_installer: Some(true),
         wait: None,
+        ignore_exit_code: None,
+    }
+    .run(&mut cx)
+    .unwrap();
+    assert_eq!(res, 0);
+
+    let res = StepExecute {
+        command: "exit 2".to_string(),
+        pwd: None,
+        call_installer: Some(true),
+        wait: None,
+        ignore_exit_code: Some(true),
     }
     .run(&mut cx)
     .unwrap();
@@ -326,6 +369,7 @@ fn test_async_execute() {
         pwd: None,
         call_installer: None,
         wait: Some("Delay".to_string()),
+        ignore_exit_code: None,
     }
     .run(&mut cx)
     .unwrap();
@@ -334,6 +378,7 @@ fn test_async_execute() {
         pwd: Some("./src".to_string()),
         call_installer: None,
         wait: Some("Delay".to_string()),
+        ignore_exit_code: None,
     }
     .run(&mut cx)
     .unwrap();
@@ -343,6 +388,7 @@ fn test_async_execute() {
         pwd: None,
         call_installer: None,
         wait: Some("Delay".to_string()),
+        ignore_exit_code: None,
     }
     .run(&mut cx)
     .unwrap();

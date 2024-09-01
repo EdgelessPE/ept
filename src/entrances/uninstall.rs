@@ -77,6 +77,7 @@ pub fn uninstall(scope: Option<String>, package_name: &String) -> Result<(String
                 pwd: None,
                 call_installer: Some(true),
                 wait: None,
+                ignore_exit_code: None,
             }
             .run(&mut cx)?;
             cx.finish()?;
@@ -172,6 +173,7 @@ fn test_uninstall() {
         pwd: Some(pwd.clone()),
         call_installer: None,
         wait: Some("Abandon".to_string()),
+        ignore_exit_code: None,
     }
     .run(&mut cx)
     .unwrap();

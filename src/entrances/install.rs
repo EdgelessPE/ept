@@ -314,6 +314,7 @@ fn test_reg_entry() {
         pwd: None,
         call_installer: None,
         wait: None,
+        ignore_exit_code: None,
     }
     .run(&mut cx)
     .unwrap();

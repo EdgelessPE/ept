@@ -255,6 +255,7 @@ fn test_workflow_executor() {
                 pwd: None,
                 call_installer: None,
                 wait: None,
+                ignore_exit_code: None,
             }),
         },
         // WorkflowNode {
@@ -326,6 +327,7 @@ fn test_workflow_executor_interpreter() {
                 pwd: None,
                 call_installer: None,
                 wait: None,
+                ignore_exit_code: None,
             }),
         },
         WorkflowNode {
