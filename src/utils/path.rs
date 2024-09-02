@@ -88,6 +88,9 @@ fn find_scope_with_name_online(name: &String, scope: Option<String>) -> Result<(
     // 遍历 mirrors
     let p = get_path_mirror()?;
     let mirror_names = read_sub_dir(p)?;
+    if mirror_names.is_empty() {
+        return Err(anyhow!("Error:No mirror added yet"));
+    }
     for mirror_name in mirror_names {
         let pkg_software = read_local_mirror_pkg_software(&mirror_name)?;
         for (scope_real_name, tree) in pkg_software.tree {
