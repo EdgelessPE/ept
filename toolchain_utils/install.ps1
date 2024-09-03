@@ -13,7 +13,7 @@ function Warning {
     Write-Host "Warning " -NoNewline -ForegroundColor Yellow
     Write-Host $message -NoNewline
 }
-function Error {
+function Err {
     param (
         [string]$message
     )
@@ -45,7 +45,7 @@ if (Test-Path -Path $toolchainsDir) {
         Remove-Item -Path $toolchainsDir -Recurse -Force
     }
     else {
-        Error("Operation aborted by user.")
+        Err("Operation aborted by user.")
         exit 1
     }
 }
@@ -63,7 +63,7 @@ try {
     Info("Extracting ept toolchain...")
     Expand-Archive -Path $zipPath -DestinationPath $toolchainsDir
 } catch {
-    Error("Failed to download and extract ept toolchain")
+    Err("Failed to download and extract ept toolchain")
     exit 2
 }
 
@@ -81,7 +81,7 @@ if (Test-Path -Path $eptExecutablePath) {
    Info("Adding official mirror...")
     & $eptExecutablePath mirror add https://registry.edgeless.top
 } else {
-    Error("ept executable not found in the extracted files")
+    Err("ept executable not found in the extracted files")
     exit 2
 }
 
