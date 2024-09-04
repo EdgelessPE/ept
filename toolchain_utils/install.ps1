@@ -30,7 +30,7 @@ function Success {
 
 # define target path
 $baseDir = Join-Path -Path $env:USERPROFILE -ChildPath "ept"
-$toolchainsDir = Join-Path -Path $baseDir -ChildPath "toolchains"
+$toolchainsDir = Join-Path -Path $baseDir -ChildPath "toolchain"
 $tempDir = Join-Path -Path $baseDir -ChildPath "temp/_script_"
 $zipPath = Join-Path -Path $tempDir -ChildPath "latest.zip"
 
