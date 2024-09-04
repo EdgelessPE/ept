@@ -43,7 +43,7 @@ jobs:
 
       # 构建 Wiki
       - name: Run scripts
-        run: pnpm build
+        run: pnpm doc:build
 
       # 部署 Wiki
       - name: Setup Pages
