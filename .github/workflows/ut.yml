@@ -25,7 +25,7 @@ jobs:
       - name: Install cargo components
         run: cargo install cargo-tarpaulin miniserve
       - name: Run tests
-        run: npm run rust:ut:xml
+        run: npm run rs:ut:xml
       - name: Upload coverage reports
         uses: codecov/codecov-action@v4.0.1
         with:
