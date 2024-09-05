@@ -1,7 +1,8 @@
 mod blake3;
 mod ecdsa;
 
-use self::blake3::{compute_hash_blake3, fast_compute_hash_blake3};
+pub use self::blake3::compute_hash_blake3;
+use self::blake3::fast_compute_hash_blake3;
 use self::ecdsa::{sign_with_ecdsa, verify_with_ecdsa};
 use crate::ca::{get_own_pair, query_others_public};
 use anyhow::Result;

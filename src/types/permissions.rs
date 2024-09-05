@@ -35,6 +35,8 @@ pub enum PermissionKey {
     fs_read,
     /// 写文件系统
     fs_write,
+    /// 下载文件
+    download_file,
     /// 查询某个进程是否正在运行
     process_query,
     /// 查询某个 Nep 包是否已被安装

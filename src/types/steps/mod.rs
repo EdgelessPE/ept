@@ -7,6 +7,7 @@ use toml::Value;
 
 mod copy;
 mod delete;
+mod download;
 mod execute;
 mod kill;
 mod link;
@@ -117,11 +118,13 @@ def_enum_step!(
     StepWait,
     StepToast,
     StepDelete,
-    StepKill
+    StepKill,
+    StepDownload
 );
 
 pub use self::copy::StepCopy;
 pub use self::delete::StepDelete;
+pub use self::download::StepDownload;
 pub use self::execute::StepExecute;
 pub use self::kill::StepKill;
 pub use self::link::StepLink;

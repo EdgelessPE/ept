@@ -130,7 +130,11 @@ impl Verifiable for StepMove {
         values_validator_path(&self.to).map_err(|e| {
             anyhow!("Error(Move):Failed to validate field 'to' as valid path : {e}")
         })?;
-        common_wild_match_verify(&self.from, &self.to, located)
+        common_wild_match_verify(&self.from, &self.to, located).map_err(|e| {
+            anyhow!("Error(Move):Failed to validate field 'to' as valid path : {e}")
+        })?;
+
+        Ok(())
     }
 }
 

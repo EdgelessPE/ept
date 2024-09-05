@@ -90,14 +90,15 @@ impl Verifiable for StepWait {
         // timeout 时间应当小于等于 30min
         if self.timeout > (30 * 60 * 1000) {
             return Err(anyhow!(
-                "Error:Timeout should not be longer than 30 min, got '{}'",
+                "Error(Wait):Timeout should not be longer than 30 min, got '{}'",
                 &self.timeout
             ));
         }
 
         // 校验跳出条件
         if let Some(cond) = &self.break_if {
-            verify_conditions(vec![cond.to_owned()], located, &"1.0.0.0".to_string())?;
+            verify_conditions(vec![cond.to_owned()], located, &"1.0.0.0".to_string())
+                .map_err(|e| anyhow!("Error(Wait):Failed to valid field 'break_if' : {e}"))?;
         }
 
         Ok(())

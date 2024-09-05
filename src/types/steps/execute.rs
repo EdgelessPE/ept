@@ -201,7 +201,8 @@ impl Verifiable for StepExecute {
         }
 
         // 命令应该是有效的 posix 命令
-        split_command(&self.command)?;
+        split_command(&self.command)
+            .map_err(|e| anyhow!("Error(Execute):Invalid command : {e}"))?;
 
         Ok(())
     }
