@@ -8,7 +8,6 @@ use crate::{
         interpretable::Interpretable,
         mixed_fs::MixedFS,
         permissions::{Generalizable, Permission, PermissionKey, PermissionLevel},
-        verifiable::Verifiable,
         workflow::WorkflowContext,
     },
     utils::{download::download, wild_match::contains_wild_match},
@@ -73,10 +72,13 @@ impl TStep for StepDownload {
         fs.add(&self.at, "");
         Vec::new()
     }
-}
-
-impl Verifiable for StepDownload {
-    fn verify_self(&self, _: &String) -> Result<()> {
+    fn verify_step(&self, ctx: &super::VerifyStepCtx) -> Result<()> {
+        // 只能在展开工作流中使用
+        if !ctx.is_expand_flow {
+            return Err(anyhow!(
+                "Error(Download):Download step can only be used in expand workflow"
+            ));
+        }
         // 校验下载地址
         if !self.url.starts_with("http://") && !self.url.starts_with("https://") {
             return Err(anyhow!(
@@ -160,7 +162,9 @@ fn test_download() {
         at: "test/target-test.exe".to_string(),
     };
 
-    step.verify_self(&"".to_string()).unwrap();
+    let mut ctx = crate::types::steps::VerifyStepCtx::_demo();
+    ctx.is_expand_flow = true;
+    step.verify_step(&ctx).unwrap();
     step.run(&mut cx).unwrap();
 
     // 下载地址错误
@@ -172,7 +176,7 @@ fn test_download() {
     .run(&mut cx)
     .is_err());
 
-    // 校验失败
+    // 哈希校验失败
     assert!(StepDownload {
         url: format!("{addr}/download-test.exe"),
         hash_blake3: "1218ef74c47f601d555499bcc3b02564d9de34ad1e2ee712af10957e2799f0fd".to_string(),
@@ -244,19 +248,21 @@ fn test_download_corelation() {
     );
 
     // 校验正确
+    let mut ctx = crate::types::steps::VerifyStepCtx::_demo();
+    ctx.is_expand_flow = true;
     assert!(StepDownload {
         url: format!("{addr}/download-test.exe"),
         hash_blake3: "0218ef74c47f601d555499bcc3b02564d9de34ad1e2ee712af10957e2799f0fd".to_string(),
         at: "test/target-test.exe".to_string(),
     }
-    .verify_self(&"".to_string())
+    .verify_step(&ctx)
     .is_ok());
     assert!(StepDownload {
         url: "https://github.com/BLAKE3-team/BLAKE3/releases/download/1.5.4/b3sum_windows_x64_bin.exe".to_string(),
         hash_blake3: "0218ef74c47f601d555499bcc3b02564d9de34ad1e2ee712af10957e2799f0fd".to_string(),
         at: "test/target-test.exe".to_string(),
     }
-    .verify_self(&"".to_string())
+    .verify_step(&ctx)
     .is_ok());
 
     // 校验错误
@@ -266,7 +272,7 @@ fn test_download_corelation() {
         hash_blake3: "0218ef74c47f601d555499bcc3b02564d9de34ad1e2ee712af10957e2799f0fd".to_string(),
         at: "test/target-test.exe".to_string(),
     }
-    .verify_self(&"".to_string())
+    .verify_step(&ctx)
     .is_err());
     // 哈希值长度错误
     assert!(StepDownload {
@@ -275,7 +281,7 @@ fn test_download_corelation() {
             .to_string(),
         at: "test/target-test.exe".to_string(),
     }
-    .verify_self(&"".to_string())
+    .verify_step(&ctx)
     .is_err());
     // 哈希值长度错误
     assert!(StepDownload {
@@ -283,7 +289,7 @@ fn test_download_corelation() {
         hash_blake3: "18ef74c47f601d555499bcc3b02564d9de34ad1e2ee712af10957e2799f0fd1".to_string(),
         at: "test/target-test.exe".to_string(),
     }
-    .verify_self(&"".to_string())
+    .verify_step(&ctx)
     .is_err());
     // 哈希值非法字符
     assert!(StepDownload {
@@ -291,7 +297,7 @@ fn test_download_corelation() {
         hash_blake3: "0218ef74c47f601d555499bcc3b02564d9de34ad1e2ee712af10957e2799f0f!".to_string(),
         at: "test/target-test.exe".to_string(),
     }
-    .verify_self(&"".to_string())
+    .verify_step(&ctx)
     .is_err());
     // 存放路径使用内置变量开头
     assert!(StepDownload {
@@ -299,7 +305,7 @@ fn test_download_corelation() {
         hash_blake3: "0218ef74c47f601d555499bcc3b02564d9de34ad1e2ee712af10957e2799f0fd".to_string(),
         at: "${Home}/test/target-test.exe".to_string(),
     }
-    .verify_self(&"".to_string())
+    .verify_step(&ctx)
     .is_err());
     // 正确：存放路径使用内置变量但是不在开头
     assert!(StepDownload {
@@ -307,7 +313,7 @@ fn test_download_corelation() {
         hash_blake3: "0218ef74c47f601d555499bcc3b02564d9de34ad1e2ee712af10957e2799f0fd".to_string(),
         at: "test/${ExitCode}//target-test.exe".to_string(),
     }
-    .verify_self(&"".to_string())
+    .verify_step(&ctx)
     .is_ok());
     // 存放路径使用绝对路径
     assert!(StepDownload {
@@ -315,7 +321,7 @@ fn test_download_corelation() {
         hash_blake3: "0218ef74c47f601d555499bcc3b02564d9de34ad1e2ee712af10957e2799f0fd".to_string(),
         at: "C:/test/target-test.exe".to_string(),
     }
-    .verify_self(&"".to_string())
+    .verify_step(&ctx)
     .is_err());
     // 存放路径包含 ..
     assert!(StepDownload {
@@ -323,7 +329,7 @@ fn test_download_corelation() {
         hash_blake3: "0218ef74c47f601d555499bcc3b02564d9de34ad1e2ee712af10957e2799f0fd".to_string(),
         at: "../test/target-test.exe".to_string(),
     }
-    .verify_self(&"".to_string())
+    .verify_step(&ctx)
     .is_err());
     // 存放路径包含通配符
     assert!(StepDownload {
@@ -331,6 +337,15 @@ fn test_download_corelation() {
         hash_blake3: "0218ef74c47f601d555499bcc3b02564d9de34ad1e2ee712af10957e2799f0fd".to_string(),
         at: "test/target-*.exe".to_string(),
     }
-    .verify_self(&"".to_string())
+    .verify_step(&ctx)
+    .is_err());
+    // 在非展开工作流中使用
+    ctx.is_expand_flow = false;
+    assert!(StepDownload {
+        url: format!("{addr}/download-test.exe"),
+        hash_blake3: "0218ef74c47f601d555499bcc3b02564d9de34ad1e2ee712af10957e2799f0fd".to_string(),
+        at: "test/target-test.exe".to_string(),
+    }
+    .verify_step(&ctx)
     .is_err());
 }

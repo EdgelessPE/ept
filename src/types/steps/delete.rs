@@ -7,10 +7,7 @@ use crate::types::steps::Permission;
 use crate::{
     executor::{judge_perm_level, values_validator_path},
     log, p2s,
-    types::{
-        mixed_fs::MixedFS, permissions::Generalizable, verifiable::Verifiable,
-        workflow::WorkflowContext,
-    },
+    types::{mixed_fs::MixedFS, permissions::Generalizable, workflow::WorkflowContext},
     utils::{
         fs::try_recycle,
         wild_match::{contains_wild_match, parse_wild_match},
@@ -83,6 +80,13 @@ impl TStep for StepDelete {
         fs.remove(&self.at);
         Vec::new()
     }
+    fn verify_step(&self, _ctx: &super::VerifyStepCtx) -> Result<()> {
+        values_validator_path(&self.at).map_err(|e| {
+            anyhow!("Error(Delete):Failed to validate field 'at' as valid path : {e}")
+        })?;
+
+        Ok(())
+    }
 }
 
 impl Interpretable for StepDelete {
@@ -94,16 +98,6 @@ impl Interpretable for StepDelete {
             at: interpreter(self.at),
             force: self.force,
         }
-    }
-}
-
-impl Verifiable for StepDelete {
-    fn verify_self(&self, _: &String) -> Result<()> {
-        values_validator_path(&self.at).map_err(|e| {
-            anyhow!("Error(Delete):Failed to validate field 'at' as valid path : {e}")
-        })?;
-
-        Ok(())
     }
 }
 
@@ -210,17 +204,18 @@ fn test_delete_corelation() {
     );
 
     // 校验
+    let ctx = crate::types::steps::VerifyStepCtx::_demo();
     assert!(StepDelete {
         at: "C:/Users/Desktop".to_string(),
         force: None,
     }
-    .verify_self(&"".to_string())
+    .verify_step(&ctx)
     .is_err());
 
     assert!(StepDelete {
         at: "${OtherDesktop}".to_string(),
         force: None,
     }
-    .verify_self(&"".to_string())
+    .verify_step(&ctx)
     .is_err());
 }

@@ -5,7 +5,7 @@ use crate::types::interpretable::Interpretable;
 use crate::types::mixed_fs::MixedFS;
 use crate::types::permissions::{Generalizable, Permission};
 use crate::types::workflow::WorkflowContext;
-use crate::{log, types::verifiable::Verifiable, verify_enum};
+use crate::{log, verify_enum};
 
 use super::TStep;
 
@@ -33,6 +33,17 @@ impl TStep for StepLog {
     fn get_manifest(&self, _fs: &mut MixedFS) -> Vec<String> {
         Vec::new()
     }
+    fn verify_step(&self, _ctx: &super::VerifyStepCtx) -> Result<()> {
+        if let Some(level) = &self.level {
+            verify_enum!(
+                "Log",
+                "level",
+                level,
+                "Debug" | "Info" | "Warning" | "Error" | "Success"
+            )?;
+        }
+        Ok(())
+    }
 }
 
 impl Interpretable for StepLog {
@@ -44,20 +55,6 @@ impl Interpretable for StepLog {
             level: self.level,
             msg: interpreter(self.msg),
         }
-    }
-}
-
-impl Verifiable for StepLog {
-    fn verify_self(&self, _: &String) -> Result<()> {
-        if let Some(level) = &self.level {
-            verify_enum!(
-                "Log",
-                "level",
-                level,
-                "Debug" | "Info" | "Warning" | "Error" | "Success"
-            )?;
-        }
-        Ok(())
     }
 }
 
@@ -74,7 +71,8 @@ fn test_log() {
         level: Some(String::from("Info")),
         msg: String::from("Hello nep!"),
     };
-    step.verify_self(&String::from("./")).unwrap();
+    let ctx = crate::types::steps::VerifyStepCtx::_demo();
+    step.verify_step(&ctx).unwrap();
     step.run(&mut cx).unwrap();
 }
 

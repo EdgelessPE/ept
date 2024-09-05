@@ -2,7 +2,6 @@ use crate::executor::values_validator_path;
 use crate::types::interpretable::Interpretable;
 use crate::types::mixed_fs::MixedFS;
 use crate::types::permissions::{Generalizable, Permission, PermissionKey, PermissionLevel};
-use crate::types::verifiable::Verifiable;
 use crate::types::workflow::WorkflowContext;
 use crate::utils::{
     command::split_command, format_path, is_starts_with_inner_value, term::read_console,
@@ -158,25 +157,7 @@ impl TStep for StepExecute {
 
         manifest
     }
-}
-
-impl Interpretable for StepExecute {
-    fn interpret<F>(self, interpreter: F) -> Self
-    where
-        F: Fn(String) -> String,
-    {
-        Self {
-            command: interpreter(self.command),
-            pwd: self.pwd.map(interpreter),
-            call_installer: self.call_installer,
-            wait: self.wait,
-            ignore_exit_code: self.ignore_exit_code,
-        }
-    }
-}
-
-impl Verifiable for StepExecute {
-    fn verify_self(&self, _: &String) -> Result<()> {
+    fn verify_step(&self, _ctx: &super::VerifyStepCtx) -> Result<()> {
         // 不得出现反斜杠
         if self.command.contains('\\') {
             return Err(anyhow!("Error(Execute):Backslash (\\) in '{cmd}' is not allowed, use forward slash (/) instead",cmd=&self.command));
@@ -208,6 +189,21 @@ impl Verifiable for StepExecute {
     }
 }
 
+impl Interpretable for StepExecute {
+    fn interpret<F>(self, interpreter: F) -> Self
+    where
+        F: Fn(String) -> String,
+    {
+        Self {
+            command: interpreter(self.command),
+            pwd: self.pwd.map(interpreter),
+            call_installer: self.call_installer,
+            wait: self.wait,
+            ignore_exit_code: self.ignore_exit_code,
+        }
+    }
+}
+
 impl Generalizable for StepExecute {
     fn generalize_permissions(&self) -> Result<Vec<Permission>> {
         let node = if self.call_installer.unwrap_or(false) {
@@ -231,27 +227,26 @@ impl Generalizable for StepExecute {
 
 #[test]
 fn test_execute_validate() {
-    let located = String::new();
-
-    let res = StepExecute {
+    let ctx = crate::types::steps::VerifyStepCtx::_demo();
+    assert!(StepExecute {
         command: "${AppData}/Installer.exe /S".to_string(),
         pwd: None,
         call_installer: Some(true),
         wait: None,
         ignore_exit_code: None,
     }
-    .verify_self(&located);
-    assert!(res.is_ok());
+    .verify_step(&ctx)
+    .is_ok());
 
-    let res = StepExecute {
+    assert!(StepExecute {
         command: "C:/Windows/Installer.exe /S".to_string(),
         pwd: None,
         call_installer: Some(true),
         wait: None,
         ignore_exit_code: None,
     }
-    .verify_self(&located);
-    assert!(res.is_err());
+    .verify_step(&ctx)
+    .is_err());
 }
 
 #[test]

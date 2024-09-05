@@ -6,7 +6,6 @@ use crate::types::steps::Permission;
 use crate::types::{
     mixed_fs::MixedFS,
     permissions::{Generalizable, PermissionLevel},
-    verifiable::Verifiable,
     workflow::WorkflowContext,
 };
 use anyhow::{anyhow, Ok, Result};
@@ -53,6 +52,9 @@ impl TStep for StepToast {
     fn get_manifest(&self, _: &mut MixedFS) -> Vec<String> {
         Vec::new()
     }
+    fn verify_step(&self, _ctx: &super::VerifyStepCtx) -> Result<()> {
+        Ok(())
+    }
 }
 
 impl Interpretable for StepToast {
@@ -64,12 +66,6 @@ impl Interpretable for StepToast {
             title: interpreter(self.title),
             content: interpreter(self.content),
         }
-    }
-}
-
-impl Verifiable for StepToast {
-    fn verify_self(&self, _: &String) -> Result<()> {
-        Ok(())
     }
 }
 
@@ -118,6 +114,17 @@ fn test_toast_corelation() {
     }
     .get_manifest(&mut mixed_fs)
     .is_empty());
+
+    // 校验
+    assert!(StepToast {
+        title: "测试标题😘".to_string(),
+        content: "Hey, love from ept\n你好，爱来自乙烯丙烯三元聚合物".to_string(),
+    }
+    .verify_step(&super::VerifyStepCtx {
+        located: "".to_string(),
+        is_expand_flow: false,
+    })
+    .is_ok());
 
     // 解释
     assert_eq!(

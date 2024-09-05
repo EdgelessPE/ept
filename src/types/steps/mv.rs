@@ -6,7 +6,7 @@ use crate::{
     log, p2s,
     types::{
         mixed_fs::MixedFS, permissions::Generalizable, permissions::Permission,
-        verifiable::Verifiable, workflow::WorkflowContext,
+        workflow::WorkflowContext,
     },
     utils::{
         fs::try_recycle,
@@ -90,6 +90,20 @@ impl TStep for StepMove {
         fs.add(&self.to, &self.from);
         Vec::new()
     }
+    fn verify_step(&self, ctx: &super::VerifyStepCtx) -> Result<()> {
+        let located = &ctx.located;
+        values_validator_path(&self.from).map_err(|e| {
+            anyhow!("Error(Move):Failed to validate field 'from' as valid path : {e}")
+        })?;
+        values_validator_path(&self.to).map_err(|e| {
+            anyhow!("Error(Move):Failed to validate field 'to' as valid path : {e}")
+        })?;
+        common_wild_match_verify(&self.from, &self.to, located).map_err(|e| {
+            anyhow!("Error(Move):Failed to validate field 'to' as valid path : {e}")
+        })?;
+
+        Ok(())
+    }
 }
 
 impl Interpretable for StepMove {
@@ -119,22 +133,6 @@ impl Generalizable for StepMove {
                 targets: vec![self.to.clone()],
             },
         ])
-    }
-}
-
-impl Verifiable for StepMove {
-    fn verify_self(&self, located: &String) -> Result<()> {
-        values_validator_path(&self.from).map_err(|e| {
-            anyhow!("Error(Move):Failed to validate field 'from' as valid path : {e}")
-        })?;
-        values_validator_path(&self.to).map_err(|e| {
-            anyhow!("Error(Move):Failed to validate field 'to' as valid path : {e}")
-        })?;
-        common_wild_match_verify(&self.from, &self.to, located).map_err(|e| {
-            anyhow!("Error(Move):Failed to validate field 'to' as valid path : {e}")
-        })?;
-
-        Ok(())
     }
 }
 
@@ -326,26 +324,27 @@ fn test_move_corelation() {
     );
 
     // 校验
+    let ctx = crate::types::steps::VerifyStepCtx::_demo();
     assert!(StepMove {
         from: "./bin".to_string(),
         to: "${Desktop}".to_string(),
         overwrite: None
     }
-    .verify_self(&"".to_string())
+    .verify_step(&ctx)
     .is_ok());
     assert!(StepMove {
         from: "bin".to_string(),
         to: "${OtherDesktop}".to_string(),
         overwrite: None
     }
-    .verify_self(&"".to_string())
+    .verify_step(&ctx)
     .is_err());
     assert!(StepMove {
         from: "C:/Users/Desktop".to_string(),
         to: "${Desktop}".to_string(),
         overwrite: None
     }
-    .verify_self(&"".to_string())
+    .verify_step(&ctx)
     .is_err());
 
     assert!(StepMove {
@@ -353,13 +352,13 @@ fn test_move_corelation() {
         to: "C:/Users/Nep/Desktop".to_string(),
         overwrite: None
     }
-    .verify_self(&"".to_string())
+    .verify_step(&ctx)
     .is_err());
     assert!(StepMove {
         from: "${Home}".to_string(),
         to: "${Desktop}/*".to_string(),
         overwrite: None
     }
-    .verify_self(&"".to_string())
+    .verify_step(&ctx)
     .is_err());
 }

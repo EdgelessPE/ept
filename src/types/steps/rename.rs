@@ -9,10 +9,7 @@ use crate::types::permissions::PermissionKey;
 use crate::{
     executor::{judge_perm_level, values_validator_path},
     log, p2s,
-    types::{
-        permissions::{Generalizable, Permission},
-        verifiable::Verifiable,
-    },
+    types::permissions::{Generalizable, Permission},
     utils::{
         path::{parse_relative_path_with_located, split_parent},
         wild_match::contains_wild_match,
@@ -92,6 +89,27 @@ impl TStep for StepRename {
         fs.add(&concat_to(&self.to, &self.from, &String::new()), &self.from);
         Vec::new()
     }
+    fn verify_step(&self, _ctx: &super::VerifyStepCtx) -> Result<()> {
+        values_validator_path(&self.from).map_err(|e| {
+            anyhow!("Error(Rename):Failed to validate field 'from' as valid path : {e}")
+        })?;
+        // 检查 from 是否包含通配符
+        if contains_wild_match(&self.from) {
+            return Err(anyhow!(
+                "Error(Rename):Field 'from' shouldn't contain wild match : '{from}'",
+                from = &self.from
+            ));
+        }
+        // 检查 to 的正则表达式
+        if PURE_NAME_NOT_MATCH_REGEX.is_match(&self.to) {
+            return Err(anyhow!(
+                "Error(Rename):Field 'to' illegal, expect pure file or directory name, got '{to}'",
+                to = &self.to
+            ));
+        }
+
+        Ok(())
+    }
 }
 
 impl Interpretable for StepRename {
@@ -113,30 +131,6 @@ impl Generalizable for StepRename {
             level: judge_perm_level(&self.from)?,
             targets: vec![self.from.clone()],
         }])
-    }
-}
-
-impl Verifiable for StepRename {
-    fn verify_self(&self, _: &String) -> Result<()> {
-        values_validator_path(&self.from).map_err(|e| {
-            anyhow!("Error(Rename):Failed to validate field 'from' as valid path : {e}")
-        })?;
-        // 检查 from 是否包含通配符
-        if contains_wild_match(&self.from) {
-            return Err(anyhow!(
-                "Error(Rename):Field 'from' shouldn't contain wild match : '{from}'",
-                from = &self.from
-            ));
-        }
-        // 检查 to 的正则表达式
-        if PURE_NAME_NOT_MATCH_REGEX.is_match(&self.to) {
-            return Err(anyhow!(
-                "Error(Rename):Field 'to' illegal, expect pure file or directory name, got '{to}'",
-                to = &self.to
-            ));
-        }
-
-        Ok(())
     }
 }
 
@@ -237,59 +231,60 @@ fn test_rename_corelation() {
     );
 
     // 校验
+    let ctx = crate::types::steps::VerifyStepCtx::_demo();
     assert!(StepRename {
         from: "./bin".to_string(),
         to: "temp".to_string(),
     }
-    .verify_self(&"".to_string())
+    .verify_step(&ctx)
     .is_ok());
     assert!(StepRename {
         from: "./bin.exe".to_string(),
         to: "temp".to_string(),
     }
-    .verify_self(&"".to_string())
+    .verify_step(&ctx)
     .is_ok());
     assert!(StepRename {
         from: "./bin.exe".to_string(),
         to: "temp/".to_string(),
     }
-    .verify_self(&"".to_string())
+    .verify_step(&ctx)
     .is_err());
     assert!(StepRename {
         from: "./bin/*".to_string(),
         to: "temp".to_string(),
     }
-    .verify_self(&"".to_string())
+    .verify_step(&ctx)
     .is_err());
     assert!(StepRename {
         from: "./bin".to_string(),
         to: "${Desktop}".to_string(),
     }
-    .verify_self(&"".to_string())
+    .verify_step(&ctx)
     .is_err());
     assert!(StepRename {
         from: "bin".to_string(),
         to: "${OtherDesktop}".to_string(),
     }
-    .verify_self(&"".to_string())
+    .verify_step(&ctx)
     .is_err());
     assert!(StepRename {
         from: "C:/Users/Desktop".to_string(),
         to: "${Desktop}".to_string(),
     }
-    .verify_self(&"".to_string())
+    .verify_step(&ctx)
     .is_err());
 
     assert!(StepRename {
         from: "${Home}".to_string(),
         to: "C:/Users/Nep/Desktop".to_string(),
     }
-    .verify_self(&"".to_string())
+    .verify_step(&ctx)
     .is_err());
     assert!(StepRename {
         from: "${Home}".to_string(),
         to: "${Desktop}/*".to_string(),
     }
-    .verify_self(&"".to_string())
+    .verify_step(&ctx)
     .is_err());
 }

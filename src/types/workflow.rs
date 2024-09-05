@@ -1,5 +1,6 @@
 use std::{env::current_dir, process::Child};
 
+use super::steps::VerifyStepCtx;
 use super::{
     package::GlobalPackage, permissions::Generalizable, steps::Step, verifiable::Verifiable,
 };
@@ -118,10 +119,10 @@ impl Generalizable for WorkflowNode {
     }
 }
 
-impl Verifiable for WorkflowNode {
-    fn verify_self(&self, located: &String) -> Result<()> {
-        self.header.verify_self(located)?;
-        self.body.verify_self(located)
+impl WorkflowNode {
+    pub fn verify_step(&self, ctx: &VerifyStepCtx) -> Result<()> {
+        self.header.verify_self(&ctx.located)?;
+        self.body.verify_step(ctx)
     }
 }
 

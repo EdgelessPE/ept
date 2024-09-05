@@ -1,5 +1,4 @@
 use crate::types::permissions::{Generalizable, Permission};
-use crate::types::verifiable::Verifiable;
 use anyhow::{anyhow, Result};
 use serde::de;
 use serde::{Deserialize, Serialize};
@@ -19,13 +18,29 @@ mod rename;
 mod toast;
 mod wait;
 
-pub trait TStep: Verifiable + Generalizable + Interpretable {
-    /// Run this step
+pub struct VerifyStepCtx {
+    pub located: String,
+    pub is_expand_flow: bool,
+}
+
+impl VerifyStepCtx {
+    pub fn _demo() -> Self {
+        Self {
+            located: "".to_string(),
+            is_expand_flow: false,
+        }
+    }
+}
+
+pub trait TStep: Generalizable + Interpretable {
+    /// Run this step, return 0 by default
     fn run(self, cx: &mut WorkflowContext) -> Result<i32>;
     /// Run reversed step
     fn reverse_run(self, cx: &mut WorkflowContext) -> Result<()>;
     /// Get manifest
     fn get_manifest(&self, fs: &mut MixedFS) -> Vec<String>;
+    /// Verify step
+    fn verify_step(&self, ctx: &VerifyStepCtx) -> Result<()>;
 }
 
 fn toml_try_into<'de, T>(key: String, val: Value) -> Result<T>
@@ -85,12 +100,9 @@ macro_rules! def_enum_step {
                     $( Step::$x(step) => step.get_manifest(fs) ),*
                 }
             }
-        }
-
-        impl Verifiable for Step {
-            fn verify_self(&self,located:&String) -> Result<()> {
+            pub fn verify_step(&self,ctx:&VerifyStepCtx) -> Result<()> {
                 match self {
-                    $( Step::$x(step) => step.verify_self(located) ),*
+                    $( Step::$x(step) => step.verify_step(ctx) ),*
                 }
             }
         }

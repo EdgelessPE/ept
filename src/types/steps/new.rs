@@ -4,7 +4,6 @@ use crate::{
     types::{
         mixed_fs::MixedFS,
         permissions::{Generalizable, Permission, PermissionKey},
-        verifiable::Verifiable,
         workflow::WorkflowContext,
     },
     utils::wild_match::contains_wild_match,
@@ -82,22 +81,7 @@ impl TStep for StepNew {
         fs.add(&self.at, "");
         Vec::new()
     }
-}
-
-impl Interpretable for StepNew {
-    fn interpret<F>(self, interpreter: F) -> Self
-    where
-        F: Fn(String) -> String,
-    {
-        Self {
-            at: interpreter(self.at),
-            overwrite: self.overwrite,
-        }
-    }
-}
-
-impl Verifiable for StepNew {
-    fn verify_self(&self, _: &String) -> Result<()> {
+    fn verify_step(&self, _ctx: &super::VerifyStepCtx) -> Result<()> {
         values_validator_path(&self.at)
             .map_err(|e| anyhow!("Error(New):Failed to validate field 'at' as valid path : {e}"))?;
         // 检查 at 是否包含通配符
@@ -109,6 +93,18 @@ impl Verifiable for StepNew {
         }
 
         Ok(())
+    }
+}
+
+impl Interpretable for StepNew {
+    fn interpret<F>(self, interpreter: F) -> Self
+    where
+        F: Fn(String) -> String,
+    {
+        Self {
+            at: interpreter(self.at),
+            overwrite: self.overwrite,
+        }
     }
 }
 
@@ -204,23 +200,24 @@ fn test_new_corelation() {
     );
 
     // 校验
+    let ctx = crate::types::steps::VerifyStepCtx::_demo();
     assert!(StepNew {
         at: "C:/Users/Desktop".to_string(),
         overwrite: None,
     }
-    .verify_self(&"".to_string())
+    .verify_step(&ctx)
     .is_err());
     assert!(StepNew {
         at: "C:/Users/Desktop/*".to_string(),
         overwrite: None,
     }
-    .verify_self(&"".to_string())
+    .verify_step(&ctx)
     .is_err());
 
     assert!(StepNew {
         at: "${OtherDesktop}".to_string(),
         overwrite: None,
     }
-    .verify_self(&"".to_string())
+    .verify_step(&ctx)
     .is_err());
 }

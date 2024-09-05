@@ -2,8 +2,7 @@ use crate::parsers::{parse_package, parse_workflow};
 use crate::types::extended_semver::ExSemVer;
 use crate::types::mixed_fs::MixedFS;
 use crate::types::package::GlobalPackage;
-use crate::types::steps::Step;
-use crate::types::verifiable::Verifiable;
+use crate::types::steps::{Step, VerifyStepCtx};
 use crate::types::workflow::WorkflowNode;
 use crate::utils::exe_version::get_exe_version;
 use crate::utils::is_starts_with_inner_value;
@@ -41,10 +40,10 @@ fn get_workflow_path(source_dir: &String, file_name: &str) -> PathBuf {
 }
 
 // 返回是否调用了 call_installer
-fn verify_workflow(flow: Vec<WorkflowNode>, located: &String) -> Result<bool> {
+fn verify_workflow(flow: Vec<WorkflowNode>, ctx: &VerifyStepCtx) -> Result<bool> {
     let mut have_call_installer = false;
     for node in flow {
-        node.verify_self(located)?;
+        node.verify_step(ctx)?;
         if let Step::StepExecute(step) = node.body {
             if !have_call_installer {
                 have_call_installer = step.call_installer.unwrap_or(false);
@@ -83,7 +82,13 @@ pub fn verify(source_dir: &String) -> Result<GlobalPackage> {
     let setup_flow = parse_workflow(&p2s!(setup_path))?;
 
     // 记录 setup 中是否用到 call_installer
-    let check_call_installer = verify_workflow(setup_flow.clone(), &pkg_content_path)?;
+    let check_call_installer = verify_workflow(
+        setup_flow.clone(),
+        &VerifyStepCtx {
+            located: pkg_content_path.clone(),
+            is_expand_flow: false,
+        },
+    )?;
 
     // 如果用到了 call_installer 则有一些特殊逻辑，除非提供了 registry_entry：
     if check_call_installer && software.registry_entry.is_none() {
@@ -104,11 +109,15 @@ pub fn verify(source_dir: &String) -> Result<GlobalPackage> {
 
     // 检查其他工作流
     let optional_workflows = vec!["update.toml", "remove.toml"];
+    let ctx = VerifyStepCtx {
+        located: source_dir.to_string(),
+        is_expand_flow: false,
+    };
     for opt_workflow in optional_workflows {
         let opt_path = get_workflow_path(source_dir, opt_workflow);
         if opt_path.exists() {
             let flow = parse_workflow(&p2s!(opt_path))?;
-            let call_installer = verify_workflow(flow, source_dir)?;
+            let call_installer = verify_workflow(flow, &ctx)?;
             if check_call_installer && !call_installer {
                 return Err(anyhow!("Error:Workflow '{opt_workflow}' should include 'Execute' step with 'call_installer' field enabled when workflow 'setup.toml' includes such step"));
             }

@@ -3,7 +3,6 @@ use crate::executor::values_validator_path;
 use crate::types::interpretable::Interpretable;
 use crate::types::mixed_fs::MixedFS;
 use crate::types::permissions::{Generalizable, Permission, PermissionKey, PermissionLevel};
-use crate::types::verifiable::Verifiable;
 use crate::types::workflow::WorkflowContext;
 use crate::utils::is_starts_with_inner_value;
 use crate::utils::{get_path_bin, path::parse_relative_path_with_located, term::ask_yn_in_step};
@@ -262,6 +261,11 @@ impl TStep for StepPath {
             Vec::new()
         }
     }
+    fn verify_step(&self, _ctx: &super::VerifyStepCtx) -> Result<()> {
+        values_validator_path(&self.record).map_err(|e| {
+            anyhow!("Error(Path):Failed to validate field 'record' as valid path : {e}")
+        })
+    }
 }
 
 impl Interpretable for StepPath {
@@ -273,14 +277,6 @@ impl Interpretable for StepPath {
             record: interpreter(self.record),
             alias: self.alias,
         }
-    }
-}
-
-impl Verifiable for StepPath {
-    fn verify_self(&self, _: &String) -> Result<()> {
-        values_validator_path(&self.record).map_err(|e| {
-            anyhow!("Error(Path):Failed to validate field 'record' as valid path : {e}")
-        })
     }
 }
 

@@ -7,7 +7,6 @@ use crate::{
     types::{
         mixed_fs::MixedFS,
         permissions::{Generalizable, PermissionLevel},
-        verifiable::Verifiable,
         workflow::WorkflowContext,
     },
 };
@@ -56,6 +55,15 @@ impl TStep for StepKill {
     fn get_manifest(&self, _: &mut MixedFS) -> Vec<String> {
         Vec::new()
     }
+    fn verify_step(&self, _ctx: &super::VerifyStepCtx) -> Result<()> {
+        if !self.target.to_lowercase().ends_with(".exe") {
+            log!(
+                "Warning(Kill):Generally field 'target' should end with '.exe', got '{t}'",
+                t = self.target
+            );
+        }
+        Ok(())
+    }
 }
 
 impl Interpretable for StepKill {
@@ -64,18 +72,6 @@ impl Interpretable for StepKill {
         F: Fn(String) -> String,
     {
         self
-    }
-}
-
-impl Verifiable for StepKill {
-    fn verify_self(&self, _: &String) -> Result<()> {
-        if !self.target.to_lowercase().ends_with(".exe") {
-            log!(
-                "Warning(Kill):Generally field 'target' should end with '.exe', got '{t}'",
-                t = self.target
-            );
-        }
-        Ok(())
     }
 }
 
@@ -153,14 +149,15 @@ fn test_kill_corelation() {
     );
 
     // 校验
+    let ctx = crate::types::steps::VerifyStepCtx::_demo();
     assert!(StepKill {
         target: "code.exe".to_string(),
     }
-    .verify_self(&"".to_string())
+    .verify_step(&ctx)
     .is_ok());
     assert!(StepKill {
         target: "code".to_string(),
     }
-    .verify_self(&"".to_string())
+    .verify_step(&ctx)
     .is_ok());
 }

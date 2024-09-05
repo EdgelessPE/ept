@@ -3,10 +3,7 @@ use crate::executor::condition_eval;
 use crate::log;
 use crate::types::interpretable::Interpretable;
 use crate::types::steps::Permission;
-use crate::types::{
-    mixed_fs::MixedFS, permissions::Generalizable, verifiable::Verifiable,
-    workflow::WorkflowContext,
-};
+use crate::types::{mixed_fs::MixedFS, permissions::Generalizable, workflow::WorkflowContext};
 use crate::utils::conditions::{get_permissions_from_conditions, verify_conditions};
 use anyhow::{anyhow, Ok, Result};
 use serde::{Deserialize, Serialize};
@@ -74,19 +71,8 @@ impl TStep for StepWait {
     fn get_manifest(&self, _: &mut MixedFS) -> Vec<String> {
         Vec::new()
     }
-}
-
-impl Interpretable for StepWait {
-    fn interpret<F>(self, _: F) -> Self
-    where
-        F: Fn(String) -> String,
-    {
-        self
-    }
-}
-
-impl Verifiable for StepWait {
-    fn verify_self(&self, located: &String) -> Result<()> {
+    fn verify_step(&self, ctx: &super::VerifyStepCtx) -> Result<()> {
+        let located = &ctx.located;
         // timeout 时间应当小于等于 30min
         if self.timeout > (30 * 60 * 1000) {
             return Err(anyhow!(
@@ -102,6 +88,15 @@ impl Verifiable for StepWait {
         }
 
         Ok(())
+    }
+}
+
+impl Interpretable for StepWait {
+    fn interpret<F>(self, _: F) -> Self
+    where
+        F: Fn(String) -> String,
+    {
+        self
     }
 }
 
@@ -227,23 +222,24 @@ fn test_wait_corelation() {
     );
 
     // 校验
+    let ctx = crate::types::steps::VerifyStepCtx::_demo();
     assert!(StepWait {
         timeout: 30 * 60 * 1000,
         break_if: Some("ExitCode == 1".to_string())
     }
-    .verify_self(&"".to_string())
+    .verify_step(&ctx)
     .is_ok());
     assert!(StepWait {
         timeout: 30 * 60 * 1000 + 1,
         break_if: None
     }
-    .verify_self(&"".to_string())
+    .verify_step(&ctx)
     .is_err());
     assert!(StepWait {
         timeout: 100,
         break_if: Some("Exit == 0".to_string())
     }
-    .verify_self(&"".to_string())
+    .verify_step(&ctx)
     .is_err());
 
     // 生成权限
