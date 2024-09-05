@@ -175,7 +175,7 @@ pub fn update_using_parsed(
 ) -> Result<Vec<UpdateInfo>> {
     let mut arr = Vec::new();
     for parsed in parsed {
-        log!("Info:Start updating with {}", parsed.to_string());
+        log!("Info:Start updating with {}", parsed.preview());
         let res = match parsed {
             ParseInputResEnum::LocalPath(p) => update_using_package(&p, false)?,
             ParseInputResEnum::Url(u) => update_using_url(&u, false)?,

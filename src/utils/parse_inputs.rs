@@ -1,6 +1,7 @@
 use std::fmt::Display;
 
 use anyhow::{anyhow, Result};
+use colored::Colorize;
 
 use crate::{
     entrances::{auto_mirror_update_all, info_local, info_online},
@@ -50,6 +51,30 @@ impl Display for ParseInputResEnum {
             }
         };
         write!(f, "{line}")
+    }
+}
+
+impl ParseInputResEnum {
+    // 打印内联的预览语句
+    pub fn preview(&self) -> String {
+        match self {
+            ParseInputResEnum::LocalPath(p) => format!("{}: {p}", "local path"),
+            ParseInputResEnum::Url(u) => format!("{}: {u}", "url"),
+            ParseInputResEnum::PackageMatcher(p) => {
+                let version_tip = if let Some(cur) = &p.current_version {
+                    format!("{cur} → {}", p.target_version)
+                } else {
+                    p.target_version.to_owned()
+                };
+                format!(
+                    "{}: {}/{} ({})",
+                    "package",
+                    &p.scope.truecolor(100, 100, 100).italic(),
+                    &p.name.cyan().bold(),
+                    version_tip
+                )
+            }
+        }
     }
 }
 

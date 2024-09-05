@@ -162,7 +162,7 @@ pub fn install_using_parsed(
 ) -> Result<Vec<(String, String)>> {
     let mut arr = Vec::new();
     for parsed in parsed {
-        log!("Info:Start installing {}", parsed.to_string());
+        log!("Info:Start installing {}", parsed.preview());
         let (scope, name) = match parsed {
             ParseInputResEnum::LocalPath(p) => install_using_package(&p, false)?,
             ParseInputResEnum::Url(u) => install_using_url(&u, false)?,
