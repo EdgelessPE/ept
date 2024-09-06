@@ -427,7 +427,7 @@ fn test_update_workflow_executions() {
 
         // 断言仅存在指定文件
         for file in assert_files {
-            let p = Path::new(&desktop).join(&format!("{file}.lnk"));
+            let p = Path::new(&desktop).join(format!("{file}.lnk"));
             assert!(p.exists());
             std::fs::remove_file(p).unwrap();
         }
@@ -437,7 +437,7 @@ fn test_update_workflow_executions() {
 
         // 卸载
         crate::utils::test::_ensure_testing_vscode_uninstalled();
-        let remove_lnk = Path::new(&desktop).join(&format!("vsc{new_type}-remove-1.75.4.1.lnk"));
+        let remove_lnk = Path::new(&desktop).join(format!("vsc{new_type}-remove-1.75.4.1.lnk"));
         if remove_lnk.exists() {
             std::fs::remove_file(remove_lnk).unwrap()
         }
