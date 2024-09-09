@@ -20,6 +20,7 @@ pub struct WorkflowHeader {
     /// 步骤类型
     //@ 必须是[步骤](/nep/definition/4-steps.html)定义中的一种值。
     pub step: String,
+    #[serde(rename = "if")]
     /// 步骤执行条件。
     //@ 是合法的条件。
     pub c_if: Option<String>,
