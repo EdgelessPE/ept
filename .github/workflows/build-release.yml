@@ -7,7 +7,7 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  test:
+  build:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -17,5 +17,5 @@ jobs:
         run: npm run rs:build
       - uses: actions/upload-artifact@v4
         with:
-          name: my-artifact
+          name: ept.exe
           path: target/release/ept.exe
