@@ -255,7 +255,8 @@ fn test_download_corelation() {
     );
 
     // 校验正确
-    let mut ctx = crate::types::steps::VerifyStepCtx::_demo();
+    crate::utils::test::_ensure_clear_test_dir();
+    let mut ctx: crate::types::steps::VerifyStepCtx = crate::types::steps::VerifyStepCtx::_demo();
     ctx.is_expand_flow = true;
     assert!(StepDownload {
         url: format!("{addr}/download-test.exe"),
@@ -318,7 +319,7 @@ fn test_download_corelation() {
     assert!(StepDownload {
         url: format!("{addr}/download-test.exe"),
         hash_blake3: "0218ef74c47f601d555499bcc3b02564d9de34ad1e2ee712af10957e2799f0fd".to_string(),
-        at: "test/${ExitCode}//target-test.exe".to_string(),
+        at: "test/${ExitCode}/target-test.exe".to_string(),
     }
     .verify_step(&ctx)
     .is_ok());
@@ -348,6 +349,15 @@ fn test_download_corelation() {
     .is_err());
     // 在非展开工作流中使用
     ctx.is_expand_flow = false;
+    assert!(StepDownload {
+        url: format!("{addr}/download-test.exe"),
+        hash_blake3: "0218ef74c47f601d555499bcc3b02564d9de34ad1e2ee712af10957e2799f0fd".to_string(),
+        at: "test/target-test.exe".to_string(),
+    }
+    .verify_step(&ctx)
+    .is_err());
+    // 文件已存在
+    std::fs::write("test/target-test.exe", "114").unwrap();
     assert!(StepDownload {
         url: format!("{addr}/download-test.exe"),
         hash_blake3: "0218ef74c47f601d555499bcc3b02564d9de34ad1e2ee712af10957e2799f0fd".to_string(),
