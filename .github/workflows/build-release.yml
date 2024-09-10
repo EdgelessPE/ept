@@ -14,4 +14,8 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - name: Run build
-        run: cargo build -r
+        run: pnpm rs:build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: my-artifact
+          path: target/release/ept.exe
