@@ -33,6 +33,7 @@ pub struct StepDownload {
     /// 保存的相对位置，起始目录为包内容目录（和包名相同的目录）
     //# `at = "bin/b3sum.exe"`
     //@ 是合法的相对路径
+    //@ 在校验工作流时不存在该文件
     pub at: String,
 }
 
@@ -112,6 +113,11 @@ impl TStep for StepDownload {
         values_validator_path(&self.at).map_err(|e| {
             anyhow!("Error(Download):Failed to validate field 'at' as valid path : {e}")
         })?;
+
+        // 校验时该文件不存在
+        if Path::new(&ctx.located).join(&self.at).exists() {
+            return Err(anyhow!("Error(Download):File '{}' already exists", self.at));
+        }
 
         Ok(())
     }

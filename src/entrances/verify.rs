@@ -107,7 +107,7 @@ pub fn verify(source_dir: &String) -> Result<GlobalPackage> {
         }
     }
 
-    // 检查其他工作流
+    // 检查更新、卸载工作流
     let optional_workflows = vec!["update.toml", "remove.toml"];
     let ctx = VerifyStepCtx {
         located: source_dir.to_string(),
@@ -123,6 +123,18 @@ pub fn verify(source_dir: &String) -> Result<GlobalPackage> {
             }
         }
     }
+
+    // 检查展开工作流
+    let ctx = VerifyStepCtx {
+        located: source_dir.to_string(),
+        is_expand_flow: true,
+    };
+    let expand_path = get_workflow_path(source_dir, "expand.toml");
+    if expand_path.exists() {
+        let flow = parse_workflow(&p2s!(expand_path))?;
+        verify_workflow(flow, &ctx)?;
+    }
+
     log_ok_last!("Info:Verifying workflows...");
 
     // 校验 setup 工作流装箱单

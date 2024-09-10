@@ -55,6 +55,7 @@ category = "{CATEGORY}"
 * `setup.toml`
 * `update.toml`
 * `remove.toml`
+* `expand.toml`
 
 其中 `setup.toml` 是必需提供的。
 
