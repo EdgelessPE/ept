@@ -38,6 +38,7 @@ pub struct StepDownload {
 
 impl TStep for StepDownload {
     fn run(self, cx: &mut WorkflowContext) -> Result<i32> {
+        //- （仅能在拓展工作流中使用）从 URL 下载文件并使用提供的 BLAKE3 Hash 校验完整性。
         // 下载
         let p = Path::new(&cx.located).join(&self.at).to_path_buf();
         download(&self.url, &p).map_err(|e| {

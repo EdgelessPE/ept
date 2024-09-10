@@ -30,6 +30,8 @@ Nep 规范支持 ept 通过对包的工作流上下文进行总结获得该包�
 读文件系统
 ### fs_write
 写文件系统
+### download_file
+下载文件
 ### process_query
 查询某个进程是否正在运行
 ### nep_installed

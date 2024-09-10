@@ -10,8 +10,14 @@ import { parsePermission } from "./permission";
 
 function getExtra(file: string): StepInfo["extra"] {
   // TODO:添加更多字段
+  const run = getCommentsInBlock({ file, startsWith: "fn run" }).wiki;
+  if (!run) {
+    throw new Error(
+      `Error:Missing step wiki in '${file}', add wiki in 'fn run'`,
+    );
+  }
   return {
-    run: getCommentsInBlock({ file, startsWith: "fn run" }).wiki ?? "",
+    run,
     reverseRun: getCommentsInBlock({ file, startsWith: "fn reverse_run" }).wiki,
     manifest: getCommentsInBlock({
       file,
