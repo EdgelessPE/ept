@@ -141,8 +141,8 @@ export function splitBlock({
       }
     }
 
-    // 忽略普通或其他特殊注释
-    if (line.startsWith("//")) continue;
+    // 忽略普通或其他特殊注释、忽略属性宏
+    if (line.startsWith("//") || line.startsWith("#")) continue;
 
     // 走到这个位置说明匹配到申明语句了
 
