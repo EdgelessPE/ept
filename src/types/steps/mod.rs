@@ -48,10 +48,8 @@ where
     T: de::Deserialize<'de>,
 {
     val.to_owned().try_into().map_err(|err| {
-        let name_brw = val["name"].to_owned();
-        let name = name_brw.as_str().unwrap_or("unknown name");
         let step = val["step"].as_str().unwrap_or("unknown step");
-        anyhow!("Error:Can't parse workflow node '{name}'({key}) into step '{step}' : {err}")
+        anyhow!("Error:Can't parse workflow node '{key}' into step '{step}' : {err}")
     })
 }
 

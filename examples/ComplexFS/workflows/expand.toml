@@ -1,0 +1,5 @@
+[download_bin]
+step = "Download"
+url = "https://d1.music.126.net/dmusic/NeteaseCloudMusic_Music_official_2.10.13.202675_32.exe"
+hash_blake3 = "7edb25e1914e7d7cb5619781ab5f9a14cb01ee86bf5dddf9ceaf86189838ac20"
+at = "installer.exe"
