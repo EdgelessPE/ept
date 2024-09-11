@@ -100,5 +100,5 @@ async function main(): Promise<boolean> {
   return true;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-floating-promises
+ 
 main().then((res) => process.exit(res ? 0 : 1));

@@ -23,24 +23,20 @@
     "typescript": "^5.5.4"
   },
   "devDependencies": {
+    "@eslint/js": "^9.10.0",
     "@modern-js/tsconfig": "2.59.0",
     "@rspress/plugin-shiki": "^1.30.0",
     "@types/jest": "^29.5.12",
     "@types/node": "^22.5.4",
-    "@typescript-eslint/eslint-plugin": "^8.3.0",
     "chatgpt-md-translator": "^1.7.1",
-    "eslint": "^8.57.0",
-    "eslint-config-love": "^63.0.0",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-import": "^2.30.0",
-    "eslint-plugin-n": "^17.10.2",
-    "eslint-plugin-prettier": "^5.2.1",
-    "eslint-plugin-promise": "^7.1.0",
+    "eslint": "^9.10.0",
+    "globals": "^15.9.0",
     "lint-staged": "^15.2.10",
     "prettier": "^3.3.3",
     "simple-git-hooks": "^2.11.1",
     "ts-results": "^3.3.0",
-    "tsx": "^4.19.0"
+    "tsx": "^4.19.0",
+    "typescript-eslint": "^8.5.0"
   },
   "simple-git-hooks": {
     "pre-commit": "npx lint-staged"
