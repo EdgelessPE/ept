@@ -36,7 +36,7 @@ async function main(): Promise<boolean> {
       } else if (dirent.isFile()) {
         const zhMdPath = path.join(curZhBase, dirent.name);
         const enMdPath = path.join(curEnDir, dirent.name);
-        if (dirent.name.endsWith(".md")) {
+        if (dirent.name.endsWith(".md") || dirent.name.endsWith(".mdx")) {
           // 读取对应的英文 md 状态
           if (existsSync(enMdPath)) {
             const { mtime: zhMTime } = await stat(zhMdPath);
@@ -74,7 +74,7 @@ async function main(): Promise<boolean> {
     } else {
       // 确认是否开始翻译
       console.log(
-        `Info: The following ${markdowns.length} markdown files needs translation:\n${markdowns.join("\n")}\n\n`,
+        `Info: The following ${markdowns.length} markdown files needs translation:\n${markdowns.join("\n")}\n`,
       );
       const res = await askYn("Start now?(y/n)");
       if (!res) {
