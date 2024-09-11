@@ -44,5 +44,6 @@
   },
   "simple-git-hooks": {
     "pre-commit": "npx lint-staged"
-  }
+  },
+  "packageManager": "pnpm@9.10.0"
 }
