@@ -11,7 +11,7 @@
     "chatgpt-md-translator": "chatgpt-md-translator",
     "lint": "eslint --fix scripts/**/* bindings/**/*",
     "prepare": "npx simple-git-hooks && rustup component add clippy",
-    "rs:build": "cmd /c vc_ltl_scripts\\build.bat",
+    "rs:build": "cmd /c scripts\\vc_ltl\\build.bat",
     "rs:lint": "cargo fmt && cargo clippy --fix --allow-dirty --allow-staged",
     "rs:ut": "cargo test -- --test-threads 1",
     "rs:ut:html": "cargo tarpaulin -o html --exclude-files test/** --exclude-files node_modules/** && start tarpaulin-report.html",
