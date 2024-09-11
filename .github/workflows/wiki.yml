@@ -2,7 +2,7 @@ name: Deploy Wiki
 
 on:
   push:
-    branches: [develop]
+    branches: [ develop ]
     paths:
       - "doc/**"
       - ".github/workflows/wiki.yml"
@@ -26,13 +26,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # 获取仓库源码
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
           ref: ${{ github.ref }}
 
       # 缓存依赖
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         with:
           path: "**/node_modules"
           key: ${{ runner.os }}-modules-${{ hashFiles('**/pnpm-lock.yaml') }}

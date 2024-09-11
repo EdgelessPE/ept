@@ -22,14 +22,14 @@ A brief description of the package, try to extract from official channels.
 
 ### template
 Package template, in the current version, it can only be "Software".
-* Type: `String enum` 
+* Type: `String Enum` 
 * Valid values: `Software` 
 * Example: `template = "Software"`
 
 ### version
 Package version number, using ExSemVer specification.
 
-ExSemVer specification adds a `RESERVED` bit between `PATCH` and `PRE` based on [SemVer](https://semver.org), used to mark different packaging versions, or to be compatible with the common 4-digit version numbers on the Windows platform; if the upstream version number conforms to SemVer specification, then set the `RESERVED` bit to `0`.
+ExSemVer specification adds a `RESERVED` bit between `PATCH` and `PRE` based on [SemVer](https://semver.org), used to mark different packaging versions, or to be compatible with the common 4-digit version numbers on the Windows platform; if the upstream version number conforms to SemVer specification, set the `RESERVED` bit to `0`.
 * Type: `String`  
 * Example: `version = "1.0.0.0"`
 
@@ -53,7 +53,7 @@ Supports using `<>` to wrap the author's email.
 ### strict
 <Tag>Optional</Tag> Whether to use strict mode, the default is `true`.
 
-When strict mode is enabled, if an error occurs in a step, the workflow will immediately stop execution and report an error; otherwise, the workflow will only warn of the error and continue to run the subsequent steps.
+When strict mode is enabled, if a step fails, the workflow will immediately stop execution and report an error; otherwise, the workflow will only warn of the error and continue to run the subsequent steps.
 
 :::warning
 Note that if you want to use the built-in variable [`ExitCode`](/nep/definition/2-context#exitcode), set `strict` to `false`.
@@ -85,18 +85,18 @@ Software category, recommended to be one of the Edgeless plugin package categori
 
 ### arch
 <Tag>Optional</Tag> The target architecture for software compilation, the default indicates that architecture compatibility is not checked during installation.
-* Type: `String enum` 
+* Type: `String Enum` 
 * Valid values: `X64` `X86` `ARM64` 
 * Example: `arch = "X64"`
 
 ### language
 Software language, `Multi` indicates multiple languages.
-* Type: `String enum` 
+* Type: `String Enum` 
 * Valid values: `Multi` `zh-CN` `en-US` 
 * Example: `language = "Multi"` {/*examples*/}
 
 ### main_program
-<Optional> The path to the main program, which can be a relative or absolute path.
+<Tag>Optional</Tag> Path to the main program, which can be a relative or absolute path.
 
 If using an absolute path, it must start with a [built-in variable](/nep/workflow/2-context.html#built-in-variables).
 * Type: `String`  
@@ -110,21 +110,21 @@ If using an absolute path, it must start with a [built-in variable](/nep/workflo
   ```
 
 ### tags
-<Optional> Tags, used for recommending similar packages or aggregating multiple similar packages.
+<Tag>Optional</Tag> Tags, used for recommending similar packages or aggregating multiple closely related packages.
 
-Do not repeat information from the package name, category, or author's name.
+Do not repeat information from the package name, category, or author name.
 * Type: `Vec<String>`  
 * Example: `tags = ["electron", "typescript"]`
 
 ### alias
-<Optional> Aliases, used for associative lookup.
+<Tag>Optional</Tag> Aliases, used for associated lookups.
 
 Do not repeat information from the tags.
 * Type: `Vec<String>`  
 * Example: `alias = ["code", "vsc", "Visual Studio Code"]`
 
 ### registry_entry
-<Optional> Registry entry, if the software is installed by calling an installer and has an Uninstall entry in the registry, providing this field can eliminate the need to write an uninstallation workflow and help ept obtain more information.
+<Tag>Optional</Tag> Registry entry, if the software is installed by calling an installer and has an Uninstall entry in the registry, providing this field can eliminate the need to write an uninstall workflow and help ept obtain more information.
 
 Supports entries in the following 3 locations:
 

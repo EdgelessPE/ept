@@ -26,7 +26,7 @@ ${importsText} ${descriptionText} \n${content}`;
   fs.writeFileSync(
     path.join(
       __dirname,
-      `../doc/nep/definition/${toFileName}.md${imports?.length ? "x" : ""}`,
+      `../../doc/zh/nep/definition/${toFileName}.md${imports?.length ? "x" : ""}`,
     ),
     finalText,
   );

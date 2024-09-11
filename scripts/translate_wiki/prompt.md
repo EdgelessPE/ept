@@ -7,5 +7,5 @@ You must strictly follow the rules below.
 - Never change the contents of code blocks even if they appear to have a bug.
 - Always preserve the original line breaks. Do not add or remove blank lines.
 - Never touch the permalink such as `{/*examples*/}` at the end of each heading.
-- Never touch HTML-like tags such as `<Notes>`.
+- Never touch HTML-like tags such as `<Tag>` `</Tag>`.
 - Never touch abbreviations like `ept` `nep` or any other abbreviations.

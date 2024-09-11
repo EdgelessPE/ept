@@ -2,12 +2,13 @@ import path from "path";
 
 export function parseFilePath(rawPath: string) {
   if (rawPath.startsWith("@/")) {
-    rawPath = rawPath.replace("@/", path.join(__dirname, "../src/"));
+    rawPath = rawPath.replace("@/", path.join(__dirname, "../../src/"));
   }
   return rawPath;
 }
 
 const DECL_REGEX = /(\w+):\s?([\w<>()]+)/;
+
 // 输入类型申明行，返回解析结果
 export function parseTypeDeclaration(decl: string):
   | {
