@@ -6,6 +6,15 @@ import { askYn, translate } from "./utils";
 const DOC_ROOT = path.join(__dirname, "../../doc");
 
 async function main(): Promise<boolean> {
+  // 检查配置文件
+  if (!existsSync(".chatgpt-md-translator")) {
+    console.error(
+      "Error: Config not found, read the 'scripts/translate_wiki/README.md'",
+    );
+    return false;
+  }
+
+  // 拼接语言根目录
   const zhDir = path.join(DOC_ROOT, "zh");
   const enDir = path.join(DOC_ROOT, "en");
 
@@ -83,6 +92,7 @@ async function main(): Promise<boolean> {
     const enPath = path.join(enDir, relativePath);
     const res = await translate(zhPath, enPath);
     if (!res) {
+      console.error(`Error: Failed to translate '${relativePath}'`);
       return false;
     }
   }
