@@ -1,6 +1,6 @@
 [package]
 name = "ept"
-version = "0.2.1"
+version = "0.2.2"
 edition = "2021"
 
 [profile.release]
@@ -63,4 +63,4 @@ winreg = "0.52.0"
 winrt-notification = "0.5.1"
 
 [lints.rust]
- unexpected_cfgs = { level = "warn", check-cfg = ['cfg(tarpaulin_include)'] }
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(tarpaulin_include)'] }

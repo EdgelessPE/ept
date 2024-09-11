@@ -6,11 +6,11 @@ export default defineConfig({
   root: path.join(__dirname, "doc"),
   // base:'ept',
   title: "ept",
-  description: "Modern package solution for Windows",
+  description: "Next-generation Windows package management solution",
   icon: "https://home.edgeless.top/favicon.ico",
   themeConfig: {
     footer: {
-      message: "MPL-2.0 Licensed | Rendered by Rspress",
+      message: "MIT Licensed | Rendered by Rspress",
     },
     socialLinks: [
       {

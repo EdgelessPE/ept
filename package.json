@@ -1,7 +1,7 @@
 {
-  "name": "ept-docs",
-  "version": "1.0.0",
-  "license": "MPL-2.0",
+  "name": "ept",
+  "version": "0.2.2",
+  "license": "MIT",
   "scripts": {
     "doc:dev": "rspress dev",
     "doc:build": "pnpm doc:gen && pnpm doc:translate --check && rspress build",
