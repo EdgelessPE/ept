@@ -1,0 +1,18 @@
+{
+  "gettingStarted": {
+    "en": "Getting Started",
+    "zh": "快速开始"
+  },
+  "features": {
+    "en": "Introduction",
+    "zh": "介绍"
+  },
+  "ept-tool": {
+    "en": "The ept tool",
+    "zh": "ept工具"
+  },
+  "nep-spec": {
+    "en": "The Nep specification",
+    "zh": "Nep规范"
+  }
+}

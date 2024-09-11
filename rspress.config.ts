@@ -23,9 +23,30 @@ export default defineConfig({
       docRepoBaseUrl: "https://github.com/EdgelessPE/ept/edit/develop/doc",
       text: "Edit this page on GitHub",
     },
+    locales: [
+      {
+        lang: "en",
+        label: "ON THIS Page",
+      },
+      {
+        lang: "zh",
+        label: "大纲",
+      },
+    ],
   },
   markdown: {
     checkDeadLinks: true,
   },
   plugins: [pluginShiki()],
+  lang: "zh",
+  locales: [
+    {
+      lang: "en",
+      label: "English",
+    },
+    {
+      lang: "zh",
+      label: "简体中文",
+    },
+  ],
 });

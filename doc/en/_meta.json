@@ -1,11 +1,11 @@
 [
   {
-    "text": "ept工具",
+    "text": "ept-tool",
     "link": "/ept/guide",
     "activeMatch": "^/ept/"
   },
   {
-    "text": "Nep规范",
+    "text": "nep-spec",
     "link": "/nep/introduction/1-whats",
     "activeMatch": "^/nep/"
   }
