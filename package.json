@@ -7,6 +7,8 @@
     "doc:build": "pnpm doc:gen && rspress build",
     "doc:preview": "rspress preview",
     "doc:gen": "ts-node ./scripts/gen_api/index.ts",
+    "doc:translate": "cd ./scripts/translate_wiki && ts-node index.ts",
+    "chatgpt-md-translator": "chatgpt-md-translator",
     "lint": "eslint --fix scripts/**/* bindings/**/*",
     "prepare": "npx simple-git-hooks && rustup component add clippy",
     "rs:build":"cmd /c vc_ltl_scripts\\build.bat",
