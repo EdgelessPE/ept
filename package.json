@@ -6,7 +6,7 @@
     "doc:dev": "rspress dev",
     "doc:build": "pnpm doc:gen && rspress build",
     "doc:preview": "rspress preview",
-    "doc:gen": "ts-node ./scripts/index.ts",
+    "doc:gen": "ts-node ./scripts/gen_api/index.ts",
     "lint": "eslint --fix scripts/**/* bindings/**/*",
     "prepare": "npx simple-git-hooks && rustup component add clippy",
     "rs:build":"cmd /c vc_ltl_scripts\\build.bat",
