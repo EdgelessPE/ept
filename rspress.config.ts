@@ -7,7 +7,8 @@ export default defineConfig({
   // base:'ept',
   title: "ept",
   description: "Next-generation Windows package management solution",
-  icon: "https://home.edgeless.top/favicon.ico",
+  icon: "doc/public/nep.ico",
+  logo: "/nep.png",
   themeConfig: {
     footer: {
       message: "MIT Licensed | Rendered by Rspress",

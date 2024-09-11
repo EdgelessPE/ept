@@ -3,27 +3,27 @@
   {
     "type": "dir",
     "name": "introduction",
-    "label": "introduction"
+    "label": "介绍"
   },
   {
     "type": "dir",
     "name": "struct",
-    "label": "package-struct"
+    "label": "包结构"
   },
   {
     "type": "dir",
     "name": "workflow",
-    "label": "workflow"
+    "label": "工作流"
   },
   {
     "type": "dir",
     "name": "ability",
-    "label": "ability"
+    "label": "能力"
   },
   {
     "type": "dir",
     "name": "definition",
-    "label": "definition-and-api",
+    "label": "定义与API",
     "collapsed": true
   }
 ]
