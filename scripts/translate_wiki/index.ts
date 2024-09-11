@@ -4,10 +4,11 @@ import { readdir, mkdir, stat, cp } from "node:fs/promises";
 import { askYn, translate } from "./utils";
 
 const DOC_ROOT = path.join(__dirname, "../../doc");
+const IS_CHECK_MODE = process.argv.includes("--check");
 
 async function main(): Promise<boolean> {
   // 检查配置文件
-  if (!existsSync(".chatgpt-md-translator")) {
+  if (!IS_CHECK_MODE && !existsSync(".chatgpt-md-translator")) {
     console.error(
       "Error: Config not found, read the 'scripts/translate_wiki/README.md'",
     );
@@ -66,7 +67,7 @@ async function main(): Promise<boolean> {
   // 如果只是检查，直接可以返回结果了
 
   if (markdowns.length > 0) {
-    if (process.argv.includes("--check")) {
+    if (IS_CHECK_MODE) {
       console.error(
         `Error: The following ${markdowns.length} markdown files needs translation:\n${markdowns.join("\n")}`,
       );
