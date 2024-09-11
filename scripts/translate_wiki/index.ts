@@ -100,5 +100,4 @@ async function main(): Promise<boolean> {
   return true;
 }
 
- 
 main().then((res) => process.exit(res ? 0 : 1));

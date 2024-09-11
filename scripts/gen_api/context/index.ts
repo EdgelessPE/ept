@@ -9,7 +9,6 @@ export function genContextWiki(
   { valuesTop, fnTop, top }: { valuesTop: Top; fnTop: Top; top: Top },
   {
     valuesFile,
-    fnDir,
     appendValues,
   }: { valuesFile: string; fnDir: string; appendValues: ValueInfo[] },
   toFileName: string,
