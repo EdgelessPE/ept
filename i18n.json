@@ -1,12 +1,4 @@
 {
-  "gettingStarted": {
-    "en": "Getting Started",
-    "zh": "快速开始"
-  },
-  "features": {
-    "en": "Introduction",
-    "zh": "介绍"
-  },
   "ept-tool": {
     "en": "The ept tool",
     "zh": "ept工具"
@@ -14,5 +6,25 @@
   "nep-spec": {
     "en": "The Nep specification",
     "zh": "Nep规范"
+  },
+  "introduction": {
+    "en": "Introduction",
+    "zh": "介绍"
+  },
+  "package-struct": {
+    "en": "Package Struct",
+    "zh": "包结构"
+  },
+  "workflow": {
+    "en": "Workflow",
+    "zh": "工作流"
+  },
+  "ability": {
+    "en": "Ability",
+    "zh": "能力"
+  },
+  "definition-and-api": {
+    "en": "Definitions and APIs",
+    "zh": "定义与API"
   }
 }

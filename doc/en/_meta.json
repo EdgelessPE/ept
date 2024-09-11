@@ -2,11 +2,11 @@
   {
     "text": "ept-tool",
     "link": "/ept/guide",
-    "activeMatch": "^/ept/"
+    "activeMatch": "^(/en)?/ept/"
   },
   {
     "text": "nep-spec",
     "link": "/nep/introduction/1-whats",
-    "activeMatch": "^/nep/"
+    "activeMatch": "^(/en)?/nep/"
   }
 ]
