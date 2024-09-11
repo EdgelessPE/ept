@@ -1,4 +1,5 @@
 export default {
-    "*.ts": "eslint --fix",
-    "*.rs":()=>["cargo fmt","cargo clippy --fix --allow-dirty --allow-staged"]
-}
+  "*.ts": "eslint --fix",
+  "*.rs": () => ["cargo fmt", "cargo clippy --fix --allow-dirty --allow-staged"],
+  "*.md": () => ["pnpm doc:translate --check"]
+};
