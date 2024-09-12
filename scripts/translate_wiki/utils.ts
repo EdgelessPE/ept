@@ -48,3 +48,12 @@ export async function calcMD5(filePath: string): Promise<string> {
     });
   });
 }
+
+export function hasChinese(str: string): string | null {
+  const res = str.match(/[\u4e00-\u9fa5]+/g);
+  if (res) {
+    return res.join(", ");
+  } else {
+    return null;
+  }
+}

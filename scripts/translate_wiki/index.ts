@@ -1,7 +1,7 @@
 import path from "path";
 import { existsSync } from "node:fs";
-import { readdir, cp, mkdir } from "node:fs/promises";
-import { askYn, calcMD5, translate } from "./utils";
+import { readdir, cp, mkdir, readFile } from "node:fs/promises";
+import { askYn, calcMD5, hasChinese, translate } from "./utils";
 import { readStoreMd5, writeStoreMd5 } from "./store";
 
 const DOC_ROOT = path.join(__dirname, "../../doc");
@@ -22,6 +22,7 @@ async function main(): Promise<boolean> {
 
   // 迭代中文目录，收集需要翻译的 Markdown 文件，保存的时候使用相对于语言目录的相对路径
   const markdowns: string[] = [];
+  const allMarkdowns: string[] = [];
 
   // dfs 处理闭包，base 是相对语言目录的相对路径
   async function procDir(base: string = "") {
@@ -40,6 +41,7 @@ async function main(): Promise<boolean> {
         const zhMdPath = path.join(curZhBase, dirent.name);
         const enMdPath = path.join(curEnDir, dirent.name);
         if (dirent.name.endsWith(".md") || dirent.name.endsWith(".mdx")) {
+          allMarkdowns.push(fileBasePath);
           // 判断中英文的 md5 是否匹配
           if (existsSync(enMdPath)) {
             const { zh, en } = await readStoreMd5(fileBasePath);
@@ -97,6 +99,20 @@ async function main(): Promise<boolean> {
       }
     }
   } else {
+    // 检查模式下额外检查英文文档中是否包含中文
+    if (IS_CHECK_MODE) {
+      let has = false;
+      for (const base of allMarkdowns) {
+        const enPath = path.join(enDir, base);
+        const enText = await readFile(enPath);
+        const res = hasChinese(enText.toString());
+        if (res) {
+          console.error(`Error: '${base}' contains Chinese : ${res}}`);
+          has = true;
+        }
+      }
+      return !has;
+    }
     return true;
   }
 
@@ -110,6 +126,14 @@ async function main(): Promise<boolean> {
       console.error(`Error: Failed to translate '${relativePath}'`);
       return false;
     } else {
+      // 检查是否包含中文
+      const enText = await readFile(enPath);
+      if (hasChinese(enText.toString())) {
+        console.warn(
+          `Warning: '${relativePath}' contains Chinese, please check it manually`,
+        );
+      }
+      // 更新 md5
       const zhMd5 = await calcMD5(zhPath);
       const enMd5 = await calcMD5(enPath);
       await writeStoreMd5(relativePath, { zh: zhMd5, en: enMd5 });
