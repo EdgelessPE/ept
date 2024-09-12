@@ -97,8 +97,7 @@ export function genStepsWiki({ srcDir }: { srcDir: string }, toDir: string) {
       extra,
     });
   }
-  for (let i = 0; i < steps.length; i++) {
-    const step = steps[i];
+  for (const step of steps) {
     writeWiki(
       {
         title: step.name,
@@ -106,7 +105,7 @@ export function genStepsWiki({ srcDir }: { srcDir: string }, toDir: string) {
         imports: ['import Tag from "../../../components/tag.tsx"'],
         content: stepRenderer(step, { titleLevel: 1 }),
       },
-      path.join(toDir, `${i + 1}-${step.name.toLowerCase()}`),
+      path.join(toDir, step.name.toLowerCase()),
     );
   }
 }
