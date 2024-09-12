@@ -35,7 +35,7 @@ MODEL_NAME="moonshot-v1-8k"
 
 # The maximum number of lines for code blocks
 # sent to the API as-is for context.
-# CODE_BLOCK_PRESERVATION_LINES=5
+CODE_BLOCK_PRESERVATION_LINES=10
 
 # Transforms the input path to the output file path.
 # OUTPUT_FILE_PATTERN=""
