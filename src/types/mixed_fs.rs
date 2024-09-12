@@ -78,12 +78,12 @@ impl MixedFS {
         self.to_remove_wild_match.insert(path);
     }
 
-    pub fn add(&mut self, path: &String, from: &str) {
+    pub fn add(&mut self, path: &str, from: &str) {
         debug_assert!(!contains_wild_match(path));
         if is_starts_with_inner_value(path) {
             return;
         }
-
+        let path = &format_path(path);
         // 配置 var_warn_manifest flag
         self.var_warn_manifest = true;
 
@@ -206,7 +206,7 @@ fn test_mixed_fs() {
     assert!(mfs.exists("Cargo.toml"));
 
     // 增删指定文件
-    mfs.add(&"./1.txt".to_string(), "./backup/1.txt");
+    mfs.add("./1.txt", "./backup/1.txt");
     mfs.remove("Cargo.toml");
 
     assert!(mfs.exists("1.txt"));
@@ -214,7 +214,7 @@ fn test_mixed_fs() {
     assert!(!mfs.exists("Cargo.toml"));
 
     // 增删通配文件
-    mfs.add(&"./c/".to_string(), "./src/types/*.rs");
+    mfs.add("./c/", "./src/types/*.rs");
     mfs.remove("./src/main?rs");
 
     assert!(mfs.exists("c/mod.rs"));
@@ -228,7 +228,7 @@ fn test_mixed_fs() {
     assert!(!mfs.exists("c/mixed_fs.rs"));
 
     // 增删指定目录
-    mfs.add(&"./233".to_string(), "${AppData}/Edgeless/ept/");
+    mfs.add("./233", "${AppData}/Edgeless/ept/");
     mfs.remove("target");
 
     assert!(mfs.exists("233/whats.ts"));

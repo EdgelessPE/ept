@@ -140,6 +140,11 @@ pub fn verify(source_dir: &String) -> Result<GlobalPackage> {
     // 校验 setup 工作流装箱单
     log!("Info:Checking manifest...");
     let mut fs = MixedFS::new(pkg_content_path.clone());
+    // 如果有展开工作流，先使用展开工作流跑一遍
+    if expand_path.exists() {
+        let expand_flow = parse_workflow(&p2s!(expand_path))?;
+        let _expand_manifest = get_manifest(expand_flow, &mut fs);
+    }
     let setup_manifest = get_manifest(setup_flow, &mut fs);
     manifest_validator(&pkg_content_path, setup_manifest, &mut fs)?;
     log_ok_last!("Info:Checking manifest...");
