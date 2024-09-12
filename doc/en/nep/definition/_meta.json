@@ -1,0 +1,11 @@
+[
+  "1-package",
+  "2-context",
+  "3-permissions",
+  {
+    "type": "dir",
+    "name": "4-steps",
+    "label": "steps"
+  },
+  "5-workflow"
+]

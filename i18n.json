@@ -26,5 +26,9 @@
   "definition-and-api": {
     "en": "Definitions and APIs",
     "zh": "定义与API"
+  },
+  "steps": {
+    "en": "Steps",
+    "zh": "步骤"
   }
 }
