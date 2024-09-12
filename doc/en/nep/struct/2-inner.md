@@ -1,7 +1,7 @@
-# Inclusion
-Inclusion contains the main file content, such as for a software package, the inclusion contains all the necessary files for program execution as well as description files, workflow, and other context; archiving these contents using tar and compressing with the Zstandard compression algorithm will yield the inclusion.
+# Inner-package
+An Inner-package contains the main file content, for example, for a software package, the Inner-package includes all the necessary files for program execution as well as description files, workflow, and other context; archiving these contents with tar and compressing them with the Zstandard compression algorithm will yield the Inner-package.
 
-The general directory structure of the inclusion content is as follows:
+The general directory structure of the Inner-package content is as follows:
 ```
 │  package.toml           # Package description file
 │
@@ -13,7 +13,7 @@ The general directory structure of the inclusion content is as follows:
         remove.toml
 ```
 ## Package Description File
-The package description file is named `package.toml`, storing necessary descriptive information about the contents of the package, such as name, version number, author, summary, etc.
+The package description file is named `package.toml`, which stores necessary descriptive information about the contents of the package, such as name, version number, author, summary, etc.
 
 A package description file might look like this:
 ```toml
@@ -37,21 +37,21 @@ scope = "{SCOPE}"
 category = "{CATEGORY}"
 ```
 ### Package Information Table
-The package information table is within the `[package]` table in `package.toml`, providing general information for Nep packages.
+The package information table is within the `[package]` table in `package.toml`, providing general information about the Nep package.
 
-You can find the complete package information table field definition in [Definition and API](/nep/definition/1-package).
+You can find the complete definition of the package information table fields in [Definitions and APIs](/nep/definition/1-package).
 ### Exclusive Table
-Different package templates have their own exclusive table fields, providing unique information for packages belonging to that template. For example, for software packages (`template = "Software"`), their exclusive table is the `[software]` table in `package.toml`.
+Different package templates have their own exclusive table fields, providing unique information for the package belonging to that template. For example, for a software package (`template = "Software"`), its exclusive table is the `[software]` table in `package.toml`.
 
-You can find the complete exclusive table field definition in [Definition and API](/nep/definition/1-package).
+You can find the complete definition of the exclusive table fields in [Definitions and APIs](/nep/definition/1-package).
 ## Package Content Directory
 The package content directory stores the files needed by users, and its directory name should be determined according to the situation.
 
-For software packages, the name of the package content directory is consistent with the package name in the package information table (`package.name`). For example, if a package has a filename of `VSCode_1.0.0.0_Microsoft`, then its package name is `VSCode`, and its package content directory is also `VSCode`, which contains the main program of VSCode and other files needed for its operation.
+For a software package, the name of the package content directory should be consistent with the package name in the package information table (`package.name`). For example, if a package has a filename of `VSCode_1.0.0.0_Microsoft`, then its package name is `VSCode`, and its package content directory is also `VSCode`, which stores the main program of VSCode and other files needed for its operation.
 ## Workflow Directory
 The workflow directory is named `workflows`, containing workflow description files that comply with the Nep workflow specification.
 
-For software packages, the valid workflow file names are:
+For a software package, the valid workflow file names are:
 * `setup.toml`
 * `update.toml`
 * `remove.toml`

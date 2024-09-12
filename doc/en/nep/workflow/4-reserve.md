@@ -9,4 +9,4 @@ source_file = "./code.exe"
 
 So even if the packager does not provide an uninstallation workflow (`remove.toml`), the reverse workflow will automatically generate a step to delete this shortcut during uninstallation.
 
-You can find the complete reverse workflow definition in [Definitions and API](/nep/definition/4-steps). {/*examples*/}
+You can find the complete reverse workflow definition in [Definitions and APIs](/nep/definition/4-steps).

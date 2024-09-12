@@ -1,0 +1,94 @@
+{
+  "ept/commands.md": {
+    "zh": "99972b9c650fc29703cb1febcba332a5",
+    "en": "70d224bdf558102ed10e55d371fd809c"
+  },
+  "ept/config.md": {
+    "zh": "72ef959d6c528a80c12d2f3fd96dd36f",
+    "en": "3872a6a782470a6dc2a3339de1305bcb"
+  },
+  "ept/guide.md": {
+    "zh": "64f917b3a8cb71d9cd6215e84c3aea8d",
+    "en": "35a45a87943cce67e6a991adec564b7e"
+  },
+  "ept/quick-start.md": {
+    "zh": "d15e716204deeb9006f397408cbad3bf",
+    "en": "f379205d1384e10655c4c1f3cca37a4c"
+  },
+  "index.md": {
+    "zh": "7cc59490c44bb2b4ba2467b84e4afe85",
+    "en": "74187a80addead60072dd43b026e78fc"
+  },
+  "nep/ability/1-permission.md": {
+    "zh": "f3fa5486aaca786abf2b1883ee561161",
+    "en": "19a6f3928b4ad9c0340f831c6f2d4172"
+  },
+  "nep/ability/2-manifest.md": {
+    "zh": "0923ecff5049827948fda156eb68bfb2",
+    "en": "0cd61b07a5f31c7265e5ca49e6a4f1bd"
+  },
+  "nep/definition/1-package.mdx": {
+    "zh": "790bc61a34cc1d380a13a8a7fe582675",
+    "en": "0659e9f28c97d8be32196deb040f3895"
+  },
+  "nep/definition/2-context.md": {
+    "zh": "79e2ac30ca439a3b2cc2fa1554e374cd",
+    "en": "7274b9d510b655a8665803012016d6bb"
+  },
+  "nep/definition/3-permissions.md": {
+    "zh": "911577f12fa03e91b3e2044bc0a64dbd",
+    "en": "265eeaf23ee812e60b76c647bf3001db"
+  },
+  "nep/definition/4-steps.mdx": {
+    "zh": "6d24cbb8781a5f7222a0e8b918ffbc51",
+    "en": "6d24cbb8781a5f7222a0e8b918ffbc51"
+  },
+  "nep/definition/5-workflow.md": {
+    "zh": "a24aef869857c138785da13c4f46eff7",
+    "en": "37b5367f512ec4f55a226b48c643f562"
+  },
+  "nep/index.md": {
+    "zh": "a154bca0b4cef076f03ef8ba56241a33",
+    "en": "419a60c7bd82715cf6faaa9597699134"
+  },
+  "nep/introduction/1-whats.md": {
+    "zh": "e8c3b388731b310121698564f76d1baa",
+    "en": "97518a52bcf225bc780429fa735b37a4"
+  },
+  "nep/introduction/2-solved.md": {
+    "zh": "6b022d1c1e42ae5d8014041c647a3e4e",
+    "en": "8f6085b7a8973f7b21f196e751ee9b0c"
+  },
+  "nep/struct/1-basic.md": {
+    "zh": "a842fba96b2cee7501e653af10e819c9",
+    "en": "ce6ca790a5efb3ef404060d3b2b4056d"
+  },
+  "nep/struct/2-inner.md": {
+    "zh": "0ba495d4f3c8cabf681ff4a959db2dcd",
+    "en": "c4124f970e4a23677caf5b30cb5cbc35"
+  },
+  "nep/struct/3-outer.md": {
+    "zh": "08b7ad08dd8a97f4b05bceec155ae692",
+    "en": "159027d0089cf6c4e79eb17f40351fe6"
+  },
+  "nep/workflow/1-basic.md": {
+    "zh": "151b60933ad5b9dc4b4debb28c3882f9",
+    "en": "edf4d4591fbd7da5e399a3e9e612110b"
+  },
+  "nep/workflow/2-context.md": {
+    "zh": "829d3e6827e5c822371fd6631167a143",
+    "en": "e1781a34b32c4f704e0acced71b7ec1d"
+  },
+  "nep/workflow/3-conditions.md": {
+    "zh": "e8ceb383de1ad556ae258ff07c7f6671",
+    "en": "0f6a99e75ffa195b438b889c244c26e9"
+  },
+  "nep/workflow/4-reserve.md": {
+    "zh": "c5df19cacac6a0608448f367a5cad2a3",
+    "en": "4dfe4c907b514a3bc44100e560adb28e"
+  },
+  "nep/workflow/5-common.md": {
+    "zh": "b51d86f2bac046641d6e8454a8c30b19",
+    "en": "9347c6cb47ad6f9a8289ba87089167b3"
+  }
+}

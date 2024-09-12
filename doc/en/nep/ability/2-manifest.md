@@ -1,6 +1,6 @@
 # Manifest
 
-Nep supports generating manifest by summarizing the steps in the installation workflow, checking the content that must be carried in the package before packaging.
+Nep supports generating a manifest by summarizing the steps in the installation workflow, checking the content that must be carried in the package before packaging.
 
 For example, for the following example steps:
 

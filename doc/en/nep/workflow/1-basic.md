@@ -1,6 +1,6 @@
-# Basic Workflow Introduction
+# Introduction to Basic Workflow
 
-Workflows are used to perform a series of specific "steps" to complete specific tasks, such as installation, updates, or uninstallation.
+A workflow is used to perform a series of specific "steps" to complete specific tasks, such as installation, updating, or uninstallation.
 
 An example installation workflow might look like this:
 ```toml
@@ -28,11 +28,11 @@ step = "Copy"
 from = "./VSCode/_config"
 to = "./Users/Config"
 ```
-is an independent step, which is used to copy folders.
+is an independent step, which is used to copy a folder.
 
-Each step is an independent toml table and must contain the `step` field to indicate what kind of operation the step needs to perform; the value of the `step` field must be one of the several step types defined in [Definitions and APIs](/nep/definition/4-steps).
+Each step is an independent toml table and must include the `step` field to indicate what kind of operation the step needs to perform; the value of the `step` field must be one of the several step types defined in [Definitions and APIs](/nep/definition/4-steps).
 
-Below the `step` field are the fields unique to the `Copy` step—`from` and `to`, indicating where to copy files from and where to copy them to. For different steps, you can view [Definitions and APIs](/nep/definition/4-steps) to understand their respective unique fields.
+Below the `step` field are the unique fields of the `Copy` step—`from` and `to`, indicating where to copy files from and where to copy them to. For different steps, you can view [Definitions and APIs](/nep/definition/4-steps) to understand their respective unique fields.
 
 The key of the step usually uses [snake_case](https://en.wikipedia.org/wiki/Snake_case) to indicate the actual meaning of the operation the step wants to perform, for example, the example above indicates that this step wants to **copy the configuration folder**. Since keys cannot contain spaces, special characters, or Chinese characters, if you want to express the meaning of the operation more clearly, you can add a `name` field to the step:
 ```toml
@@ -41,4 +41,4 @@ name = "Pre-set VSCode Configuration"
 step = "Copy"
 from = "./VSCode/_config"
 to = "./Users/Config"
-``` {/*steps*/}
+```

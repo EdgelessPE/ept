@@ -51,6 +51,9 @@ async function main(): Promise<boolean> {
                 markdowns.push(fileBasePath);
               } else if (enMd5 !== en) {
                 // 英文的 md5 匹配不上，理解为手动润色，重新生成英文的 md5
+                console.log(
+                  `Info: Manually translated '${fileBasePath}', regenerate en md5`,
+                );
                 const enMd5 = await calcMD5(enMdPath);
                 await writeStoreMd5(fileBasePath, { zh, en: enMd5 });
               }

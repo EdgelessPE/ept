@@ -6,7 +6,7 @@ Provides context information available during the workflow execution, such as bu
 ## Built-in Variables
 Built-in variables available in step fields. Note that when used in non-conditional fields, you need to use the template syntax, see [Built-in Variables](/nep/workflow/2-context.html#built-in-variables) for details.
 
-The "Permission Level" field indicates the [permission](/nep/ability/1-permission) level required for the path corresponding to this built-in variable when accessed.
+The "Permission Level" field indicates the [permission](/nep/ability/1-permission) level required for the corresponding path of this built-in variable when accessed.
 ### ExitCode
 :::warning
 By default, the workflow will be executed in [strict mode](/nep/definition/1-package#strict), so you need to explicitly declare to turn off strict mode in `package.toml` before you can use this built-in variable normally.
@@ -71,7 +71,7 @@ User's home directory
 Application data directory
 
 :::warning
-Note: This variable and the `%appdata%` variable within the Windows system represent different directory locations, and it will not automatically add `Roaming` at the end.
+Note: This variable and the `%appdata%` variable within the Windows system represent different directory locations, and it will not automatically append `Roaming` at the end.
 :::
 * Permission level: [`Sensitive`](/nep/definition/3-permissions#sensitive)
 * Example value: `C:/Users/UserName/AppData` 
@@ -142,10 +142,10 @@ Runtime system architecture, possible values: `X64` `X86` `ARM64`
     ```
 
 ## Built-in Functions
-The built-in variables available for conditional statements in steps. The built-in variables provided in the current version are simple functions that take `String` as input and output `Bool`.
+Built-in variables available for conditional statements in steps. The built-in variables provided in the current version are simple functions that take `String` as input and output `Bool`.
 ### Exist
 Checks if a file or directory pointed to by a certain path exists.
-* Input validation: Requires a valid path as input
+* Input validation: Requires a valid path
 * Example: ``if = 'Exist("${SystemDrive}/Windows")'``
 * Permissions:
   * Type: [`fs_read`](/nep/definition/3-permissions#fs_read)
@@ -159,7 +159,7 @@ Checks if a certain process is running.
   * Level: [`Normal`](/nep/definition/3-permissions#Normal)
 ### IsDirectory
 Checks if a certain path points to a directory.
-* Input validation: Requires a valid path as input
+* Input validation: Requires a valid path
 * Example: ``if = 'IsDirectory("${SystemDrive}/Windows")'``
 * Permissions:
   * Type: [`fs_read`](/nep/definition/3-permissions#fs_read)
@@ -170,4 +170,4 @@ Checks if a certain package has been installed by ept.
 * Example: ``if = 'IsInstalled("Microsoft/VSCode")'``
 * Permissions:
   * Type: [`nep_installed`](/nep/definition/3-permissions#nep_installed)
-  * Level: [`Normal`](/nep/definition/3-permissions#Normal) {/*examples*/}
+  * Level: [`Normal`](/nep/definition/3-permissions#Normal)

@@ -1,3 +1,3 @@
 # Package Structure
 
-Nep packages are divided into "inner packages" and "outer packages". A valid Nep package refers to a valid outer package; a valid outer package should wrap a valid inner package.
+Nep packages are divided into "Inner-packages" and "Outer-packages". A valid Nep package refers to a valid Outer-package; a valid Outer-package should wrap a valid Inner-package.

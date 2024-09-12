@@ -1,14 +1,13 @@
-# Outsourcing
-Outsourcing includes the in-package and some other information that needs to be provided for ept to use, such as signature files, QA test results, etc.; these contents can be archived using tar to obtain the out-package.
+# Outer-package
+An Outer-package includes an Inner-package and some other information needed to be provided to ept for use, such as signature files, QA test results, etc.; archiving these contents using tar will yield an Outer-package.
 
-The general directory structure of the out-package is as follows:
+The general directory structure of an Outer-package is as follows:
 ```
-│  {PACKAGE_NAME}_{VERSION}_{FIRST_AUTHOR}.tar.zst          # In-package
+│  {PACKAGE_NAME}_{VERSION}_{FIRST_AUTHOR}.tar.zst          # Inner-package
 │  signature.toml                                           # Signature file
 ```
-
 ## Signature File
-The signature file is named `signature.toml`, which stores the author's and signature information for the in-package and other files.
+The signature file is named `signature.toml`, which stores the author and signature information for the Inner-package and other files.
 
 A signature file might look like this:
 ```toml

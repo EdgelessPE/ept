@@ -12,9 +12,9 @@ step = "Log"
 if = 'ExitCode!=0' # Condition statement
 msg = "Warning: Failed to execute installer!"
 ```
-In this example, if the `call_installer` step fails, the `ExitCode` will be set to a non-zero value (let's assume it's set to 1), then when the `warning_on_failure` step is executed, the value of `ExitCode` is 1, the condition statement evaluates to true, and thus the warning "Warning: Failed to execute installer!" is printed.
+In this example, if the `call_installer` step fails, the value of `ExitCode` will be set to a non-zero value (here it is assumed to be set to 1). Then, when the step `warning_on_failure` is executed, the value of `ExitCode` is 1, the result of the condition statement is true, and therefore the warning `Warning: Failed to execute installer!` is printed.
 
-It is important to note that the value of `ExitCode` is always the **result of the execution of the previous step**, so the third step (log_2) in the following example will not be executed:
+It should be noted that the value of `ExitCode` is always the **result of the execution of the previous step**. Therefore, the third step ( `log_2` ) in the following example will not be executed:
 ```toml
 [throw_error]
 step = "Execute"

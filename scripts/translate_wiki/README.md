@@ -8,6 +8,7 @@
 ## 使用
 * 重新生成文档，或手动对文档进行编辑
 * 执行命令 `pnpm doc:translate`
+* 如果需要对翻译结果手动润色，请在润色结束后执行一次 `pnpm doc:translate --check`，脚本会自动为润色后的英文文档生成 md5
 
 ## Git Hook
 在进行 git commit 操作时 lint-staged 会调用 `pnpm doc:translate --check` 对文档是否同步进行检查，如果没有同步国际化则提交失败

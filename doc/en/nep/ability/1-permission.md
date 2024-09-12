@@ -22,6 +22,6 @@ Permission {
     ],
 }
 ```
-The above raw data can be translated as: A sensitive permission to write to the file system is required, with the target being `${ProgramFiles_X86}/Microsoft/32.dll`.
+The above raw data can be translated as: It requires a sensitive permission to write to the file system, with the target being `${ProgramFiles_X86}/Microsoft/32.dll`.
 
 You can find the complete permission definition in [Definition and API](/nep/definition/3-permissions).
