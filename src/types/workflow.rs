@@ -16,13 +16,22 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct WorkflowHeader {
     /// 步骤名称，缺省使用步骤键的 sentence case。
+    //# ```toml
+    //# name = "创建快捷方式"
+    //# ```
     pub name: Option<String>,
     /// 步骤类型
     //@ 必须是[步骤](/nep/definition/4-steps/0-general.html)定义中的一种值。
+    //# ```toml
+    //# step = "Link"
+    //# ```
     pub step: String,
     #[serde(rename = "if")]
     /// 步骤执行条件。
     //@ 是合法的条件。
+    //# ```toml
+    //# if = "Exist(\"./mc/vsc.exe\") && IsDirectory(\"${SystemDrive}/Windows\") || Exist(\"${AppData}/Roaming/Edgeless/ept\")"
+    //# ```
     pub c_if: Option<String>,
 }
 

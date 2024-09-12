@@ -13,3 +13,4 @@ You must strictly follow the rules below.
 - Translate comments that start with '#' or '//' in a code block
 - Use "open-source" instead of "open source", "String Enum" instead of "String enum"
 - Avoid adding "The" at the beginning of a sentence.
+- Expect cases mentioned above, avoid leaving any chinese characters in the translated text.

@@ -27,6 +27,7 @@ export function genWorkflowWiki({
     {
       title: top.title,
       description: top.description,
+      imports: ['import Tag from "../../../components/tag.tsx"'],
       content,
     },
     "4-steps/0-general",

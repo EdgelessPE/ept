@@ -6,6 +6,7 @@ export function renderWorkflow(
     extra,
     type,
     declaration,
+    demo,
   }: CommonFieldInfo & {
     type:
       | {
@@ -24,5 +25,6 @@ export function renderWorkflow(
   }
   const validationText = extra ? `\n* 校验规则：${extra}` : "";
   return `${"#".repeat(titleLevel)} ${type.name}
-${wiki}${validationText}`;
+${type.optional ? "<Tag>可选</Tag> " : ""}${wiki ?? ""}${validationText}
+* 示例：\n${demo}`;
 }
