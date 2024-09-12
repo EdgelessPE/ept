@@ -11,7 +11,7 @@ The ept package management tool that comes with Nep is implemented in Rust, with
 ## More Comprehensive Package Solution
 The manifest strategy used by some solutions is not a true "package" in the sense, so it cannot effectively meet the package management needs of offline scenarios.
 
-Nep itself is a well-designed package specification, so it can be easily used in offline or private deployment scenarios. At the same time, we have also considered the advantages of the manifest strategy in accelerating static resources, and will provide a package similar to the manifest form in the future to more reasonably use the static acceleration resources of upstream manufacturers to achieve faster package distribution.
+Nep itself is a well-designed package specification, so it can be easily used in offline or private deployment scenarios. At the same time, we have also considered the advantages of the manifest strategy in accelerating static resource downloads, and will provide a package similar to the manifest form in the future to more reasonably use the static acceleration resources of upstream manufacturers to achieve faster package distribution.
 
 ## Faster Resource Link Strategy Design
 In scenarios such as decompression, integrity verification, and signing, Nep has chosen a more modern solution that can complete resource management functions more quickly and securely.

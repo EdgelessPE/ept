@@ -48,12 +48,12 @@
     "en": "97518a52bcf225bc780429fa735b37a4"
   },
   "nep/introduction/2-solved.md": {
-    "zh": "6b022d1c1e42ae5d8014041c647a3e4e",
-    "en": "8f6085b7a8973f7b21f196e751ee9b0c"
+    "zh": "8e984fe54f40ab2b0cf1736eafed8424",
+    "en": "2fd85558be7c25e1920d4881561d683e"
   },
   "nep/struct/1-basic.md": {
-    "zh": "a842fba96b2cee7501e653af10e819c9",
-    "en": "ce6ca790a5efb3ef404060d3b2b4056d"
+    "zh": "ebf203c08be25d5ceeff393d787ad73d",
+    "en": "84034412d4df71397bda642a12d9f983"
   },
   "nep/struct/2-inner.md": {
     "zh": "0ba495d4f3c8cabf681ff4a959db2dcd",
@@ -81,7 +81,7 @@
   },
   "nep/workflow/5-common.md": {
     "zh": "b51d86f2bac046641d6e8454a8c30b19",
-    "en": "9347c6cb47ad6f9a8289ba87089167b3"
+    "en": "aa70410530d279f1bf94916f2135ecad"
   },
   "nep/definition/4-steps/0-general.md": {
     "zh": "ca31ebf3c78b08d6cb928433269e5e44",
@@ -113,7 +113,7 @@
   },
   "nep/definition/4-steps/download.mdx": {
     "zh": "02bb2c640f95f808f54e9d006cfcd682",
-    "en": "297d8fe3d59d0a70d27f4b62173cafc1"
+    "en": "355086b0a6debd17998ecd830f07cff2"
   },
   "nep/definition/4-steps/execute.mdx": {
     "zh": "47e480dc6ec67aa71a124ce71b7e7cc5",

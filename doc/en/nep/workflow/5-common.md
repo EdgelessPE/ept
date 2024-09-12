@@ -17,5 +17,5 @@ The situation during update is slightly more complex:
 * If the first author of the two packages before and after the update is different:
   * First, execute the uninstallation workflow and the corresponding reverse workflow of the installation workflow of the old package, then execute the installation workflow of the new package
 
-## Expansion
-In expandable packages, ept will invoke the expansion workflow before installation or update.
+## Expandable
+In expandable packages, ept will invoke the expandable workflow before installation or update.
