@@ -25,6 +25,7 @@ export async function readStoreMd5(fileBasePath: string): Promise<StoreNode> {
   const json = await getCachedJson();
   return json[fileBasePath] ?? { zh: undefined, en: undefined };
 }
+
 export async function writeStoreMd5(fileBasePath: string, node: StoreNode) {
   const json = await getCachedJson();
   json[fileBasePath] = node;

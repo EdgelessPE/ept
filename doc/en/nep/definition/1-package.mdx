@@ -16,9 +16,9 @@ Do not include underscores (`_`), please use spaces or hyphens (`-`) instead.
 * Example: `name = "VSCode"`
 
 ### description
-A brief description of the package, try to extract from official channels.
+A brief description of the package, try to extract the introduction from official channels.
 * Type: `String`  
-* Example: `description = "Microsoft's cross-platform open-source editor"`
+* Example: `description = "An open-source cross-platform editor developed by Microsoft"`
 
 ### template
 Package template, in the current version, it can only be "Software".
@@ -41,7 +41,7 @@ Supports wrapping author email with `<>`.
 * Example: `authors = ["Cno <dsyourshy@qq.com>", "Microsoft"]`
 
 ### license
-<Tag>Optional</Tag> Open source license [SPDX identifier](https://spdx.org/licenses/) or EULA link.
+<Tag>Optional</Tag> Open-source license [SPDX identifier](https://spdx.org/licenses/) or EULA link.
 * Type: `String`  
 * Example: `license = "MIT"`
 
@@ -53,7 +53,7 @@ Supports wrapping author email with `<>`.
 ### strict
 <Tag>Optional</Tag> Whether to use strict mode, the default is `true`.
 
-When strict mode is enabled, if an error occurs in a step, the workflow will immediately stop execution and report an error; otherwise, the workflow will only warn of the error and continue to run the subsequent steps.
+When strict mode is enabled, if an error occurs in a step, the workflow will immediately stop execution and report an error; otherwise, the workflow will only warn the error and continue to run the subsequent steps.
 
 :::warning
 Note that if you want to use the built-in variable [`ExitCode`](/nep/definition/2-context#exitcode), please set `strict` to `false`.
@@ -67,9 +67,9 @@ Software package exclusive table.
 ### scope
 Software distribution domain, usually fill in the name of the upstream organization.
 
-If the direct upstream of the software package is the distributor (organization), use the name of the distributor, such as `PortableApps`; if the direct upstream of the software package is the official website, use the name of the developer (organization), such as `Microsoft`.
+If the direct upstream of the software package is the distributor/organization, use the distributor's name, such as `PortableApps`; if the direct upstream of the software package is the official website, use the developer's/organization's name, such as `Microsoft`.
 
-If the upstream organization is a formal organization with an independent domain name, capitalize the beginning of the distribution domain, such as using `GitHub` as the distribution domain for `GitHub Desktop` published by GitHub; if the upstream organization represents a general reference to a group, use a lowercase distribution domain, such as using `github` as the distribution domain for open source projects hosted on GitHub Releases.
+If the upstream organization is a formal organization with an independent domain name, capitalize the beginning of the distribution domain, such as using `GitHub` as the distribution domain for `GitHub Desktop` published by GitHub; if the upstream organization represents a general reference to a group, use a lowercase beginning for the distribution domain, such as using `github` as the distribution domain for open-source projects hosted on GitHub Releases.
 * Type: `String`  
 * Example: `scope = "Microsoft"`
 
@@ -79,7 +79,7 @@ Software upstream URL, which can be the official website's download page or the 
 * Example: `upstream = "https://code.visualstudio.com/"`
 
 ### category
-Software category, recommended to be one of the Edgeless plugin package categories.
+Software category, it is recommended to be one of the Edgeless plugin package categories.
 * Type: `String`  
 * Example: `category = "Integrated Development"`
 
@@ -98,7 +98,7 @@ Software language, `Multi` indicates multiple languages.
 ### main_program
 <Tag>Optional</Tag> Main program path, which can be a relative or absolute path.
 
-If using an absolute path, it must start with a [built-in variable](/nep/workflow/2-context.html#built-in-variables).
+If using an absolute path, it must start with [built-in variables](/nep/workflow/2-context.html#built-in-variables).
 * Type: `String`  
 * Example:
   ```toml
