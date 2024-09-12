@@ -37,10 +37,10 @@ The default installation location of the current package
 * Example Value: `C:/Users/UserName/ept/Microsoft/VSCode` 
 * Example:
     ```toml
-    # 非条件字段中使用
+    # Use in non-conditional fields
     to = "${DefaultLocation}/config"
 
-    # 条件字段中使用
+    # Use in conditional fields
     if = 'DefaultLocation=="C:/Users/UserName/ept/Microsoft/VSCode"'
     ```
 ### SystemDrive
@@ -49,10 +49,10 @@ System drive letter
 * Example Value: `C:` 
 * Example:
     ```toml
-    # 非条件字段中使用
+    # Use in non-conditional fields
     to = "${SystemDrive}/Windows/system32"
 
-    # 条件字段中使用
+    # Use in conditional fields
     if = 'SystemDrive=="C:"'
     ```
 ### Home
@@ -61,10 +61,10 @@ User's home directory
 * Example Value: `C:/Users/UserName` 
 * Example:
     ```toml
-    # 非条件字段中使用
+    # Use in non-conditional fields
     to = "${Home}/Document"
 
-    # 条件字段中使用
+    # Use in conditional fields
     if = 'Home=="C:/Users/UserName"'
     ```
 ### AppData
@@ -77,10 +77,10 @@ Note: This variable and the `%appdata%` variable within the Windows system repre
 * Example value: `C:/Users/UserName/AppData` 
 * Example:
     ```toml
-    # 非条件字段中使用
+    # Use in non-conditional fields
     to = "${AppData}/Roaming/Microsoft/Windows/Start Menu"
 
-    # 条件字段中使用
+    # Use in conditional fields
     if = 'AppData=="C:/Users/UserName/AppData"'
     ```
 ### ProgramFiles_X64
@@ -89,10 +89,10 @@ ProgramFiles directory
 * Example value: `C:/Program Files` 
 * Example:
     ```toml
-    # 非条件字段中使用
+    # Use in non-conditional fields
     to = "${ProgramFiles_X64}/Microsoft/Windows"
 
-    # 条件字段中使用
+    # Use in conditional fields
     if = 'ProgramFiles_X64=="C:/Program Files"'
     ```
 ### ProgramFiles_X86
@@ -101,10 +101,10 @@ ProgramFiles (x86) directory
 * Example value: `C:/Program Files (x86)` 
 * Example:
     ```toml
-    # 非条件字段中使用
+    # Use in non-conditional fields
     to = "${ProgramFiles_X86}/Microsoft"
 
-    # 条件字段中使用
+    # Use in conditional fields
     if = 'ProgramFiles_X86=="C:/Program Files (x86)"'
     ```
 ### Desktop
@@ -113,10 +113,10 @@ Current user's desktop directory
 * Example value: `C:/Users/UserName/Desktop` 
 * Example:
     ```toml
-    # 非条件字段中使用
+    # Use in non-conditional fields
     to = "${Desktop}"
 
-    # 条件字段中使用
+    # Use in conditional fields
     if = 'Desktop=="C:/Users/UserName/Desktop"'
     ```
 ### PublicDesktop
@@ -125,10 +125,10 @@ Public desktop directory
 * Example value: `C:/Users/Public/Desktop` 
 * Example:
     ```toml
-    # 非条件字段中使用
+    # Use in non-conditional fields
     to = "${PublicDesktop}"
 
-    # 条件字段中使用
+    # Use in conditional fields
     if = 'PublicDesktop=="C:/Users/Public/Desktop"'
     ```
 ### Arch
@@ -137,7 +137,7 @@ Runtime system architecture, possible values: `X64` `X86` `ARM64`
 * Example value: `X64` 
 * Example:
     ```toml
-    # Used in conditional fields
+    # Use in conditional fields
     if = 'Arch=="X64"'
     ```
 
