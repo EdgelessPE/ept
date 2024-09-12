@@ -21,15 +21,18 @@ async function getCachedJson(): Promise<Record<string, StoreNode>> {
 
   return cachedJson!;
 }
+function convertPath(raw: string) {
+  return raw.replace(/\\/g, "/");
+}
 export async function readStoreMd5(fileBasePath: string): Promise<StoreNode> {
   const json = await getCachedJson();
-  return json[fileBasePath] ?? { zh: undefined, en: undefined };
+  return json[convertPath(fileBasePath)] ?? { zh: undefined, en: undefined };
 }
 
 let changed = false;
 export async function writeStoreMd5(fileBasePath: string, node: StoreNode) {
   const json = await getCachedJson();
-  json[fileBasePath] = node;
+  json[convertPath(fileBasePath)] = node;
   const text = JSON.stringify(json, null, 2);
   await writeFile(path.join(__dirname, "./store.json"), text);
   changed = true;
