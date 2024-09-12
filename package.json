@@ -6,7 +6,7 @@
     "doc:dev": "rspress dev",
     "doc:build": "pnpm doc:gen && pnpm doc:translate --check && rspress build",
     "doc:preview": "rspress preview",
-    "doc:gen": "tsx ./scripts/gen_api/index.ts",
+    "doc:gen": "tsx scripts/gen_wiki/index.ts",
     "doc:translate": "cd ./scripts/translate_wiki && tsx index.ts",
     "chatgpt-md-translator": "cd ./scripts/translate_wiki && chatgpt-md-translator",
     "lint": "eslint --fix scripts/**/* bindings/**/*",
