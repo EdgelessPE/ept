@@ -100,8 +100,8 @@ genStepsWiki(
 genWorkflowWiki({
   file: "@/types/workflow.rs",
   top: {
-    title: "工作流",
-    description: "在步骤上附加的公共工作流字段定义。",
+    title: "通用字段",
+    description: "在步骤上附加的公共字段定义。",
   },
   titleLevel: 1,
 });

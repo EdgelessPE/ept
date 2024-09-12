@@ -29,6 +29,6 @@ export function genWorkflowWiki({
       description: top.description,
       content,
     },
-    "5-workflow",
+    "4-steps/0-general",
   );
 }

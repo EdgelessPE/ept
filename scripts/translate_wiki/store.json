@@ -39,10 +39,6 @@
     "zh": "911577f12fa03e91b3e2044bc0a64dbd",
     "en": "265eeaf23ee812e60b76c647bf3001db"
   },
-  "nep/definition/5-workflow.md": {
-    "zh": "c22d5bd52f24f6e7107d062fc7ac05f3",
-    "en": "38105476c4bb5e41149707ab89cc56be"
-  },
   "nep/index.md": {
     "zh": "a154bca0b4cef076f03ef8ba56241a33",
     "en": "419a60c7bd82715cf6faaa9597699134"
@@ -88,8 +84,8 @@
     "en": "9347c6cb47ad6f9a8289ba87089167b3"
   },
   "nep/definition/4-steps/0-general.md": {
-    "zh": "ca29bbe7f53cb46007b063a43faccbed",
-    "en": "879593762dd6d2554c2064cdcd4d9f94"
+    "zh": "ca31ebf3c78b08d6cb928433269e5e44",
+    "en": "ccd1a87cce33ad1ac589989ea815abdb"
   },
   "nep/definition/4-steps/copy.mdx": {
     "zh": "2b25a1091ef8b92d4b1392b0ef793279",
@@ -120,7 +116,7 @@
     "en": "297d8fe3d59d0a70d27f4b62173cafc1"
   },
   "nep/definition/4-steps/execute.mdx": {
-    "zh": "c619f0961abdc955cc2b40cc32b24d34",
+    "zh": "47e480dc6ec67aa71a124ce71b7e7cc5",
     "en": "26f8b1f5230f77ade50d4114a9f60336"
   },
   "nep/definition/4-steps/kill.mdx": {
