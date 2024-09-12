@@ -2,7 +2,7 @@ import path from "path";
 import { existsSync } from "node:fs";
 import { readdir, cp, mkdir } from "node:fs/promises";
 import { askYn, calcMD5, translate } from "./utils";
-import { flushStoreMd5, readStoreMd5, writeStoreMd5 } from "./store";
+import { readStoreMd5, writeStoreMd5 } from "./store";
 
 const DOC_ROOT = path.join(__dirname, "../../doc");
 const IS_CHECK_MODE = process.argv.includes("--check");
@@ -46,9 +46,13 @@ async function main(): Promise<boolean> {
             if (zh && en) {
               const zhMd5 = await calcMD5(zhMdPath);
               const enMd5 = await calcMD5(enMdPath);
-              if (zhMd5 !== zh || enMd5 !== en) {
-                // 中英文的 md5 匹配不上，需要重新生成
+              if (zhMd5 !== zh) {
+                // 中文的 md5 匹配不上，需要重新生成
                 markdowns.push(fileBasePath);
+              } else if (enMd5 !== en) {
+                // 英文的 md5 匹配不上，理解为手动润色，重新生成英文的 md5
+                const enMd5 = await calcMD5(enMdPath);
+                await writeStoreMd5(fileBasePath, { zh, en: enMd5 });
               }
             } else {
               // 英文文件存在但是没有 md5，同样需要生成
@@ -102,20 +106,12 @@ async function main(): Promise<boolean> {
     if (!res) {
       console.error(`Error: Failed to translate '${relativePath}'`);
       return false;
+    } else {
+      const zhMd5 = await calcMD5(zhPath);
+      const enMd5 = await calcMD5(enPath);
+      await writeStoreMd5(relativePath, { zh: zhMd5, en: enMd5 });
     }
   }
-
-  // 对列表中的文件重新生成 md5
-  for (const base of markdowns) {
-    const zhPath = path.join(zhDir, base);
-    const enPath = path.join(enDir, base);
-    const zhMd5 = await calcMD5(zhPath);
-    const enMd5 = await calcMD5(enPath);
-    await writeStoreMd5(base, { zh: zhMd5, en: enMd5 });
-  }
-
-  // 保存 store
-  await flushStoreMd5();
 
   return true;
 }

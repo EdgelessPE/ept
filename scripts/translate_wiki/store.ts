@@ -26,9 +26,6 @@ export async function readStoreMd5(fileBasePath: string): Promise<StoreNode> {
 export async function writeStoreMd5(fileBasePath: string, node: StoreNode) {
   const json = await getCachedJson();
   json[fileBasePath] = node;
-}
-export async function flushStoreMd5() {
-  const json = await getCachedJson();
   const text = JSON.stringify(json, null, 2);
   await writeFile(path.join(__dirname, "./store.json"), text);
 }
