@@ -1,8 +1,9 @@
 import path from "path";
+import { execSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { readdir, cp, mkdir, readFile } from "node:fs/promises";
 import { askYn, calcMD5, hasChinese, translate } from "./utils";
-import { readStoreMd5, writeStoreMd5 } from "./store";
+import { hasStoreChanged, readStoreMd5, writeStoreMd5 } from "./store";
 
 const DOC_ROOT = path.join(__dirname, "../../doc");
 const IS_CHECK_MODE = process.argv.includes("--check");
@@ -81,14 +82,34 @@ async function main(): Promise<boolean> {
 
   await procDir();
 
-  // 如果只是检查，直接可以返回结果了
-  if (markdowns.length > 0) {
-    if (IS_CHECK_MODE) {
+  if (IS_CHECK_MODE) {
+    // 如果只是检查出问题，直接抛出
+    if (markdowns.length > 0) {
       console.error(
         `Error: The following ${markdowns.length} markdown files needs translation:\n${markdowns.join("\n")}`,
       );
       return false;
-    } else {
+    }
+    // 检查模式下额外检查英文文档中是否包含中文
+    let has = false;
+    for (const base of allMarkdowns) {
+      const enPath = path.join(enDir, base);
+      const enText = await readFile(enPath);
+      const res = hasChinese(enText.toString());
+      if (res) {
+        console.error(`Error: '${base}' contains Chinese : ${res}}`);
+        has = true;
+      }
+    }
+    if (has) return false;
+    // 如果更新了 store，提交暂存
+    if (hasStoreChanged()) {
+      console.log("Info: Update store.json, staging it");
+      execSync(`git add ./store.json`);
+    }
+    return true;
+  } else {
+    if (markdowns.length > 0) {
       // 确认是否开始翻译
       console.log(
         `Info: The following ${markdowns.length} markdown files needs translation:\n${markdowns.join("\n")}\n`,
@@ -97,23 +118,11 @@ async function main(): Promise<boolean> {
       if (!res) {
         return false;
       }
+    } else {
+      // 没有需要翻译的文档
+      console.log("Info: All markdown files are up to date");
+      return true;
     }
-  } else {
-    // 检查模式下额外检查英文文档中是否包含中文
-    if (IS_CHECK_MODE) {
-      let has = false;
-      for (const base of allMarkdowns) {
-        const enPath = path.join(enDir, base);
-        const enText = await readFile(enPath);
-        const res = hasChinese(enText.toString());
-        if (res) {
-          console.error(`Error: '${base}' contains Chinese : ${res}}`);
-          has = true;
-        }
-      }
-      return !has;
-    }
-    return true;
   }
 
   // 翻译

@@ -20,4 +20,4 @@ The following manifest will be generated:
 
 Assuming the package name is `VSCode`, the file `VSCode/Code.exe` must be included when packaging.
 
-You can find the complete basis for generating the manifest in [Definition and API](/nep/definition/4-steps). {/*examples*/}
+You can find the complete basis for generating the manifest in [Definition and API](/nep/definition/4-steps).
