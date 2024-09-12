@@ -8,7 +8,7 @@ Step name, by default uses the sentence case of the step key.
 
 ## step
 Step type
-* Validation rule: Must be one of the values defined in [Steps](/nep/definition/4-steps.html).
+* Validation rule: Must be one of the values defined in [Steps](/nep/definition/4-steps/0-general.html).
 
 ## if
 Condition for step execution.

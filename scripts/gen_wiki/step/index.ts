@@ -1,11 +1,11 @@
-import { type CommonFieldInfo, type Top } from "../type";
+import { type CommonFieldInfo } from "../type";
 import fs from "fs";
 import { parseFilePath } from "../utils";
 import path from "path";
 import { getCommentsInBlock, splitBlock } from "../block";
 import { type StepInfo } from "./type";
 import { writeWiki } from "../writer";
-import { stepsRenderer } from "./markdown";
+import { stepRenderer } from "./markdown";
 import { parsePermission } from "./permission";
 
 function getExtra(file: string): StepInfo["extra"] {
@@ -70,11 +70,7 @@ function formatField({
   }
 }
 
-export function genStepsWiki(
-  top: Top,
-  { srcDir }: { srcDir: string },
-  toFileName: string,
-) {
+export function genStepsWiki({ srcDir }: { srcDir: string }, toDir: string) {
   const dir = parseFilePath(srcDir);
   const fileNames = fs
     .readdirSync(dir)
@@ -101,12 +97,16 @@ export function genStepsWiki(
       extra,
     });
   }
-  writeWiki(
-    {
-      ...top,
-      imports: ['import Tag from "../../components/tag.tsx"'],
-      content: stepsRenderer(steps, { titleLevel: 1 }),
-    },
-    toFileName,
-  );
+  for (let i = 0; i < steps.length; i++) {
+    const step = steps[i];
+    writeWiki(
+      {
+        title: step.name,
+        description: step.extra.run,
+        imports: ['import Tag from "../../../components/tag.tsx"'],
+        content: stepRenderer(step, { titleLevel: 1 }),
+      },
+      path.join(toDir, `${i + 1}-${step.name.toLowerCase()}`),
+    );
+  }
 }

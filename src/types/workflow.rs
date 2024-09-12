@@ -18,7 +18,7 @@ pub struct WorkflowHeader {
     /// 步骤名称，缺省使用步骤键的 sentence case。
     pub name: Option<String>,
     /// 步骤类型
-    //@ 必须是[步骤](/nep/definition/4-steps.html)定义中的一种值。
+    //@ 必须是[步骤](/nep/definition/4-steps/0-general.html)定义中的一种值。
     pub step: String,
     #[serde(rename = "if")]
     /// 步骤执行条件。

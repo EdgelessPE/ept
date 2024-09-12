@@ -8,7 +8,7 @@
 
 ## step
 步骤类型
-* 校验规则：必须是[步骤](/nep/definition/4-steps.html)定义中的一种值。
+* 校验规则：必须是[步骤](/nep/definition/4-steps/0-general.html)定义中的一种值。
 
 ## if
 步骤执行条件。

@@ -93,10 +93,6 @@ genPermissionsWiki({
 
 genStepsWiki(
   {
-    title: "步骤",
-    description: "通过步骤组成工作流完成指定操作。",
-  },
-  {
     srcDir: "@/types/steps",
   },
   "4-steps",

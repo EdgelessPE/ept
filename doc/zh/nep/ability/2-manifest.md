@@ -20,4 +20,4 @@ operation = "Add"
 
 假设包名为`VSCode`，则在打包时必须包含文件`VSCode/Code.exe`。
 
-你可以在[定义与API](/nep/definition/4-steps)中找到完整的装箱单生成依据。
+你可以在[定义与API](/nep/definition/4-steps/0-general)中找到完整的装箱单生成依据。

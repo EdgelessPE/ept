@@ -44,7 +44,7 @@ function permissionRenderer({
 * 目标：${targets}${sceneText}`;
 }
 
-function stepRenderer(
+export function stepRenderer(
   info: StepInfo,
   { titleLevel }: { titleLevel: number },
 ): string {
@@ -56,9 +56,7 @@ function stepRenderer(
         .map((item) => `* ${item}`)
         .join("\n")}`
     : "";
-  return `${"#".repeat(titleLevel)} ${info.name}
-${info.extra.run}
-${"#".repeat(titleLevel + 1)} 字段
+  return `\n${"#".repeat(titleLevel + 1)} 字段
 ${info.fields
   .map((field) => fieldRenderer(field, titleLevel + 2))
   .join("\n")} ${reverseText}${manifestText}
@@ -68,12 +66,4 @@ ${
     ? `${info.extra.permissions.map(permissionRenderer).join("\n<br/>\n")}`
     : "无需权限\n"
 }`;
-}
-export function stepsRenderer(
-  infos: StepInfo[],
-  { titleLevel }: { titleLevel: number },
-) {
-  return `${infos
-    .map((info) => stepRenderer(info, { titleLevel: titleLevel + 1 }))
-    .join("\n---\n")}`;
 }

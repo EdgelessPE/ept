@@ -9,4 +9,4 @@ source_file = "./code.exe"
 
 那么即使打包者未提供卸载工作流（`remove.toml`），在卸载时反向工作流也会自动生成一个将这个快捷方式删除的步骤。
 
-你可以在[定义与API](/nep/definition/4-steps)中找到完整的反向工作流定义。
+你可以在[定义与API](/nep/definition/4-steps/0-general)中找到完整的反向工作流定义。
