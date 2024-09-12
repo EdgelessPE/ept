@@ -93,11 +93,11 @@
   },
   "nep/definition/4-steps/copy.mdx": {
     "zh": "2b25a1091ef8b92d4b1392b0ef793279",
-    "en": "7516387cdf0436e0ab6dbfe789598bcc"
+    "en": "0f49303d586c723f199805bb36910c49"
   },
   "nep/definition/4-steps/path.mdx": {
     "zh": "c5092e155996b742d26be78c8dcfc410",
-    "en": "729974d2d74430f3ddaf63e3feec429d"
+    "en": "a2c5c4e1de32978b726bfab40159eb5a"
   },
   "nep/definition/4-steps/rename.mdx": {
     "zh": "cb9c7ed6a156a68ba9b1dce4b1748896",
@@ -113,7 +113,7 @@
   },
   "nep/definition/4-steps/delete.mdx": {
     "zh": "9e58f57b97be6a3986006eb6a4701647",
-    "en": "856ed6c72bb456c757f6fba2912db38a"
+    "en": "98e51716af49427cd5c0cfcc3a26306c"
   },
   "nep/definition/4-steps/download.mdx": {
     "zh": "02bb2c640f95f808f54e9d006cfcd682",
@@ -129,7 +129,7 @@
   },
   "nep/definition/4-steps/link.mdx": {
     "zh": "f81393a5f4af0b54f1ecb4ff49093503",
-    "en": "5c4c48055eeb5f1148a6fb2e1d222bc3"
+    "en": "b59b20b2e83f7e70327142eff4d406c8"
   },
   "nep/definition/4-steps/log.mdx": {
     "zh": "288acce42bd6d8c92cb853f7a353704c",
@@ -137,10 +137,10 @@
   },
   "nep/definition/4-steps/move.mdx": {
     "zh": "c9f3d3a9c720d179fea5dc347f202079",
-    "en": "97ba0ab4cdbfdca36b87b97f84dd8a6e"
+    "en": "8c3e66619249f47dab58aabe9d916282"
   },
   "nep/definition/4-steps/new.mdx": {
     "zh": "b3eacf858a643d9a567ec4f599351580",
-    "en": "a2e43cb47879a79ff97cac0d0adf573a"
+    "en": "94fa1caced4b6d7b9e5e493caee301fd"
   }
 }
