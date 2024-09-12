@@ -1,5 +1,6 @@
 use crate::utils::fmt_print::{fmt_log, fmt_log_in_step};
 use crate::utils::is_confirm_mode;
+use anyhow::anyhow;
 use colored::{ColoredString, Colorize};
 use dialoguer::Confirm;
 use encoding::all::GBK;
@@ -19,9 +20,10 @@ fn ask_yn_impl(prompt: String, default_value: bool) -> bool {
         true
     } else {
         Confirm::new()
-            .with_prompt(prompt)
+            .with_prompt(&prompt)
             .default(default_value)
             .interact()
+            .map_err(|e| anyhow!("Error:Failed to ask yn question '{prompt}' : {e}"))
             .unwrap()
     }
 }
