@@ -1,7 +1,8 @@
 import path from "path";
 import { existsSync } from "node:fs";
-import { readdir, mkdir, stat, cp } from "node:fs/promises";
-import { askYn, translate } from "./utils";
+import { readdir, cp, mkdir } from "node:fs/promises";
+import { askYn, calcMD5, translate } from "./utils";
+import { flushStoreMd5, readStoreMd5, writeStoreMd5 } from "./store";
 
 const DOC_ROOT = path.join(__dirname, "../../doc");
 const IS_CHECK_MODE = process.argv.includes("--check");
@@ -31,32 +32,39 @@ async function main(): Promise<boolean> {
     const list = await readdir(curZhBase, { withFileTypes: true });
     // 迭代 md 文件
     for (const dirent of list) {
+      const fileBasePath = path.join(base, dirent.name);
       if (dirent.isDirectory()) {
         // 递归文件夹
-        await procDir(path.join(base, dirent.name));
+        await procDir(fileBasePath);
       } else if (dirent.isFile()) {
         const zhMdPath = path.join(curZhBase, dirent.name);
         const enMdPath = path.join(curEnDir, dirent.name);
         if (dirent.name.endsWith(".md") || dirent.name.endsWith(".mdx")) {
-          // 读取对应的英文 md 状态
+          // 判断中英文的 md5 是否匹配
           if (existsSync(enMdPath)) {
-            const { mtime: zhMTime } = await stat(zhMdPath);
-            const { mtime: enMTime } = await stat(enMdPath);
-            // 如果修改间隔超过 1h 则需要更新
-            if (zhMTime.valueOf() - enMTime.valueOf() > 60 * 60 * 1000) {
-              markdowns.push(path.join(base, dirent.name));
+            const { zh, en } = await readStoreMd5(fileBasePath);
+            if (zh && en) {
+              const zhMd5 = await calcMD5(zhMdPath);
+              const enMd5 = await calcMD5(enMdPath);
+              if (zhMd5 !== zh || enMd5 !== en) {
+                // 中英文的 md5 匹配不上，需要重新生成
+                markdowns.push(fileBasePath);
+              }
+            } else {
+              // 英文文件存在但是没有 md5，同样需要生成
+              markdowns.push(fileBasePath);
             }
           } else {
-            // 文件不存在，也需要处理
+            // 英文文件不存在，需要生成
             const parentDir = path.dirname(enMdPath);
             if (!existsSync(parentDir)) {
               await mkdir(parentDir, { recursive: true });
             }
-            markdowns.push(path.join(base, dirent.name));
+            markdowns.push(fileBasePath);
           }
         } else {
           // 其他文件需要复制
-          await cp(zhMdPath, enMdPath);
+          if (!existsSync(enMdPath)) await cp(zhMdPath, enMdPath);
         }
       }
     }
@@ -65,7 +73,6 @@ async function main(): Promise<boolean> {
   await procDir();
 
   // 如果只是检查，直接可以返回结果了
-
   if (markdowns.length > 0) {
     if (IS_CHECK_MODE) {
       console.error(
@@ -97,6 +104,18 @@ async function main(): Promise<boolean> {
       return false;
     }
   }
+
+  // 对列表中的文件重新生成 md5
+  for (const base of markdowns) {
+    const zhPath = path.join(zhDir, base);
+    const enPath = path.join(enDir, base);
+    const zhMd5 = await calcMD5(zhPath);
+    const enMd5 = await calcMD5(enPath);
+    await writeStoreMd5(base, { zh: zhMd5, en: enMd5 });
+  }
+
+  // 保存 store
+  await flushStoreMd5();
 
   return true;
 }
