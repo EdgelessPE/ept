@@ -1,4 +1,4 @@
-# Introduction to Basic Workflow
+# Basic Workflow Introduction
 
 A workflow is used to perform a series of specific "steps" to complete specific tasks, such as installation, updating, or uninstallation.
 
