@@ -18,7 +18,7 @@ Do not include underscores (`_`), please use spaces or hyphens (`-`) instead.
 ### description
 A brief description of the package, try to extract the introduction from official channels.
 * Type: `String`  
-* Example: `description = "An open-source cross-platform editor developed by Microsoft"`
+* Example: `description = "A cross-platform open-source editor developed by Microsoft"`
 
 ### template
 Package template, in the current version, it can only be "Software".
@@ -53,7 +53,7 @@ Supports wrapping author email with `<>`.
 ### strict
 <Tag>Optional</Tag> Whether to use strict mode, the default is `true`.
 
-When strict mode is enabled, if an error occurs in a step, the workflow will immediately stop execution and report an error; otherwise, the workflow will only warn the error and continue to run the subsequent steps.
+When strict mode is enabled, if an error occurs in a step, the workflow will immediately stop execution and report an error; otherwise, the workflow will only warn of the error and continue to run the subsequent steps.
 
 :::warning
 Note that if you want to use the built-in variable [`ExitCode`](/nep/definition/2-context#exitcode), please set `strict` to `false`.
@@ -74,7 +74,7 @@ If the upstream organization is a formal organization with an independent domain
 * Example: `scope = "Microsoft"`
 
 ### upstream
-Software upstream URL, which can be the official website's download page or the distribution details page provided by the distributor (organization).
+Software upstream URL, which can be the official website's download page or the distribution details page provided by the distributor/organization.
 * Type: `String`  
 * Example: `upstream = "https://code.visualstudio.com/"`
 
@@ -98,7 +98,7 @@ Software language, `Multi` indicates multiple languages.
 ### main_program
 <Tag>Optional</Tag> Main program path, which can be a relative or absolute path.
 
-If using an absolute path, it must start with [built-in variables](/nep/workflow/2-context.html#built-in-variables).
+If using an absolute path, it must start with a [built-in variable](/nep/workflow/2-context.html#built-in-variables).
 * Type: `String`  
 * Example:
   ```toml
@@ -117,7 +117,7 @@ Do not repeat information from the package name, category, or author name.
 * Example: `tags = ["electron", "typescript"]`
 
 ### alias
-<Tag>Optional</Tag> Aliases, used for associated lookups.
+<Tag>Optional</Tag> Aliases, used for associative lookup.
 
 Do not repeat information from the tags.
 * Type: `Vec<String>`  
