@@ -43,7 +43,7 @@ async function main(): Promise<boolean> {
     for (let i = 0; i < zhList.length; i++) {
       const zh = zhList[i];
       const en = enList[i];
-      if (zh.name !== en.name) {
+      if (zh.name !== en.name || zh.isFile() !== en.isFile()) {
         console.error(
           `Error: The dirent name in '${base}' is not equal: zh: ${zh.name}, en: ${en.name}`,
         );
