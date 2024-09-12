@@ -29,18 +29,36 @@ async function main(): Promise<boolean> {
   async function procDir(base: string = "") {
     // 拼接绝对路径
     const curZhBase = path.join(zhDir, base);
-    const curEnDir = path.join(enDir, base);
-    // 读取 zh 目录
-    const list = await readdir(curZhBase, { withFileTypes: true });
+    const curEnBase = path.join(enDir, base);
+    // 读取目录
+    const zhList = await readdir(curZhBase, { withFileTypes: true });
+    const enList = await readdir(curEnBase, { withFileTypes: true });
+    // 逐一对比这两个目录是否一致
+    if (zhList.length !== enList.length) {
+      console.error(
+        `Error: The number of dirents in '${curZhBase}' and '${curEnBase}' is not equal`,
+      );
+      process.exit(1);
+    }
+    for (let i = 0; i < zhList.length; i++) {
+      const zh = zhList[i];
+      const en = enList[i];
+      if (zh.name !== en.name) {
+        console.error(
+          `Error: The dirent name in '${base}' is not equal: zh: ${zh.name}, en: ${en.name}`,
+        );
+        process.exit(1);
+      }
+    }
     // 迭代 md 文件
-    for (const dirent of list) {
+    for (const dirent of zhList) {
       const fileBasePath = path.join(base, dirent.name);
       if (dirent.isDirectory()) {
         // 递归文件夹
         await procDir(fileBasePath);
       } else if (dirent.isFile()) {
         const zhMdPath = path.join(curZhBase, dirent.name);
-        const enMdPath = path.join(curEnDir, dirent.name);
+        const enMdPath = path.join(curEnBase, dirent.name);
         if (dirent.name.endsWith(".md") || dirent.name.endsWith(".mdx")) {
           allMarkdowns.push(fileBasePath);
           // 判断中英文的 md5 是否匹配
@@ -73,8 +91,15 @@ async function main(): Promise<boolean> {
             markdowns.push(fileBasePath);
           }
         } else {
-          // 其他文件需要复制
-          if (!existsSync(enMdPath)) await cp(zhMdPath, enMdPath);
+          // 其他文件会被强行同步
+          await cp(zhMdPath, enMdPath);
+          // 检查是否包含中文
+          const zhText = await readFile(zhMdPath);
+          if (hasChinese(zhText.toString())) {
+            console.warn(
+              `Warning: '${fileBasePath}' contains Chinese, please use i18n key`,
+            );
+          }
         }
       }
     }
