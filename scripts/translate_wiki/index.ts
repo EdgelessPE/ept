@@ -2,7 +2,7 @@ import path from "path";
 import { execSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { readdir, cp, mkdir, readFile } from "node:fs/promises";
-import { askYn, calcMD5, hasChinese, translate } from "./utils";
+import { ask, calcMD5, hasChinese, translate } from "./utils";
 import { hasStoreChanged, readStoreMd5, writeStoreMd5 } from "./store";
 
 const DOC_ROOT = path.join(__dirname, "../../doc");
@@ -139,8 +139,22 @@ async function main(): Promise<boolean> {
       console.log(
         `Info: The following ${markdowns.length} markdown files needs translation:\n${markdowns.join("\n")}\n`,
       );
-      const res = await askYn("Start now?(y/n)");
-      if (!res) {
+      const res = await ask(
+        "Start translation now? Or input 'u' to update md5 without translation(y/u/n) : ",
+      );
+      if (res === "y") {
+        // 确认翻译，继续往下走
+      } else if (res === "u") {
+        // 不翻译，确认当前中文文档和英文文档经过手动润色
+        for (const relativePath of markdowns) {
+          const zhPath = path.join(zhDir, relativePath);
+          const enPath = path.join(enDir, relativePath);
+          const zhMd5 = await calcMD5(zhPath);
+          const enMd5 = await calcMD5(enPath);
+          await writeStoreMd5(relativePath, { zh: zhMd5, en: enMd5 });
+        }
+        return true;
+      } else {
         return false;
       }
     } else {

@@ -8,10 +8,10 @@ const rl = readline.createInterface({
   output: process.stdout,
 });
 
-export async function askYn(prompt: string): Promise<boolean> {
+export async function ask(prompt: string): Promise<string> {
   return await new Promise((resolve) => {
     rl.question(prompt, (answer) => {
-      resolve(answer.toLowerCase() === "y");
+      resolve(answer.toLowerCase());
     });
   });
 }
