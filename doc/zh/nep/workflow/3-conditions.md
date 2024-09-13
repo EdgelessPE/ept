@@ -1,7 +1,7 @@
 # 条件
 通过条件字段`if`上的条件语句可以在工作流中根据[上下文](./2-context.md)控制某条步骤是否需要被执行。
 
-最常见的情景是配合内置变量 [ExitCode](/nep/definition/2-context.html#exitcode) 使用，根据上一条步骤的退出码决定是否执行当前步骤：
+例如配合内置变量 [ExitCode](/nep/definition/2-context.html#exitcode) 使用（注意使用此变量需要在 `package.toml` 中关闭严格模式），根据上一条步骤的退出码决定是否执行当前步骤：
 ```toml
 [call_installer]
 step = "Execute"
