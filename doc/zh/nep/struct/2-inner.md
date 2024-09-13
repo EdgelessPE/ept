@@ -17,7 +17,7 @@
 
 一个包描述文件可能如下：
 ```toml
-# nep 版本号
+# nep 规范版本号
 nep = "x.x"
 
 [package]

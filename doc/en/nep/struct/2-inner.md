@@ -17,7 +17,7 @@ The package description file is named `package.toml`, which stores necessary des
 
 A package description file might look like this:
 ```toml
-# nep version number
+# Nep spec version number
 nep = "x.x"
 
 [package]
