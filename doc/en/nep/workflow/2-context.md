@@ -40,7 +40,7 @@ target = "code.exe"
 This means if the `code.exe` process is still running, kill that process.
 
 :::info
-Note that built-in functions are typically simple functions with a single string input and a boolean output; if you need to use complex functions, consider executing a script.
+Note that built-in functions are typically simple functions with a single string input and a boolean output; if you need to use complex functions, consider executing a script with step [`Execute`](/nep/definition/4-steps/execute.html).
 :::
 
 You can find the complete definition of built-in functions in [Definitions and APIs](/nep/definition/2-context).
