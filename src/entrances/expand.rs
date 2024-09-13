@@ -1,13 +1,11 @@
-use std::path::Path;
-
-use anyhow::{anyhow, Result};
-
 use crate::{
     executor::workflow_executor,
     log, log_ok_last, p2s,
     parsers::{parse_package, parse_workflow},
     utils::fs::try_recycle,
 };
+use anyhow::{anyhow, Result};
+use std::path::Path;
 
 // 给定一个工作目录，对该目录执行展开
 fn expand_workshop(workshop_path: &String) -> Result<()> {
@@ -54,8 +52,9 @@ fn test_expand_workshop() {
     // 对工作目录进行展开
     expand_workshop(&"test/VSCodeE".to_string()).unwrap();
 
-    // 断言存在 Code.exe
+    // 断言文件是否存在
     assert!(Path::new("test/VSCodeE/VSCodeE/Code.exe").exists());
+    assert!(!Path::new("test/VSCodeE/workflows/expand.toml").exists());
 
     handler.kill().unwrap();
 }
