@@ -6,6 +6,7 @@ use super::{
     },
 };
 use crate::{
+    entrances::{expand_workshop, is_workshop_expandable},
     executor::workflow_executor,
     p2s,
     parsers::{parse_author, parse_workflow},
@@ -101,6 +102,12 @@ pub fn update_using_package(source_file: &String, verify_signature: bool) -> Res
     log!("Info:Running reverse setup workflow...");
     workflow_reverse_executor(setup_workflow, located_str.clone(), local_package)?;
     log_ok_last!("Info:Running reverse setup workflow...");
+
+    // 执行展开工作流
+    let temp_dir_inner = p2s!(temp_dir_inner_path);
+    if is_workshop_expandable(&temp_dir_inner) {
+        expand_workshop(&temp_dir_inner)?;
+    }
 
     // 移除旧的 app 目录
     // TODO:尽可能提前检查占用，避免无法删除
@@ -478,4 +485,56 @@ fn test_update_with_different_author() {
     // 卸载
     std::fs::remove_file(desktop_path.join("vsc3-remove-1.75.4.0.lnk")).unwrap();
     crate::utils::test::_ensure_testing_vscode_uninstalled();
+}
+
+#[test]
+fn test_update_expandable() {
+    use std::path::Path;
+    envmnt::set("CONFIRM", "true");
+    crate::utils::test::_ensure_clear_test_dir();
+    crate::utils::test::_ensure_testing_uninstalled("Microsoft", "VSCodeE");
+
+    // 断言原来的包中不包含这个二进制文件
+    assert!(!Path::new("examples/VSCodeE/VSCodeE/Code.exe").exists());
+
+    // 启动文件服务器
+    let (_addr, mut handler) = crate::utils::test::_run_static_file_server();
+    std::fs::copy("examples/VSCode/VSCode/Code.exe", "test/Code.exe").unwrap();
+
+    // 安装
+    crate::utils::fs::copy_dir("examples/VSCodeE", "test/VSCodeE").unwrap();
+    install_using_package(&"test/VSCodeE".to_string(), false).unwrap();
+
+    // 断言安装成功
+    assert!(info_local(&"Microsoft".to_string(), &"VSCodeE".to_string()).is_ok());
+    let app_exe_path = get_path_apps(&"Microsoft".to_string(), &"VSCodeE".to_string(), false)
+        .unwrap()
+        .join("Code.exe");
+    assert!(app_exe_path.exists());
+
+    // 手动删除这个包
+    std::fs::remove_file(&app_exe_path).unwrap();
+    assert!(!app_exe_path.exists());
+
+    // 生成一个更新包
+    let pkg_path = crate::utils::test::_fork_example_with_version("examples/VSCodeE", "1.75.5.0");
+
+    // 断言原来的包中不包含这个二进制文件
+    assert!(!Path::new(&pkg_path).join("VSCodeE/Code.exe").exists());
+
+    // 安装更新包
+    update_using_package(&pkg_path, false).unwrap();
+
+    // 断言安装成功
+    assert!(
+        info_local(&"Microsoft".to_string(), &"VSCodeE".to_string())
+            .unwrap()
+            .1
+            .version
+            == "1.75.5.0"
+    );
+    assert!(app_exe_path.exists());
+
+    crate::utils::test::_ensure_testing_uninstalled("Microsoft", "VSCodeE");
+    handler.kill().unwrap();
 }
