@@ -1,12 +1,12 @@
 # What Problems Does Nep Solve
 We are aware that there are already several package management solutions for the Windows platform, but these solutions all have more or less some flaws. Nep has the following features to address some of the pain points of existing solutions:
 
-> Reference: [Chocolatey](https://chocolatey.org/) [Scoop](https://scoop.sh/) [Winget](https://github.com/microsoft/winget-cli)
+> Reference: [Chocolatey](https://chocolatey.org/), [Scoop](https://scoop.sh/), [Winget](https://github.com/microsoft/winget-cli)
 
 ## Lighter Runtime Dependency Requirements
 Current solutions cannot do without the support of "giants" such as .Net, PowerShell, Git, NuGet, and cannot effectively cope with lightweight scenarios.
 
-The ept package management tool that comes with Nep is implemented in Rust, with a compiled single file size of less than 20MB, and can run without any dependency libraries.
+The ept package management tool that comes with Nep is implemented in Rust, with a compiled single file size of less than 20MB (the size is close to 6MB after zip compression), and can run without any dependency libraries.
 
 ## More Comprehensive Package Solution
 The manifest strategy used by some solutions is not a true "package" in the sense, so it cannot effectively meet the package management needs of offline scenarios.

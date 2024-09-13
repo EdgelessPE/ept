@@ -1,12 +1,12 @@
 # Nep 解决了什么问题
 我们清楚目前已经有多款针对 Windows 平台的类包管理解决方案，但是这些方案都或多或少的存在一些缺陷。Nep 拥有如下特性来解决现有方案的部分痛点：
 
-> 参考：[Chocolatey](https://chocolatey.org/) [Scoop](https://scoop.sh/) [Winget](https://github.com/microsoft/winget-cli)
+> 参考：[Chocolatey](https://chocolatey.org/)，[Scoop](https://scoop.sh/)，[Winget](https://github.com/microsoft/winget-cli)
 
 ## 更轻量的运行依赖需要
 当前的多种方案离不开 .Net、PowerShell、Git、NuGet 等“庞然大物”的支持，无法有效应对轻量化的场景。
 
-Nep 配套的 ept 包管理工具使用 Rust 实现，编译后单文件体积小于 20MB，且无需任何依赖库即可运行。
+Nep 配套的 ept 包管理工具使用 Rust 实现，编译后单文件体积小于 20MB（使用 zip 压缩后体积接近 6MB），且无需任何依赖库即可运行。
 
 ## 更完善的包解决方案
 部分方案使用的装箱单策略并非一种真正意义上的“包”，因此无法有效应对离线场景的包管理需求。
