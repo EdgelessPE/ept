@@ -18,4 +18,4 @@ The situation during update is slightly more complex:
   * First, execute the uninstallation workflow and the corresponding reverse workflow of the installation workflow of the old package, then execute the installation workflow of the new package
 
 ## Expandable
-In expandable packages, ept will invoke the expandable workflow before installation or update.
+In expandable packages, ept will invoke the expandable workflow (`expand.toml`) before installation or update.
