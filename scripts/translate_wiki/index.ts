@@ -137,7 +137,7 @@ async function main(): Promise<boolean> {
     if (markdowns.length > 0) {
       // 确认是否开始翻译
       console.log(
-        `Info: The following ${markdowns.length} markdown files needs translation:\n${markdowns.join("\n")}\n`,
+        `Info: The following ${markdowns.length} markdown files needs translation:\n${markdowns.map((t) => `    ${t}`).join("\n")}\n`,
       );
       const res = await ask(
         "Start translation now? Or input 'u' to update md5 without translation(y/u/n) : ",

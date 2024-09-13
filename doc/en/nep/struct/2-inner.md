@@ -1,5 +1,5 @@
 # Inner-package
-An Inner-package contains the main file content, for example, for a software package, the Inner-package includes all the necessary files for program execution as well as description files, workflow, and other context; archiving these contents with tar and compressing them with the Zstandard compression algorithm will yield the Inner-package.
+An Inner-package contains the main file content, for example, for a software package, the Inner-package contains all the necessary files for program execution, as well as description files, workflows, and other context; archiving these contents using tar and compressing with the Zstandard compression algorithm will yield the Inner-package.
 
 The general directory structure of the Inner-package content is as follows:
 ```
@@ -8,7 +8,7 @@ The general directory structure of the Inner-package content is as follows:
 ├─{PACKAGE_NAME}          # Package content directory
 │       ...
 │
-└─workflows               # Workflow directory
+└─workflows               # Workflows directory
         setup.toml
         remove.toml
 ```
@@ -39,15 +39,15 @@ category = "{CATEGORY}"
 ### Package Information Table
 The package information table is within the `[package]` table in `package.toml`, providing general information about the Nep package.
 
-You can find the complete package information table field definition in [Definitions and APIs](/nep/definition/1-package).
+You can find the complete definition of the package information table fields in [Definitions and APIs](/nep/definition/1-package).
 ### Exclusive Table
 Different package templates have their own exclusive table fields, providing unique information for the package belonging to that template. For example, for a software package (`template = "Software"`), its exclusive table is the `[software]` table in `package.toml`.
 
-You can find the complete exclusive table field definition in [Definitions and APIs](/nep/definition/1-package).
+You can find the complete definition of the exclusive table fields in [Definitions and APIs](/nep/definition/1-package).
 ## Package Content Directory
-The package content directory stores the files needed by the user, and its directory name is consistent with the package name in the package information table (`package.name`), which contains the main program of VSCode and other files required for its operation.
-## Workflow Directory
-The workflow directory is named `workflows`, and it contains workflow description files that comply with the Nep workflow specification.
+The package content directory stores the files needed by the user, with the directory name consistent with the package name in the package information table (`package.name`), which contains the main program of the software and other files required for its operation.
+## Workflows Directory
+The workflows directory is named `workflows`, containing workflow description files that comply with the Nep workflow specification.
 
 For software packages, the valid workflow file names are:
 * `setup.toml`
