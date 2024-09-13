@@ -9,9 +9,12 @@ use super::{
         validator::installed_validator,
     },
 };
-use crate::utils::{
-    download::download_nep, fs::move_or_copy, is_qa_mode, path::parse_relative_path_with_located,
-    term::ask_yn,
+use crate::{
+    entrances::{expand_workshop, is_workshop_expandable},
+    utils::{
+        download::download_nep, fs::move_or_copy, is_qa_mode,
+        path::parse_relative_path_with_located, term::ask_yn,
+    },
 };
 use crate::{
     entrances::{info, update_using_package},
@@ -70,6 +73,12 @@ pub fn install_using_package(
         return Ok((res.scope, res.name));
     }
 
+    // 执行展开工作流
+    let temp_dir_inner = p2s!(temp_dir_inner_path);
+    if is_workshop_expandable(&temp_dir_inner) {
+        expand_workshop(&temp_dir_inner)?;
+    }
+
     // 解析最终安装位置
     let into_dir = get_path_apps(&software.scope, &package.name, true)?;
     if into_dir.exists() {
@@ -98,7 +107,7 @@ pub fn install_using_package(
     workflow_executor(setup_workflow, into_dir.clone(), package_struct)?;
     log_ok_last!("Info:Running setup workflow...");
 
-    // 保存上下文
+    // 保存 nep 包的元信息
     let ctx_path = Path::new(&into_dir).join(".nep_context");
     move_or_copy(temp_dir_inner_path, ctx_path)?;
 
@@ -426,4 +435,34 @@ fn test_install_with_matcher() {
 
     // 换回原镜像源
     crate::utils::test::_unmount_custom_mirror(custom_mirror_ctx);
+}
+
+#[test]
+fn test_install_expandable() {
+    envmnt::set("CONFIRM", "true");
+    crate::utils::test::_ensure_clear_test_dir();
+    crate::utils::test::_ensure_testing_uninstalled("Microsoft", "VSCodeE");
+
+    // 断言原来的包中不包含这个二进制文件
+    assert!(!Path::new("examples/VSCodeE/VSCodeE/Code.exe").exists());
+
+    // 启动文件服务器
+    let (_addr, mut handler) = crate::utils::test::_run_static_file_server();
+    std::fs::copy("examples/VSCode/VSCode/Code.exe", "test/Code.exe").unwrap();
+
+    // 安装
+    crate::utils::fs::copy_dir("examples/VSCodeE", "test/VSCodeE").unwrap();
+    install_using_package(&"test/VSCodeE".to_string(), false).unwrap();
+
+    // 断言安装成功
+    assert!(info_local(&"Microsoft".to_string(), &"VSCodeE".to_string()).is_ok());
+    assert!(
+        get_path_apps(&"Microsoft".to_string(), &"VSCodeE".to_string(), false)
+            .unwrap()
+            .join("Code.exe")
+            .exists()
+    );
+
+    crate::utils::test::_ensure_testing_uninstalled("Microsoft", "VSCodeE");
+    handler.kill().unwrap();
 }
