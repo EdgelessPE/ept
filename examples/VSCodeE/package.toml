@@ -1,0 +1,24 @@
+# nep 版本号
+nep = "0.2"
+
+[package]
+# 包名
+name = "VSCodeE"
+# 包模板 仅可取 "Software"
+template = "Software"
+# 版本号
+version = "1.75.4.0"
+# 打包者/作者
+authors = ["Cno <dsyourshy@qq.com>","Microsoft"]
+# 许可证缩写或链接（可选）
+license = "MIT"
+description = "Visual Studio Code"
+
+[software]
+scope = "Microsoft"
+# 上游发布页面 URL
+upstream = "https://code.visualstudio.com/"
+# 软件分类
+category = "办公编辑"
+tags = ["Electron"]
+language = "Multi"

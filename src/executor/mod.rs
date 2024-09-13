@@ -113,7 +113,10 @@ pub fn workflow_executor(
 
         // 在严格模式下立即返回错误
         if cx.exit_code != 0 && strict_mode {
-            return Err(anyhow!("Error:Throw due to strict mode"));
+            return Err(anyhow!(
+                "Error:Throw due to strict mode : got exit code '{}' at step '{name}'",
+                cx.exit_code
+            ));
         }
         log!("Debug:Stop step '{name}'");
     }

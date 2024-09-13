@@ -1,5 +1,6 @@
 mod clean;
 pub mod config;
+mod expand;
 mod info;
 mod install;
 mod list;

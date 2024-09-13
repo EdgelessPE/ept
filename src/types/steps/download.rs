@@ -3,6 +3,7 @@ use std::path::Path;
 use super::TStep;
 use crate::{
     executor::values_validator_path,
+    p2s,
     signature::compute_hash_blake3,
     types::{
         interpretable::Interpretable,
@@ -50,7 +51,7 @@ impl TStep for StepDownload {
             )
         })?;
         // 校验
-        let got_hash = compute_hash_blake3(&self.at).map_err(|e| {
+        let got_hash = compute_hash_blake3(&p2s!(p)).map_err(|e| {
             anyhow!(
                 "Error(Download):Failed to compute hash for file '{}': {e}",
                 self.at
