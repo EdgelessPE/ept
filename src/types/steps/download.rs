@@ -4,7 +4,7 @@ use super::TStep;
 use crate::{
     executor::values_validator_path,
     p2s,
-    signature::compute_hash_blake3,
+    signature::blake3::compute_hash_blake3,
     types::{
         interpretable::Interpretable,
         mixed_fs::MixedFS,

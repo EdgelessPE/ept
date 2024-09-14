@@ -19,6 +19,10 @@ pub fn compute_hash_blake3(from_file: &String) -> Result<String> {
     Ok(hash)
 }
 
+pub fn compute_hash_blake3_from_string(from_string: &String) -> Result<String> {
+    fast_compute_hash_blake3(from_string.as_bytes())
+}
+
 pub fn fast_compute_hash_blake3(raw: &[u8]) -> Result<String> {
     let hash = hash(raw);
     let hash = hash.to_hex().to_string();
