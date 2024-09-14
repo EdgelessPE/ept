@@ -37,6 +37,7 @@ fn router(action: Action) -> Result<String> {
     use types::{cli::ActionMirror, extended_semver::ExSemVer};
     use utils::{
         fmt_print::{fmt_mirror_line, fmt_package_line},
+        get_path_apps,
         parse_inputs::{parse_install_inputs, parse_uninstall_inputs, parse_update_inputs},
         term::ask_yn,
     };
@@ -144,8 +145,12 @@ fn router(action: Action) -> Result<String> {
             }
             let length = parsed.len();
             for (scope, name, _) in parsed {
-                let tip = uninstall(Some(scope), &name).map(|(scope, name)| {
+                let tip = uninstall(Some(scope.clone()), &name).map(|(scope, name)| {
                     format!("Success:Package '{scope}/{name}' uninstalled successfully")
+                }).map_err(|e|{
+                    // 卸载失败时提示用户如何手动解决坏包
+                    let app_path=get_path_apps(&scope, &name, false).unwrap();
+                    anyhow!("Error:Failed to uninstall package '{scope}/{name}' : '{e}', try to manually delete '{}' if this package is broken",p2s!(app_path))
                 })?;
                 log!("{tip}");
             }
