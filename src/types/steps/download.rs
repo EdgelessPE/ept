@@ -37,14 +37,14 @@ pub struct StepDownload {
     //# `at = "bin/b3sum.exe"`
     //@ 是合法的相对路径
     //@ 在校验工作流时不存在该文件
-    pub at: String,
+    pub to: String,
 }
 
 impl TStep for StepDownload {
     fn run(self, cx: &mut WorkflowContext) -> Result<i32> {
         //- （仅能在拓展工作流中使用）从 URL 下载文件并使用提供的 BLAKE3 Hash 校验完整性。
         // 下载
-        let p = Path::new(&cx.located).join(&self.at).to_path_buf();
+        let p = Path::new(&cx.located).join(&self.to).to_path_buf();
         let cache_path = get_path_cache()?;
         let cache_ctx = download(
             &self.url,
@@ -55,20 +55,20 @@ impl TStep for StepDownload {
             anyhow!(
                 "Error(Download):Failed to download from '{}' to '{}': {e}",
                 self.url,
-                self.at
+                self.to
             )
         })?;
         // 校验
         let got_hash = compute_hash_blake3(&p2s!(p)).map_err(|e| {
             anyhow!(
                 "Error(Download):Failed to compute hash for file '{}': {e}",
-                self.at
+                self.to
             )
         })?;
         if got_hash != self.hash_blake3 {
             return Err(anyhow!(
                 "Error(Download):Hash mismatch for file '{}' : expected '{}', got '{got_hash}'",
-                self.at,
+                self.to,
                 self.hash_blake3
             ));
         }
@@ -84,7 +84,7 @@ impl TStep for StepDownload {
     }
     fn get_manifest(&self, fs: &mut MixedFS) -> Vec<String> {
         // 添加下载后的文件
-        fs.add(&self.at, "");
+        fs.add(&self.to, "");
         Vec::new()
     }
     fn verify_step(&self, ctx: &super::VerifyStepCtx) -> Result<()> {
@@ -111,25 +111,25 @@ impl TStep for StepDownload {
         }
 
         // 存放位置为合法的相对路径，不应该包含通配符
-        if Path::new(&self.at).is_absolute() || self.at.starts_with("${") {
+        if Path::new(&self.to).is_absolute() || self.to.starts_with("${") {
             return Err(anyhow!(
                 "Error(Download):Invalid 'at' field '{}' : relative path expected",
-                self.at
+                self.to
             ));
         }
-        if contains_wild_match(&self.at) {
+        if contains_wild_match(&self.to) {
             return Err(anyhow!(
                 "Error(Download):Invalid 'at' field '{}' : wild match not allowed",
-                self.at
+                self.to
             ));
         }
-        values_validator_path(&self.at).map_err(|e| {
+        values_validator_path(&self.to).map_err(|e| {
             anyhow!("Error(Download):Failed to validate field 'at' as valid path : {e}")
         })?;
 
         // 校验时该文件不存在
-        if Path::new(&ctx.located).join(&self.at).exists() {
-            return Err(anyhow!("Error(Download):File '{}' already exists", self.at));
+        if Path::new(&ctx.located).join(&self.to).exists() {
+            return Err(anyhow!("Error(Download):File '{}' already exists", self.to));
         }
 
         Ok(())
@@ -154,7 +154,7 @@ impl Interpretable for StepDownload {
         Self {
             url: interpreter(self.url),
             hash_blake3: self.hash_blake3,
-            at: interpreter(self.at),
+            to: interpreter(self.to),
         }
     }
 }
@@ -179,7 +179,7 @@ fn test_download() {
     let step = StepDownload {
         url: format!("{addr}/download-test.exe"),
         hash_blake3: "0218ef74c47f601d555499bcc3b02564d9de34ad1e2ee712af10957e2799f0fd".to_string(),
-        at: "test/target-test.exe".to_string(),
+        to: "test/target-test.exe".to_string(),
     };
 
     let mut ctx = crate::types::steps::VerifyStepCtx::_demo();
@@ -191,7 +191,7 @@ fn test_download() {
     assert!(StepDownload {
         url: format!("{addr}/download-test.apk"),
         hash_blake3: "0218ef74c47f601d555499bcc3b02564d9de34ad1e2ee712af10957e2799f0fd".to_string(),
-        at: "test/target-test.apk".to_string(),
+        to: "test/target-test.apk".to_string(),
     }
     .run(&mut cx)
     .is_err());
@@ -200,7 +200,7 @@ fn test_download() {
     assert!(StepDownload {
         url: format!("{addr}/download-test.exe"),
         hash_blake3: "1218ef74c47f601d555499bcc3b02564d9de34ad1e2ee712af10957e2799f0fd".to_string(),
-        at: "test/target-test.exe".to_string(),
+        to: "test/target-test.exe".to_string(),
     }
     .run(&mut cx)
     .is_err());
@@ -218,7 +218,7 @@ fn test_download_corelation() {
     StepDownload {
         url: format!("{addr}/download-test.exe"),
         hash_blake3: "0218ef74c47f601d555499bcc3b02564d9de34ad1e2ee712af10957e2799f0fd".to_string(),
-        at: "test/target-test.exe".to_string(),
+        to: "test/target-test.exe".to_string(),
     }
     .reverse_run(&mut cx)
     .unwrap();
@@ -227,7 +227,7 @@ fn test_download_corelation() {
     assert!(StepDownload {
         url: format!("{addr}/download-test.exe"),
         hash_blake3: "0218ef74c47f601d555499bcc3b02564d9de34ad1e2ee712af10957e2799f0fd".to_string(),
-        at: "test/target-test.exe".to_string(),
+        to: "test/target-test.exe".to_string(),
     }
     .get_manifest(&mut mixed_fs)
     .is_empty());
@@ -239,7 +239,7 @@ fn test_download_corelation() {
             url: format!("{addr}/download-test.exe"),
             hash_blake3: "0218ef74c47f601d555499bcc3b02564d9de34ad1e2ee712af10957e2799f0fd"
                 .to_string(),
-            at: "test/target-test.exe".to_string(),
+            to: "test/target-test.exe".to_string(),
         }
         .generalize_permissions()
         .unwrap()
@@ -257,13 +257,13 @@ fn test_download_corelation() {
         StepDownload {
             url: "${Home}".to_string(),
             hash_blake3: "${Home}".to_string(),
-            at: "${Home}".to_string(),
+            to: "${Home}".to_string(),
         }
         .interpret(|s| s.replace("${Home}", "C:/Users/Nep")),
         StepDownload {
             url: "C:/Users/Nep".to_string(),
             hash_blake3: "${Home}".to_string(),
-            at: "C:/Users/Nep".to_string(),
+            to: "C:/Users/Nep".to_string(),
         }
     );
 
@@ -274,14 +274,14 @@ fn test_download_corelation() {
     assert!(StepDownload {
         url: format!("{addr}/download-test.exe"),
         hash_blake3: "0218ef74c47f601d555499bcc3b02564d9de34ad1e2ee712af10957e2799f0fd".to_string(),
-        at: "test/target-test.exe".to_string(),
+        to: "test/target-test.exe".to_string(),
     }
     .verify_step(&ctx)
     .is_ok());
     assert!(StepDownload {
         url: "https://github.com/BLAKE3-team/BLAKE3/releases/download/1.5.4/b3sum_windows_x64_bin.exe".to_string(),
         hash_blake3: "0218ef74c47f601d555499bcc3b02564d9de34ad1e2ee712af10957e2799f0fd".to_string(),
-        at: "test/target-test.exe".to_string(),
+        to: "test/target-test.exe".to_string(),
     }
     .verify_step(&ctx)
     .is_ok());
@@ -291,7 +291,7 @@ fn test_download_corelation() {
     assert!(StepDownload {
         url: "ftp://localhost/download-test.exe".to_string(),
         hash_blake3: "0218ef74c47f601d555499bcc3b02564d9de34ad1e2ee712af10957e2799f0fd".to_string(),
-        at: "test/target-test.exe".to_string(),
+        to: "test/target-test.exe".to_string(),
     }
     .verify_step(&ctx)
     .is_err());
@@ -300,7 +300,7 @@ fn test_download_corelation() {
         url: format!("{addr}/download-test.exe"),
         hash_blake3: "0218ef74c47f601d555499bcc3b02564d9de34ad1e2ee712af10957e2799f0fd1"
             .to_string(),
-        at: "test/target-test.exe".to_string(),
+        to: "test/target-test.exe".to_string(),
     }
     .verify_step(&ctx)
     .is_err());
@@ -308,7 +308,7 @@ fn test_download_corelation() {
     assert!(StepDownload {
         url: format!("{addr}/download-test.exe"),
         hash_blake3: "18ef74c47f601d555499bcc3b02564d9de34ad1e2ee712af10957e2799f0fd1".to_string(),
-        at: "test/target-test.exe".to_string(),
+        to: "test/target-test.exe".to_string(),
     }
     .verify_step(&ctx)
     .is_err());
@@ -316,7 +316,7 @@ fn test_download_corelation() {
     assert!(StepDownload {
         url: format!("{addr}/download-test.exe"),
         hash_blake3: "0218ef74c47f601d555499bcc3b02564d9de34ad1e2ee712af10957e2799f0f!".to_string(),
-        at: "test/target-test.exe".to_string(),
+        to: "test/target-test.exe".to_string(),
     }
     .verify_step(&ctx)
     .is_err());
@@ -324,7 +324,7 @@ fn test_download_corelation() {
     assert!(StepDownload {
         url: format!("{addr}/download-test.exe"),
         hash_blake3: "0218ef74c47f601d555499bcc3b02564d9de34ad1e2ee712af10957e2799f0fd".to_string(),
-        at: "${Home}/test/target-test.exe".to_string(),
+        to: "${Home}/test/target-test.exe".to_string(),
     }
     .verify_step(&ctx)
     .is_err());
@@ -332,7 +332,7 @@ fn test_download_corelation() {
     assert!(StepDownload {
         url: format!("{addr}/download-test.exe"),
         hash_blake3: "0218ef74c47f601d555499bcc3b02564d9de34ad1e2ee712af10957e2799f0fd".to_string(),
-        at: "test/${ExitCode}/target-test.exe".to_string(),
+        to: "test/${ExitCode}/target-test.exe".to_string(),
     }
     .verify_step(&ctx)
     .is_ok());
@@ -340,7 +340,7 @@ fn test_download_corelation() {
     assert!(StepDownload {
         url: format!("{addr}/download-test.exe"),
         hash_blake3: "0218ef74c47f601d555499bcc3b02564d9de34ad1e2ee712af10957e2799f0fd".to_string(),
-        at: "C:/test/target-test.exe".to_string(),
+        to: "C:/test/target-test.exe".to_string(),
     }
     .verify_step(&ctx)
     .is_err());
@@ -348,7 +348,7 @@ fn test_download_corelation() {
     assert!(StepDownload {
         url: format!("{addr}/download-test.exe"),
         hash_blake3: "0218ef74c47f601d555499bcc3b02564d9de34ad1e2ee712af10957e2799f0fd".to_string(),
-        at: "../test/target-test.exe".to_string(),
+        to: "../test/target-test.exe".to_string(),
     }
     .verify_step(&ctx)
     .is_err());
@@ -356,7 +356,7 @@ fn test_download_corelation() {
     assert!(StepDownload {
         url: format!("{addr}/download-test.exe"),
         hash_blake3: "0218ef74c47f601d555499bcc3b02564d9de34ad1e2ee712af10957e2799f0fd".to_string(),
-        at: "test/target-*.exe".to_string(),
+        to: "test/target-*.exe".to_string(),
     }
     .verify_step(&ctx)
     .is_err());
@@ -365,7 +365,7 @@ fn test_download_corelation() {
     assert!(StepDownload {
         url: format!("{addr}/download-test.exe"),
         hash_blake3: "0218ef74c47f601d555499bcc3b02564d9de34ad1e2ee712af10957e2799f0fd".to_string(),
-        at: "test/target-test.exe".to_string(),
+        to: "test/target-test.exe".to_string(),
     }
     .verify_step(&ctx)
     .is_err());
@@ -374,7 +374,7 @@ fn test_download_corelation() {
     assert!(StepDownload {
         url: format!("{addr}/download-test.exe"),
         hash_blake3: "0218ef74c47f601d555499bcc3b02564d9de34ad1e2ee712af10957e2799f0fd".to_string(),
-        at: "test/target-test.exe".to_string(),
+        to: "test/target-test.exe".to_string(),
     }
     .verify_step(&ctx)
     .is_err());

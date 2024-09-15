@@ -13,7 +13,7 @@ use super::allocate_path_temp;
 
 // cached 接受参数为 (存放缓存的路径，缓存 key)
 // 函数返回的是缓存上下文，当文件被验证可用后可以使用这个上下文传递给 spawn_cache 函数进行缓存
-pub fn download(url: &str, at: PathBuf, cached: Option<(PathBuf, String)>) -> Result<CacheCtx> {
+pub fn download(url: &str, to: PathBuf, cached: Option<(PathBuf, String)>) -> Result<CacheCtx> {
     let cfg = get_config();
     // 检查缓存
     let enabled_cache =
@@ -22,11 +22,11 @@ pub fn download(url: &str, at: PathBuf, cached: Option<(PathBuf, String)>) -> Re
         if let Some((cache_path, cache_key)) = cached.clone() {
             let cache_file_path = cache_path.join(&cache_key);
             if cache_file_path.exists() {
-                copy(&cache_file_path,& at).map_err(|e: std::io::Error| {
-                    anyhow!("Error:Failed to restore cache from '{cache_file_path:?}' to '{at:?}' : {e}")
+                copy(&cache_file_path,& to).map_err(|e: std::io::Error| {
+                    anyhow!("Error:Failed to restore cache from '{cache_file_path:?}' to '{to:?}' : {e}")
                 })?;
-                log!("Info:Restored cache form '{cache_file_path:?}' to '{at:?}'");
-                return Ok(CacheCtx(false, at, None));
+                log!("Info:Restored cache form '{cache_file_path:?}' to '{to:?}'");
+                return Ok(CacheCtx(false, to, None));
             }
         }
     }
@@ -53,7 +53,7 @@ pub fn download(url: &str, at: PathBuf, cached: Option<(PathBuf, String)>) -> Re
     pb.set_length(content_length);
 
     // 创建文件以写入数据
-    let mut file = File::create(&at)?;
+    let mut file = File::create(&to)?;
 
     let mut buf = vec![0; 1024];
     let mut downloaded = 0;
@@ -72,9 +72,9 @@ pub fn download(url: &str, at: PathBuf, cached: Option<(PathBuf, String)>) -> Re
     }
     // 下载完成，清除进度条
     pb.finish_and_clear();
-    log!("Info:Downloaded file stored at '{at:?}'");
+    log!("Info:Downloaded file stored at '{to:?}'");
 
-    Ok(CacheCtx(enabled_cache, at, cached))
+    Ok(CacheCtx(enabled_cache, to, cached))
 }
 
 // 返回 （文件存放路径，缓存上下文）

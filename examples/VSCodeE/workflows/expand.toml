@@ -2,4 +2,4 @@
 step = "Download"
 url = "http://localhost:19191/Code.exe"
 hash_blake3 = "2bf5959cad30e3ce2d7ad1879321845b6bcc4b04e86fb136463cdc8f39832f71"
-at = "Code.exe"
+to = "Code.exe"
