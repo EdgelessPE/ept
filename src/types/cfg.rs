@@ -1,14 +1,13 @@
 use std::{
     fs::{create_dir_all, write},
     path::{Path, PathBuf},
-    str::FromStr,
 };
 
 use anyhow::{anyhow, Result};
 use config::Config;
 use dirs::home_dir;
 use humantime::parse_duration;
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize};
 use toml::{to_string_pretty, Value};
 
 use crate::{log, p2s, types::verifiable::Verifiable};
@@ -28,21 +27,39 @@ pub struct Local {
 pub struct Online {
     pub mirror_update_interval: String,
 }
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum PreferenceEnum {
     HighPriority,
     LowPriority,
     Forbidden,
 }
 
-impl FromStr for PreferenceEnum {
-    type Err = anyhow::Error;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
+impl<'de> Deserialize<'de> for PreferenceEnum {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let s = String::deserialize(deserializer)?;
+        match s.as_str() {
             "high-priority" => Ok(PreferenceEnum::HighPriority),
             "low-priority" => Ok(PreferenceEnum::LowPriority),
             "forbidden" => Ok(PreferenceEnum::Forbidden),
-            _ => Err(anyhow!("Invalid priority : '{s}'")),
+            _ => Err(serde::de::Error::custom(format!(
+                "Invalid priority : '{s}'"
+            ))),
+        }
+    }
+}
+
+impl Serialize for PreferenceEnum {
+    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        match *self {
+            PreferenceEnum::HighPriority => serializer.serialize_str("high-priority"),
+            PreferenceEnum::LowPriority => serializer.serialize_str("low-priority"),
+            PreferenceEnum::Forbidden => serializer.serialize_str("forbidden"),
         }
     }
 }
