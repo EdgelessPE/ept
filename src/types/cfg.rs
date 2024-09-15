@@ -34,6 +34,16 @@ pub enum PreferenceEnum {
     Forbidden,
 }
 
+impl From<PreferenceEnum> for i32 {
+    fn from(val: PreferenceEnum) -> Self {
+        match val {
+            PreferenceEnum::Forbidden => -1024,
+            PreferenceEnum::HighPriority => 16,
+            PreferenceEnum::LowPriority => 2,
+        }
+    }
+}
+
 impl<'de> Deserialize<'de> for PreferenceEnum {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
@@ -70,6 +80,7 @@ pub struct Preference {
     pub portable: PreferenceEnum,
     pub expandable: PreferenceEnum,
 }
+
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct Cfg {
     pub local: Local,

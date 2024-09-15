@@ -1,6 +1,7 @@
 use anyhow::{anyhow, Result};
 use fs_extra::file::read_to_string;
 use semver::VersionReq;
+use std::cmp::Ordering;
 use std::path::PathBuf;
 use tantivy::collector::TopDocs;
 use tantivy::query::QueryParser;
@@ -24,6 +25,7 @@ use crate::{
     utils::get_path_mirror,
 };
 
+use super::cfg::get_flags_score;
 use super::download::fill_url_template;
 use super::fs::ensure_dir_exist;
 use super::fs::try_recycle;
@@ -184,7 +186,7 @@ pub fn filter_release(
         .clone()
         .map_or_else(|| "None".to_string(), |m| m.to_string());
     let mut req_str = "".to_string();
-    let mut arr = if let Some(matcher) = semver_matcher {
+    let arr = if let Some(matcher) = semver_matcher {
         req_str = matcher.to_string();
         let res_arr: Vec<MirrorPkgSoftwareRelease> = releases
             .iter()
@@ -195,14 +197,50 @@ pub fn filter_release(
     } else {
         releases.clone()
     };
-    arr.sort_by(|a, b| b.version.cmp(&a.version));
-    if let Some(f) = arr.first() {
+    // 计算各个 release 的 flags 得分
+    let mut arr_with_score: Vec<(MirrorPkgSoftwareRelease, i32)> = arr
+        .into_iter()
+        .map(|node| {
+            let score = node
+                .get_flags()
+                .map(|flags| {
+                    get_flags_score(&flags)
+                        .map_err(|e| {
+                            anyhow!(
+                                "Error:Failed to calculate flags score for '{}' : {e}",
+                                node.file_name
+                            )
+                        })
+                        .unwrap()
+                })
+                .unwrap_or_default();
+            (node, score)
+        })
+        .collect();
+    arr_with_score.sort_by(|(a, a_score), (b, b_score)| {
+        // 优先按照版本号排序
+        let ver_cmp_res = b.version.cmp(&a.version);
+        // 版本号一致时使用 flags 的分数排序
+        if ver_cmp_res == Ordering::Equal {
+            b_score.cmp(a_score)
+        } else {
+            ver_cmp_res
+        }
+    });
+    if let Some((f, score)) = arr_with_score.first() {
         log!(
-            "Debug:Matched version '{}' ('{}') with matcher '{matcher_str}'",
+            "Debug:Matched version '{}' ('{}', score:{score}) with matcher '{matcher_str}'",
             f.version.to_string(),
             f.file_name
         );
-        Ok(f.to_owned())
+        if *score >= 0 {
+            Ok(f.to_owned())
+        } else {
+            Err(anyhow!(
+                "Error:The latest release ('{}') is blocked due to configured preference policy, try change your preference in config",
+                f.file_name
+            ))
+        }
     } else {
         let versions: Vec<String> = releases
             .iter()
