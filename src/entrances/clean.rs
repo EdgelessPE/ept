@@ -9,7 +9,10 @@ use crate::{
     log, log_ok_last, p2s,
     parsers::parse_workflow,
     types::{steps::Step, workflow::WorkflowNode},
-    utils::{get_bare_apps, get_path_apps, get_path_bin, parse_bare_temp, term::ask_yn},
+    utils::{
+        get_bare_apps, get_path_apps, get_path_bin, get_path_cache, get_path_meta, parse_bare_temp,
+        term::ask_yn,
+    },
 };
 
 use super::info_local;
@@ -34,10 +37,12 @@ pub fn clean() -> Result<usize> {
     let mut clean_list = Vec::new();
     let mut valid_entrances = HashSet::new();
 
-    // temp 目录，直接删除
-    let temp_path = parse_bare_temp()?;
-    if temp_path.exists() {
-        clean_list.push(temp_path);
+    // 处理直接删除的目录
+    let dirs_to_clean = vec![parse_bare_temp()?, get_path_cache()?, get_path_meta()?];
+    for p in dirs_to_clean {
+        if p.exists() {
+            clean_list.push(p);
+        }
     }
 
     // apps 目录，查找未安装成功的目录
