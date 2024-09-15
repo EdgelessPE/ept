@@ -2,6 +2,7 @@ pub mod exe_version;
 #[macro_use]
 pub mod log;
 pub mod arch;
+pub mod cache;
 pub mod cfg;
 pub mod command;
 pub mod conditions;

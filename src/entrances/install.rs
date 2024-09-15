@@ -11,8 +11,9 @@ use super::{
 };
 use crate::{
     entrances::{expand_workshop, is_workshop_expandable},
+    signature::blake3::compute_hash_blake3_from_string,
     utils::{
-        download::download_nep, fs::move_or_copy, is_qa_mode,
+        cache::spawn_cache, download::download_nep, fs::move_or_copy, get_path_cache, is_qa_mode,
         path::parse_relative_path_with_located, term::ask_yn,
     },
 };
@@ -143,10 +144,17 @@ pub fn install_using_package(
 
 pub fn install_using_url(url: &str, verify_signature: bool) -> Result<(String, String)> {
     // 下载文件到临时目录
-    let p = download_nep(url)?;
+    let cache_path = get_path_cache()?;
+    let url_hash = compute_hash_blake3_from_string(url)?;
+    let (p, cache_ctx) = download_nep(url, Some((cache_path, url_hash)))?;
 
     // 安装
-    install_using_package(&p2s!(p), verify_signature)
+    let info = install_using_package(&p2s!(p), verify_signature)?;
+
+    // 缓存下载的包
+    spawn_cache(cache_ctx)?;
+
+    Ok(info)
 }
 
 pub fn _install_using_package_matcher(

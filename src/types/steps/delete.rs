@@ -47,7 +47,7 @@ fn delete(target: &String, force: bool) -> Result<()> {
                 Ok(())
             } else {
                 Err(anyhow!(
-                    "Error(Delete):Failed to force delete '{target}' : '{e}'"
+                    "Error(Delete):Failed to force delete '{target}' : {e}"
                 ))
             }
         } else {

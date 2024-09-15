@@ -11,7 +11,9 @@ use crate::{
         permissions::{Generalizable, Permission, PermissionKey, PermissionLevel},
         workflow::WorkflowContext,
     },
-    utils::{download::download, wild_match::contains_wild_match},
+    utils::{
+        cache::spawn_cache, download::download, get_path_cache, wild_match::contains_wild_match,
+    },
 };
 use anyhow::{anyhow, Ok, Result};
 use regex::Regex;
@@ -43,7 +45,13 @@ impl TStep for StepDownload {
         //- （仅能在拓展工作流中使用）从 URL 下载文件并使用提供的 BLAKE3 Hash 校验完整性。
         // 下载
         let p = Path::new(&cx.located).join(&self.at).to_path_buf();
-        download(&self.url, &p).map_err(|e| {
+        let cache_path = get_path_cache()?;
+        let cache_ctx = download(
+            &self.url,
+            p.clone(),
+            Some((cache_path, self.hash_blake3.clone())),
+        )
+        .map_err(|e| {
             anyhow!(
                 "Error(Download):Failed to download from '{}' to '{}': {e}",
                 self.url,
@@ -64,6 +72,10 @@ impl TStep for StepDownload {
                 self.hash_blake3
             ));
         }
+
+        // 缓存
+        spawn_cache(cache_ctx)
+            .map_err(|e| anyhow!("Error(Download)::Failed to cache downloaded file : {e}"))?;
 
         Ok(0)
     }

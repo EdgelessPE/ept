@@ -16,6 +16,7 @@ use crate::{p2s, types::verifiable::Verifiable};
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct Local {
     pub base: String,
+    pub enable_cache: bool,
 }
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct Online {
@@ -35,17 +36,21 @@ lazy_static! {
     static ref CFG: RwLock<Cfg> = RwLock::new(Cfg::init().unwrap());
 }
 
-impl Cfg {
-    pub fn default() -> Self {
+impl Default for Cfg {
+    fn default() -> Self {
         Self {
             local: Local {
                 base: p2s!(USER_DIR),
+                enable_cache: false,
             },
             online: Online {
                 mirror_update_interval: "1d".to_string(),
             },
         }
     }
+}
+
+impl Cfg {
     pub fn use_which() -> Result<PathBuf> {
         let from = if CUR_DIR.join(FILE_NAME).exists() {
             CUR_DIR.join(FILE_NAME)

@@ -10,11 +10,13 @@ use crate::{
     executor::workflow_executor,
     p2s,
     parsers::{parse_author, parse_workflow},
+    signature::blake3::compute_hash_blake3_from_string,
     types::{author::Author, extended_semver::ExSemVer},
     utils::{
+        cache::spawn_cache,
         download::download_nep,
         fs::move_or_copy,
-        get_path_apps,
+        get_path_apps, get_path_cache,
         parse_inputs::{parse_update_inputs, ParseInputResEnum},
         term::ask_yn,
     },
@@ -157,10 +159,17 @@ pub fn update_using_package(source_file: &String, verify_signature: bool) -> Res
 
 pub fn update_using_url(url: &str, verify_signature: bool) -> Result<UpdateInfo> {
     // 下载文件到临时目录
-    let p = download_nep(url)?;
+    let cache_path = get_path_cache()?;
+    let url_hash = compute_hash_blake3_from_string(url)?;
+    let (p, cache_ctx) = download_nep(url, Some((cache_path, url_hash)))?;
 
     // 更新
-    update_using_package(&p2s!(p), verify_signature)
+    let info = update_using_package(&p2s!(p), verify_signature)?;
+
+    // 缓存下载的包
+    spawn_cache(cache_ctx)?;
+
+    Ok(info)
 }
 
 pub fn update_using_package_matcher(matcher: String, verify_signature: bool) -> Result<UpdateInfo> {

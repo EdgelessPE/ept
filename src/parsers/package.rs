@@ -166,7 +166,7 @@ pub fn parse_package(
 
 fn is_nep_version_compatible(pkg_str: &String, ept_str: &String) -> Result<()> {
     let pkg_ver = semver::Version::parse(&(pkg_str.clone() + ".0"))
-        .map_err(|e| anyhow!("Error:Failed to parse nep package version '{pkg_str}' : '{e}'"))?;
+        .map_err(|e| anyhow!("Error:Failed to parse nep package version '{pkg_str}' : {e}"))?;
     let ept_ver = semver::Version::parse(ept_str)?;
 
     if pkg_ver.major != ept_ver.major || pkg_ver.minor != ept_ver.minor {

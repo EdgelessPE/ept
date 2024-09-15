@@ -2,15 +2,32 @@ use anyhow::{anyhow, Result};
 use indicatif::{ProgressBar, ProgressState, ProgressStyle};
 use reqwest::blocking::Client;
 use std::cmp::min;
-use std::fs::File;
+use std::fs::{copy, File};
 use std::io::{Read, Write};
 use std::path::PathBuf;
 
-use crate::p2s;
+use crate::utils::cache::CacheCtx;
+use crate::utils::cfg::get_config;
 
 use super::allocate_path_temp;
 
-pub fn download(url: &str, at: &PathBuf) -> Result<()> {
+// cached 接受参数为 (存放缓存的路径，缓存 key)
+// 函数返回的是缓存上下文，当文件被验证可用后可以使用这个上下文传递给 spawn_cache 函数进行缓存
+pub fn download(url: &str, at: PathBuf, cached: Option<(PathBuf, String)>) -> Result<CacheCtx> {
+    let cfg = get_config();
+    // 检查缓存
+    let enabled_cache = cfg.local.enable_cache && cached.is_some();
+    if enabled_cache {
+        if let Some((cache_path, cache_key)) = cached.clone() {
+            let cache_file_path = cache_path.join(&cache_key);
+            if cache_file_path.exists() {
+                copy(&cache_file_path,& at).map_err(|e: std::io::Error| {
+                    anyhow!("Error:Failed to restore cache from '{cache_file_path:?}' to '{at:?}' : {e}")
+                })?;
+            }
+        }
+    }
+
     let url = url.replace('+', "%2B");
     log!("Info:Start downloading '{url}'");
 
@@ -33,7 +50,7 @@ pub fn download(url: &str, at: &PathBuf) -> Result<()> {
     pb.set_length(content_length);
 
     // 创建文件以写入数据
-    let mut file = File::create(at)?;
+    let mut file = File::create(&at)?;
 
     let mut buf = vec![0; 1024];
     let mut downloaded = 0;
@@ -52,18 +69,19 @@ pub fn download(url: &str, at: &PathBuf) -> Result<()> {
     }
     // 下载完成，清除进度条
     pb.finish_and_clear();
-    log!("Info:Downloaded file stored at '{at}'", at = p2s!(at));
+    log!("Info:Downloaded file stored at '{at:?}'");
 
-    Ok(())
+    Ok(CacheCtx(enabled_cache, at, cached))
 }
 
-pub fn download_nep(url: &str) -> Result<PathBuf> {
+// 返回 （文件存放路径，缓存上下文）
+pub fn download_nep(url: &str, cached: Option<(PathBuf, String)>) -> Result<(PathBuf, CacheCtx)> {
     // 下载文件到临时目录
     let temp_dir = allocate_path_temp(&"download".to_string(), false)?;
     let p = temp_dir.join("downloaded.nep");
-    download(url, &p)?;
+    let cache_ctx = download(url, p.clone(), cached)?;
 
-    Ok(p)
+    Ok((p, cache_ctx))
 }
 
 pub fn fill_url_template(
@@ -109,6 +127,6 @@ pub fn fill_url_template(
 #[test]
 fn test_download_nep() {
     let url = crate::utils::test::_run_mirror_mock_server();
-    let path = download_nep(&format!("{url}/api/hello")).unwrap();
+    let (path, _cache_ctx) = download_nep(&format!("{url}/api/hello"), None).unwrap();
     assert!(path.exists() && path.metadata().unwrap().len() > 300);
 }
