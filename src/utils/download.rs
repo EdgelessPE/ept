@@ -24,6 +24,8 @@ pub fn download(url: &str, at: PathBuf, cached: Option<(PathBuf, String)>) -> Re
                 copy(&cache_file_path,& at).map_err(|e: std::io::Error| {
                     anyhow!("Error:Failed to restore cache from '{cache_file_path:?}' to '{at:?}' : {e}")
                 })?;
+                log!("Info:Restored cache form '{cache_file_path:?}' to '{at:?}'");
+                return Ok(CacheCtx(false, at, None));
             }
         }
     }
