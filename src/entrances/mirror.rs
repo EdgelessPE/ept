@@ -73,7 +73,7 @@ pub fn mirror_add(url: &String, should_match_name: Option<String>) -> Result<Str
     // 更新索引并写 pkg-software.toml
     let p = get_path_mirror()?.join(&mirror_name);
     build_index_for_mirror(pkg_software_res.clone(), p.join("index"))?;
-    let value = Value::try_from(pkg_software_res.clone())?;
+    let value = Value::try_from(pkg_software_res)?;
     let text = to_string_pretty(&value)?;
     write(p.join("pkg-software.toml"), text)?;
 

@@ -213,7 +213,6 @@ pub struct MirrorPkgSoftwareRelease {
     pub size: u64,
     pub timestamp: u64,
     pub integrity: Option<String>,
-    // meta 和 permissions 在这里被省略
 }
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct SearchResult {
