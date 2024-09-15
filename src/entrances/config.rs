@@ -1,6 +1,7 @@
 use crate::{
     p2s,
-    utils::cfg::{get_config, set_config, Cfg},
+    types::cfg::Cfg,
+    utils::cfg::{get_config, set_config},
 };
 use anyhow::{anyhow, Error, Result};
 use toml::Value;

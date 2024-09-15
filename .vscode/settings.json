@@ -20,6 +20,7 @@
         "Freqs",
         "hkcu",
         "HKEY",
+        "humantime",
         "HWND",
         "indicatif",
         "Inflector",

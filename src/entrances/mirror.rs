@@ -8,7 +8,7 @@ use std::{
 use toml::{to_string_pretty, Value};
 use url::Url;
 
-use crate::utils::cfg::Cfg;
+use crate::types::cfg::Cfg;
 use crate::{
     log, log_ok_last,
     types::{
