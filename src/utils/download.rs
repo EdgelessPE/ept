@@ -16,7 +16,8 @@ use super::allocate_path_temp;
 pub fn download(url: &str, at: PathBuf, cached: Option<(PathBuf, String)>) -> Result<CacheCtx> {
     let cfg = get_config();
     // 检查缓存
-    let enabled_cache = cfg.local.enable_cache && cached.is_some();
+    let enabled_cache =
+        (envmnt::get_or("CACHE", "false") == "true" || cfg.local.enable_cache) && cached.is_some();
     if enabled_cache {
         if let Some((cache_path, cache_key)) = cached.clone() {
             let cache_file_path = cache_path.join(&cache_key);
@@ -117,14 +118,42 @@ pub fn fill_url_template(
     Ok(res)
 }
 
-// #[test]
-// fn test_download() {
-//     download(
-//         &"http:/localhost:3000/api/redirect?path=/Socket/Edgeless_Beta_4.1.0.iso".to_string(),
-//         &"down_test.iso".to_string(),
-//     )
-//     .unwrap();
-// }
+#[test]
+fn test_download() {
+    envmnt::set("CACHE", "true");
+    // 删除下载缓存
+    let cache_dir = crate::utils::get_path_cache().unwrap();
+    if cache_dir.exists() {
+        std::fs::remove_dir_all(&cache_dir).unwrap();
+    }
+
+    // 启动服务器提供静态文件
+    crate::utils::test::_ensure_clear_test_dir();
+    std::fs::copy("examples/VSCode/VSCode/Code.exe", "test/source.exe").unwrap();
+    let (url_base, mut handler) = crate::utils::test::_run_static_file_server();
+    let url = format!("{url_base}/source.exe");
+    let at = std::path::Path::new("test/bin.exe");
+    let hash = crate::signature::blake3::compute_hash_blake3_from_string(&url).unwrap();
+    let cache_file_path = cache_dir.join(&hash);
+
+    // 首次下载
+    let cached = Some((cache_dir.clone(), hash.clone()));
+    let cache_ctx = download(&url, at.to_path_buf(), cached.clone()).unwrap();
+
+    // 断言下载成功
+    assert!(at.exists());
+    assert!(!cache_file_path.exists());
+
+    // 缓存
+    crate::utils::cache::spawn_cache(cache_ctx).unwrap();
+    assert!(cache_file_path.exists());
+
+    // 关闭服务器后仍能正常下载
+    handler.kill().unwrap();
+    std::fs::remove_file(at).unwrap();
+    download(&url, at.to_path_buf(), cached).unwrap();
+    assert!(at.exists());
+}
 
 #[test]
 fn test_download_nep() {

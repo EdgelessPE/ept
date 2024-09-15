@@ -25,7 +25,6 @@ pub struct Args {
     /// Run commands in debug mode
     #[arg(short, long)]
     pub debug: bool,
-    // TODO:支持日志写入文件，并检查 println!
 }
 
 #[derive(Subcommand, Debug)]
