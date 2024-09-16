@@ -104,7 +104,7 @@ pub fn info(scope: Option<String>, package_name: &String) -> Result<Info> {
 
     // 在线检查
     if let Ok((item, _)) = info_online(&scope, &package_name, None) {
-        let latest = filter_release(item.releases, None)?;
+        let latest = filter_release(item.releases, None, false)?;
         info.online = Some(InfoDiff {
             version: latest.version.to_string(),
             authors: Vec::new(),

@@ -151,7 +151,7 @@ pub fn parse_update_inputs(packages: Vec<String>) -> Result<Vec<ParseInputResEnu
                 let (online_item, _url_template) =
                     info_online(&scope, &package_name, matcher.mirror.clone())?;
                 let selected_release =
-                    filter_release(online_item.releases, matcher.version_req.clone())?;
+                    filter_release(online_item.releases, matcher.version_req.clone(), true)?;
                 if selected_release.version <= ExSemVer::parse(&local_diff.version)? {
                     return Err(anyhow!("Error:Package '{name}' has been up to date ({local_version}), can't update to the version of given package ({fresh_version})",name=package_name,local_version=&local_diff.version,fresh_version=&selected_release.version));
                 }

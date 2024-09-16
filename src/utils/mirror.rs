@@ -112,7 +112,7 @@ pub fn build_index_for_mirror(content: MirrorPkgSoftware, dir: PathBuf) -> Resul
         for item in node {
             // 筛选出最高版本号
             let releases = item.releases.to_owned();
-            let latest = filter_release(releases, None)?.version.to_string();
+            let latest = filter_release(releases, None, false)?.version.to_string();
             index_writer.add_document(doc!(
               name => item.name.as_str(),
               scope => scope_str.as_str(),
@@ -180,6 +180,7 @@ pub fn search_index_for_mirror(
 pub fn filter_release(
     releases: Vec<MirrorPkgSoftwareRelease>,
     semver_matcher: Option<VersionReq>,
+    enable_flags_score: bool,
 ) -> Result<MirrorPkgSoftwareRelease> {
     // 筛选 matcher
     let matcher_str = semver_matcher
@@ -201,19 +202,22 @@ pub fn filter_release(
     let mut arr_with_score: Vec<(MirrorPkgSoftwareRelease, i32)> = arr
         .into_iter()
         .map(|node| {
-            let score = node
-                .get_flags()
-                .map(|flags| {
-                    get_flags_score(&flags)
-                        .map_err(|e| {
-                            anyhow!(
-                                "Error:Failed to calculate flags score for '{}' : {e}",
-                                node.file_name
-                            )
-                        })
-                        .unwrap()
-                })
-                .unwrap_or_default();
+            let score = if enable_flags_score {
+                node.get_flags()
+                    .map(|flags| {
+                        get_flags_score(&flags)
+                            .map_err(|e| {
+                                anyhow!(
+                                    "Error:Failed to calculate flags score for '{}' : {e}",
+                                    node.file_name
+                                )
+                            })
+                            .unwrap()
+                    })
+                    .unwrap_or_default()
+            } else {
+                0
+            };
             (node, score)
         })
         .collect();
@@ -262,7 +266,7 @@ pub fn get_url_with_version_req(
     // 拿到 info online
     let (info, url_template) = info_online(&scope, &package_name, matcher.mirror)?;
     // 匹配版本
-    let matched_release = filter_release(info.releases, matcher.version_req)?;
+    let matched_release = filter_release(info.releases, matcher.version_req, true)?;
     // 填充模板获取 url
     let url = fill_url_template(
         &url_template,
@@ -299,7 +303,7 @@ fn test_filter_release() {
             integrity: None,
         },
     ];
-    let res = filter_release(arr, None).unwrap();
+    let res = filter_release(arr, None, false).unwrap();
     assert_eq!(res.version.to_string(), "1.86.1.0".to_string());
 
     let arr = vec![
@@ -325,7 +329,7 @@ fn test_filter_release() {
             integrity: None,
         },
     ];
-    let res = filter_release(arr, Some(VersionReq::parse("121").unwrap())).unwrap();
+    let res = filter_release(arr, Some(VersionReq::parse("121").unwrap()), false).unwrap();
     assert_eq!(res.version.to_string(), "121.0.6099.200".to_string());
 }
 
