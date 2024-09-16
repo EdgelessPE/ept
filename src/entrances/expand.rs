@@ -34,7 +34,7 @@ pub fn expand_workshop(workshop_path: &String) -> Result<()> {
         expand_workflow,
         p2s!(base.join(&package_struct.package.name)),
         package_struct,
-    )?;
+    ).map_err(|e|anyhow!("Error:Failed to execute expand workflow : '{e}'. If this error persists, consider changing 'preference.expandable' to 'low-priority' in config"))?;
 
     // 删掉展开工作流
     try_recycle(expand_workflow_path)?;

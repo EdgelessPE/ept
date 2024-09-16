@@ -55,7 +55,7 @@ impl<'de> Deserialize<'de> for PreferenceEnum {
             "low-priority" => Ok(PreferenceEnum::LowPriority),
             "forbidden" => Ok(PreferenceEnum::Forbidden),
             _ => Err(serde::de::Error::custom(format!(
-                "Invalid priority : '{s}'"
+                "Invalid priority : '{s}', expect 'high-priority', 'low-priority' or 'forbidden'"
             ))),
         }
     }

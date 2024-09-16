@@ -411,6 +411,14 @@ fn test_filter_release_with_flags() {
         "Firefox_127.0.0.1_Cno.P.nep".to_string()
     );
 
+    // 全部禁用，会报错
+    modifier(
+        PreferenceEnum::Forbidden,
+        PreferenceEnum::Forbidden,
+        PreferenceEnum::Forbidden,
+    );
+    assert!(filter_release(releases.clone(), None, true).is_err());
+
     // 恢复原有配置
     set_config(cfg_bak).unwrap();
 }
