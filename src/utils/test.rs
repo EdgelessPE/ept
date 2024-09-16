@@ -126,6 +126,37 @@ pub fn _run_mirror_mock_server() -> String {
                     }
                 ]
             }
+        ],
+        "PortableApps":[
+            {
+                "name":"Firefox",
+                "releases":[
+                    {
+                        "file_name":"Firefox_127.0.0.1_Cno.I.nep",
+                        "version":"127.0.0.1",
+                        "size": 94245376,
+                        "timestamp": 1704554724
+                    },
+                    {
+                        "file_name":"Firefox_127.0.0.1_Cno.IE.nep",
+                        "version":"127.0.0.1",
+                        "size": 94245376,
+                        "timestamp": 1704554724
+                    },
+                    {
+                        "file_name":"Firefox_127.0.0.1_Cno.P.nep",
+                        "version":"127.0.0.1",
+                        "size": 94245376,
+                        "timestamp": 1704554724
+                    },
+                    {
+                        "file_name":"Firefox_127.0.0.1_Cno.PE.nep",
+                        "version":"127.0.0.1",
+                        "size": 94245376,
+                        "timestamp": 1704554724
+                    },
+                ]
+            }
         ]
     },
     "timestamp": 1704554724,

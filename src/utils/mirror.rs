@@ -25,6 +25,7 @@ use crate::{
     utils::get_path_mirror,
 };
 
+use super::cfg::get_config;
 use super::cfg::get_flags_score;
 use super::download::fill_url_template;
 use super::fs::ensure_dir_exist;
@@ -182,6 +183,7 @@ pub fn filter_release(
     semver_matcher: Option<VersionReq>,
     enable_flags_score: bool,
 ) -> Result<MirrorPkgSoftwareRelease> {
+    let cfg = get_config();
     // 筛选 matcher
     let matcher_str = semver_matcher
         .clone()
@@ -205,7 +207,7 @@ pub fn filter_release(
             let score = if enable_flags_score {
                 node.get_flags()
                     .map(|flags| {
-                        get_flags_score(&flags)
+                        get_flags_score(&flags, &cfg)
                             .map_err(|e| {
                                 anyhow!(
                                     "Error:Failed to calculate flags score for '{}' : {e}",
@@ -280,6 +282,7 @@ pub fn get_url_with_version_req(
 #[test]
 fn test_filter_release() {
     use crate::types::extended_semver::ExSemVer;
+    // 直接筛选最高版本
     let arr = vec![
         MirrorPkgSoftwareRelease {
             file_name: "VSCode_1.85.1.0_Cno.nep".to_string(),
@@ -306,6 +309,7 @@ fn test_filter_release() {
     let res = filter_release(arr, None, false).unwrap();
     assert_eq!(res.version.to_string(), "1.86.1.0".to_string());
 
+    // 使用 matcher
     let arr = vec![
         MirrorPkgSoftwareRelease {
             file_name: "Chrome_120.0.6099.200_Cno.nep".to_string(),
@@ -331,6 +335,84 @@ fn test_filter_release() {
     ];
     let res = filter_release(arr, Some(VersionReq::parse("121").unwrap()), false).unwrap();
     assert_eq!(res.version.to_string(), "121.0.6099.200".to_string());
+}
+
+#[test]
+fn test_filter_release_with_flags() {
+    envmnt::set("DEBUG", "true");
+    use crate::types::cfg::PreferenceEnum;
+    use crate::types::extended_semver::ExSemVer;
+    use crate::utils::cfg::set_config;
+    use std::str::FromStr;
+    let cfg_bak = get_config();
+
+    let releases = vec![
+        MirrorPkgSoftwareRelease {
+            file_name: "Firefox_127.0.0.1_Cno.I.nep".to_string(),
+            version: ExSemVer::from_str("127.0.0.1").unwrap(),
+            size: 94245376,
+            timestamp: 1704554724,
+            integrity: None,
+        },
+        MirrorPkgSoftwareRelease {
+            file_name: "Firefox_127.0.0.1_Cno.IE.nep".to_string(),
+            version: ExSemVer::from_str("127.0.0.1").unwrap(),
+            size: 94245376,
+            timestamp: 1704554724,
+            integrity: None,
+        },
+        MirrorPkgSoftwareRelease {
+            file_name: "Firefox_127.0.0.1_Cno.P.nep".to_string(),
+            version: ExSemVer::from_str("127.0.0.1").unwrap(),
+            size: 94245376,
+            timestamp: 1704554724,
+            integrity: None,
+        },
+        MirrorPkgSoftwareRelease {
+            file_name: "Firefox_127.0.0.1_Cno.PE.nep".to_string(),
+            version: ExSemVer::from_str("127.0.0.1").unwrap(),
+            size: 94245376,
+            timestamp: 1704554724,
+            integrity: None,
+        },
+    ];
+
+    let modifier = |i: PreferenceEnum, p: PreferenceEnum, e: PreferenceEnum| {
+        let mut cfg = cfg_bak.clone();
+        cfg.preference.installer = i;
+        cfg.preference.portable = p;
+        cfg.preference.expandable = e;
+        set_config(cfg).unwrap();
+    };
+
+    // 默认优先级配置，会匹配到 PE 版本
+    modifier(
+        PreferenceEnum::LowPriority,
+        PreferenceEnum::HighPriority,
+        PreferenceEnum::HighPriority,
+    );
+    assert_eq!(
+        filter_release(releases.clone(), None, true)
+            .unwrap()
+            .file_name,
+        "Firefox_127.0.0.1_Cno.PE.nep".to_string()
+    );
+
+    // 便携且不要可拓展模式，匹配到 P 版本
+    modifier(
+        PreferenceEnum::Forbidden,
+        PreferenceEnum::HighPriority,
+        PreferenceEnum::Forbidden,
+    );
+    assert_eq!(
+        filter_release(releases.clone(), None, true)
+            .unwrap()
+            .file_name,
+        "Firefox_127.0.0.1_Cno.P.nep".to_string()
+    );
+
+    // 恢复原有配置
+    set_config(cfg_bak).unwrap();
 }
 
 // #[test]

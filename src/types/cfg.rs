@@ -156,14 +156,11 @@ impl Cfg {
 
         Ok(cfg)
     }
-    pub fn overwrite(&mut self, other: Self) -> Result<()> {
+    pub fn overwrite(other: Self) -> Result<()> {
         // 校验
         other
             .verify_self(&"".to_string())
             .map_err(|e| anyhow!("Error:Invalid overwrite config : {e}"))?;
-
-        // 赋值
-        self.local = other.local.clone();
 
         let from = Self::use_which()?;
         let value = Value::try_from(other)?;
