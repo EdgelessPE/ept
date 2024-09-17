@@ -37,7 +37,7 @@
     "prettier": "^3.3.3",
     "simple-git-hooks": "^2.11.1",
     "ts-results": "^3.3.0",
-    "tsx": "^4.19.0",
+    "tsx": "^4.19.1",
     "typescript-eslint": "^8.5.0"
   },
   "simple-git-hooks": {
