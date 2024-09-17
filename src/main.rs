@@ -318,14 +318,14 @@ fn main() {
 
     // 使用路由器匹配入口
     let res = router(args.action);
-    if res.is_ok() {
-        let msg = res.unwrap();
+    if let Ok(msg) = res {
         if !msg.is_empty() {
             log!("{msg}");
         }
         exit(0);
-    } else {
-        log!("{msg}", msg = res.unwrap_err());
+    }
+    if let Err(msg) = res {
+        log!("{msg}");
         exit(1);
     }
 }
