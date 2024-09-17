@@ -114,7 +114,7 @@ impl<'de> Deserialize<'de> for ServiceKeys {
 impl Verifiable for MirrorHello {
     fn verify_self(&self, _located: &String) -> Result<()> {
         // 必须有 hello 服务
-        let _hello_res = filter_service_from_meta(self.clone(), ServiceKeys::Hello)?;
+        let _hello_res = filter_service_from_meta(self, ServiceKeys::Hello)?;
 
         Ok(())
     }
@@ -293,4 +293,24 @@ fn test_get_flags() {
         integrity: None,
     };
     assert_eq!(r.get_flags(), None);
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct MirrorEptToolchain {
+    pub update: MirrorEptToolchainUpdate,
+    pub releases: Vec<MirrorEptToolchainRelease>,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct MirrorEptToolchainUpdate {
+    pub wild_gaps: Vec<String>,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct MirrorEptToolchainRelease {
+    pub name: String,
+    pub version: String,
+    pub url: String,
+    pub size: i64,
+    pub timestamp: i64,
 }

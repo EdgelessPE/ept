@@ -8,7 +8,6 @@ use std::{
 use toml::{to_string_pretty, Value};
 use url::Url;
 
-use crate::types::cfg::Cfg;
 use crate::{
     log, log_ok_last,
     types::{
@@ -16,10 +15,15 @@ use crate::{
         verifiable::Verifiable,
     },
     utils::{
+        constants::{MIRROR_FILE_EPT_TOOLCHAIN, MIRROR_FILE_PKG_SOFTWARE},
         fs::{ensure_dir_exist, read_sub_dir, try_recycle},
         get_path_mirror,
         mirror::{build_index_for_mirror, filter_service_from_meta, read_local_mirror_hello},
     },
+};
+use crate::{
+    types::{cfg::Cfg, mirror::MirrorEptToolchain},
+    utils::constants::MIRROR_FILE_HELLO,
 };
 
 // 返回远程镜像源申明的名称
@@ -56,7 +60,7 @@ pub fn mirror_add(url: &String, should_match_name: Option<String>) -> Result<Str
     res.verify_self(&"".to_string())?;
 
     // 请求软件包列表
-    let (ps_url, _) = filter_service_from_meta(res.clone(), ServiceKeys::PkgSoftware)?;
+    let (ps_url, _) = filter_service_from_meta(&res, ServiceKeys::PkgSoftware)?;
     log!("Debug:Fetching software list from '{ps_url}'...");
     let pkg_software_res: MirrorPkgSoftware = get(&ps_url)
         .map_err(|e| anyhow!("Error:Failed to fetch '{ps_url}' : {e}"))?
@@ -75,13 +79,29 @@ pub fn mirror_add(url: &String, should_match_name: Option<String>) -> Result<Str
     build_index_for_mirror(pkg_software_res.clone(), p.join("index"))?;
     let value = Value::try_from(pkg_software_res)?;
     let text = to_string_pretty(&value)?;
-    write(p.join("pkg-software.toml"), text)?;
+    write(p.join(MIRROR_FILE_PKG_SOFTWARE), text)?;
+
+    // 请求工具链服务
+    if let Ok((ps_url, _)) = filter_service_from_meta(&res, ServiceKeys::EptToolchain) {
+        log!("Debug:Fetching ept toolchain data from '{ps_url}'...");
+        let res: MirrorEptToolchain = get(&ps_url)
+            .map_err(|e| anyhow!("Error:Failed to fetch '{ps_url}' : {e}"))?
+            .json()
+            .map_err(|e| {
+                anyhow!(
+                    "Error:Failed to decode response as valid ept toolchain data from '{ps_url}' : {e}"
+                )
+            })?;
+        let value = Value::try_from(res)?;
+        let text = to_string_pretty(&value)?;
+        write(p.join(MIRROR_FILE_EPT_TOOLCHAIN), text)?;
+    }
 
     // [defer] 写 hello.toml
     ensure_dir_exist(&p)?;
     let value = Value::try_from(res)?;
     let text = to_string_pretty(&value)?;
-    write(p.join("hello.toml"), text)?;
+    write(p.join(MIRROR_FILE_HELLO), text)?;
 
     Ok(mirror_name)
 }
@@ -90,7 +110,7 @@ pub fn mirror_update(name: &String) -> Result<String> {
     // 读取 meta 文件
     let (meta, _) = read_local_mirror_hello(name)?;
     // 筛选出 hello 服务
-    let (hello_path, _) = filter_service_from_meta(meta, ServiceKeys::Hello)?;
+    let (hello_path, _) = filter_service_from_meta(&meta, ServiceKeys::Hello)?;
     // 调用 add
     mirror_add(&hello_path, Some(name.to_string()))
 }
@@ -99,7 +119,7 @@ pub fn mirror_list() -> Result<Vec<(String, SystemTime)>> {
     let p = get_path_mirror()?;
     let mut res = Vec::new();
     for name in read_sub_dir(&p)? {
-        let file_path = p.join(&name).join("hello.toml");
+        let file_path = p.join(&name).join(MIRROR_FILE_HELLO);
         let time = metadata(file_path)?.modified()?;
 
         res.push((name, time));

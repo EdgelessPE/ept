@@ -27,6 +27,8 @@ use crate::{
 
 use super::cfg::get_config;
 use super::cfg::get_flags_score;
+use super::constants::MIRROR_FILE_HELLO;
+use super::constants::MIRROR_FILE_PKG_SOFTWARE;
 use super::download::fill_url_template;
 use super::fs::ensure_dir_exist;
 use super::fs::try_recycle;
@@ -35,7 +37,7 @@ use super::path::find_scope_with_name;
 // 读取 meta
 pub fn read_local_mirror_hello(name: &String) -> Result<(MirrorHello, PathBuf)> {
     let dir_path = get_path_mirror()?.join(name);
-    let p = dir_path.join("hello.toml");
+    let p = dir_path.join(MIRROR_FILE_HELLO);
     if !p.exists() {
         return Err(anyhow!("Error:Mirror '{name}' hasn't been added"));
     }
@@ -48,7 +50,7 @@ pub fn read_local_mirror_hello(name: &String) -> Result<(MirrorHello, PathBuf)> 
 
 // 读取 pkg-software
 pub fn read_local_mirror_pkg_software(name: &String) -> Result<MirrorPkgSoftware> {
-    let p = get_path_mirror()?.join(name).join("pkg-software.toml");
+    let p = get_path_mirror()?.join(name).join(MIRROR_FILE_PKG_SOFTWARE);
     if !p.exists() {
         return Err(anyhow!("Error:Mirror '{name}' hasn't been added"));
     }
@@ -63,7 +65,10 @@ pub fn read_local_mirror_pkg_software(name: &String) -> Result<MirrorPkgSoftware
 }
 
 // 从 meta 中筛选出服务，返回的第一个参数是拼接了 root_url 后的路径
-pub fn filter_service_from_meta(hello: MirrorHello, key: ServiceKeys) -> Result<(String, Service)> {
+pub fn filter_service_from_meta(
+    hello: &MirrorHello,
+    key: ServiceKeys,
+) -> Result<(String, Service)> {
     let res = hello.service.iter().find(|s| s.key == key);
     if let Some(r) = res {
         Ok((format!("{r}{p}", r = hello.root_url, p = r.path), r.clone()))

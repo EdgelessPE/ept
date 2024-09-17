@@ -6,6 +6,7 @@ pub mod cache;
 pub mod cfg;
 pub mod command;
 pub mod conditions;
+pub mod constants;
 pub mod download;
 pub mod env;
 pub mod fmt_print;
