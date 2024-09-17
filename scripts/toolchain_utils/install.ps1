@@ -35,7 +35,7 @@ $tempDir = Join-Path -Path $baseDir -ChildPath "temp/_script_"
 $zipPath = Join-Path -Path $tempDir -ChildPath "latest.zip"
 
 # toolchain download address
-$zipUrl = "https://registry.edgeless.top/obj/latest.zip"
+$zipUrl = "https://registry.edgeless.top/api/ept/latest"
 
 # check if toolchain dir exists
 if (Test-Path -Path $toolchainsDir) {
