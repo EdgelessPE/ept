@@ -16,7 +16,7 @@ use crate::{
 use anyhow::{anyhow, Ok, Result};
 use zip::ZipArchive;
 
-pub fn upgrade() -> Result<String> {
+pub fn upgrade(need_exit_process: bool) -> Result<String> {
     // 读取工具链信息
     let toolchain_data = read_local_mirror_ept_toolchain()?;
     let current_version = env!("CARGO_PKG_VERSION");
@@ -87,6 +87,11 @@ pub fn upgrade() -> Result<String> {
         .map_err(|e| anyhow!("Error:Failed to execute command : {e}"))?;
 
     // 立即退出当前进程
-    log!("Info:Waiting for external script to finish upgrading, current process exiting...");
-    process::exit(0);
+    let tip = "Info:Waiting for external script to finish upgrading, current process exiting...";
+    if need_exit_process {
+        log!("{tip}");
+        process::exit(0);
+    } else {
+        Ok(tip.to_string())
+    }
 }
