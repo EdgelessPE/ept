@@ -43,7 +43,6 @@ pub fn install_using_package(
     let setup_workflow = parse_workflow(&p2s!(setup_file_path))?;
     let package = package_struct.package.clone();
     let software = package_struct.software.clone().unwrap();
-    log_ok_last!("Info:Resolving package...");
 
     // 使用绝对路径的 main_program 字段，检查是否已经全局安装过该软件
     if let Some(installed) = &software.main_program {
@@ -62,7 +61,6 @@ pub fn install_using_package(
         }
     }
 
-    log!("Info:Deploying files...");
     // 检查对应包名有没有被安装过
     if let Ok((_, diff)) = info_local(&software.scope, &package.name) {
         log!(
@@ -73,6 +71,7 @@ pub fn install_using_package(
         let res = update_using_package(source_file, verify_signature)?;
         return Ok((res.scope, res.name));
     }
+    log_ok_last!("Info:Resolving package...");
 
     // 执行展开工作流
     let temp_dir_inner = p2s!(temp_dir_inner_path);
@@ -81,6 +80,7 @@ pub fn install_using_package(
     }
 
     // 解析最终安装位置
+    log!("Info:Deploying files...");
     let into_dir = get_path_apps(&software.scope, &package.name, true)?;
     if into_dir.exists() {
         remove_dir_all(into_dir.clone()).map_err(|_| {
