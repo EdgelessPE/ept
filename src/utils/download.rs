@@ -80,7 +80,7 @@ pub fn download(url: &str, to: PathBuf, cached: Option<(PathBuf, String)>) -> Re
 // 返回 （文件存放路径，缓存上下文）
 pub fn download_nep(url: &str, cached: Option<(PathBuf, String)>) -> Result<(PathBuf, CacheCtx)> {
     // 下载文件到临时目录
-    let temp_dir = allocate_path_temp(&"download".to_string(), false)?;
+    let temp_dir = allocate_path_temp("download", false)?;
     let p = temp_dir.join("downloaded.nep");
     let cache_ctx = download(url, p.clone(), cached)?;
 

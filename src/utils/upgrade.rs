@@ -1,10 +1,13 @@
 use std::str::FromStr;
 
-use crate::types::mirror::{MirrorEptToolchain, MirrorEptToolchainRelease};
+use crate::{
+    p2s,
+    types::mirror::{MirrorEptToolchain, MirrorEptToolchainRelease},
+};
 use anyhow::{anyhow, Result};
 use fs_extra::file::read_to_string;
 use semver::Version;
-use serde_json::from_str;
+use toml::from_str;
 
 use super::{constants::MIRROR_FILE_EPT_TOOLCHAIN, fs::read_sub_dir, get_path_mirror};
 
@@ -20,8 +23,12 @@ pub fn read_local_mirror_ept_toolchain() -> Result<MirrorEptToolchain> {
             continue;
         }
         let text = read_to_string(&p)?;
-        let res: MirrorEptToolchain = from_str(&text)
-            .map_err(|e| anyhow!("Error:Invalid ept toolchain content at '{p:?}' : {e}"))?;
+        let res: MirrorEptToolchain = from_str(&text).map_err(|e| {
+            anyhow!(
+                "Error:Invalid ept toolchain content at '{p}' : {e}",
+                p = p2s!(p)
+            )
+        })?;
         return Ok(res);
     }
     Err(anyhow!(
