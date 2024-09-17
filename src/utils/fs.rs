@@ -101,6 +101,7 @@ pub fn move_or_copy<P: AsRef<Path>>(from: P, to: P) -> Result<()> {
     let from_str = p2s!(from);
     let to_str = p2s!(to);
 
+    log!("Debug:Try moving '{from_str}' to '{to_str}'");
     if let Err(e) = rename(from, to) {
         log!("Warning:Failed to move '{from_str}' to '{to_str}', trying to copy : {e}");
 

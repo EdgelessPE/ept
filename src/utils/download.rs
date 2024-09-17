@@ -73,7 +73,7 @@ pub fn download(url: &str, to: PathBuf, cached: Option<(PathBuf, String)>) -> Re
     // 下载完成，清除进度条
     pb.finish_and_clear();
     log!("Info:Downloaded file stored at '{to:?}'");
-
+    file.flush()?;
     Ok(CacheCtx(enabled_cache, to, cached))
 }
 
