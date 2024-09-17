@@ -19,6 +19,7 @@ pub mod random;
 pub mod reg_entry;
 pub mod term;
 pub mod test;
+pub mod upgrade;
 pub mod wild_match;
 
 use anyhow::{anyhow, Result};
@@ -90,7 +91,7 @@ pub fn parse_bare_temp() -> Result<PathBuf> {
     parse_relative_path_with_base("temp")
 }
 
-pub fn allocate_path_temp(name: &String, sub_dir: bool) -> Result<PathBuf> {
+pub fn allocate_path_temp(name: &str, sub_dir: bool) -> Result<PathBuf> {
     let random_name = name.to_owned() + "_" + &random_short_string();
     let p = parse_relative_path_with_base("temp")?.join(random_name);
     if sub_dir {
@@ -114,6 +115,10 @@ pub fn get_path_cache() -> Result<PathBuf> {
 
 pub fn get_path_meta() -> Result<PathBuf> {
     ensure_exist(parse_relative_path_with_base("meta")?)
+}
+
+pub fn get_path_toolchain() -> Result<PathBuf> {
+    ensure_exist(parse_relative_path_with_base("toolchain")?)
 }
 
 pub fn get_system_drive() -> Result<String> {

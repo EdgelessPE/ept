@@ -10,6 +10,7 @@ mod pack;
 mod search;
 mod uninstall;
 mod update;
+mod upgrade;
 mod utils;
 mod verify;
 
