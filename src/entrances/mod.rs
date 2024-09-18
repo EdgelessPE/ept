@@ -28,3 +28,4 @@ pub use self::pack::pack;
 pub use self::search::search;
 pub use self::uninstall::uninstall;
 pub use self::update::{update_all, update_using_package, update_using_parsed};
+pub use self::upgrade::upgrade;

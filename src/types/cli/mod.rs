@@ -97,6 +97,13 @@ pub enum Action {
         operation: ActionMirror,
     },
 
+    /// Upgrade ept toolchain
+    Upgrade {
+        /// Check for upgrade without performing the update process
+        #[arg(short, long)]
+        check: bool,
+    },
+
     /// Clean temporary or illegal files
     Clean,
 }

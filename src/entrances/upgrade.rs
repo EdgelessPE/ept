@@ -16,7 +16,9 @@ use crate::{
 use anyhow::{anyhow, Ok, Result};
 use zip::ZipArchive;
 
-pub fn upgrade(need_exit_process: bool) -> Result<String> {
+// dry_run: 干运行，仅检查是否有更新
+// need_exit_process: 仅当单测时传入 false，以此防止跑单测时进程退出
+pub fn upgrade(dry_run: bool, need_exit_process: bool) -> Result<String> {
     // 读取工具链信息
     let toolchain_data = read_local_mirror_ept_toolchain()?;
     let current_version = env!("CARGO_PKG_VERSION");
@@ -24,10 +26,15 @@ pub fn upgrade(need_exit_process: bool) -> Result<String> {
     // 检查是否有更新
     let (has_upgrade, is_cross_wid_gap, latest_release) =
         check_has_upgrade(current_version, toolchain_data)?;
-    if !has_upgrade {
-        return Ok(format!(
-            "Success:The current ept version ('{current_version}') is the latest"
-        ));
+    if !has_upgrade || dry_run {
+        return Ok(if has_upgrade {
+            format!(
+                "Info:A new version of ept toolchain ('{}') is available, use 'ept upgrade' to spawn upgrade",
+                &latest_release.version
+            )
+        } else {
+            format!("Success:The ept toolchain is up to date ('{current_version}')")
+        });
     }
     if is_cross_wid_gap {
         return Err(anyhow!(
@@ -72,10 +79,9 @@ pub fn upgrade(need_exit_process: bool) -> Result<String> {
         .join("upgrade.cmd")
         .to_string_lossy()
         .replace("/", "\\");
-    let script_content = format!(
-        "copy /y release\\* \"{}\"",
-        toolchain_path.to_string_lossy()
-    );
+    let script_content = include_str!("../../scripts/toolchain_utils/upgrade.cmd")
+        .to_string()
+        .replace("{target}", toolchain_path.to_string_lossy().as_ref());
     write(&script_path, script_content)
         .map_err(|e| anyhow!("Error:Failed to write to '{script_path:?}' : {e}"))?;
 

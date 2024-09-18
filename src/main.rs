@@ -33,7 +33,7 @@ use crate::utils::launch_clean;
 fn router(action: Action) -> Result<String> {
     // 环境变量读取
 
-    use entrances::{install_using_parsed, update_using_parsed};
+    use entrances::{install_using_parsed, update_using_parsed, upgrade};
     use types::{cli::ActionMirror, extended_semver::ExSemVer};
     use utils::{
         fmt_print::{fmt_mirror_line, fmt_package_line},
@@ -287,6 +287,7 @@ fn router(action: Action) -> Result<String> {
                 mirror_remove(&name).map(|_| format!("Success:Mirror '{name}' removed"))
             }
         },
+        Action::Upgrade { check } => upgrade(check, true),
     }
 }
 
