@@ -291,6 +291,7 @@ fn router(action: Action, cfg: Cfg) -> Result<String> {
 
 #[cfg(not(tarpaulin_include))]
 fn main() {
+    use entrances::mirror_list;
     // 清理缓存
     use utils::upgrade::{check_has_upgrade, fmt_upgradable, fmt_upgradable_cross_wid_gap};
     launch_clean().unwrap();
@@ -320,8 +321,9 @@ fn main() {
     let cfg = get_config();
 
     // 判断是否需要检查更新
-    let need_check_update =
-        cfg.online.auto_check_upgrade && !matches!(&args.action, Action::Upgrade { check: _ });
+    let need_check_update = cfg.online.auto_check_upgrade
+        && !matches!(&args.action, Action::Upgrade { check: _ })
+        && !mirror_list().unwrap_or_default().is_empty();
 
     // 使用路由器匹配入口
     let res = router(args.action, cfg);
