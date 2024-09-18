@@ -87,8 +87,8 @@ pub fn upgrade(dry_run: bool, need_exit_process: bool) -> Result<String> {
 
     // 执行脚本
     Command::new("cmd")
-        .args(vec!["/c", script_path.as_str()])
-        .current_dir(temp_release_dir)
+        .args(vec!["/c", "start", script_path.as_str()])
+        .current_dir(temp_dir)
         .spawn()
         .map_err(|e| anyhow!("Error:Failed to execute command : {e}"))?;
 
