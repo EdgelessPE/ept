@@ -37,7 +37,7 @@ pub fn read_local_mirror_ept_toolchain() -> Result<MirrorEptToolchain> {
 }
 
 // 检查当前 ept 是否可更新，返回 （是否有更新，是否跨越鸿沟，当前的最新版本）
-pub fn check_has_upgrade(
+fn check_has_upgrade_impl(
     current_version: &str,
     res: MirrorEptToolchain,
 ) -> Result<(bool, bool, MirrorEptToolchainRelease)> {
@@ -71,8 +71,32 @@ pub fn check_has_upgrade(
     }
 }
 
+pub fn check_has_upgrade() -> Result<(bool, bool, MirrorEptToolchainRelease)> {
+    let toolchain_data = read_local_mirror_ept_toolchain()?;
+    let current_version = env!("CARGO_PKG_VERSION");
+    check_has_upgrade_impl(current_version, toolchain_data)
+}
+
+pub fn fmt_upgradable(latest_release: MirrorEptToolchainRelease) -> String {
+    format!(
+        "Info:A new version of ept toolchain ('{}') is available, use 'ept upgrade' to spawn upgrade",
+        latest_release.version
+    )
+}
+
+pub fn fmt_upgradable_cross_wid_gap(
+    gentle: bool,
+    latest_release: MirrorEptToolchainRelease,
+) -> String {
+    format!(
+        "{}:A new version of ept toolchain ('{}') is available, but reinstall is required. Visit 'https://ept.edgeless.top' to upgrade",
+        if gentle {"Warning"}else{"Error"},
+        latest_release.version
+    )
+}
+
 #[test]
-fn test_check_has_upgrade() {
+fn test_check_has_upgrade_impl() {
     use crate::types::mirror::{MirrorEptToolchainRelease, MirrorEptToolchainUpdate};
     // 没有更新
     let res = MirrorEptToolchain {
@@ -97,7 +121,7 @@ fn test_check_has_upgrade() {
         ],
     };
     assert_eq!(
-        check_has_upgrade("0.2.2", res.clone()).unwrap(),
+        check_has_upgrade_impl("0.2.2", res.clone()).unwrap(),
         (
             false,
             false,
@@ -113,7 +137,7 @@ fn test_check_has_upgrade() {
 
     // 有可用的自更新
     assert_eq!(
-        check_has_upgrade("0.2.1", res).unwrap(),
+        check_has_upgrade_impl("0.2.1", res).unwrap(),
         (
             true,
             false,
@@ -157,7 +181,7 @@ fn test_check_has_upgrade() {
         ],
     };
     assert_eq!(
-        check_has_upgrade("1.0.0", res.clone()).unwrap(),
+        check_has_upgrade_impl("1.0.0", res.clone()).unwrap(),
         (
             false,
             false,
@@ -173,7 +197,7 @@ fn test_check_has_upgrade() {
 
     // 有更新且更新会跨域鸿沟
     assert_eq!(
-        check_has_upgrade("0.2.2", res.clone()).unwrap(),
+        check_has_upgrade_impl("0.2.2", res.clone()).unwrap(),
         (
             true,
             true,

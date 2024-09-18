@@ -10,7 +10,7 @@ use crate::{
         download::download,
         get_path_toolchain,
         term::ask_yn,
-        upgrade::{check_has_upgrade, read_local_mirror_ept_toolchain},
+        upgrade::{check_has_upgrade, fmt_upgradable, fmt_upgradable_cross_wid_gap},
     },
 };
 use anyhow::{anyhow, Ok, Result};
@@ -19,26 +19,20 @@ use zip::ZipArchive;
 // dry_run: 干运行，仅检查是否有更新
 // need_exit_process: 仅当单测时传入 false，以此防止跑单测时进程退出
 pub fn upgrade(dry_run: bool, need_exit_process: bool) -> Result<String> {
-    // 读取工具链信息
-    let toolchain_data = read_local_mirror_ept_toolchain()?;
     let current_version = env!("CARGO_PKG_VERSION");
-
     // 检查是否有更新
-    let (has_upgrade, is_cross_wid_gap, latest_release) =
-        check_has_upgrade(current_version, toolchain_data)?;
+    let (has_upgrade, is_cross_wid_gap, latest_release) = check_has_upgrade()?;
     if !has_upgrade || dry_run {
         return Ok(if has_upgrade {
-            format!(
-                "Info:A new version of ept toolchain ('{}') is available, use 'ept upgrade' to spawn upgrade",
-                &latest_release.version
-            )
+            fmt_upgradable(latest_release)
         } else {
             format!("Success:The ept toolchain is up to date ('{current_version}')")
         });
     }
     if is_cross_wid_gap {
         return Err(anyhow!(
-            "Error:The latest ept requires reinstall, visit 'https://ept.edgeless.top' to upgrade"
+            "{}",
+            fmt_upgradable_cross_wid_gap(false, latest_release)
         ));
     }
 
@@ -54,7 +48,7 @@ pub fn upgrade(dry_run: bool, need_exit_process: bool) -> Result<String> {
     }
 
     // 下载最新的 zip 包，不带缓存
-    let temp_dir = allocate_path_temp("download", false)?;
+    let temp_dir = allocate_path_temp("upgrade", false)?;
     let zip_path = temp_dir.join("latest.zip");
     let _ = download(&latest_release.url, zip_path.clone(), None)?;
 
