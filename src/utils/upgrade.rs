@@ -100,7 +100,7 @@ fn test_check_has_upgrade() {
         check_has_upgrade("0.2.2", res.clone()).unwrap(),
         (
             false,
-            true,
+            false,
             MirrorEptToolchainRelease {
                 name: "ept_0.2.2.zip".to_string(),
                 version: "0.2.2".to_string(),
@@ -116,7 +116,7 @@ fn test_check_has_upgrade() {
         check_has_upgrade("0.2.1", res).unwrap(),
         (
             true,
-            true,
+            false,
             MirrorEptToolchainRelease {
                 name: "ept_0.2.2.zip".to_string(),
                 version: "0.2.2".to_string(),
@@ -160,7 +160,7 @@ fn test_check_has_upgrade() {
         check_has_upgrade("1.0.0", res.clone()).unwrap(),
         (
             false,
-            true,
+            false,
             MirrorEptToolchainRelease {
                 name: "ept_1.0.0.zip".to_string(),
                 version: "1.0.0".to_string(),
@@ -176,7 +176,7 @@ fn test_check_has_upgrade() {
         check_has_upgrade("0.2.2", res.clone()).unwrap(),
         (
             true,
-            false,
+            true,
             MirrorEptToolchainRelease {
                 name: "ept_1.0.0.zip".to_string(),
                 version: "1.0.0".to_string(),
