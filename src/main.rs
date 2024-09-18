@@ -14,13 +14,7 @@ mod types;
 #[macro_use]
 mod utils;
 
-use anyhow::{anyhow, Result};
-use clap::Parser;
-use colored::Colorize;
-use entrances::meta;
-use std::fs::write;
-use std::process::exit;
-
+use self::types::cfg::Cfg;
 use self::types::cli::{Action, ActionConfig, Args};
 use crate::entrances::config::{config_get, config_init, config_list, config_set, config_which};
 use crate::entrances::{
@@ -28,11 +22,16 @@ use crate::entrances::{
 };
 use crate::utils::cfg::get_config;
 use crate::utils::launch_clean;
+use anyhow::{anyhow, Result};
+use clap::Parser;
+use colored::Colorize;
+use entrances::meta;
+use std::fs::write;
+use std::process::exit;
 
 #[cfg(not(tarpaulin_include))]
-fn router(action: Action) -> Result<String> {
+fn router(action: Action, cfg: Cfg) -> Result<String> {
     // 环境变量读取
-
     use entrances::{install_using_parsed, update_using_parsed, upgrade};
     use types::{cli::ActionMirror, extended_semver::ExSemVer};
     use utils::{
@@ -48,7 +47,6 @@ fn router(action: Action) -> Result<String> {
         },
         types::matcher::{PackageInputEnum, PackageMatcher},
     };
-    let cfg = get_config();
     let verify_signature = envmnt::get_or("OFFLINE", "false") == *"false";
 
     // 匹配入口
@@ -294,6 +292,7 @@ fn router(action: Action) -> Result<String> {
 #[cfg(not(tarpaulin_include))]
 fn main() {
     // 清理缓存
+    use utils::upgrade::{check_has_upgrade, fmt_upgradable, fmt_upgradable_cross_wid_gap};
     launch_clean().unwrap();
 
     // 启用虚拟终端
@@ -317,16 +316,44 @@ fn main() {
         envmnt::set("CONFIRM", "true");
     }
 
+    // 获取配置
+    let cfg = get_config();
+
+    // 判断是否需要检查更新
+    let need_check_update =
+        cfg.online.auto_check_upgrade && !matches!(&args.action, Action::Upgrade { check: _ });
+
     // 使用路由器匹配入口
-    let res = router(args.action);
-    if let Ok(msg) = res {
+    let res = router(args.action, cfg);
+
+    // 判断退出码
+    let mut exit_code = 0;
+    if let Ok(msg) = &res {
         if !msg.is_empty() {
             log!("{msg}");
         }
-        exit(0);
     }
     if let Err(msg) = res {
         log!("{msg}");
-        exit(1);
+        exit_code = 1;
     }
+
+    // 检查程序更新
+    if need_check_update {
+        let (has_upgrade, is_cross_wid_gap, latest_release)= check_has_upgrade().map_err(|e|anyhow!("Error:Failed to check self upgrade : '{e}'. If this error persists, consider changing 'online.auto_check_upgrade' to 'false' in config")).unwrap();
+        if has_upgrade {
+            println!();
+            log!(
+                "{}",
+                if is_cross_wid_gap {
+                    fmt_upgradable_cross_wid_gap(true, latest_release)
+                } else {
+                    fmt_upgradable(latest_release)
+                }
+            )
+        }
+    }
+
+    // 退出
+    exit(exit_code);
 }

@@ -26,6 +26,7 @@ pub struct Local {
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct Online {
     pub mirror_update_interval: String,
+    pub auto_check_upgrade: bool,
 }
 #[derive(Clone, Debug, PartialEq)]
 pub enum PreferenceEnum {
@@ -97,6 +98,7 @@ impl Default for Cfg {
             },
             online: Online {
                 mirror_update_interval: "1d".to_string(),
+                auto_check_upgrade: true,
             },
             preference: Preference {
                 installer: PreferenceEnum::LowPriority,
