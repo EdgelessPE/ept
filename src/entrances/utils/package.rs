@@ -39,10 +39,16 @@ pub fn clean_temp(source_file: &String) -> Result<()> {
         if clean_res.is_ok() {
             log_ok_last!("Info:Cleaning...");
         } else {
-            log!("Warning:Failed to remove temporary directory '{temp_dir_path:?}'");
+            log!(
+                "Warning:Failed to remove temporary directory '{}'",
+                p2s!(temp_dir_path)
+            );
         }
     } else {
-        log!("Debug:Leaving temporary directory '{temp_dir_path:?}'");
+        log!(
+            "Debug:Leaving temporary directory '{}'",
+            p2s!(temp_dir_path)
+        );
     }
 
     Ok(())

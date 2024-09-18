@@ -151,7 +151,6 @@ impl TStep for StepLink {
         // 解析源文件绝对路径
         let abs_clear_source_path =
             parse_relative_path_with_located(&self.source_file, &cx.located);
-        // println!("{abs_clear_source_path:?}");
         let abs_clear_source = p2s!(abs_clear_source_path);
 
         // 创建实例

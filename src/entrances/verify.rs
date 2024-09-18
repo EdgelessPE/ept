@@ -156,7 +156,10 @@ pub fn verify(source_dir: &String) -> Result<GlobalPackage> {
                 &format!("{name}/{mp}", name = global.package.name),
                 source_dir,
             );
-            log!("Debug:Main program path : '{mp_path:?}',with source_dir = '{source_dir}'");
+            log!(
+                "Debug:Main program path : '{}',with source_dir = '{source_dir}'",
+                p2s!(mp_path)
+            );
             let read_res = get_exe_version(mp_path);
             if let Ok(version) = read_res {
                 // 与申明的版本号进行比较，仅要求 semver 部分相等即可

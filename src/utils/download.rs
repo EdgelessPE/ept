@@ -6,6 +6,7 @@ use std::fs::{copy, File};
 use std::io::{Read, Write};
 use std::path::PathBuf;
 
+use crate::p2s;
 use crate::utils::cache::CacheCtx;
 use crate::utils::cfg::get_config;
 
@@ -22,10 +23,18 @@ pub fn download(url: &str, to: PathBuf, cached: Option<(PathBuf, String)>) -> Re
         if let Some((cache_path, cache_key)) = cached.clone() {
             let cache_file_path = cache_path.join(&cache_key);
             if cache_file_path.exists() {
-                copy(&cache_file_path,& to).map_err(|e: std::io::Error| {
-                    anyhow!("Error:Failed to restore cache from '{cache_file_path:?}' to '{to:?}' : {e}")
+                copy(&cache_file_path, &to).map_err(|e: std::io::Error| {
+                    anyhow!(
+                        "Error:Failed to restore cache from '{}' to '{}' : {e}",
+                        p2s!(cache_file_path),
+                        p2s!(to)
+                    )
                 })?;
-                log!("Info:Restored cache form '{cache_file_path:?}' to '{to:?}'");
+                log!(
+                    "Info:Restored cache form '{}' to '{}'",
+                    p2s!(cache_file_path),
+                    p2s!(to)
+                );
                 return Ok(CacheCtx(false, to, None));
             }
         }
@@ -72,7 +81,7 @@ pub fn download(url: &str, to: PathBuf, cached: Option<(PathBuf, String)>) -> Re
     }
     // 下载完成，清除进度条
     pb.finish_and_clear();
-    log!("Info:Downloaded file stored at '{to:?}'");
+    log!("Info:Downloaded file stored at '{}'", p2s!(to));
     file.flush()?;
     Ok(CacheCtx(enabled_cache, to, cached))
 }

@@ -4,7 +4,7 @@ use std::{
 };
 
 use crate::{
-    log,
+    log, p2s,
     utils::{
         allocate_path_temp,
         download::download,
@@ -61,15 +61,23 @@ pub fn upgrade(dry_run: bool, need_exit_process: bool) -> Result<String> {
     // 解压到临时目录
     let temp_release_dir = temp_dir.join("release");
     let file = File::open(&zip_path)
-        .map_err(|e| anyhow!("Error:Failed to open '{zip_path:?}' as file : {e}"))?;
-    let mut zip_ins = ZipArchive::new(file)
-        .map_err(|e| anyhow!("Error:Failed to open '{zip_path:?}' as zip file : {e}"))?;
-    zip_ins
-        .extract(&temp_release_dir)
-        .map_err(|e| anyhow!("Error:Failed to extract zip file '{zip_path:?}' : {e}"))?;
+        .map_err(|e| anyhow!("Error:Failed to open '{}' as file : {e}", p2s!(zip_path)))?;
+    let mut zip_ins = ZipArchive::new(file).map_err(|e| {
+        anyhow!(
+            "Error:Failed to open '{}' as zip file : {e}",
+            p2s!(zip_path)
+        )
+    })?;
+    zip_ins.extract(&temp_release_dir).map_err(|e| {
+        anyhow!(
+            "Error:Failed to extract zip file '{}' : {e}",
+            p2s!(zip_path)
+        )
+    })?;
     if !temp_release_dir.join("ept.exe").exists() {
         return Err(anyhow!(
-            "Error:Invalid zip file : Failed to find 'ept.exe' in '{temp_release_dir:?}'"
+            "Error:Invalid zip file : Failed to find 'ept.exe' in '{}'",
+            p2s!(temp_release_dir)
         ));
     }
 
@@ -83,7 +91,7 @@ pub fn upgrade(dry_run: bool, need_exit_process: bool) -> Result<String> {
         .to_string()
         .replace("{target}", toolchain_path.to_string_lossy().as_ref());
     write(&script_path, script_content)
-        .map_err(|e| anyhow!("Error:Failed to write to '{script_path:?}' : {e}"))?;
+        .map_err(|e| anyhow!("Error:Failed to write to '{}' : {e}", &script_path))?;
 
     // 执行脚本
     Command::new("cmd")

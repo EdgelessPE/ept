@@ -57,7 +57,7 @@ pub fn is_current_arch_match(pkg_arch: &String) -> Result<()> {
         Ok(())
     } else {
         Err(anyhow!(
-            "Error:Package arch '{pkg_arch}' doesn't match current os arch '{sys_arch:?}'"
+            "Error:Package arch '{pkg_arch}' doesn't match current os arch '{sys_arch}'"
         ))
     }
 }
