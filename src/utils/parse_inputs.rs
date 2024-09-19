@@ -2,6 +2,7 @@ use std::fmt::Display;
 
 use anyhow::{anyhow, Result};
 use colored::Colorize;
+use serde::{Deserialize, Serialize};
 
 use crate::{
     entrances::{auto_mirror_update_all, info_local, info_online},
@@ -19,6 +20,7 @@ use super::{
     path::find_scope_with_name,
 };
 
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct ParsePackageInputRes {
     pub name: String,
     pub scope: String,
@@ -26,6 +28,7 @@ pub struct ParsePackageInputRes {
     pub target_version: String,
     pub download_url: String,
 }
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub enum ParseInputResEnum {
     LocalPath(String),
     Url(String),
@@ -196,4 +199,162 @@ pub fn parse_uninstall_inputs(packages: Vec<String>) -> Result<Vec<(String, Stri
     }
 
     Ok(arr)
+}
+
+#[test]
+fn test_print_enum() {
+    // 提升覆盖率用
+    assert!(ParseInputResEnum::LocalPath("test".to_string())
+        .to_string()
+        .contains("test"));
+    assert!(ParseInputResEnum::LocalPath("test".to_string())
+        .preview()
+        .contains("test"));
+
+    assert!(ParseInputResEnum::Url("http://localhost/test".to_string())
+        .to_string()
+        .contains("http://localhost/test"));
+    assert!(ParseInputResEnum::Url("http://localhost/test".to_string())
+        .preview()
+        .contains("http://localhost/test"));
+
+    assert!(ParseInputResEnum::PackageMatcher(ParsePackageInputRes {
+        name: "test".to_string(),
+        scope: "test".to_string(),
+        current_version: None,
+        target_version: "test".to_string(),
+        download_url: "URL_ADDRESS".to_string()
+    })
+    .to_string()
+    .contains("test"));
+    assert!(ParseInputResEnum::PackageMatcher(ParsePackageInputRes {
+        name: "test".to_string(),
+        scope: "test".to_string(),
+        current_version: None,
+        target_version: "test".to_string(),
+        download_url: "URL_ADDRESS".to_string()
+    })
+    .preview()
+    .contains("test"));
+    assert!(ParseInputResEnum::PackageMatcher(ParsePackageInputRes {
+        name: "test".to_string(),
+        scope: "test".to_string(),
+        current_version: Some("1.75.4.0".to_string()),
+        target_version: "test".to_string(),
+        download_url: "URL_ADDRESS".to_string()
+    })
+    .to_string()
+    .contains("test"));
+    assert!(ParseInputResEnum::PackageMatcher(ParsePackageInputRes {
+        name: "test".to_string(),
+        scope: "test".to_string(),
+        current_version: Some("1.75.4.0".to_string()),
+        target_version: "test".to_string(),
+        download_url: "URL_ADDRESS".to_string()
+    })
+    .preview()
+    .contains("test"));
+}
+
+#[test]
+fn test_parse_inputs() {
+    envmnt::set("DEBUG", "true");
+    envmnt::set("CONFIRM", "true");
+
+    // 使用 mock 的镜像数据
+    let mock_ctx = crate::utils::test::_use_mock_mirror_data();
+
+    // 先卸载 vscode
+    crate::utils::test::_ensure_testing_vscode_uninstalled();
+    // 测试安装的解析
+    let res = parse_install_inputs(vec![
+        "examples/VSCode".to_string(),
+        "vscode".to_string(),
+        "http://localhost/vscode.nep".to_string(),
+    ])
+    .unwrap();
+    assert_eq!(
+        res,
+        vec![
+            ParseInputResEnum::LocalPath("examples/VSCode".to_string()),
+            ParseInputResEnum::PackageMatcher(ParsePackageInputRes {
+                name: "VSCode".to_string(),
+                scope: "Microsoft".to_string(),
+                current_version: None,
+                target_version: "1.75.4.2".to_string(),
+                download_url: "http://localhost:19191/static/VSCode_1.75.4.2_Cno.nep?scope=Microsoft&software=VSCode".to_string()
+            }),
+            ParseInputResEnum::Url("http://localhost/vscode.nep".to_string()),
+        ]
+    );
+    // 测试更新的解析
+    assert!(parse_update_inputs(vec!["vscode".to_string(),]).is_err());
+
+    // 安装 vscode
+    crate::utils::test::_ensure_testing_vscode();
+    // 测试安装的解析
+    let res = parse_install_inputs(vec![
+        "examples/VSCode".to_string(),
+        "vscode".to_string(),
+        "http://localhost/vscode.nep".to_string(),
+    ])
+    .unwrap();
+    assert_eq!(
+        res,
+        vec![
+            ParseInputResEnum::LocalPath("examples/VSCode".to_string()),
+            ParseInputResEnum::PackageMatcher(ParsePackageInputRes {
+                name: "VSCode".to_string(),
+                scope: "Microsoft".to_string(),
+                current_version: Some("1.75.4.0".to_string()),
+                target_version: "1.75.4.2".to_string(),
+                download_url: "http://localhost:19191/static/VSCode_1.75.4.2_Cno.nep?scope=Microsoft&software=VSCode".to_string()
+            }),
+            ParseInputResEnum::Url("http://localhost/vscode.nep".to_string()),
+        ]
+    );
+    // 测试更新的解析
+    let res = parse_update_inputs(vec![
+        "examples/VSCode".to_string(),
+        "vscode".to_string(),
+        "http://localhost/vscode.nep".to_string(),
+    ])
+    .unwrap();
+    assert_eq!(
+        res,
+        vec![
+            ParseInputResEnum::LocalPath("examples/VSCode".to_string()),
+            ParseInputResEnum::PackageMatcher(ParsePackageInputRes {
+                name: "VSCode".to_string(),
+                scope: "Microsoft".to_string(),
+                current_version: Some("1.75.4.0".to_string()),
+                target_version: "1.75.4.2".to_string(),
+                download_url: "http://localhost:19191/static/VSCode_1.75.4.2_Cno.nep?scope=Microsoft&software=VSCode".to_string()
+            }),
+            ParseInputResEnum::Url("http://localhost/vscode.nep".to_string()),
+        ]
+    );
+
+    // 测试卸载的解析
+    let res = parse_uninstall_inputs(vec!["vscode".to_string()]).unwrap();
+    assert_eq!(
+        res,
+        vec![(
+            "Microsoft".to_string(),
+            "VSCode".to_string(),
+            "1.75.4.0".to_string()
+        ),]
+    );
+    let res = parse_uninstall_inputs(vec!["microSOFT/Vscode".to_string()]).unwrap();
+    assert_eq!(
+        res,
+        vec![(
+            "Microsoft".to_string(),
+            "VSCode".to_string(),
+            "1.75.4.0".to_string()
+        )]
+    );
+
+    crate::utils::test::_restore_mirror_data(mock_ctx);
+    crate::utils::test::_ensure_testing_vscode_uninstalled();
 }

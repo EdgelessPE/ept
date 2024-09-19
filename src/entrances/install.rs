@@ -19,7 +19,7 @@ use crate::{
 };
 use crate::{
     entrances::{info, update_using_package},
-    utils::parse_inputs::{parse_install_inputs, ParseInputResEnum},
+    utils::parse_inputs::ParseInputResEnum,
 };
 use crate::{executor::workflow_executor, parsers::parse_workflow, utils::get_path_apps};
 use crate::{log, log_ok_last, p2s};
@@ -155,22 +155,6 @@ pub fn install_using_url(url: &str, verify_signature: bool) -> Result<(String, S
     spawn_cache(cache_ctx)?;
 
     Ok(info)
-}
-
-pub fn _install_using_package_matcher(
-    matcher: String,
-    verify_signature: bool,
-) -> Result<(String, String)> {
-    // 解析
-    let parsed = parse_install_inputs(vec![matcher])?;
-    // 执行安装
-    if let ParseInputResEnum::PackageMatcher(p) = parsed.first().unwrap() {
-        install_using_url(&p.download_url, verify_signature)
-    } else {
-        Err(anyhow!(
-            "Error:Fatal:Input matcher can't be parsed as package matcher"
-        ))
-    }
 }
 
 pub fn install_using_parsed(
@@ -407,7 +391,9 @@ fn test_install_with_matcher() {
 
     // 执行安装
     crate::utils::test::_ensure_testing_vscode_uninstalled();
-    _install_using_package_matcher("vscode".to_string(), false).unwrap();
+    let parsed =
+        crate::utils::parse_inputs::parse_install_inputs(vec!["vscode".to_string()]).unwrap();
+    install_using_parsed(parsed, false).unwrap();
     assert!(
         info_local(&"Microsoft".to_string(), &"VSCode".to_string())
             .unwrap()

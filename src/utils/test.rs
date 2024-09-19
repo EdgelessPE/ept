@@ -277,3 +277,38 @@ pub fn _fork_example_with_version(origin_dir: &str, to_version: &str) -> String 
     std::fs::write(pkg_path, text).unwrap();
     dir
 }
+
+// 将当前的镜像数据替换为 _run_mirror_mock_server 中定义的 mock 数据；在结束时使用 _restore_mirror_data 恢复
+pub fn _use_mock_mirror_data() -> (bool, PathBuf, PathBuf) {
+    use crate::utils::test::_run_mirror_mock_server;
+    use std::fs::{remove_dir_all, rename};
+
+    // 备份原有的镜像文件夹
+    let origin_p = crate::utils::get_path_mirror().unwrap();
+    let bak_p = origin_p.parent().unwrap().join("mirror_bak");
+    let has_origin_mirror = origin_p.exists();
+    if has_origin_mirror {
+        if bak_p.exists() {
+            remove_dir_all(&origin_p).unwrap();
+        } else {
+            rename(&origin_p, &bak_p).unwrap();
+        }
+    }
+    assert!(crate::entrances::mirror_list().unwrap().is_empty());
+
+    // 使用 mock 的镜像数据
+    let mock_url = _run_mirror_mock_server();
+    crate::entrances::mirror_add(&mock_url, None).unwrap();
+
+    (has_origin_mirror, origin_p, bak_p)
+}
+
+// 还原原有的镜像文件夹
+pub fn _restore_mirror_data(tup: (bool, PathBuf, PathBuf)) {
+    use std::fs::{remove_dir_all, rename};
+    let (has_origin_mirror, origin_p, bak_p) = tup;
+    if has_origin_mirror {
+        remove_dir_all(&origin_p).unwrap();
+        rename(&bak_p, &origin_p).unwrap();
+    }
+}

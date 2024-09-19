@@ -106,9 +106,7 @@ pub fn upgrade(dry_run: bool, need_exit_process: bool) -> Result<String> {
 
 #[test]
 fn test_upgrade() {
-    use crate::entrances::mirror_list;
     use crate::signature::blake3::compute_hash_blake3;
-    use crate::utils::get_path_mirror;
     use crate::utils::test::_run_mirror_mock_server;
     use std::fs::{copy, remove_dir_all, rename};
     use std::{thread::sleep, time::Duration};
@@ -118,17 +116,7 @@ fn test_upgrade() {
     crate::utils::test::_ensure_clear_test_dir();
 
     // 备份原有的镜像文件夹
-    let origin_p = get_path_mirror().unwrap();
-    let bak_p = origin_p.parent().unwrap().join("mirror_bak");
-    let has_origin_mirror = origin_p.exists();
-    if has_origin_mirror {
-        if bak_p.exists() {
-            remove_dir_all(&origin_p).unwrap();
-        } else {
-            rename(&origin_p, &bak_p).unwrap();
-        }
-    }
-    assert!(mirror_list().unwrap().is_empty());
+    let mock_ctx = crate::utils::test::_use_mock_mirror_data();
 
     // 备份原工具链
     let toolchain_path = get_path_toolchain().unwrap();
@@ -158,6 +146,7 @@ fn test_upgrade() {
     let (_, mut handler) = crate::utils::test::_run_static_file_server();
 
     // 运行 upgrade
+    upgrade(true, false).unwrap();
     upgrade(false, false).unwrap();
 
     // 等待 3s 后断言程序被更新
@@ -169,10 +158,7 @@ fn test_upgrade() {
     );
 
     // 还原原有的镜像文件夹
-    if has_origin_mirror {
-        remove_dir_all(&origin_p).unwrap();
-        rename(&bak_p, &origin_p).unwrap();
-    }
+    crate::utils::test::_restore_mirror_data(mock_ctx);
     // 还原原工具链
     if has_origin_toolchain {
         remove_dir_all(&toolchain_path).unwrap();
