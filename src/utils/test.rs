@@ -86,6 +86,10 @@ pub fn _run_mirror_mock_server() -> String {
         {
             "key": "PKG_SOFTWARE",
             "path": "/api/pkg/software"
+        },
+        {
+            "key": "EPT_TOOLCHAIN",
+            "path": "/api/ept/toolchain"
         }
     ],
     "property": {
@@ -101,72 +105,102 @@ pub fn _run_mirror_mock_server() -> String {
             .path("/api/pkg/software");
         then.status(200)
             .header("Content-Type", "application/json")
-            .json_body(serde_json::json!({
-    "tree": {
-        "Microsoft": [
+            .json_body(serde_json::json!(
             {
-                "name": "VSCode",
+                "tree": {
+                    "Microsoft": [
+                        {
+                            "name": "VSCode",
+                            "releases": [
+                                {
+                                    "file_name": "VSCode_1.75.4.2_Cno.nep",
+                                    "version": "1.75.4.2",
+                                    "size": 94245376,
+                                    "timestamp": 1704554724
+                                }
+                            ]
+                        },
+                        {
+                            "name": "Notepad",
+                            "releases": [
+                                {
+                                    "file_name": "Notepad_22.1.0.0_Cno.nep",
+                                    "version": "22.1.0.0",
+                                    "size": 94245376,
+                                    "timestamp": 1704554724
+                                }
+                            ]
+                        }
+                    ],
+                    "PortableApps":[
+                        {
+                            "name":"Firefox",
+                            "releases":[
+                                {
+                                    "file_name":"Firefox_127.0.0.1_Cno.I.nep",
+                                    "version":"127.0.0.1",
+                                    "size": 94245376,
+                                    "timestamp": 1704554724
+                                },
+                                {
+                                    "file_name":"Firefox_127.0.0.1_Cno.IE.nep",
+                                    "version":"127.0.0.1",
+                                    "size": 94245376,
+                                    "timestamp": 1704554724
+                                },
+                                {
+                                    "file_name":"Firefox_127.0.0.1_Cno.P.nep",
+                                    "version":"127.0.0.1",
+                                    "size": 94245376,
+                                    "timestamp": 1704554724
+                                },
+                                {
+                                    "file_name":"Firefox_127.0.0.1_Cno.PE.nep",
+                                    "version":"127.0.0.1",
+                                    "size": 94245376,
+                                    "timestamp": 1704554724
+                                },
+                            ]
+                        }
+                    ]
+                },
+                "timestamp": 1704554724,
+                "url_template": "http://localhost:19191/static/{file_name}?scope={scope}&software={software}".to_string()
+            }));
+    });
+
+    mock_server.mock(|when, then| {
+        when.method("GET").path("/api/ept/toolchain");
+        then.status(200)
+            .header("Content-Type", "application/json")
+            .json_body(serde_json::json!(
+            {
+                "update": {
+                    "wild_gaps": []
+                },
                 "releases": [
                     {
-                        "file_name": "VSCode_1.75.4.2_Cno.nep",
-                        "version": "1.75.4.2",
-                        "size": 94245376,
-                        "timestamp": 1704554724
+                        "name": "ept_0.1.1.zip",
+                        "version": "0.1.1",
+                        "url": "https://registry.edgeless.top/api/redirect?path=/ept_builds/ept_0.1.1.zip",
+                        "size": 7244837,
+                        "timestamp": 1726559266
+                    },
+                    {
+                        "name": "ept_9999.9999.9999.zip",
+                        "version": "9999.9999.9999",
+                        "url": "http://localhost:19191/ept_9999.9999.9999.zip",
+                        "size": 6805967,
+                        "timestamp": 1726563312
                     }
                 ]
-            },
-            {
-                "name": "Notepad",
-                "releases": [
-                    {
-                        "file_name": "Notepad_22.1.0.0_Cno.nep",
-                        "version": "22.1.0.0",
-                        "size": 94245376,
-                        "timestamp": 1704554724
-                    }
-                ]
-            }
-        ],
-        "PortableApps":[
-            {
-                "name":"Firefox",
-                "releases":[
-                    {
-                        "file_name":"Firefox_127.0.0.1_Cno.I.nep",
-                        "version":"127.0.0.1",
-                        "size": 94245376,
-                        "timestamp": 1704554724
-                    },
-                    {
-                        "file_name":"Firefox_127.0.0.1_Cno.IE.nep",
-                        "version":"127.0.0.1",
-                        "size": 94245376,
-                        "timestamp": 1704554724
-                    },
-                    {
-                        "file_name":"Firefox_127.0.0.1_Cno.P.nep",
-                        "version":"127.0.0.1",
-                        "size": 94245376,
-                        "timestamp": 1704554724
-                    },
-                    {
-                        "file_name":"Firefox_127.0.0.1_Cno.PE.nep",
-                        "version":"127.0.0.1",
-                        "size": 94245376,
-                        "timestamp": 1704554724
-                    },
-                ]
-            }
-        ]
-    },
-    "timestamp": 1704554724,
-    "url_template": "http://localhost:19191/static/{file_name}?scope={scope}&software={software}".to_string()
-}));
+            }));
     });
 
     root_url
 }
 
+// 将 test 目录在 19191 端口上提供文件下载服务
 pub fn _run_static_file_server() -> (String, std::process::Child) {
     let port = "19191";
     // 检查 miniserve 是否已安装

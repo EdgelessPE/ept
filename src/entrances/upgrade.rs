@@ -103,3 +103,80 @@ pub fn upgrade(dry_run: bool, need_exit_process: bool) -> Result<String> {
         Ok(tip.to_string())
     }
 }
+
+#[test]
+fn test_upgrade() {
+    use crate::entrances::mirror_list;
+    use crate::signature::blake3::compute_hash_blake3;
+    use crate::utils::get_path_mirror;
+    use crate::utils::test::_run_mirror_mock_server;
+    use std::fs::{copy, remove_dir_all, rename};
+    use std::{thread::sleep, time::Duration};
+
+    envmnt::set("CONFIRM", "true");
+    envmnt::set("DEBUG", "true");
+    crate::utils::test::_ensure_clear_test_dir();
+
+    // 备份原有的镜像文件夹
+    let origin_p = get_path_mirror().unwrap();
+    let bak_p = origin_p.parent().unwrap().join("mirror_bak");
+    let has_origin_mirror = origin_p.exists();
+    if has_origin_mirror {
+        if bak_p.exists() {
+            remove_dir_all(&origin_p).unwrap();
+        } else {
+            rename(&origin_p, &bak_p).unwrap();
+        }
+    }
+    assert!(mirror_list().unwrap().is_empty());
+
+    // 备份原工具链
+    let toolchain_path = get_path_toolchain().unwrap();
+    let bak_toolchain_path = toolchain_path.parent().unwrap().join("toolchain_bak");
+    let has_origin_toolchain = toolchain_path.exists();
+    if has_origin_toolchain {
+        if bak_toolchain_path.exists() {
+            remove_dir_all(&toolchain_path).unwrap();
+        } else {
+            rename(&toolchain_path, &bak_toolchain_path).unwrap();
+        }
+    }
+    assert!(!toolchain_path.join("ept.exe").exists());
+
+    // 启动 mock 服务器
+    let mock_url = _run_mirror_mock_server();
+
+    // 添加 mock 镜像
+    crate::entrances::mirror_add(&mock_url, None).unwrap();
+
+    // 准备下载包并启动静态文件服务器
+    copy(
+        "examples/old_ept_toolchain/ept_9999.9999.9999.zip",
+        "test/ept_9999.9999.9999.zip",
+    )
+    .unwrap();
+    let (_, mut handler) = crate::utils::test::_run_static_file_server();
+
+    // 运行 upgrade
+    upgrade(false, false).unwrap();
+
+    // 等待 3s 后断言程序被更新
+    sleep(Duration::from_secs(3));
+    assert!(toolchain_path.join("what can i say.man").exists());
+    assert_eq!(
+        compute_hash_blake3(&p2s!(toolchain_path.join("ept.exe"))).unwrap(),
+        "47902cfe5ef75cae1b7cd0497b9b36f98847e55f1afb20d1799f99daf6c40ee4".to_string()
+    );
+
+    // 还原原有的镜像文件夹
+    if has_origin_mirror {
+        remove_dir_all(&origin_p).unwrap();
+        rename(&bak_p, &origin_p).unwrap();
+    }
+    // 还原原工具链
+    if has_origin_toolchain {
+        remove_dir_all(&toolchain_path).unwrap();
+        rename(&bak_toolchain_path, &toolchain_path).unwrap();
+    }
+    handler.kill().unwrap();
+}
