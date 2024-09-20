@@ -211,3 +211,16 @@ fn test_check_has_upgrade_impl() {
         )
     );
 }
+
+#[test]
+fn test_fmt_upgradable_cross_wid_gap() {
+    let latest_release = MirrorEptToolchainRelease {
+        name: "test".to_string(),
+        version: "1.75.0.0".to_string(),
+        url: "http://localhost/vscode.nep".to_string(),
+        size: 0,
+        timestamp: 0,
+    };
+    fmt_upgradable_cross_wid_gap(true, latest_release.clone());
+    fmt_upgradable_cross_wid_gap(false, latest_release.clone());
+}

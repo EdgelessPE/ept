@@ -34,8 +34,7 @@ pub fn compress(source_dir: &String, into_file: &String) -> Result<()> {
     compress_zstd(&temp_tar, into_file)
         .map_err(|res| anyhow!("Error:Can't compress '{temp_tar}' into '{into_file}' : {res}"))?;
 
-    let rm_res = remove_file(&temp_tar);
-    if let Err(e) = rm_res {
+    if let Err(e) = remove_file(&temp_tar) {
         log!("Warning:Can't remove temp tar '{temp_tar}' : {e}");
     }
 
@@ -51,8 +50,7 @@ pub fn decompress(source_file: &String, into_dir: &String) -> Result<()> {
     release_tar(&temp_tar, into_dir)
         .map_err(|res| anyhow!("Error:Can't release '{temp_tar}' into '{into_dir}' : {res}"))?;
 
-    let rm_res = remove_file(&temp_tar);
-    if let Err(e) = rm_res {
+    if let Err(e) = remove_file(&temp_tar) {
         log!("Warning:Can't remove temp tar '{temp_tar}' : {e}");
     }
 
