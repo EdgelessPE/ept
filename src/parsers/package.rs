@@ -105,7 +105,7 @@ pub fn parse_package(
     let ver_opt = dirty_toml.get("nep");
     if let Some(val) = ver_opt {
         let pkg_ver = val.as_str().unwrap_or("0.0").to_string();
-        is_nep_version_compatible(&pkg_ver, &env!("CARGO_PKG_VERSION").to_string())?;
+        is_nep_version_compatible(&pkg_ver, env!("CARGO_PKG_VERSION"))?;
     } else {
         return Err(anyhow!("Error:Field 'nep' undefined in '{p}'"));
     }
@@ -164,29 +164,21 @@ pub fn parse_package(
     Ok(pkg)
 }
 
-fn is_nep_version_compatible(pkg_str: &String, ept_str: &String) -> Result<()> {
-    let pkg_ver = semver::Version::parse(&(pkg_str.clone() + ".0"))
-        .map_err(|e| anyhow!("Error:Failed to parse nep package version '{pkg_str}' : {e}"))?;
-    let ept_ver = semver::Version::parse(ept_str)?;
-
-    if pkg_ver.major != ept_ver.major || pkg_ver.minor != ept_ver.minor {
-        // 0 开头的要求 major 和 minor 一致
-        if pkg_str.starts_with("0.") || ept_str.to_string().starts_with("0.") {
-            return Err(anyhow!(
-                "Error:Nep package version '{pkg_str}' incompatible, current ept only accept version '{ept_str}'"
-            ));
-        } else {
-            // 检查 major 是否一致
-            if pkg_ver.major != ept_ver.major {
-                return Err(anyhow!(
-                    "Error:Nep package version '{pkg_str}' incompatible, current ept only accept version starts with '{major}'",
-                    major=ept_ver.major
-                ));
-            }
-        }
+fn is_nep_version_compatible(pkg_str: &String, ept_str: &str) -> Result<()> {
+    // 检查 nep 版本号是一位数字
+    if pkg_str.len() != 1 || pkg_str.parse::<u32>().is_err() {
+        return Err(anyhow!("Error:Invalid nep version '{pkg_str}'"));
     }
 
-    Ok(())
+    // 检查第一位兼容
+    if ept_str.starts_with(pkg_str) {
+        Ok(())
+    } else {
+        Err(anyhow!(
+            "Error:Nep package version '{pkg_str}' incompatible, current ept only accept version starts with '{major}'",
+            major=ept_str.chars().next().unwrap_or_default()
+        ))
+    }
 }
 
 #[test]
@@ -217,12 +209,11 @@ fn test_update_main_program() {
 
 #[test]
 fn test_is_nep_version_compatible() {
-    assert!(is_nep_version_compatible(&"0.2".to_string(), &"0.2.1".to_string()).is_ok());
-    assert!(is_nep_version_compatible(&"0.1".to_string(), &"0.2.1".to_string()).is_err());
-    assert!(is_nep_version_compatible(&"1.0".to_string(), &"1.10.3".to_string()).is_ok());
-    assert!(is_nep_version_compatible(&"1.0".to_string(), &"1.0.30".to_string()).is_ok());
-    assert!(is_nep_version_compatible(&"1.2".to_string(), &"1.0.30".to_string()).is_ok());
-    assert!(is_nep_version_compatible(&"1.8".to_string(), &"2.0.0".to_string()).is_err());
+    assert!(is_nep_version_compatible(&"0".to_string(), "0.2.1").is_ok());
+    assert!(is_nep_version_compatible(&"1".to_string(), "1.10.3").is_ok());
+    assert!(is_nep_version_compatible(&"1".to_string(), "1.0.30").is_ok());
+    assert!(is_nep_version_compatible(&"1".to_string(), "1.0.30").is_ok());
+    assert!(is_nep_version_compatible(&"1".to_string(), "2.0.0").is_err());
 }
 
 #[test]
@@ -231,7 +222,7 @@ fn test_parse_package() {
     let located = &"examples/VSCode".to_string();
     let pkg = parse_package(&"examples/VSCode/package.toml".to_string(), located, false).unwrap();
     let answer = GlobalPackage {
-        nep: "0.2".to_string(),
+        nep: "0".to_string(),
         package: crate::types::package::Package {
             name: "VSCode".to_string(),
             description: "Visual Studio Code".to_string(),

@@ -1,5 +1,5 @@
 # nep 版本号
-nep = "0.2"
+nep = "0"
 
 [package]
 # 包名
