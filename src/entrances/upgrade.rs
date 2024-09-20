@@ -115,7 +115,7 @@ fn test_upgrade() {
     envmnt::set("DEBUG", "true");
     crate::utils::test::_ensure_clear_test_dir();
 
-    // 备份原有的镜像文件夹
+    // 使用 mock 的镜像数据
     let mock_ctx = crate::utils::test::_use_mock_mirror_data();
 
     // 备份原工具链
@@ -132,10 +132,7 @@ fn test_upgrade() {
     assert!(!toolchain_path.join("ept.exe").exists());
 
     // 启动 mock 服务器
-    let mock_url = _run_mirror_mock_server();
-
-    // 添加 mock 镜像
-    crate::entrances::mirror_add(&mock_url, None).unwrap();
+    let _ = _run_mirror_mock_server();
 
     // 准备下载包并启动静态文件服务器
     copy(
