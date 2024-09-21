@@ -258,9 +258,9 @@ fn test_print_enum() {
 
 #[test]
 fn test_parse_inputs() {
-    use crate::utils::envmnt;
-    envmnt::set("DEBUG", "true");
-    envmnt::set("CONFIRM", "true");
+    use crate::utils::flags::{set_flag, Flag};
+    set_flag(Flag::Debug, true);
+    set_flag(Flag::Confirm, true);
 
     // 使用 mock 的镜像数据
     let mock_ctx = crate::utils::test::_use_mock_mirror_data();

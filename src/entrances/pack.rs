@@ -97,16 +97,16 @@ pub fn pack(source_dir: &String, into_file: Option<String>, need_sign: bool) -> 
 
 #[test]
 fn test_pack() {
-    use crate::utils::envmnt;
-    envmnt::set("DEBUG", "false");
-    envmnt::set("CONFIRM", "true");
+    use crate::utils::flags::{set_flag, Flag};
+    set_flag(Flag::Debug, false);
+    set_flag(Flag::Confirm, true);
     pack(
         &"./examples/ComplexFS".to_string(),
         Some("./test/ComplexFS_1.75.0.0_Cno.nep".to_string()),
         true,
     )
     .unwrap();
-    envmnt::set("DEBUG", "true");
+    set_flag(Flag::Debug, true);
     pack(
         &"./examples/ComplexFS".to_string(),
         Some("./test/ComplexFS_1.75.0.0_Cno.nep".to_string()),

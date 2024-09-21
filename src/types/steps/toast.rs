@@ -82,8 +82,8 @@ impl Generalizable for StepToast {
 #[test]
 fn test_toast() {
     use crate::types::workflow::WorkflowContext;
-    use crate::utils::envmnt;
-    envmnt::set("DEBUG", "true");
+    use crate::utils::flags::{set_flag, Flag};
+    set_flag(Flag::Debug, true);
     let mut cx = WorkflowContext::_demo();
 
     StepToast {

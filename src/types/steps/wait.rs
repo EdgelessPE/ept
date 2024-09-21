@@ -120,8 +120,8 @@ impl Generalizable for StepWait {
 #[test]
 fn test_wait() {
     use crate::types::workflow::WorkflowContext;
-    use crate::utils::envmnt;
-    envmnt::set("DEBUG", "true");
+    use crate::utils::flags::{set_flag, Flag};
+    set_flag(Flag::Debug, true);
     let mut cx = WorkflowContext::_demo();
 
     // 测试普通等待

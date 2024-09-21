@@ -270,10 +270,10 @@ fn fast_unpack_nep(
 
 #[test]
 fn test_unpack_nep() {
-    use crate::utils::envmnt;
+    use crate::utils::flags::{set_flag, Flag};
     if cfg!(debug_assertions) {
         log!("Warning:Debug mode enabled");
-        envmnt::set("DEBUG", "true");
+        set_flag(Flag::Debug, true);
     }
     crate::utils::test::_ensure_clear_test_dir();
 
@@ -290,10 +290,10 @@ fn test_unpack_nep() {
 
 #[test]
 fn test_normal_unpack_nep() {
-    use crate::utils::envmnt;
+    use crate::utils::flags::{set_flag, Flag};
     if cfg!(debug_assertions) {
         log!("Warning:Debug mode enabled");
-        envmnt::set("DEBUG", "true");
+        set_flag(Flag::Debug, true);
     }
     crate::utils::test::_ensure_clear_test_dir();
 
@@ -310,10 +310,10 @@ fn test_normal_unpack_nep() {
 
 #[test]
 fn test_fast_unpack_nep() {
-    use crate::utils::envmnt;
+    use crate::utils::flags::{set_flag, Flag};
     if cfg!(debug_assertions) {
         log!("Warning:Debug mode enabled");
-        envmnt::set("DEBUG", "true");
+        set_flag(Flag::Debug, true);
     }
     crate::utils::test::_ensure_clear_test_dir();
 
@@ -330,7 +330,7 @@ fn test_fast_unpack_nep() {
 
 // #[test]
 // fn benchmark_fast_unpack_nep() {
-//     envmnt::set("DEBUG", "true");
+//     set_flag(Flag::DEBUG, true);
 //     // 准备带有一定体积的包
 //     crate::utils::test::_ensure_clear_test_dir();
 

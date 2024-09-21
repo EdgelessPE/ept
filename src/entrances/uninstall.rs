@@ -161,12 +161,12 @@ pub fn uninstall(scope: Option<String>, package_name: &String) -> Result<(String
 
 #[test]
 fn test_uninstall() {
-    use crate::utils::envmnt;
+    use crate::utils::flags::{set_flag, Flag};
     // 完整的安装和卸载流程案例位于entrances::install::test_install
 
     // 这里测试一下需要杀进程的案例
     use crate::types::steps::TStep;
-    envmnt::set("CONFIRM", "true");
+    set_flag(Flag::Confirm, true);
     let pwd = crate::utils::test::_ensure_testing("Microsoft", "Notepad");
     let mut cx = WorkflowContext::_demo();
     StepExecute {

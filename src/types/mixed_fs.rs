@@ -197,8 +197,8 @@ impl MixedFS {
 
 #[test]
 fn test_mixed_fs() {
-    use crate::utils::envmnt;
-    envmnt::set("DEBUG", "true");
+    use crate::utils::flags::{set_flag, Flag};
+    set_flag(Flag::Debug, true);
     let base = &"./".to_string();
     let mut mfs = MixedFS::new(base.clone());
 

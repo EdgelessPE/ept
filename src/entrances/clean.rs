@@ -152,10 +152,10 @@ pub fn clean() -> Result<usize> {
 
 #[test]
 fn test_clean() {
-    use crate::utils::envmnt;
+    use crate::utils::flags::{set_flag, Flag};
     use crate::utils::fs::copy_dir;
     use std::fs::{copy, create_dir_all, write};
-    envmnt::set("CONFIRM", "true");
+    set_flag(Flag::Confirm, true);
 
     // 安装 vscode
     crate::utils::test::_ensure_testing_vscode_uninstalled();

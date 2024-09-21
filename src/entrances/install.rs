@@ -189,10 +189,10 @@ pub fn install_using_parsed(
 
 #[test]
 fn test_install() {
-    use crate::utils::envmnt;
+    use crate::utils::flags::{set_flag, Flag};
     use crate::utils::fs::copy_dir;
-    envmnt::set("DEBUG", "true");
-    envmnt::set("CONFIRM", "true");
+    set_flag(Flag::Debug, true);
+    set_flag(Flag::Confirm, true);
     crate::utils::test::_ensure_clear_test_dir();
 
     // 校验路径
@@ -295,9 +295,9 @@ fn test_install_dism() {
 #[test]
 fn test_reg_entry() {
     use crate::types::{steps::TStep, workflow::WorkflowContext};
-    use crate::utils::envmnt;
+    use crate::utils::flags::{set_flag, Flag};
     use winreg::enums::HKEY_CURRENT_USER;
-    envmnt::set("DEBUG", "true");
+    set_flag(Flag::Debug, true);
     let cur_dir_pb = std::env::current_dir().unwrap();
     let cur_dir = p2s!(cur_dir_pb);
     let flag_path = Path::new("_reg_entry_success.log");
@@ -367,8 +367,8 @@ fn test_reg_entry() {
 
 #[test]
 fn test_install_with_matcher() {
-    use crate::utils::envmnt;
-    envmnt::set("CONFIRM", "true");
+    use crate::utils::flags::{set_flag, Flag};
+    set_flag(Flag::Confirm, true);
     // 替换测试镜像源
     let custom_mirror_ctx = crate::utils::test::_mount_custom_mirror();
 
@@ -436,8 +436,8 @@ fn test_install_with_matcher() {
 
 #[test]
 fn test_install_expandable() {
-    use crate::utils::envmnt;
-    envmnt::set("CONFIRM", "true");
+    use crate::utils::flags::{set_flag, Flag};
+    set_flag(Flag::Confirm, true);
     crate::utils::test::_ensure_clear_test_dir();
     crate::utils::test::_ensure_testing_uninstalled("Microsoft", "VSCodeE");
 

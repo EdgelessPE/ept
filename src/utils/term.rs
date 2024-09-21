@@ -56,8 +56,8 @@ pub fn read_console(v: Vec<u8>) -> String {
 
 #[test]
 fn test_ask_yn() {
-    use crate::utils::envmnt;
-    envmnt::set("CONFIRM", "true");
+    use crate::utils::flags::{set_flag, Flag};
+    set_flag(Flag::Confirm, true);
     assert!(ask_yn("Do you like what you see😘?".to_string(), true));
     assert!(ask_yn_in_step(
         "Step",

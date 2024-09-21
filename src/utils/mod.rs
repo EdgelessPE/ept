@@ -9,7 +9,7 @@ pub mod conditions;
 pub mod constants;
 pub mod download;
 pub mod env;
-pub mod envmnt;
+pub mod flags;
 pub mod fmt_print;
 pub mod fs;
 pub mod mirror;
@@ -24,6 +24,7 @@ pub mod upgrade;
 pub mod wild_match;
 
 use anyhow::{anyhow, Result};
+use flags::{get_flag, Flag};
 use regex::Regex;
 
 use std::env::var;
@@ -53,19 +54,19 @@ fn ensure_exist(p: PathBuf) -> Result<PathBuf> {
 }
 
 pub fn is_debug_mode() -> bool {
-    envmnt::get_or("DEBUG", "false") == *"true"
+    get_flag(Flag::Debug, false)
 }
 
 pub fn is_qa_mode() -> bool {
-    envmnt::get_or("QA", "false") == *"true"
+    get_flag(Flag::QA, false)
 }
 
 pub fn is_confirm_mode() -> bool {
-    envmnt::get_or("CONFIRM", "false") == *"true"
+    get_flag(Flag::Confirm, false)
 }
 
 pub fn is_no_warning_mode() -> bool {
-    envmnt::get_or("NO_WARNING", "false") == *"true"
+    get_flag(Flag::NoWarning, false)
 }
 
 pub fn format_path(raw: &str) -> String {

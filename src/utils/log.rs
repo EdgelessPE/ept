@@ -90,8 +90,8 @@ macro_rules! log_ok_last {
 
 #[test]
 fn test_log() {
-    use crate::utils::envmnt;
-    envmnt::set("DEBUG", "true");
+    use crate::utils::flags::{set_flag, Flag};
+    set_flag(Flag::Debug, true);
 
     fn_log("Question:This is a question".to_string());
     fn_log("Debug:This is a debug".to_string());

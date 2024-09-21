@@ -182,8 +182,8 @@ pub fn verify(source_dir: &String) -> Result<GlobalPackage> {
 
 #[test]
 fn test_verify() {
-    use crate::utils::envmnt;
-    envmnt::set("DEBUG", "true");
+    use crate::utils::flags::{set_flag, Flag};
+    set_flag(Flag::Debug, true);
     use std::fs::write;
     verify(&"./examples/VSCode".to_string()).unwrap();
     verify(&"./examples/CallInstaller".to_string()).unwrap();

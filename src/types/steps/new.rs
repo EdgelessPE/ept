@@ -121,10 +121,10 @@ impl Generalizable for StepNew {
 #[test]
 fn test_new() {
     use crate::types::workflow::WorkflowContext;
-    use crate::utils::envmnt;
+    use crate::utils::flags::{set_flag, Flag};
     use std::fs::metadata;
     use std::path::Path;
-    envmnt::set("DEBUG", "true");
+    set_flag(Flag::Debug, true);
     let mut cx = WorkflowContext::_demo();
     if Path::new("test").exists() {
         std::fs::remove_dir_all("test").unwrap();

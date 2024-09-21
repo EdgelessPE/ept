@@ -5,7 +5,7 @@ use super::{
         validator::installed_validator,
     },
 };
-use crate::utils::envmnt;
+use crate::utils::flags::{set_flag, Flag};
 use crate::{
     entrances::{expand_workshop, is_workshop_expandable},
     executor::workflow_executor,
@@ -253,7 +253,7 @@ pub fn update_all(verify_signature: bool) -> Result<(i32, i32)> {
     // 依次更新
     let mut success_count = 0;
     let mut failure_count = 0;
-    envmnt::set("CONFIRM", "true");
+    set_flag(Flag::Confirm, true);
     for info in update_list {
         let res =
             update_using_package_matcher(format!("{}/{}", info.scope, info.name), verify_signature);
@@ -265,7 +265,7 @@ pub fn update_all(verify_signature: bool) -> Result<(i32, i32)> {
             log!("{}", info.format_success());
         }
     }
-    envmnt::set("CONFIRM", "false");
+    set_flag(Flag::Confirm, false);
 
     Ok((success_count, failure_count))
 }
@@ -287,8 +287,8 @@ fn test_same_author() {
 
 #[test]
 fn test_update_using_package() {
-    envmnt::set("DEBUG", "true");
-    envmnt::set("CONFIRM", "true");
+    set_flag(Flag::Debug, true);
+    set_flag(Flag::Confirm, true);
     crate::utils::test::_ensure_clear_test_dir();
 
     // 卸载
@@ -334,8 +334,8 @@ fn test_update_using_package() {
 fn test_update_all() {
     let tup = crate::utils::test::_mount_custom_mirror();
     let (_, mut handler) = crate::utils::test::_run_static_file_server();
-    envmnt::set("DEBUG", "true");
-    envmnt::set("CONFIRM", "true");
+    set_flag(Flag::Debug, true);
+    set_flag(Flag::Confirm, true);
     crate::utils::test::_ensure_clear_test_dir();
 
     // 确保已卸载
@@ -398,7 +398,7 @@ fn test_update_workflow_executions() {
     use std::path::Path;
     let desktop = crate::utils::env::env_desktop();
     assert!(crate::utils::wild_match::parse_wild_match("vsc*.lnk".to_string(), &desktop).is_err());
-    envmnt::set("CONFIRM", "true");
+    set_flag(Flag::Confirm, true);
 
     // (旧包类型，新包类型，更新后断言存在的文件)
     let test_arr = vec![
@@ -463,7 +463,7 @@ fn test_update_workflow_executions() {
 
 #[test]
 fn test_update_with_different_author() {
-    envmnt::set("CONFIRM", "true");
+    set_flag(Flag::Confirm, true);
     let desktop = crate::utils::env::env_desktop();
     assert!(crate::utils::wild_match::parse_wild_match("vsc*.lnk".to_string(), &desktop).is_err());
     let desktop_path = std::path::Path::new(&desktop);
@@ -500,7 +500,7 @@ fn test_update_with_different_author() {
 #[test]
 fn test_update_expandable() {
     use std::path::Path;
-    envmnt::set("CONFIRM", "true");
+    set_flag(Flag::Confirm, true);
     crate::utils::test::_ensure_clear_test_dir();
     crate::utils::test::_ensure_testing_uninstalled("Microsoft", "VSCodeE");
 

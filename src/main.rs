@@ -21,7 +21,7 @@ use crate::entrances::{
     auto_mirror_update_all, clean, info, install_using_package, list, pack, uninstall, update_all,
 };
 use crate::utils::cfg::get_config;
-use crate::utils::envmnt;
+use crate::utils::flags::{set_flag, Flag};
 use crate::utils::launch_clean;
 use anyhow::{anyhow, Result};
 use clap::Parser;
@@ -36,6 +36,7 @@ fn router(action: Action, cfg: Cfg) -> Result<String> {
     use entrances::{install_using_parsed, update_using_parsed, upgrade};
     use types::{cli::ActionMirror, extended_semver::ExSemVer};
     use utils::{
+        flags::{get_flag, set_flag, Flag},
         fmt_print::{fmt_mirror_line, fmt_package_line},
         get_path_apps,
         parse_inputs::{parse_install_inputs, parse_uninstall_inputs, parse_update_inputs},
@@ -48,7 +49,7 @@ fn router(action: Action, cfg: Cfg) -> Result<String> {
         },
         types::matcher::{PackageInputEnum, PackageMatcher},
     };
-    let verify_signature = envmnt::get_or("OFFLINE", "false") == *"false";
+    let verify_signature = !get_flag(Flag::Offline, false);
 
     // 匹配入口
     match action {
@@ -217,7 +218,7 @@ fn router(action: Action, cfg: Cfg) -> Result<String> {
         } => pack(&source_dir, into_file, verify_signature)
             .map(|location| format!("Success:Package stored at '{location}'")),
         Action::Meta { package, save_at } => {
-            envmnt::set("NO_WARNING", "true");
+            set_flag(Flag::NoWarning, true);
             let package_input_enum = PackageInputEnum::parse(package, true, true)?;
             let res = meta(package_input_enum, verify_signature)?;
             let text = serde_json::to_string_pretty(&res)
@@ -303,19 +304,19 @@ fn main() {
     // 配置环境变量
     let args = Args::parse();
     if args.qa {
-        envmnt::set("QA", "true");
+        set_flag(Flag::QA, true);
     }
     if args.debug || args.qa || cfg!(debug_assertions) {
         log!("Warning:Debug mode enabled");
-        envmnt::set("DEBUG", "true");
+        set_flag(Flag::Debug, true);
     }
     if args.offline {
         log!("Warning:Offline mode enabled, ept couldn't guarantee security or integrality of packages");
-        envmnt::set("OFFLINE", "true");
+        set_flag(Flag::Offline, true);
     }
     if args.qa || args.yes {
         log!("Warning:Confirmation mode enabled");
-        envmnt::set("CONFIRM", "true");
+        set_flag(Flag::Confirm, true);
     }
 
     // 获取配置

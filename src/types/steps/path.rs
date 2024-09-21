@@ -311,9 +311,9 @@ fn test_set_system_path() {
 
 #[test]
 fn test_path() {
-    use crate::utils::envmnt;
-    envmnt::set("DEBUG", "true");
-    envmnt::set("CONFIRM", "true");
+    use crate::utils::flags::{set_flag, Flag};
+    set_flag(Flag::Debug, true);
+    set_flag(Flag::Confirm, true);
     let mut cx = WorkflowContext::_demo();
 
     // 添加目录

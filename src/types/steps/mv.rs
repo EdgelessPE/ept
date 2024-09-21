@@ -138,10 +138,10 @@ impl Generalizable for StepMove {
 
 #[test]
 fn test_copy() {
-    use crate::utils::envmnt;
+    use crate::utils::flags::{set_flag, Flag};
     use crate::utils::fs::copy_dir;
     use std::path::Path;
-    envmnt::set("DEBUG", "true");
+    set_flag(Flag::Debug, true);
     let mut cx = WorkflowContext::_demo();
     crate::utils::test::_ensure_clear_test_dir();
 

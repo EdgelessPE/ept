@@ -344,8 +344,8 @@ fn test_filter_release() {
 
 #[test]
 fn test_filter_release_with_flags() {
-    use crate::utils::envmnt;
-    envmnt::set("DEBUG", "true");
+    use crate::utils::flags::{set_flag, Flag};
+    set_flag(Flag::Debug, true);
     use crate::types::cfg::PreferenceEnum;
     use crate::types::extended_semver::ExSemVer;
     use crate::utils::cfg::set_config;

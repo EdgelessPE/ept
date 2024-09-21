@@ -124,8 +124,8 @@ pub fn meta(input: PackageInputEnum, verify_signature: bool) -> Result<MetaResul
 #[test]
 fn test_meta() {
     use crate::types::matcher::PackageMatcher;
-    use crate::utils::envmnt;
-    envmnt::set("CONFIRM", "true");
+    use crate::utils::flags::{set_flag, Flag};
+    set_flag(Flag::Confirm, true);
     let res = meta(
         PackageInputEnum::LocalPath("examples/PermissionsTest".to_string()),
         false,
