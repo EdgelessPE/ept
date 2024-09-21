@@ -1,3 +1,5 @@
+use std::sync::Mutex;
+
 use colored::Colorize;
 use console::Term;
 use regex::Regex;
@@ -6,12 +8,12 @@ use super::{
     fmt_print::{fmt_log, fmt_log_in_step},
     is_debug_mode, is_no_warning_mode,
 };
-use crate::utils::envmnt;
 
 lazy_static! {
     static ref RE: Regex =
         Regex::new(r"(Question|Debug|Info|Warning|Error|Success)(\(\w+\))?:(.+)").unwrap();
     static ref TERM: Term = Term::stdout();
+    static ref LAST_LOG: Mutex<String> = Mutex::new("".to_string());
 }
 
 fn gen_log(msg: &String, replace_head: Option<String>) -> Option<String> {
@@ -54,7 +56,8 @@ fn gen_log(msg: &String, replace_head: Option<String>) -> Option<String> {
 pub fn fn_log(msg: String) {
     let g = gen_log(&msg, None);
     if let Some(content) = g {
-        envmnt::set("LAST_LOG", &msg);
+        let mut s = LAST_LOG.lock().unwrap();
+        *s = msg;
         TERM.write_line(&content).unwrap();
     }
 }
@@ -62,8 +65,8 @@ pub fn fn_log(msg: String) {
 pub fn fn_log_ok_last(msg: String) {
     let g = gen_log(&format!("{msg}   {ok}", ok = "ok".green()), None);
     if let Some(content) = g {
-        let last_log = envmnt::get_or("LAST_LOG", "");
-        if last_log == msg {
+        let last_log = LAST_LOG.lock().unwrap();
+        if last_log.clone() == msg {
             TERM.move_cursor_up(1).unwrap();
             TERM.clear_line().unwrap();
         }
@@ -87,6 +90,7 @@ macro_rules! log_ok_last {
 
 #[test]
 fn test_log() {
+    use crate::utils::envmnt;
     envmnt::set("DEBUG", "true");
 
     fn_log("Question:This is a question".to_string());
