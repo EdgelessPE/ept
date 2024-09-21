@@ -225,7 +225,7 @@ fn router(action: Action, cfg: Cfg) -> Result<String> {
             let mut res_toml = toml::Value::try_from(res)?;
             let _ = res_toml.as_table_mut().unwrap().remove("temp_dir");
 
-            // 反序列化并写控制台或写文件
+            // 序列化
             let text = toml::to_string_pretty(&res_toml)
                 .map_err(|e| anyhow!("Error:Failed to deserialize result : {e}"))?;
             if let Some(into) = save_at {
