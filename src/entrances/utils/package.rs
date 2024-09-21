@@ -10,7 +10,6 @@ use anyhow::{anyhow, Result};
 use sysinfo::System;
 use tar::Archive;
 
-use crate::utils::envmnt;
 use crate::{
     compression::{decompress, fast_decompress_zstd, release_tar},
     entrances,
@@ -85,10 +84,7 @@ pub fn unpack_nep(source: &String, verify_signature: bool) -> Result<(PathBuf, G
     let size = meta.len();
     // 获取 fast 处理方法的文件大小上限，确保最大占用内存不超过 4GB
     let s = System::new_all();
-    let size_limit = envmnt::get_u64(
-        "FAST_UNPACK_LIMIT",
-        min(s.available_memory() / 3, 4 * 1024 * 1024 * 1024),
-    );
+    let size_limit = min(s.available_memory() / 3, 4 * 1024 * 1024 * 1024);
 
     let res = if size <= size_limit {
         log!("Debug:Use fast unpack method ({size}/{size_limit})");
@@ -274,6 +270,7 @@ fn fast_unpack_nep(
 
 #[test]
 fn test_unpack_nep() {
+    use crate::utils::envmnt;
     if cfg!(debug_assertions) {
         log!("Warning:Debug mode enabled");
         envmnt::set("DEBUG", "true");
@@ -293,6 +290,7 @@ fn test_unpack_nep() {
 
 #[test]
 fn test_normal_unpack_nep() {
+    use crate::utils::envmnt;
     if cfg!(debug_assertions) {
         log!("Warning:Debug mode enabled");
         envmnt::set("DEBUG", "true");
@@ -312,6 +310,7 @@ fn test_normal_unpack_nep() {
 
 #[test]
 fn test_fast_unpack_nep() {
+    use crate::utils::envmnt;
     if cfg!(debug_assertions) {
         log!("Warning:Debug mode enabled");
         envmnt::set("DEBUG", "true");
