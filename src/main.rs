@@ -21,7 +21,7 @@ use crate::entrances::{
     auto_mirror_update_all, clean, info, install_using_package, list, pack, uninstall, update_all,
 };
 use crate::utils::cfg::get_config;
-use crate::utils::flags::{set_flag, Flag};
+use crate::utils::flags::{get_flag, set_flag, Flag};
 use crate::utils::launch_clean;
 use anyhow::{anyhow, Result};
 use clap::Parser;
@@ -36,7 +36,6 @@ fn router(action: Action, cfg: Cfg) -> Result<String> {
     use entrances::{install_using_parsed, update_using_parsed, upgrade};
     use types::{cli::ActionMirror, extended_semver::ExSemVer};
     use utils::{
-        flags::{get_flag, set_flag, Flag},
         fmt_print::{fmt_mirror_line, fmt_package_line},
         get_path_apps,
         parse_inputs::{parse_install_inputs, parse_uninstall_inputs, parse_update_inputs},
@@ -218,10 +217,16 @@ fn router(action: Action, cfg: Cfg) -> Result<String> {
         } => pack(&source_dir, into_file, verify_signature)
             .map(|location| format!("Success:Package stored at '{location}'")),
         Action::Meta { package, save_at } => {
-            set_flag(Flag::NoWarning, true);
+            // 调用 meta
             let package_input_enum = PackageInputEnum::parse(package, true, true)?;
             let res = meta(package_input_enum, verify_signature)?;
-            let text = serde_json::to_string_pretty(&res)
+
+            // 移除 temp_dir
+            let mut res_toml = toml::Value::try_from(res)?;
+            let _ = res_toml.as_table_mut().unwrap().remove("temp_dir");
+
+            // 反序列化并写控制台或写文件
+            let text = toml::to_string_pretty(&res_toml)
                 .map_err(|e| anyhow!("Error:Failed to deserialize result : {e}"))?;
             if let Some(into) = save_at {
                 write(&into, text)
