@@ -258,6 +258,7 @@ fn test_print_enum() {
 
 #[test]
 fn test_parse_inputs() {
+    use crate::utils::envmnt;
     envmnt::set("DEBUG", "true");
     envmnt::set("CONFIRM", "true");
 

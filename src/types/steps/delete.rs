@@ -113,6 +113,7 @@ impl Generalizable for StepDelete {
 
 #[test]
 fn test_delete() {
+    use crate::utils::envmnt;
     envmnt::set("DEBUG", "true");
     let mut cx = WorkflowContext::_demo();
     crate::utils::test::_ensure_clear_test_dir();

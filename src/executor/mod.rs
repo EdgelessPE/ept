@@ -225,6 +225,7 @@ fn test_condition_eval() {
 
 #[test]
 fn test_workflow_executor() {
+    use crate::utils::envmnt;
     envmnt::set("DEBUG", "true");
     use crate::types::steps::{Step, StepExecute, StepLog};
     use crate::types::workflow::{WorkflowHeader, WorkflowNode};

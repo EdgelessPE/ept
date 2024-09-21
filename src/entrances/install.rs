@@ -189,6 +189,7 @@ pub fn install_using_parsed(
 
 #[test]
 fn test_install() {
+    use crate::utils::envmnt;
     use crate::utils::fs::copy_dir;
     envmnt::set("DEBUG", "true");
     envmnt::set("CONFIRM", "true");
@@ -294,6 +295,7 @@ fn test_install_dism() {
 #[test]
 fn test_reg_entry() {
     use crate::types::{steps::TStep, workflow::WorkflowContext};
+    use crate::utils::envmnt;
     use winreg::enums::HKEY_CURRENT_USER;
     envmnt::set("DEBUG", "true");
     let cur_dir_pb = std::env::current_dir().unwrap();
@@ -365,6 +367,7 @@ fn test_reg_entry() {
 
 #[test]
 fn test_install_with_matcher() {
+    use crate::utils::envmnt;
     envmnt::set("CONFIRM", "true");
     // 替换测试镜像源
     let custom_mirror_ctx = crate::utils::test::_mount_custom_mirror();
@@ -433,6 +436,7 @@ fn test_install_with_matcher() {
 
 #[test]
 fn test_install_expandable() {
+    use crate::utils::envmnt;
     envmnt::set("CONFIRM", "true");
     crate::utils::test::_ensure_clear_test_dir();
     crate::utils::test::_ensure_testing_uninstalled("Microsoft", "VSCodeE");

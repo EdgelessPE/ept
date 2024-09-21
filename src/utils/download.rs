@@ -11,6 +11,7 @@ use crate::utils::cache::CacheCtx;
 use crate::utils::cfg::get_config;
 
 use super::allocate_path_temp;
+use crate::utils::envmnt;
 
 // cached 接受参数为 (存放缓存的路径，缓存 key)
 // 函数返回的是缓存上下文，当文件被验证可用后可以使用这个上下文传递给 spawn_cache 函数进行缓存

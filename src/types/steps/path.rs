@@ -311,6 +311,7 @@ fn test_set_system_path() {
 
 #[test]
 fn test_path() {
+    use crate::utils::envmnt;
     envmnt::set("DEBUG", "true");
     envmnt::set("CONFIRM", "true");
     let mut cx = WorkflowContext::_demo();

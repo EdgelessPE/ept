@@ -5,6 +5,7 @@ use super::{
         validator::installed_validator,
     },
 };
+use crate::utils::envmnt;
 use crate::{
     entrances::{expand_workshop, is_workshop_expandable},
     executor::workflow_executor,

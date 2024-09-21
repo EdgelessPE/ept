@@ -10,6 +10,7 @@ use anyhow::{anyhow, Result};
 use sysinfo::System;
 use tar::Archive;
 
+use crate::utils::envmnt;
 use crate::{
     compression::{decompress, fast_decompress_zstd, release_tar},
     entrances,

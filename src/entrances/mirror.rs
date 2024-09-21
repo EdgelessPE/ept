@@ -172,6 +172,7 @@ pub fn mirror_remove(name: &String) -> Result<()> {
 
 #[test]
 fn test_mirror() {
+    use crate::utils::envmnt;
     envmnt::set("DEBUG", "true");
     use crate::entrances::search;
     use crate::utils::test::_run_mirror_mock_server;

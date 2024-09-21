@@ -212,6 +212,7 @@ impl Generalizable for StepCopy {
 
 #[test]
 fn test_copy() {
+    use crate::utils::envmnt;
     use std::fs::remove_dir_all;
     use std::path::Path;
     envmnt::set("DEBUG", "true");

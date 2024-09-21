@@ -88,6 +88,7 @@ impl Generalizable for StepKill {
 #[test]
 fn test_kill() {
     use crate::types::workflow::WorkflowContext;
+    use crate::utils::envmnt;
     envmnt::set("DEBUG", "true");
     envmnt::set("CONFIRM", "true");
     let mut cx = WorkflowContext::_demo();

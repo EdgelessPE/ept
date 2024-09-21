@@ -21,6 +21,7 @@ use crate::entrances::{
     auto_mirror_update_all, clean, info, install_using_package, list, pack, uninstall, update_all,
 };
 use crate::utils::cfg::get_config;
+use crate::utils::envmnt;
 use crate::utils::launch_clean;
 use anyhow::{anyhow, Result};
 use clap::Parser;

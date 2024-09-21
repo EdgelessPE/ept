@@ -182,6 +182,7 @@ pub fn verify(source_dir: &String) -> Result<GlobalPackage> {
 
 #[test]
 fn test_verify() {
+    use crate::utils::envmnt;
     envmnt::set("DEBUG", "true");
     use std::fs::write;
     verify(&"./examples/VSCode".to_string()).unwrap();

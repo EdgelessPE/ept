@@ -6,6 +6,7 @@ use super::{
     fmt_print::{fmt_log, fmt_log_in_step},
     is_debug_mode, is_no_warning_mode,
 };
+use crate::utils::envmnt;
 
 lazy_static! {
     static ref RE: Regex =

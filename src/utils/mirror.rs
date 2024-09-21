@@ -344,6 +344,7 @@ fn test_filter_release() {
 
 #[test]
 fn test_filter_release_with_flags() {
+    use crate::utils::envmnt;
     envmnt::set("DEBUG", "true");
     use crate::types::cfg::PreferenceEnum;
     use crate::types::extended_semver::ExSemVer;

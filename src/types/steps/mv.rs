@@ -138,6 +138,7 @@ impl Generalizable for StepMove {
 
 #[test]
 fn test_copy() {
+    use crate::utils::envmnt;
     use crate::utils::fs::copy_dir;
     use std::path::Path;
     envmnt::set("DEBUG", "true");

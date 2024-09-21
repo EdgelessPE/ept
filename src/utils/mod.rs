@@ -9,6 +9,7 @@ pub mod conditions;
 pub mod constants;
 pub mod download;
 pub mod env;
+pub mod envmnt;
 pub mod fmt_print;
 pub mod fs;
 pub mod mirror;

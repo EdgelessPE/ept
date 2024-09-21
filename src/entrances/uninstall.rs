@@ -161,6 +161,7 @@ pub fn uninstall(scope: Option<String>, package_name: &String) -> Result<(String
 
 #[test]
 fn test_uninstall() {
+    use crate::utils::envmnt;
     // 完整的安装和卸载流程案例位于entrances::install::test_install
 
     // 这里测试一下需要杀进程的案例

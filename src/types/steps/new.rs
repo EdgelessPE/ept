@@ -121,6 +121,7 @@ impl Generalizable for StepNew {
 #[test]
 fn test_new() {
     use crate::types::workflow::WorkflowContext;
+    use crate::utils::envmnt;
     use std::fs::metadata;
     use std::path::Path;
     envmnt::set("DEBUG", "true");

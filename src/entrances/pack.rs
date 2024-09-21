@@ -97,6 +97,7 @@ pub fn pack(source_dir: &String, into_file: Option<String>, need_sign: bool) -> 
 
 #[test]
 fn test_pack() {
+    use crate::utils::envmnt;
     envmnt::set("DEBUG", "false");
     envmnt::set("CONFIRM", "true");
     pack(

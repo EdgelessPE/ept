@@ -152,6 +152,7 @@ pub fn clean() -> Result<usize> {
 
 #[test]
 fn test_clean() {
+    use crate::utils::envmnt;
     use crate::utils::fs::copy_dir;
     use std::fs::{copy, create_dir_all, write};
     envmnt::set("CONFIRM", "true");

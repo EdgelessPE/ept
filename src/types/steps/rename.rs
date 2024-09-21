@@ -137,6 +137,7 @@ impl Generalizable for StepRename {
 #[test]
 fn test_rename() {
     use crate::types::workflow::WorkflowContext;
+    use crate::utils::envmnt;
     use std::path::Path;
     envmnt::set("DEBUG", "true");
     let mut cx = WorkflowContext::_demo();

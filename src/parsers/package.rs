@@ -218,6 +218,7 @@ fn test_is_nep_version_compatible() {
 
 #[test]
 fn test_parse_package() {
+    use crate::utils::envmnt;
     envmnt::set("DEBUG", "true");
     let located = &"examples/VSCode".to_string();
     let pkg = parse_package(&"examples/VSCode/package.toml".to_string(), located, false).unwrap();
