@@ -65,10 +65,6 @@ pub fn is_confirm_mode() -> bool {
     get_flag(Flag::Confirm, false)
 }
 
-pub fn is_no_warning_mode() -> bool {
-    get_flag(Flag::NoWarning, false)
-}
-
 pub fn format_path(raw: &str) -> String {
     let tmp = raw.replace('\\', "/");
     tmp.strip_prefix("./").map(|s| s.to_string()).unwrap_or(tmp)

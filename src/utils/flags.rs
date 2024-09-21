@@ -7,7 +7,6 @@ pub enum Flag {
     Cache,
     Confirm,
     Debug,
-    NoWarning,
     Offline,
     QA,
 }
