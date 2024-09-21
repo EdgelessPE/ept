@@ -62,17 +62,18 @@ pub fn meta(input: PackageInputEnum, verify_signature: bool) -> Result<MetaResul
     let temp_dir = p2s!(temp_dir_inner_path);
 
     // 检查工作流存在
-    let exists_workflows: Vec<(String, String)> = vec!["setup.toml", "update.toml", "remove.toml"]
-        .into_iter()
-        .filter_map(|name| {
-            let p = workflow_path.join(name);
-            if p.exists() {
-                Some((name.to_string(), p2s!(p)))
-            } else {
-                None
-            }
-        })
-        .collect();
+    let exists_workflows: Vec<(String, String)> =
+        vec!["setup.toml", "update.toml", "remove.toml", "expand.toml"]
+            .into_iter()
+            .filter_map(|name| {
+                let p = workflow_path.join(name);
+                if p.exists() {
+                    Some((name.to_string(), p2s!(p)))
+                } else {
+                    None
+                }
+            })
+            .collect();
 
     // 收集所有工作流
     let total_workflow = exists_workflows
