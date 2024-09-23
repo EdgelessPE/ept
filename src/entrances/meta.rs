@@ -170,9 +170,9 @@ fn test_meta() {
                 key: PermissionKey::execute_installer,
                 level: PermissionLevel::Important,
                 targets: vec![
-                    "installer /S".to_string(),
-                    "uninstaller /S".to_string(),
-                    "updater /S".to_string(),
+                    "installer.exe /S".to_string(),
+                    "uninstaller.exe /S".to_string(),
+                    "updater.exe /S".to_string(),
                 ],
             },
             Permission {
