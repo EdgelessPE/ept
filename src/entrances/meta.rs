@@ -19,7 +19,6 @@ use anyhow::{anyhow, Result};
 use super::{
     info_local,
     utils::{package::unpack_nep, validator::installed_validator},
-    verify::verify,
 };
 
 // 返回 (临时目录，工作流所在目录，全局包)
@@ -33,7 +32,7 @@ fn find_meta_target(
             let p = Path::new(&local_path);
             if p.exists() {
                 let (path, pkg) = unpack_nep(&local_path, verify_signature)?;
-                verify(&p2s!(path))?;
+                // verify(&p2s!(path))?;
                 return Ok((path.clone(), path.join("workflows"), pkg));
             }
         }
