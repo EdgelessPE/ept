@@ -22,5 +22,5 @@ target = "Code.exe"
 [uninstall]
 name = "Run uninstaller"
 step = "Execute"
-command = "uninstaller /S"
+command = "uninstaller.exe /S"
 call_installer = true

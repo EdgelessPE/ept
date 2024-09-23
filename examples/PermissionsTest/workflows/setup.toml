@@ -20,7 +20,7 @@ operation = "Add"
 [install]
 name = "Run installer"
 step = "Execute"
-command = "installer /S"
+command = "installer.exe /S"
 call_installer = true
 
 [run]
