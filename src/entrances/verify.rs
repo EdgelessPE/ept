@@ -9,6 +9,7 @@ use crate::utils::is_starts_with_inner_value;
 use crate::utils::path::parse_relative_path_with_located;
 use crate::{log, log_ok_last, p2s};
 use anyhow::{anyhow, Result};
+use std::collections::HashSet;
 use std::fs::read_dir;
 use std::path::{Path, PathBuf};
 
@@ -16,8 +17,15 @@ use super::utils::validator::{inner_validator, manifest_validator};
 
 fn get_manifest(flow: Vec<WorkflowNode>, fs: &mut MixedFS) -> Vec<String> {
     let mut manifest = Vec::new();
+    let mut set = HashSet::new();
     for node in flow {
-        manifest.append(&mut node.body.get_manifest(fs));
+        for item in node.body.get_manifest(fs) {
+            if set.contains(&item) {
+                continue;
+            }
+            set.insert(item.clone());
+            manifest.push(item);
+        }
     }
     debug_assert!(manifest.clone().into_iter().fold(true, |state, cur| {
         if !state {
@@ -145,7 +153,14 @@ pub fn verify(source_dir: &String) -> Result<GlobalPackage> {
         let expand_flow = parse_workflow(&p2s!(expand_path))?;
         let _expand_manifest = get_manifest(expand_flow, &mut fs);
     }
-    let setup_manifest = get_manifest(setup_flow, &mut fs);
+    let mut setup_manifest = get_manifest(setup_flow, &mut fs);
+    // 加上 update 工作流的装箱单
+    let update_path = get_workflow_path(source_dir, "update.toml");
+    if update_path.exists() {
+        let update_flow = parse_workflow(&p2s!(update_path))?;
+        let mut update_manifest = get_manifest(update_flow, &mut fs);
+        setup_manifest.append(&mut update_manifest);
+    }
     manifest_validator(&pkg_content_path, setup_manifest, &mut fs)?;
     log_ok_last!("Info:Checking manifest...");
 
@@ -181,12 +196,35 @@ pub fn verify(source_dir: &String) -> Result<GlobalPackage> {
 }
 
 #[test]
+fn test_get_manifest() {
+    let mut fs = MixedFS::new("./examples/VSCode".to_string());
+    let setup_workflow =
+        parse_workflow(&"examples/PermissionsTest/workflows/setup.toml".to_string()).unwrap();
+    assert_eq!(
+        get_manifest(setup_workflow, &mut fs),
+        vec![
+            "bin".to_string(),
+            "Code.exe".to_string(),
+            "installer.exe".to_string()
+        ]
+    );
+
+    let update_workflow =
+        parse_workflow(&"examples/PermissionsTest/workflows/update.toml".to_string()).unwrap();
+    assert_eq!(
+        get_manifest(update_workflow, &mut fs),
+        vec!["bin".to_string(), "updater.exe".to_string()]
+    );
+}
+
+#[test]
 fn test_verify() {
     use crate::utils::flags::{set_flag, Flag};
     set_flag(Flag::Debug, true);
     use std::fs::write;
     verify(&"./examples/VSCode".to_string()).unwrap();
     verify(&"./examples/CallInstaller".to_string()).unwrap();
+    verify(&"./examples/PermissionsTest".to_string()).unwrap();
 
     // 手动添加没有 call_installer 的 update.toml
     std::fs::copy(
