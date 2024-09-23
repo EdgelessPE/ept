@@ -209,6 +209,11 @@ fn test_meta() {
                 targets: vec!["./lib".to_string(),],
             },
             Permission {
+                key: PermissionKey::download_file,
+                level: PermissionLevel::Important,
+                targets: vec!["http://localhost:19191/Code.exe".to_string(),],
+            },
+            Permission {
                 key: PermissionKey::notify_toast,
                 level: PermissionLevel::Normal,
                 targets: vec![
