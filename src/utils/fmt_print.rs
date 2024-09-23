@@ -2,6 +2,14 @@ use chrono::DateTime;
 use colored::{ColoredString, Colorize};
 use std::time::SystemTime;
 
+fn ellipsis(raw: &str, limit: usize) -> String {
+    let len = raw.len();
+    if len <= limit {
+        return raw.to_string();
+    }
+    format!("{}...", &raw[0..limit - 3])
+}
+
 pub fn fmt_log(head: ColoredString, msg: &str) -> String {
     format!("{head:>8} {msg}")
 }
@@ -12,9 +20,9 @@ pub fn fmt_log_in_step(step: &str, head: ColoredString, msg: &str) -> String {
 
 pub fn fmt_package_line(scope: &str, name: &str, version: &str, mirror: Option<String>) -> String {
     format!(
-        "  {:>20}/{:<50} {:<20} {}\n",
-        scope.truecolor(100, 100, 100).italic(),
-        name.cyan().bold(),
+        "  {:>15}/{:<30} {:<22} {}\n",
+        ellipsis(scope, 15).truecolor(100, 100, 100).italic(),
+        ellipsis(name, 30).cyan().bold(),
         format!("({version})"),
         mirror.unwrap_or_default().as_str().truecolor(100, 100, 100)
     )
@@ -31,6 +39,16 @@ pub fn fmt_mirror_line(name: &str, updated_at: SystemTime) -> String {
 }
 
 #[test]
+fn test_ellipsis() {
+    assert_eq!(ellipsis("VSCode", 10), "VSCode".to_string());
+    assert_eq!(ellipsis("Visual Studio Code", 10), "Visual ...".to_string());
+    assert_eq!(
+        ellipsis("Visual Studio Code", 16),
+        "Visual Studio...".to_string()
+    );
+}
+
+#[test]
 fn test_fmt() {
     println!("{}", fmt_log("Test".purple(), "This is a fmt test message"));
     println!(
@@ -40,6 +58,15 @@ fn test_fmt() {
     print!(
         "{}",
         fmt_package_line("Scope", "Name", "1.1.4.5", Some("mock-server".to_string()),)
+    );
+    print!(
+        "{}",
+        fmt_package_line(
+            "Portable-Apps-Foundation",
+            "Firefox-Special-Edition-For-Developers",
+            "1145.1419.1981.0000",
+            Some("mock-server".to_string()),
+        )
     );
     print!("{}", fmt_mirror_line("mock-server", SystemTime::now()));
 }

@@ -10,7 +10,7 @@ use crate::{
         download::download,
         get_path_toolchain,
         term::ask_yn,
-        upgrade::{check_has_upgrade, fmt_upgradable, fmt_upgradable_cross_wid_gap},
+        upgrade::{check_has_upgrade, print_upgradable, print_upgradable_cross_wid_gap},
     },
 };
 use anyhow::{anyhow, Ok, Result};
@@ -24,7 +24,7 @@ pub fn upgrade(dry_run: bool, need_exit_process: bool) -> Result<String> {
     let (has_upgrade, is_cross_wid_gap, latest_release) = check_has_upgrade()?;
     if !has_upgrade || dry_run {
         return Ok(if has_upgrade {
-            fmt_upgradable(latest_release)
+            print_upgradable(latest_release)
         } else {
             format!("Success:The ept toolchain is up to date ('{current_version}')")
         });
@@ -32,7 +32,7 @@ pub fn upgrade(dry_run: bool, need_exit_process: bool) -> Result<String> {
     if is_cross_wid_gap {
         return Err(anyhow!(
             "{}",
-            fmt_upgradable_cross_wid_gap(false, latest_release)
+            print_upgradable_cross_wid_gap(false, latest_release)
         ));
     }
 

@@ -77,14 +77,14 @@ pub fn check_has_upgrade() -> Result<(bool, bool, MirrorEptToolchainRelease)> {
     check_has_upgrade_impl(current_version, toolchain_data)
 }
 
-pub fn fmt_upgradable(latest_release: MirrorEptToolchainRelease) -> String {
+pub fn print_upgradable(latest_release: MirrorEptToolchainRelease) -> String {
     format!(
         "Info:A new version of ept toolchain ('{}') is available, use 'ept upgrade' to spawn upgrade",
         latest_release.version
     )
 }
 
-pub fn fmt_upgradable_cross_wid_gap(
+pub fn print_upgradable_cross_wid_gap(
     gentle: bool,
     latest_release: MirrorEptToolchainRelease,
 ) -> String {
@@ -221,6 +221,6 @@ fn test_fmt_upgradable_cross_wid_gap() {
         size: 0,
         timestamp: 0,
     };
-    fmt_upgradable_cross_wid_gap(true, latest_release.clone());
-    fmt_upgradable_cross_wid_gap(false, latest_release.clone());
+    print_upgradable_cross_wid_gap(true, latest_release.clone());
+    print_upgradable_cross_wid_gap(false, latest_release.clone());
 }

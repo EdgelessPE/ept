@@ -300,7 +300,7 @@ fn router(action: Action, cfg: Cfg) -> Result<String> {
 fn main() {
     use entrances::mirror_list;
     // 清理缓存
-    use utils::upgrade::{check_has_upgrade, fmt_upgradable, fmt_upgradable_cross_wid_gap};
+    use utils::upgrade::{check_has_upgrade, print_upgradable, print_upgradable_cross_wid_gap};
     launch_clean().unwrap();
 
     // 启用虚拟终端
@@ -355,9 +355,9 @@ fn main() {
             log!(
                 "{}",
                 if is_cross_wid_gap {
-                    fmt_upgradable_cross_wid_gap(true, latest_release)
+                    print_upgradable_cross_wid_gap(true, latest_release)
                 } else {
-                    fmt_upgradable(latest_release)
+                    print_upgradable(latest_release)
                 }
             )
         }

@@ -38,8 +38,8 @@ pub enum ParseInputResEnum {
 impl Display for ParseInputResEnum {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let line = match self {
-            ParseInputResEnum::LocalPath(p) => format!("{:>12}: {p}", "Local path"),
-            ParseInputResEnum::Url(u) => format!("{:>12}: {u}", "URL"),
+            ParseInputResEnum::LocalPath(p) => format!("{:>12}: {p}\n", "Local path"),
+            ParseInputResEnum::Url(u) => format!("{:>12}: {u}\n", "URL"),
             ParseInputResEnum::PackageMatcher(p) => {
                 let version_tip = if let Some(cur) = &p.current_version {
                     format!("{cur} → {}", p.target_version)
@@ -47,7 +47,7 @@ impl Display for ParseInputResEnum {
                     p.target_version.to_owned()
                 };
                 format!(
-                    "{:>12}: {}",
+                    "{:>12}:{}",
                     "Package",
                     fmt_package_line(&p.scope, &p.name, &version_tip, None)
                 )
