@@ -25,7 +25,7 @@
   "devDependencies": {
     "@eslint/js": "^9.11.0",
     "@modern-js/tsconfig": "2.60.1",
-    "@rspress/plugin-shiki": "^1.30.0",
+    "@rspress/plugin-shiki": "^1.31.1",
     "@types/jest": "^29.5.13",
     "@types/node": "^22.5.5",
     "chatgpt-md-translator": "^1.7.1",
