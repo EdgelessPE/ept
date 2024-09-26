@@ -16,8 +16,8 @@ export function getBumpType(): BumpType {
   );
 }
 
-export function needGitTag() {
-  return !!args.tag;
+export function isNotDryRun() {
+  return !args.dry;
 }
 
 export async function modifyVersion(

@@ -1,11 +1,19 @@
 import { readFile } from "node:fs/promises";
 import TOML from "smol-toml";
 import cp from "child_process";
-import { getBumpType, modifyVersion, needGitTag, sleep } from "./utils";
+import { getBumpType, modifyVersion, isNotDryRun, sleep } from "./utils";
 import { SemVer } from "semver";
 import rcedit from "rcedit";
+import { existsSync } from "node:fs";
 
 async function main() {
+  // 检查证书存在
+  if (!existsSync("scripts/release_version/cert.pfx")) {
+    throw new Error(
+      "Certificate not found, please put 'cert.pfx' in 'scripts/release_version'",
+    );
+  }
+
   // 读取版本号，并判断 Rust 和 Node 版本号一致
   const packageText = (await readFile("package.json")).toString();
   const cargoText = (await readFile("Cargo.toml")).toString();
@@ -34,11 +42,13 @@ async function main() {
   );
 
   // 修改版本号
-  await modifyVersion("package.json", packageVersion, targetVersion);
-  await modifyVersion("Cargo.toml", packageVersion, targetVersion);
+  if (isNotDryRun()) {
+    await modifyVersion("package.json", packageVersion, targetVersion);
+    await modifyVersion("Cargo.toml", packageVersion, targetVersion);
+  }
 
   // 打 git tag
-  if (needGitTag()) {
+  if (isNotDryRun()) {
     console.log("Info: Tagging...");
     cp.execSync(`git tag ${targetVersion}`);
   }
@@ -59,6 +69,12 @@ async function main() {
       LegalCopyright: `Copyright (c) ${new Date().getFullYear()} Cno. MIT Licensed project of EdgelessPE`,
     },
   });
+
+  // 签名
+  console.log("Info: Signing...");
+  cp.execSync(
+    'signtool sign /f "scripts/release_version/cert.pfx" /p 114514 /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 target/release/ept.exe',
+  );
 }
 
 main().then();

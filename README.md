@@ -30,7 +30,9 @@
 * 执行 `pnpm rs:ut`
 * 如需要查看单测覆盖率，请使用 `cargo install cargo-tarpaulin` 安装 [tarpaulin](https://github.com/xd009642/tarpaulin) 后执行 `pnpm rs:ut:html`
 
-## 构建
+## 构建与发版
 使用 `cargo build` 构建测试版本的可执行文件，该文件运行时会默认启用 Debug 模式。
 
 如果需要构建生产环境的版本，请执行 `pnpm rs:build`，这会调用 [vc-ltl](https://crates.io/crates/vc-ltl) 构建一个无需 VC 运行库的生产版本可执行文件。
+
+需要发版时使用的命令为 `pnpm rs:release`，详情见 [README.md](scripts/release_version/README.md)。

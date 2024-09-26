@@ -46,6 +46,7 @@
         "Secp",
         "sentencecase",
         "SETTINGCHANGE",
+        "signtool",
         "SMTO",
         "startmenu",
         "subkey",
