@@ -1,3 +1,3 @@
 $cert = New-SelfSignedCertificate -Type CodeSigningCert -Subject "CN=EdgelessPE" -KeyUsage DigitalSignature -FriendlyName "EptCodeSigningCert" -CertStoreLocation "Cert:\CurrentUser\My" -KeyLength 2048 -KeyAlgorithm RSA -HashAlgorithm SHA256 -Provider "Microsoft Software Key Storage Provider" -KeyExportPolicy Exportable
-$pwd = ConvertTo-SecureString -String "114514" -Force -AsPlainText
-Export-PfxCertificate -Cert $cert -FilePath "cert.pfx" -Password $pwd
+$passwd = ConvertTo-SecureString -String "114514" -Force -AsPlainText
+Export-PfxCertificate -Cert $cert -FilePath "cert.pfx" -Password $passwd
