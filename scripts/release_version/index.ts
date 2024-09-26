@@ -14,6 +14,11 @@ async function main() {
     );
   }
 
+  // 提示干运行
+  if (isNotDryRun()) {
+    console.log("Info: Dry run mode, no file changes or git tag will be made");
+  }
+
   // 读取版本号，并判断 Rust 和 Node 版本号一致
   const packageText = (await readFile("package.json")).toString();
   const cargoText = (await readFile("Cargo.toml")).toString();
