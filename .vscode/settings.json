@@ -39,6 +39,7 @@
         "postpack",
         "predef",
         "pwsh",
+        "rcedit",
         "reqwest",
         "rspress",
         "Rustup",
