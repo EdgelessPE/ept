@@ -15,7 +15,7 @@ async function main() {
   }
 
   // 提示干运行
-  if (isNotDryRun()) {
+  if (!isNotDryRun()) {
     console.log("Info: Dry run mode, no file changes or git tag will be made");
   }
 
