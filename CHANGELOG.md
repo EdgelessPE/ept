@@ -2,7 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
-## [unreleased]
+## [0.3.0] - 2024-09-27
+
+### 🚀 Features
+
+- 支持使用 git cliff
+- 支持脚本生成CHANGELOG
+
+## [0.2.2] - 2024-09-27
 
 ### 🚀 Features
 

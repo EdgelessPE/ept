@@ -35,6 +35,7 @@ async function main() {
   }
 
   const targetVersion = await getTargetVersion(packageVersion);
+  console.log(`Info: Target version : ${targetVersion}`);
 
   // 确认执行
   const res = await ask(
@@ -44,15 +45,16 @@ async function main() {
     throw new Error("Operation canceled by user");
   }
   const isDev = res === "d";
+  const binPath = isDev ? "target/debug/ept.exe" : "target/release/ept.exe";
 
   // 编译 Rust 项目
   console.log("Info: Compiling...");
-  cp.execSync(`npm run rs:build`);
+  cp.execSync(isDev ? "cargo build" : "npm run rs:build");
+  await sleep(1000);
 
   // 修改编译产物的版本号
   console.log("Info: Modifying release version...");
-  await sleep(1000);
-  await rcedit("target/release/ept.exe", {
+  await rcedit(binPath, {
     "product-version": targetVersion,
     "file-version": targetVersion,
     "version-string": {
@@ -65,11 +67,12 @@ async function main() {
   // 签名
   console.log("Info: Signing...");
   cp.execSync(
-    'signtool sign /f "scripts/release_version/cert.pfx" /p 114514 /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 target/release/ept.exe',
+    `signtool sign /f "scripts/release_version/cert.pfx" /p 114514 /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 ${binPath}`,
   );
 
   // 生成 Changelog
-  await genChangeLog();
+  console.log("Info: Generating changelog...");
+  await genChangeLog(targetVersion);
 
   // 修改版本号
   if (!isDev) {
@@ -84,6 +87,10 @@ async function main() {
     cp.execSync(`git commit -m "release: ${targetVersion}"`);
     cp.execSync(`git tag ${targetVersion}`);
   }
+
+  console.log(
+    `Success: New executable file generated at '${binPath}', version ${targetVersion}`,
+  );
 }
 
-main().then();
+main().then(() => process.exit(0));

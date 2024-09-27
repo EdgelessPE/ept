@@ -37,17 +37,11 @@ export async function getTargetVersion(curVersion: string): Promise<string> {
   // 自动判断版本号
   const res = await runGitCliff(
     {
-      bump: "auto",
+      bumpedVersion: true,
     },
     { stdio: undefined },
   );
-  // console.log(res.stdout);
-  const ver = res.stdout?.match(/## \[(\d+\.\d+\.\d+)\]/)?.[1];
-  if (ver) {
-    return ver;
-  } else {
-    throw new Error(`Failed to parse auto bump version from git cliff`);
-  }
+  return res.stdout.trim();
 }
 
 export async function modifyVersion(
@@ -75,8 +69,9 @@ export async function sleep(ms: number) {
   return new Promise((res) => setTimeout(res, ms));
 }
 
-export async function genChangeLog() {
+export async function genChangeLog(targetVersion: string) {
   await runGitCliff({
     output: "CHANGELOG.md",
+    tag: targetVersion,
   });
 }
