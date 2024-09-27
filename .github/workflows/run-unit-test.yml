@@ -1,0 +1,34 @@
+name: Run unit test
+
+on: 
+  push:
+    paths:
+      - "src/**"
+      - "examples/**"
+      - ".github/workflows/ut.yml"
+  pull_request:
+    paths:
+      - "src/**"
+      - "examples/**"
+      - "Cargo.lock"
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Install cargo components
+        run: cargo install cargo-tarpaulin miniserve
+      - name: Run tests
+        run: npm run rs:ut:xml
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v4.0.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./cobertura.xml
