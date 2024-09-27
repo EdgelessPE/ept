@@ -72,7 +72,7 @@ async function main() {
 
   // 生成 Changelog
   console.log("Info: Generating changelog...");
-  await genChangeLog(targetVersion);
+  await genChangeLog(targetVersion, isDev);
 
   // 修改版本号
   if (!isDev) {

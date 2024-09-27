@@ -70,7 +70,7 @@ export async function sleep(ms: number) {
 }
 
 const INSERT_TAG = "<!-- INSERT_HERE -->";
-export async function genChangeLog(targetVersion: string) {
+export async function genChangeLog(targetVersion: string, isDev: boolean) {
   // 生成新版本的变更日志
   const { stdout } = await runGitCliff(
     {
@@ -90,6 +90,7 @@ export async function genChangeLog(targetVersion: string) {
     const nextText = text.replace(INSERT_TAG, `${INSERT_TAG}\n\n${stdout}`);
     await writeFile("CHANGELOG.md", nextText);
   } else {
-    console.log("Warning: No change log generated");
+    if (isDev) console.log("Warning: No change log generated");
+    else throw new Error("Error: No change log generated");
   }
 }
