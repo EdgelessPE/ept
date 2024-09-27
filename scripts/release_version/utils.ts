@@ -74,3 +74,9 @@ export async function modifyVersion(
 export async function sleep(ms: number) {
   return new Promise((res) => setTimeout(res, ms));
 }
+
+export async function genChangeLog() {
+  await runGitCliff({
+    output: "CHANGELOG.md",
+  });
+}

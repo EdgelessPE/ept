@@ -1,7 +1,13 @@
 import { readFile } from "node:fs/promises";
 import TOML from "smol-toml";
 import cp from "child_process";
-import { getTargetVersion, modifyVersion, ask, sleep } from "./utils";
+import {
+  getTargetVersion,
+  modifyVersion,
+  ask,
+  sleep,
+  genChangeLog,
+} from "./utils";
 import rcedit from "rcedit";
 import { existsSync } from "node:fs";
 
@@ -39,18 +45,6 @@ async function main() {
   }
   const isDev = res === "d";
 
-  // 修改版本号
-  if (!isDev) {
-    await modifyVersion("package.json", packageVersion, targetVersion);
-    await modifyVersion("Cargo.toml", packageVersion, targetVersion);
-  }
-
-  // 打 git tag
-  if (!isDev) {
-    console.log("Info: Tagging...");
-    cp.execSync(`git tag ${targetVersion}`);
-  }
-
   // 编译 Rust 项目
   console.log("Info: Compiling...");
   cp.execSync(`npm run rs:build`);
@@ -73,6 +67,23 @@ async function main() {
   cp.execSync(
     'signtool sign /f "scripts/release_version/cert.pfx" /p 114514 /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 target/release/ept.exe',
   );
+
+  // 生成 Changelog
+  await genChangeLog();
+
+  // 修改版本号
+  if (!isDev) {
+    await modifyVersion("package.json", packageVersion, targetVersion);
+    await modifyVersion("Cargo.toml", packageVersion, targetVersion);
+  }
+
+  // 提交 git 变更并打 tag
+  if (!isDev) {
+    console.log("Info: Committing and tagging...");
+    cp.execSync(`git add -all`);
+    cp.execSync(`git commit -m "release: ${targetVersion}"`);
+    cp.execSync(`git tag ${targetVersion}`);
+  }
 }
 
 main().then();
