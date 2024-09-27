@@ -11,6 +11,7 @@
         "chrono",
         "Chuyu",
         "clippy",
+        "commitlint",
         "dialoguer",
         "Dism",
         "envmnt",

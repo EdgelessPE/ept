@@ -16,7 +16,7 @@
     "rs:ut:html": "cargo tarpaulin -o html --exclude-files test/** --exclude-files node_modules/** && start tarpaulin-report.html",
     "rs:ut:xml": "cargo tarpaulin -o xml --exclude-files test/** --exclude-files node_modules/**",
     "rs:build": "cmd /c scripts\\vc_ltl\\build.bat",
-    "rs:release":"tsx scripts/release_version/index.ts"
+    "rs:release": "tsx scripts/release_version/index.ts"
   },
   "dependencies": {
     "@types/minimist": "^1.2.5",
@@ -30,10 +30,11 @@
     "typescript": "^5.5.4"
   },
   "devDependencies": {
+    "@commitlint/cli": "^19.5.0",
+    "@commitlint/config-conventional": "^19.5.0",
     "@eslint/js": "^9.11.0",
     "@modern-js/tsconfig": "2.60.1",
     "@rspress/plugin-shiki": "^1.31.1",
-    "@types/jest": "^29.5.13",
     "@types/node": "^22.5.5",
     "chatgpt-md-translator": "^1.7.1",
     "eslint": "^9.10.0",
@@ -48,7 +49,8 @@
     "typescript-eslint": "^8.6.0"
   },
   "simple-git-hooks": {
-    "pre-commit": "npx lint-staged"
+    "pre-commit": "npx lint-staged",
+    "commit-msg": "npx --no -- commitlint --edit $1"
   },
   "packageManager": "pnpm@9.11.0"
 }
