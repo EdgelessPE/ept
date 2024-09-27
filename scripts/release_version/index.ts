@@ -36,6 +36,9 @@ async function main() {
 
   const targetVersion = await getTargetVersion(packageVersion);
   console.log(`Info: Target version : ${targetVersion}`);
+  if (targetVersion === packageVersion) {
+    throw new Error(`No commits find since last tag '${packageVersion}'`);
+  }
 
   // 确认执行
   const res = await ask(
