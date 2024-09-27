@@ -1,8 +1,7 @@
 import { readFile } from "node:fs/promises";
 import TOML from "smol-toml";
 import cp from "child_process";
-import { getBumpType, modifyVersion, isNotDryRun, sleep } from "./utils";
-import { SemVer } from "semver";
+import { getTargetVersion, modifyVersion, ask, sleep } from "./utils";
 import rcedit from "rcedit";
 import { existsSync } from "node:fs";
 
@@ -12,11 +11,6 @@ async function main() {
     throw new Error(
       "Certificate not found, please put 'cert.pfx' in 'scripts/release_version'",
     );
-  }
-
-  // 提示干运行
-  if (!isNotDryRun()) {
-    console.log("Info: Dry run mode, no file changes or git tag will be made");
   }
 
   // 读取版本号，并判断 Rust 和 Node 版本号一致
@@ -34,26 +28,25 @@ async function main() {
     );
   }
 
-  // 解析版本号
-  const instance = new SemVer(packageVersion);
+  const targetVersion = await getTargetVersion(packageVersion);
 
-  // 解析下一版本号
-  const bumpType = getBumpType();
-  instance.inc(bumpType);
-  const targetVersion = instance.toString();
-
-  console.log(
-    `Info: Bumping version from '${packageVersion}' to '${targetVersion}'...`,
+  // 确认执行
+  const res = await ask(
+    `Info: Ready to bumping version from '${packageVersion}' to '${targetVersion}', press 'd' to run with develop mode without modifying file or adding git tag (y/d/n) : `,
   );
+  if (res !== "y" && res !== "d") {
+    throw new Error("Operation canceled by user");
+  }
+  const isDev = res === "d";
 
   // 修改版本号
-  if (isNotDryRun()) {
+  if (!isDev) {
     await modifyVersion("package.json", packageVersion, targetVersion);
     await modifyVersion("Cargo.toml", packageVersion, targetVersion);
   }
 
   // 打 git tag
-  if (isNotDryRun()) {
+  if (!isDev) {
     console.log("Info: Tagging...");
     cp.execSync(`git tag ${targetVersion}`);
   }

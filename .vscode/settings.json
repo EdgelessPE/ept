@@ -47,7 +47,9 @@
         "Secp",
         "sentencecase",
         "SETTINGCHANGE",
+        "shiki",
         "signtool",
+        "smol",
         "SMTO",
         "startmenu",
         "subkey",
@@ -65,6 +67,15 @@
         "WPARAM",
         "Zstandard",
         "zstd"
+    ],
+    "cSpell.ignorePaths": [
+        "package-lock.json",
+        "node_modules",
+        "vscode-extension",
+        ".git/objects",
+        ".vscode",
+        ".vscode-insiders",
+        "pnpm-lock.yaml"
     ],
     "rust-analyzer.linkedProjects": [
         ".\\Cargo.toml"

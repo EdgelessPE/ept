@@ -4,6 +4,10 @@ import { existsSync } from "node:fs";
 import { readdir, cp, mkdir, readFile } from "node:fs/promises";
 import { ask, calcMD5, hasChinese, translate } from "./utils";
 import { hasStoreChanged, readStoreMd5, writeStoreMd5 } from "./store";
+import { fileURLToPath } from "node:url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const DOC_ROOT = path.join(__dirname, "../../doc");
 const IS_CHECK_MODE = process.argv.includes("--check");

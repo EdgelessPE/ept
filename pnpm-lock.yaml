@@ -14,6 +14,12 @@ importers:
       '@types/semver':
         specifier: ^7.5.8
         version: 7.5.8
+      git-cliff:
+        specifier: ^2.6.0
+        version: 2.6.0
+      git-cliff-windows-x64:
+        specifier: ^2.6.0
+        version: 2.6.0
       minimist:
         specifier: ^1.2.8
         version: 1.2.8
@@ -66,6 +72,18 @@ importers:
       eslint-plugin-prettier:
         specifier: ^5.2.1
         version: 5.2.1(eslint-config-prettier@9.1.0(eslint@9.10.0(jiti@1.21.6)))(eslint@9.10.0(jiti@1.21.6))(prettier@3.3.3)
+      git-cliff-darwin-arm64:
+        specifier: ^2.6.0
+        version: 2.6.0
+      git-cliff-darwin-x64:
+        specifier: ^2.6.0
+        version: 2.6.0
+      git-cliff-linux-x64:
+        specifier: ^2.6.0
+        version: 2.6.0
+      git-cliff-windows-arm64:
+        specifier: ^2.6.0
+        version: 2.6.0
       globals:
         specifier: ^15.9.0
         version: 15.9.0
@@ -480,25 +498,21 @@ packages:
     resolution: {integrity: sha512-svPOFlem7s6T33tX8a28uD5Ngc7bdML96ioiH7Fhi0J/at+WAthor4GeUNwkwuzBQI/Nc9XCgiYPcE0pzP7c6w==}
     cpu: [arm64]
     os: [linux]
-    libc: [glibc]
 
   '@rspack/binding-linux-arm64-musl@1.0.5':
     resolution: {integrity: sha512-cysqogEUNc0TgzzXcK9bkv12eoCjqhLzOvGXQU1zSEU9Hov7tuzMDl3Z6R3A7NgOCmWu84/wOnTrkSOI28caew==}
     cpu: [arm64]
     os: [linux]
-    libc: [musl]
 
   '@rspack/binding-linux-x64-gnu@1.0.5':
     resolution: {integrity: sha512-qIEMsWOzTKpVm0Sg553gKkua49Kd/sElLD1rZcXjjxjAsD97uq8AiNncArMfYdDKgkKbtwtW/Fb3uVuafTLnZg==}
     cpu: [x64]
     os: [linux]
-    libc: [glibc]
 
   '@rspack/binding-linux-x64-musl@1.0.5':
     resolution: {integrity: sha512-yulltMSQN3aBt3NMURYTmJcpAJBi4eEJ4i9qF0INE8f0885sJpI0j35/31POkCghG1ZOSZkYALFrheKKP9e8pg==}
     cpu: [x64]
     os: [linux]
-    libc: [musl]
 
   '@rspack/binding-win32-arm64-msvc@1.0.5':
     resolution: {integrity: sha512-5oF/qN6TnUj28UAdaOgSIWKq7HG5QgI4p37zvQBBTXZHhrwN2kE6H+TaofWnSqWJynwmGIxJIx8bGo3lDfFbfA==}
@@ -1418,6 +1432,37 @@ packages:
 
   get-tsconfig@4.8.0:
     resolution: {integrity: sha512-Pgba6TExTZ0FJAn1qkJAjIeKoDJ3CsI2ChuLohJnZl/tTU8MVrq3b+2t5UOPfRa4RMsorClBjJALkJUMjG1PAw==}
+
+  git-cliff-darwin-arm64@2.6.0:
+    resolution: {integrity: sha512-WdBQmeLKDjJWl/Y6djgwqEUh8eYTJ5ljLea2M8qDhlEBMoC9Ew3VcRmdfTy2fSIxm7WBZm9T6ukkQj4vCv099Q==}
+    os: [darwin]
+
+  git-cliff-darwin-x64@2.6.0:
+    resolution: {integrity: sha512-Zvio86pLAbFGI5khYtVloecKxOac9JV9gL8MR8Eb+1hsliH+LY6MGCzy7zsrDCWEJ9+nH5qfMB24UwABsZhbMg==}
+    cpu: [x64]
+    os: [darwin]
+
+  git-cliff-linux-arm64@2.6.0:
+    resolution: {integrity: sha512-FdeulZysE/JFhHmCKnNqXUnOexC4Zg+AloD7DBaiTP5Af2dpVLbV0upjFj2GfQE/x0eGhZH5BqZM5uY6ANuMFQ==}
+    cpu: [arm64]
+    os: [linux]
+
+  git-cliff-linux-x64@2.6.0:
+    resolution: {integrity: sha512-lQDjcT1ieJZaC6ULvWcG/0s3+RgItnEsNSD37Xwh/p7HWaz7FZaWrkVySgWSsDahE0GdYnR8v5hs1C1plT2d6w==}
+    os: [linux]
+
+  git-cliff-windows-arm64@2.6.0:
+    resolution: {integrity: sha512-xREKhwIKJMZvUzU0nsu0pLt1LMMdWn3367OZoJTy1RyEzqAFpOZXdejuD0GSFCN/t9QgyDJWURQKFekyfKwYSg==}
+    os: [win32]
+
+  git-cliff-windows-x64@2.6.0:
+    resolution: {integrity: sha512-wFnK2cizOrxpPZT4IHmSnUK0YQUuLuI4XZAJHepV4hU4GJWi6q1bIZGoQapRtfZ82bSEF+4EIstoDDoWVwmLGw==}
+    os: [win32]
+
+  git-cliff@2.6.0:
+    resolution: {integrity: sha512-ipMTSjMLjJN0z5AAWUvZJLBYISwu5NvmdrrXmsqwrJ1QXhOgsWOXobft86YH6JJVkKuyh/M4gdhNnAS0H4ldkw==}
+    engines: {node: '>=18.19 || >=20.6 || >=21'}
+    hasBin: true
 
   git-raw-commits@4.0.0:
     resolution: {integrity: sha512-ICsMM1Wk8xSGMowkOmPrzo2Fgmfo4bMHLNX6ytHjajRJUqvHOw/TFapQ+QG75c3X/tTDDhOSRPGC52dDbNM8FQ==}
@@ -4386,6 +4431,30 @@ snapshots:
   get-tsconfig@4.8.0:
     dependencies:
       resolve-pkg-maps: 1.0.0
+
+  git-cliff-darwin-arm64@2.6.0: {}
+
+  git-cliff-darwin-x64@2.6.0: {}
+
+  git-cliff-linux-arm64@2.6.0:
+    optional: true
+
+  git-cliff-linux-x64@2.6.0: {}
+
+  git-cliff-windows-arm64@2.6.0: {}
+
+  git-cliff-windows-x64@2.6.0: {}
+
+  git-cliff@2.6.0:
+    dependencies:
+      execa: 8.0.1
+    optionalDependencies:
+      git-cliff-darwin-arm64: 2.6.0
+      git-cliff-darwin-x64: 2.6.0
+      git-cliff-linux-arm64: 2.6.0
+      git-cliff-linux-x64: 2.6.0
+      git-cliff-windows-arm64: 2.6.0
+      git-cliff-windows-x64: 2.6.0
 
   git-raw-commits@4.0.0:
     dependencies:
