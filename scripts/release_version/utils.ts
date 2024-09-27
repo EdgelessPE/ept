@@ -69,9 +69,27 @@ export async function sleep(ms: number) {
   return new Promise((res) => setTimeout(res, ms));
 }
 
+const INSERT_TAG = "<!-- INSERT_HERE -->";
 export async function genChangeLog(targetVersion: string) {
-  await runGitCliff({
-    output: "CHANGELOG.md",
-    tag: targetVersion,
-  });
+  // 生成新版本的变更日志
+  const { stdout } = await runGitCliff(
+    {
+      tag: targetVersion,
+      unreleased: true,
+      strip: "all",
+    },
+    {
+      stdio: undefined,
+    },
+  );
+  console.log(stdout);
+
+  // 将其插入到 CHANGELOG 的对应位置
+  if (stdout.trim()) {
+    const text = (await readFile("CHANGELOG.md")).toString();
+    const nextText = text.replace(INSERT_TAG, `${INSERT_TAG}\n\n${stdout}`);
+    await writeFile("CHANGELOG.md", nextText);
+  } else {
+    console.log("Warning: No change log generated");
+  }
 }
