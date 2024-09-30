@@ -17,9 +17,6 @@ importers:
       git-cliff:
         specifier: ^2.6.0
         version: 2.6.0
-      git-cliff-windows-x64:
-        specifier: ^2.6.0
-        version: 2.6.0
       minimist:
         specifier: ^1.2.8
         version: 1.2.8
@@ -44,7 +41,7 @@ importers:
     devDependencies:
       '@commitlint/cli':
         specifier: ^19.5.0
-        version: 19.5.0(@types/node@22.5.5)(typescript@5.6.2)
+        version: 19.5.0(@types/node@22.7.4)(typescript@5.6.2)
       '@commitlint/config-conventional':
         specifier: ^19.5.0
         version: 19.5.0
@@ -58,8 +55,8 @@ importers:
         specifier: ^1.31.1
         version: 1.31.1
       '@types/node':
-        specifier: ^22.5.5
-        version: 22.5.5
+        specifier: ^22.7.4
+        version: 22.7.4
       chatgpt-md-translator:
         specifier: ^1.7.1
         version: 1.7.1
@@ -82,6 +79,9 @@ importers:
         specifier: ^2.6.0
         version: 2.6.0
       git-cliff-windows-arm64:
+        specifier: ^2.6.0
+        version: 2.6.0
+      git-cliff-windows-x64:
         specifier: ^2.6.0
         version: 2.6.0
       globals:
@@ -686,6 +686,9 @@ packages:
 
   '@types/node@22.5.5':
     resolution: {integrity: sha512-Xjs4y5UPO/CLdzpgR6GirZJx36yScjh73+2NlLlkFRSoQN8B0DpfXPdZGnvVmLRLOsqDpOfTNv7D9trgGhmOIA==}
+
+  '@types/node@22.7.4':
+    resolution: {integrity: sha512-y+NPi1rFzDs1NdQHHToqeiX2TIS79SWEAw9GYhkkx8bD0ChpfqC+n2j5OXOCpzfojBEBt6DnEnnG9MY0zk1XLg==}
 
   '@types/parse5@6.0.3':
     resolution: {integrity: sha512-SuT16Q1K51EAVPz1K29DJ/sXjhSQ0zjvsypYJ6tlwVsRV9jwW5Adq2ch8Dq8kDBCkYnELS7N7VNCSB5nC56t/g==}
@@ -1435,6 +1438,7 @@ packages:
 
   git-cliff-darwin-arm64@2.6.0:
     resolution: {integrity: sha512-WdBQmeLKDjJWl/Y6djgwqEUh8eYTJ5ljLea2M8qDhlEBMoC9Ew3VcRmdfTy2fSIxm7WBZm9T6ukkQj4vCv099Q==}
+    cpu: [arm64]
     os: [darwin]
 
   git-cliff-darwin-x64@2.6.0:
@@ -1449,14 +1453,17 @@ packages:
 
   git-cliff-linux-x64@2.6.0:
     resolution: {integrity: sha512-lQDjcT1ieJZaC6ULvWcG/0s3+RgItnEsNSD37Xwh/p7HWaz7FZaWrkVySgWSsDahE0GdYnR8v5hs1C1plT2d6w==}
+    cpu: [x64]
     os: [linux]
 
   git-cliff-windows-arm64@2.6.0:
     resolution: {integrity: sha512-xREKhwIKJMZvUzU0nsu0pLt1LMMdWn3367OZoJTy1RyEzqAFpOZXdejuD0GSFCN/t9QgyDJWURQKFekyfKwYSg==}
+    cpu: [arm64]
     os: [win32]
 
   git-cliff-windows-x64@2.6.0:
     resolution: {integrity: sha512-wFnK2cizOrxpPZT4IHmSnUK0YQUuLuI4XZAJHepV4hU4GJWi6q1bIZGoQapRtfZ82bSEF+4EIstoDDoWVwmLGw==}
+    cpu: [x64]
     os: [win32]
 
   git-cliff@2.6.0:
@@ -2986,11 +2993,11 @@ snapshots:
 
   '@bufbuild/protobuf@1.10.0': {}
 
-  '@commitlint/cli@19.5.0(@types/node@22.5.5)(typescript@5.6.2)':
+  '@commitlint/cli@19.5.0(@types/node@22.7.4)(typescript@5.6.2)':
     dependencies:
       '@commitlint/format': 19.5.0
       '@commitlint/lint': 19.5.0
-      '@commitlint/load': 19.5.0(@types/node@22.5.5)(typescript@5.6.2)
+      '@commitlint/load': 19.5.0(@types/node@22.7.4)(typescript@5.6.2)
       '@commitlint/read': 19.5.0
       '@commitlint/types': 19.5.0
       tinyexec: 0.3.0
@@ -3037,7 +3044,7 @@ snapshots:
       '@commitlint/rules': 19.5.0
       '@commitlint/types': 19.5.0
 
-  '@commitlint/load@19.5.0(@types/node@22.5.5)(typescript@5.6.2)':
+  '@commitlint/load@19.5.0(@types/node@22.7.4)(typescript@5.6.2)':
     dependencies:
       '@commitlint/config-validator': 19.5.0
       '@commitlint/execute-rule': 19.5.0
@@ -3045,7 +3052,7 @@ snapshots:
       '@commitlint/types': 19.5.0
       chalk: 5.3.0
       cosmiconfig: 9.0.0(typescript@5.6.2)
-      cosmiconfig-typescript-loader: 5.0.0(@types/node@22.5.5)(cosmiconfig@9.0.0(typescript@5.6.2))(typescript@5.6.2)
+      cosmiconfig-typescript-loader: 5.0.0(@types/node@22.7.4)(cosmiconfig@9.0.0(typescript@5.6.2))(typescript@5.6.2)
       lodash.isplainobject: 4.0.6
       lodash.merge: 4.6.2
       lodash.uniq: 4.5.0
@@ -3577,7 +3584,7 @@ snapshots:
 
   '@types/conventional-commits-parser@5.0.0':
     dependencies:
-      '@types/node': 22.5.5
+      '@types/node': 22.7.4
 
   '@types/debug@4.1.12':
     dependencies:
@@ -3610,6 +3617,10 @@ snapshots:
   '@types/ms@0.7.34': {}
 
   '@types/node@22.5.5':
+    dependencies:
+      undici-types: 6.19.8
+
+  '@types/node@22.7.4':
     dependencies:
       undici-types: 6.19.8
 
@@ -4026,9 +4037,9 @@ snapshots:
 
   core-js@3.38.1: {}
 
-  cosmiconfig-typescript-loader@5.0.0(@types/node@22.5.5)(cosmiconfig@9.0.0(typescript@5.6.2))(typescript@5.6.2):
+  cosmiconfig-typescript-loader@5.0.0(@types/node@22.7.4)(cosmiconfig@9.0.0(typescript@5.6.2))(typescript@5.6.2):
     dependencies:
-      '@types/node': 22.5.5
+      '@types/node': 22.7.4
       cosmiconfig: 9.0.0(typescript@5.6.2)
       jiti: 1.21.6
       typescript: 5.6.2
