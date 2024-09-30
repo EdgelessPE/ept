@@ -17,9 +17,6 @@ importers:
       git-cliff:
         specifier: ^2.6.0
         version: 2.6.0
-      git-cliff-windows-x64:
-        specifier: ^2.6.0
-        version: 2.6.0
       minimist:
         specifier: ^1.2.8
         version: 1.2.8
@@ -49,8 +46,8 @@ importers:
         specifier: ^19.5.0
         version: 19.5.0
       '@eslint/js':
-        specifier: ^9.11.0
-        version: 9.11.0
+        specifier: ^9.11.1
+        version: 9.11.1
       '@modern-js/tsconfig':
         specifier: 2.60.1
         version: 2.60.1
@@ -82,6 +79,9 @@ importers:
         specifier: ^2.6.0
         version: 2.6.0
       git-cliff-windows-arm64:
+        specifier: ^2.6.0
+        version: 2.6.0
+      git-cliff-windows-x64:
         specifier: ^2.6.0
         version: 2.6.0
       globals:
@@ -362,8 +362,8 @@ packages:
     resolution: {integrity: sha512-fuXtbiP5GWIn8Fz+LWoOMVf/Jxm+aajZYkhi6CuEm4SxymFM+eUWzbO9qXT+L0iCkL5+KGYMCSGxo686H19S1g==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@eslint/js@9.11.0':
-    resolution: {integrity: sha512-LPkkenkDqyzTFauZLLAPhIb48fj6drrfMvRGSL9tS3AcZBSVTllemLSNyCvHNNL2t797S/6DJNSIwRwXgMO/eQ==}
+  '@eslint/js@9.11.1':
+    resolution: {integrity: sha512-/qu+TWz8WwPWc7/HcIJKi+c+MOm46GdVaSlTTQcaqaL53+GsoA6MxWp5PtTx48qbSP7ylM1Kn7nhvkugfJvRSA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
   '@eslint/object-schema@2.1.4':
@@ -1435,6 +1435,7 @@ packages:
 
   git-cliff-darwin-arm64@2.6.0:
     resolution: {integrity: sha512-WdBQmeLKDjJWl/Y6djgwqEUh8eYTJ5ljLea2M8qDhlEBMoC9Ew3VcRmdfTy2fSIxm7WBZm9T6ukkQj4vCv099Q==}
+    cpu: [arm64]
     os: [darwin]
 
   git-cliff-darwin-x64@2.6.0:
@@ -1449,14 +1450,17 @@ packages:
 
   git-cliff-linux-x64@2.6.0:
     resolution: {integrity: sha512-lQDjcT1ieJZaC6ULvWcG/0s3+RgItnEsNSD37Xwh/p7HWaz7FZaWrkVySgWSsDahE0GdYnR8v5hs1C1plT2d6w==}
+    cpu: [x64]
     os: [linux]
 
   git-cliff-windows-arm64@2.6.0:
     resolution: {integrity: sha512-xREKhwIKJMZvUzU0nsu0pLt1LMMdWn3367OZoJTy1RyEzqAFpOZXdejuD0GSFCN/t9QgyDJWURQKFekyfKwYSg==}
+    cpu: [arm64]
     os: [win32]
 
   git-cliff-windows-x64@2.6.0:
     resolution: {integrity: sha512-wFnK2cizOrxpPZT4IHmSnUK0YQUuLuI4XZAJHepV4hU4GJWi6q1bIZGoQapRtfZ82bSEF+4EIstoDDoWVwmLGw==}
+    cpu: [x64]
     os: [win32]
 
   git-cliff@2.6.0:
@@ -3199,7 +3203,7 @@ snapshots:
 
   '@eslint/js@9.10.0': {}
 
-  '@eslint/js@9.11.0': {}
+  '@eslint/js@9.11.1': {}
 
   '@eslint/object-schema@2.1.4': {}
 
