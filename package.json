@@ -53,7 +53,7 @@
   "optionalDependencies": {
     "git-cliff-darwin-arm64": "^2.6.0",
     "git-cliff-darwin-x64": "^2.6.0",
-    "git-cliff-linux-x64": "^2.6.0",
+    "git-cliff-linux-x64": "^2.6.1",
     "git-cliff-windows-arm64": "^2.6.0",
     "git-cliff-windows-x64": "^2.6.0"
   },
