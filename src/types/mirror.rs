@@ -8,7 +8,7 @@ use anyhow::Result;
 use regex::Regex;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
-use super::{extended_semver::ExSemVer, verifiable::Verifiable};
+use super::{extended_semver::ExSemVer, mixed_fs::MixedFS, verifiable::Verifiable};
 
 lazy_static! {
     static ref FLAGS_RE: Regex = Regex::new(r"\.([A-Z]+)\.nep$").unwrap();
@@ -112,7 +112,7 @@ impl<'de> Deserialize<'de> for ServiceKeys {
 }
 
 impl Verifiable for MirrorHello {
-    fn verify_self(&self, _located: &String) -> Result<()> {
+    fn verify_self(&self, _located: &MixedFS) -> Result<()> {
         // 必须有 hello 服务
         let _hello_res = filter_service_from_meta(self, ServiceKeys::Hello)?;
 
@@ -128,7 +128,7 @@ pub struct MirrorPkgSoftware {
 }
 
 impl Verifiable for MirrorPkgSoftware {
-    fn verify_self(&self, _located: &String) -> Result<()> {
+    fn verify_self(&self, _located: &MixedFS) -> Result<()> {
         // 检查 url 模板
         let str = String::new();
         fill_url_template(&self.url_template, &str, &str, &str)?;
@@ -241,9 +241,8 @@ pub struct SearchResult {
 
 #[test]
 fn test_mirror_pkg_software() {
-    MirrorPkgSoftware::_demo()
-        .verify_self(&"".to_string())
-        .unwrap()
+    let mixed_fs = MixedFS::new("");
+    MirrorPkgSoftware::_demo().verify_self(&mixed_fs).unwrap()
 }
 
 #[test]

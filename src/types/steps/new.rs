@@ -169,7 +169,7 @@ fn test_new() {
 #[test]
 fn test_new_corelation() {
     let mut cx = WorkflowContext::_demo();
-    let mut mixed_fs = MixedFS::new("".to_string());
+    let mut mixed_fs = MixedFS::new("");
 
     // 反向工作流
     StepNew {

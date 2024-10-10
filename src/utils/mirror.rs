@@ -16,6 +16,7 @@ use crate::entrances::info_online;
 use crate::types::matcher::PackageMatcher;
 use crate::types::mirror::MirrorPkgSoftwareRelease;
 use crate::types::mirror::SearchResult;
+use crate::types::mixed_fs::MixedFS;
 use crate::{
     p2s,
     types::{
@@ -44,7 +45,7 @@ pub fn read_local_mirror_hello(name: &String) -> Result<(MirrorHello, PathBuf)> 
     let text = read_to_string(&p)?;
     let hello: MirrorHello = from_str(&text)
         .map_err(|e| anyhow!("Error:Invalid hello content at '{fp}' : {e}", fp = p2s!(p)))?;
-    hello.verify_self(&"".to_string())?;
+    hello.verify_self(&MixedFS::new(""))?;
     Ok((hello, dir_path))
 }
 

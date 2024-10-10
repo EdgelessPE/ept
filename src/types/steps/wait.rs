@@ -72,7 +72,7 @@ impl TStep for StepWait {
         Vec::new()
     }
     fn verify_step(&self, ctx: &super::VerifyStepCtx) -> Result<()> {
-        let located = &ctx.located;
+        let located = &ctx.mixed_fs.located;
         // timeout 时间应当小于等于 30min
         if self.timeout > (30 * 60 * 1000) {
             return Err(anyhow!(
@@ -192,7 +192,7 @@ fn test_wait() {
 #[test]
 fn test_wait_corelation() {
     let mut cx = WorkflowContext::_demo();
-    let mut mixed_fs = MixedFS::new("".to_string());
+    let mut mixed_fs = MixedFS::new("");
     // 反向工作流
     StepWait {
         timeout: 1000,

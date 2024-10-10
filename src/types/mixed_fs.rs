@@ -45,11 +45,11 @@ fn merge_path(exact_from: &String, to: String) -> String {
 }
 
 impl MixedFS {
-    pub fn new(located: String) -> Self {
+    pub fn new(located: &str) -> Self {
         log!("Debug:MixedFS instance created with located '{located}'");
         debug_assert!(located.is_empty() || Path::new(&located).exists());
         MixedFS {
-            located,
+            located: located.to_string(),
             to_add: HashSet::new(),
             to_remove: HashSet::new(),
             to_add_wild_match: HashSet::new(),
@@ -200,8 +200,7 @@ impl MixedFS {
 fn test_mixed_fs() {
     use crate::utils::flags::{set_flag, Flag};
     set_flag(Flag::Debug, true);
-    let base = &"./".to_string();
-    let mut mfs = MixedFS::new(base.clone());
+    let mut mfs = MixedFS::new("./");
 
     // 基础判断能力
     assert!(!mfs.exists("./1.txt"));

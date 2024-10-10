@@ -9,7 +9,7 @@ use crate::{
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
 
-use super::{interpretable::Interpretable, mixed_fs::MixedFS, verifiable::VerifiableMixed};
+use super::{interpretable::Interpretable, mixed_fs::MixedFS, verifiable::Verifiable};
 use ts_rs::TS;
 
 #[derive(Serialize, Deserialize, Clone, Debug, TS, PartialEq)]
@@ -64,7 +64,7 @@ pub struct Software {
     pub registry_entry: Option<String>,
 }
 
-impl VerifiableMixed for Software {
+impl Verifiable for Software {
     fn verify_self(&self, mixed_fs: &MixedFS) -> Result<()> {
         let err_wrapper = |e: anyhow::Error| {
             anyhow!("Error:Failed to verify table 'software' in 'package.toml' : {e}")
@@ -153,9 +153,8 @@ impl Interpretable for Software {
 #[test]
 fn test_verify_software() {
     use crate::types::package::GlobalPackage;
-    let located = "".to_string();
     let base = GlobalPackage::_demo().software.unwrap();
-    let mixed_fs = MixedFS::new(located);
+    let mixed_fs = MixedFS::new("");
     assert!(base.verify_self(&mixed_fs).is_ok());
 
     // 校验架构

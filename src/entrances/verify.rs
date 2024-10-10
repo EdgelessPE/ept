@@ -93,7 +93,7 @@ pub fn verify(source_dir: &String) -> Result<GlobalPackage> {
     let check_call_installer = verify_workflow(
         setup_flow.clone(),
         &VerifyStepCtx {
-            located: pkg_content_path.clone(),
+            mixed_fs: MixedFS::new(&pkg_content_path),
             is_expand_flow: false,
         },
     )?;
@@ -118,7 +118,7 @@ pub fn verify(source_dir: &String) -> Result<GlobalPackage> {
     // 检查更新、卸载工作流
     let optional_workflows = vec!["update.toml", "remove.toml"];
     let ctx = VerifyStepCtx {
-        located: source_dir.to_string(),
+        mixed_fs: MixedFS::new(source_dir),
         is_expand_flow: false,
     };
     for opt_workflow in optional_workflows {
@@ -134,7 +134,7 @@ pub fn verify(source_dir: &String) -> Result<GlobalPackage> {
 
     // 检查展开工作流
     let ctx = VerifyStepCtx {
-        located: source_dir.to_string(),
+        mixed_fs: MixedFS::new(source_dir),
         is_expand_flow: true,
     };
     let expand_path = get_workflow_path(source_dir, "expand.toml");
@@ -147,7 +147,7 @@ pub fn verify(source_dir: &String) -> Result<GlobalPackage> {
 
     // 校验 setup 工作流装箱单
     log!("Info:Checking manifest...");
-    let mut fs = MixedFS::new(pkg_content_path.clone());
+    let mut fs = MixedFS::new(&pkg_content_path);
     // 如果有展开工作流，先使用展开工作流跑一遍
     if expand_path.exists() {
         let expand_flow = parse_workflow(&p2s!(expand_path))?;
@@ -197,7 +197,7 @@ pub fn verify(source_dir: &String) -> Result<GlobalPackage> {
 
 #[test]
 fn test_get_manifest() {
-    let mut fs = MixedFS::new("./examples/VSCode".to_string());
+    let mut fs = MixedFS::new("./examples/VSCode");
     let setup_workflow =
         parse_workflow(&"examples/PermissionsTest/workflows/setup.toml".to_string()).unwrap();
     assert_eq!(

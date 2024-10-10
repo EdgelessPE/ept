@@ -26,7 +26,7 @@ use super::utils::validator::installed_validator;
 
 fn get_manifest(flow: Vec<WorkflowNode>) -> Vec<String> {
     let mut manifest = Vec::new();
-    let mut fs = MixedFS::new("".to_string());
+    let mut fs = MixedFS::new("");
     for node in flow {
         manifest.append(&mut node.body.get_manifest(&mut fs));
     }

@@ -12,6 +12,8 @@ use toml::{to_string_pretty, Value};
 
 use crate::{log, p2s, types::verifiable::Verifiable};
 
+use super::mixed_fs::MixedFS;
+
 lazy_static! {
     static ref CUR_DIR: PathBuf = Path::new("./").to_path_buf();
     static ref USER_DIR: PathBuf = home_dir().unwrap().join("ept");
@@ -151,17 +153,18 @@ impl Cfg {
                 f = p2s!(from),
             )
         })?;
-
+        let mixed_fs = MixedFS::new("");
         // 校验
-        cfg.verify_self(&"".to_string())
+        cfg.verify_self(&mixed_fs)
             .map_err(|e| anyhow!("Error:Invalid config '{f}' : {e}", f = p2s!(from)))?;
 
         Ok(cfg)
     }
     pub fn overwrite(other: Self) -> Result<()> {
         // 校验
+        let mixed_fs = MixedFS::new("");
         other
-            .verify_self(&"".to_string())
+            .verify_self(&mixed_fs)
             .map_err(|e| anyhow!("Error:Invalid overwrite config : {e}"))?;
 
         let from = Self::use_which()?;
@@ -173,7 +176,7 @@ impl Cfg {
 }
 
 impl Verifiable for Cfg {
-    fn verify_self(&self, _: &String) -> Result<()> {
+    fn verify_self(&self, _: &MixedFS) -> Result<()> {
         // base 必须为存在的绝对路径
         let base_path = Path::new(&self.local.base);
         if !base_path.is_absolute() {

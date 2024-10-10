@@ -98,7 +98,7 @@ fn test_toast() {
 fn test_toast_corelation() {
     use crate::types::workflow::WorkflowContext;
     let mut cx = WorkflowContext::_demo();
-    let mut mixed_fs = MixedFS::new("".to_string());
+    let mut mixed_fs = MixedFS::new("");
 
     // 反向工作流
     StepToast {
@@ -122,7 +122,7 @@ fn test_toast_corelation() {
         content: "Hey, love from ept\n你好，爱来自乙烯丙烯三元聚合物".to_string(),
     }
     .verify_step(&super::VerifyStepCtx {
-        located: "".to_string(),
+        mixed_fs: MixedFS::new(""),
         is_expand_flow: false,
     })
     .is_ok());

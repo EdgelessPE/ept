@@ -19,14 +19,14 @@ mod toast;
 mod wait;
 
 pub struct VerifyStepCtx {
-    pub located: String,
+    pub mixed_fs: MixedFS,
     pub is_expand_flow: bool,
 }
 
 impl VerifyStepCtx {
     pub fn _demo() -> Self {
         Self {
-            located: "".to_string(),
+            mixed_fs: MixedFS::new(""),
             is_expand_flow: false,
         }
     }

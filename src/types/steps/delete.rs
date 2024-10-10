@@ -173,7 +173,7 @@ fn test_delete() {
 #[test]
 fn test_delete_corelation() {
     let mut cx = WorkflowContext::_demo();
-    let mut mixed_fs = MixedFS::new("".to_string());
+    let mut mixed_fs = MixedFS::new("");
 
     // 反向工作流
     StepDelete {

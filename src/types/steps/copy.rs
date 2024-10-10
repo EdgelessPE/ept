@@ -164,7 +164,7 @@ impl TStep for StepCopy {
         Vec::new()
     }
     fn verify_step(&self, ctx: &super::VerifyStepCtx) -> Result<()> {
-        let located = &ctx.located;
+        let located = &ctx.mixed_fs.located;
 
         values_validator_path(&self.from).map_err(|e| {
             anyhow!("Error(Copy):Failed to validate field 'from' as valid path : {e}")

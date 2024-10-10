@@ -1,5 +1,6 @@
 use std::{env::current_dir, process::Child};
 
+use super::mixed_fs::MixedFS;
 use super::steps::VerifyStepCtx;
 use super::{
     package::GlobalPackage, permissions::Generalizable, steps::Step, verifiable::Verifiable,
@@ -54,9 +55,13 @@ impl Generalizable for WorkflowHeader {
 }
 
 impl Verifiable for WorkflowHeader {
-    fn verify_self(&self, located: &String) -> Result<()> {
+    fn verify_self(&self, mixed_fs: &MixedFS) -> Result<()> {
         // 校验条件
-        verify_conditions(self.get_conditions(), located, &"1.0.0.0".to_string())
+        verify_conditions(
+            self.get_conditions(),
+            &mixed_fs.located,
+            &"1.0.0.0".to_string(),
+        )
     }
 }
 
@@ -98,9 +103,9 @@ fn test_header_valid() {
         step: "Step".to_string(),
         c_if: Some("Exist(\"./mc/vsc.exe\") && IsDirectory(\"${SystemDrive}/Windows\") || Exist(\"${AppData}/Roaming/Edgeless/ept\")".to_string()),
     };
+    let mixed_fs = MixedFS::new(&String::from("./examples/VSCode"));
 
-    flow.verify_self(&String::from("./examples/VSCode"))
-        .unwrap();
+    flow.verify_self(&mixed_fs).unwrap();
 
     let flow = WorkflowHeader {
         name: Some("Name".to_string()),
@@ -108,9 +113,7 @@ fn test_header_valid() {
         c_if: Some("${Arch}==\"X64\"".to_string()),
     };
 
-    assert!(flow
-        .verify_self(&String::from("./examples/VSCode"))
-        .is_err());
+    assert!(flow.verify_self(&mixed_fs).is_err());
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
@@ -131,7 +134,7 @@ impl Generalizable for WorkflowNode {
 
 impl WorkflowNode {
     pub fn verify_step(&self, ctx: &VerifyStepCtx) -> Result<()> {
-        self.header.verify_self(&ctx.located)?;
+        self.header.verify_self(&ctx.mixed_fs)?;
         self.body.verify_step(ctx)
     }
 }

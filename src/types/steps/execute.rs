@@ -251,7 +251,7 @@ fn test_execute_validate() {
 
 #[test]
 fn test_execute_manifest() {
-    let mut fs = MixedFS::new("examples/Dism++/Dism++".to_string());
+    let mut fs = MixedFS::new("examples/Dism++/Dism++");
 
     let manifest = StepExecute {
         command: "./Dism++x64.exe /S".to_string(),

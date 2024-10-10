@@ -288,7 +288,7 @@ fn test_link() {
     use std::fs::{remove_dir, remove_file};
     let mut cx = WorkflowContext::_demo();
     let mut ctx = crate::types::steps::VerifyStepCtx::_demo();
-    ctx.located = "./examples/VSCode/VSCode".to_string();
+    ctx.mixed_fs = MixedFS::new("./examples/VSCode/VSCode");
 
     // 配置拉满
     let step = StepLink {
@@ -348,7 +348,7 @@ fn test_link() {
 
 #[test]
 fn test_link_corelation() {
-    let mut mixed_fs = MixedFS::new("".to_string());
+    let mut mixed_fs = MixedFS::new("");
     // 装箱单
     assert_eq!(
         StepLink {

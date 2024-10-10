@@ -2,13 +2,7 @@ use anyhow::Result;
 
 use super::mixed_fs::MixedFS;
 
-#[deprecated(note = "Use VerifiableMixed instead")]
 pub trait Verifiable {
-    #![allow(clippy::ptr_arg)]
-    fn verify_self(&self, located: &String) -> Result<()>;
-}
-pub trait VerifiableMixed {
-    #![allow(clippy::ptr_arg)]
     fn verify_self(&self, mixed_fs: &MixedFS) -> Result<()>;
 }
 

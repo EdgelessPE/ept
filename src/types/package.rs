@@ -5,10 +5,8 @@ use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
 use super::{
-    extended_semver::ExSemVer,
-    interpretable::Interpretable,
-    mixed_fs::MixedFS,
-    verifiable::{Verifiable, VerifiableMixed},
+    extended_semver::ExSemVer, interpretable::Interpretable, mixed_fs::MixedFS,
+    verifiable::Verifiable,
 };
 
 #[derive(Serialize, Deserialize, Clone, Debug, TS, PartialEq)]
@@ -48,7 +46,7 @@ pub struct Package {
     pub strict: Option<bool>,
 }
 
-impl VerifiableMixed for Package {
+impl Verifiable for Package {
     fn verify_self(&self, _: &MixedFS) -> Result<()> {
         let err_wrapper = |e: anyhow::Error| {
             anyhow!("Error:Failed to verify table 'package' in 'package.toml' : {e}")
@@ -118,7 +116,7 @@ impl GlobalPackage {
     }
 }
 
-impl VerifiableMixed for GlobalPackage {
+impl Verifiable for GlobalPackage {
     fn verify_self(&self, mixed_fs: &MixedFS) -> Result<()> {
         self.package.verify_self(mixed_fs)?;
         if let Some(software) = &self.software {

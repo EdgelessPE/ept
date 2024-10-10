@@ -128,7 +128,7 @@ impl TStep for StepDownload {
         })?;
 
         // 校验时该文件不存在
-        if Path::new(&ctx.located).join(&self.to).exists() {
+        if Path::new(&ctx.mixed_fs.located).join(&self.to).exists() {
             return Err(anyhow!("Error(Download):File '{}' already exists", self.to));
         }
 
@@ -211,7 +211,7 @@ fn test_download() {
 #[test]
 fn test_download_corelation() {
     let mut cx = WorkflowContext::_demo();
-    let mut mixed_fs = MixedFS::new("".to_string());
+    let mut mixed_fs = MixedFS::new("");
     let addr = "http://localhost:8080";
 
     // 反向工作流

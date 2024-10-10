@@ -79,7 +79,7 @@ fn test_log() {
 #[test]
 fn test_log_corelation() {
     let mut cx = WorkflowContext::_demo();
-    let mut mixed_fs = MixedFS::new("".to_string());
+    let mut mixed_fs = MixedFS::new("");
     // 反向工作流
     StepLog {
         level: Some(String::from("Info")),

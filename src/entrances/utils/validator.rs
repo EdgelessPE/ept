@@ -111,10 +111,10 @@ pub fn installed_validator(dir: &String) -> Result<String> {
 
 #[test]
 fn test_manifest_validator() {
-    let base = "examples/VSCode".to_string();
+    let base = "examples/VSCode";
     let manifest = vec!["VSCode", "Microsoft", "VScode", "package.toml"];
     assert!(manifest_validator(
-        &base.clone(),
+        &base.to_string(),
         manifest.into_iter().map(|s| s.to_string()).collect(),
         &mut MixedFS::new(base)
     )

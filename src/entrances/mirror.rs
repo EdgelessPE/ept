@@ -12,6 +12,7 @@ use crate::{
     log, log_ok_last,
     types::{
         mirror::{MirrorHello, MirrorPkgSoftware, ServiceKeys},
+        mixed_fs::MixedFS,
         verifiable::Verifiable,
     },
     utils::{
@@ -57,7 +58,8 @@ pub fn mirror_add(url: &String, should_match_name: Option<String>) -> Result<Str
     }
 
     // 校验
-    res.verify_self(&"".to_string())?;
+    let mixed_fs = MixedFS::new("");
+    res.verify_self(&mixed_fs)?;
 
     // 请求软件包列表
     let (ps_url, _) = filter_service_from_meta(&res, ServiceKeys::PkgSoftware)?;
@@ -72,7 +74,7 @@ pub fn mirror_add(url: &String, should_match_name: Option<String>) -> Result<Str
         })?;
 
     // 校验
-    pkg_software_res.verify_self(&"".to_string())?;
+    pkg_software_res.verify_self(&mixed_fs)?;
 
     // 更新索引并写 pkg-software.toml
     let p = get_path_mirror()?.join(&mirror_name);
