@@ -38,7 +38,7 @@ serde_json = "1.0.128"
 shell-words = "1.1.0"
 strum = "0.26.3"
 strum_macros = "0.26.4"
-sysinfo = "0.31.4"
+sysinfo = "0.32.0"
 tantivy = "0.22.0"
 tar = "0.4.42"
 toml = { version = "0.8.19", features = ["preserve_order"] }
