@@ -15,8 +15,8 @@ importers:
         specifier: ^7.5.8
         version: 7.5.8
       git-cliff:
-        specifier: ^2.6.0
-        version: 2.6.0
+        specifier: ^2.6.1
+        version: 2.6.1
       minimist:
         specifier: ^1.2.8
         version: 1.2.8
@@ -1439,13 +1439,23 @@ packages:
     cpu: [arm64]
     os: [darwin]
 
+  git-cliff-darwin-arm64@2.6.1:
+    resolution: {integrity: sha512-uzLlHGXgOf6gzBaloWdfBCfqQFKTcitT65IgtdH1mEX03SLgRFJUhlw4tYbTXVwdPgfWSoP1LGO+b+D4/s8X9g==}
+    cpu: [arm64]
+    os: [darwin]
+
   git-cliff-darwin-x64@2.6.0:
     resolution: {integrity: sha512-Zvio86pLAbFGI5khYtVloecKxOac9JV9gL8MR8Eb+1hsliH+LY6MGCzy7zsrDCWEJ9+nH5qfMB24UwABsZhbMg==}
     cpu: [x64]
     os: [darwin]
 
-  git-cliff-linux-arm64@2.6.0:
-    resolution: {integrity: sha512-FdeulZysE/JFhHmCKnNqXUnOexC4Zg+AloD7DBaiTP5Af2dpVLbV0upjFj2GfQE/x0eGhZH5BqZM5uY6ANuMFQ==}
+  git-cliff-darwin-x64@2.6.1:
+    resolution: {integrity: sha512-sx8ppi6Lb0rd96gT6GBKtZlssCm1GbpNsI+vUO1quMyRMSpfI/6TtIQNiLO59M2LNqzGXemC7ULyX0ENAh9QWA==}
+    cpu: [x64]
+    os: [darwin]
+
+  git-cliff-linux-arm64@2.6.1:
+    resolution: {integrity: sha512-T2Y7K4kBdGyD5GIZGYRLgbl0uRYVyBhWfQYj8emnt1XSvF/XaLGhi6hNPJuNCB+394HuhMtb2vV3G3S4uTumxg==}
     cpu: [arm64]
     os: [linux]
 
@@ -1454,8 +1464,18 @@ packages:
     cpu: [x64]
     os: [linux]
 
+  git-cliff-linux-x64@2.6.1:
+    resolution: {integrity: sha512-4Y+kEM8JYT7HPgt++DEaqWW/SDxJ9iotork15sTP3fOiRMZi8p58ifjHEfPYVUup/hLpTmH2aiX72HNKa4gwRA==}
+    cpu: [x64]
+    os: [linux]
+
   git-cliff-windows-arm64@2.6.0:
     resolution: {integrity: sha512-xREKhwIKJMZvUzU0nsu0pLt1LMMdWn3367OZoJTy1RyEzqAFpOZXdejuD0GSFCN/t9QgyDJWURQKFekyfKwYSg==}
+    cpu: [arm64]
+    os: [win32]
+
+  git-cliff-windows-arm64@2.6.1:
+    resolution: {integrity: sha512-6xx3AWYeJ00Y/KZb78j9QX0sG+mMav9q/FCexuf89aTs5QjGJfXWtEB7DijvH/m4FDYqVjWcXyt9+ST9eBx0eg==}
     cpu: [arm64]
     os: [win32]
 
@@ -1464,8 +1484,13 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  git-cliff@2.6.0:
-    resolution: {integrity: sha512-ipMTSjMLjJN0z5AAWUvZJLBYISwu5NvmdrrXmsqwrJ1QXhOgsWOXobft86YH6JJVkKuyh/M4gdhNnAS0H4ldkw==}
+  git-cliff-windows-x64@2.6.1:
+    resolution: {integrity: sha512-hRsOv0kVU/cKt9rglWYPuv84ZI1MflhhzQrycz99xF7heGbob4RRgcuN0JXnYPf3q8ATnMgsVlMccaIRXuJFGg==}
+    cpu: [x64]
+    os: [win32]
+
+  git-cliff@2.6.1:
+    resolution: {integrity: sha512-dxquXEx+dRWbggtxQzH2GpgCr6F+HjuY/jZA5QCc1AdvWfq010BxlRElrH7mgS2fHvvybY9gSw7qQEBk3tSM4Q==}
     engines: {node: '>=18.19 || >=20.6 || >=21'}
     hasBin: true
 
@@ -4440,31 +4465,46 @@ snapshots:
   git-cliff-darwin-arm64@2.6.0:
     optional: true
 
+  git-cliff-darwin-arm64@2.6.1:
+    optional: true
+
   git-cliff-darwin-x64@2.6.0:
     optional: true
 
-  git-cliff-linux-arm64@2.6.0:
+  git-cliff-darwin-x64@2.6.1:
+    optional: true
+
+  git-cliff-linux-arm64@2.6.1:
     optional: true
 
   git-cliff-linux-x64@2.6.0:
     optional: true
 
+  git-cliff-linux-x64@2.6.1:
+    optional: true
+
   git-cliff-windows-arm64@2.6.0:
+    optional: true
+
+  git-cliff-windows-arm64@2.6.1:
     optional: true
 
   git-cliff-windows-x64@2.6.0:
     optional: true
 
-  git-cliff@2.6.0:
+  git-cliff-windows-x64@2.6.1:
+    optional: true
+
+  git-cliff@2.6.1:
     dependencies:
       execa: 8.0.1
     optionalDependencies:
-      git-cliff-darwin-arm64: 2.6.0
-      git-cliff-darwin-x64: 2.6.0
-      git-cliff-linux-arm64: 2.6.0
-      git-cliff-linux-x64: 2.6.0
-      git-cliff-windows-arm64: 2.6.0
-      git-cliff-windows-x64: 2.6.0
+      git-cliff-darwin-arm64: 2.6.1
+      git-cliff-darwin-x64: 2.6.1
+      git-cliff-linux-arm64: 2.6.1
+      git-cliff-linux-x64: 2.6.1
+      git-cliff-windows-arm64: 2.6.1
+      git-cliff-windows-x64: 2.6.1
 
   git-raw-commits@4.0.0:
     dependencies:
