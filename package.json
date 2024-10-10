@@ -34,7 +34,7 @@
   "devDependencies": {
     "@commitlint/cli": "^19.5.0",
     "@commitlint/config-conventional": "^19.5.0",
-    "@eslint/js": "^9.11.0",
+    "@eslint/js": "^9.12.0",
     "@modern-js/tsconfig": "2.60.1",
     "@rspress/plugin-shiki": "^1.31.1",
     "@types/node": "^22.5.5",
