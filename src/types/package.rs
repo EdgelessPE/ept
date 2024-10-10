@@ -2,10 +2,14 @@ use crate::types::software::Software;
 use crate::verify_enum;
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
-use std::path::Path;
 use ts_rs::TS;
 
-use super::{extended_semver::ExSemVer, interpretable::Interpretable, verifiable::Verifiable};
+use super::{
+    extended_semver::ExSemVer,
+    interpretable::Interpretable,
+    mixed_fs::MixedFS,
+    verifiable::{Verifiable, VerifiableMixed},
+};
 
 #[derive(Serialize, Deserialize, Clone, Debug, TS, PartialEq)]
 #[ts(export)]
@@ -44,8 +48,8 @@ pub struct Package {
     pub strict: Option<bool>,
 }
 
-impl Verifiable for Package {
-    fn verify_self(&self, _: &String) -> Result<()> {
+impl VerifiableMixed for Package {
+    fn verify_self(&self, _: &MixedFS) -> Result<()> {
         let err_wrapper = |e: anyhow::Error| {
             anyhow!("Error:Failed to verify table 'package' in 'package.toml' : {e}")
         };
@@ -114,14 +118,11 @@ impl GlobalPackage {
     }
 }
 
-impl Verifiable for GlobalPackage {
-    fn verify_self(&self, located: &String) -> Result<()> {
-        if !Path::new(located).exists() {
-            return Err(anyhow!("Error:Path '{located}' not exist"));
-        }
-        self.package.verify_self(located)?;
+impl VerifiableMixed for GlobalPackage {
+    fn verify_self(&self, mixed_fs: &MixedFS) -> Result<()> {
+        self.package.verify_self(mixed_fs)?;
         if let Some(software) = &self.software {
-            software.verify_self(located)?;
+            software.verify_self(mixed_fs)?;
         }
 
         Ok(())

@@ -1,6 +1,7 @@
 use crate::executor::values_replacer;
 use crate::types::interpretable::Interpretable;
-use crate::types::verifiable::Verifiable;
+use crate::types::mixed_fs::MixedFS;
+use crate::types::verifiable::{Verifiable, VerifiableMixed};
 use crate::types::{extended_semver::ExSemVer, package::GlobalPackage};
 use crate::utils::reg_entry::get_reg_entry;
 use crate::utils::{exe_version::get_exe_version, path::parse_relative_path_with_located};
@@ -126,11 +127,12 @@ pub fn parse_package(
     }
 
     // 支持智能识别 located 指的 "根目录" 还是 "根目录/名称"
-    if Path::new(&(located.to_owned() + "/package.toml")).exists() {
-        pkg.verify_self(&format!("{located}/{name}", name = pkg.package.name))?;
+    let mixed_located = if Path::new(&(located.to_owned() + "/package.toml")).exists() {
+        format!("{located}/{name}", name = pkg.package.name)
     } else {
-        pkg.verify_self(located)?;
-    }
+        located.to_string()
+    };
+    pkg.verify_self(&MixedFS::new(mixed_located))?;
 
     // 解释
     let package_version = pkg.package.version.clone();

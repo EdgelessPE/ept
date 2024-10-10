@@ -11,7 +11,7 @@ use crate::{
 };
 
 pub struct MixedFS {
-    located: String,
+    pub located: String,
 
     // 不含通配符
     to_add: HashSet<String>,
@@ -47,6 +47,7 @@ fn merge_path(exact_from: &String, to: String) -> String {
 impl MixedFS {
     pub fn new(located: String) -> Self {
         log!("Debug:MixedFS instance created with located '{located}'");
+        debug_assert!(located.is_empty() || Path::new(&located).exists());
         MixedFS {
             located,
             to_add: HashSet::new(),
