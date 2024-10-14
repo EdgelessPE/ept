@@ -14,7 +14,7 @@ anyhow = "1.0.89"
 base64 = "0.22.1"
 blake3 = { version = "1.5.4", features = ["rayon"] }
 chrono = "0.4.38"
-clap = { version = "4.5.19", features = ["derive"] }
+clap = { version = "4.5.20", features = ["derive"] }
 colored = "2.1.0"
 console = "0.15.8"
 dirs = "5.0.1"
