@@ -19,7 +19,7 @@ export async function ask(prompt: string): Promise<string> {
   if (args.confirm) {
     return "y";
   }
-  return await new Promise((resolve) => {
+  return new Promise((resolve) => {
     rl.question(prompt, (answer) => {
       resolve(answer.toLowerCase());
     });
