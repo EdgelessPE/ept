@@ -10,11 +10,11 @@ lto = true
 
 [dependencies]
 Inflector = "0.11.4"
-anyhow = "1.0.89"
+anyhow = "1.0.91"
 base64 = "0.22.1"
 blake3 = { version = "1.5.4", features = ["rayon"] }
 chrono = "0.4.38"
-clap = { version = "4.5.19", features = ["derive"] }
+clap = { version = "4.5.20", features = ["derive"] }
 colored = "2.1.0"
 console = "0.15.8"
 dirs = "5.0.1"
@@ -34,7 +34,7 @@ reqwest = { version = "0.12.8", features = ["blocking", "json"] }
 rustyline = "14.0.0"
 semver = "1.0.23"
 serde = { version = "1.0.210", features = ["derive"] }
-serde_json = "1.0.128"
+serde_json = "1.0.132"
 shell-words = "1.1.0"
 strum = "0.26.3"
 strum_macros = "0.26.4"
