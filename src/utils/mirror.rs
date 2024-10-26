@@ -119,6 +119,9 @@ pub fn build_index_for_mirror(content: MirrorPkgSoftware, dir: PathBuf) -> Resul
         for item in node {
             // 筛选出最高版本号
             let releases = item.releases.to_owned();
+            if releases.is_empty() {
+                continue;
+            }
             let latest = filter_release(releases, None, false)?.version.to_string();
             index_writer.add_document(doc!(
               name => item.name.as_str(),
