@@ -3,6 +3,8 @@ use crate::types::interpretable::Interpretable;
 use crate::types::mixed_fs::MixedFS;
 use crate::types::verifiable::Verifiable;
 use crate::types::{extended_semver::ExSemVer, package::GlobalPackage};
+use crate::utils::expand::get_expanded_mixed_fs;
+use crate::utils::get_workflows_path;
 use crate::utils::reg_entry::get_reg_entry;
 use crate::utils::{exe_version::get_exe_version, path::parse_relative_path_with_located};
 use crate::{log, p2s};
@@ -132,7 +134,11 @@ pub fn parse_package(
     } else {
         located
     };
-    pkg.verify_self(&MixedFS::new(mixed_located))?;
+
+    // 校验
+    let workflows_path = get_workflows_path(located)?;
+    let mixed_fs = get_expanded_mixed_fs(MixedFS::new(mixed_located), workflows_path)?;
+    pkg.verify_self(&mixed_fs)?;
 
     // 解释
     let package_version = pkg.package.version.clone();

@@ -45,8 +45,8 @@ pub fn update_using_package(source_file: &String, verify_signature: bool) -> Res
 
     // 确认包是否已安装
     log!("Info:Resolving package...");
-    let (local_package, local_diff) = info_local(&fresh_scope, &name).map_err(|_| {
-        anyhow!("Error:Package '{name}' hasn't been installed, use 'ept install' instead",)
+    let (local_package, local_diff) = info_local(&fresh_scope, &name).map_err(|e| {
+        anyhow!("Error:Package '{name}' hasn't been installed or installation broken, use 'ept install' or 'ept uninstall' instead : '{e}'")
     })?;
     let local_software = local_package.software.clone().unwrap();
 
@@ -501,6 +501,7 @@ fn test_update_with_different_author() {
 fn test_update_expandable() {
     use std::path::Path;
     set_flag(Flag::Confirm, true);
+    set_flag(Flag::Debug, true);
     crate::utils::test::_ensure_clear_test_dir();
     crate::utils::test::_ensure_testing_uninstalled("Microsoft", "VSCodeE");
 
@@ -522,9 +523,13 @@ fn test_update_expandable() {
         .join("Code.exe");
     assert!(app_exe_path.exists());
 
-    // 手动删除这个包
-    std::fs::remove_file(&app_exe_path).unwrap();
-    assert!(!app_exe_path.exists());
+    // 手动删除一个依赖文件
+    let ico_path = get_path_apps(&"Microsoft".to_string(), &"VSCodeE".to_string(), false)
+        .unwrap()
+        .join("favicon.ico");
+    std::fs::remove_file(&ico_path).unwrap();
+    assert!(app_exe_path.exists());
+    assert!(!ico_path.exists());
 
     // 生成一个更新包
     let pkg_path = crate::utils::test::_fork_example_with_version("examples/VSCodeE", "1.75.5.0");
@@ -544,6 +549,7 @@ fn test_update_expandable() {
             == "1.75.5.0"
     );
     assert!(app_exe_path.exists());
+    assert!(ico_path.exists());
 
     crate::utils::test::_ensure_testing_uninstalled("Microsoft", "VSCodeE");
     handler.kill().unwrap();

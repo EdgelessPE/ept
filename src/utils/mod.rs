@@ -9,6 +9,7 @@ pub mod conditions;
 pub mod constants;
 pub mod download;
 pub mod env;
+pub mod expand;
 pub mod flags;
 pub mod fmt_print;
 pub mod fs;
@@ -29,7 +30,7 @@ use regex::Regex;
 
 use std::env::var;
 use std::fs::create_dir_all;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use self::fs::try_recycle;
 use self::path::parse_relative_path_with_base;
@@ -140,6 +141,23 @@ pub fn launch_clean() -> Result<()> {
     }
 
     Ok(())
+}
+
+pub fn get_workflows_path(located: &String) -> Result<PathBuf> {
+    let possible_path = vec![
+        format!("{located}/workflows"),
+        format!("{located}/.nep_context/workflows"),
+    ];
+
+    for p in possible_path {
+        let p = Path::new(&p);
+        if p.exists() {
+            return Ok(p.to_path_buf());
+        }
+    }
+    Err(anyhow!(
+        "Error:Failed to find workflows directory in {located}"
+    ))
 }
 
 #[test]

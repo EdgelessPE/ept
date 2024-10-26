@@ -166,28 +166,32 @@ pub fn verify(source_dir: &String) -> Result<GlobalPackage> {
 
     // 如果显式提供了相对路径的主程序，检查该主程序是否可以正常读取版本号
     if let Some(mp) = software.main_program {
+        // 仅对相对路径且不是尚未拓展的主程序进行检查
         if !mp.starts_with("${") && Path::new(&mp).is_relative() {
             let mp_path = parse_relative_path_with_located(
                 &format!("{name}/{mp}", name = global.package.name),
                 source_dir,
             );
+            let is_virtual = !mp_path.exists() && fs.exists(&mp);
             log!(
-                "Debug:Main program path : '{}',with source_dir = '{source_dir}'",
+                "Debug:Main program path : '{}',with source_dir = '{source_dir}', is_virtual = {is_virtual}",
                 p2s!(mp_path)
             );
-            let read_res = get_exe_version(mp_path);
-            if let Ok(version) = read_res {
-                // 与申明的版本号进行比较，仅要求 semver 部分相等即可
-                let d_ver = ExSemVer::parse(&global.package.version)?;
-                let r_ver = ExSemVer::parse(&version)?;
-                if d_ver.semver_instance != r_ver.semver_instance {
-                    return Err(anyhow!("Error:The version declared ({dv}) is inconsistent with the version obtained by the read main program ({version}), consider remove field 'software.main_program'",dv=&global.package.version));
-                }
-            } else {
-                return Err(anyhow!(
+            if !is_virtual {
+                let read_res = get_exe_version(mp_path);
+                if let Ok(version) = read_res {
+                    // 与申明的版本号进行比较，仅要求 semver 部分相等即可
+                    let d_ver = ExSemVer::parse(&global.package.version)?;
+                    let r_ver = ExSemVer::parse(&version)?;
+                    if d_ver.semver_instance != r_ver.semver_instance {
+                        return Err(anyhow!("Error:The version declared ({dv}) is inconsistent with the version obtained by the read main program ({version}), consider remove field 'software.main_program'",dv=&global.package.version));
+                    }
+                } else {
+                    return Err(anyhow!(
                     "Error:Failed to read version of main program '{mp}', consider remove field 'software.main_program' : {e}",
                     e = read_res.unwrap_err()
                 ));
+                }
             }
         }
     }
@@ -223,6 +227,7 @@ fn test_verify() {
     set_flag(Flag::Debug, true);
     use std::fs::write;
     verify(&"./examples/VSCode".to_string()).unwrap();
+    verify(&"./examples/VSCodeE".to_string()).unwrap();
     verify(&"./examples/CallInstaller".to_string()).unwrap();
     verify(&"./examples/PermissionsTest".to_string()).unwrap();
 
