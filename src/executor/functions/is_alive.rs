@@ -3,7 +3,7 @@ use crate::{
     utils::{conditions::ensure_arg, process::is_alive_with_name},
 };
 use anyhow::{anyhow, Result};
-use evalexpr::{Function, Value};
+use evalexpr::{DefaultNumericTypes, Function, Value};
 
 use super::EvalFunction;
 
@@ -14,7 +14,7 @@ pub struct IsAlive {
 }
 
 impl EvalFunction for IsAlive {
-    fn get_closure(_: String) -> Function {
+    fn get_closure(_: String) -> Function<DefaultNumericTypes> {
         Function::new(move |val| {
             let arg = ensure_arg(val)?;
             Ok(Value::Boolean(is_alive_with_name(&arg)))

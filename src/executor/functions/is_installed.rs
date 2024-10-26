@@ -4,7 +4,7 @@ use crate::{
     utils::conditions::ensure_arg,
 };
 use anyhow::{anyhow, Result};
-use evalexpr::{error, Function, Value};
+use evalexpr::{error, DefaultNumericTypes, Function, Value};
 use regex::Regex;
 
 use super::EvalFunction;
@@ -20,7 +20,7 @@ pub struct IsInstalled {
 }
 
 impl EvalFunction for IsInstalled {
-    fn get_closure(_: String) -> Function {
+    fn get_closure(_: String) -> Function<DefaultNumericTypes> {
         Function::new(move |val| {
             let arg = ensure_arg(val)?;
             let sp: Vec<&str> = arg.split('/').collect();

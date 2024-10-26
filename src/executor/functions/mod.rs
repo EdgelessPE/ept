@@ -40,7 +40,7 @@ macro_rules! def_eval_functions {
 }
 
 trait EvalFunction {
-    fn get_closure(located: String) -> Function;
+    fn get_closure(located: String) -> Function<DefaultNumericTypes>;
     fn get_permission(arg: String) -> Result<Permission>;
     fn verify_arg(arg: String) -> Result<()>;
 }

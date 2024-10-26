@@ -4,7 +4,7 @@ use crate::{
     utils::{conditions::ensure_arg, path::parse_relative_path_with_located},
 };
 use anyhow::Result;
-use evalexpr::{Function, Value};
+use evalexpr::{DefaultNumericTypes, Function, Value};
 
 use super::EvalFunction;
 
@@ -15,7 +15,7 @@ pub struct Exist {
 }
 
 impl EvalFunction for Exist {
-    fn get_closure(located: String) -> Function {
+    fn get_closure(located: String) -> Function<DefaultNumericTypes> {
         Function::new(move |val| {
             let arg = ensure_arg(val)?;
             let p = parse_relative_path_with_located(&arg, &located);
