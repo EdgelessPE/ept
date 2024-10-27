@@ -29,20 +29,8 @@ jobs:
       - name: Run build
         run: npm run rs:release
 
-      - name: Generate a changelog
-        run: node_modules/git-cliff-windows-x64/bin/git-cliff.exe -s all --current -o CURRENT_CHANGELOG.md
-
-      - name: Read file content
-        id: read_changelog
-        shell: bash
-        run: |
-          CHANGELOG=$(cat CURRENT_CHANGELOG.md)
-          echo "Changelog content:"
-          echo "$CHANGELOG"
-          echo "body=$CHANGELOG" >> $GITHUB_OUTPUT
-
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
-          body_path: ${{ steps.read_changelog.outputs.body }}
+          body_path: CHANGELOG.md
           files: target/release/ept.exe
