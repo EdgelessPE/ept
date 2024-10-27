@@ -29,10 +29,13 @@ jobs:
         run: npm i pnpm@9 --global && pnpm install
 
       - name: Run build
+        id: build
         run: npm run rs:release
 
       - name: Create zip
-        run: 7z a ept_windows_x64_${{ github.ref }}.zip target/release/ept.exe
+        run: |
+          copy target/release/ept.exe ept.exe
+          7z a ept_windows_x64_${{ steps.build.outputs.version }}.zip target/release/ept.exe
 
       - name: Generate a changelog
         run: node_modules/git-cliff-windows-x64/bin/git-cliff.exe -s all --current -o CURRENT_CHANGELOG.md
@@ -41,4 +44,4 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           body_path: CURRENT_CHANGELOG.md
-          files: ept_windows_x64_${{ github.ref }}.zip
+          files: ept_windows_x64_${{ steps.build.outputs.version }}.zip

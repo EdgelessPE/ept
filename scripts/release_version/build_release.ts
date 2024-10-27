@@ -1,4 +1,4 @@
-import cp from "child_process";
+import cp, { execSync } from "child_process";
 import { getCurrentVersion, sleep } from "./utils";
 import rcedit from "rcedit";
 import { existsSync } from "node:fs";
@@ -14,6 +14,7 @@ async function main() {
   }
 
   const targetVersion = await getCurrentVersion();
+  execSync(`echo "version=${targetVersion}" >> $GITHUB_OUTPUT`);
 
   console.log(`Info: Target version : ${targetVersion}`);
   const binPath = "target/release/ept.exe";
