@@ -17,7 +17,8 @@
     "rs:ut:html": "cargo tarpaulin -o html --exclude-files test/** --exclude-files node_modules/** && start tarpaulin-report.html",
     "rs:ut:xml": "cargo tarpaulin -o xml --exclude-files test/** --exclude-files node_modules/**",
     "rs:build": "cmd /c scripts\\vc_ltl\\build.bat",
-    "rs:release": "tsx scripts/release_version/index.ts"
+    "bump": "tsx scripts/release_version/bump_version.ts",
+    "rs:release": "tsx scripts/release_version/build_release.ts"
   },
   "dependencies": {
     "@types/minimist": "^1.2.5",

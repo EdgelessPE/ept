@@ -3,6 +3,7 @@ import minimist from "minimist";
 import { readFile, writeFile } from "node:fs/promises";
 import { runGitCliff } from "git-cliff";
 import { SemVer } from "semver";
+import TOML from "smol-toml";
 
 const BUMP_TYPE = ["major", "minor", "patch"] as const;
 const args = minimist(process.argv.slice(2));
@@ -93,4 +94,22 @@ export async function genChangeLog(targetVersion: string, isDev: boolean) {
     if (isDev) console.log("Warning: No change log generated");
     else throw new Error("Error: No change log generated");
   }
+}
+
+// 读取版本号，并判断 Rust 和 Node 版本号一致
+export async function getCurrentVersion(): Promise<string> {
+  const packageText = (await readFile("package.json")).toString();
+  const cargoText = (await readFile("Cargo.toml")).toString();
+
+  const packageVersion = JSON.parse(packageText).version;
+  const cargoVersion = (
+    TOML.parse(cargoText) as { package: { version: string } }
+  ).package.version;
+
+  if (packageVersion !== cargoVersion) {
+    throw new Error(
+      `Version mismatch in 'package.json'(${packageVersion}) and 'Cargo.toml'(${cargoVersion})`,
+    );
+  }
+  return packageVersion;
 }
