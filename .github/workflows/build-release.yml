@@ -1,7 +1,9 @@
 name: Build release
 
-on: 
-  workflow_dispatch:
+on:
+  push:
+    tags:
+      - 'v*'
 
 env:
   CARGO_TERM_COLOR: always
@@ -15,7 +17,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - name: Run build
         run: npm run rs:build
-      - uses: actions/upload-artifact@v4
+      - name: Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: ept.exe
-          path: target/release/ept.exe
+          files: target/release/ept.exe

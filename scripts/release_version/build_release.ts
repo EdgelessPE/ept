@@ -3,9 +3,11 @@ import { getCurrentVersion, sleep } from "./utils";
 import rcedit from "rcedit";
 import { existsSync } from "node:fs";
 
+const IS_USE_CERT = false;
+
 async function main() {
   // 检查证书存在
-  if (!existsSync("scripts/release_version/cert.pfx")) {
+  if (IS_USE_CERT && !existsSync("scripts/release_version/cert.pfx")) {
     throw new Error(
       "Certificate not found, please put 'cert.pfx' in 'scripts/release_version'",
     );
@@ -34,10 +36,12 @@ async function main() {
   });
 
   // 签名
-  console.log("Info: Signing...");
-  cp.execSync(
-    `signtool sign /f "scripts/release_version/cert.pfx" /p 114514 /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 ${binPath}`,
-  );
+  if (IS_USE_CERT) {
+    console.log("Info: Signing...");
+    cp.execSync(
+      `signtool sign /f "scripts/release_version/cert.pfx" /p 114514 /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 ${binPath}`,
+    );
+  }
 
   console.log(
     `Success: New executable file generated at '${binPath}', version ${targetVersion}`,
