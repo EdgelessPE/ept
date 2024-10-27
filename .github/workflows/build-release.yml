@@ -34,10 +34,10 @@ jobs:
         id: git-cliff
         with:
           config: cliff.toml
-          args: -s all --current -o CURRENT_CHANGELOG.md
+          args: -s all --current
 
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
-          body_path: CURRENT_CHANGELOG.md
+          body_path: git-cliff/CHANGELOG.md
           files: target/release/ept.exe
