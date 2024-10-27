@@ -39,3 +39,4 @@ cobertura.xml
 .husky
 *.iso
 /CURRENT_CHANGELOG.md
+/*.txt

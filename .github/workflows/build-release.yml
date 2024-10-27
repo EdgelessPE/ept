@@ -33,10 +33,10 @@ jobs:
         run: npm run rs:release
 
       - name: Generate a changelog
-        run: git cliff -s all --current -o CURRENT_CHANGELOG.md
+        run: git cliff -s all --current -o ${{ github.workspace }}-CHANGELOG.txt
 
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
-          body_path: CURRENT_CHANGELOG.md
+          body_path: ${{ github.workspace }}-CHANGELOG.txt
           files: target/release/ept.exe
