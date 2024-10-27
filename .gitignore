@@ -38,3 +38,4 @@ cobertura.xml
 *.profraw
 .husky
 *.iso
+/CURRENT_CHANGELOG.md
