@@ -13,6 +13,8 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: dtolnay/rust-toolchain@stable
 
@@ -29,8 +31,11 @@ jobs:
       - name: Run build
         run: npm run rs:release
 
+      - name: Generate a changelog
+        run: node_modules/git-cliff-windows-x64/bin/git-cliff.exe -s all --current -o CURRENT_CHANGELOG.md
+
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
-          body_path: CHANGELOG.md
+          body_path: CURRENT_CHANGELOG.md
           files: target/release/ept.exe
