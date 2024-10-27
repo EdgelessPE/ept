@@ -29,15 +29,14 @@ jobs:
       - name: Run build
         run: npm run rs:release
 
+      - name: Install git cliff
+        run: winget install git-cliff
+
       - name: Generate a changelog
-        uses: orhun/git-cliff-action@v4
-        id: git-cliff
-        with:
-          config: cliff.toml
-          args: -s all --current
+        run: git cliff -s all --current -o CURRENT_CHANGELOG.md
 
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
-          body_path: git-cliff/CHANGELOG.md
+          body_path: CURRENT_CHANGELOG.md
           files: target/release/ept.exe
