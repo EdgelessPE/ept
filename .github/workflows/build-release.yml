@@ -34,9 +34,7 @@ jobs:
         id: git-cliff
         with:
           config: cliff.toml
-          args: -s all --current
-        env:
-          OUTPUT: CURRENT_CHANGELOG.md
+          args: -s all --current -o CURRENT_CHANGELOG.md
 
       - name: Release
         uses: softprops/action-gh-release@v2
