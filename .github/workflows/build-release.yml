@@ -16,9 +16,6 @@ jobs:
 
       - uses: dtolnay/rust-toolchain@stable
 
-      - name: Install git cliff
-        run: cargo install git-cliff
-
       - uses: Swatinem/rust-cache@v2
 
       - uses: actions/cache@v4
@@ -33,7 +30,7 @@ jobs:
         run: npm run rs:release
 
       - name: Generate a changelog
-        run: git cliff -s all --current -o ${{ github.workspace }}-CHANGELOG.txt
+        run: node_modules/git-cliff-windows-x64/bin/git-cliff.exe -s all --current -o ${{ github.workspace }}-CHANGELOG.txt
 
       - name: Release
         uses: softprops/action-gh-release@v2
