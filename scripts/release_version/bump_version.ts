@@ -33,6 +33,7 @@ async function bump_version() {
   if (!isDev) {
     await modifyVersion("package.json", packageVersion, targetVersion);
     await modifyVersion("Cargo.toml", packageVersion, targetVersion);
+    cp.execSync(`cargo update -w`);
   }
 
   // 提交 git 变更并打 tag
