@@ -60,7 +60,7 @@ importers:
         version: 1.11.1
       '@commitlint/cli':
         specifier: ^19.5.0
-        version: 19.5.0(@types/node@22.7.5)(typescript@5.6.3)
+        version: 19.5.0(@types/node@22.8.1)(typescript@5.6.3)
       '@commitlint/config-conventional':
         specifier: ^19.5.0
         version: 19.5.0
@@ -77,8 +77,8 @@ importers:
         specifier: ^1.31.1
         version: 1.31.1
       '@types/node':
-        specifier: ^22.7.5
-        version: 22.7.5
+        specifier: ^22.8.1
+        version: 22.8.1
       chatgpt-md-translator:
         specifier: ^1.7.1
         version: 1.7.1
@@ -778,6 +778,9 @@ packages:
 
   '@types/node@22.7.5':
     resolution: {integrity: sha512-jML7s2NAzMWc//QSJ1a3prpk78cOPchGvXJsC3C6R6PSMoooztvRVQEz89gmBTBY1SPMaqo5teB4uNHPdetShQ==}
+
+  '@types/node@22.8.1':
+    resolution: {integrity: sha512-k6Gi8Yyo8EtrNtkHXutUu2corfDf9su95VYVP10aGYMMROM6SAItZi0w1XszA6RtWTHSVp5OeFof37w0IEqCQg==}
 
   '@types/parse5@6.0.3':
     resolution: {integrity: sha512-SuT16Q1K51EAVPz1K29DJ/sXjhSQ0zjvsypYJ6tlwVsRV9jwW5Adq2ch8Dq8kDBCkYnELS7N7VNCSB5nC56t/g==}
@@ -3119,11 +3122,11 @@ snapshots:
 
   '@bufbuild/protobuf@2.2.0': {}
 
-  '@commitlint/cli@19.5.0(@types/node@22.7.5)(typescript@5.6.3)':
+  '@commitlint/cli@19.5.0(@types/node@22.8.1)(typescript@5.6.3)':
     dependencies:
       '@commitlint/format': 19.5.0
       '@commitlint/lint': 19.5.0
-      '@commitlint/load': 19.5.0(@types/node@22.7.5)(typescript@5.6.3)
+      '@commitlint/load': 19.5.0(@types/node@22.8.1)(typescript@5.6.3)
       '@commitlint/read': 19.5.0
       '@commitlint/types': 19.5.0
       tinyexec: 0.3.0
@@ -3170,7 +3173,7 @@ snapshots:
       '@commitlint/rules': 19.5.0
       '@commitlint/types': 19.5.0
 
-  '@commitlint/load@19.5.0(@types/node@22.7.5)(typescript@5.6.3)':
+  '@commitlint/load@19.5.0(@types/node@22.8.1)(typescript@5.6.3)':
     dependencies:
       '@commitlint/config-validator': 19.5.0
       '@commitlint/execute-rule': 19.5.0
@@ -3178,7 +3181,7 @@ snapshots:
       '@commitlint/types': 19.5.0
       chalk: 5.3.0
       cosmiconfig: 9.0.0(typescript@5.6.3)
-      cosmiconfig-typescript-loader: 5.0.0(@types/node@22.7.5)(cosmiconfig@9.0.0(typescript@5.6.3))(typescript@5.6.3)
+      cosmiconfig-typescript-loader: 5.0.0(@types/node@22.8.1)(cosmiconfig@9.0.0(typescript@5.6.3))(typescript@5.6.3)
       lodash.isplainobject: 4.0.6
       lodash.merge: 4.6.2
       lodash.uniq: 4.5.0
@@ -3780,7 +3783,7 @@ snapshots:
 
   '@types/conventional-commits-parser@5.0.0':
     dependencies:
-      '@types/node': 22.7.5
+      '@types/node': 22.8.1
 
   '@types/debug@4.1.12':
     dependencies:
@@ -3813,6 +3816,10 @@ snapshots:
   '@types/ms@0.7.34': {}
 
   '@types/node@22.7.5':
+    dependencies:
+      undici-types: 6.19.8
+
+  '@types/node@22.8.1':
     dependencies:
       undici-types: 6.19.8
 
@@ -4231,9 +4238,9 @@ snapshots:
 
   core-js@3.38.1: {}
 
-  cosmiconfig-typescript-loader@5.0.0(@types/node@22.7.5)(cosmiconfig@9.0.0(typescript@5.6.3))(typescript@5.6.3):
+  cosmiconfig-typescript-loader@5.0.0(@types/node@22.8.1)(cosmiconfig@9.0.0(typescript@5.6.3))(typescript@5.6.3):
     dependencies:
-      '@types/node': 22.7.5
+      '@types/node': 22.8.1
       cosmiconfig: 9.0.0(typescript@5.6.3)
       jiti: 1.21.6
       typescript: 5.6.3
