@@ -35,7 +35,7 @@ jobs:
       - name: Create zip
         run: |
           copy target/release/ept.exe ept.exe
-          7z a ept_windows_x64_${{ steps.build.outputs.version }}.zip ept.exe
+          7z a ept-${{ steps.build.outputs.version }}-windows-x64.zip ept.exe
 
       - name: Generate a changelog
         run: node_modules/git-cliff-windows-x64/bin/git-cliff.exe -s all --current -o CURRENT_CHANGELOG.md
@@ -44,4 +44,4 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           body_path: CURRENT_CHANGELOG.md
-          files: ept_windows_x64_${{ steps.build.outputs.version }}.zip
+          files: ept-${{ steps.build.outputs.version }}-windows-x64.zip
