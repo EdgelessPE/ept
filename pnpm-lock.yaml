@@ -40,8 +40,8 @@ importers:
         version: 5.6.3
     optionalDependencies:
       git-cliff-darwin-arm64:
-        specifier: ^2.6.0
-        version: 2.6.0
+        specifier: ^2.6.1
+        version: 2.6.1
       git-cliff-darwin-x64:
         specifier: ^2.6.1
         version: 2.6.1
@@ -1527,11 +1527,6 @@ packages:
 
   get-tsconfig@4.8.0:
     resolution: {integrity: sha512-Pgba6TExTZ0FJAn1qkJAjIeKoDJ3CsI2ChuLohJnZl/tTU8MVrq3b+2t5UOPfRa4RMsorClBjJALkJUMjG1PAw==}
-
-  git-cliff-darwin-arm64@2.6.0:
-    resolution: {integrity: sha512-WdBQmeLKDjJWl/Y6djgwqEUh8eYTJ5ljLea2M8qDhlEBMoC9Ew3VcRmdfTy2fSIxm7WBZm9T6ukkQj4vCv099Q==}
-    cpu: [arm64]
-    os: [darwin]
 
   git-cliff-darwin-arm64@2.6.1:
     resolution: {integrity: sha512-uzLlHGXgOf6gzBaloWdfBCfqQFKTcitT65IgtdH1mEX03SLgRFJUhlw4tYbTXVwdPgfWSoP1LGO+b+D4/s8X9g==}
@@ -4636,9 +4631,6 @@ snapshots:
   get-tsconfig@4.8.0:
     dependencies:
       resolve-pkg-maps: 1.0.0
-
-  git-cliff-darwin-arm64@2.6.0:
-    optional: true
 
   git-cliff-darwin-arm64@2.6.1:
     optional: true
