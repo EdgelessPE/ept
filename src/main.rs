@@ -300,7 +300,10 @@ fn router(action: Action, cfg: Cfg) -> Result<String> {
 fn main() {
     use entrances::mirror_list;
     // 清理缓存
-    use utils::upgrade::{check_has_upgrade, print_upgradable, print_upgradable_cross_wid_gap};
+    use utils::{
+        term::write_windows_terminal_status,
+        upgrade::{check_has_upgrade, print_upgradable, print_upgradable_cross_wid_gap},
+    };
     launch_clean().unwrap();
 
     // 启用虚拟终端
@@ -333,7 +336,9 @@ fn main() {
         && !mirror_list().unwrap_or_default().is_empty();
 
     // 使用路由器匹配入口
+    write_windows_terminal_status(3);
     let res = router(args.action, cfg);
+    write_windows_terminal_status(0);
 
     // 判断退出码
     let mut exit_code = 0;

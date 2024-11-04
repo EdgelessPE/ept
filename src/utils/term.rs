@@ -19,12 +19,15 @@ fn ask_yn_impl(prompt: String, default_value: bool) -> bool {
         log!("{prompt} (confirmed)");
         true
     } else {
-        Confirm::new()
+        write_windows_terminal_status(0);
+        let res = Confirm::new()
             .with_prompt(&prompt)
             .default(default_value)
             .interact()
             .map_err(|e| anyhow!("Error:Failed to ask yn question '{prompt}' : {e}"))
-            .unwrap()
+            .unwrap();
+        write_windows_terminal_status(3);
+        res
     }
 }
 
@@ -52,6 +55,17 @@ pub fn read_console(v: Vec<u8>) -> String {
 
     // 宽松 UTF-8 兜底
     String::from_utf8_lossy(&v).to_string()
+}
+
+/*
+   0 是默认状态，表示应隐藏进度栏。 在命令完成后使用此状态来清除任何进度状态。
+   1：将进度值设置为 <progress>，处于“默认”状态。
+   2：将进度值设置为 <progress>，处于“错误”状态。
+   3：将任务栏设置为“不确定”状态。 这对于没有进度值但仍在运行的命令非常有用。 此状态忽略 <progress> 值。
+   4：将进度值设置为 <progress>，处于“警告”状态。
+*/
+pub fn write_windows_terminal_status(status: u8) {
+    println!("\x1b]9;4;{status};0\x07");
 }
 
 #[test]
