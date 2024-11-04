@@ -39,7 +39,7 @@
     "@commitlint/types": "^19.5.0",
     "@eslint/js": "^9.13.0",
     "@modern-js/tsconfig": "2.60.1",
-    "@rspress/plugin-shiki": "^1.31.1",
+    "@rspress/plugin-shiki": "^1.35.3",
     "@types/node": "^22.8.1",
     "chatgpt-md-translator": "^1.7.1",
     "eslint": "^9.10.0",
