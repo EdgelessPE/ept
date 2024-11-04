@@ -71,8 +71,8 @@ importers:
         specifier: ^9.13.0
         version: 9.13.0
       '@modern-js/tsconfig':
-        specifier: 2.60.1
-        version: 2.60.1
+        specifier: 2.60.6
+        version: 2.60.6
       '@rspress/plugin-shiki':
         specifier: ^1.31.1
         version: 1.31.1
@@ -449,8 +449,8 @@ packages:
     peerDependencies:
       react: '>=16'
 
-  '@modern-js/tsconfig@2.60.1':
-    resolution: {integrity: sha512-uwVQiCsRZSmNaiBJbeNv892udKNXOM6+ru7X6YaK025I2qP0XHHkrr3Idtge/EyZ5qsnfZn3ACZqsIdOYmxN3A==}
+  '@modern-js/tsconfig@2.60.6':
+    resolution: {integrity: sha512-r8l8TsnFRHHbiZxob1PgGEgQQiD1d3tpAhPYyxgahZiupsM5ONjtVHh3wu9/e7b6f1ugxcS8dwIYwmVXDd1GCQ==}
 
   '@modern-js/utils@2.60.4':
     resolution: {integrity: sha512-RQuROvNA68Dr2SI0mEc1MmG5X2yVmz+aWViZP1Q89z9ErVSJGCSspUHpM2kFQaCwDgbB7Oz84bcAnP0C+ED9TQ==}
@@ -775,9 +775,6 @@ packages:
 
   '@types/ms@0.7.34':
     resolution: {integrity: sha512-nG96G3Wp6acyAgJqGasjODb+acrI7KltPiRxzHPXnP3NgI28bpQDRv53olbqGXbfcgF5aiiHmO3xpwEpS5Ld9g==}
-
-  '@types/node@22.7.5':
-    resolution: {integrity: sha512-jML7s2NAzMWc//QSJ1a3prpk78cOPchGvXJsC3C6R6PSMoooztvRVQEz89gmBTBY1SPMaqo5teB4uNHPdetShQ==}
 
   '@types/node@22.8.1':
     resolution: {integrity: sha512-k6Gi8Yyo8EtrNtkHXutUu2corfDf9su95VYVP10aGYMMROM6SAItZi0w1XszA6RtWTHSVp5OeFof37w0IEqCQg==}
@@ -3408,7 +3405,7 @@ snapshots:
       '@types/react': 18.3.5
       react: 18.3.1
 
-  '@modern-js/tsconfig@2.60.1': {}
+  '@modern-js/tsconfig@2.60.6': {}
 
   '@modern-js/utils@2.60.4':
     dependencies:
@@ -3804,10 +3801,6 @@ snapshots:
   '@types/minimist@1.2.5': {}
 
   '@types/ms@0.7.34': {}
-
-  '@types/node@22.7.5':
-    dependencies:
-      undici-types: 6.19.8
 
   '@types/node@22.8.1':
     dependencies:
@@ -4994,7 +4987,7 @@ snapshots:
 
   jest-worker@27.5.1:
     dependencies:
-      '@types/node': 22.7.5
+      '@types/node': 22.8.1
       merge-stream: 2.0.0
       supports-color: 8.1.1
 
