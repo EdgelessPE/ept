@@ -40,7 +40,7 @@
     "@eslint/js": "^9.13.0",
     "@modern-js/tsconfig": "2.61.0",
     "@rspress/plugin-shiki": "^1.37.0",
-    "@types/node": "^22.8.1",
+    "@types/node": "^22.9.0",
     "chatgpt-md-translator": "^1.7.1",
     "eslint": "^9.10.0",
     "eslint-config-prettier": "^9.1.0",
