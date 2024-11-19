@@ -42,7 +42,7 @@
     "@rspress/plugin-shiki": "^1.37.0",
     "@types/node": "^22.9.0",
     "chatgpt-md-translator": "^1.7.1",
-    "eslint": "^9.10.0",
+    "eslint": "^9.15.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
     "globals": "^15.11.0",
