@@ -46,8 +46,8 @@ importers:
         specifier: ^2.6.1
         version: 2.6.1
       git-cliff-linux-x64:
-        specifier: ^2.6.1
-        version: 2.6.1
+        specifier: ^2.7.0
+        version: 2.7.0
       git-cliff-windows-arm64:
         specifier: ^2.6.1
         version: 2.6.1
@@ -1480,6 +1480,11 @@ packages:
 
   git-cliff-linux-x64@2.6.1:
     resolution: {integrity: sha512-4Y+kEM8JYT7HPgt++DEaqWW/SDxJ9iotork15sTP3fOiRMZi8p58ifjHEfPYVUup/hLpTmH2aiX72HNKa4gwRA==}
+    cpu: [x64]
+    os: [linux]
+
+  git-cliff-linux-x64@2.7.0:
+    resolution: {integrity: sha512-0qHHPEsAo9HQZpifM9wdnjot90yB7C+LIHSFfGhkTsmzr/Daxnekt0um6mb3yEA7YuFnE9+c8mvLDoXlgJ5eaA==}
     cpu: [x64]
     os: [linux]
 
@@ -4455,6 +4460,9 @@ snapshots:
     optional: true
 
   git-cliff-linux-x64@2.6.1:
+    optional: true
+
+  git-cliff-linux-x64@2.7.0:
     optional: true
 
   git-cliff-windows-arm64@2.6.1:
