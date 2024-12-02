@@ -43,7 +43,7 @@ tantivy = "0.22.0"
 tar = "0.4.43"
 toml = { version = "0.8.19", features = ["preserve_order"] }
 trash = "5.1.1"
-ts-rs = "10.0.0"
+ts-rs = "10.1.0"
 url = "2.5.4"
 which = "7.0.0"
 wildmatch = "2.4.0"
