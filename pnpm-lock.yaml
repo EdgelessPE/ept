@@ -74,8 +74,8 @@ importers:
         specifier: 2.62.1
         version: 2.62.1
       '@rspress/plugin-shiki':
-        specifier: ^1.37.2
-        version: 1.37.2
+        specifier: ^1.37.3
+        version: 1.37.3
       '@types/node':
         specifier: ^22.9.0
         version: 22.9.0
@@ -719,8 +719,8 @@ packages:
     peerDependencies:
       '@rspress/runtime': ^1.37.1
 
-  '@rspress/plugin-shiki@1.37.2':
-    resolution: {integrity: sha512-gzgz8acCvJxmsmPQGTOHueK1wyrgK0HrR7GYAcit4fK5W+fLtl1PKtSJIym7AFXrBgs9iQgAC7+id+TmznESYg==}
+  '@rspress/plugin-shiki@1.37.3':
+    resolution: {integrity: sha512-mfjDF/vtR7yHkLFHWs6ouTwc+9nG9am0l3s4K1KekT+ZjUMfI88WTMQnZpzotsarOVXpTtpzGxpiAWuAILzodw==}
     engines: {node: '>=14.17.6'}
 
   '@rspress/runtime@1.37.1':
@@ -730,8 +730,8 @@ packages:
   '@rspress/shared@1.37.1':
     resolution: {integrity: sha512-4F59HFo8U3HUfa092EMWtfDiJv0hqBnlJbA7nBtihehKk8Wq9cTmVeTRTuOXNI6z4U6nW0j2mQC+FaO2GKmMCA==}
 
-  '@rspress/shared@1.37.2':
-    resolution: {integrity: sha512-mUTvmOQn6D3uYcEJGNGnYY9sFAt3WxySmRZ4399M9bcrxtjP7gOQ+K7T17DfCBN5TW934scKsnyJc4ruMqIzXg==}
+  '@rspress/shared@1.37.3':
+    resolution: {integrity: sha512-EJV039UJu5fSuodfs7OzXdxKbMLKc3HjOwZOJzxBt1Ywky6AeBHAd9GtkVetE5ud8DI2TloTkSGbkh1lNbq/fw==}
 
   '@rspress/theme-default@1.37.1':
     resolution: {integrity: sha512-CSNrRWZFbZThNBddWvrybW1I1u9iXmkfbPRZ7Rd+cJKEugrGMQ78kFrMAq/e9+3O4qW8IRBbVCgDR8RvdBYo3A==}
@@ -3670,9 +3670,9 @@ snapshots:
       '@rspress/runtime': 1.37.1
       medium-zoom: 1.1.0
 
-  '@rspress/plugin-shiki@1.37.2':
+  '@rspress/plugin-shiki@1.37.3':
     dependencies:
-      '@rspress/shared': 1.37.2
+      '@rspress/shared': 1.37.3
       hast-util-from-html: 2.0.3
       shiki: 0.14.7
       unist-util-visit: 5.0.0
@@ -3694,13 +3694,14 @@ snapshots:
       gray-matter: 4.0.3
       unified: 10.1.2
 
-  '@rspress/shared@1.37.2':
+  '@rspress/shared@1.37.3':
     dependencies:
       '@rsbuild/core': 1.1.5
       chalk: 5.3.0
       execa: 5.1.1
       fs-extra: 11.2.0
       gray-matter: 4.0.3
+      lodash-es: 4.17.21
       unified: 10.1.2
 
   '@rspress/theme-default@1.37.1':
