@@ -114,7 +114,7 @@ pub fn meta(input: PackageInputEnum, verify_signature: bool) -> Result<MetaResul
     });
 
     Ok(MetaResult {
-        temp_dir,
+        temp_dir: Some(temp_dir),
         permissions,
         workflows: exists_workflows.into_iter().map(|(name, _)| name).collect(),
         package: global,

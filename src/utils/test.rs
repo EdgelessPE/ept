@@ -22,6 +22,7 @@ pub fn _ensure_testing_vscode() -> String {
     )
     .unwrap()
     .temp_dir
+    .unwrap()
 }
 
 pub fn _ensure_testing_vscode_uninstalled() {
@@ -47,6 +48,7 @@ pub fn _ensure_testing(scope: &str, name: &str) -> String {
     )
     .unwrap()
     .temp_dir
+    .unwrap()
 }
 
 pub fn _ensure_testing_uninstalled(scope: &str, name: &str) {
