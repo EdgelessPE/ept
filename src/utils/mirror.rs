@@ -299,6 +299,7 @@ fn test_filter_release() {
             size: 94245376,
             timestamp: 1704554724,
             integrity: None,
+            meta: None,
         },
         MirrorPkgSoftwareRelease {
             file_name: "VSCode_1.86.1.0_Cno.nep".to_string(),
@@ -306,6 +307,7 @@ fn test_filter_release() {
             size: 94245376,
             timestamp: 1704554724,
             integrity: None,
+            meta: None,
         },
         MirrorPkgSoftwareRelease {
             file_name: "VSCode_1.85.2.0_Cno.nep".to_string(),
@@ -313,6 +315,7 @@ fn test_filter_release() {
             size: 94245376,
             timestamp: 1704554724,
             integrity: None,
+            meta: None,
         },
     ];
     let res = filter_release(arr, None, false).unwrap();
@@ -326,6 +329,7 @@ fn test_filter_release() {
             size: 133763072,
             timestamp: 1704554608,
             integrity: None,
+            meta: None,
         },
         MirrorPkgSoftwareRelease {
             file_name: "Chrome_121.0.6099.200_Cno.nep".to_string(),
@@ -333,6 +337,7 @@ fn test_filter_release() {
             size: 133763072,
             timestamp: 1704554608,
             integrity: None,
+            meta: None,
         },
         MirrorPkgSoftwareRelease {
             file_name: "Chrome_122.0.6099.200_Cno.nep".to_string(),
@@ -340,6 +345,7 @@ fn test_filter_release() {
             size: 133763072,
             timestamp: 1704554608,
             integrity: None,
+            meta: None,
         },
     ];
     let res = filter_release(arr, Some(VersionReq::parse("121").unwrap()), false).unwrap();
@@ -363,6 +369,7 @@ fn test_filter_release_with_flags() {
             size: 94245376,
             timestamp: 1704554724,
             integrity: None,
+            meta: None,
         },
         MirrorPkgSoftwareRelease {
             file_name: "Firefox_127.0.0.1_Cno.IE.nep".to_string(),
@@ -370,6 +377,7 @@ fn test_filter_release_with_flags() {
             size: 94245376,
             timestamp: 1704554724,
             integrity: None,
+            meta: None,
         },
         MirrorPkgSoftwareRelease {
             file_name: "Firefox_127.0.0.1_Cno.P.nep".to_string(),
@@ -377,6 +385,7 @@ fn test_filter_release_with_flags() {
             size: 94245376,
             timestamp: 1704554724,
             integrity: None,
+            meta: None,
         },
         MirrorPkgSoftwareRelease {
             file_name: "Firefox_127.0.0.1_Cno.PE.nep".to_string(),
@@ -384,6 +393,7 @@ fn test_filter_release_with_flags() {
             size: 94245376,
             timestamp: 1704554724,
             integrity: None,
+            meta: None,
         },
     ];
 

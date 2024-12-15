@@ -8,7 +8,9 @@ use anyhow::Result;
 use regex::Regex;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
-use super::{extended_semver::ExSemVer, mixed_fs::MixedFS, verifiable::Verifiable};
+use super::{
+    extended_semver::ExSemVer, meta::MetaResult, mixed_fs::MixedFS, verifiable::Verifiable,
+};
 
 lazy_static! {
     static ref FLAGS_RE: Regex = Regex::new(r"\.([A-Z]+)\.nep$").unwrap();
@@ -150,6 +152,7 @@ impl MirrorPkgSoftware {
                     size: 94245376,
                     timestamp: 1704554724,
                     integrity: None,
+                    meta: None,
                 }],
             }],
         );
@@ -163,6 +166,7 @@ impl MirrorPkgSoftware {
                     size: 94245376,
                     timestamp: 1704554724,
                     integrity: None,
+                    meta: None,
                 }],
             }],
         );
@@ -176,6 +180,7 @@ impl MirrorPkgSoftware {
                     size: 133763072,
                     timestamp: 1704554608,
                     integrity: None,
+                    meta: None,
                 }],
             }],
         );
@@ -189,6 +194,7 @@ impl MirrorPkgSoftware {
                     size: 192179712,
                     timestamp: 1704554110,
                     integrity: None,
+                    meta: None,
                 }],
             }],
         );
@@ -218,6 +224,7 @@ pub struct MirrorPkgSoftwareRelease {
     pub size: u64,
     pub timestamp: u64,
     pub integrity: Option<String>,
+    pub meta: Option<MetaResult>,
 }
 
 impl MirrorPkgSoftwareRelease {
@@ -254,6 +261,7 @@ fn test_get_flags() {
         size: 114514,
         timestamp: 114514,
         integrity: None,
+        meta: None,
     };
     assert_eq!(r.get_flags(), None);
 
@@ -263,6 +271,7 @@ fn test_get_flags() {
         size: 114514,
         timestamp: 114514,
         integrity: None,
+        meta: None,
     };
     assert_eq!(r.get_flags(), Some("P".to_string()));
 
@@ -272,6 +281,7 @@ fn test_get_flags() {
         size: 114514,
         timestamp: 114514,
         integrity: None,
+        meta: None,
     };
     assert_eq!(r.get_flags(), Some("EI".to_string()));
 
@@ -281,6 +291,7 @@ fn test_get_flags() {
         size: 114514,
         timestamp: 114514,
         integrity: None,
+        meta: None,
     };
     assert_eq!(r.get_flags(), Some("EI".to_string()));
 
@@ -290,6 +301,7 @@ fn test_get_flags() {
         size: 114514,
         timestamp: 114514,
         integrity: None,
+        meta: None,
     };
     assert_eq!(r.get_flags(), None);
 }
