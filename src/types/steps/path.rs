@@ -123,6 +123,7 @@ fn set_system_path(record: &str, is_add: bool) -> Result<bool> {
         .map_err(|err| anyhow!("Error(Path):Can't write to register : {err}"))?;
 
     // 发送全局广播
+    #[allow(clippy::manual_c_str_literals)]
     let result = unsafe {
         SendMessageTimeoutA(
             HWND_BROADCAST,
