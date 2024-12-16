@@ -218,8 +218,10 @@ fn test_mirror() {
         description: "Visual Studio Code".to_string(),
         from_mirror: Some("mock-server".to_string()),
     }];
+    // 精准名称
     let search_res = search(&"vscode".to_string(), false).unwrap();
     assert_eq!(search_res, expected_res);
+    // 大小写不敏感名称
     let search_res = search(&"FIREFOx".to_string(), false).unwrap();
     assert_eq!(
         search_res,
@@ -231,8 +233,10 @@ fn test_mirror() {
             from_mirror: Some("mock-server".to_string()),
         }]
     );
+    // Tag 搜索
     let search_res = search(&"ELECTRON".to_string(), false).unwrap();
     assert_eq!(search_res, expected_res);
+    // 正则名称
     let search_res = search(&r"vs\w+".to_string(), true).unwrap();
     assert_eq!(search_res, expected_res);
     assert!(search(&"microsoft".to_string(), false).is_err());
