@@ -37,7 +37,7 @@
     "@commitlint/cli": "^19.6.0",
     "@commitlint/config-conventional": "^19.5.0",
     "@commitlint/types": "^19.5.0",
-    "@eslint/js": "^9.13.0",
+    "@eslint/js": "^9.17.0",
     "@modern-js/tsconfig": "2.63.1",
     "@rspress/plugin-shiki": "^1.38.0",
     "@types/node": "^22.9.0",
