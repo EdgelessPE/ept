@@ -231,6 +231,8 @@ fn test_mirror() {
             from_mirror: Some("mock-server".to_string()),
         }]
     );
+    let search_res = search(&"ELECTRON".to_string(), false).unwrap();
+    assert_eq!(search_res, expected_res);
     let search_res = search(&r"vs\w+".to_string(), true).unwrap();
     assert_eq!(search_res, expected_res);
     assert!(search(&"microsoft".to_string(), false).is_err());

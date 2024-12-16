@@ -108,107 +108,108 @@ pub fn _run_mirror_mock_server() -> String {
         then.status(200)
             .header("Content-Type", "application/json")
             .json_body(serde_json::json!(
-            {
-                "tree": {
-                    "Microsoft": [
-                        {
-                            "name": "VSCode",
-                            "releases": [
-                                {
-                                    "file_name": "VSCode_1.75.4.2_Cno.nep",
-                                    "version": "1.75.4.2",
-                                    "size": 94245376,
-                                    "timestamp": 1704554724,
-                                    "meta": {
-                            "workflows": [
-                                "setup.toml",
-                                "remove.toml"
-                            ],
-                            "permissions": [
-                                {
-                                    "key": "execute_installer",
-                                    "level": "Important",
-                                    "targets": [
-                                        "${AppData}/Local/Programs/Microsoft VS Code/unins000.exe",
-                                        "VSCodeUserSetup-x64-1.96.0.exe /VERYSILENT /MERGETASKS=!runcode"
-                                    ]
-                                }
-                            ],
-                            "package": {
-                                "nep": "0",
-                                "package": {
-                                    "name": "VSCode",
-                                    "description": "Visual Studio Code",
-                                    "template": "Software",
-                                    "version": "1.75.4.2",
-                                    "authors": [
-                                        "Bot <bot@edgeless.top>",
-                                        "Cno <cno4tech@gmail.com>"
-                                    ],
-                                    "license": "MIT"
-                                },
-                                "software": {
-                                    "scope": "Microsoft",
-                                    "upstream": "https://code.visualstudio.com/",
-                                    "category": "办公编辑",
-                                    "language": "Multi",
-                                    "main_program": "Code.exe",
-                                    "tags": [
-                                        "electron"
-                                    ]
-                                }
+                {
+                    "tree": {
+                        "Microsoft": [
+                            {
+                                "name": "VSCode",
+                                "releases": [
+                                    {
+                                        "file_name": "VSCode_1.75.4.2_Cno.nep",
+                                        "version": "1.75.4.2",
+                                        "size": 94245376,
+                                        "timestamp": 1704554724,
+                                        "meta": {
+                                            "workflows": [
+                                                "setup.toml",
+                                                "remove.toml"
+                                            ],
+                                            "permissions": [
+                                                {
+                                                    "key": "execute_installer",
+                                                    "level": "Important",
+                                                    "targets": [
+                                                        "${AppData}/Local/Programs/Microsoft VS Code/unins000.exe",
+                                                        "VSCodeUserSetup-x64-1.96.0.exe /VERYSILENT /MERGETASKS=!runcode"
+                                                    ]
+                                                }
+                                            ],
+                                            "package": {
+                                                "nep": "0",
+                                                "package": {
+                                                    "name": "VSCode",
+                                                    "description": "Visual Studio Code",
+                                                    "template": "Software",
+                                                    "version": "1.75.4.2",
+                                                    "authors": [
+                                                        "Bot <bot@edgeless.top>",
+                                                        "Cno <cno4tech@gmail.com>"
+                                                    ],
+                                                    "license": "MIT"
+                                                },
+                                                "software": {
+                                                    "scope": "Microsoft",
+                                                    "upstream": "https://code.visualstudio.com/",
+                                                    "category": "办公编辑",
+                                                    "language": "Multi",
+                                                    "main_program": "Code.exe",
+                                                    "tags": [
+                                                        "electron"
+                                                    ]
+                                                }
+                                            }
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "Notepad",
+                                "releases": [
+                                    {
+                                        "file_name": "Notepad_22.1.0.0_Cno.nep",
+                                        "version": "22.1.0.0",
+                                        "size": 94245376,
+                                        "timestamp": 1704554724
+                                    }
+                                ]
                             }
-                        }
-                                }
-                            ]
-                        },
-                        {
-                            "name": "Notepad",
-                            "releases": [
-                                {
-                                    "file_name": "Notepad_22.1.0.0_Cno.nep",
-                                    "version": "22.1.0.0",
-                                    "size": 94245376,
-                                    "timestamp": 1704554724
-                                }
-                            ]
-                        }
-                    ],
-                    "PortableApps":[
-                        {
-                            "name":"Firefox",
-                            "releases":[
-                                {
-                                    "file_name":"Firefox_127.0.0.1_Cno.I.nep",
-                                    "version":"127.0.0.1",
-                                    "size": 94245376,
-                                    "timestamp": 1704554724
-                                },
-                                {
-                                    "file_name":"Firefox_127.0.0.1_Cno.IE.nep",
-                                    "version":"127.0.0.1",
-                                    "size": 94245376,
-                                    "timestamp": 1704554724
-                                },
-                                {
-                                    "file_name":"Firefox_127.0.0.1_Cno.P.nep",
-                                    "version":"127.0.0.1",
-                                    "size": 94245376,
-                                    "timestamp": 1704554724
-                                },
-                                {
-                                    "file_name":"Firefox_127.0.0.1_Cno.PE.nep",
-                                    "version":"127.0.0.1",
-                                    "size": 94245376,
-                                    "timestamp": 1704554724
-                                },
-                            ]
-                        }
-                    ]
-                },
-                "timestamp": 1704554724,
-                "url_template": "http://localhost:19191/static/{file_name}?scope={scope}&software={software}".to_string()
-            }));
+                        ],
+                        "PortableApps": [
+                            {
+                                "name": "Firefox",
+                                "releases": [
+                                    {
+                                        "file_name": "Firefox_127.0.0.1_Cno.I.nep",
+                                        "version": "127.0.0.1",
+                                        "size": 94245376,
+                                        "timestamp": 1704554724
+                                    },
+                                    {
+                                        "file_name": "Firefox_127.0.0.1_Cno.IE.nep",
+                                        "version": "127.0.0.1",
+                                        "size": 94245376,
+                                        "timestamp": 1704554724
+                                    },
+                                    {
+                                        "file_name": "Firefox_127.0.0.1_Cno.P.nep",
+                                        "version": "127.0.0.1",
+                                        "size": 94245376,
+                                        "timestamp": 1704554724
+                                    },
+                                    {
+                                        "file_name": "Firefox_127.0.0.1_Cno.PE.nep",
+                                        "version": "127.0.0.1",
+                                        "size": 94245376,
+                                        "timestamp": 1704554724
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "timestamp": 1704554724,
+                    "url_template": "http://localhost:19191/static/{file_name}?scope={scope}&software={software}"
+                }
+        ));
     });
 
     mock_server.mock(|when, then| {
