@@ -118,7 +118,47 @@ pub fn _run_mirror_mock_server() -> String {
                                     "file_name": "VSCode_1.75.4.2_Cno.nep",
                                     "version": "1.75.4.2",
                                     "size": 94245376,
-                                    "timestamp": 1704554724
+                                    "timestamp": 1704554724,
+                                    "meta": {
+                            "workflows": [
+                                "setup.toml",
+                                "remove.toml"
+                            ],
+                            "permissions": [
+                                {
+                                    "key": "execute_installer",
+                                    "level": "Important",
+                                    "targets": [
+                                        "${AppData}/Local/Programs/Microsoft VS Code/unins000.exe",
+                                        "VSCodeUserSetup-x64-1.96.0.exe /VERYSILENT /MERGETASKS=!runcode"
+                                    ]
+                                }
+                            ],
+                            "package": {
+                                "nep": "0",
+                                "package": {
+                                    "name": "VSCode",
+                                    "description": "Visual Studio Code",
+                                    "template": "Software",
+                                    "version": "1.75.4.2",
+                                    "authors": [
+                                        "Bot <bot@edgeless.top>",
+                                        "Cno <cno4tech@gmail.com>"
+                                    ],
+                                    "license": "MIT"
+                                },
+                                "software": {
+                                    "scope": "Microsoft",
+                                    "upstream": "https://code.visualstudio.com/",
+                                    "category": "办公编辑",
+                                    "language": "Multi",
+                                    "main_program": "Code.exe",
+                                    "tags": [
+                                        "electron"
+                                    ]
+                                }
+                            }
+                        }
                                 }
                             ]
                         },

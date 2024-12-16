@@ -215,10 +215,22 @@ fn test_mirror() {
         name: "VSCode".to_string(),
         scope: "Microsoft".to_string(),
         version: "1.75.4.2".to_string(),
+        description: "Visual Studio Code".to_string(),
         from_mirror: Some("mock-server".to_string()),
     }];
     let search_res = search(&"vscode".to_string(), false).unwrap();
     assert_eq!(search_res, expected_res);
+    let search_res = search(&"FIREFOx".to_string(), false).unwrap();
+    assert_eq!(
+        search_res,
+        vec![crate::types::mirror::SearchResult {
+            name: "Firefox".to_string(),
+            scope: "PortableApps".to_string(),
+            version: "127.0.0.1".to_string(),
+            description: "".to_string(),
+            from_mirror: Some("mock-server".to_string()),
+        }]
+    );
     let search_res = search(&r"vs\w+".to_string(), true).unwrap();
     assert_eq!(search_res, expected_res);
     assert!(search(&"microsoft".to_string(), false).is_err());

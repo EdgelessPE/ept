@@ -243,6 +243,7 @@ pub struct SearchResult {
     pub name: String,
     pub scope: String,
     pub version: String,
+    pub description: String,
     pub from_mirror: Option<String>,
 }
 

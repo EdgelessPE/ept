@@ -18,13 +18,21 @@ pub fn fmt_log_in_step(step: &str, head: ColoredString, msg: &str) -> String {
     format!("{head:>8} {s:<9} {msg}", s = step.truecolor(100, 100, 100))
 }
 
-pub fn fmt_package_line(scope: &str, name: &str, version: &str, mirror: Option<String>) -> String {
+pub fn fmt_package_line(
+    scope: &str,
+    name: &str,
+    version: &str,
+    description: Option<String>,
+) -> String {
     format!(
         "  {:>15}/{:<30} {:<22} {}\n",
         ellipsis(scope, 15).truecolor(100, 100, 100).italic(),
         ellipsis(name, 30).cyan().bold(),
         format!("({version})"),
-        mirror.unwrap_or_default().as_str().truecolor(100, 100, 100)
+        description
+            .unwrap_or_default()
+            .as_str()
+            .truecolor(100, 100, 100)
     )
 }
 

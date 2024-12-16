@@ -171,7 +171,11 @@ fn router(action: Action, cfg: Cfg) -> Result<String> {
                                 &node.scope,
                                 &node.name,
                                 &node.version,
-                                node.from_mirror,
+                                Some(format!(
+                                    "{} [{}]",
+                                    &node.description,
+                                    node.from_mirror.unwrap_or("unknown".to_string())
+                                )),
                             )
                         });
                 res
