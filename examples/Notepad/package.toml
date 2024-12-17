@@ -17,7 +17,7 @@ description = "Notepad"
 [software]
 scope = "Microsoft"
 # 上游发布页面 URL
-upstream = "https://code.visualstudio.com/"
+upstream = "https://notepad.visualstudio.com/"
 # 软件分类
 category = "办公编辑"
 tags = ["记事本"]

@@ -169,7 +169,45 @@ pub fn _run_mirror_mock_server() -> String {
                                         "file_name": "Notepad_22.1.0.0_Cno.nep",
                                         "version": "22.1.0.0",
                                         "size": 94245376,
-                                        "timestamp": 1704554724
+                                        "timestamp": 1704554724,
+                                        "meta": {
+                                            "workflows": [
+                                                "setup.toml",
+                                                "remove.toml"
+                                            ],
+                                            "permissions": [
+                                                {
+                                                    "key": "path_entrances",
+                                                    "level": "Normal",
+                                                    "targets": [
+                                                        "notepad.exe"
+                                                    ]
+                                                }
+                                            ],
+                                            "package": {
+                                                "nep": "0",
+                                                "package": {
+                                                    "name": "Notepad",
+                                                    "description": "Notepad",
+                                                    "template": "Software",
+                                                    "version": "22.1.0.0",
+                                                    "authors": [
+                                                        "Bot <bot@edgeless.top>",
+                                                        "Cno <cno4tech@gmail.com>"
+                                                    ],
+                                                    "license": "MIT"
+                                                },
+                                                "software": {
+                                                    "scope": "Microsoft",
+                                                    "upstream": "https://notepad.visualstudio.com/",
+                                                    "category": "办公编辑",
+                                                    "language": "Multi",
+                                                    "tags": [
+                                                        "记事本"
+                                                    ]
+                                                }
+                                            }
+                                        }
                                     }
                                 ]
                             }
