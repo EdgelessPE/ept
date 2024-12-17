@@ -16,6 +16,7 @@ pub mod fs;
 pub mod mirror;
 pub mod parse_inputs;
 pub mod path;
+pub mod permissions;
 pub mod process;
 pub mod random;
 pub mod reg_entry;

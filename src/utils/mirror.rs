@@ -2,6 +2,7 @@ use anyhow::{anyhow, Result};
 use fs_extra::file::read_to_string;
 use semver::VersionReq;
 use std::cmp::Ordering;
+use std::path::Path;
 use std::path::PathBuf;
 use tantivy::collector::TopDocs;
 use tantivy::query::QueryParser;
@@ -17,6 +18,7 @@ use crate::types::matcher::PackageMatcher;
 use crate::types::mirror::MirrorPkgSoftwareRelease;
 use crate::types::mirror::SearchResult;
 use crate::types::mixed_fs::MixedFS;
+use crate::types::permissions::PermissionKey;
 use crate::{
     p2s,
     types::{
@@ -34,6 +36,7 @@ use super::download::fill_url_template;
 use super::fs::ensure_dir_exist;
 use super::fs::try_recycle;
 use super::path::find_scope_with_name;
+use super::permissions::filter_permissions;
 
 // 读取 meta
 pub fn read_local_mirror_hello(name: &String) -> Result<(MirrorHello, PathBuf)> {
@@ -80,7 +83,7 @@ pub fn filter_service_from_meta(
     }
 }
 
-fn get_schema() -> Result<(Schema, Field, Field, Field, Field, Field)> {
+fn get_schema() -> Result<(Schema, Field, Field, Field, Field, Field, Field)> {
     let mut schema_builder = Schema::builder();
     let opt = TextOptions::default()
         .set_indexing_options(
@@ -94,6 +97,7 @@ fn get_schema() -> Result<(Schema, Field, Field, Field, Field, Field)> {
     let version = schema_builder.add_text_field("version", STORED);
     let description = schema_builder.add_text_field("description", STORED);
     let tags = schema_builder.add_text_field("tags", TEXT | STORED);
+    let bin = schema_builder.add_text_field("bin", TEXT | STORED);
     Ok((
         schema_builder.build(),
         name,
@@ -101,6 +105,7 @@ fn get_schema() -> Result<(Schema, Field, Field, Field, Field, Field)> {
         version,
         description,
         tags,
+        bin,
     ))
 }
 
@@ -116,7 +121,7 @@ fn register_tokenizer(index: &mut Index) {
 
 // 为包构建索引
 pub fn build_index_for_mirror(content: MirrorPkgSoftware, dir: PathBuf) -> Result<()> {
-    let (schema, name, scope, version, description, tags) = get_schema()?;
+    let (schema, name, scope, version, description, tags, bin) = get_schema()?;
     if dir.exists() {
         try_recycle(&dir)?;
     }
@@ -133,17 +138,30 @@ pub fn build_index_for_mirror(content: MirrorPkgSoftware, dir: PathBuf) -> Resul
             }
             let release = filter_release(releases, None, false)?;
             let meta_res = if let Some(meta) = release.meta {
+                // 收集二进制文件
+                let mut bin_stems: Vec<String> = Vec::new();
+                for perm in filter_permissions(PermissionKey::path_entrances, meta.permissions) {
+                    for target in perm.targets {
+                        let p = Path::new(&target);
+                        bin_stems.push(p2s!(p.file_stem().unwrap()));
+                    }
+                }
+
                 (
+                    // 描述
                     meta.package.package.description,
+                    // 标签
                     meta.package
                         .software
                         .unwrap()
                         .tags
                         .unwrap_or_default()
                         .join(" "),
+                    // 二进制
+                    bin_stems.join(" "),
                 )
             } else {
-                ("".to_string(), "".to_string())
+                ("".to_string(), "".to_string(), "".to_string())
             };
             index_writer.add_document(doc!(
               name => item.name.as_str(),
@@ -151,6 +169,7 @@ pub fn build_index_for_mirror(content: MirrorPkgSoftware, dir: PathBuf) -> Resul
               version => release.version.to_string().as_str(),
               description => meta_res.0.as_str(),
               tags => meta_res.1.as_str(),
+              bin => meta_res.2.as_str(),
             ))?;
         }
     }
@@ -165,7 +184,7 @@ pub fn search_index_for_mirror(
     dir: PathBuf,
     is_regex: bool,
 ) -> Result<Vec<SearchResult>> {
-    let (_schema, name, scope, version, description, tags) = get_schema()?;
+    let (_schema, name, scope, version, description, tags, bin) = get_schema()?;
 
     let mut index = Index::open_in_dir(dir)?;
     register_tokenizer(&mut index);
@@ -183,7 +202,7 @@ pub fn search_index_for_mirror(
             .map_err(|e| anyhow!("Error:Invalid regex : {e}"))?;
         searcher.search(&query, &TopDocs::with_limit(10))?
     } else {
-        let query_parser = QueryParser::for_index(&index, vec![name, tags]);
+        let query_parser = QueryParser::for_index(&index, vec![name, tags, bin]);
         let query = query_parser.parse_query(text)?;
         searcher.search(&query, &TopDocs::with_limit(10))?
     };
