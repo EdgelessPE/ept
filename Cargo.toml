@@ -16,7 +16,7 @@ blake3 = { version = "1.5.5", features = ["rayon"] }
 chrono = "0.4.39"
 clap = { version = "4.5.23", features = ["derive"] }
 colored = "2.2.0"
-console = "0.15.8"
+console = "0.15.10"
 dirs = "5.0.1"
 ed25519-compact = "2.1.1"
 encoding = "0.2.33"
