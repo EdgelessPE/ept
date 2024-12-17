@@ -180,7 +180,7 @@ pub fn _run_mirror_mock_server() -> String {
                                                     "key": "path_entrances",
                                                     "level": "Normal",
                                                     "targets": [
-                                                        "notepad.exe"
+                                                        "ntpd.exe"
                                                     ]
                                                 }
                                             ],

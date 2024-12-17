@@ -236,6 +236,18 @@ fn test_mirror() {
     // Tag 搜索
     let search_res = search(&"ELECTRON".to_string(), false).unwrap();
     assert_eq!(search_res, expected_res);
+    // 二进制搜索
+    let search_res = search(&"ntpd".to_string(), false).unwrap();
+    assert_eq!(
+        search_res,
+        vec![crate::types::mirror::SearchResult {
+            name: "Notepad".to_string(),
+            scope: "Microsoft".to_string(),
+            version: "22.1.0.0".to_string(),
+            description: "Notepad".to_string(),
+            from_mirror: Some("mock-server".to_string()),
+        }]
+    );
     // 正则名称
     let search_res = search(&r"vs\w+".to_string(), true).unwrap();
     assert_eq!(search_res, expected_res);
