@@ -2,6 +2,7 @@ use anyhow::{anyhow, Result};
 use fs_extra::file::read_to_string;
 use semver::VersionReq;
 use std::cmp::Ordering;
+use std::collections::HashMap;
 use std::path::Path;
 use std::path::PathBuf;
 use tantivy::collector::TopDocs;
@@ -17,6 +18,7 @@ use crate::entrances::info_online;
 use crate::types::matcher::PackageMatcher;
 use crate::types::mirror::MirrorPkgSoftwareRelease;
 use crate::types::mirror::SearchResult;
+use crate::types::mirror::TreeItem;
 use crate::types::mixed_fs::MixedFS;
 use crate::types::permissions::PermissionKey;
 use crate::{
@@ -129,8 +131,20 @@ pub fn build_index_for_mirror(content: MirrorPkgSoftware, dir: PathBuf) -> Resul
     let mut index = Index::create_in_dir(&dir, schema.clone())?;
     register_tokenizer(&mut index);
     let mut index_writer = index.writer(50_000_000)?;
+    // 快查索引
+    let mut quick_map = HashMap::new();
     for (scope_str, node) in content.tree.iter() {
         for item in node {
+            // 写快查索引
+            quick_map.insert(
+                (
+                    scope_str.clone().to_lowercase(),
+                    item.name.clone().to_lowercase(),
+                ),
+                item.to_owned(),
+            );
+
+            // 构建搜索索引
             // 筛选出最高版本号
             let releases = item.releases.to_owned();
             if releases.is_empty() {
@@ -173,10 +187,22 @@ pub fn build_index_for_mirror(content: MirrorPkgSoftware, dir: PathBuf) -> Resul
             ))?;
         }
     }
+
+    // 写索引
+    let serialized_quick_map = bincode::serialize(&quick_map)?;
+    let quick_path = dir.join("quick-map.bin");
+    std::fs::write(&quick_path, serialized_quick_map).map_err(|e| {
+        anyhow!(
+            "Error:Failed to write quick map to {}:{e}",
+            p2s!(quick_path)
+        )
+    })?;
     index_writer.commit()?;
 
     Ok(())
 }
+
+//
 
 // 从索引中搜索内容
 pub fn search_index_for_mirror(
@@ -230,6 +256,43 @@ pub fn search_index_for_mirror(
     Ok(arr)
 }
 
+// 使用快查索引读取 TreeItem
+pub fn read_tree_item_from_quick_map(
+    mirror_index_dir: PathBuf,
+    name: &str,
+    scope: &str,
+) -> Result<TreeItem> {
+    let quick_path = mirror_index_dir.join("quick-map.bin");
+    if !quick_path.exists() {
+        return Err(anyhow!(
+            "Error:Missing quick map in '{}'",
+            p2s!(mirror_index_dir)
+        ));
+    }
+    let bin_data = std::fs::read(&quick_path).map_err(|e| {
+        anyhow!(
+            "Error:Failed to read quick map at '{}' : {e}",
+            p2s!(quick_path)
+        )
+    })?;
+    let quick_map: HashMap<(String, String), TreeItem> =
+        bincode::deserialize(&bin_data).map_err(|e| {
+            anyhow!(
+                "Error:Invalid quick map bin at '{}' : {e}",
+                p2s!(quick_path)
+            )
+        })?;
+
+    // 尝试读 map
+    let res = quick_map.get(&(scope.to_lowercase(), name.to_lowercase()));
+    if let Some(item) = res {
+        Ok(item.clone())
+    } else {
+        Err(anyhow!("Error:Failed to find '{scope}/{name}'"))
+    }
+}
+
+// 匹配 release
 // 如果没有提供 semver matcher 则返回最大版本
 pub fn filter_release(
     releases: Vec<MirrorPkgSoftwareRelease>,
