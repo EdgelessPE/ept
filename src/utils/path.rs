@@ -5,10 +5,7 @@ use std::path::{Path, PathBuf};
 use crate::{p2s, utils::cfg::get_config};
 
 use super::{
-    format_path,
-    fs::read_sub_dir,
-    get_bare_apps, get_path_mirror,
-    mirror::read_quick_maps,
+    format_path, fs::read_sub_dir, get_bare_apps, get_path_mirror, mirror::read_quick_maps,
 };
 
 pub fn split_parent(raw: &str, located: &String) -> (PathBuf, String) {
