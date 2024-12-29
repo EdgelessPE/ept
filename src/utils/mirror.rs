@@ -17,6 +17,7 @@ use toml::from_str;
 use crate::entrances::info_online;
 use crate::types::matcher::PackageMatcher;
 use crate::types::mirror::MirrorPkgSoftwareRelease;
+use crate::types::mirror::QuickMap;
 use crate::types::mirror::SearchResult;
 use crate::types::mirror::TreeItem;
 use crate::types::mixed_fs::MixedFS;
@@ -190,7 +191,10 @@ pub fn build_index_for_mirror(content: MirrorPkgSoftware, dir: PathBuf) -> Resul
     }
 
     // 写索引
-    let serialized_quick_map = bincode::serialize(&quick_map)?;
+    let serialized_quick_map = bincode::serialize(&QuickMap {
+        map: quick_map,
+        url_template: content.url_template,
+    })?;
     let quick_path = dir.join(MIRROR_FILE_QUICK_MAP);
     std::fs::write(&quick_path, serialized_quick_map).map_err(|e| {
         anyhow!(
@@ -256,11 +260,12 @@ pub fn search_index_for_mirror(
 }
 
 // 使用快查索引读取 TreeItem
+// 第二个参数为 URL 模板
 pub fn read_tree_item_from_quick_map(
     scope: &str,
     name: &str,
     mirror_name: &str,
-) -> Result<TreeItem> {
+) -> Result<(TreeItem, String)> {
     let quick_path = get_path_mirror()?
         .join(mirror_name)
         .join("index")
@@ -274,18 +279,19 @@ pub fn read_tree_item_from_quick_map(
             p2s!(quick_path)
         )
     })?;
-    let quick_map: HashMap<(String, String), TreeItem> =
-        bincode::deserialize(&bin_data).map_err(|e| {
-            anyhow!(
-                "Error:Invalid quick map bin at '{}' : {e}",
-                p2s!(quick_path)
-            )
-        })?;
+    let quick_map: QuickMap = bincode::deserialize(&bin_data).map_err(|e| {
+        anyhow!(
+            "Error:Invalid quick map bin at '{}' : {e}",
+            p2s!(quick_path)
+        )
+    })?;
 
     // 尝试读 map
-    let res = quick_map.get(&(scope.to_lowercase(), name.to_lowercase()));
+    let res = quick_map
+        .map
+        .get(&(scope.to_lowercase(), name.to_lowercase()));
     if let Some(item) = res {
-        Ok(item.clone())
+        Ok((item.clone(), quick_map.url_template))
     } else {
         Err(anyhow!("Error:Failed to find '{scope}/{name}'"))
     }

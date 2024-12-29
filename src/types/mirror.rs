@@ -51,6 +51,12 @@ pub struct Property {
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
+pub struct QuickMap {
+    pub map: HashMap<(String, String), TreeItem>,
+    pub url_template: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct Service {
     pub key: ServiceKeys,
     pub path: String,
