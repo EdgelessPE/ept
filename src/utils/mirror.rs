@@ -33,7 +33,6 @@ use crate::{
 use super::cfg::get_config;
 use super::cfg::get_flags_score;
 use super::constants::MIRROR_FILE_HELLO;
-use super::constants::MIRROR_FILE_PKG_SOFTWARE;
 use super::constants::MIRROR_FILE_QUICK_MAP;
 use super::download::fill_url_template;
 use super::fs::ensure_dir_exist;
@@ -56,20 +55,20 @@ pub fn read_local_mirror_hello(name: &String) -> Result<(MirrorHello, PathBuf)> 
 }
 
 // 读取 pkg-software
-pub fn read_local_mirror_pkg_software(name: &String) -> Result<MirrorPkgSoftware> {
-    let p = get_path_mirror()?.join(name).join(MIRROR_FILE_PKG_SOFTWARE);
-    if !p.exists() {
-        return Err(anyhow!("Error:Mirror '{name}' hasn't been added"));
-    }
-    let text = read_to_string(&p)?;
-    let pkg_software: MirrorPkgSoftware = from_str(&text).map_err(|e| {
-        anyhow!(
-            "Error:Invalid pkg software content at '{fp}' : {e}",
-            fp = p2s!(p)
-        )
-    })?;
-    Ok(pkg_software)
-}
+// pub fn read_local_mirror_pkg_software(name: &String) -> Result<MirrorPkgSoftware> {
+//     let p = get_path_mirror()?.join(name).join(MIRROR_FILE_PKG_SOFTWARE);
+//     if !p.exists() {
+//         return Err(anyhow!("Error:Mirror '{name}' hasn't been added"));
+//     }
+//     let text = read_to_string(&p)?;
+//     let pkg_software: MirrorPkgSoftware = from_str(&text).map_err(|e| {
+//         anyhow!(
+//             "Error:Invalid pkg software content at '{fp}' : {e}",
+//             fp = p2s!(p)
+//         )
+//     })?;
+//     Ok(pkg_software)
+// }
 
 // 从 meta 中筛选出服务，返回的第一个参数是拼接了 root_url 后的路径
 pub fn filter_service_from_meta(

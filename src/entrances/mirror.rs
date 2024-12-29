@@ -16,7 +16,7 @@ use crate::{
         verifiable::Verifiable,
     },
     utils::{
-        constants::{MIRROR_FILE_EPT_TOOLCHAIN, MIRROR_FILE_PKG_SOFTWARE},
+        constants::MIRROR_FILE_EPT_TOOLCHAIN,
         fs::{ensure_dir_exist, read_sub_dir, try_recycle},
         get_path_mirror,
         mirror::{build_index_for_mirror, filter_service_from_meta, read_local_mirror_hello},
@@ -79,9 +79,9 @@ pub fn mirror_add(url: &String, should_match_name: Option<String>) -> Result<Str
     // 更新索引并写 pkg-software.toml
     let p = get_path_mirror()?.join(&mirror_name);
     build_index_for_mirror(pkg_software_res.clone(), p.join("index"))?;
-    let value = Value::try_from(pkg_software_res)?;
-    let text = to_string_pretty(&value)?;
-    write(p.join(MIRROR_FILE_PKG_SOFTWARE), text)?;
+    // let value = Value::try_from(pkg_software_res)?;
+    // let text = to_string_pretty(&value)?;
+    // write(p.join(MIRROR_FILE_PKG_SOFTWARE), text)?;
 
     // 请求工具链服务
     if let Ok((ps_url, _)) = filter_service_from_meta(&res, ServiceKeys::EptToolchain) {
