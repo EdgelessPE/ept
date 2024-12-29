@@ -34,6 +34,7 @@ use super::cfg::get_config;
 use super::cfg::get_flags_score;
 use super::constants::MIRROR_FILE_HELLO;
 use super::constants::MIRROR_FILE_PKG_SOFTWARE;
+use super::constants::MIRROR_FILE_QUICK_MAP;
 use super::download::fill_url_template;
 use super::fs::ensure_dir_exist;
 use super::fs::try_recycle;
@@ -190,7 +191,7 @@ pub fn build_index_for_mirror(content: MirrorPkgSoftware, dir: PathBuf) -> Resul
 
     // 写索引
     let serialized_quick_map = bincode::serialize(&quick_map)?;
-    let quick_path = dir.join("quick-map.bin");
+    let quick_path = dir.join(MIRROR_FILE_QUICK_MAP);
     std::fs::write(&quick_path, serialized_quick_map).map_err(|e| {
         anyhow!(
             "Error:Failed to write quick map to {}:{e}",
@@ -201,8 +202,6 @@ pub fn build_index_for_mirror(content: MirrorPkgSoftware, dir: PathBuf) -> Resul
 
     Ok(())
 }
-
-//
 
 // 从索引中搜索内容
 pub fn search_index_for_mirror(
@@ -258,16 +257,15 @@ pub fn search_index_for_mirror(
 
 // 使用快查索引读取 TreeItem
 pub fn read_tree_item_from_quick_map(
-    mirror_index_dir: PathBuf,
+    mirror_name: &str,
     name: &str,
     scope: &str,
 ) -> Result<TreeItem> {
-    let quick_path = mirror_index_dir.join("quick-map.bin");
+    let quick_path = get_path_mirror()?
+        .join(mirror_name)
+        .join(MIRROR_FILE_QUICK_MAP);
     if !quick_path.exists() {
-        return Err(anyhow!(
-            "Error:Missing quick map in '{}'",
-            p2s!(mirror_index_dir)
-        ));
+        return Err(anyhow!("Error:Missing quick map at '{}'", p2s!(quick_path)));
     }
     let bin_data = std::fs::read(&quick_path).map_err(|e| {
         anyhow!(
