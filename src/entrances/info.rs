@@ -13,7 +13,7 @@ use crate::{
     utils::{
         fs::read_sub_dir,
         get_path_apps, get_path_mirror,
-        mirror::{filter_release, read_local_mirror_pkg_software},
+        mirror::{filter_release, read_local_mirror_pkg_software, read_tree_item_from_quick_map},
         path::find_scope_with_name,
     },
 };
@@ -49,17 +49,9 @@ pub fn info_online(
 ) -> Result<(TreeItem, String)> {
     // 定义匹配函数
     let item_matcher = |mirror_name: &String| {
+        let item = read_tree_item_from_quick_map(scope, package_name, mirror_name)?;
         let pkg_software = read_local_mirror_pkg_software(mirror_name)?;
-        if let Some(entry) = pkg_software.tree.get(scope) {
-            for item in entry {
-                if &item.name == package_name {
-                    return Ok((item.to_owned(), pkg_software.url_template));
-                }
-            }
-        }
-        Err(anyhow!(
-            "Error:Can't find such package in mirror '{mirror_name}'"
-        ))
+        Ok((item, pkg_software.url_template))
     };
     if let Some(mirror_name) = mirror {
         return item_matcher(&mirror_name);

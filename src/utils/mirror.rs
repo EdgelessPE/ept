@@ -257,12 +257,13 @@ pub fn search_index_for_mirror(
 
 // 使用快查索引读取 TreeItem
 pub fn read_tree_item_from_quick_map(
-    mirror_name: &str,
-    name: &str,
     scope: &str,
+    name: &str,
+    mirror_name: &str,
 ) -> Result<TreeItem> {
     let quick_path = get_path_mirror()?
         .join(mirror_name)
+        .join("index")
         .join(MIRROR_FILE_QUICK_MAP);
     if !quick_path.exists() {
         return Err(anyhow!("Error:Missing quick map at '{}'", p2s!(quick_path)));
