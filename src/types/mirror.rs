@@ -51,8 +51,13 @@ pub struct Property {
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
-pub struct QuickMap {
-    pub map: HashMap<(String, String), TreeItem>,
+pub struct QuickMaps {
+    // 用于通过小写名称查找 scope 和真实名称的 Map
+    // HashMap<小写名称, (可能的 scope, 真实名称)>
+    pub scope_map: HashMap<String, (Vec<String>, String)>,
+    // 用于通过小写 scope 和小写名称查找 TreeItem 的 Map
+    // HashMap<(小写 scope, 小写名称), TreeItem>>
+    pub full_map: HashMap<(String, String), TreeItem>,
     pub url_template: String,
 }
 

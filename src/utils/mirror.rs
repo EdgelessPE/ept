@@ -17,9 +17,8 @@ use toml::from_str;
 use crate::entrances::info_online;
 use crate::types::matcher::PackageMatcher;
 use crate::types::mirror::MirrorPkgSoftwareRelease;
-use crate::types::mirror::QuickMap;
+use crate::types::mirror::QuickMaps;
 use crate::types::mirror::SearchResult;
-use crate::types::mirror::TreeItem;
 use crate::types::mixed_fs::MixedFS;
 use crate::types::permissions::PermissionKey;
 use crate::{
@@ -134,17 +133,21 @@ pub fn build_index_for_mirror(content: MirrorPkgSoftware, dir: PathBuf) -> Resul
     register_tokenizer(&mut index);
     let mut index_writer = index.writer(50_000_000)?;
     // 快查索引
-    let mut quick_map = HashMap::new();
+    let mut full_map = HashMap::new();
+    let mut scope_map = HashMap::new();
     for (scope_str, node) in content.tree.iter() {
         for item in node {
             // 写快查索引
-            quick_map.insert(
-                (
-                    scope_str.clone().to_lowercase(),
-                    item.name.clone().to_lowercase(),
-                ),
+            let name_str = item.name.clone();
+            full_map.insert(
+                (scope_str.to_lowercase(), name_str.to_lowercase()),
                 item.to_owned(),
             );
+            scope_map
+                .entry(name_str.to_lowercase())
+                .or_insert_with(|| (Vec::new(), name_str.clone()))
+                .0
+                .push(scope_str.clone());
 
             // 构建搜索索引
             // 筛选出最高版本号
@@ -191,8 +194,9 @@ pub fn build_index_for_mirror(content: MirrorPkgSoftware, dir: PathBuf) -> Resul
     }
 
     // 写索引
-    let serialized_quick_map = bincode::serialize(&QuickMap {
-        map: quick_map,
+    let serialized_quick_map = bincode::serialize(&QuickMaps {
+        scope_map,
+        full_map,
         url_template: content.url_template,
     })?;
     let quick_path = dir.join(MIRROR_FILE_QUICK_MAP);
@@ -259,13 +263,8 @@ pub fn search_index_for_mirror(
     Ok(arr)
 }
 
-// 使用快查索引读取 TreeItem
-// 第二个参数为 URL 模板
-pub fn read_tree_item_from_quick_map(
-    scope: &str,
-    name: &str,
-    mirror_name: &str,
-) -> Result<(TreeItem, String)> {
+// 读取快查索引
+pub fn read_quick_maps(mirror_name: &str) -> Result<QuickMaps> {
     let quick_path = get_path_mirror()?
         .join(mirror_name)
         .join("index")
@@ -279,22 +278,14 @@ pub fn read_tree_item_from_quick_map(
             p2s!(quick_path)
         )
     })?;
-    let quick_map: QuickMap = bincode::deserialize(&bin_data).map_err(|e| {
+    let quick_map: QuickMaps = bincode::deserialize(&bin_data).map_err(|e| {
         anyhow!(
             "Error:Invalid quick map bin at '{}' : {e}",
             p2s!(quick_path)
         )
     })?;
 
-    // 尝试读 map
-    let res = quick_map
-        .map
-        .get(&(scope.to_lowercase(), name.to_lowercase()));
-    if let Some(item) = res {
-        Ok((item.clone(), quick_map.url_template))
-    } else {
-        Err(anyhow!("Error:Failed to find '{scope}/{name}'"))
-    }
+    Ok(quick_map)
 }
 
 // 匹配 release

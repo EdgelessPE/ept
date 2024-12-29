@@ -13,7 +13,7 @@ use crate::{
     utils::{
         fs::read_sub_dir,
         get_path_apps, get_path_mirror,
-        mirror::{filter_release, read_tree_item_from_quick_map},
+        mirror::{filter_release, read_quick_maps},
         path::find_scope_with_name,
     },
 };
@@ -48,8 +48,17 @@ pub fn info_online(
     mirror: Option<String>,
 ) -> Result<(TreeItem, String)> {
     // 定义匹配函数
-    let item_matcher =
-        |mirror_name: &String| read_tree_item_from_quick_map(scope, package_name, mirror_name);
+    let item_matcher = |mirror_name: &String| {
+        let quick_maps = read_quick_maps(mirror_name)?;
+        let res = quick_maps
+            .full_map
+            .get(&(scope.to_lowercase(), package_name.to_lowercase()));
+        if let Some(item) = res {
+            Ok((item.clone(), quick_maps.url_template))
+        } else {
+            Err(anyhow!("Error:Failed to find '{scope}/{package_name}'"))
+        }
+    };
     if let Some(mirror_name) = mirror {
         return item_matcher(&mirror_name);
     } else {

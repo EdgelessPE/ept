@@ -5,8 +5,10 @@ use std::path::{Path, PathBuf};
 use crate::{p2s, utils::cfg::get_config};
 
 use super::{
-    format_path, fs::read_sub_dir, get_bare_apps, get_path_mirror,
-    mirror::read_local_mirror_pkg_software,
+    format_path,
+    fs::read_sub_dir,
+    get_bare_apps, get_path_mirror,
+    mirror::read_quick_maps,
 };
 
 pub fn split_parent(raw: &str, located: &String) -> (PathBuf, String) {
@@ -84,7 +86,6 @@ fn find_scope_with_name_locally(name: &String, scope: Option<String>) -> Result<
 }
 
 fn find_scope_with_name_online(name: &String, scope: Option<String>) -> Result<(String, String)> {
-    let scope_input_str = scope.clone().unwrap_or("".to_string());
     // 遍历 mirrors
     let p = get_path_mirror()?;
     let mirror_names = read_sub_dir(p)?;
@@ -92,15 +93,18 @@ fn find_scope_with_name_online(name: &String, scope: Option<String>) -> Result<(
         return Err(anyhow!("Error:No mirror added yet"));
     }
     for mirror_name in mirror_names {
-        let pkg_software = read_local_mirror_pkg_software(&mirror_name)?;
-        for (scope_real_name, tree) in pkg_software.tree {
-            if scope.is_some() && scope_real_name.to_lowercase() != scope_input_str.to_lowercase() {
-                continue;
-            }
-            for node in tree {
-                if node.name.to_lowercase() == name.to_lowercase() {
-                    return Ok((scope_real_name, node.name));
+        let quick_maps = read_quick_maps(&mirror_name)?;
+        if let Some((possible_scopes, true_name)) = quick_maps.scope_map.get(&name.to_lowercase()) {
+            if let Some(dirty_scope) = scope.clone() {
+                for s in possible_scopes {
+                    if s.to_lowercase() == dirty_scope.to_lowercase() {
+                        return Ok((s.clone(), name.clone()));
+                    }
                 }
+            } else if possible_scopes.len() == 1 {
+                return Ok((possible_scopes[0].clone(), true_name.clone()));
+            } else {
+                return Err(anyhow!("Error:Multiple scopes found for '{name}' : {}. Use explicit scope like '{}/{name}' to specify exact package",possible_scopes.join(","),possible_scopes[0]));
             }
         }
     }
