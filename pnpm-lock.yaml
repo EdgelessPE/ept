@@ -43,8 +43,8 @@ importers:
         specifier: ^2.7.0
         version: 2.7.0
       git-cliff-darwin-x64:
-        specifier: ^2.6.1
-        version: 2.6.1
+        specifier: ^2.7.0
+        version: 2.7.0
       git-cliff-linux-x64:
         specifier: ^2.7.0
         version: 2.7.0
@@ -1543,11 +1543,6 @@ packages:
   git-cliff-darwin-arm64@2.7.0:
     resolution: {integrity: sha512-8D6Zxk9onts9r16yzuJEUq4ixGMJYvUI47GujUbs3ifsXB7x8SCOX7QCwmylRkZKnRC95fZ3jwi+gy95SwVaPQ==}
     cpu: [arm64]
-    os: [darwin]
-
-  git-cliff-darwin-x64@2.6.1:
-    resolution: {integrity: sha512-sx8ppi6Lb0rd96gT6GBKtZlssCm1GbpNsI+vUO1quMyRMSpfI/6TtIQNiLO59M2LNqzGXemC7ULyX0ENAh9QWA==}
-    cpu: [x64]
     os: [darwin]
 
   git-cliff-darwin-x64@2.7.0:
@@ -4585,9 +4580,6 @@ snapshots:
       resolve-pkg-maps: 1.0.0
 
   git-cliff-darwin-arm64@2.7.0:
-    optional: true
-
-  git-cliff-darwin-x64@2.6.1:
     optional: true
 
   git-cliff-darwin-x64@2.7.0:
