@@ -52,8 +52,8 @@ importers:
         specifier: ^2.7.0
         version: 2.7.0
       git-cliff-windows-x64:
-        specifier: ^2.6.1
-        version: 2.6.1
+        specifier: ^2.7.0
+        version: 2.7.0
     devDependencies:
       '@actions/core':
         specifier: ^1.11.1
@@ -1549,11 +1549,6 @@ packages:
   git-cliff-windows-arm64@2.7.0:
     resolution: {integrity: sha512-uq5qGuWkO6YCEGg9nDk3butX0F80hfICsBh6LWicL9bfpyfEzdSbuv4AS1hJ2jTIjqRMOP2NRSii4pM9bqjfsw==}
     cpu: [arm64]
-    os: [win32]
-
-  git-cliff-windows-x64@2.6.1:
-    resolution: {integrity: sha512-hRsOv0kVU/cKt9rglWYPuv84ZI1MflhhzQrycz99xF7heGbob4RRgcuN0JXnYPf3q8ATnMgsVlMccaIRXuJFGg==}
-    cpu: [x64]
     os: [win32]
 
   git-cliff-windows-x64@2.7.0:
@@ -4560,9 +4555,6 @@ snapshots:
     optional: true
 
   git-cliff-windows-arm64@2.7.0:
-    optional: true
-
-  git-cliff-windows-x64@2.6.1:
     optional: true
 
   git-cliff-windows-x64@2.7.0:
