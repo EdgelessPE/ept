@@ -47,9 +47,9 @@ pub struct Software {
     //# `tags = ["electron", "typescript"]`
     pub tags: Option<Vec<String>>,
     /// 别名，用于关联查找。
-    /// 不需要重复输入标签中的信息。
-    //# `alias = ["code", "vsc", "Visual Studio Code"]`
-    pub alias: Option<Vec<String>>,
+    /// 不需要重复输入标签中已有的信息。
+    //# `alias = "code"`
+    pub alias: Option<String>,
     /// 注册表入口，如果该软件是调用安装器安装的且在注册表中有 Uninstall 入口，提供该字段可以免去编写卸载工作流并帮助 ept 获取更多信息。
     /// 支持如下 3 个位置的入口：
     /// ```
@@ -111,18 +111,13 @@ impl Verifiable for Software {
         }
 
         // tags 不应该 software 表中的字段重复
-        let mut alias = self
-            .alias
-            .to_owned()
-            .unwrap_or_default()
-            .into_iter()
-            .map(|tag| ("alias", tag))
-            .collect();
         let mut fields = vec![
             ("scope", self.scope.to_owned()),
             ("category", self.category.to_owned()),
         ];
-        fields.append(&mut alias);
+        if let Some(alias) = &self.alias {
+            fields.push(("alias", alias.to_owned()));
+        }
         let tag_checker = |tag: &String| {
             for (field, text) in fields.clone() {
                 if text.contains(tag) {
@@ -170,7 +165,7 @@ fn test_verify_software() {
     // 校验 tags 重复
     let mut s3 = base.clone();
     s3.tags = Some(vec!["Visual Studio".to_string(), "Microsoft".to_string()]);
-    s3.alias = Some(vec!["Visual Studio Code".to_string()]);
+    s3.alias = Some("Visual Studio Code".to_string());
     assert!(s3.verify_self(&mixed_fs).is_err());
     s3.alias = None;
     assert!(s3.verify_self(&mixed_fs).is_ok());
