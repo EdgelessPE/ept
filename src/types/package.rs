@@ -121,6 +121,16 @@ impl Verifiable for GlobalPackage {
         self.package.verify_self(mixed_fs)?;
         if let Some(software) = &self.software {
             software.verify_self(mixed_fs)?;
+
+            // 别名不能和名称重复
+            if let Some(alias) = &software.alias {
+                if alias == &self.package.name {
+                    return Err(anyhow!(
+                        "Error:field 'alias' shouldn't be the same as 'name', got '{a}'",
+                        a = alias
+                    ));
+                }
+            }
         }
 
         Ok(())
