@@ -124,7 +124,7 @@ impl Verifiable for GlobalPackage {
 
             // 别名不能和名称重复
             if let Some(alias) = &software.alias {
-                if alias == &self.package.name {
+                if alias.to_lowercase() == self.package.name.to_lowercase() {
                     return Err(anyhow!(
                         "Error:field 'alias' shouldn't be the same as 'name', got '{a}'",
                         a = alias
