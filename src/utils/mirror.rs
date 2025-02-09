@@ -85,7 +85,7 @@ pub fn filter_service_from_meta(
     }
 }
 
-fn get_schema() -> Result<(Schema, Field, Field, Field, Field, Field, Field)> {
+fn get_schema() -> Result<(Schema, Field, Field, Field, Field, Field, Field, Field)> {
     let mut schema_builder = Schema::builder();
     let opt = TextOptions::default()
         .set_indexing_options(
@@ -100,6 +100,7 @@ fn get_schema() -> Result<(Schema, Field, Field, Field, Field, Field, Field)> {
     let description = schema_builder.add_text_field("description", STORED);
     let tags = schema_builder.add_text_field("tags", TEXT | STORED);
     let bin = schema_builder.add_text_field("bin", TEXT | STORED);
+    let alias = schema_builder.add_text_field("alias", TEXT | STORED);
     Ok((
         schema_builder.build(),
         name,
@@ -108,6 +109,7 @@ fn get_schema() -> Result<(Schema, Field, Field, Field, Field, Field, Field)> {
         description,
         tags,
         bin,
+        alias,
     ))
 }
 
@@ -123,7 +125,7 @@ fn register_tokenizer(index: &mut Index) {
 
 // 为包构建索引
 pub fn build_index_for_mirror(content: MirrorPkgSoftware, dir: PathBuf) -> Result<()> {
-    let (schema, name, scope, version, description, tags, bin) = get_schema()?;
+    let (schema, name, scope, version, description, tags, bin, alias) = get_schema()?;
     if dir.exists() {
         try_recycle(&dir)?;
     }
@@ -164,22 +166,24 @@ pub fn build_index_for_mirror(content: MirrorPkgSoftware, dir: PathBuf) -> Resul
                         bin_stems.push(p2s!(p.file_stem().unwrap()));
                     }
                 }
-
+                let software = meta.package.software.unwrap();
                 (
                     // 描述
                     meta.package.package.description,
                     // 标签
-                    meta.package
-                        .software
-                        .unwrap()
-                        .tags
-                        .unwrap_or_default()
-                        .join(" "),
+                    software.tags.unwrap_or_default().join(" "),
                     // 二进制
                     bin_stems.join(" "),
+                    // 别名
+                    software.alias.unwrap_or_default(),
                 )
             } else {
-                ("".to_string(), "".to_string(), "".to_string())
+                (
+                    "".to_string(),
+                    "".to_string(),
+                    "".to_string(),
+                    "".to_string(),
+                )
             };
             index_writer.add_document(doc!(
               name => item.name.as_str(),
@@ -188,7 +192,21 @@ pub fn build_index_for_mirror(content: MirrorPkgSoftware, dir: PathBuf) -> Resul
               description => meta_res.0.as_str(),
               tags => meta_res.1.as_str(),
               bin => meta_res.2.as_str(),
+              alias => meta_res.3.as_str(),
             ))?;
+
+            // 为别名添加 scope_map
+            if !meta_res.3.is_empty() {
+                log!(
+                    "Debug:Adding alias '{}' for '{scope_str}/{name_str}'",
+                    meta_res.3
+                );
+                scope_map
+                    .entry(meta_res.3.to_lowercase())
+                    .or_insert_with(|| (Vec::new(), name_str.clone()))
+                    .0
+                    .push(scope_str.clone());
+            }
         }
     }
 
@@ -216,7 +234,7 @@ pub fn search_index_for_mirror(
     dir: PathBuf,
     is_regex: bool,
 ) -> Result<Vec<SearchResult>> {
-    let (_schema, name, scope, version, description, tags, bin) = get_schema()?;
+    let (_schema, name, scope, version, description, tags, bin, alias) = get_schema()?;
 
     let mut index = Index::open_in_dir(dir)?;
     register_tokenizer(&mut index);
@@ -234,7 +252,7 @@ pub fn search_index_for_mirror(
             .map_err(|e| anyhow!("Error:Invalid regex : {e}"))?;
         searcher.search(&query, &TopDocs::with_limit(10))?
     } else {
-        let query_parser = QueryParser::for_index(&index, vec![name, tags, bin]);
+        let query_parser = QueryParser::for_index(&index, vec![name, tags, bin, alias]);
         let query = query_parser.parse_query(text)?;
         searcher.search(&query, &TopDocs::with_limit(10))?
     };

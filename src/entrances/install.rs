@@ -405,6 +405,19 @@ fn test_install_with_matcher() {
             == *"1.75.4.0"
     );
 
+    // 使用大小写不敏感的别名直接安装
+    crate::utils::test::_ensure_testing_vscode_uninstalled();
+    let parsed =
+        crate::utils::parse_inputs::parse_install_inputs(vec!["CODE".to_string()]).unwrap();
+    install_using_parsed(parsed, false).unwrap();
+    assert!(
+        info_local(&"Microsoft".to_string(), &"VSCode".to_string())
+            .unwrap()
+            .1
+            .version
+            == *"1.75.4.0"
+    );
+
     // 手动升版本号
     let source_dir = crate::utils::test::_fork_example_with_version("examples/VSCode", "1.75.4.1");
 

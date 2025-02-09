@@ -153,6 +153,7 @@ pub fn _run_mirror_mock_server() -> String {
                                                     "category": "办公编辑",
                                                     "language": "Multi",
                                                     "main_program": "Code.exe",
+                                                    "alias": "code",
                                                     "tags": [
                                                         "electron"
                                                     ]

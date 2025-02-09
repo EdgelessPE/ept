@@ -221,6 +221,9 @@ fn test_mirror() {
     // 精准名称
     let search_res = search(&"vscode".to_string(), false).unwrap();
     assert_eq!(search_res, expected_res);
+    // 大小写不敏感别名
+    let search_res = search(&"Code".to_string(), false).unwrap();
+    assert_eq!(search_res, expected_res);
     // 大小写不敏感名称
     let search_res = search(&"FIREFOx".to_string(), false).unwrap();
     assert_eq!(
