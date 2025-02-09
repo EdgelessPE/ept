@@ -109,19 +109,19 @@ ExSemVer 规范在 [SemVer](https://semver.org) 的基础上在`PATCH`和`PRE`�
   main_program = "${AppData}/Local/Programs/Microsoft VS Code/Code.exe"
   ```
 
-### tags
-<Tag>可选</Tag> 标签，用于联想推荐相似包或聚合多个相近的包。
-
-不需要重复输入包名、分类或是作者名中的信息。
-* 类型：`Vec<String>`  
-* 示例：`tags = ["electron", "typescript"]`
-
 ### alias
 <Tag>可选</Tag> 别名，用于关联查找。
 
-不需要重复输入标签中的信息。
+不需要重复输入标签中已有的信息；如果该软件在现实中存在多个别名，请选择一个最常用的进行填写，并将其他别名添加到标签字段中。
+* 类型：`String`  
+* 示例：`alias = "code"`
+
+### tags
+<Tag>可选</Tag> 标签，用于联想推荐相似包或聚合多个相近的包。
+
+不需要重复输入包名、作者名、分类、别名中的信息。
 * 类型：`Vec<String>`  
-* 示例：`alias = ["code", "vsc", "Visual Studio Code"]`
+* 示例：`tags = ["electron", "typescript"]`
 
 ### registry_entry
 <Tag>可选</Tag> 注册表入口，如果该软件是调用安装器安装的且在注册表中有 Uninstall 入口，提供该字段可以免去编写卸载工作流并帮助 ept 获取更多信息。

@@ -42,14 +42,14 @@ pub struct Software {
     //# main_program = "${AppData}/Local/Programs/Microsoft VS Code/Code.exe"
     //# ```
     pub main_program: Option<String>,
-    /// 标签，用于联想推荐相似包或聚合多个相近的包。
-    /// 不需要重复输入包名、分类或是作者名中的信息。
-    //# `tags = ["electron", "typescript"]`
-    pub tags: Option<Vec<String>>,
     /// 别名，用于关联查找。
-    /// 不需要重复输入标签中已有的信息。
+    /// 不需要重复输入标签中已有的信息；如果该软件在现实中存在多个别名，请选择一个最常用的进行填写，并将其他别名添加到标签字段中。
     //# `alias = "code"`
     pub alias: Option<String>,
+    /// 标签，用于联想推荐相似包或聚合多个相近的包。
+    /// 不需要重复输入包名、作者名、分类、别名中的信息。
+    //# `tags = ["electron", "typescript"]`
+    pub tags: Option<Vec<String>>,
     /// 注册表入口，如果该软件是调用安装器安装的且在注册表中有 Uninstall 入口，提供该字段可以免去编写卸载工作流并帮助 ept 获取更多信息。
     /// 支持如下 3 个位置的入口：
     /// ```

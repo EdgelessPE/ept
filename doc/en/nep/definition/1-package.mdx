@@ -109,19 +109,19 @@ If using an absolute path, it must start with a [built-in variable](/nep/workflo
   main_program = "${AppData}/Local/Programs/Microsoft VS Code/Code.exe"
   ```
 
+### alias
+<Tag>Optional</Tag> Alias, used for association lookup.
+
+Do not repeat information already in the tag; if the software has multiple aliases in reality, choose the most commonly used one for filling in, and add the other aliases to the tags field.
+* Type: `String`  
+* Example: `alias = "code"`
+
 ### tags
 <Tag>Optional</Tag> Tags, used for recommending similar packages or aggregating multiple closely related packages.
 
-Do not repeat information from the package name, category, or author name.
+Do not repeat information from the package name, author name, category, or alias.
 * Type: `Vec<String>`  
 * Example: `tags = ["electron", "typescript"]`
-
-### alias
-<Tag>Optional</Tag> Aliases, used for associative lookup.
-
-Do not repeat information from the tags.
-* Type: `Vec<String>`  
-* Example: `alias = ["code", "vsc", "Visual Studio Code"]`
 
 ### registry_entry
 <Tag>Optional</Tag> Registry entry, if the software is installed by calling an installer and has an Uninstall entry in the registry, providing this field can eliminate the need to write an uninstall workflow and help ept obtain more information.
