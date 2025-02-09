@@ -117,12 +117,27 @@ pub fn info(scope: Option<String>, package_name: &String) -> Result<Info> {
     }
 }
 
-// #[test]
-// fn test_info() {
-// use crate::utils::test::_ensure_testing_vscode,
-// _ensure_testing_vscode();
-// let res = info(Some("Microsoft".to_string()), &"VSCode".to_string()).unwrap();
-// println!("{res:#?}");
-// let res = info(None, &"vscode".to_string()).unwrap();
-// println!("{res:#?}");
-// }
+#[test]
+fn test_info() {
+    use crate::utils::flags::{set_flag, Flag};
+    use crate::utils::test::_ensure_testing_vscode;
+    set_flag(Flag::Confirm, true);
+    // 替换测试镜像源
+    let custom_mirror_ctx = crate::utils::test::_mount_custom_mirror();
+    _ensure_testing_vscode();
+
+    // 带 scope
+    let base = info(Some("Microsoft".to_string()), &"VSCode".to_string()).unwrap();
+    println!("{base:#?}");
+
+    // 单纯名字
+    let res = info(None, &"vscode".to_string()).unwrap();
+    assert_eq!(base, res);
+
+    // 别名
+    let res = info(None, &"CoDe".to_string()).unwrap();
+    assert_eq!(base, res);
+
+    // 换回原镜像源
+    crate::utils::test::_unmount_custom_mirror(custom_mirror_ctx);
+}

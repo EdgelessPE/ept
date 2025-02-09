@@ -5,7 +5,7 @@ use std::fmt::{Display, Formatter};
 
 use crate::types::software::Software;
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, PartialEq, Clone, Debug)]
 pub struct Info {
     pub name: String,
     pub template: String,
@@ -16,7 +16,7 @@ pub struct Info {
 }
 
 // 线上与本地的差异点
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, PartialEq, Clone, Debug)]
 pub struct InfoDiff {
     pub version: String,
     pub authors: Vec<String>,
