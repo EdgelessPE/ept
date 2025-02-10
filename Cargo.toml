@@ -45,7 +45,7 @@ toml = { version = "0.8.19", features = ["preserve_order"] }
 trash = "5.2.1"
 ts-rs = "10.1.0"
 url = "2.5.4"
-which = "7.0.1"
+which = "7.0.2"
 wildmatch = "2.4.0"
 zstd = "0.13.2"
 httpmock = "0.7.0"
