@@ -62,7 +62,7 @@ pub fn install_using_package(
     }
 
     // 检查对应包名有没有被安装过
-    if let Ok((_, diff)) = info_local(&software.scope, &package.name) {
+    if let Ok((_, diff)) = info_local(&package.scope, &package.name) {
         log!(
             "Warning:Package '{name}' has been installed({ver}), switch to update entrance",
             name = package.name,
@@ -81,7 +81,7 @@ pub fn install_using_package(
 
     // 解析最终安装位置
     log!("Info:Deploying files...");
-    let into_dir = get_path_apps(&software.scope, &package.name, true)?;
+    let into_dir = get_path_apps(&package.scope, &package.name, true)?;
     if into_dir.exists() {
         remove_dir_all(into_dir.clone()).map_err(|_| {
             anyhow!(
@@ -127,10 +127,10 @@ pub fn install_using_package(
         }
     }
     // 执行一次 info
-    info(Some(software.scope.clone()), &package.name).map_err(|e| {
+    info(Some(package.scope.clone()), &package.name).map_err(|e| {
         anyhow!(
             "Error:Validating failed : failed to get info of '{scope}/{name}' : {e}",
-            scope = software.scope,
+            scope = package.scope,
             name = package.name
         )
     })?;
@@ -139,7 +139,7 @@ pub fn install_using_package(
     // 清理临时文件夹
     clean_temp(source_file)?;
 
-    Ok((software.scope, package.name))
+    Ok((package.scope, package.name))
 }
 
 pub fn install_using_url(url: &str, verify_signature: bool) -> Result<(String, String)> {

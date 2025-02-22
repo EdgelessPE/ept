@@ -189,8 +189,7 @@ impl TStep for StepPath {
         let stem = self
             .alias
             .unwrap_or_else(|| p2s!(Path::new(&self.record).file_stem().unwrap()));
-        let cmd_target_str =
-            conflict_resolver(&bin_abs, &stem, &cx.pkg.software.clone().unwrap().scope);
+        let cmd_target_str = conflict_resolver(&bin_abs, &stem, &cx.pkg.package.scope);
         if !abs_target_path.exists() {
             return Err(anyhow!(
                 "Error(Path):Failed to add path : final target '{abs_target_str}' not exist"
@@ -237,7 +236,7 @@ impl TStep for StepPath {
         let stem = self
             .alias
             .unwrap_or_else(|| p2s!(Path::new(&self.record).file_stem().unwrap()));
-        let scope = cx.pkg.software.clone().unwrap().scope;
+        let scope = &cx.pkg.package.scope;
         let delete_list = vec![
             format!("{bin_abs}/{scope}-{stem}.cmd"),
             format!("{bin_abs}/{stem}.cmd"),

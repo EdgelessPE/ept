@@ -233,6 +233,7 @@ fn test_parse_package() {
     let answer = GlobalPackage {
         nep: "0".to_string(),
         package: crate::types::package::Package {
+            scope: "Microsoft".to_string(),
             name: "VSCode".to_string(),
             description: "Visual Studio Code".to_string(),
             template: "Software".to_string(),
@@ -246,7 +247,6 @@ fn test_parse_package() {
             strict: None,
         },
         software: Some(crate::types::software::Software {
-            scope: "Microsoft".to_string(),
             upstream: "https://code.visualstudio.com/".to_string(),
             category: "办公编辑".to_string(),
             arch: None,

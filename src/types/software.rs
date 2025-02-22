@@ -15,11 +15,6 @@ use ts_rs::TS;
 #[derive(Serialize, Deserialize, Clone, Debug, TS, PartialEq)]
 #[ts(export)]
 pub struct Software {
-    /// 软件发行域，通常填写上游组织名称。
-    /// 若软件包的直接上游为发行商/组织则使用发行商的名称，例如 `PortableApps`；若软件包的直接上游为官方网站则使用开发商/组织的名称，例如 `Microsoft`。
-    /// 若上游组织为正式的、拥有独立域名的组织，则将发行域开头大写，例如对于 GitHub 发布的 `GitHub Desktop` 软件使用 `GitHub` 作为发行域；若上游组织表示对一个群体的泛指，则将发行域开头小写，例如对于将发行托管在 GitHub Releases 上的开源项目使用 `github` 作为发行域。
-    //# `scope = "Microsoft"`
-    pub scope: String,
     /// 软件上游 URL，可以是官方网站的下载页或发行商/组织提供的发行详情页。
     //# `upstream = "https://code.visualstudio.com/"`
     pub upstream: String,
@@ -110,11 +105,8 @@ impl Verifiable for Software {
             }
         }
 
-        // tags 不应该 software 表中的字段重复
-        let mut fields = vec![
-            ("scope", self.scope.to_owned()),
-            ("category", self.category.to_owned()),
-        ];
+        // tags 不应该与 software 表中的字段重复
+        let mut fields = vec![("category", self.category.to_owned())];
         if let Some(alias) = &self.alias {
             fields.push(("alias", alias.to_owned()));
         }
@@ -169,6 +161,4 @@ fn test_verify_software() {
     assert!(s3.verify_self(&mixed_fs).is_err());
     s3.alias = None;
     assert!(s3.verify_self(&mixed_fs).is_ok());
-    s3.scope = "Microsoft".to_string();
-    assert!(s3.verify_self(&mixed_fs).is_err());
 }

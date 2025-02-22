@@ -75,7 +75,7 @@ pub fn clean() -> Result<usize> {
                         let setup = parse_workflow(&setup_path)?;
 
                         // 解析有效的入口名称
-                        let scope = global.software.unwrap().scope;
+                        let scope = global.package.scope;
                         get_valid_entrances(setup)
                             .into_iter()
                             .for_each(|entrance_full_name| {

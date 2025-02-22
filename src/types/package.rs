@@ -16,6 +16,11 @@ pub struct Package {
     /// 不得包含下划线（`_`），请使用空格或横杠线（`-`）代替。
     //# `name = "VSCode"`
     pub name: String,
+    /// 包发行域，通常填写上游组织名称。
+    /// 若包的直接上游为发行商/组织则使用发行商的名称，例如 `PortableApps`；若包的直接上游为官方网站则使用开发商/组织的名称，例如 `Microsoft`。
+    /// 若上游组织为正式的、拥有独立域名的组织，则将发行域开头大写，例如对于 GitHub 发布的 `GitHub Desktop` 软件使用 `GitHub` 作为发行域；若上游组织表示对一个群体的泛指，则将发行域开头小写，例如对于将发行托管在 GitHub Releases 上的开源项目使用 `github` 作为发行域。
+    //# `scope = "Microsoft"`
+    pub scope: String,
     /// 包的简短描述，尽量从官方渠道摘取简介。
     //# `description = "微软开发的跨平台开源编辑器"`
     pub description: String,
@@ -66,6 +71,11 @@ impl Verifiable for Package {
         // 版本号必须可以解析
         ExSemVer::parse(&self.version).map_err(err_wrapper)?;
 
+        // 检查 scope 是否为空
+        if self.scope.is_empty() {
+            return Err(err_wrapper(anyhow!("field 'scope' should not be empty")));
+        }
+
         Ok(())
     }
 }
@@ -100,9 +110,9 @@ impl GlobalPackage {
                 license: None,
                 icon: None,
                 strict: None,
+                scope: "Edgeless".to_string(),
             },
             software: Some(Software {
-                scope: "Edgeless".to_string(),
                 upstream: "https://github.com/EdgelessPE/ept".to_string(),
                 category: "实用工具".to_string(),
                 arch: None,

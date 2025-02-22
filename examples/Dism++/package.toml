@@ -11,9 +11,9 @@ version = "10.1.1002.1"
 # 打包者/作者
 authors = ["Cno <dsyourshy@qq.com>","Chuyu"]
 description = "全球第一款基于 CBS 的 Dism GUI 实现。"
+scope = "Chuyu"
 
 [software]
-scope = "Chuyu"
 # 上游发布页面 URL
 upstream = "https://github.com/Chuyu-Team/Dism-Multi-language"
 # 软件分类

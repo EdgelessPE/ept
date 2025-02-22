@@ -145,10 +145,10 @@ pub fn _run_mirror_mock_server() -> String {
                                                         "Bot <bot@edgeless.top>",
                                                         "Cno <cno4tech@gmail.com>"
                                                     ],
-                                                    "license": "MIT"
+                                                    "license": "MIT",
+                                                    "scope": "Microsoft"
                                                 },
                                                 "software": {
-                                                    "scope": "Microsoft",
                                                     "upstream": "https://code.visualstudio.com/",
                                                     "category": "办公编辑",
                                                     "language": "Multi",
@@ -196,10 +196,10 @@ pub fn _run_mirror_mock_server() -> String {
                                                         "Bot <bot@edgeless.top>",
                                                         "Cno <cno4tech@gmail.com>"
                                                     ],
-                                                    "license": "MIT"
+                                                    "license": "MIT",
+                                                    "scope": "Microsoft"
                                                 },
                                                 "software": {
-                                                    "scope": "Microsoft",
                                                     "upstream": "https://notepad.visualstudio.com/",
                                                     "category": "办公编辑",
                                                     "language": "Multi",

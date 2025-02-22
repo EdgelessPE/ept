@@ -207,7 +207,7 @@ fn router(action: Action, cfg: Cfg) -> Result<String> {
                             String::new()
                         };
                         acc + &fmt_package_line(
-                            &node.software.unwrap().scope,
+                            &node.scope,
                             &node.name,
                             &format!("{local_ver}{update_tip}"),
                             None,

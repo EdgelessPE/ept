@@ -39,16 +39,14 @@ pub fn update_using_package(source_file: &String, verify_signature: bool) -> Res
 
     // 解包
     let (temp_dir_inner_path, fresh_package) = unpack_nep(source_file, verify_signature)?;
-    let fresh_software = fresh_package.software.clone().unwrap();
     let name = fresh_package.package.name.clone();
-    let fresh_scope = fresh_software.scope;
+    let fresh_scope = fresh_package.package.scope.clone();
 
     // 确认包是否已安装
     log!("Info:Resolving package...");
     let (local_package, local_diff) = info_local(&fresh_scope, &name).map_err(|e| {
         anyhow!("Error:Package '{name}' hasn't been installed or installation broken, use 'ept install' or 'ept uninstall' instead : '{e}'")
     })?;
-    let local_software = local_package.software.clone().unwrap();
 
     // 确认是否允许升级
     let local_version = ExSemVer::from_str(&local_diff.version)?;
@@ -68,7 +66,10 @@ pub fn update_using_package(source_file: &String, verify_signature: bool) -> Res
             return Err(anyhow!("Error:Update canceled by user"));
         }
         // 卸载
-        uninstall(Some(local_software.scope), &local_package.package.name)?;
+        uninstall(
+            Some(local_package.package.scope),
+            &local_package.package.name,
+        )?;
         // 安装
         install_using_package(source_file, verify_signature)?;
         return Ok(UpdateInfo {
@@ -79,7 +80,7 @@ pub fn update_using_package(source_file: &String, verify_signature: bool) -> Res
         });
     }
 
-    let located = get_path_apps(&local_software.scope, &name, true)?;
+    let located = get_path_apps(&local_package.package.scope, &name, true)?;
     let located_str = p2s!(located);
     log_ok_last!("Info:Resolving package...");
 
@@ -224,7 +225,7 @@ pub fn update_all(verify_signature: bool) -> Result<(i32, i32)> {
 
             Some(UpdateInfo {
                 name: node.name.to_owned(),
-                scope: node.software?.scope,
+                scope: node.scope.to_owned(),
                 from_version: local_version,
                 to_version: online_version,
             })

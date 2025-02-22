@@ -8,6 +8,7 @@ use crate::types::software::Software;
 #[derive(Serialize, Deserialize, PartialEq, Clone, Debug)]
 pub struct Info {
     pub name: String,
+    pub scope: String,
     pub template: String,
     pub license: Option<String>,
     pub local: Option<InfoDiff>,

@@ -83,6 +83,7 @@ pub fn info(scope: Option<String>, package_name: &String) -> Result<Info> {
 
     // 创建结果结构体
     let mut info = Info {
+        scope: scope.clone(),
         name: package_name.clone(),
         template: String::from("Software"),
         license: None,

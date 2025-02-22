@@ -13,9 +13,9 @@ authors = ["Cno <dsyourshy@qq.com>"]
 # 许可证缩写或链接（可选）
 license = "MIT"
 description = "Testing registry entry"
+scope = "Cno"
 
 [software]
-scope = "Cno"
 # 上游发布页面 URL
 upstream = "https://code.visualstudio.com/"
 # 软件分类
