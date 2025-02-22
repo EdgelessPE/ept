@@ -1,3 +1,4 @@
+use anyhow::Result;
 use chrono::DateTime;
 use colored::{ColoredString, Colorize};
 use std::time::SystemTime;
@@ -82,11 +83,12 @@ fn test_fmt() {
 }
 
 pub enum FmtPrintCaller {
+    Info,
     Install,
     Update,
     Uninstall,
 }
 
 pub trait FmtPrint {
-    fn fmt_print(&self, fmt_caller: FmtPrintCaller) -> String;
+    fn fmt_print(&self, fmt_caller: FmtPrintCaller) -> Result<String>;
 }

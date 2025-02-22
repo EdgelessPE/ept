@@ -89,8 +89,8 @@ pub fn info(package_matcher: PackageMatcher) -> Result<Info> {
         name: package_name.clone(),
         local: None,
         online: None,
-        package: None,
-        software: None,
+        // package: None,
+        // software: None,
         meta: None,
     };
 
@@ -99,8 +99,8 @@ pub fn info(package_matcher: PackageMatcher) -> Result<Info> {
     if local_path.exists() {
         let (global, local) = info_local(&scope, &package_name)?;
         info.local = Some(local);
-        info.software = global.software;
-        info.package = Some(global.package);
+        // info.software = global.software;
+        // info.package = Some(global.package);
         info.meta = Some(meta(
             PackageInputEnum::PackageMatcher(package_matcher),
             false,
