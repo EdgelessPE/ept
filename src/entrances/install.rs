@@ -128,12 +128,15 @@ pub fn install_using_package(
         }
     }
     // 执行一次 info
-    info(PackageMatcher {
-        scope: Some(package.scope.clone()),
-        name: package.name.clone(),
-        mirror: None,
-        version_req: None,
-    })
+    info(
+        PackageMatcher {
+            scope: Some(package.scope.clone()),
+            name: package.name.clone(),
+            mirror: None,
+            version_req: None,
+        },
+        None,
+    )
     .map_err(|e| {
         anyhow!(
             "Error:Validating failed : failed to get info of '{scope}/{name}' : {e}",
@@ -348,12 +351,15 @@ fn test_reg_entry() {
 
     // 确认版本号已经更新
     assert_eq!(
-        crate::entrances::info(PackageMatcher {
-            scope: Some("Cno".to_string()),
-            name: "RegEntry".to_string(),
-            mirror: None,
-            version_req: None,
-        })
+        crate::entrances::info(
+            PackageMatcher {
+                scope: Some("Cno".to_string()),
+                name: "RegEntry".to_string(),
+                mirror: None,
+                version_req: None,
+            },
+            None
+        )
         .unwrap()
         .local
         .unwrap()

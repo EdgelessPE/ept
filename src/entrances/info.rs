@@ -78,7 +78,10 @@ pub fn info_online(
     ))
 }
 
-pub fn info(package_matcher: PackageMatcher) -> Result<Info> {
+pub fn info(
+    package_matcher: PackageMatcher,
+    replace_next: Option<PackageInputEnum>,
+) -> Result<Info> {
     let scope = package_matcher.scope.clone();
     let package_name = package_matcher.name.clone();
     // 查找 scope 并使用 scope 更新纠正大小写
@@ -97,7 +100,7 @@ pub fn info(package_matcher: PackageMatcher) -> Result<Info> {
     // 扫描本地安装目录
     let local_path = get_path_apps(&scope, &package_name, false)?;
     if local_path.exists() {
-        let (global, local) = info_local(&scope, &package_name)?;
+        let (_global, local) = info_local(&scope, &package_name)?;
         info.local = Some(local);
         // info.software = global.software;
         // info.package = Some(global.package);
@@ -108,15 +111,24 @@ pub fn info(package_matcher: PackageMatcher) -> Result<Info> {
     }
 
     // 在线检查
-    if let Ok((item, _)) = info_online(&scope, &package_name, None) {
-        let latest = filter_release(item.releases, None, false)?;
+    if let Some(next_package_input) = replace_next {
+        let next_meta = meta(next_package_input, false)?;
         info.online = Some(InfoDiff {
-            version: latest.version.to_string(),
-            authors: Vec::new(),
+            version: next_meta.package.package.version.clone(),
+            authors: next_meta.package.package.authors.clone(),
         });
+        info.meta = Some(next_meta);
+    } else if let Ok((item, _)) = info_online(&scope, &package_name, None) {
+        let latest = filter_release(item.releases, None, false)?;
+        let mut authors = Vec::new();
         if let Some(meta) = latest.meta {
+            authors = meta.package.package.authors.clone();
             info.meta = Some(meta);
         }
+        info.online = Some(InfoDiff {
+            version: latest.version.to_string(),
+            authors,
+        });
     }
 
     // 检查到底有没有这个包
@@ -137,32 +149,41 @@ fn test_info() {
     _ensure_testing_vscode();
 
     // 带 scope
-    let base = info(PackageMatcher {
-        scope: Some("Microsoft".to_string()),
-        name: "VSCode".to_string(),
-        mirror: None,
-        version_req: None,
-    })
+    let base = info(
+        PackageMatcher {
+            scope: Some("Microsoft".to_string()),
+            name: "VSCode".to_string(),
+            mirror: None,
+            version_req: None,
+        },
+        None,
+    )
     .unwrap();
     println!("{base:#?}");
 
     // 单纯名字
-    let res = info(PackageMatcher {
-        scope: None,
-        name: "vscode".to_string(),
-        mirror: None,
-        version_req: None,
-    })
+    let res = info(
+        PackageMatcher {
+            scope: None,
+            name: "vscode".to_string(),
+            mirror: None,
+            version_req: None,
+        },
+        None,
+    )
     .unwrap();
     assert_eq!(base, res);
 
     // 别名
-    let res = info(PackageMatcher {
-        scope: None,
-        name: "CoDe".to_string(),
-        mirror: None,
-        version_req: None,
-    })
+    let res = info(
+        PackageMatcher {
+            scope: None,
+            name: "CoDe".to_string(),
+            mirror: None,
+            version_req: None,
+        },
+        None,
+    )
     .unwrap();
     assert_eq!(base, res);
 

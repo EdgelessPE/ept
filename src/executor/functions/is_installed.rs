@@ -32,12 +32,15 @@ impl EvalFunction for IsInstalled {
                     "Invalid argument '{arg}' : expect 'SCOPE/NAME', e.g. 'Microsoft/VSCode'"
                 )));
             }
-            let info = info(PackageMatcher {
-                scope: Some(sp[0].to_string()),
-                name: sp[1].to_string(),
-                mirror: None,
-                version_req: None,
-            });
+            let info = info(
+                PackageMatcher {
+                    scope: Some(sp[0].to_string()),
+                    name: sp[1].to_string(),
+                    mirror: None,
+                    version_req: None,
+                },
+                None,
+            );
 
             Ok(Value::Boolean(info.is_ok()))
         })
