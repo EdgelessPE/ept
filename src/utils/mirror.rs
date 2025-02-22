@@ -85,7 +85,18 @@ pub fn filter_service_from_meta(
     }
 }
 
-fn get_schema() -> Result<(Schema, Field, Field, Field, Field, Field, Field, Field)> {
+struct SchemaFields {
+    schema: Schema,
+    name: Field,
+    scope: Field,
+    version: Field,
+    description: Field,
+    tags: Field,
+    bin: Field,
+    alias: Field,
+}
+
+fn get_schema() -> Result<SchemaFields> {
     let mut schema_builder = Schema::builder();
     let opt = TextOptions::default()
         .set_indexing_options(
@@ -101,8 +112,9 @@ fn get_schema() -> Result<(Schema, Field, Field, Field, Field, Field, Field, Fie
     let tags = schema_builder.add_text_field("tags", TEXT | STORED);
     let bin = schema_builder.add_text_field("bin", TEXT | STORED);
     let alias = schema_builder.add_text_field("alias", TEXT | STORED);
-    Ok((
-        schema_builder.build(),
+
+    Ok(SchemaFields {
+        schema: schema_builder.build(),
         name,
         scope,
         version,
@@ -110,7 +122,7 @@ fn get_schema() -> Result<(Schema, Field, Field, Field, Field, Field, Field, Fie
         tags,
         bin,
         alias,
-    ))
+    })
 }
 
 fn register_tokenizer(index: &mut Index) {
@@ -125,12 +137,12 @@ fn register_tokenizer(index: &mut Index) {
 
 // 为包构建索引
 pub fn build_index_for_mirror(content: MirrorPkgSoftware, dir: PathBuf) -> Result<()> {
-    let (schema, name, scope, version, description, tags, bin, alias) = get_schema()?;
+    let schema_fields = get_schema()?;
     if dir.exists() {
         try_recycle(&dir)?;
     }
     ensure_dir_exist(&dir)?;
-    let mut index = Index::create_in_dir(&dir, schema.clone())?;
+    let mut index = Index::create_in_dir(&dir, schema_fields.schema.clone())?;
     register_tokenizer(&mut index);
     let mut index_writer = index.writer(50_000_000)?;
     // 快查索引
@@ -186,13 +198,13 @@ pub fn build_index_for_mirror(content: MirrorPkgSoftware, dir: PathBuf) -> Resul
                 )
             };
             index_writer.add_document(doc!(
-              name => item.name.as_str(),
-              scope => scope_str.as_str(),
-              version => release.version.to_string().as_str(),
-              description => meta_res.0.as_str(),
-              tags => meta_res.1.as_str(),
-              bin => meta_res.2.as_str(),
-              alias => meta_res.3.as_str(),
+              schema_fields.name => item.name.as_str(),
+              schema_fields.scope => scope_str.as_str(),
+              schema_fields.version => release.version.to_string().as_str(),
+              schema_fields.description => meta_res.0.as_str(),
+              schema_fields.tags => meta_res.1.as_str(),
+              schema_fields.bin => meta_res.2.as_str(),
+              schema_fields.alias => meta_res.3.as_str(),
             ))?;
 
             // 为别名添加 scope_map
@@ -234,7 +246,7 @@ pub fn search_index_for_mirror(
     dir: PathBuf,
     is_regex: bool,
 ) -> Result<Vec<SearchResult>> {
-    let (_schema, name, scope, version, description, tags, bin, alias) = get_schema()?;
+    let schema_fields = get_schema()?;
 
     let mut index = Index::open_in_dir(dir)?;
     register_tokenizer(&mut index);
@@ -248,11 +260,19 @@ pub fn search_index_for_mirror(
         if is_regex { "regex" } else { "text" }
     );
     let top_docs = if is_regex {
-        let query = RegexQuery::from_pattern(text, name)
+        let query = RegexQuery::from_pattern(text, schema_fields.name)
             .map_err(|e| anyhow!("Error:Invalid regex : {e}"))?;
         searcher.search(&query, &TopDocs::with_limit(10))?
     } else {
-        let query_parser = QueryParser::for_index(&index, vec![name, tags, bin, alias]);
+        let query_parser = QueryParser::for_index(
+            &index,
+            vec![
+                schema_fields.name,
+                schema_fields.tags,
+                schema_fields.bin,
+                schema_fields.alias,
+            ],
+        );
         let query = query_parser.parse_query(text)?;
         searcher.search(&query, &TopDocs::with_limit(10))?
     };
@@ -269,10 +289,10 @@ pub fn search_index_for_mirror(
             }
         };
         arr.push(SearchResult {
-            name: read_field(name)?,
-            scope: read_field(scope)?,
-            version: read_field(version)?,
-            description: read_field(description)?,
+            name: read_field(schema_fields.name)?,
+            scope: read_field(schema_fields.scope)?,
+            version: read_field(schema_fields.version)?,
+            description: read_field(schema_fields.description)?,
             from_mirror: None,
         })
     }
