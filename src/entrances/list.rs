@@ -2,7 +2,7 @@ use anyhow::Result;
 
 use crate::{
     log,
-    types::info::Info,
+    types::{info::Info, matcher::PackageMatcher},
     utils::{fs::read_sub_dir, get_bare_apps},
 };
 
@@ -16,7 +16,12 @@ pub fn list() -> Result<Vec<Info>> {
         // 扫描 scope 目录
         for name in read_sub_dir(app_dir.join(&scope))? {
             // 尝试将其作为合法的 nep 安装目录读取 info
-            let info_res = info(Some(scope.clone()), &name);
+            let info_res = info(PackageMatcher {
+                scope: Some(scope.clone()),
+                name: name.clone(),
+                mirror: None,
+                version_req: None,
+            });
             if let Ok(r) = info_res {
                 res.push(r);
             } else {

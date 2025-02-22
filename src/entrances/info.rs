@@ -7,6 +7,7 @@ use crate::{
     parsers::parse_package,
     types::{
         info::{Info, InfoDiff},
+        matcher::{PackageInputEnum, PackageMatcher},
         mirror::TreeItem,
         package::GlobalPackage,
     },
@@ -18,7 +19,7 @@ use crate::{
     },
 };
 
-use super::utils::validator::installed_validator;
+use super::{meta, utils::validator::installed_validator};
 
 pub fn info_local(scope: &String, package_name: &String) -> Result<(GlobalPackage, InfoDiff)> {
     let local_path = get_path_apps(scope, package_name, false)?;
@@ -77,28 +78,33 @@ pub fn info_online(
     ))
 }
 
-pub fn info(scope: Option<String>, package_name: &String) -> Result<Info> {
+pub fn info(package_matcher: PackageMatcher) -> Result<Info> {
+    let scope = package_matcher.scope.clone();
+    let package_name = package_matcher.name.clone();
     // 查找 scope 并使用 scope 更新纠正大小写
-    let (scope, package_name) = find_scope_with_name(package_name, scope)?;
-
+    let (scope, package_name) = find_scope_with_name(&package_name, scope)?;
     // 创建结果结构体
     let mut info = Info {
         scope: scope.clone(),
         name: package_name.clone(),
-        template: String::from("Software"),
-        license: None,
         local: None,
         online: None,
+        package: None,
         software: None,
+        meta: None,
     };
 
     // 扫描本地安装目录
     let local_path = get_path_apps(&scope, &package_name, false)?;
     if local_path.exists() {
         let (global, local) = info_local(&scope, &package_name)?;
-        info.license = global.package.license;
         info.local = Some(local);
         info.software = global.software;
+        info.package = Some(global.package);
+        info.meta = Some(meta(
+            PackageInputEnum::PackageMatcher(package_matcher),
+            false,
+        )?);
     }
 
     // 在线检查
@@ -107,7 +113,10 @@ pub fn info(scope: Option<String>, package_name: &String) -> Result<Info> {
         info.online = Some(InfoDiff {
             version: latest.version.to_string(),
             authors: Vec::new(),
-        })
+        });
+        if let Some(meta) = latest.meta {
+            info.meta = Some(meta);
+        }
     }
 
     // 检查到底有没有这个包
@@ -128,15 +137,33 @@ fn test_info() {
     _ensure_testing_vscode();
 
     // 带 scope
-    let base = info(Some("Microsoft".to_string()), &"VSCode".to_string()).unwrap();
+    let base = info(PackageMatcher {
+        scope: Some("Microsoft".to_string()),
+        name: "VSCode".to_string(),
+        mirror: None,
+        version_req: None,
+    })
+    .unwrap();
     println!("{base:#?}");
 
     // 单纯名字
-    let res = info(None, &"vscode".to_string()).unwrap();
+    let res = info(PackageMatcher {
+        scope: None,
+        name: "vscode".to_string(),
+        mirror: None,
+        version_req: None,
+    })
+    .unwrap();
     assert_eq!(base, res);
 
     // 别名
-    let res = info(None, &"CoDe".to_string()).unwrap();
+    let res = info(PackageMatcher {
+        scope: None,
+        name: "CoDe".to_string(),
+        mirror: None,
+        version_req: None,
+    })
+    .unwrap();
     assert_eq!(base, res);
 
     // 换回原镜像源

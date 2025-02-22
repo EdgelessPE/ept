@@ -18,6 +18,7 @@ pub fn fmt_log_in_step(step: &str, head: ColoredString, msg: &str) -> String {
     format!("{head:>8} {s:<9} {msg}", s = step.truecolor(100, 100, 100))
 }
 
+#[deprecated]
 pub fn fmt_package_line(
     scope: &str,
     name: &str,
@@ -36,6 +37,7 @@ pub fn fmt_package_line(
     )
 }
 
+#[deprecated]
 pub fn fmt_mirror_line(name: &str, updated_at: SystemTime) -> String {
     let date_time: DateTime<chrono::Local> = updated_at.into();
     let time_str = date_time.format("%Y-%m-%d %H:%M:%S").to_string();
@@ -77,4 +79,14 @@ fn test_fmt() {
         )
     );
     print!("{}", fmt_mirror_line("mock-server", SystemTime::now()));
+}
+
+pub enum FmtPrintCaller {
+    Install,
+    Update,
+    Uninstall,
+}
+
+pub trait FmtPrint {
+    fn fmt_print(&self, fmt_caller: FmtPrintCaller) -> String;
 }

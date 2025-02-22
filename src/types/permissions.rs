@@ -1,9 +1,21 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
-use strum_macros::EnumString;
+use strum_macros::{EnumString, IntoStaticStr};
 use ts_rs::TS;
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, PartialOrd, Eq, Hash, TS)]
+#[derive(
+    Serialize,
+    Deserialize,
+    Clone,
+    Debug,
+    PartialEq,
+    PartialOrd,
+    Eq,
+    Hash,
+    TS,
+    EnumString,
+    IntoStaticStr,
+)]
 #[ts(export)]
 pub enum PermissionLevel {
     /// 普通权限
@@ -15,7 +27,18 @@ pub enum PermissionLevel {
 }
 
 #[derive(
-    Serialize, Deserialize, Clone, Debug, PartialEq, PartialOrd, Eq, Ord, Hash, TS, EnumString,
+    Serialize,
+    Deserialize,
+    Clone,
+    Debug,
+    PartialEq,
+    PartialOrd,
+    Eq,
+    Ord,
+    Hash,
+    TS,
+    EnumString,
+    IntoStaticStr,
 )]
 #[allow(non_camel_case_types)]
 pub enum PermissionKey {
