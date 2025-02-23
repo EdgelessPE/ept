@@ -105,7 +105,7 @@ pub fn info(
         // info.software = global.software;
         // info.package = Some(global.package);
         info.meta = Some(meta(
-            PackageInputEnum::PackageMatcher(package_matcher),
+            PackageInputEnum::PackageMatcher(package_matcher.clone()),
             false,
         )?);
     }
@@ -118,7 +118,7 @@ pub fn info(
             authors: next_meta.package.package.authors.clone(),
         });
         info.meta = Some(next_meta);
-    } else if let Ok((item, _)) = info_online(&scope, &package_name, None) {
+    } else if let Ok((item, _)) = info_online(&scope, &package_name, package_matcher.mirror) {
         let latest = filter_release(item.releases, None, false)?;
         let mut authors = Vec::new();
         if let Some(meta) = latest.meta {

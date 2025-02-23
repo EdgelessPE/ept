@@ -8,6 +8,7 @@ use crate::{
     entrances::{auto_mirror_update_all, info_local, info_online},
     types::{
         extended_semver::ExSemVer,
+        info::Info,
         matcher::{PackageInputEnum, PackageMatcher},
     },
     utils::fmt_print::fmt_package_line,
@@ -34,6 +35,7 @@ pub enum ParseInputResEnum {
     Url(String),
     PackageMatcher(ParsePackageInputRes),
 }
+pub type ParseReturned = (ParseInputResEnum, Info);
 
 impl Display for ParseInputResEnum {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

@@ -6,13 +6,17 @@ use std::{
 use crate::{
     p2s,
     parsers::parse_workflow,
+    signature::blake3::compute_hash_blake3_from_string,
     types::{
         matcher::PackageInputEnum,
         meta::MetaResult,
         package::GlobalPackage,
         permissions::{Generalizable, Permission, PermissionKey, PermissionLevel},
     },
-    utils::{get_path_apps, path::find_scope_with_name},
+    utils::{
+        cache::spawn_cache, download::download_nep, get_path_apps, get_path_cache,
+        path::find_scope_with_name,
+    },
 };
 use anyhow::{anyhow, Result};
 
@@ -45,8 +49,17 @@ fn find_meta_target(
                 return Ok((path.clone(), path.join(".nep_context/workflows"), pkg));
             }
         }
-        PackageInputEnum::Url(_) => {
-            return Err(anyhow!("Error:URL is not acceptable"));
+        PackageInputEnum::Url(url) => {
+            // 下载文件到临时目录
+            let cache_path = get_path_cache()?;
+            let url_hash = compute_hash_blake3_from_string(&url)?;
+            let (p, cache_ctx) = download_nep(&url, Some((cache_path, url_hash)))?;
+
+            // 缓存下载的包
+            spawn_cache(cache_ctx)?;
+
+            let (path, pkg) = unpack_nep(&p2s!(p), verify_signature)?;
+            return Ok((path.clone(), path.join("workflows"), pkg));
         }
     }
 
