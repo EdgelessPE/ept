@@ -79,11 +79,9 @@ impl UpdateInfo {
     }
 }
 
-impl FmtPrint for Info {
-    fn fmt_print(&self, fmt_caller: FmtPrintCaller) -> Result<String> {
-        let mut output = String::new();
-
-        // 版本提示
+impl Info {
+    pub fn get_common_tips(&self, fmt_caller: &FmtPrintCaller) -> Result<(String, String)> {
+        // 更新提示
         let has_installed = self.local.is_some();
         let local_ver = self.local.clone().unwrap_or_default().version;
         let online_ver = self.online.clone().unwrap_or_default().version;
@@ -107,22 +105,44 @@ impl FmtPrint for Info {
             FmtPrintCaller::Uninstall => local_tip,
         };
 
-        // 标题行
-        output.push_str(&format!(
+        // 标题
+        let title = format!(
             "{}/{} {}\n",
             self.scope.italic(),
             self.name.bold(),
             version_tip
-        ));
+        );
 
         // 来源行
-        if let FmtPrintCaller::Install(matcher) = fmt_caller {
-            output.push_str(&format!(
+        let source_tip = match fmt_caller {
+            FmtPrintCaller::Install(matcher) => format!(
                 "{}{}\n",
                 "Source: ".truecolor(100, 100, 100),
                 matcher.to_string().truecolor(100, 100, 100)
-            ));
-        }
+            ),
+            FmtPrintCaller::Update(matcher) => format!(
+                "{}{}\n",
+                "Source: ".truecolor(100, 100, 100),
+                matcher.to_string().truecolor(100, 100, 100)
+            ),
+            _ => "".to_string(),
+        };
+
+        Ok((title, source_tip))
+    }
+}
+
+impl FmtPrint for Info {
+    fn fmt_print(&self, fmt_caller: FmtPrintCaller) -> Result<String> {
+        let mut output = String::new();
+
+        let (title, source) = self.get_common_tips(&fmt_caller)?;
+
+        // 标题行
+        output.push_str(&title);
+
+        // 来源行
+        output.push_str(&source);
 
         // 分割线
         output.push_str(&"-".repeat(71));
@@ -189,6 +209,44 @@ impl FmtPrint for Info {
 
         Ok(output)
     }
+    fn fmt_brief_print(&self, fmt_caller: FmtPrintCaller) -> Result<String> {
+        let mut output = String::new();
+        let (title, source) = self.get_common_tips(&fmt_caller)?;
+        output.push_str(&format!("· {title}"));
+        output.push_str(&format!("  {source}"));
+
+        // 收集权限简报
+        let mut sensitive_count = 0;
+        let mut important_count = 0;
+        for perm in &self.meta.as_ref().unwrap().permissions {
+            match perm.level {
+                PermissionLevel::Sensitive => sensitive_count += 1,
+                PermissionLevel::Important => important_count += 1,
+                _ => {}
+            }
+        }
+        if sensitive_count + important_count > 0 {
+            let mut perm = format!("{}", "Permission:".truecolor(100, 100, 100));
+            if sensitive_count > 0 {
+                perm.push_str(&format!(
+                    " {} {}",
+                    sensitive_count.to_string().red(),
+                    "Sensitive".red()
+                ));
+            }
+            if important_count > 0 {
+                perm.push_str(&format!(
+                    " {} {}",
+                    important_count.to_string().yellow(),
+                    "Important".yellow()
+                ));
+            }
+
+            output.push_str(&format!("  {}\n", perm));
+        }
+
+        Ok(output)
+    }
 }
 
 #[test]
@@ -211,11 +269,23 @@ fn test_info() {
         // software: demo_pkg.software.clone(),
         meta: Some(MetaResult {
             temp_dir: None,
-            permissions: vec![Permission {
-                key: super::permissions::PermissionKey::execute_installer,
-                level: PermissionLevel::Important,
-                targets: vec!["installer.exe".to_string()],
-            }],
+            permissions: vec![
+                Permission {
+                    key: super::permissions::PermissionKey::execute_custom,
+                    level: PermissionLevel::Sensitive,
+                    targets: vec!["cmd.exe".to_string()],
+                },
+                Permission {
+                    key: super::permissions::PermissionKey::execute_installer,
+                    level: PermissionLevel::Important,
+                    targets: vec!["installer.exe".to_string()],
+                },
+                Permission {
+                    key: super::permissions::PermissionKey::link_desktop,
+                    level: PermissionLevel::Normal,
+                    targets: vec!["Install".to_string()],
+                },
+            ],
             workflows: vec!["setup.toml".to_string(), "remove.toml".to_string()],
             package: demo_pkg,
         }),
@@ -224,6 +294,13 @@ fn test_info() {
         "{}",
         info.fmt_print(FmtPrintCaller::Install(
             crate::utils::fmt_print::PackageSource::Mirror("Official".to_string())
+        ))
+        .unwrap()
+    );
+    println!(
+        "{}",
+        info.fmt_brief_print(FmtPrintCaller::Update(
+            crate::utils::fmt_print::PackageSource::Url("https://114.514/sodayo.nep".to_string())
         ))
         .unwrap()
     );

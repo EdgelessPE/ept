@@ -3,7 +3,6 @@ use chrono::DateTime;
 use colored::{ColoredString, Colorize};
 use std::{fmt::Display, time::SystemTime};
 
-
 fn ellipsis(raw: &str, limit: usize) -> String {
     let len = raw.len();
     if len <= limit {
@@ -108,4 +107,5 @@ pub enum FmtPrintCaller {
 
 pub trait FmtPrint {
     fn fmt_print(&self, fmt_caller: FmtPrintCaller) -> Result<String>;
+    fn fmt_brief_print(&self, fmt_caller: FmtPrintCaller) -> Result<String>;
 }
