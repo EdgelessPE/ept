@@ -1,7 +1,8 @@
 use anyhow::Result;
 use chrono::DateTime;
 use colored::{ColoredString, Colorize};
-use std::time::SystemTime;
+use std::{fmt::Display, time::SystemTime};
+
 
 fn ellipsis(raw: &str, limit: usize) -> String {
     let len = raw.len();
@@ -82,10 +83,26 @@ fn test_fmt() {
     print!("{}", fmt_mirror_line("mock-server", SystemTime::now()));
 }
 
+pub enum PackageSource {
+    Mirror(String),
+    LocalPath(String),
+    Url(String),
+}
+
+impl Display for PackageSource {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            PackageSource::Mirror(mirror) => write!(f, "Mirror '{}'", mirror),
+            PackageSource::LocalPath(path) => write!(f, "Path '{}'", path),
+            PackageSource::Url(url) => write!(f, "URL '{}'", url),
+        }
+    }
+}
+
 pub enum FmtPrintCaller {
     Info,
-    Install,
-    Update,
+    Install(PackageSource),
+    Update(PackageSource),
     Uninstall,
 }
 

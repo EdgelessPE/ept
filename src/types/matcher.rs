@@ -20,6 +20,28 @@ pub struct PackageMatcher {
     pub version_req: Option<VersionReq>,
 }
 
+impl std::fmt::Display for PackageMatcher {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mirror_area = if let Some(mirror) = &self.mirror {
+            format!("{}/", mirror)
+        } else {
+            "".to_string()
+        };
+        let scope_area = if let Some(scope) = &self.scope {
+            format!("{}/", scope)
+        } else {
+            "".to_string()
+        };
+        let name = &self.name;
+        let version_req_area = if let Some(version_req) = &self.version_req {
+            format!("@{}", version_req)
+        } else {
+            "".to_string()
+        };
+        write!(f, "{mirror_area}{scope_area}{name}{version_req_area}")
+    }
+}
+
 impl PackageMatcher {
     pub fn parse(text: &String, deny_mirror: bool, deny_version_matcher: bool) -> Result<Self> {
         if text.is_empty() {
@@ -86,6 +108,16 @@ pub enum PackageInputEnum {
     LocalPath(String),
 }
 
+impl std::fmt::Display for PackageInputEnum {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            PackageInputEnum::PackageMatcher(m) => write!(f, "Pattern: '{}'", m),
+            PackageInputEnum::Url(u) => write!(f, "URL: '{}'", u),
+            PackageInputEnum::LocalPath(p) => write!(f, "Path: '{}'", p),
+        }
+    }
+}
+
 impl PackageInputEnum {
     pub fn parse(text: String, deny_mirror: bool, deny_version_matcher: bool) -> Result<Self> {
         // 判断是否为 URL
@@ -123,6 +155,13 @@ fn test_parse_package_matcher() {
         }
     );
     assert_eq!(
+        PackageMatcher::parse(&"VSCode".to_string(), false, false)
+            .unwrap()
+            .to_string(),
+        "VSCode".to_string()
+    );
+
+    assert_eq!(
         PackageMatcher::parse(&"VSCode@1.0.0".to_string(), false, false).unwrap(),
         PackageMatcher {
             name: "VSCode".to_string(),
@@ -132,6 +171,13 @@ fn test_parse_package_matcher() {
         }
     );
     assert_eq!(
+        PackageMatcher::parse(&"VSCode@1.0.0".to_string(), false, false)
+            .unwrap()
+            .to_string(),
+        "VSCode@^1.0.0".to_string()
+    );
+
+    assert_eq!(
         PackageMatcher::parse(&"Microsoft/VSCode@^1.1.0".to_string(), false, false).unwrap(),
         PackageMatcher {
             name: "VSCode".to_string(),
@@ -140,6 +186,13 @@ fn test_parse_package_matcher() {
             version_req: Some(VersionReq::parse("^1.1.0").unwrap())
         }
     );
+    assert_eq!(
+        PackageMatcher::parse(&"Microsoft/VSCode@^1.1.0".to_string(), false, false)
+            .unwrap()
+            .to_string(),
+        "Microsoft/VSCode@^1.1.0".to_string()
+    );
+
     assert_eq!(
         PackageMatcher::parse(
             &"Official/Microsoft/VSCode@\">=0.1.0\"".to_string(),
@@ -153,6 +206,16 @@ fn test_parse_package_matcher() {
             mirror: Some("Official".to_string()),
             version_req: Some(VersionReq::parse(">=0.1.0").unwrap())
         }
+    );
+    assert_eq!(
+        PackageMatcher::parse(
+            &"Official/Microsoft/VSCode@\">=0.1.0\"".to_string(),
+            false,
+            false
+        )
+        .unwrap()
+        .to_string(),
+        "Official/Microsoft/VSCode@>=0.1.0".to_string()
     );
 
     // 测试 deny

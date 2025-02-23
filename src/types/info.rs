@@ -102,8 +102,8 @@ impl FmtPrint for Info {
                     updated_tip
                 }
             }
-            FmtPrintCaller::Install => online_tip,
-            FmtPrintCaller::Update => has_update_tip,
+            FmtPrintCaller::Install(_) => online_tip,
+            FmtPrintCaller::Update(_) => has_update_tip,
             FmtPrintCaller::Uninstall => local_tip,
         };
 
@@ -112,8 +112,17 @@ impl FmtPrint for Info {
             "{}/{} {}\n",
             self.scope.italic(),
             self.name.bold(),
-            version_tip.truecolor(100, 100, 100)
+            version_tip
         ));
+
+        // 来源行
+        if let FmtPrintCaller::Install(matcher) = fmt_caller {
+            output.push_str(&format!(
+                "{}{}\n",
+                "Source: ".truecolor(100, 100, 100),
+                matcher.to_string().truecolor(100, 100, 100)
+            ));
+        }
 
         // 分割线
         output.push_str(&"-".repeat(71));
@@ -211,5 +220,11 @@ fn test_info() {
             package: demo_pkg,
         }),
     };
-    println!("{}", info.fmt_print(FmtPrintCaller::Info).unwrap());
+    println!(
+        "{}",
+        info.fmt_print(FmtPrintCaller::Install(
+            crate::utils::fmt_print::PackageSource::Mirror("Official".to_string())
+        ))
+        .unwrap()
+    );
 }
