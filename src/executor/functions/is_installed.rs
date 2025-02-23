@@ -1,7 +1,7 @@
 use crate::{
     entrances::info,
     types::{
-        matcher::PackageMatcher,
+        matcher::{PackageInputEnum, PackageMatcher},
         permissions::{Permission, PermissionKey, PermissionLevel},
     },
     utils::conditions::ensure_arg,
@@ -33,12 +33,12 @@ impl EvalFunction for IsInstalled {
                 )));
             }
             let info = info(
-                PackageMatcher {
+                PackageInputEnum::PackageMatcher(PackageMatcher {
                     scope: Some(sp[0].to_string()),
                     name: sp[1].to_string(),
                     mirror: None,
                     version_req: None,
-                },
+                }),
                 None,
             );
 

@@ -184,7 +184,7 @@ fn router(action: Action, cfg: Cfg) -> Result<String> {
         Action::Info { package_matcher } => {
             auto_mirror_update_all(&cfg)?;
             let parse_res = PackageMatcher::parse(&package_matcher, true, true)?;
-            info(parse_res, None).map(|res| format!("{res:#?}"))
+            info(PackageInputEnum::PackageMatcher(parse_res), None).map(|res| format!("{res:#?}"))
         }
         Action::List => list().map(|list| {
             if list.is_empty() {

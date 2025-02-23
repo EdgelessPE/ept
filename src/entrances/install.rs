@@ -12,7 +12,7 @@ use super::{
 use crate::{
     entrances::{expand_workshop, is_workshop_expandable},
     signature::blake3::compute_hash_blake3_from_string,
-    types::matcher::PackageMatcher,
+    types::matcher::{PackageInputEnum, PackageMatcher},
     utils::{
         cache::spawn_cache, download::download_nep, fs::move_or_copy, get_path_cache, is_qa_mode,
         path::parse_relative_path_with_located, term::ask_yn,
@@ -129,12 +129,12 @@ pub fn install_using_package(
     }
     // 执行一次 info
     info(
-        PackageMatcher {
+        PackageInputEnum::PackageMatcher(PackageMatcher {
             scope: Some(package.scope.clone()),
             name: package.name.clone(),
             mirror: None,
             version_req: None,
-        },
+        }),
         None,
     )
     .map_err(|e| {
@@ -352,12 +352,12 @@ fn test_reg_entry() {
     // 确认版本号已经更新
     assert_eq!(
         crate::entrances::info(
-            PackageMatcher {
+            PackageInputEnum::PackageMatcher(PackageMatcher {
                 scope: Some("Cno".to_string()),
                 name: "RegEntry".to_string(),
                 mirror: None,
                 version_req: None,
-            },
+            }),
             None
         )
         .unwrap()
