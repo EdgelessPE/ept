@@ -193,6 +193,7 @@ pub fn info(current_input: PackageInputEnum, next_input: Option<PackageInputEnum
 
 #[test]
 fn test_info() {
+    use crate::types::matcher::PackageMatcher;
     use crate::utils::flags::{set_flag, Flag};
     use crate::utils::test::_ensure_testing_vscode;
     set_flag(Flag::Confirm, true);
