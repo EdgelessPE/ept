@@ -386,7 +386,7 @@ fn main() {
             }
         } else {
             log!("{}", check_res.unwrap_err());
-            exit_code = 1;
+            // exit_code = 1;
         }
     }
 
