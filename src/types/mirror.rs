@@ -5,6 +5,7 @@ use std::{
 
 use crate::utils::{download::fill_url_template, mirror::filter_service_from_meta};
 use anyhow::Result;
+use colored::Colorize;
 use regex::Regex;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
@@ -256,6 +257,19 @@ pub struct SearchResult {
     pub version: String,
     pub description: String,
     pub from_mirror: Option<String>,
+}
+
+impl SearchResult {
+    pub fn fmt_brief_print(&self) -> String {
+        format!(
+            "· {}/{} ({})\n  {} {}\n",
+            self.scope.italic(),
+            self.name.bold(),
+            self.version,
+            "Description:".truecolor(100, 100, 100),
+            self.description.truecolor(100, 100, 100)
+        )
+    }
 }
 
 #[test]

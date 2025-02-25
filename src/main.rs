@@ -176,21 +176,11 @@ fn router(action: Action, cfg: Cfg) -> Result<String> {
             auto_mirror_update_all(&cfg)?;
             search(&keyword, regex).map(|results| {
                 let len = results.len();
-                let res: String =
-                    results
-                        .into_iter()
-                        .fold(format!("\nFound {len} results:\n"), |acc, node| {
-                            acc + &fmt_package_line(
-                                &node.scope,
-                                &node.name,
-                                &node.version,
-                                Some(format!(
-                                    "{} [{}]",
-                                    &node.description,
-                                    node.from_mirror.unwrap_or("unknown".to_string())
-                                )),
-                            )
-                        });
+                let res: String = results
+                    .into_iter()
+                    .fold(format!("\nFound {len} results:\n"), |acc, node| {
+                        acc + &node.fmt_brief_print()
+                    });
                 res
             })
         }
