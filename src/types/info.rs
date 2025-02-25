@@ -216,33 +216,39 @@ impl FmtPrint for Info {
         output.push_str(&format!("  {source}"));
 
         // 收集权限简报
-        let mut sensitive_count = 0;
-        let mut important_count = 0;
-        for perm in &self.meta.as_ref().unwrap().permissions {
-            match perm.level {
-                PermissionLevel::Sensitive => sensitive_count += 1,
-                PermissionLevel::Important => important_count += 1,
-                _ => {}
+        let need_permission = matches!(
+            fmt_caller,
+            FmtPrintCaller::Install(_) | FmtPrintCaller::Update(_)
+        );
+        if need_permission {
+            let mut sensitive_count = 0;
+            let mut important_count = 0;
+            for perm in &self.meta.as_ref().unwrap().permissions {
+                match perm.level {
+                    PermissionLevel::Sensitive => sensitive_count += 1,
+                    PermissionLevel::Important => important_count += 1,
+                    _ => {}
+                }
             }
-        }
-        if sensitive_count + important_count > 0 {
-            let mut perm = format!("{}", "Permission:".truecolor(100, 100, 100));
-            if sensitive_count > 0 {
-                perm.push_str(&format!(
-                    " {} {}",
-                    sensitive_count.to_string().red(),
-                    "Sensitive".red()
-                ));
-            }
-            if important_count > 0 {
-                perm.push_str(&format!(
-                    " {} {}",
-                    important_count.to_string().yellow(),
-                    "Important".yellow()
-                ));
-            }
+            if sensitive_count + important_count > 0 {
+                let mut perm = format!("{}", "Permission:".truecolor(100, 100, 100));
+                if sensitive_count > 0 {
+                    perm.push_str(&format!(
+                        " {} {}",
+                        sensitive_count.to_string().red(),
+                        "Sensitive".red()
+                    ));
+                }
+                if important_count > 0 {
+                    perm.push_str(&format!(
+                        " {} {}",
+                        important_count.to_string().yellow(),
+                        "Important".yellow()
+                    ));
+                }
 
-            output.push_str(&format!("  {}\n", perm));
+                output.push_str(&format!("  {}\n", perm));
+            }
         }
 
         Ok(output)

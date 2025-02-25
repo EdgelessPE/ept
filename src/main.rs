@@ -25,7 +25,6 @@ use crate::utils::flags::{get_flag, set_flag, Flag};
 use crate::utils::launch_clean;
 use anyhow::{anyhow, Result};
 use clap::Parser;
-use colored::Colorize;
 use entrances::meta;
 use std::fs::write;
 use std::process::exit;
@@ -34,7 +33,7 @@ use std::process::exit;
 fn router(action: Action, cfg: Cfg) -> Result<String> {
     // 环境变量读取
     use entrances::{install_using_parsed, update_using_parsed, upgrade};
-    use types::{cli::ActionMirror, extended_semver::ExSemVer};
+    use types::cli::ActionMirror;
     use utils::{
         fmt_print::{fmt_mirror_line, fmt_package_line, FmtPrint, FmtPrintCaller, PackageSource},
         get_path_apps,
@@ -193,29 +192,11 @@ fn router(action: Action, cfg: Cfg) -> Result<String> {
             if list.is_empty() {
                 return "Info:No installed package".to_string();
             }
-            let res: String =
-                list.into_iter()
-                    .fold(String::from("\nInstalled packages:\n"), |acc, node| {
-                        let local_ver = node.local.unwrap().version;
-                        let update_tip = if let Some(online_diff) = node.online {
-                            let online_ver = online_diff.version;
-                            if ExSemVer::parse(&online_ver).unwrap()
-                                > ExSemVer::parse(&local_ver).unwrap()
-                            {
-                                format!("  ↑ {online_ver}").green().to_string()
-                            } else {
-                                String::new()
-                            }
-                        } else {
-                            String::new()
-                        };
-                        acc + &fmt_package_line(
-                            &node.scope,
-                            &node.name,
-                            &format!("{local_ver}{update_tip}"),
-                            None,
-                        )
-                    });
+            let res: String = list
+                .into_iter()
+                .fold(String::from("\nInstalled packages:\n"), |acc, node| {
+                    acc + &node.fmt_brief_print(FmtPrintCaller::Info).unwrap()
+                });
             res
         }),
         Action::Pack {
