@@ -414,7 +414,7 @@ fn test_install_with_matcher() {
     crate::utils::test::_ensure_testing_vscode_uninstalled();
     let parsed =
         crate::utils::parse_inputs::parse_install_inputs(vec!["vscode".to_string()]).unwrap();
-    install_using_parsed(parsed, false).unwrap();
+    install_using_parsed(parsed.into_iter().map(|p| p.0).collect(), false).unwrap();
     assert!(
         info_local(&"Microsoft".to_string(), &"VSCode".to_string())
             .unwrap()
@@ -427,7 +427,7 @@ fn test_install_with_matcher() {
     crate::utils::test::_ensure_testing_vscode_uninstalled();
     let parsed =
         crate::utils::parse_inputs::parse_install_inputs(vec!["CODE".to_string()]).unwrap();
-    install_using_parsed(parsed, false).unwrap();
+    install_using_parsed(parsed.into_iter().map(|p| p.0).collect(), false).unwrap();
     assert!(
         info_local(&"Microsoft".to_string(), &"VSCode".to_string())
             .unwrap()

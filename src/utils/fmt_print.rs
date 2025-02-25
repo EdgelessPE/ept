@@ -3,6 +3,9 @@ use chrono::DateTime;
 use colored::{ColoredString, Colorize};
 use std::{fmt::Display, time::SystemTime};
 
+
+use super::parse_inputs::ParseInputResEnum;
+
 fn ellipsis(raw: &str, limit: usize) -> String {
     let len = raw.len();
     if len <= limit {
@@ -59,33 +62,20 @@ fn test_ellipsis() {
     );
 }
 
-#[test]
-fn test_fmt() {
-    println!("{}", fmt_log("Test".purple(), "This is a fmt test message"));
-    println!(
-        "{}",
-        fmt_log_in_step("Test", "Test".purple(), "This is a fmt test message")
-    );
-    print!(
-        "{}",
-        fmt_package_line("Scope", "Name", "1.1.4.5", Some("mock-server".to_string()),)
-    );
-    print!(
-        "{}",
-        fmt_package_line(
-            "Portable-Apps-Foundation",
-            "Firefox-Special-Edition-For-Developers",
-            "1145.1419.1981.0000",
-            Some("mock-server".to_string()),
-        )
-    );
-    print!("{}", fmt_mirror_line("mock-server", SystemTime::now()));
-}
-
 pub enum PackageSource {
     Mirror(String),
     LocalPath(String),
     Url(String),
+}
+
+impl From<ParseInputResEnum> for PackageSource {
+    fn from(value: ParseInputResEnum) -> Self {
+        match value {
+            ParseInputResEnum::Url(url) => PackageSource::Url(url),
+            ParseInputResEnum::LocalPath(path) => PackageSource::LocalPath(path),
+            ParseInputResEnum::PackageMatcher(res) => PackageSource::Mirror(res.mirror),
+        }
+    }
 }
 
 impl Display for PackageSource {

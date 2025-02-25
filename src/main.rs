@@ -36,7 +36,7 @@ fn router(action: Action, cfg: Cfg) -> Result<String> {
     use entrances::{install_using_parsed, update_using_parsed, upgrade};
     use types::{cli::ActionMirror, extended_semver::ExSemVer};
     use utils::{
-        fmt_print::{fmt_mirror_line, fmt_package_line},
+        fmt_print::{fmt_mirror_line, fmt_package_line, FmtPrint, FmtPrintCaller, PackageSource},
         get_path_apps,
         parse_inputs::{parse_install_inputs, parse_uninstall_inputs, parse_update_inputs},
         term::ask_yn,
@@ -59,7 +59,12 @@ fn router(action: Action, cfg: Cfg) -> Result<String> {
             let tip = &parsed
                 .iter()
                 .fold("\nTarget packages:\n".to_string(), |acc, node| {
-                    acc + &node.to_string()
+                    acc + &node
+                        .1
+                        .fmt_brief_print(FmtPrintCaller::Install(PackageSource::from(
+                            node.0.clone(),
+                        )))
+                        .unwrap()
                 });
             println!("{tip}");
             if !ask_yn(
@@ -72,14 +77,16 @@ fn router(action: Action, cfg: Cfg) -> Result<String> {
                 return Err(anyhow!("Error:Operation canceled by user"));
             }
             // 执行
-            install_using_parsed(parsed, verify_signature).map(|arr| {
-                let length = arr.len();
-                if length == 1 {
-                    String::new()
-                } else {
-                    format!("Success:{length} packages installed successfully")
-                }
-            })
+            install_using_parsed(parsed.into_iter().map(|p| p.0).collect(), verify_signature).map(
+                |arr| {
+                    let length = arr.len();
+                    if length == 1 {
+                        String::new()
+                    } else {
+                        format!("Success:{length} packages installed successfully")
+                    }
+                },
+            )
         }
         Action::Update { packages } => {
             if let Some(packages) = packages {
@@ -89,7 +96,12 @@ fn router(action: Action, cfg: Cfg) -> Result<String> {
                 let tip = &parsed
                     .iter()
                     .fold("\nTarget packages:\n".to_string(), |acc, node| {
-                        acc + &node.to_string()
+                        acc + &node
+                            .1
+                            .fmt_brief_print(FmtPrintCaller::Update(PackageSource::from(
+                                node.0.clone(),
+                            )))
+                            .unwrap()
                     });
                 println!("{tip}");
                 if !ask_yn(
@@ -102,14 +114,15 @@ fn router(action: Action, cfg: Cfg) -> Result<String> {
                     return Err(anyhow!("Error:Operation canceled by user"));
                 }
                 // 执行
-                update_using_parsed(parsed, verify_signature).map(|arr| {
-                    let length = arr.len();
-                    if length == 1 {
-                        String::new()
-                    } else {
-                        format!("Success:{length} packages updated successfully")
-                    }
-                })
+                update_using_parsed(parsed.into_iter().map(|p| p.0).collect(), verify_signature)
+                    .map(|arr| {
+                        let length = arr.len();
+                        if length == 1 {
+                            String::new()
+                        } else {
+                            format!("Success:{length} packages updated successfully")
+                        }
+                    })
             } else {
                 update_all(verify_signature).map(|(success_count, failure_count)| {
                     if failure_count == 0 {

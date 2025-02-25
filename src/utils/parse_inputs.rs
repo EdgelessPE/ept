@@ -1,17 +1,15 @@
-use std::fmt::Display;
 
 use anyhow::{anyhow, Result};
 use colored::Colorize;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    entrances::{auto_mirror_update_all, info_local, info_online},
+    entrances::{auto_mirror_update_all, info, info_local, info_online},
     types::{
         extended_semver::ExSemVer,
         info::Info,
         matcher::{PackageInputEnum, PackageMatcher},
     },
-    utils::fmt_print::fmt_package_line,
 };
 
 use super::{
@@ -25,6 +23,7 @@ use super::{
 pub struct ParsePackageInputRes {
     pub name: String,
     pub scope: String,
+    pub mirror: String,
     pub current_version: Option<String>,
     pub target_version: String,
     pub download_url: String,
@@ -36,28 +35,6 @@ pub enum ParseInputResEnum {
     PackageMatcher(ParsePackageInputRes),
 }
 pub type ParseReturned = (ParseInputResEnum, Info);
-
-impl Display for ParseInputResEnum {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let line = match self {
-            ParseInputResEnum::LocalPath(p) => format!("{:>12}: {p}\n", "Local path"),
-            ParseInputResEnum::Url(u) => format!("{:>12}: {u}\n", "URL"),
-            ParseInputResEnum::PackageMatcher(p) => {
-                let version_tip = if let Some(cur) = &p.current_version {
-                    format!("{cur} → {}", p.target_version)
-                } else {
-                    p.target_version.to_owned()
-                };
-                format!(
-                    "{:>12}:{}",
-                    "Package",
-                    fmt_package_line(&p.scope, &p.name, &version_tip, None)
-                )
-            }
-        };
-        write!(f, "{line}")
-    }
-}
 
 impl ParseInputResEnum {
     // 打印内联的预览语句
@@ -83,15 +60,17 @@ impl ParseInputResEnum {
     }
 }
 
-pub fn parse_install_inputs(packages: Vec<String>) -> Result<Vec<ParseInputResEnum>> {
-    let mut res: Vec<ParseInputResEnum> = Vec::new();
+pub fn parse_install_inputs(packages: Vec<String>) -> Result<Vec<ParseReturned>> {
+    let mut res: Vec<ParseReturned> = Vec::new();
     let mut mirror_updated = false;
     for p in packages {
+        let input_parsed = PackageInputEnum::parse(p, false, false)?;
+        let info = info(input_parsed.clone(), None)?;
         // 首先解析输入类型
-        match PackageInputEnum::parse(p, false, false)? {
-            PackageInputEnum::Url(url) => res.push(ParseInputResEnum::Url(url)),
+        match input_parsed {
+            PackageInputEnum::Url(url) => res.push((ParseInputResEnum::Url(url), info)),
             PackageInputEnum::LocalPath(source_file) => {
-                res.push(ParseInputResEnum::LocalPath(source_file))
+                res.push((ParseInputResEnum::LocalPath(source_file), info))
             }
             // 如果是 PackageMatcher，则解析信息
             PackageInputEnum::PackageMatcher(matcher) => {
@@ -113,29 +92,35 @@ pub fn parse_install_inputs(packages: Vec<String>) -> Result<Vec<ParseInputResEn
                     continue;
                 }
                 // 解析 url
-                let (url, target_release) = get_url_with_version_req(matcher)?;
-                res.push(ParseInputResEnum::PackageMatcher(ParsePackageInputRes {
-                    name: package_name,
-                    scope,
-                    current_version: None,
-                    target_version: target_release.version.to_string(),
-                    download_url: url,
-                }))
+                let (url, target_release, mirror_name) = get_url_with_version_req(matcher)?;
+                res.push((
+                    ParseInputResEnum::PackageMatcher(ParsePackageInputRes {
+                        name: package_name,
+                        scope,
+                        current_version: None,
+                        target_version: target_release.version.to_string(),
+                        download_url: url,
+                        mirror: mirror_name,
+                    }),
+                    info,
+                ))
             }
         };
     }
     Ok(res)
 }
 
-pub fn parse_update_inputs(packages: Vec<String>) -> Result<Vec<ParseInputResEnum>> {
-    let mut res: Vec<ParseInputResEnum> = Vec::new();
+pub fn parse_update_inputs(packages: Vec<String>) -> Result<Vec<ParseReturned>> {
+    let mut res: Vec<ParseReturned> = Vec::new();
     let mut mirror_updated = false;
     for p in packages {
+        let input_parsed = PackageInputEnum::parse(p, false, false)?;
+        let info = info(input_parsed.clone(), None)?;
         // 首先解析输入类型
-        match PackageInputEnum::parse(p, false, false)? {
-            PackageInputEnum::Url(url) => res.push(ParseInputResEnum::Url(url)),
+        match input_parsed {
+            PackageInputEnum::Url(url) => res.push((ParseInputResEnum::Url(url), info)),
             PackageInputEnum::LocalPath(source_file) => {
-                res.push(ParseInputResEnum::LocalPath(source_file))
+                res.push((ParseInputResEnum::LocalPath(source_file), info))
             }
             // 如果是 PackageMatcher，则解析信息
             PackageInputEnum::PackageMatcher(matcher) => {
@@ -153,7 +138,7 @@ pub fn parse_update_inputs(packages: Vec<String>) -> Result<Vec<ParseInputResEnu
                     anyhow!("Error:Package '{scope}/{package_name}' hasn't been installed, use 'ept install' instead")
                 })?;
                 // 检查包的版本号是否允许升级
-                let (online_item, _url_template) =
+                let (online_item, _url_template, _) =
                     info_online(&scope, &package_name, matcher.mirror.clone())?;
                 let selected_release =
                     filter_release(online_item.releases, matcher.version_req.clone(), true)?;
@@ -161,14 +146,18 @@ pub fn parse_update_inputs(packages: Vec<String>) -> Result<Vec<ParseInputResEnu
                     return Err(anyhow!("Error:Package '{name}' has been up to date ({local_version}), can't update to the version of given package ({fresh_version})",name=package_name,local_version=&local_diff.version,fresh_version=&selected_release.version));
                 }
                 // 解析 url
-                let (url, target_release) = get_url_with_version_req(matcher)?;
-                res.push(ParseInputResEnum::PackageMatcher(ParsePackageInputRes {
-                    name: package_name,
-                    scope,
-                    current_version: Some(local_diff.version),
-                    target_version: target_release.version.to_string(),
-                    download_url: url,
-                }))
+                let (url, target_release, mirror_name) = get_url_with_version_req(matcher)?;
+                res.push((
+                    ParseInputResEnum::PackageMatcher(ParsePackageInputRes {
+                        name: package_name,
+                        scope,
+                        current_version: Some(local_diff.version),
+                        target_version: target_release.version.to_string(),
+                        download_url: url,
+                        mirror: mirror_name,
+                    }),
+                    info,
+                ))
             }
         };
     }
@@ -204,68 +193,29 @@ pub fn parse_uninstall_inputs(packages: Vec<String>) -> Result<Vec<(String, Stri
 }
 
 #[test]
-fn test_print_enum() {
-    // 提升覆盖率用
-    assert!(ParseInputResEnum::LocalPath("test".to_string())
-        .to_string()
-        .contains("test"));
-    assert!(ParseInputResEnum::LocalPath("test".to_string())
-        .preview()
-        .contains("test"));
-
-    assert!(ParseInputResEnum::Url("http://localhost/test".to_string())
-        .to_string()
-        .contains("http://localhost/test"));
-    assert!(ParseInputResEnum::Url("http://localhost/test".to_string())
-        .preview()
-        .contains("http://localhost/test"));
-
-    assert!(ParseInputResEnum::PackageMatcher(ParsePackageInputRes {
-        name: "test".to_string(),
-        scope: "test".to_string(),
-        current_version: None,
-        target_version: "test".to_string(),
-        download_url: "URL_ADDRESS".to_string()
-    })
-    .to_string()
-    .contains("test"));
-    assert!(ParseInputResEnum::PackageMatcher(ParsePackageInputRes {
-        name: "test".to_string(),
-        scope: "test".to_string(),
-        current_version: None,
-        target_version: "test".to_string(),
-        download_url: "URL_ADDRESS".to_string()
-    })
-    .preview()
-    .contains("test"));
-    assert!(ParseInputResEnum::PackageMatcher(ParsePackageInputRes {
-        name: "test".to_string(),
-        scope: "test".to_string(),
-        current_version: Some("1.75.4.0".to_string()),
-        target_version: "test".to_string(),
-        download_url: "URL_ADDRESS".to_string()
-    })
-    .to_string()
-    .contains("test"));
-    assert!(ParseInputResEnum::PackageMatcher(ParsePackageInputRes {
-        name: "test".to_string(),
-        scope: "test".to_string(),
-        current_version: Some("1.75.4.0".to_string()),
-        target_version: "test".to_string(),
-        download_url: "URL_ADDRESS".to_string()
-    })
-    .preview()
-    .contains("test"));
-}
-
-#[test]
 fn test_parse_inputs() {
     use crate::utils::flags::{set_flag, Flag};
+    use crate::utils::test::_run_static_file_server;
+    use crate::utils::Path;
+
     set_flag(Flag::Debug, true);
     set_flag(Flag::Confirm, true);
 
     // 使用 mock 的镜像数据
     let mock_ctx = crate::utils::test::_use_mock_mirror_data();
+    let (base_url, mut handler) = _run_static_file_server();
+
+    // 准备 vscode 包
+    let static_path = Path::new("test");
+    if !static_path.exists() {
+        std::fs::create_dir_all(static_path).unwrap();
+    }
+    crate::pack(
+        &"./examples/VSCode".to_string(),
+        Some(static_path.join("vscode.nep").to_string_lossy().to_string()),
+        true,
+    )
+    .unwrap();
 
     // 先卸载 vscode
     crate::utils::test::_ensure_testing_vscode_uninstalled();
@@ -273,21 +223,22 @@ fn test_parse_inputs() {
     let res = parse_install_inputs(vec![
         "examples/VSCode".to_string(),
         "vscode".to_string(),
-        "http://localhost/vscode.nep".to_string(),
+        format!("{base_url}/vscode.nep"),
     ])
     .unwrap();
     assert_eq!(
-        res,
+        res.into_iter().map(|p| p.0).collect::<Vec<_>>(),
         vec![
             ParseInputResEnum::LocalPath("examples/VSCode".to_string()),
             ParseInputResEnum::PackageMatcher(ParsePackageInputRes {
                 name: "VSCode".to_string(),
                 scope: "Microsoft".to_string(),
+                mirror: "mock-server".to_string(),
                 current_version: None,
                 target_version: "1.75.4.2".to_string(),
                 download_url: "http://localhost:19191/static/VSCode_1.75.4.2_Cno.nep?scope=Microsoft&software=VSCode".to_string()
             }),
-            ParseInputResEnum::Url("http://localhost/vscode.nep".to_string()),
+            ParseInputResEnum::Url(format!("{base_url}/vscode.nep")),
         ]
     );
     // 测试更新的解析
@@ -299,42 +250,44 @@ fn test_parse_inputs() {
     let res = parse_install_inputs(vec![
         "examples/VSCode".to_string(),
         "vscode".to_string(),
-        "http://localhost/vscode.nep".to_string(),
+        format!("{base_url}/vscode.nep"),
     ])
     .unwrap();
     assert_eq!(
-        res,
+        res.into_iter().map(|p| p.0).collect::<Vec<_>>(),
         vec![
             ParseInputResEnum::LocalPath("examples/VSCode".to_string()),
             ParseInputResEnum::PackageMatcher(ParsePackageInputRes {
                 name: "VSCode".to_string(),
                 scope: "Microsoft".to_string(),
+                mirror: "mock-server".to_string(),
                 current_version: Some("1.75.4.0".to_string()),
                 target_version: "1.75.4.2".to_string(),
                 download_url: "http://localhost:19191/static/VSCode_1.75.4.2_Cno.nep?scope=Microsoft&software=VSCode".to_string()
             }),
-            ParseInputResEnum::Url("http://localhost/vscode.nep".to_string()),
+            ParseInputResEnum::Url(format!("{base_url}/vscode.nep")),
         ]
     );
     // 测试更新的解析
     let res = parse_update_inputs(vec![
         "examples/VSCode".to_string(),
         "vscode".to_string(),
-        "http://localhost/vscode.nep".to_string(),
+        format!("{base_url}/vscode.nep"),
     ])
     .unwrap();
     assert_eq!(
-        res,
+        res.into_iter().map(|p| p.0).collect::<Vec<_>>(),
         vec![
             ParseInputResEnum::LocalPath("examples/VSCode".to_string()),
             ParseInputResEnum::PackageMatcher(ParsePackageInputRes {
                 name: "VSCode".to_string(),
                 scope: "Microsoft".to_string(),
+                mirror: "mock-server".to_string(),
                 current_version: Some("1.75.4.0".to_string()),
                 target_version: "1.75.4.2".to_string(),
                 download_url: "http://localhost:19191/static/VSCode_1.75.4.2_Cno.nep?scope=Microsoft&software=VSCode".to_string()
             }),
-            ParseInputResEnum::Url("http://localhost/vscode.nep".to_string()),
+            ParseInputResEnum::Url(format!("{base_url}/vscode.nep")),
         ]
     );
 
@@ -360,4 +313,5 @@ fn test_parse_inputs() {
 
     crate::utils::test::_restore_mirror_data(mock_ctx);
     crate::utils::test::_ensure_testing_vscode_uninstalled();
+    handler.kill().unwrap();
 }

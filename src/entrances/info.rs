@@ -50,12 +50,12 @@ pub fn info_local(scope: &String, package_name: &String) -> Result<(GlobalPackag
     Ok((global.clone(), local))
 }
 
-// 第二个参数为 URL 模板
+// 第二个参数为 URL 模板，第三个参数为 mirror
 pub fn info_online(
     scope: &String,
     package_name: &String,
     mirror: Option<String>,
-) -> Result<(TreeItem, String)> {
+) -> Result<(TreeItem, String, String)> {
     // 定义匹配函数
     let item_matcher = |mirror_name: &String| {
         let quick_maps = read_quick_maps(mirror_name)?;
@@ -63,7 +63,7 @@ pub fn info_online(
             .full_map
             .get(&(scope.to_lowercase(), package_name.to_lowercase()));
         if let Some(item) = res {
-            Ok((item.clone(), quick_maps.url_template))
+            Ok((item.clone(), quick_maps.url_template, mirror_name.clone()))
         } else {
             Err(anyhow!("Error:Failed to find '{scope}/{package_name}'"))
         }
@@ -75,8 +75,8 @@ pub fn info_online(
         let p = get_path_mirror()?;
         let mirror_names = read_sub_dir(p)?;
         for name in mirror_names {
-            if let Ok(res) = item_matcher(&name) {
-                return Ok(res);
+            if let Ok((res, url_template, mirror_name)) = item_matcher(&name) {
+                return Ok((res, url_template, mirror_name));
             }
         }
     }
@@ -170,7 +170,7 @@ pub fn info(current_input: PackageInputEnum, next_input: Option<PackageInputEnum
             authors: next_meta.package.package.authors.clone(),
         });
         info.meta = Some(next_meta);
-    } else if let Ok((item, _)) = info_online(&scope, &package_name, mirror) {
+    } else if let Ok((item, _, _)) = info_online(&scope, &package_name, mirror) {
         let latest = filter_release(item.releases, None, false)?;
         let mut authors = Vec::new();
         if let Some(meta) = latest.meta {
