@@ -3,7 +3,6 @@ use chrono::DateTime;
 use colored::{ColoredString, Colorize};
 use std::{fmt::Display, time::SystemTime};
 
-
 use super::parse_inputs::ParseInputResEnum;
 
 fn ellipsis(raw: &str, limit: usize) -> String {
