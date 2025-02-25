@@ -371,17 +371,21 @@ fn main() {
 
     // 检查程序更新
     if need_check_update {
-        let (has_upgrade, is_cross_wid_gap, latest_release)= check_has_upgrade().map_err(|e|anyhow!("Error:Failed to check self upgrade : '{e}'. If this error persists, consider changing 'online.auto_check_upgrade' to 'false' in config")).unwrap();
-        if has_upgrade {
-            println!();
-            log!(
-                "{}",
-                if is_cross_wid_gap {
-                    print_upgradable_cross_wid_gap(true, latest_release)
-                } else {
-                    print_upgradable(latest_release)
-                }
-            )
+        let check_res = check_has_upgrade().map_err(|e| anyhow!("Error:Failed to check self upgrade : '{e}'. If this error persists, consider changing 'online.auto_check_upgrade' to 'false' in config"));
+        if let Ok((has_upgrade, is_cross_wid_gap, latest_release)) = check_res {
+            if has_upgrade {
+                println!();
+                log!(
+                    "{}",
+                    if is_cross_wid_gap {
+                        print_upgradable_cross_wid_gap(true, latest_release)
+                    } else {
+                        print_upgradable(latest_release)
+                    }
+                )
+            }
+        } else {
+            log!("{}", check_res.unwrap_err());
         }
     }
 
