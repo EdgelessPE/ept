@@ -31,6 +31,8 @@ pub fn spawn_cache(ctx: CacheCtx) -> Result<()> {
             })?;
             log!("Info:Cache stored at '{}'", p2s!(target))
         }
+    } else {
+        log!("Debug:Cache disabled, skip spawning cache");
     }
     Ok(())
 }

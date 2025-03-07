@@ -37,8 +37,15 @@ pub fn download(url: &str, to: PathBuf, cached: Option<(PathBuf, String)>) -> Re
                     p2s!(to)
                 );
                 return Ok(CacheCtx(false, to, None));
+            } else {
+                log!(
+                    "Debug:Cache not found for '{url}' at '{}'",
+                    p2s!(cache_file_path)
+                );
             }
         }
+    } else {
+        log!("Debug:Cache disabled, skip restoring cache");
     }
 
     let url = url.replace('+', "%2B");
