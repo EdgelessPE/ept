@@ -35,9 +35,7 @@ fn router(action: Action, cfg: Cfg) -> Result<String> {
     use entrances::{install_using_parsed, update_using_parsed, upgrade};
     use types::cli::ActionMirror;
     use utils::{
-        fmt_print::{
-            fmt_package_line, fmt_print_mirror_line, FmtPrint, FmtPrintCaller, PackageSource,
-        },
+        fmt_print::{fmt_print_mirror_line, FmtPrint, FmtPrintCaller, PackageSource},
         get_path_apps,
         parse_inputs::{parse_install_inputs, parse_uninstall_inputs, parse_update_inputs},
         term::ask_yn,
@@ -142,10 +140,11 @@ fn router(action: Action, cfg: Cfg) -> Result<String> {
             // 解析输入
             let parsed = parse_uninstall_inputs(package_matchers)?;
             // 询问是否执行
-            let tip = &parsed.iter().fold(
-                "\nTarget packages:\n".to_string(),
-                |acc, (scope, name, version)| acc + &fmt_package_line(scope, name, version, None),
-            );
+            let tip = &parsed
+                .iter()
+                .fold("\nTarget packages:\n".to_string(), |acc, info| {
+                    acc + &info.fmt_brief_print(FmtPrintCaller::Uninstall).unwrap()
+                });
             println!("{tip}");
             if !ask_yn(
                 format!(
@@ -157,7 +156,9 @@ fn router(action: Action, cfg: Cfg) -> Result<String> {
                 return Err(anyhow!("Error:Operation canceled by user"));
             }
             let length = parsed.len();
-            for (scope, name, _) in parsed {
+            for info in parsed {
+                let scope = info.scope;
+                let name = info.name;
                 let tip = uninstall(Some(scope.clone()), &name).map(|(scope, name)| {
                     format!("Success:Package '{scope}/{name}' uninstalled successfully")
                 }).map_err(|e|{

@@ -5,7 +5,7 @@ use std::{fmt::Display, time::SystemTime};
 
 use super::parse_inputs::ParseInputResEnum;
 
-fn ellipsis(raw: &str, limit: usize) -> String {
+fn _ellipsis(raw: &str, limit: usize) -> String {
     let len = raw.len();
     if len <= limit {
         return raw.to_string();
@@ -21,31 +21,15 @@ pub fn fmt_log_in_step(step: &str, head: ColoredString, msg: &str) -> String {
     format!("{head:>8} {s:<9} {msg}", s = step.truecolor(100, 100, 100))
 }
 
-#[deprecated]
-pub fn fmt_package_line(
-    scope: &str,
-    name: &str,
-    version: &str,
-    description: Option<String>,
-) -> String {
-    format!(
-        "  {:>15}/{:<30} {:<22} {}\n",
-        ellipsis(scope, 15).truecolor(100, 100, 100).italic(),
-        ellipsis(name, 30).cyan().bold(),
-        format!("({version})"),
-        description
-            .unwrap_or_default()
-            .as_str()
-            .truecolor(100, 100, 100)
-    )
-}
-
 #[test]
 fn test_ellipsis() {
-    assert_eq!(ellipsis("VSCode", 10), "VSCode".to_string());
-    assert_eq!(ellipsis("Visual Studio Code", 10), "Visual ...".to_string());
+    assert_eq!(_ellipsis("VSCode", 10), "VSCode".to_string());
     assert_eq!(
-        ellipsis("Visual Studio Code", 16),
+        _ellipsis("Visual Studio Code", 10),
+        "Visual ...".to_string()
+    );
+    assert_eq!(
+        _ellipsis("Visual Studio Code", 16),
         "Visual Studio...".to_string()
     );
 }

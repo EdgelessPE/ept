@@ -6,7 +6,7 @@ use crate::{
     entrances::{auto_mirror_update_all, info, info_local, info_online},
     types::{
         extended_semver::ExSemVer,
-        info::Info,
+        info::{Info, InfoDiff},
         matcher::{PackageInputEnum, PackageMatcher},
     },
 };
@@ -163,7 +163,7 @@ pub fn parse_update_inputs(packages: Vec<String>) -> Result<Vec<ParseReturned>> 
     Ok(res)
 }
 
-pub fn parse_uninstall_inputs(packages: Vec<String>) -> Result<Vec<(String, String, String)>> {
+pub fn parse_uninstall_inputs(packages: Vec<String>) -> Result<Vec<Info>> {
     let mut arr = Vec::new();
     for p in packages {
         // 简单校验是否可以卸载
@@ -178,14 +178,23 @@ pub fn parse_uninstall_inputs(packages: Vec<String>) -> Result<Vec<(String, Stri
             return Err(anyhow!("Error:Package '{p}' not installed"));
         }
 
-        // 查询版本号
-        let version = if let Ok((_, local_diff)) = info_local(&scope, &package_name) {
-            local_diff.version
+        // 查询 Info
+        let info = if let Ok((_, local_diff)) = info_local(&scope, &package_name) {
+            local_diff
         } else {
-            "broken".to_string()
+            InfoDiff {
+                version: "broken".to_string(),
+                authors: vec![],
+            }
         };
 
-        arr.push((scope, package_name, version));
+        arr.push(Info {
+            name: package_name,
+            scope,
+            local: Some(info),
+            online: None,
+            meta: None,
+        });
     }
 
     Ok(arr)
@@ -294,20 +303,36 @@ fn test_parse_inputs() {
     let res = parse_uninstall_inputs(vec!["vscode".to_string()]).unwrap();
     assert_eq!(
         res,
-        vec![(
-            "Microsoft".to_string(),
-            "VSCode".to_string(),
-            "1.75.4.0".to_string()
-        ),]
+        vec![Info {
+            name: "VSCode".to_string(),
+            scope: "Microsoft".to_string(),
+            local: Some(InfoDiff {
+                version: "1.75.4.0".to_string(),
+                authors: vec![
+                    "Cno <dsyourshy@qq.com>".to_string(),
+                    "Microsoft".to_string()
+                ],
+            }),
+            online: None,
+            meta: None,
+        }]
     );
     let res = parse_uninstall_inputs(vec!["microSOFT/Vscode".to_string()]).unwrap();
     assert_eq!(
         res,
-        vec![(
-            "Microsoft".to_string(),
-            "VSCode".to_string(),
-            "1.75.4.0".to_string()
-        )]
+        vec![Info {
+            name: "VSCode".to_string(),
+            scope: "Microsoft".to_string(),
+            local: Some(InfoDiff {
+                version: "1.75.4.0".to_string(),
+                authors: vec![
+                    "Cno <dsyourshy@qq.com>".to_string(),
+                    "Microsoft".to_string()
+                ],
+            }),
+            online: None,
+            meta: None,
+        }]
     );
 
     crate::utils::test::_restore_mirror_data(mock_ctx);
