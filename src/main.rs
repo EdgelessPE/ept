@@ -54,6 +54,16 @@ fn router(action: Action, cfg: Cfg) -> Result<String> {
         Action::Install { packages } => {
             // 解析输入
             let parsed = parse_install_inputs(packages)?;
+            // 打印详细元信息
+            log!("Info:Check the following information before installation:");
+            println!();
+            for (input, info) in &parsed {
+                println!(
+                    "{}\n",
+                    info.fmt_print(FmtPrintCaller::Install(PackageSource::from(input.clone())))
+                        .unwrap()
+                );
+            }
             // 询问是否执行
             let tip = &parsed
                 .iter()

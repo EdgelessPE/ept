@@ -175,7 +175,9 @@ impl FmtPrint for Info {
                     output.push_str(&format!("· 🌟 Alias:       {}\n", alias));
                 }
                 if let Some(tags) = &software.tags {
-                    output.push_str(&format!("· 🏷️ Tags:        {}\n", tags.join(", ")));
+                    if !tags.is_empty() {
+                        output.push_str(&format!("· 🏷️ Tags:        {}\n", tags.join(", ")));
+                    }
                 }
                 output.push('\n');
 
@@ -199,7 +201,6 @@ impl FmtPrint for Info {
                     for target in &perm.targets {
                         output.push_str(&format!("      · {}\n", target));
                     }
-                    output.push('\n');
                 }
             }
         }
