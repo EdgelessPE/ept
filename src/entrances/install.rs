@@ -291,14 +291,14 @@ fn test_install() {
 
 #[test]
 fn test_install_dism() {
-    use crate::utils::arch::{get_arch, SysArch};
+    use crate::utils::arch::SysArch;
     use crate::utils::test::_ensure_testing_uninstalled;
     _ensure_testing_uninstalled("Chuyu", "Dism++");
 
     crate::utils::fs::copy_dir("examples/Dism++", "test/Dism++").unwrap();
 
     install_using_package(&"test/Dism++".to_string(), false).unwrap();
-    let stem_name = match get_arch().unwrap() {
+    let stem_name = match SysArch::get_current_arch().unwrap() {
         SysArch::X64 => "Dism++x64",
         SysArch::X86 => "Dism++x86",
         SysArch::ARM64 => "Dism++ARM64",

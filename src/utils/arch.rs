@@ -1,8 +1,11 @@
 use anyhow::{anyhow, Ok, Result};
 use serde::{Deserialize, Serialize};
 use std::fmt;
+use strum_macros::{EnumString, IntoStaticStr};
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+#[derive(
+    Serialize, Deserialize, Clone, Debug, PartialEq, PartialOrd, Eq, Hash, EnumString, IntoStaticStr,
+)]
 pub enum SysArch {
     X64,
     X86,
@@ -14,33 +17,35 @@ impl fmt::Display for SysArch {
     }
 }
 
-pub fn get_arch() -> Result<SysArch> {
-    #[cfg(target_arch = "x86")]
-    return Ok(SysArch::X86);
-    #[cfg(target_arch = "x86_64")]
-    return Ok(SysArch::X64);
-    #[cfg(target_arch = "aarch64")]
-    return Ok(SysArch::ARM64);
+impl SysArch {
+    pub fn get_current_arch() -> Result<Self> {
+        #[cfg(target_arch = "x86")]
+        return Ok(Self::X86);
+        #[cfg(target_arch = "x86_64")]
+        return Ok(Self::X64);
+        #[cfg(target_arch = "aarch64")]
+        return Ok(Self::ARM64);
 
-    #[allow(unreachable_code)]
-    {
-        Err(anyhow!("Error:Failed to get current system arch, that's amazing that you seems to be running a magic Windows OS"))
+        #[allow(unreachable_code)]
+        {
+            Err(anyhow!("Error:Failed to get current system arch, that's amazing that you seems to be running a magic Windows OS"))
+        }
     }
-}
 
-fn parse_arch(text: &String) -> Result<SysArch> {
-    match text.to_uppercase().as_str() {
-        "X64" => Ok(SysArch::X64),
-        "X86" => Ok(SysArch::X86),
-        "ARM64" => Ok(SysArch::ARM64),
-        _ => Err(anyhow!(
-            "Error:Failed to parse '{text}' as valid system arch"
-        )),
+    fn parse(text: &str) -> Result<Self> {
+        match text {
+            "X64" => Ok(Self::X64),
+            "X86" => Ok(Self::X86),
+            "ARM64" => Ok(Self::ARM64),
+            _ => Err(anyhow!(
+                "Error:Failed to parse '{text}' as valid system arch"
+            )),
+        }
     }
 }
 
 pub fn is_current_arch_match(pkg_arch: &String) -> Result<()> {
-    let sys_arch = get_arch()?;
+    let sys_arch = SysArch::get_current_arch()?;
     let allowed_arch = match sys_arch {
         SysArch::X64 => {
             vec![SysArch::X64, SysArch::X86]
@@ -53,7 +58,7 @@ pub fn is_current_arch_match(pkg_arch: &String) -> Result<()> {
         }
     };
 
-    if allowed_arch.contains(&parse_arch(pkg_arch)?) {
+    if allowed_arch.contains(&SysArch::parse(pkg_arch)?) {
         Ok(())
     } else {
         Err(anyhow!(
@@ -64,18 +69,24 @@ pub fn is_current_arch_match(pkg_arch: &String) -> Result<()> {
 
 #[test]
 fn test_parse_arch() {
-    assert_eq!(parse_arch(&"X64".to_string()).unwrap(), SysArch::X64);
-    assert_eq!(parse_arch(&"x64".to_string()).unwrap(), SysArch::X64);
-    assert_eq!(parse_arch(&"X86".to_string()).unwrap(), SysArch::X86);
-    assert_eq!(parse_arch(&"x86".to_string()).unwrap(), SysArch::X86);
-    assert_eq!(parse_arch(&"ARM64".to_string()).unwrap(), SysArch::ARM64);
-    assert_eq!(parse_arch(&"aRm64".to_string()).unwrap(), SysArch::ARM64);
-    assert!(parse_arch(&"RISC".to_string()).is_err());
+    assert_eq!(SysArch::parse("X64").unwrap(), SysArch::X64);
+    assert_eq!(SysArch::parse("X86").unwrap(), SysArch::X86);
+    assert_eq!(SysArch::parse("x86").unwrap(), SysArch::X86);
+    assert_eq!(
+        SysArch::parse("ARM64").unwrap(),
+        SysArch::ARM64
+    );
+    assert_eq!(SysArch::parse("x64").unwrap(), SysArch::X64);
+    assert_eq!(
+        SysArch::parse("aRm64").unwrap(),
+        SysArch::ARM64
+    );
+    assert!(SysArch::parse("RISC").is_err());
 }
 
 #[test]
 fn test_is_current_arch_match() {
-    let cur_arch = get_arch().unwrap();
+    let cur_arch = SysArch::get_current_arch().unwrap();
     let cur_arch_str = cur_arch.to_string();
     assert!(is_current_arch_match(&cur_arch_str).is_ok());
 
