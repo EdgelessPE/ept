@@ -213,7 +213,9 @@ impl FmtPrint for Info {
         let mut output = String::new();
         let (title, source) = self.get_common_tips(&fmt_caller)?;
         output.push_str(&format!("· {title}"));
-        output.push_str(&format!("  {source}"));
+        if !source.is_empty() {
+            output.push_str(&format!("  {source}"));
+        }
 
         // 收集权限简报
         let need_permission = matches!(
