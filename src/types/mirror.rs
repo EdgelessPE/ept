@@ -272,6 +272,12 @@ impl SearchResult {
     }
 }
 
+pub struct MirrorInfo {
+    pub name: String,
+    pub updated_at: SystemTime,
+    pub root_url: String,
+}
+
 #[test]
 fn test_mirror_pkg_software() {
     let mixed_fs = MixedFS::new("");

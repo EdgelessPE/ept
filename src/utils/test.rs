@@ -263,7 +263,7 @@ pub fn _run_mirror_mock_server() -> String {
                                                     "key": "path_entrances",
                                                     "level": "Normal",
                                                     "targets": [
-                                                        "ntpd.exe"
+                                                        "name.exe"
                                                     ]
                                                 }
                                             ],
@@ -312,7 +312,7 @@ pub fn _run_mirror_mock_server() -> String {
                                                     "key": "path_entrances",
                                                     "level": "Normal",
                                                     "targets": [
-                                                        "ntpd.exe"
+                                                        "name.exe"
                                                     ]
                                                 }
                                             ],
@@ -363,7 +363,7 @@ pub fn _run_mirror_mock_server() -> String {
                                                     "key": "path_entrances",
                                                     "level": "Normal",
                                                     "targets": [
-                                                        "ntpd.exe"
+                                                        "name.exe"
                                                     ]
                                                 }
                                             ],
@@ -412,7 +412,7 @@ pub fn _run_mirror_mock_server() -> String {
                                                     "key": "path_entrances",
                                                     "level": "Normal",
                                                     "targets": [
-                                                        "ntpd.exe"
+                                                        "name.exe"
                                                     ]
                                                 }
                                             ],

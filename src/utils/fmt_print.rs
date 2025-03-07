@@ -1,7 +1,9 @@
 use anyhow::Result;
 use chrono::DateTime;
 use colored::{ColoredString, Colorize};
-use std::{fmt::Display, time::SystemTime};
+use std::fmt::Display;
+
+use crate::types::mirror::MirrorInfo;
 
 use super::parse_inputs::ParseInputResEnum;
 
@@ -72,13 +74,15 @@ pub trait FmtPrint {
     fn fmt_brief_print(&self, fmt_caller: FmtPrintCaller) -> Result<String>;
 }
 
-pub fn fmt_print_mirror_line(name: &str, updated_at: SystemTime) -> String {
-    let date_time: DateTime<chrono::Local> = updated_at.into();
+pub fn fmt_print_mirror_line(mirror_info: MirrorInfo) -> String {
+    let date_time: DateTime<chrono::Local> = mirror_info.updated_at.into();
     let time_str = date_time.format("%Y-%m-%d %H:%M:%S").to_string();
+    let root_str = format!("Root URL: '{}'", mirror_info.root_url);
     let update_str = format!("Last Update: {time_str}");
     format!(
-        "· {}\n  {}",
-        name.bold(),
+        "· {}\n  {}\n  {}",
+        mirror_info.name.bold(),
+        root_str.as_str().truecolor(100, 100, 100),
         update_str.as_str().truecolor(100, 100, 100)
     )
 }

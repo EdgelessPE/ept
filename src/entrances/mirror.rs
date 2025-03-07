@@ -11,7 +11,7 @@ use url::Url;
 use crate::{
     log, log_ok_last,
     types::{
-        mirror::{MirrorHello, MirrorPkgSoftware, ServiceKeys},
+        mirror::{MirrorHello, MirrorInfo, MirrorPkgSoftware, ServiceKeys},
         mixed_fs::MixedFS,
         verifiable::Verifiable,
     },
@@ -117,14 +117,19 @@ pub fn mirror_update(name: &String) -> Result<String> {
     mirror_add(&hello_path, Some(name.to_string()))
 }
 
-pub fn mirror_list() -> Result<Vec<(String, SystemTime)>> {
+pub fn mirror_list() -> Result<Vec<MirrorInfo>> {
     let p = get_path_mirror()?;
     let mut res = Vec::new();
     for name in read_sub_dir(&p)? {
         let file_path = p.join(&name).join(MIRROR_FILE_HELLO);
         let time = metadata(file_path)?.modified()?;
+        let (meta, _) = read_local_mirror_hello(&name)?;
 
-        res.push((name, time));
+        res.push(MirrorInfo {
+            name,
+            updated_at: time,
+            root_url: meta.root_url,
+        });
     }
     Ok(res)
 }
@@ -153,7 +158,7 @@ pub fn auto_mirror_update_all(cfg: &Cfg) -> Result<bool> {
     let ls = mirror_list()?;
     let res = ls
         .into_iter()
-        .find(|(_, modified_time)| now.duration_since(*modified_time).unwrap() > duration_cfg);
+        .find(|mirror_info| now.duration_since(mirror_info.updated_at).unwrap() > duration_cfg);
     if res.is_some() {
         log!("Info:Automatically updating mirror index...");
         mirror_update_all()?;
@@ -207,8 +212,9 @@ fn test_mirror() {
     // 测试列出
     let ls = mirror_list().unwrap();
     assert_eq!(ls.len(), 1);
-    let (name, old_update_time) = ls.first().unwrap();
-    assert_eq!(name, "mock-server");
+    let mirror_info = ls.first().unwrap();
+    let old_update_time = mirror_info.updated_at;
+    assert_eq!(mirror_info.name, "mock-server");
 
     // 测试搜索
     let expected_res = vec![crate::types::mirror::SearchResult {
@@ -260,8 +266,14 @@ fn test_mirror() {
     sleep(Duration::from_micros(100));
     mirror_update(&"mock-server".to_string()).unwrap();
     let ls = mirror_list().unwrap();
-    let (_, new_update_time) = ls.first().unwrap();
-    assert!(new_update_time.duration_since(*old_update_time).unwrap() > Duration::from_micros(50));
+    let mirror_info = ls.first().unwrap();
+    assert!(
+        mirror_info
+            .updated_at
+            .duration_since(old_update_time)
+            .unwrap()
+            > Duration::from_micros(50)
+    );
 
     // 测试移除
     mirror_remove(&"mock-server".to_string()).unwrap();

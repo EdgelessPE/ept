@@ -291,8 +291,8 @@ fn router(action: Action, cfg: Cfg) -> Result<String> {
                 if !res.is_empty() {
                     let str: String = res
                         .into_iter()
-                        .fold(String::from("\nAdded mirrors:\n"), |acc, (name, time)| {
-                            acc + &fmt_print_mirror_line(&name, time)
+                        .fold(String::from("\nAdded mirrors:\n"), |acc, info| {
+                            acc + &fmt_print_mirror_line(info)
                         });
                     Ok(str)
                 } else {
