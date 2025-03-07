@@ -119,6 +119,7 @@ pub fn install_using_package(
     // 如果提供了主程序检查是否存在
     if let Some(installed) = &software.main_program {
         let p = parse_relative_path_with_located(installed, &into_dir);
+        log!("Debug:Checking main program at '{}'", p2s!(p));
         if !p.exists() {
             if is_qa_mode() {
                 log!("Warning:Validating failed : field 'main_program' provided in table 'software' not exist : '{installed}'")
@@ -127,7 +128,13 @@ pub fn install_using_package(
             }
         }
     }
+
     // 执行一次 info
+    log!(
+        "Debug:Try to get info of '{scope}/{name}'",
+        scope = package.scope,
+        name = package.name
+    );
     info(
         PackageInputEnum::PackageMatcher(PackageMatcher {
             scope: Some(package.scope.clone()),
