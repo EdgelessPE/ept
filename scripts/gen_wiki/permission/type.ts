@@ -1,4 +1,4 @@
 export interface PermissionInfo {
-  name: string;
-  wiki?: string;
+	name: string;
+	wiki?: string;
 }

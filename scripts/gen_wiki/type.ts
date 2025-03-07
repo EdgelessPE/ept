@@ -1,12 +1,12 @@
 export interface Top {
-  title: string;
-  description?: string;
+	title: string;
+	description?: string;
 }
 
 export interface CommonFieldInfo {
-  wiki?: string;
-  demo?: string;
-  extra?: string;
-  enums?: string;
-  declaration: string;
+	wiki?: string;
+	demo?: string;
+	extra?: string;
+	enums?: string;
+	declaration: string;
 }
