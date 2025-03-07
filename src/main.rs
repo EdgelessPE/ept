@@ -35,7 +35,9 @@ fn router(action: Action, cfg: Cfg) -> Result<String> {
     use entrances::{install_using_parsed, update_using_parsed, upgrade};
     use types::cli::ActionMirror;
     use utils::{
-        fmt_print::{fmt_mirror_line, fmt_package_line, FmtPrint, FmtPrintCaller, PackageSource},
+        fmt_print::{
+            fmt_package_line, fmt_print_mirror_line, FmtPrint, FmtPrintCaller, PackageSource,
+        },
         get_path_apps,
         parse_inputs::{parse_install_inputs, parse_uninstall_inputs, parse_update_inputs},
         term::ask_yn,
@@ -269,7 +271,7 @@ fn router(action: Action, cfg: Cfg) -> Result<String> {
                     let str: String = res
                         .into_iter()
                         .fold(String::from("\nAdded mirrors:\n"), |acc, (name, time)| {
-                            acc + &fmt_mirror_line(&name, time)
+                            acc + &fmt_print_mirror_line(&name, time)
                         });
                     Ok(str)
                 } else {

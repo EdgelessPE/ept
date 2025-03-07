@@ -40,17 +40,6 @@ pub fn fmt_package_line(
     )
 }
 
-#[deprecated]
-pub fn fmt_mirror_line(name: &str, updated_at: SystemTime) -> String {
-    let date_time: DateTime<chrono::Local> = updated_at.into();
-    let time_str = date_time.format("%Y-%m-%d %H:%M:%S").to_string();
-    let update_str = format!("updated at {time_str}");
-    format!(
-        "  {name:<20} {str}\n",
-        str = update_str.as_str().truecolor(100, 100, 100)
-    )
-}
-
 #[test]
 fn test_ellipsis() {
     assert_eq!(ellipsis("VSCode", 10), "VSCode".to_string());
@@ -97,4 +86,15 @@ pub enum FmtPrintCaller {
 pub trait FmtPrint {
     fn fmt_print(&self, fmt_caller: FmtPrintCaller) -> Result<String>;
     fn fmt_brief_print(&self, fmt_caller: FmtPrintCaller) -> Result<String>;
+}
+
+pub fn fmt_print_mirror_line(name: &str, updated_at: SystemTime) -> String {
+    let date_time: DateTime<chrono::Local> = updated_at.into();
+    let time_str = date_time.format("%Y-%m-%d %H:%M:%S").to_string();
+    let update_str = format!("Last Update: {time_str}");
+    format!(
+        "· {}\n  {}",
+        name.bold(),
+        update_str.as_str().truecolor(100, 100, 100)
+    )
 }
