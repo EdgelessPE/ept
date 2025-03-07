@@ -85,5 +85,6 @@
     "[rust]": {
         "editor.formatOnSave": true,
     },
-    "editor.formatOnSave": false
+    "editor.formatOnSave": true,
+    "npm-scripts.showStartNotification": false
 }
