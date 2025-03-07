@@ -128,7 +128,15 @@ impl<'de> Deserialize<'de> for ServiceKeys {
 impl Verifiable for MirrorHello {
     fn verify_self(&self, _located: &MixedFS) -> Result<()> {
         // 必须有 hello 服务
-        let _hello_res = filter_service_from_meta(self, ServiceKeys::Hello)?;
+        filter_service_from_meta(self, ServiceKeys::Hello)?;
+
+        // 协议版本号为 1.0.0
+        if self.protocol != "1.0.0" {
+            return Err(anyhow::anyhow!(
+                "Error:Invalid protocol version '{}', expected '1.0.0'",
+                self.protocol
+            ));
+        }
 
         Ok(())
     }
