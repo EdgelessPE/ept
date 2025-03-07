@@ -379,6 +379,7 @@ fn main() {
                 )
             }
         } else {
+            println!();
             log!("{}", check_res.unwrap_err());
             // exit_code = 1;
         }

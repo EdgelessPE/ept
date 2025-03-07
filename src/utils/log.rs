@@ -30,7 +30,7 @@ fn gen_log(msg: &String, replace_head: Option<String>) -> Option<String> {
         }
         let c_head = match head {
             "Question" => head.bright_purple(),
-            "Debug" => head.truecolor(50, 50, 50),
+            "Debug" => head.truecolor(100, 100, 100),
             "Info" => head.bright_blue(),
             "Warning" => head.bright_yellow(),
             "Error" => head.bright_red(),
