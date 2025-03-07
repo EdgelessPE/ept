@@ -243,6 +243,207 @@ pub fn _run_mirror_mock_server() -> String {
                                     }
                                 ]
                             }
+                        ],
+                        "ScopeA": [
+                            {
+                                "name": "NameA",
+                                "releases": [
+                                    {
+                                        "file_name": "NameA_22.1.0.0_Cno.nep",
+                                        "version": "22.1.0.0",
+                                        "size": 94245376,
+                                        "timestamp": 1704554724,
+                                        "meta": {
+                                            "workflows": [
+                                                "setup.toml",
+                                                "remove.toml"
+                                            ],
+                                            "permissions": [
+                                                {
+                                                    "key": "path_entrances",
+                                                    "level": "Normal",
+                                                    "targets": [
+                                                        "ntpd.exe"
+                                                    ]
+                                                }
+                                            ],
+                                            "package": {
+                                                "nep": "0",
+                                                "package": {
+                                                    "name": "NameA",
+                                                    "description": "NameA",
+                                                    "template": "Software",
+                                                    "version": "22.1.0.0",
+                                                    "authors": [
+                                                        "Bot <bot@edgeless.top>",
+                                                        "Cno <cno4tech@gmail.com>"
+                                                    ],
+                                                    "license": "MIT",
+                                                    "scope": "ScopeA"
+                                                },
+                                                "software": {
+                                                    "upstream": "https://visualstudio.com/",
+                                                    "category": "办公编辑",
+                                                    "language": "Multi",
+                                                    "tags": [
+                                                        "记事本"
+                                                    ]
+                                                }
+                                            }
+                                        }
+                                    }
+                                ]
+                              },
+                              {
+                                "name": "NameB",
+                                "releases": [
+                                    {
+                                        "file_name": "NameB_22.1.0.0_Cno.nep",
+                                        "version": "22.1.0.0",
+                                        "size": 94245376,
+                                        "timestamp": 1704554724,
+                                        "meta": {
+                                            "workflows": [
+                                                "setup.toml",
+                                                "remove.toml"
+                                            ],
+                                            "permissions": [
+                                                {
+                                                    "key": "path_entrances",
+                                                    "level": "Normal",
+                                                    "targets": [
+                                                        "ntpd.exe"
+                                                    ]
+                                                }
+                                            ],
+                                            "package": {
+                                                "nep": "0",
+                                                "package": {
+                                                    "name": "NameB",
+                                                    "description": "NameB",
+                                                    "template": "Software",
+                                                    "version": "22.1.0.0",
+                                                    "authors": [
+                                                        "Bot <bot@edgeless.top>",
+                                                        "Cno <cno4tech@gmail.com>"
+                                                    ],
+                                                    "license": "MIT",
+                                                    "scope": "ScopeA"
+                                                },
+                                                "software": {
+                                                    "upstream": "https://visualstudio.com/",
+                                                    "category": "办公编辑",
+                                                    "language": "Multi",
+                                                    "tags": [
+                                                        "记事本"
+                                                    ]
+                                                }
+                                            }
+                                        }
+                                    }
+                                ]
+                              }
+                        ],
+                        "ScopeB": [
+                            {
+                                "name": "NameA",
+                                "releases": [
+                                    {
+                                        "file_name": "NameA_22.1.0.0_Cno.nep",
+                                        "version": "22.1.0.0",
+                                        "size": 94245376,
+                                        "timestamp": 1704554724,
+                                        "meta": {
+                                            "workflows": [
+                                                "setup.toml",
+                                                "remove.toml"
+                                            ],
+                                            "permissions": [
+                                                {
+                                                    "key": "path_entrances",
+                                                    "level": "Normal",
+                                                    "targets": [
+                                                        "ntpd.exe"
+                                                    ]
+                                                }
+                                            ],
+                                            "package": {
+                                                "nep": "0",
+                                                "package": {
+                                                    "name": "NameA",
+                                                    "description": "NameA",
+                                                    "template": "Software",
+                                                    "version": "22.1.0.0",
+                                                    "authors": [
+                                                        "Bot <bot@edgeless.top>",
+                                                        "Cno <cno4tech@gmail.com>"
+                                                    ],
+                                                    "license": "MIT",
+                                                    "scope": "ScopeB"
+                                                },
+                                                "software": {
+                                                    "upstream": "https://visualstudio.com/",
+                                                    "category": "办公编辑",
+                                                    "language": "Multi",
+                                                    "tags": [
+                                                        "记事本"
+                                                    ]
+                                                }
+                                            }
+                                        }
+                                    }
+                                ]
+                              },
+                              {
+                                "name": "UnknownName",
+                                "releases": [
+                                    {
+                                        "file_name": "UnknownName_22.1.0.0_Cno.nep",
+                                        "version": "22.1.0.0",
+                                        "size": 94245376,
+                                        "timestamp": 1704554724,
+                                        "meta": {
+                                            "workflows": [
+                                                "setup.toml",
+                                                "remove.toml"
+                                            ],
+                                            "permissions": [
+                                                {
+                                                    "key": "path_entrances",
+                                                    "level": "Normal",
+                                                    "targets": [
+                                                        "ntpd.exe"
+                                                    ]
+                                                }
+                                            ],
+                                            "package": {
+                                                "nep": "0",
+                                                "package": {
+                                                    "name": "UnknownName",
+                                                    "description": "UnknownName",
+                                                    "template": "Software",
+                                                    "version": "22.1.0.0",
+                                                    "authors": [
+                                                        "Bot <bot@edgeless.top>",
+                                                        "Cno <cno4tech@gmail.com>"
+                                                    ],
+                                                    "license": "MIT",
+                                                    "scope": "ScopeB"
+                                                },
+                                                "software": {
+                                                    "upstream": "https://visualstudio.com/",
+                                                    "category": "办公编辑",
+                                                    "language": "Multi",
+                                                    "alias": "NameB",
+                                                    "tags": [
+                                                        "记事本"
+                                                    ]
+                                                }
+                                            }
+                                        }
+                                    }
+                                ]
+                              }
                         ]
                     },
                     "timestamp": 1704554724,

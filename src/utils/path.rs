@@ -130,3 +130,43 @@ fn test_parse_relative_path() {
     println!("{:?}", parse_relative_path_with_base(&p2));
     println!("{:?}", parse_relative_path_with_base(&p3));
 }
+
+#[test]
+fn test_find_scope_with_name() {
+    use crate::utils::flags::{set_flag, Flag};
+    use crate::utils::test::{
+        _ensure_testing_vscode, _mount_custom_mirror, _unmount_custom_mirror,
+    };
+
+    set_flag(Flag::Debug, true);
+    set_flag(Flag::Confirm, true);
+    _ensure_testing_vscode();
+    let tup = _mount_custom_mirror();
+
+    // 本地信息
+    let name = String::from("vscode");
+    let res = find_scope_with_name(&name, None).unwrap();
+    assert_eq!(res, ("Microsoft".to_string(), "VSCode".to_string()));
+
+    // 在线信息
+    let name = String::from("Notepad");
+    let res = find_scope_with_name(&name, None).unwrap();
+    assert_eq!(res, ("Microsoft".to_string(), "Notepad".to_string()));
+
+    // 别名
+    let name = String::from("code");
+    let res = find_scope_with_name(&name, None).unwrap();
+    assert_eq!(res, ("Microsoft".to_string(), "VSCode".to_string()));
+
+    // 命名冲突
+    assert!(find_scope_with_name(&"NameA".to_string(), None).is_err());
+    assert!(find_scope_with_name(&"NameA".to_string(), Some("ScopeA".to_string())).is_ok());
+    assert!(find_scope_with_name(&"NameA".to_string(), Some("ScopeB".to_string())).is_ok());
+
+    // 命名和别名冲突
+    assert!(find_scope_with_name(&"NameB".to_string(), None).is_err());
+    assert!(find_scope_with_name(&"NameB".to_string(), Some("ScopeA".to_string())).is_ok());
+    assert!(find_scope_with_name(&"NameB".to_string(), Some("ScopeB".to_string())).is_ok());
+
+    _unmount_custom_mirror(tup);
+}
