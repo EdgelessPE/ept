@@ -101,6 +101,16 @@ fn router(action: Action, cfg: Cfg) -> Result<String> {
             if let Some(packages) = packages {
                 // 解析输入
                 let parsed = parse_update_inputs(packages)?;
+                // 打印详细元信息
+                log!("Info:Check the following information before update:");
+                println!();
+                for (input, info) in &parsed {
+                    println!(
+                        "{}\n",
+                        info.fmt_print(FmtPrintCaller::Update(PackageSource::from(input.clone(),)))
+                            .unwrap()
+                    );
+                }
                 // 询问是否执行
                 let tip = &parsed
                     .iter()
