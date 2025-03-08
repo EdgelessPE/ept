@@ -1,9 +1,6 @@
 use crate::{
-    entrances::info,
-    types::{
-        matcher::{PackageInputEnum, PackageMatcher},
-        permissions::{Permission, PermissionKey, PermissionLevel},
-    },
+    entrances::info_local,
+    types::permissions::{Permission, PermissionKey, PermissionLevel},
     utils::conditions::ensure_arg,
 };
 use anyhow::{anyhow, Result};
@@ -32,15 +29,7 @@ impl EvalFunction for IsInstalled {
                     "Invalid argument '{arg}' : expect 'SCOPE/NAME', e.g. 'Microsoft/VSCode'"
                 )));
             }
-            let info = info(
-                PackageInputEnum::PackageMatcher(PackageMatcher {
-                    scope: Some(sp[0].to_string()),
-                    name: sp[1].to_string(),
-                    mirror: None,
-                    version_req: None,
-                }),
-                None,
-            );
+            let info = info_local(&sp[0].to_string(), &sp[1].to_string());
 
             Ok(Value::Boolean(info.is_ok()))
         })

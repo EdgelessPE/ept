@@ -12,14 +12,13 @@ use super::{
 use crate::{
     entrances::{expand_workshop, is_workshop_expandable},
     signature::blake3::compute_hash_blake3_from_string,
-    types::matcher::{PackageInputEnum, PackageMatcher},
     utils::{
         cache::spawn_cache, download::download_nep, fs::move_or_copy, get_path_cache, is_qa_mode,
         path::parse_relative_path_with_located, term::ask_yn,
     },
 };
 use crate::{
-    entrances::{info, update_using_package},
+    entrances::update_using_package,
     utils::parse_inputs::ParseInputResEnum,
 };
 use crate::{executor::workflow_executor, parsers::parse_workflow, utils::get_path_apps};
@@ -135,16 +134,7 @@ pub fn install_using_package(
         scope = package.scope,
         name = package.name
     );
-    info(
-        PackageInputEnum::PackageMatcher(PackageMatcher {
-            scope: Some(package.scope.clone()),
-            name: package.name.clone(),
-            mirror: None,
-            version_req: None,
-        }),
-        None,
-    )
-    .map_err(|e| {
+    info_local(&package.scope, &package.name).map_err(|e| {
         anyhow!(
             "Error:Validating failed : failed to get info of '{scope}/{name}' : {e}",
             scope = package.scope,
