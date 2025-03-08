@@ -9,6 +9,7 @@ use crate::{
         info::{Info, InfoDiff},
         matcher::{PackageInputEnum, PackageMatcher},
     },
+    utils::term::ask_yn,
 };
 
 use super::{
@@ -84,10 +85,14 @@ pub fn parse_install_inputs(packages: Vec<String>) -> Result<Vec<ParseReturned>>
                     find_scope_with_name(&matcher.name, matcher.scope.clone())?;
                 // 检查对应包名有没有被安装过，如果安装过就作为 update 解析
                 if let Ok((_, diff)) = info_local(&scope, &package_name) {
-                    log!("Warning:Package '{scope}/{package_name}' has been installed({ver}), would be switched to update entrance",ver = diff.version);
-                    let mut update_parsed =
-                        parse_update_inputs(vec![format!("{scope}/{package_name}")])?;
-                    res.append(&mut update_parsed);
+                    let ask_res = ask_yn(format!("Warning:Package '{scope}/{package_name}' has been installed({ver}), sure you want to reinstall instead of using the update process?",ver = diff.version),false);
+                    if ask_res {
+                        let mut update_parsed =
+                            parse_update_inputs(vec![format!("{scope}/{package_name}")])?;
+                        res.append(&mut update_parsed);
+                    } else {
+                        log!("Warning:Ignoring the installation of '{scope}/{package_name}', you may want to use 'ept update' to update it later");
+                    }
                     continue;
                 }
                 // 解析 url
