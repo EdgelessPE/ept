@@ -33,7 +33,7 @@ impl SysArch {
     }
 
     fn parse(text: &str) -> Result<Self> {
-        match text {
+        match text.to_uppercase().as_str() {
             "X64" => Ok(Self::X64),
             "X86" => Ok(Self::X86),
             "ARM64" => Ok(Self::ARM64),
@@ -72,15 +72,9 @@ fn test_parse_arch() {
     assert_eq!(SysArch::parse("X64").unwrap(), SysArch::X64);
     assert_eq!(SysArch::parse("X86").unwrap(), SysArch::X86);
     assert_eq!(SysArch::parse("x86").unwrap(), SysArch::X86);
-    assert_eq!(
-        SysArch::parse("ARM64").unwrap(),
-        SysArch::ARM64
-    );
+    assert_eq!(SysArch::parse("ARM64").unwrap(), SysArch::ARM64);
     assert_eq!(SysArch::parse("x64").unwrap(), SysArch::X64);
-    assert_eq!(
-        SysArch::parse("aRm64").unwrap(),
-        SysArch::ARM64
-    );
+    assert_eq!(SysArch::parse("aRm64").unwrap(), SysArch::ARM64);
     assert!(SysArch::parse("RISC").is_err());
 }
 
