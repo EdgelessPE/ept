@@ -14,8 +14,8 @@ use crate::{
         permissions::{Generalizable, Permission, PermissionKey, PermissionLevel},
     },
     utils::{
-        cache::spawn_cache, download::download_nep, get_path_apps, get_path_cache,
-        mirror::filter_release, path::find_scope_with_name,
+        cache::spawn_cache, download::download_nep, get_manifest_path, get_path_apps,
+        get_path_cache, mirror::filter_release, path::find_scope_with_name,
     },
 };
 use anyhow::{anyhow, Result};
@@ -26,7 +26,7 @@ use super::{
 };
 
 enum MetaTargetResult {
-    Local(PathBuf, PathBuf, GlobalPackage),
+    Local(PathBuf, PathBuf),
     Online(MetaResult),
 }
 
@@ -37,12 +37,11 @@ fn find_meta_target(input: PackageInputEnum, verify_signature: bool) -> Result<M
             // 作为路径使用，可以是一个包或者已经解包的目录
             let p = Path::new(&local_path);
             if p.exists() {
-                let (path, pkg) = unpack_nep(&local_path, verify_signature)?;
+                let (path, _) = unpack_nep(&local_path, verify_signature)?;
                 // verify(&p2s!(path))?;
                 return Ok(MetaTargetResult::Local(
                     path.clone(),
                     path.join("workflows"),
-                    pkg,
                 ));
             }
         }
@@ -52,12 +51,11 @@ fn find_meta_target(input: PackageInputEnum, verify_signature: bool) -> Result<M
             {
                 // 先尝试在本地已安装列表中搜索
                 let path = get_path_apps(&scope, &package_name, false)?;
-                if let Ok((pkg, _)) = info_local(&scope, &package_name) {
+                if info_local(&scope, &package_name).is_ok() {
                     installed_validator(&p2s!(path))?;
                     return Ok(MetaTargetResult::Local(
                         path.clone(),
                         path.join(".nep_context/workflows"),
-                        pkg,
                     ));
                 }
 
@@ -83,11 +81,10 @@ fn find_meta_target(input: PackageInputEnum, verify_signature: bool) -> Result<M
             // 缓存下载的包
             spawn_cache(cache_ctx)?;
 
-            let (path, pkg) = unpack_nep(&p2s!(p), verify_signature)?;
+            let (path, _) = unpack_nep(&p2s!(p), verify_signature)?;
             return Ok(MetaTargetResult::Local(
                 path.clone(),
                 path.join("workflows"),
-                pkg,
             ));
         }
     }
@@ -99,7 +96,7 @@ fn find_meta_target(input: PackageInputEnum, verify_signature: bool) -> Result<M
 
 pub fn meta(input: PackageInputEnum, verify_signature: bool) -> Result<MetaResult> {
     match find_meta_target(input, verify_signature)? {
-        MetaTargetResult::Local(temp_dir_inner_path, workflow_path, global) => {
+        MetaTargetResult::Local(temp_dir_inner_path, workflow_path) => {
             let temp_dir = p2s!(temp_dir_inner_path);
 
             // 检查工作流存在
@@ -138,8 +135,6 @@ pub fn meta(input: PackageInputEnum, verify_signature: bool) -> Result<MetaResul
                 }
             }
 
-            // println!("map {map:#?}");
-
             let mut permissions = Vec::new();
             for ((level, key), targets) in map {
                 permissions.push(Permission {
@@ -155,6 +150,10 @@ pub fn meta(input: PackageInputEnum, verify_signature: bool) -> Result<MetaResul
                     a.key.cmp(&b.key)
                 }
             });
+
+            // 重新从临时目录读取 package，以解决 package 被解释的问题
+            let package_path = get_manifest_path(&temp_dir)?;
+            let global: GlobalPackage = toml::from_str(&std::fs::read_to_string(package_path)?)?;
 
             Ok(MetaResult {
                 temp_dir: Some(temp_dir),
@@ -285,22 +284,24 @@ fn test_meta() {
         res.package.software.unwrap().main_program.unwrap(),
         "${AppData}/Local/Programs/Microsoft VS Code/Code.exe".to_string()
     );
+    let sorted_permissions: Vec<Permission> = res
+        .permissions
+        .into_iter()
+        .map(|mut node| {
+            node.targets.sort();
+            node
+        })
+        .collect();
     assert_eq!(
-        res.permissions,
-        vec![
-            Permission {
-                key: PermissionKey::execute_installer,
-                level: PermissionLevel::Important,
-                targets: vec!["installer.exe /S".to_string()],
-            },
-            Permission {
-                key: PermissionKey::execute_installer,
-                level: PermissionLevel::Important,
-                targets: vec![
-                    "${AppData}/Local/Programs/Microsoft VS Code/unins000.exe /S".to_string()
-                ],
-            },
-        ]
+        sorted_permissions,
+        vec![Permission {
+            key: PermissionKey::execute_installer,
+            level: PermissionLevel::Important,
+            targets: vec![
+                "${AppData}/Local/Programs/Microsoft VS Code/unins000.exe /S".to_string(),
+                "installer.exe /S".to_string(),
+            ],
+        },]
     );
 
     // 从本地安装中生成 meta

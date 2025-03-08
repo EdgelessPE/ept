@@ -144,6 +144,21 @@ pub fn launch_clean() -> Result<()> {
     Ok(())
 }
 
+pub fn get_manifest_path(located: &String) -> Result<PathBuf> {
+    let possible_path = vec![
+        format!("{located}/package.toml"),
+        format!("{located}/.nep_context/package.toml"),
+    ];
+
+    for p in possible_path {
+        let p = Path::new(&p);
+        if p.exists() {
+            return Ok(p.to_path_buf());
+        }
+    }
+    Err(anyhow!("Error:Failed to find 'package.toml' in {located}"))
+}
+
 pub fn get_workflows_path(located: &String) -> Result<PathBuf> {
     let possible_path = vec![
         format!("{located}/workflows"),
