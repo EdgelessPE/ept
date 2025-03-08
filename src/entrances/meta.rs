@@ -4,7 +4,7 @@ use std::{
 };
 
 use crate::{
-    p2s,
+    log, p2s,
     parsers::parse_workflow,
     signature::blake3::compute_hash_blake3_from_string,
     types::{
@@ -15,21 +15,23 @@ use crate::{
     },
     utils::{
         cache::spawn_cache, download::download_nep, get_path_apps, get_path_cache,
-        path::find_scope_with_name,
+        mirror::filter_release, path::find_scope_with_name,
     },
 };
 use anyhow::{anyhow, Result};
 
 use super::{
-    info_local,
+    info_local, info_online,
     utils::{package::unpack_nep, validator::installed_validator},
 };
 
+enum MetaTargetResult {
+    Local(PathBuf, PathBuf, GlobalPackage),
+    Online(MetaResult),
+}
+
 // 返回 (临时目录，工作流所在目录，全局包)
-fn find_meta_target(
-    input: PackageInputEnum,
-    verify_signature: bool,
-) -> Result<(PathBuf, PathBuf, GlobalPackage)> {
+fn find_meta_target(input: PackageInputEnum, verify_signature: bool) -> Result<MetaTargetResult> {
     match input {
         PackageInputEnum::LocalPath(local_path) => {
             // 作为路径使用，可以是一个包或者已经解包的目录
@@ -37,16 +39,39 @@ fn find_meta_target(
             if p.exists() {
                 let (path, pkg) = unpack_nep(&local_path, verify_signature)?;
                 // verify(&p2s!(path))?;
-                return Ok((path.clone(), path.join("workflows"), pkg));
+                return Ok(MetaTargetResult::Local(
+                    path.clone(),
+                    path.join("workflows"),
+                    pkg,
+                ));
             }
         }
         PackageInputEnum::PackageMatcher(matcher) => {
-            // 作为名称使用，在本地已安装列表中搜索
-            if let Ok((scope, package_name)) = find_scope_with_name(&matcher.name, matcher.scope) {
+            if let Ok((scope, package_name)) =
+                find_scope_with_name(&matcher.name, matcher.scope.clone())
+            {
+                // 先尝试在本地已安装列表中搜索
                 let path = get_path_apps(&scope, &package_name, false)?;
-                let (pkg, _) = info_local(&scope, &package_name)?;
-                installed_validator(&p2s!(path))?;
-                return Ok((path.clone(), path.join(".nep_context/workflows"), pkg));
+                if let Ok((pkg, _)) = info_local(&scope, &package_name) {
+                    installed_validator(&p2s!(path))?;
+                    return Ok(MetaTargetResult::Local(
+                        path.clone(),
+                        path.join(".nep_context/workflows"),
+                        pkg,
+                    ));
+                }
+
+                // 直接使用在线 Info 的 Meta 信息
+                let (tree_item, _, mirror) = info_online(&scope, &package_name, matcher.mirror)?;
+                let release = filter_release(tree_item.releases, matcher.version_req, false)?;
+                if let Some(meta) = release.meta {
+                    log!("Debug:Found meta for '{scope}/{package_name}' in mirror '{mirror}'");
+                    return Ok(MetaTargetResult::Online(meta));
+                } else {
+                    return Err(anyhow!(
+                        "Error:Mirror '{mirror}' doesn't provide meta for '{scope}/{package_name}'",
+                    ));
+                }
             }
         }
         PackageInputEnum::Url(url) => {
@@ -59,7 +84,11 @@ fn find_meta_target(
             spawn_cache(cache_ctx)?;
 
             let (path, pkg) = unpack_nep(&p2s!(p), verify_signature)?;
-            return Ok((path.clone(), path.join("workflows"), pkg));
+            return Ok(MetaTargetResult::Local(
+                path.clone(),
+                path.join("workflows"),
+                pkg,
+            ));
         }
     }
 
@@ -69,69 +98,73 @@ fn find_meta_target(
 }
 
 pub fn meta(input: PackageInputEnum, verify_signature: bool) -> Result<MetaResult> {
-    // 解包
-    let (temp_dir_inner_path, workflow_path, global) = find_meta_target(input, verify_signature)?;
-    let temp_dir = p2s!(temp_dir_inner_path);
+    match find_meta_target(input, verify_signature)? {
+        MetaTargetResult::Local(temp_dir_inner_path, workflow_path, global) => {
+            let temp_dir = p2s!(temp_dir_inner_path);
 
-    // 检查工作流存在
-    let exists_workflows: Vec<(String, String)> =
-        vec!["setup.toml", "update.toml", "remove.toml", "expand.toml"]
-            .into_iter()
-            .filter_map(|name| {
-                let p = workflow_path.join(name);
-                if p.exists() {
-                    Some((name.to_string(), p2s!(p)))
-                } else {
-                    None
+            // 检查工作流存在
+            let exists_workflows: Vec<(String, String)> =
+                vec!["setup.toml", "update.toml", "remove.toml", "expand.toml"]
+                    .into_iter()
+                    .filter_map(|name| {
+                        let p = workflow_path.join(name);
+                        if p.exists() {
+                            Some((name.to_string(), p2s!(p)))
+                        } else {
+                            None
+                        }
+                    })
+                    .collect();
+
+            // 收集所有工作流
+            let total_workflow = exists_workflows
+                .clone()
+                .into_iter()
+                .map(|(_, p)| parse_workflow(&p).unwrap())
+                .fold(Vec::new(), |mut acc, mut x| {
+                    acc.append(&mut x);
+                    acc
+                });
+
+            // 收集并合并同类权限
+            let mut map: HashMap<(PermissionLevel, PermissionKey), HashSet<String>> =
+                HashMap::new();
+            for node in total_workflow {
+                for perm in node.generalize_permissions()? {
+                    let entry = map.entry((perm.level, perm.key)).or_default();
+                    for target in perm.targets {
+                        entry.insert(target);
+                    }
                 }
-            })
-            .collect();
-
-    // 收集所有工作流
-    let total_workflow = exists_workflows
-        .clone()
-        .into_iter()
-        .map(|(_, p)| parse_workflow(&p).unwrap())
-        .fold(Vec::new(), |mut acc, mut x| {
-            acc.append(&mut x);
-            acc
-        });
-
-    // 收集并合并同类权限
-    let mut map: HashMap<(PermissionLevel, PermissionKey), HashSet<String>> = HashMap::new();
-    for node in total_workflow {
-        for perm in node.generalize_permissions()? {
-            let entry = map.entry((perm.level, perm.key)).or_default();
-            for target in perm.targets {
-                entry.insert(target);
             }
+
+            // println!("map {map:#?}");
+
+            let mut permissions = Vec::new();
+            for ((level, key), targets) in map {
+                permissions.push(Permission {
+                    key,
+                    level,
+                    targets: Vec::from_iter(targets),
+                });
+            }
+            permissions.sort_by(|a, b| {
+                if a.level != b.level {
+                    a.level.partial_cmp(&b.level).unwrap().reverse()
+                } else {
+                    a.key.cmp(&b.key)
+                }
+            });
+
+            Ok(MetaResult {
+                temp_dir: Some(temp_dir),
+                permissions,
+                workflows: exists_workflows.into_iter().map(|(name, _)| name).collect(),
+                package: global,
+            })
         }
+        MetaTargetResult::Online(meta) => Ok(meta),
     }
-
-    // println!("map {map:#?}");
-
-    let mut permissions = Vec::new();
-    for ((level, key), targets) in map {
-        permissions.push(Permission {
-            key,
-            level,
-            targets: Vec::from_iter(targets),
-        });
-    }
-    permissions.sort_by(|a, b| {
-        if a.level != b.level {
-            a.level.partial_cmp(&b.level).unwrap().reverse()
-        } else {
-            a.key.cmp(&b.key)
-        }
-    });
-
-    Ok(MetaResult {
-        temp_dir: Some(temp_dir),
-        permissions,
-        workflows: exists_workflows.into_iter().map(|(name, _)| name).collect(),
-        package: global,
-    })
 }
 
 #[test]
