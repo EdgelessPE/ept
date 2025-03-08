@@ -27,7 +27,7 @@ use super::{
 
 enum MetaTargetResult {
     Local(PathBuf, PathBuf),
-    Online(MetaResult),
+    Online(Box<MetaResult>),
 }
 
 // 返回 (临时目录，工作流所在目录，全局包)
@@ -64,7 +64,7 @@ fn find_meta_target(input: PackageInputEnum, verify_signature: bool) -> Result<M
                 let release = filter_release(tree_item.releases, matcher.version_req, true)?;
                 if let Some(meta) = release.meta {
                     log!("Debug:Found meta for '{scope}/{package_name}' in mirror '{mirror}'");
-                    return Ok(MetaTargetResult::Online(meta));
+                    return Ok(MetaTargetResult::Online(Box::new(meta)));
                 } else {
                     return Err(anyhow!(
                         "Error:Mirror '{mirror}' doesn't provide meta for '{scope}/{package_name}'",
@@ -162,7 +162,7 @@ pub fn meta(input: PackageInputEnum, verify_signature: bool) -> Result<MetaResul
                 package: global,
             })
         }
-        MetaTargetResult::Online(meta) => Ok(meta),
+        MetaTargetResult::Online(meta) => Ok(*meta),
     }
 }
 
