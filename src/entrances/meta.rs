@@ -63,7 +63,7 @@ fn find_meta_target(input: PackageInputEnum, verify_signature: bool) -> Result<M
 
                 // 直接使用在线 Info 的 Meta 信息
                 let (tree_item, _, mirror) = info_online(&scope, &package_name, matcher.mirror)?;
-                let release = filter_release(tree_item.releases, matcher.version_req, false)?;
+                let release = filter_release(tree_item.releases, matcher.version_req, true)?;
                 if let Some(meta) = release.meta {
                     log!("Debug:Found meta for '{scope}/{package_name}' in mirror '{mirror}'");
                     return Ok(MetaTargetResult::Online(meta));
