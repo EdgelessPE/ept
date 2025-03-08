@@ -84,13 +84,20 @@ impl Info {
     pub fn get_common_tips(&self, fmt_caller: &FmtPrintCaller) -> Result<(String, String)> {
         // 更新提示
         let has_installed = self.local.is_some();
+
+        let target_ver = self.target.version.clone();
         let local_ver = self.local.clone().unwrap_or_default().version;
         let online_ver = self.online.clone().unwrap_or_default().version;
+
         let has_update = ExSemVer::parse(&local_ver)? < ExSemVer::parse(&online_ver)?;
+
+        let target_tip = format!("({target_ver})");
         let local_tip = format!("({local_ver})");
         let online_tip = format!("({online_ver})");
         let updated_tip = format!("(✅ {local_ver})");
         let has_update_tip = format!("({local_ver} ➡️  {online_ver})");
+        let update_to_tip = format!("({local_ver} ➡️  {target_ver})");
+
         let version_tip = match fmt_caller {
             FmtPrintCaller::Info => {
                 if !has_installed {
@@ -101,8 +108,8 @@ impl Info {
                     updated_tip
                 }
             }
-            FmtPrintCaller::Install(_) => online_tip,
-            FmtPrintCaller::Update(_) => has_update_tip,
+            FmtPrintCaller::Install(_) => target_tip,
+            FmtPrintCaller::Update(_) => update_to_tip,
             FmtPrintCaller::Uninstall => local_tip,
         };
 
