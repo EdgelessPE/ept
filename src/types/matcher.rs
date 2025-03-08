@@ -5,7 +5,10 @@ use semver::VersionReq;
 
 use anyhow::{anyhow, Ok, Result};
 
-use crate::utils::{format_path, is_url};
+use crate::{
+    log,
+    utils::{format_path, is_url},
+};
 
 lazy_static! {
     static ref PACKAGE_MATCHER_REGEX: Regex =
@@ -122,18 +125,21 @@ impl PackageInputEnum {
     pub fn parse(text: String, deny_mirror: bool, deny_version_matcher: bool) -> Result<Self> {
         // 判断是否为 URL
         if is_url(&text) {
+            log!("Debug:Parsed '{text}' as URL");
             return Ok(PackageInputEnum::Url(text));
         }
 
         // 如果本地存在该路径，则作为路径处理
         let p = Path::new(&text);
         if p.exists() {
+            log!("Debug:Parsed '{text}' as local path");
             return Ok(PackageInputEnum::LocalPath(format_path(&text)));
         }
 
         // 使用正则匹配 PackageMatcher
         if PACKAGE_MATCHER_REGEX.is_match(&text) {
             let m = PackageMatcher::parse(&text, deny_mirror, deny_version_matcher)?;
+            log!("Debug:Parsed '{text}' as package matcher : '{m}'");
             return Ok(PackageInputEnum::PackageMatcher(m));
         }
 
