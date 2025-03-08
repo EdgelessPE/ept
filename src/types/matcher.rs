@@ -46,7 +46,7 @@ impl std::fmt::Display for PackageMatcher {
 }
 
 impl PackageMatcher {
-    pub fn parse(text: &String, deny_mirror: bool, deny_version_matcher: bool) -> Result<Self> {
+    pub fn parse(text: &str, deny_mirror: bool, deny_version_matcher: bool) -> Result<Self> {
         if text.is_empty() {
             return Err(anyhow!("Error:Empty input text"));
         }
@@ -152,7 +152,7 @@ impl PackageInputEnum {
 #[test]
 fn test_parse_package_matcher() {
     assert_eq!(
-        PackageMatcher::parse(&"VSCode".to_string(), false, false).unwrap(),
+        PackageMatcher::parse("VSCode", false, false).unwrap(),
         PackageMatcher {
             name: "VSCode".to_string(),
             scope: None,
@@ -161,14 +161,14 @@ fn test_parse_package_matcher() {
         }
     );
     assert_eq!(
-        PackageMatcher::parse(&"VSCode".to_string(), false, false)
+        PackageMatcher::parse("VSCode", false, false)
             .unwrap()
             .to_string(),
         "VSCode".to_string()
     );
 
     assert_eq!(
-        PackageMatcher::parse(&"VSCode@1.0.0".to_string(), false, false).unwrap(),
+        PackageMatcher::parse("VSCode@1.0.0", false, false).unwrap(),
         PackageMatcher {
             name: "VSCode".to_string(),
             scope: None,
@@ -177,14 +177,14 @@ fn test_parse_package_matcher() {
         }
     );
     assert_eq!(
-        PackageMatcher::parse(&"VSCode@1.0.0".to_string(), false, false)
+        PackageMatcher::parse("VSCode@1.0.0", false, false)
             .unwrap()
             .to_string(),
         "VSCode@^1.0.0".to_string()
     );
 
     assert_eq!(
-        PackageMatcher::parse(&"Microsoft/VSCode@^1.1.0".to_string(), false, false).unwrap(),
+        PackageMatcher::parse("Microsoft/VSCode@^1.1.0", false, false).unwrap(),
         PackageMatcher {
             name: "VSCode".to_string(),
             scope: Some("Microsoft".to_string()),
@@ -193,7 +193,7 @@ fn test_parse_package_matcher() {
         }
     );
     assert_eq!(
-        PackageMatcher::parse(&"Microsoft/VSCode@^1.1.0".to_string(), false, false)
+        PackageMatcher::parse("Microsoft/VSCode@^1.1.0", false, false)
             .unwrap()
             .to_string(),
         "Microsoft/VSCode@^1.1.0".to_string()
@@ -201,7 +201,7 @@ fn test_parse_package_matcher() {
 
     assert_eq!(
         PackageMatcher::parse(
-            &"Official/Microsoft/VSCode@\">=0.1.0\"".to_string(),
+            "Official/Microsoft/VSCode@\">=0.1.0\"",
             false,
             false
         )
@@ -215,7 +215,7 @@ fn test_parse_package_matcher() {
     );
     assert_eq!(
         PackageMatcher::parse(
-            &"Official/Microsoft/VSCode@\">=0.1.0\"".to_string(),
+            "Official/Microsoft/VSCode@\">=0.1.0\"",
             false,
             false
         )
@@ -225,8 +225,8 @@ fn test_parse_package_matcher() {
     );
 
     // 测试 deny
-    assert!(PackageMatcher::parse(&"Official/Microsoft/VSCode".to_string(), true, false).is_err());
-    assert!(PackageMatcher::parse(&"VSCode@\">=0.1.0\"".to_string(), false, true).is_err());
+    assert!(PackageMatcher::parse("Official/Microsoft/VSCode", true, false).is_err());
+    assert!(PackageMatcher::parse("VSCode@\">=0.1.0\"", false, true).is_err());
 }
 
 #[test]

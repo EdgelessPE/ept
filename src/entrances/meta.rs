@@ -275,16 +275,158 @@ fn test_meta() {
     );
 
     // 从本地安装中生成 meta
+    use crate::types::package::Package;
+    use crate::types::software::Software;
+    crate::utils::test::_ensure_testing_vscode_uninstalled();
     crate::utils::test::_ensure_testing_vscode();
-    meta(
-        PackageInputEnum::PackageMatcher(PackageMatcher {
-            name: "VSCode".to_string(),
-            scope: None,
-            mirror: None,
-            version_req: None,
-        }),
+    assert_eq!(
+        meta(
+            PackageInputEnum::PackageMatcher(PackageMatcher {
+                name: "VSCode".to_string(),
+                scope: None,
+                mirror: None,
+                version_req: None,
+            }),
+            false,
+        )
+        .unwrap(),
+        MetaResult {
+            temp_dir: Some("C:/Users/Public/Music/apps/Microsoft/VSCode".to_string()),
+            permissions: vec![
+                Permission {
+                    key: PermissionKey::path_entrances,
+                    level: PermissionLevel::Normal,
+                    targets: vec!["Code.exe".to_string()],
+                },
+                Permission {
+                    key: PermissionKey::link_desktop,
+                    level: PermissionLevel::Normal,
+                    targets: vec!["Visual Studio Code".to_string()],
+                }
+            ],
+            workflows: vec!["setup.toml".to_string()],
+            package: GlobalPackage {
+                nep: "0".to_string(),
+                package: Package {
+                    name: "VSCode".to_string(),
+                    template: "Software".to_string(),
+                    version: "1.75.4.0".to_string(),
+                    authors: vec![
+                        "Cno <dsyourshy@qq.com>".to_string(),
+                        "Microsoft".to_string()
+                    ],
+                    license: Some("MIT".to_string()),
+                    description: "Visual Studio Code".to_string(),
+                    scope: "Microsoft".to_string(),
+                    icon: None,
+                    strict: None,
+                },
+                software: Some(Software {
+                    upstream: "https://code.visualstudio.com/".to_string(),
+                    category: "办公编辑".to_string(),
+                    tags: Some(vec!["Electron".to_string()]),
+                    language: "Multi".to_string(),
+                    arch: None,
+                    main_program: Some("Code.exe".to_string()),
+                    alias: None,
+                    registry_entry: None,
+                }),
+            },
+        }
+    );
+
+    // 从 URL 生成 meta
+    crate::utils::test::_ensure_clear_test_dir();
+    crate::utils::test::_ensure_testing_uninstalled("Microsoft", "VSCodeE");
+    let (url, mut handler) = crate::utils::test::_run_static_file_server();
+    crate::entrances::pack(
+        &"examples/VSCodeE".to_string(),
+        Some("test/VSCodeE.nep".to_string()),
         false,
     )
     .unwrap();
-    crate::utils::test::_ensure_testing_vscode_uninstalled();
+    let res = meta(PackageInputEnum::Url(format!("{url}/VSCodeE.nep")), false).unwrap();
+    assert_eq!(
+        res.permissions,
+        vec![
+            Permission {
+                key: PermissionKey::download_file,
+                level: PermissionLevel::Important,
+                targets: vec!["http://localhost:19191/Code.exe".to_string()],
+            },
+            Permission {
+                key: PermissionKey::path_entrances,
+                level: PermissionLevel::Normal,
+                targets: vec!["Code.exe".to_string()],
+            },
+            Permission {
+                key: PermissionKey::link_desktop,
+                level: PermissionLevel::Normal,
+                targets: vec!["Visual Studio Code".to_string()],
+            }
+        ]
+    );
+    assert_eq!(res.package.package.name, "VSCodeE");
+    assert_eq!(
+        res.workflows,
+        vec!["setup.toml".to_string(), "expand.toml".to_string()]
+    );
+    handler.kill().unwrap();
+
+    // 查询镜像源中的 Meta
+    let tup = crate::utils::test::_mount_custom_mirror();
+    assert_eq!(
+        meta(
+            PackageInputEnum::PackageMatcher(
+                PackageMatcher::parse("notepad", false, false).unwrap()
+            ),
+            false
+        )
+        .unwrap(),
+        MetaResult {
+            temp_dir: None,
+            permissions: vec![Permission {
+                key: PermissionKey::path_entrances,
+                level: PermissionLevel::Normal,
+                targets: vec!["ntpd.exe".to_string()],
+            }],
+            workflows: vec!["setup.toml".to_string(), "remove.toml".to_string()],
+            package: GlobalPackage {
+                nep: "0".to_string(),
+                package: Package {
+                    name: "Notepad".to_string(),
+                    template: "Software".to_string(),
+                    version: "22.1.0.0".to_string(),
+                    authors: vec![
+                        "Bot <bot@edgeless.top>".to_string(),
+                        "Cno <cno4tech@gmail.com>".to_string()
+                    ],
+                    license: Some("MIT".to_string()),
+                    description: "Notepad".to_string(),
+                    scope: "Microsoft".to_string(),
+                    icon: None,
+                    strict: None,
+                },
+                software: Some(Software {
+                    upstream: "https://notepad.visualstudio.com/".to_string(),
+                    category: "办公编辑".to_string(),
+                    tags: Some(vec!["记事本".to_string()]),
+                    language: "Multi".to_string(),
+                    arch: None,
+                    main_program: None,
+                    alias: None,
+                    registry_entry: None,
+                }),
+            },
+        }
+    );
+
+    // Firefox 没有提供 Meta，因此无法获取
+    assert!(meta(
+        PackageInputEnum::PackageMatcher(PackageMatcher::parse("firefox", false, false).unwrap()),
+        false
+    )
+    .is_err());
+
+    crate::utils::test::_unmount_custom_mirror(tup);
 }
