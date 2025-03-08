@@ -1,0 +1,4 @@
+[install]
+step = "Execute"
+command = "${AppData}/Local/Programs/Microsoft VS Code/unins000.exe /S"
+call_installer = true

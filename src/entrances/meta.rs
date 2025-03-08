@@ -172,6 +172,8 @@ fn test_meta() {
     use crate::types::matcher::PackageMatcher;
     use crate::utils::flags::{set_flag, Flag};
     set_flag(Flag::Confirm, true);
+
+    // 从本地路径中生成 meta
     let res = meta(
         PackageInputEnum::LocalPath("examples/PermissionsTest".to_string()),
         false,
@@ -270,6 +272,33 @@ fn test_meta() {
                 key: PermissionKey::process_kill,
                 level: PermissionLevel::Sensitive,
                 targets: vec!["Code.exe".to_string(),],
+            },
+        ]
+    );
+    // package 不应该被解释
+    let res = meta(
+        PackageInputEnum::LocalPath("examples/VSCodeI".to_string()),
+        false,
+    )
+    .unwrap();
+    assert_eq!(
+        res.package.software.unwrap().main_program.unwrap(),
+        "${AppData}/Local/Programs/Microsoft VS Code/Code.exe".to_string()
+    );
+    assert_eq!(
+        res.permissions,
+        vec![
+            Permission {
+                key: PermissionKey::execute_installer,
+                level: PermissionLevel::Important,
+                targets: vec!["installer.exe /S".to_string()],
+            },
+            Permission {
+                key: PermissionKey::execute_installer,
+                level: PermissionLevel::Important,
+                targets: vec![
+                    "${AppData}/Local/Programs/Microsoft VS Code/unins000.exe /S".to_string()
+                ],
             },
         ]
     );

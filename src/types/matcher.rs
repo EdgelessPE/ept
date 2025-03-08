@@ -200,12 +200,7 @@ fn test_parse_package_matcher() {
     );
 
     assert_eq!(
-        PackageMatcher::parse(
-            "Official/Microsoft/VSCode@\">=0.1.0\"",
-            false,
-            false
-        )
-        .unwrap(),
+        PackageMatcher::parse("Official/Microsoft/VSCode@\">=0.1.0\"", false, false).unwrap(),
         PackageMatcher {
             name: "VSCode".to_string(),
             scope: Some("Microsoft".to_string()),
@@ -214,13 +209,9 @@ fn test_parse_package_matcher() {
         }
     );
     assert_eq!(
-        PackageMatcher::parse(
-            "Official/Microsoft/VSCode@\">=0.1.0\"",
-            false,
-            false
-        )
-        .unwrap()
-        .to_string(),
+        PackageMatcher::parse("Official/Microsoft/VSCode@\">=0.1.0\"", false, false)
+            .unwrap()
+            .to_string(),
         "Official/Microsoft/VSCode@>=0.1.0".to_string()
     );
 
