@@ -60,12 +60,15 @@ impl ParseInputResEnum {
     }
 }
 
-pub fn parse_install_inputs(packages: Vec<String>) -> Result<Vec<ParseReturned>> {
+pub fn parse_install_inputs(
+    packages: Vec<String>,
+    verify_signature: bool,
+) -> Result<Vec<ParseReturned>> {
     let mut res: Vec<ParseReturned> = Vec::new();
     let mut mirror_updated = false;
     for p in packages {
         let input_parsed = PackageInputEnum::parse(p, false, false)?;
-        let info = info(input_parsed.clone(), None)?;
+        let info = info(input_parsed.clone(), verify_signature)?;
         // 首先解析输入类型
         match input_parsed {
             PackageInputEnum::Url(url) => res.push((ParseInputResEnum::Url(url), info)),
@@ -87,8 +90,10 @@ pub fn parse_install_inputs(packages: Vec<String>) -> Result<Vec<ParseReturned>>
                 if let Ok((_, diff)) = info_local(&scope, &package_name) {
                     let ask_res = ask_yn(format!("Warning:Package '{scope}/{package_name}' has been installed({ver}), sure you want to reinstall instead of using the update process?",ver = diff.version),false);
                     if ask_res {
-                        let mut update_parsed =
-                            parse_update_inputs(vec![format!("{scope}/{package_name}")])?;
+                        let mut update_parsed = parse_update_inputs(
+                            vec![format!("{scope}/{package_name}")],
+                            verify_signature,
+                        )?;
                         res.append(&mut update_parsed);
                     } else {
                         log!("Warning:Ignoring the installation of '{scope}/{package_name}', you may want to use 'ept update' to update it later");
@@ -114,12 +119,15 @@ pub fn parse_install_inputs(packages: Vec<String>) -> Result<Vec<ParseReturned>>
     Ok(res)
 }
 
-pub fn parse_update_inputs(packages: Vec<String>) -> Result<Vec<ParseReturned>> {
+pub fn parse_update_inputs(
+    packages: Vec<String>,
+    verify_signature: bool,
+) -> Result<Vec<ParseReturned>> {
     let mut res: Vec<ParseReturned> = Vec::new();
     let mut mirror_updated = false;
     for p in packages {
         let input_parsed = PackageInputEnum::parse(p, false, false)?;
-        let info = info(input_parsed.clone(), None)?;
+        let info = info(input_parsed.clone(), verify_signature)?;
         // 首先解析输入类型
         match input_parsed {
             PackageInputEnum::Url(url) => res.push((ParseInputResEnum::Url(url), info)),
@@ -196,6 +204,7 @@ pub fn parse_uninstall_inputs(packages: Vec<String>) -> Result<Vec<Info>> {
         arr.push(Info {
             name: package_name,
             scope,
+            target: info.clone(),
             local: Some(info),
             online: None,
             meta: None,
@@ -233,11 +242,14 @@ fn test_parse_inputs() {
     // 先卸载 vscode
     crate::utils::test::_ensure_testing_vscode_uninstalled();
     // 测试安装的解析
-    let res = parse_install_inputs(vec![
-        "examples/VSCode".to_string(),
-        "vscode".to_string(),
-        format!("{base_url}/vscode.nep"),
-    ])
+    let res = parse_install_inputs(
+        vec![
+            "examples/VSCode".to_string(),
+            "vscode".to_string(),
+            format!("{base_url}/vscode.nep"),
+        ],
+        false,
+    )
     .unwrap();
     assert_eq!(
         res.into_iter().map(|p| p.0).collect::<Vec<_>>(),
@@ -255,16 +267,19 @@ fn test_parse_inputs() {
         ]
     );
     // 测试更新的解析
-    assert!(parse_update_inputs(vec!["vscode".to_string(),]).is_err());
+    assert!(parse_update_inputs(vec!["vscode".to_string()], false).is_err());
 
     // 安装 vscode
     crate::utils::test::_ensure_testing_vscode();
     // 测试安装的解析
-    let res = parse_install_inputs(vec![
-        "examples/VSCode".to_string(),
-        "vscode".to_string(),
-        format!("{base_url}/vscode.nep"),
-    ])
+    let res = parse_install_inputs(
+        vec![
+            "examples/VSCode".to_string(),
+            "vscode".to_string(),
+            format!("{base_url}/vscode.nep"),
+        ],
+        false,
+    )
     .unwrap();
     assert_eq!(
         res.into_iter().map(|p| p.0).collect::<Vec<_>>(),
@@ -282,11 +297,14 @@ fn test_parse_inputs() {
         ]
     );
     // 测试更新的解析
-    let res = parse_update_inputs(vec![
-        "examples/VSCode".to_string(),
-        "vscode".to_string(),
-        format!("{base_url}/vscode.nep"),
-    ])
+    let res = parse_update_inputs(
+        vec![
+            "examples/VSCode".to_string(),
+            "vscode".to_string(),
+            format!("{base_url}/vscode.nep"),
+        ],
+        false,
+    )
     .unwrap();
     assert_eq!(
         res.into_iter().map(|p| p.0).collect::<Vec<_>>(),
@@ -311,6 +329,13 @@ fn test_parse_inputs() {
         vec![Info {
             name: "VSCode".to_string(),
             scope: "Microsoft".to_string(),
+            target: InfoDiff {
+                version: "1.75.4.0".to_string(),
+                authors: vec![
+                    "Cno <dsyourshy@qq.com>".to_string(),
+                    "Microsoft".to_string()
+                ],
+            },
             local: Some(InfoDiff {
                 version: "1.75.4.0".to_string(),
                 authors: vec![
@@ -328,6 +353,13 @@ fn test_parse_inputs() {
         vec![Info {
             name: "VSCode".to_string(),
             scope: "Microsoft".to_string(),
+            target: InfoDiff {
+                version: "1.75.4.0".to_string(),
+                authors: vec![
+                    "Cno <dsyourshy@qq.com>".to_string(),
+                    "Microsoft".to_string()
+                ],
+            },
             local: Some(InfoDiff {
                 version: "1.75.4.0".to_string(),
                 authors: vec![

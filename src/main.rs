@@ -53,7 +53,7 @@ fn router(action: Action, cfg: Cfg) -> Result<String> {
     match action {
         Action::Install { packages } => {
             // 解析输入
-            let parsed = parse_install_inputs(packages)?;
+            let parsed = parse_install_inputs(packages, verify_signature)?;
             // 打印详细元信息
             log!("Info:Check the following information before installation:");
             println!();
@@ -100,7 +100,7 @@ fn router(action: Action, cfg: Cfg) -> Result<String> {
         Action::Update { packages } => {
             if let Some(packages) = packages {
                 // 解析输入
-                let parsed = parse_update_inputs(packages)?;
+                let parsed = parse_update_inputs(packages, verify_signature)?;
                 // 打印详细元信息
                 log!("Info:Check the following information before update:");
                 println!();
@@ -209,7 +209,11 @@ fn router(action: Action, cfg: Cfg) -> Result<String> {
         Action::Info { package_matcher } => {
             auto_mirror_update_all(&cfg)?;
             let parse_res = PackageMatcher::parse(&package_matcher, true, true)?;
-            info(PackageInputEnum::PackageMatcher(parse_res), None).map(|res| format!("{res:#?}"))
+            info(
+                PackageInputEnum::PackageMatcher(parse_res),
+                verify_signature,
+            )
+            .map(|res| format!("{res:#?}"))
         }
         Action::List => list().map(|list| {
             if list.is_empty() {

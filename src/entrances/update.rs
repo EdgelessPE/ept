@@ -176,7 +176,7 @@ pub fn update_using_url(url: &str, verify_signature: bool) -> Result<UpdateInfo>
 
 pub fn update_using_package_matcher(matcher: String, verify_signature: bool) -> Result<UpdateInfo> {
     // 解析
-    let parsed = parse_update_inputs(vec![matcher])?;
+    let parsed = parse_update_inputs(vec![matcher], verify_signature)?;
     // 执行更新
     if let ParseInputResEnum::PackageMatcher(p) = &parsed.first().unwrap().0 {
         update_using_url(&p.download_url, verify_signature)

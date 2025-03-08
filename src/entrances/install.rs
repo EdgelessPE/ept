@@ -354,7 +354,7 @@ fn test_reg_entry() {
                     version_req: None,
                 }
             ),
-            None
+            false
         )
         .unwrap()
         .local
@@ -409,7 +409,8 @@ fn test_install_with_matcher() {
     // 执行安装
     crate::utils::test::_ensure_testing_vscode_uninstalled();
     let parsed =
-        crate::utils::parse_inputs::parse_install_inputs(vec!["vscode".to_string()]).unwrap();
+        crate::utils::parse_inputs::parse_install_inputs(vec!["vscode".to_string()], false)
+            .unwrap();
     install_using_parsed(parsed.into_iter().map(|p| p.0).collect(), false).unwrap();
     assert!(
         info_local(&"Microsoft".to_string(), &"VSCode".to_string())
@@ -422,7 +423,7 @@ fn test_install_with_matcher() {
     // 使用大小写不敏感的别名直接安装
     crate::utils::test::_ensure_testing_vscode_uninstalled();
     let parsed =
-        crate::utils::parse_inputs::parse_install_inputs(vec!["CODE".to_string()]).unwrap();
+        crate::utils::parse_inputs::parse_install_inputs(vec!["CODE".to_string()], false).unwrap();
     install_using_parsed(parsed.into_iter().map(|p| p.0).collect(), false).unwrap();
     assert!(
         info_local(&"Microsoft".to_string(), &"VSCode".to_string())

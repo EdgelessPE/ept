@@ -26,7 +26,7 @@ pub fn list() -> Result<Vec<Info>> {
                     mirror: None,
                     version_req: None,
                 }),
-                None,
+                false,
             );
             if let Ok(r) = info_res {
                 res.push(r);

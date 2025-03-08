@@ -1,6 +1,7 @@
 use std::path::Path;
 
 use anyhow::{anyhow, Result};
+use semver::VersionReq;
 
 use crate::{
     p2s,
@@ -9,6 +10,7 @@ use crate::{
     types::{
         info::{Info, InfoDiff},
         matcher::PackageInputEnum,
+        meta::MetaResult,
         mirror::TreeItem,
         package::GlobalPackage,
     },
@@ -26,6 +28,31 @@ use super::{
     meta,
     utils::{package::unpack_nep, validator::installed_validator},
 };
+
+fn consume_info_diff(
+    item: &TreeItem,
+    semver_matcher: Option<VersionReq>,
+) -> Result<(InfoDiff, Option<MetaResult>)> {
+    let latest = filter_release(item.releases.clone(), semver_matcher, true)?;
+    let version = latest.version.to_string();
+    Ok(if let Some(meta) = latest.meta {
+        (
+            InfoDiff {
+                version,
+                authors: meta.package.package.authors.clone(),
+            },
+            Some(meta),
+        )
+    } else {
+        (
+            InfoDiff {
+                version,
+                authors: vec![],
+            },
+            None,
+        )
+    })
+}
 
 pub fn info_local(scope: &String, package_name: &String) -> Result<(GlobalPackage, InfoDiff)> {
     let local_path = get_path_apps(scope, package_name, false)?;
@@ -86,42 +113,50 @@ pub fn info_online(
     ))
 }
 
-pub fn info(current_input: PackageInputEnum, next_input: Option<PackageInputEnum>) -> Result<Info> {
+pub fn info(target_input: PackageInputEnum, verify_signature: bool) -> Result<Info> {
     let mut mirror = None;
-    let (scope, package_name, local, meta_res) = match current_input {
+    let (scope, package_name, target, meta_res) = match target_input {
         PackageInputEnum::PackageMatcher(matcher) => {
             let scope = matcher.scope.clone();
             let package_name = matcher.name.clone();
             mirror = matcher.mirror.clone();
             // 查找 scope 并使用 scope 更新纠正大小写
             let (scope, package_name) = find_scope_with_name(&package_name, scope)?;
-            // 扫描本地安装目录
-            let local_path = get_path_apps(&scope, &package_name, false)?;
-            if local_path.exists() {
-                let (_global, local) = info_local(&scope, &package_name)?;
-                (
-                    scope,
-                    package_name,
-                    Some(local),
-                    Some(meta(
-                        PackageInputEnum::PackageMatcher(matcher.clone()),
-                        false,
-                    )?),
-                )
+            // 获取在线信息
+            if let Ok((item, _, _)) = info_online(&scope, &package_name, mirror.clone()) {
+                let (info_diff, meta) = consume_info_diff(&item, matcher.version_req)?;
+                (scope, package_name, info_diff, meta)
             } else {
-                (scope, package_name, None, None)
+                // 扫描本地安装目录
+                let local_path = get_path_apps(&scope, &package_name, false)?;
+                if local_path.exists() {
+                    let (_global, local) = info_local(&scope, &package_name)?;
+                    (
+                        scope,
+                        package_name,
+                        local,
+                        Some(meta(
+                            PackageInputEnum::PackageMatcher(matcher.clone()),
+                            false,
+                        )?),
+                    )
+                } else {
+                    return Err(anyhow!(
+                        "Error:Can't locate package '{scope}/{package_name}'"
+                    ));
+                }
             }
         }
         PackageInputEnum::LocalPath(_) => {
-            let meta_res = meta(current_input, false)?;
+            let meta_res = meta(target_input, verify_signature)?;
             let package = meta_res.package.package.clone();
             (
                 package.scope,
                 package.name,
-                Some(InfoDiff {
+                InfoDiff {
                     version: package.version,
                     authors: package.authors,
-                }),
+                },
                 Some(meta_res),
             )
         }
@@ -134,18 +169,18 @@ pub fn info(current_input: PackageInputEnum, next_input: Option<PackageInputEnum
             // 缓存下载的包
             spawn_cache(cache_ctx)?;
 
-            let (p, pkg) = unpack_nep(&p_str, false)?;
+            let (p, pkg) = unpack_nep(&p_str, verify_signature)?;
             let p_str = p2s!(p);
             let package = pkg.package;
-            let meta_res = meta(PackageInputEnum::LocalPath(p_str), false)?;
+            let meta_res = meta(PackageInputEnum::LocalPath(p_str), verify_signature)?;
 
             (
                 package.scope,
                 package.name,
-                Some(InfoDiff {
+                InfoDiff {
                     version: package.version,
                     authors: package.authors,
-                }),
+                },
                 Some(meta_res),
             )
         }
@@ -155,40 +190,25 @@ pub fn info(current_input: PackageInputEnum, next_input: Option<PackageInputEnum
     let mut info = Info {
         scope: scope.clone(),
         name: package_name.clone(),
-        local,
+        target,
+        local: None,
         online: None,
-        // package: None,
-        // software: None,
         meta: meta_res,
     };
 
-    // 在线检查
-    if let Some(next_package_input) = next_input {
-        let next_meta = meta(next_package_input, false)?;
-        info.online = Some(InfoDiff {
-            version: next_meta.package.package.version.clone(),
-            authors: next_meta.package.package.authors.clone(),
-        });
-        info.meta = Some(next_meta);
-    } else if let Ok((item, _, _)) = info_online(&scope, &package_name, mirror) {
-        let latest = filter_release(item.releases, None, false)?;
-        let mut authors = Vec::new();
-        if let Some(meta) = latest.meta {
-            authors = meta.package.package.authors.clone();
-            info.meta = Some(meta);
+    // 检查包的本地安装情况、在线情况
+    if let Ok((_, local)) = info_local(&scope, &package_name) {
+        info.local = Some(local);
+    }
+    if let Ok((item, _, _)) = info_online(&scope, &package_name, mirror) {
+        let (info_diff, meta) = consume_info_diff(&item, None)?;
+        info.online = Some(info_diff);
+        if info.meta.is_none() {
+            info.meta = meta;
         }
-        info.online = Some(InfoDiff {
-            version: latest.version.to_string(),
-            authors,
-        });
     }
 
-    // 检查到底有没有这个包
-    if info.local.is_some() || info.online.is_some() {
-        Ok(info)
-    } else {
-        Err(anyhow!("Error:Unknown package '{package_name}'"))
-    }
+    Ok(info)
 }
 
 #[test]
@@ -209,7 +229,7 @@ fn test_info() {
             mirror: None,
             version_req: None,
         }),
-        None,
+        false,
     )
     .unwrap();
     println!("{base:#?}");
@@ -222,7 +242,7 @@ fn test_info() {
             mirror: None,
             version_req: None,
         }),
-        None,
+        false,
     )
     .unwrap();
     assert_eq!(base, res);
@@ -235,7 +255,7 @@ fn test_info() {
             mirror: None,
             version_req: None,
         }),
-        None,
+        false,
     )
     .unwrap();
     assert_eq!(base, res);

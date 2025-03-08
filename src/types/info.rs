@@ -14,6 +14,7 @@ pub struct Info {
     pub name: String,
     pub scope: String,
 
+    pub target: InfoDiff,
     pub local: Option<InfoDiff>,
     pub online: Option<InfoDiff>,
 
@@ -266,6 +267,10 @@ fn test_info() {
     let info = Info {
         name: "VSCode".to_string(),
         scope: "Microsoft".to_string(),
+        target: InfoDiff {
+            version: "1.77.3".to_string(),
+            authors: vec!["Microsoft".to_string()],
+        },
         local: Some(InfoDiff {
             version: "1.77.3".to_string(),
             authors: vec!["Microsoft".to_string()],
