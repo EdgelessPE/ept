@@ -108,7 +108,7 @@ pub fn config_init() -> Result<String> {
 }
 
 pub fn config_which() -> Result<String> {
-    let which = Cfg::use_which()?;
+    let which = Cfg::use_which(false)?;
     Ok(p2s!(which))
 }
 

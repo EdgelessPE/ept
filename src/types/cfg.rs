@@ -121,7 +121,7 @@ impl Default for Cfg {
 }
 
 impl Cfg {
-    pub fn use_which() -> Result<PathBuf> {
+    pub fn use_which(is_initial: bool) -> Result<PathBuf> {
         let from = if CUR_DIR.join(FILE_NAME).exists() {
             CUR_DIR.join(FILE_NAME)
         } else {
@@ -140,11 +140,15 @@ impl Cfg {
             }
             from
         };
-        log!("Info:Use config at '{f}'", f = p2s!(from));
+        log!(
+            "{}:Use config at '{}'",
+            if is_initial { "Info" } else { "Debug" },
+            p2s!(from)
+        );
         Ok(from)
     }
     pub fn init() -> Result<Self> {
-        let from = Self::use_which()?;
+        let from = Self::use_which(true)?;
         let f = p2s!(from);
         let default_val = Value::try_from(Self::default()).unwrap();
         let settings = Config::builder()
@@ -176,7 +180,7 @@ impl Cfg {
             .verify_self(&mixed_fs)
             .map_err(|e| anyhow!("Error:Invalid overwrite config : {e}"))?;
 
-        let from = Self::use_which()?;
+        let from = Self::use_which(false)?;
         let value = Value::try_from(other)?;
         let text = to_string_pretty(&value)?;
         write(from, text)?;
