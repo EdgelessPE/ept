@@ -51,7 +51,9 @@ fn router(action: Action, cfg: Cfg) -> Result<String> {
 
     // 匹配入口
     match action {
-        Action::Install { packages } => {
+        Action::Install {
+            package_matchers: packages,
+        } => {
             // 解析输入
             let parsed = parse_install_inputs(packages, verify_signature)?;
             // 打印详细元信息
@@ -97,7 +99,9 @@ fn router(action: Action, cfg: Cfg) -> Result<String> {
                 },
             )
         }
-        Action::Update { packages } => {
+        Action::Update {
+            package_matchers: packages,
+        } => {
             if let Some(packages) = packages {
                 // 解析输入
                 let parsed = parse_update_inputs(packages, verify_signature)?;
@@ -231,7 +235,10 @@ fn router(action: Action, cfg: Cfg) -> Result<String> {
             into_file,
         } => pack(&source_dir, into_file, verify_signature)
             .map(|location| format!("Success:Package stored at '{location}'")),
-        Action::Meta { package, save_at } => {
+        Action::Meta {
+            package_matcher: package,
+            save_at,
+        } => {
             // 调用 meta
             let package_input_enum = PackageInputEnum::parse(package, true, true)?;
             let res = meta(package_input_enum, verify_signature)?;

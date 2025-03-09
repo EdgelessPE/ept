@@ -32,21 +32,21 @@ pub enum Action {
     /// Install a package [alias 'i' 'add']
     #[clap(aliases = &["i", "add"])]
     Install {
-        /// Package matchers（expect pattern ((MIRROR/)SCOPE/)NAME(@SEMVER)）or Nep package url or Nep package local path
-        packages: Vec<String>,
+        /// Package matchers, expect pattern ((MIRROR/)SCOPE/)NAME(@SEMVER)）or Nep package url or Nep package local path, split by space
+        package_matchers: Vec<String>,
     },
 
     /// Update all updatable packages or a specified package [alias 'up']
     #[clap(alias = "up")]
     Update {
-        /// Package matchers（expect pattern ((MIRROR/)SCOPE/)NAME(@SEMVER)）or Nep package url or Nep package local path
-        packages: Option<Vec<String>>,
+        /// Package matchers, expect pattern ((MIRROR/)SCOPE/)NAME(@SEMVER)）or Nep package url or Nep package local path, split by space
+        package_matchers: Option<Vec<String>>,
     },
 
     /// Uninstall packages [alias 'remove' 'rm']
     #[clap(aliases = &["remove","rm"])]
     Uninstall {
-        /// Package matcher, expect pattern (SCOPE/)NAME
+        /// Package matchers, expect pattern (SCOPE/)NAME, split by space
         package_matchers: Vec<String>,
     },
 
@@ -71,8 +71,8 @@ pub enum Action {
 
     /// Get meta data of given package
     Meta {
-        /// Package matcher, expect pattern (SCOPE/)NAME or Nep package local path
-        package: String,
+        /// Package matcher, expect pattern ((MIRROR/)SCOPE/)NAME(@SEMVER)）or Nep package url or Nep package local path
+        package_matcher: String,
         /// (Optional) Save meta report at
         save_at: Option<String>,
     },
