@@ -1230,7 +1230,7 @@ checksum = "c7f84e12ccf0a7ddc17a6c41c93326024c42920d7ee630d04950e6926645c0fe"
 
 [[package]]
 name = "ept"
-version = "0.2.3"
+version = "0.3.0"
 dependencies = [
  "Inflector",
  "anyhow",
