@@ -1,7 +1,12 @@
+use std::path::Path;
+
 use crate::{
     p2s,
     types::cfg::Cfg,
-    utils::cfg::{get_config, set_config},
+    utils::{
+        cfg::{get_config, set_config},
+        term::ask_yn,
+    },
 };
 use anyhow::{anyhow, Error, Result};
 use toml::Value;
@@ -88,9 +93,18 @@ pub fn config_list() -> Result<String> {
 }
 
 pub fn config_init() -> Result<String> {
+    let file_path = config_which()?;
+    if Path::new(&file_path).exists()
+        && !ask_yn(
+            format!("Config file already exists at '{file_path}', overwrite it?"),
+            false,
+        )
+    {
+        return Err(anyhow!("Error:Operation cancelled by user"));
+    }
     let init_cfg = Cfg::default();
     set_config(init_cfg)?;
-    config_which()
+    Ok(file_path)
 }
 
 pub fn config_which() -> Result<String> {
