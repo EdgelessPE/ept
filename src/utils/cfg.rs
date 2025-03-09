@@ -37,7 +37,7 @@ pub fn get_flags_score(flags: &str, cfg: &Cfg) -> Result<i32> {
         let e = match c {
             //- ARM64
             'A' => {
-                if SysArch::get_current_arch().unwrap() == SysArch::ARM64 {
+                if SysArch::get_current_arch()? == SysArch::ARM64 {
                     &PreferenceEnum::HighPriority
                 } else {
                     &PreferenceEnum::Forbidden
