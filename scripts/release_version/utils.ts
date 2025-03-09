@@ -42,7 +42,11 @@ export async function getTargetVersion(curVersion: string): Promise<string> {
 		},
 		{ stdio: undefined },
 	);
-	return res.stdout.trim();
+	const raw = res.stdout.trim();
+	if (raw.startsWith("v")) {
+		return raw.slice(1);
+	}
+	return raw;
 }
 
 export async function modifyVersion(
