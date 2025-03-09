@@ -44,7 +44,9 @@ async function bump_version() {
 		cp.execSync(`git tag v${targetVersion}`);
 	}
 
-	console.log(`Success: Bumped version to '${targetVersion}'`);
+	console.log(
+		`Success: Bumped version to '${targetVersion}', run 'git push --tags' to trigger release workflow`,
+	);
 }
 
 bump_version().then(() => process.exit(0));
