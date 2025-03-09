@@ -2,7 +2,9 @@ use std::sync::{Arc, RwLock};
 
 use anyhow::{anyhow, Result};
 
-use crate::types::cfg::Cfg;
+use crate::types::cfg::{Cfg, PreferenceEnum};
+
+use super::arch::SysArch;
 
 lazy_static! {
     static ref CFG: Arc<RwLock<Cfg>> = Arc::new(RwLock::new(Cfg::init().unwrap()));
@@ -33,8 +35,19 @@ pub fn get_flags_score(flags: &str, cfg: &Cfg) -> Result<i32> {
     let mut score = 0;
     for c in flags.chars() {
         let e = match c {
+            //- ARM64
+            'A' => {
+                if SysArch::get_current_arch().unwrap() == SysArch::ARM64 {
+                    &PreferenceEnum::HighPriority
+                } else {
+                    &PreferenceEnum::Forbidden
+                }
+            }
+            //- Expandable
             'E' => &cfg.preference.expandable,
+            //- Installer
             'I' => &cfg.preference.installer,
+            //- Portable
             'P' => &cfg.preference.portable,
             _ => {
                 return Err(anyhow!("Error:Invalid flag : '{c}'"));
