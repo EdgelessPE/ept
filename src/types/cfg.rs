@@ -131,7 +131,7 @@ impl Cfg {
             }
             from
         };
-        log!("Debug:Use config at '{f}'", f = p2s!(from));
+        log!("Info:Use config at '{f}'", f = p2s!(from));
         Ok(from)
     }
     pub fn init() -> Result<Self> {
