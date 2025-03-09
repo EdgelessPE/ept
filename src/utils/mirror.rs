@@ -392,7 +392,7 @@ pub fn filter_release(
             Ok(f.to_owned())
         } else {
             Err(anyhow!(
-                "Error:The latest release ('{}') is blocked due to configured preference policy, try change your preference in config",
+                "Error:The latest release ('{}') is blocked due to configured preference policy or system architecture, try change your preference in config",
                 f.file_name
             ))
         }
