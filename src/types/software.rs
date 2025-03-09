@@ -22,6 +22,9 @@ pub struct Software {
     //# `category = "集成开发"`
     pub category: String,
     /// 软件的编译目标架构，缺省表示安装时不检查架构兼容性。
+    /// :::warning
+    /// 镜像源已不再接收目标架构为 `X86` 的软件包，该值仅作兼容用途。
+    /// :::
     //# `arch = "X64`
     pub arch: Option<String>,
     /// 软件语言，`Multi`表示多语言。

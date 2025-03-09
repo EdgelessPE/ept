@@ -1,146 +1,146 @@
 {
-	"ept/commands.md": {
-		"zh": "99972b9c650fc29703cb1febcba332a5",
-		"en": "70d224bdf558102ed10e55d371fd809c"
-	},
-	"ept/config.md": {
-		"zh": "72ef959d6c528a80c12d2f3fd96dd36f",
-		"en": "3872a6a782470a6dc2a3339de1305bcb"
-	},
-	"ept/guide.md": {
-		"zh": "64f917b3a8cb71d9cd6215e84c3aea8d",
-		"en": "35a45a87943cce67e6a991adec564b7e"
-	},
-	"ept/quick-start.md": {
-		"zh": "d15e716204deeb9006f397408cbad3bf",
-		"en": "f379205d1384e10655c4c1f3cca37a4c"
-	},
-	"index.md": {
-		"zh": "7cc59490c44bb2b4ba2467b84e4afe85",
-		"en": "74187a80addead60072dd43b026e78fc"
-	},
-	"nep/ability/1-permission.md": {
-		"zh": "f3fa5486aaca786abf2b1883ee561161",
-		"en": "19a6f3928b4ad9c0340f831c6f2d4172"
-	},
-	"nep/ability/2-manifest.md": {
-		"zh": "48928c76f51a0fb4ecfc366b561bde37",
-		"en": "ab4c26ba8a22ffd6bcb9bfa8fc645220"
-	},
-	"nep/definition/1-package.mdx": {
-		"zh": "463ec1ae5908d4abedbfe27d7b664c3a",
-		"en": "0c0df82e9c1239e8c5e9e4fdc47806d6"
-	},
-	"nep/definition/2-context.md": {
-		"zh": "79e2ac30ca439a3b2cc2fa1554e374cd",
-		"en": "0e253d8903c5f553f1a45aca139cc86b"
-	},
-	"nep/definition/3-permissions.md": {
-		"zh": "911577f12fa03e91b3e2044bc0a64dbd",
-		"en": "265eeaf23ee812e60b76c647bf3001db"
-	},
-	"nep/index.md": {
-		"zh": "a154bca0b4cef076f03ef8ba56241a33",
-		"en": "419a60c7bd82715cf6faaa9597699134"
-	},
-	"nep/introduction/1-whats.md": {
-		"zh": "e8c3b388731b310121698564f76d1baa",
-		"en": "97518a52bcf225bc780429fa735b37a4"
-	},
-	"nep/introduction/2-solved.md": {
-		"zh": "f7582e6faee3bce19b180a11b886f1ca",
-		"en": "e39541d9d7f4ae71cad0a7729bd8f4af"
-	},
-	"nep/struct/1-basic.md": {
-		"zh": "ebf203c08be25d5ceeff393d787ad73d",
-		"en": "84034412d4df71397bda642a12d9f983"
-	},
-	"nep/struct/2-inner.md": {
-		"zh": "2f1440edab43b086f62c1ca3bf033257",
-		"en": "c15d42c4938534e0a3372567d96272ab"
-	},
-	"nep/struct/3-outer.md": {
-		"zh": "08b7ad08dd8a97f4b05bceec155ae692",
-		"en": "159027d0089cf6c4e79eb17f40351fe6"
-	},
-	"nep/workflow/1-basic.md": {
-		"zh": "c513d3f8dc95011551e25f06bee217f1",
-		"en": "e7fae07d5f210545c149aa9bddfa8d8d"
-	},
-	"nep/workflow/2-context.md": {
-		"zh": "2e8179d0d98cb2a094957463a0ac8eb8",
-		"en": "5b00105c3f3592b9962a4cfe924beffb"
-	},
-	"nep/workflow/3-conditions.md": {
-		"zh": "b930578867dff3b0d09f0a61a904cdca",
-		"en": "43e50265219e0a04433b097bfa76c784"
-	},
-	"nep/workflow/4-reserve.md": {
-		"zh": "ec5b3ab8b9747cbf98cd8e2e06b8e884",
-		"en": "5b9aa3e4c1595fe697622c7b803f48d4"
-	},
-	"nep/workflow/5-common.md": {
-		"zh": "e3624f0da4d705087fd35e84fb152039",
-		"en": "f4102bc221a2fa6c0921a4a74d369d61"
-	},
-	"nep/definition/4-steps/0-general.md": {
-		"zh": "ca31ebf3c78b08d6cb928433269e5e44",
-		"en": "ccd1a87cce33ad1ac589989ea815abdb"
-	},
-	"nep/definition/4-steps/copy.mdx": {
-		"zh": "2b25a1091ef8b92d4b1392b0ef793279",
-		"en": "0f49303d586c723f199805bb36910c49"
-	},
-	"nep/definition/4-steps/path.mdx": {
-		"zh": "c5092e155996b742d26be78c8dcfc410",
-		"en": "a2c5c4e1de32978b726bfab40159eb5a"
-	},
-	"nep/definition/4-steps/rename.mdx": {
-		"zh": "cb9c7ed6a156a68ba9b1dce4b1748896",
-		"en": "a027b6f3e5356a4b7b378189a5309e3e"
-	},
-	"nep/definition/4-steps/toast.mdx": {
-		"zh": "33554886231d1397a2f2b1ed8993d414",
-		"en": "09996a7fedf62906e9d0407d94eea76c"
-	},
-	"nep/definition/4-steps/wait.mdx": {
-		"zh": "c5fec07dbccbf667fa446929845cd0c5",
-		"en": "1e2f2e3a1e4d47489d7e85dc598f1025"
-	},
-	"nep/definition/4-steps/delete.mdx": {
-		"zh": "9e58f57b97be6a3986006eb6a4701647",
-		"en": "98e51716af49427cd5c0cfcc3a26306c"
-	},
-	"nep/definition/4-steps/download.mdx": {
-		"zh": "7c9a9e8256f5107e5e91e6dbefa3c224",
-		"en": "91f56714edb22c5994c7d9bab33f5c3c"
-	},
-	"nep/definition/4-steps/execute.mdx": {
-		"zh": "47e480dc6ec67aa71a124ce71b7e7cc5",
-		"en": "26f8b1f5230f77ade50d4114a9f60336"
-	},
-	"nep/definition/4-steps/kill.mdx": {
-		"zh": "c461c3a2f548433097b303e0289a11d4",
-		"en": "e3cc9d48541bedd9671467be47f97a97"
-	},
-	"nep/definition/4-steps/link.mdx": {
-		"zh": "f81393a5f4af0b54f1ecb4ff49093503",
-		"en": "b59b20b2e83f7e70327142eff4d406c8"
-	},
-	"nep/definition/4-steps/log.mdx": {
-		"zh": "288acce42bd6d8c92cb853f7a353704c",
-		"en": "a0412e13e56630d2a2ddb589607a4f26"
-	},
-	"nep/definition/4-steps/move.mdx": {
-		"zh": "c9f3d3a9c720d179fea5dc347f202079",
-		"en": "8c3e66619249f47dab58aabe9d916282"
-	},
-	"nep/definition/4-steps/new.mdx": {
-		"zh": "b3eacf858a643d9a567ec4f599351580",
-		"en": "94fa1caced4b6d7b9e5e493caee301fd"
-	},
-	"nep/definition/4-steps/0-general.mdx": {
-		"zh": "25c05e57cb1d1d211e3840080060b174",
-		"en": "6afd03bd8aac4cdca9baef69fbb1aa29"
-	}
+  "ept/commands.md": {
+    "zh": "99972b9c650fc29703cb1febcba332a5",
+    "en": "70d224bdf558102ed10e55d371fd809c"
+  },
+  "ept/config.md": {
+    "zh": "72ef959d6c528a80c12d2f3fd96dd36f",
+    "en": "3872a6a782470a6dc2a3339de1305bcb"
+  },
+  "ept/guide.md": {
+    "zh": "64f917b3a8cb71d9cd6215e84c3aea8d",
+    "en": "35a45a87943cce67e6a991adec564b7e"
+  },
+  "ept/quick-start.md": {
+    "zh": "d15e716204deeb9006f397408cbad3bf",
+    "en": "f379205d1384e10655c4c1f3cca37a4c"
+  },
+  "index.md": {
+    "zh": "7cc59490c44bb2b4ba2467b84e4afe85",
+    "en": "74187a80addead60072dd43b026e78fc"
+  },
+  "nep/ability/1-permission.md": {
+    "zh": "f3fa5486aaca786abf2b1883ee561161",
+    "en": "19a6f3928b4ad9c0340f831c6f2d4172"
+  },
+  "nep/ability/2-manifest.md": {
+    "zh": "48928c76f51a0fb4ecfc366b561bde37",
+    "en": "ab4c26ba8a22ffd6bcb9bfa8fc645220"
+  },
+  "nep/definition/1-package.mdx": {
+    "zh": "b58e5221f9090952153e5c1957cf745d",
+    "en": "83bb462ef5b8e14bfe5f6c49581c921f"
+  },
+  "nep/definition/2-context.md": {
+    "zh": "79e2ac30ca439a3b2cc2fa1554e374cd",
+    "en": "0e253d8903c5f553f1a45aca139cc86b"
+  },
+  "nep/definition/3-permissions.md": {
+    "zh": "911577f12fa03e91b3e2044bc0a64dbd",
+    "en": "265eeaf23ee812e60b76c647bf3001db"
+  },
+  "nep/index.md": {
+    "zh": "a154bca0b4cef076f03ef8ba56241a33",
+    "en": "419a60c7bd82715cf6faaa9597699134"
+  },
+  "nep/introduction/1-whats.md": {
+    "zh": "e8c3b388731b310121698564f76d1baa",
+    "en": "97518a52bcf225bc780429fa735b37a4"
+  },
+  "nep/introduction/2-solved.md": {
+    "zh": "f7582e6faee3bce19b180a11b886f1ca",
+    "en": "e39541d9d7f4ae71cad0a7729bd8f4af"
+  },
+  "nep/struct/1-basic.md": {
+    "zh": "ebf203c08be25d5ceeff393d787ad73d",
+    "en": "84034412d4df71397bda642a12d9f983"
+  },
+  "nep/struct/2-inner.md": {
+    "zh": "2f1440edab43b086f62c1ca3bf033257",
+    "en": "c15d42c4938534e0a3372567d96272ab"
+  },
+  "nep/struct/3-outer.md": {
+    "zh": "08b7ad08dd8a97f4b05bceec155ae692",
+    "en": "159027d0089cf6c4e79eb17f40351fe6"
+  },
+  "nep/workflow/1-basic.md": {
+    "zh": "c513d3f8dc95011551e25f06bee217f1",
+    "en": "e7fae07d5f210545c149aa9bddfa8d8d"
+  },
+  "nep/workflow/2-context.md": {
+    "zh": "2e8179d0d98cb2a094957463a0ac8eb8",
+    "en": "5b00105c3f3592b9962a4cfe924beffb"
+  },
+  "nep/workflow/3-conditions.md": {
+    "zh": "b930578867dff3b0d09f0a61a904cdca",
+    "en": "43e50265219e0a04433b097bfa76c784"
+  },
+  "nep/workflow/4-reserve.md": {
+    "zh": "ec5b3ab8b9747cbf98cd8e2e06b8e884",
+    "en": "5b9aa3e4c1595fe697622c7b803f48d4"
+  },
+  "nep/workflow/5-common.md": {
+    "zh": "e3624f0da4d705087fd35e84fb152039",
+    "en": "f4102bc221a2fa6c0921a4a74d369d61"
+  },
+  "nep/definition/4-steps/0-general.md": {
+    "zh": "ca31ebf3c78b08d6cb928433269e5e44",
+    "en": "ccd1a87cce33ad1ac589989ea815abdb"
+  },
+  "nep/definition/4-steps/copy.mdx": {
+    "zh": "2b25a1091ef8b92d4b1392b0ef793279",
+    "en": "0f49303d586c723f199805bb36910c49"
+  },
+  "nep/definition/4-steps/path.mdx": {
+    "zh": "c5092e155996b742d26be78c8dcfc410",
+    "en": "a2c5c4e1de32978b726bfab40159eb5a"
+  },
+  "nep/definition/4-steps/rename.mdx": {
+    "zh": "cb9c7ed6a156a68ba9b1dce4b1748896",
+    "en": "a027b6f3e5356a4b7b378189a5309e3e"
+  },
+  "nep/definition/4-steps/toast.mdx": {
+    "zh": "33554886231d1397a2f2b1ed8993d414",
+    "en": "09996a7fedf62906e9d0407d94eea76c"
+  },
+  "nep/definition/4-steps/wait.mdx": {
+    "zh": "c5fec07dbccbf667fa446929845cd0c5",
+    "en": "1e2f2e3a1e4d47489d7e85dc598f1025"
+  },
+  "nep/definition/4-steps/delete.mdx": {
+    "zh": "9e58f57b97be6a3986006eb6a4701647",
+    "en": "98e51716af49427cd5c0cfcc3a26306c"
+  },
+  "nep/definition/4-steps/download.mdx": {
+    "zh": "7c9a9e8256f5107e5e91e6dbefa3c224",
+    "en": "91f56714edb22c5994c7d9bab33f5c3c"
+  },
+  "nep/definition/4-steps/execute.mdx": {
+    "zh": "47e480dc6ec67aa71a124ce71b7e7cc5",
+    "en": "26f8b1f5230f77ade50d4114a9f60336"
+  },
+  "nep/definition/4-steps/kill.mdx": {
+    "zh": "c461c3a2f548433097b303e0289a11d4",
+    "en": "e3cc9d48541bedd9671467be47f97a97"
+  },
+  "nep/definition/4-steps/link.mdx": {
+    "zh": "f81393a5f4af0b54f1ecb4ff49093503",
+    "en": "b59b20b2e83f7e70327142eff4d406c8"
+  },
+  "nep/definition/4-steps/log.mdx": {
+    "zh": "288acce42bd6d8c92cb853f7a353704c",
+    "en": "a0412e13e56630d2a2ddb589607a4f26"
+  },
+  "nep/definition/4-steps/move.mdx": {
+    "zh": "c9f3d3a9c720d179fea5dc347f202079",
+    "en": "8c3e66619249f47dab58aabe9d916282"
+  },
+  "nep/definition/4-steps/new.mdx": {
+    "zh": "b3eacf858a643d9a567ec4f599351580",
+    "en": "94fa1caced4b6d7b9e5e493caee301fd"
+  },
+  "nep/definition/4-steps/0-general.mdx": {
+    "zh": "25c05e57cb1d1d211e3840080060b174",
+    "en": "6afd03bd8aac4cdca9baef69fbb1aa29"
+  }
 }

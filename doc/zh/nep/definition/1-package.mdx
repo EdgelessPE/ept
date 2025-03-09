@@ -85,6 +85,10 @@ ExSemVer 规范在 [SemVer](https://semver.org) 的基础上在`PATCH`和`PRE`�
 
 ### arch
 <Tag>可选</Tag> 软件的编译目标架构，缺省表示安装时不检查架构兼容性。
+
+:::warning
+镜像源已不再接收目标架构为 `X86` 的软件包，该值仅作兼容用途。
+:::
 * 类型：`String 枚举` 
 * 有效值：`X64` `X86` `ARM64` 
 * 示例：`arch = "X64`
