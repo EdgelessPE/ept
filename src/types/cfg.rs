@@ -85,10 +85,16 @@ pub struct Preference {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
+pub struct Interaction {
+    pub enable_windows_terminal_status: bool,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct Cfg {
     pub local: Local,
     pub online: Online,
     pub preference: Preference,
+    pub interaction: Interaction,
 }
 
 impl Default for Cfg {
@@ -106,6 +112,9 @@ impl Default for Cfg {
                 installer: PreferenceEnum::LowPriority,
                 portable: PreferenceEnum::HighPriority,
                 expandable: PreferenceEnum::HighPriority,
+            },
+            interaction: Interaction {
+                enable_windows_terminal_status: false,
             },
         }
     }

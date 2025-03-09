@@ -6,6 +6,8 @@ use dialoguer::Confirm;
 use encoding::all::GBK;
 use encoding::{DecoderTrap, Encoding};
 
+use super::cfg::get_config;
+
 fn get_question_head(default_value: bool) -> ColoredString {
     if default_value {
         "Question".truecolor(103, 58, 183)
@@ -65,7 +67,9 @@ pub fn read_console(v: Vec<u8>) -> String {
    4：将进度值设置为 <progress>，处于“警告”状态。
 */
 pub fn write_windows_terminal_status(status: u8) {
-    println!("\x1b]9;4;{status};0\x07");
+    if get_config().interaction.enable_windows_terminal_status {
+        println!("\x1b]9;4;{status};0\x07");
+    }
 }
 
 #[test]
