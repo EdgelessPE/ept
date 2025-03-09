@@ -93,7 +93,7 @@ export async function genChangeLog(targetVersion: string, isDev: boolean) {
 	if (stdout.trim()) {
 		const text = (await readFile("CHANGELOG.md")).toString();
 		const nextText = text.replace(INSERT_TAG, `${INSERT_TAG}\n\n${stdout}`);
-		await writeFile("CHANGELOG.md", nextText);
+		if (!isDev) await writeFile("CHANGELOG.md", nextText);
 	} else {
 		if (isDev) console.log("Warning: No change log generated");
 		else throw new Error("Error: No change log generated");
