@@ -36,7 +36,7 @@
     "@actions/core": "^1.11.1",
     "@biomejs/biome": "1.9.4",
     "@commitlint/cli": "^19.6.1",
-    "@commitlint/config-conventional": "^19.6.0",
+    "@commitlint/config-conventional": "^19.8.0",
     "@commitlint/types": "^19.5.0",
     "@modern-js/tsconfig": "2.63.7",
     "@rspress/plugin-shiki": "^1.39.4",
