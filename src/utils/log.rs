@@ -51,23 +51,37 @@ fn gen_log(msg: &String, replace_head: Option<String>) -> Option<String> {
 }
 
 pub fn fn_log(msg: String) {
-    let g = gen_log(&msg, None);
-    if let Some(content) = g {
-        let mut s = LAST_LOG.lock().unwrap();
-        *s = msg;
-        TERM.write_line(&content).unwrap();
+    #[cfg(test)]
+    {
+        println!("{}", msg)
+    }
+    #[cfg(not(test))]
+    {
+        let g = gen_log(&msg, None);
+        if let Some(content) = g {
+            let mut s = LAST_LOG.lock().unwrap();
+            *s = msg;
+            TERM.write_line(&content).unwrap();
+        }
     }
 }
 
 pub fn fn_log_ok_last(msg: String) {
-    let g = gen_log(&format!("{msg}   {ok}", ok = "ok".green()), None);
-    if let Some(content) = g {
-        let last_log = LAST_LOG.lock().unwrap();
-        if last_log.clone() == msg {
-            TERM.move_cursor_up(1).unwrap();
-            TERM.clear_line().unwrap();
+    #[cfg(test)]
+    {
+        println!("{}", msg)
+    }
+    #[cfg(not(test))]
+    {
+        let g = gen_log(&format!("{msg}   {ok}", ok = "ok".green()), None);
+        if let Some(content) = g {
+            let last_log = LAST_LOG.lock().unwrap();
+            if last_log.clone() == msg {
+                TERM.move_cursor_up(1).unwrap();
+                TERM.clear_line().unwrap();
+            }
+            TERM.write_line(&content).unwrap();
         }
-        TERM.write_line(&content).unwrap();
     }
 }
 
