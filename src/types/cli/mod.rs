@@ -61,7 +61,7 @@ pub enum Action {
 
     /// Query a package
     Info {
-        /// Package matcher, expect pattern (SCOPE/)NAME
+        /// Package matcher, expect pattern ((MIRROR/)SCOPE/)NAME(@SEMVER)）or Nep package url or Nep package local path
         package_matcher: String,
     },
 

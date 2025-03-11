@@ -45,7 +45,7 @@ fn router(action: Action, cfg: Cfg) -> Result<String> {
         entrances::{
             mirror_add, mirror_list, mirror_remove, mirror_update, mirror_update_all, search,
         },
-        types::matcher::{PackageInputEnum, PackageMatcher},
+        types::matcher::PackageInputEnum,
     };
     let verify_signature = !get_flag(Flag::Offline, false);
 
@@ -220,12 +220,8 @@ fn router(action: Action, cfg: Cfg) -> Result<String> {
         }
         Action::Info { package_matcher } => {
             auto_mirror_update_all(&cfg)?;
-            let parse_res = PackageMatcher::parse(&package_matcher, true, true)?;
-            info(
-                PackageInputEnum::PackageMatcher(parse_res),
-                verify_signature,
-            )
-            .map(|res| format!("{res:#?}"))
+            let parse_res = PackageInputEnum::parse(package_matcher, true, true)?;
+            info(parse_res, verify_signature).map(|res| format!("{res:#?}"))
         }
         Action::List => list().map(|list| {
             if list.is_empty() {
