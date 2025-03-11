@@ -334,6 +334,9 @@ fn main() {
     // 启用虚拟终端
     colored::control::set_virtual_terminal(true).unwrap();
 
+    // 获取配置
+    let cfg = get_config();
+
     // 配置环境变量
     let args = Args::parse();
     if args.qa {
@@ -343,7 +346,7 @@ fn main() {
         log!("Warning:Debug mode enabled");
         set_flag(Flag::Debug, true);
     }
-    if args.offline {
+    if args.offline || cfg.online.offline {
         log!("Warning:Offline mode enabled, ept couldn't guarantee security or integrality of packages");
         set_flag(Flag::Offline, true);
     }
@@ -351,9 +354,6 @@ fn main() {
         log!("Warning:Confirmation mode enabled");
         set_flag(Flag::Confirm, true);
     }
-
-    // 获取配置
-    let cfg = get_config();
 
     // 清理缓存
     launch_clean().unwrap();
