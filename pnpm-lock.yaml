@@ -71,8 +71,8 @@ importers:
         specifier: ^19.5.0
         version: 19.5.0
       '@modern-js/tsconfig':
-        specifier: 2.63.7
-        version: 2.63.7
+        specifier: 2.65.3
+        version: 2.65.3
       '@rspress/plugin-shiki':
         specifier: ^1.39.4
         version: 1.43.1
@@ -467,8 +467,8 @@ packages:
     peerDependencies:
       react: '>=16'
 
-  '@modern-js/tsconfig@2.63.7':
-    resolution: {integrity: sha512-tZJhe0q+SGyyQX02SiCfge1pzJrQvS0ygLUHuZKDvYYd4uVMtkc8NYmuzVWYuWHlcj1RlPFApm95Q31/HqPuTg==}
+  '@modern-js/tsconfig@2.65.3':
+    resolution: {integrity: sha512-7sdewlaK823wH8BahbDqBSjvVHu5dNkmplB/MepsZtpY5+whEBOl2EfTpuoKuJykK3A23jwx7mVvE3izH4VJKg==}
 
   '@module-federation/error-codes@0.8.4':
     resolution: {integrity: sha512-55LYmrDdKb4jt+qr8qE8U3al62ZANp3FhfVaNPOaAmdTh0jHdD8M3yf5HKFlr5xVkVO4eV/F/J2NCfpbh+pEXQ==}
@@ -724,6 +724,9 @@ packages:
   '@types/node@22.13.10':
     resolution: {integrity: sha512-I6LPUvlRH+O6VRUqYOcMudhaIdUVWfsjnZavnsraHvpBwaEyMN29ry+0UVJhImYL16xsscu0aske3yA+uPOWfw==}
 
+  '@types/node@22.13.10':
+    resolution: {integrity: sha512-I6LPUvlRH+O6VRUqYOcMudhaIdUVWfsjnZavnsraHvpBwaEyMN29ry+0UVJhImYL16xsscu0aske3yA+uPOWfw==}
+
   '@types/node@22.13.9':
     resolution: {integrity: sha512-acBjXdRJ3A6Pb3tqnw9HZmyR3Fiol3aGxRCK1x3d+6CDAMjl7I649wpSd+yNURCjbOUGu9tqtLKnTGxmK6CyGw==}
 
@@ -923,6 +926,9 @@ packages:
   callsites@3.1.0:
     resolution: {integrity: sha512-P8BjAsXvZS+VIDUI11hHCQEv74YT67YUi5JJFNWIqL235sBmjX4+qx9Muvls5ivyNENctx46xQLQ3aTuE7ssaQ==}
     engines: {node: '>=6'}
+
+  caniuse-lite@1.0.30001703:
+    resolution: {integrity: sha512-kRlAGTRWgPsOj7oARC9m1okJEXdL/8fekFVcxA8Hl7GH4r/sN4OJn/i6Flde373T50KS7Y37oFbMwlE8+F42kQ==}
 
   caniuse-lite@1.0.30001703:
     resolution: {integrity: sha512-kRlAGTRWgPsOj7oARC9m1okJEXdL/8fekFVcxA8Hl7GH4r/sN4OJn/i6Flde373T50KS7Y37oFbMwlE8+F42kQ==}
@@ -3068,7 +3074,7 @@ snapshots:
       '@types/react': 19.0.10
       react: 18.3.1
 
-  '@modern-js/tsconfig@2.63.7': {}
+  '@modern-js/tsconfig@2.65.3': {}
 
   '@module-federation/error-codes@0.8.4': {}
 
@@ -3398,6 +3404,10 @@ snapshots:
     dependencies:
       undici-types: 6.20.0
 
+  '@types/node@22.13.10':
+    dependencies:
+      undici-types: 6.20.0
+
   '@types/node@22.13.9':
     dependencies:
       undici-types: 6.20.0
@@ -3605,6 +3615,8 @@ snapshots:
   cac@6.7.14: {}
 
   callsites@3.1.0: {}
+
+  caniuse-lite@1.0.30001703: {}
 
   caniuse-lite@1.0.30001703: {}
 
