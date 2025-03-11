@@ -3,7 +3,10 @@ use colored::Colorize;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
 
-use crate::utils::fmt_print::{FmtPrint, FmtPrintCaller};
+use crate::utils::{
+    cfg::get_config,
+    fmt_print::{FmtPrint, FmtPrintCaller},
+};
 
 use super::extended_semver::ExSemVer;
 use super::meta::MetaResult;
@@ -156,56 +159,152 @@ impl FmtPrint for Info {
         output.push_str(&"-".repeat(71));
         output.push('\n');
 
+        let show_emojis = get_config().interaction.show_emojis;
         if let Some(meta) = &self.meta {
             let package = &meta.package.package;
             // Basic 部分
             output.push_str(&format!("{}\n", "Basic".bold()));
-            output.push_str(&format!("· 📝 Description: {}\n", package.description));
             output.push_str(&format!(
-                "· 👤 Author:      {}\n",
+                "·{} Description: {}\n",
+                if show_emojis {
+                    format!(" {}", "📝")
+                } else {
+                    "".to_string()
+                },
+                package.description
+            ));
+            output.push_str(&format!(
+                "·{} Author:      {}\n",
+                if show_emojis {
+                    format!(" {}", "👤")
+                } else {
+                    "".to_string()
+                },
                 package.authors.join(", ")
             ));
             if let Some(license) = &package.license {
-                output.push_str(&format!("· 📜 License:     {}\n", license));
+                output.push_str(&format!(
+                    "·{} License:     {}\n",
+                    if show_emojis {
+                        format!(" {}", "📜")
+                    } else {
+                        "".to_string()
+                    },
+                    license
+                ));
             }
             output.push('\n');
 
             // Software 部分
             if let Some(software) = &meta.package.software {
                 output.push_str(&format!("{}\n", "Software".bold()));
-                output.push_str(&format!("· 🔗 Upstream:    {}\n", software.upstream));
-                output.push_str(&format!("· 📂 Category:    {}\n", software.category));
+                output.push_str(&format!(
+                    "·{} Upstream:    {}\n",
+                    if show_emojis {
+                        format!(" {}", "🔗")
+                    } else {
+                        "".to_string()
+                    },
+                    software.upstream
+                ));
+                output.push_str(&format!(
+                    "·{} Category:    {}\n",
+                    if show_emojis {
+                        format!(" {}", "📂")
+                    } else {
+                        "".to_string()
+                    },
+                    software.category
+                ));
                 if let Some(arch) = &software.arch {
-                    output.push_str(&format!("· 🖥️ Arch:        {}\n", arch));
+                    output.push_str(&format!(
+                        "·{} Arch:        {}\n",
+                        if show_emojis {
+                            format!(" {}", "🖥️")
+                        } else {
+                            "".to_string()
+                        },
+                        arch
+                    ));
                 }
-                output.push_str(&format!("· 🌐 Language:    {}\n", software.language));
+                output.push_str(&format!(
+                    "·{} Language:    {}\n",
+                    if show_emojis {
+                        format!(" {}", "🌐")
+                    } else {
+                        "".to_string()
+                    },
+                    software.language
+                ));
                 if let Some(alias) = &software.alias {
-                    output.push_str(&format!("· 🌟 Alias:       {}\n", alias));
+                    output.push_str(&format!(
+                        "·{} Alias:       {}\n",
+                        if show_emojis {
+                            format!(" {}", "🌟")
+                        } else {
+                            "".to_string()
+                        },
+                        alias
+                    ));
                 }
                 if let Some(tags) = &software.tags {
                     if !tags.is_empty() {
-                        output.push_str(&format!("· 🏷️ Tags:        {}\n", tags.join(", ")));
+                        output.push_str(&format!(
+                            "·{} Tags:        {}\n",
+                            if show_emojis {
+                                format!(" {}", "🏷️")
+                            } else {
+                                "".to_string()
+                            },
+                            tags.join(", ")
+                        ));
                     }
                 }
                 output.push('\n');
 
                 // Meta 部分（权限）
                 output.push_str(&format!("{}\n", "Meta".bold()));
-                output.push_str("· 🛡️ Permissions: \n");
+                output.push_str(&format!(
+                    "·{} Permissions: \n",
+                    if show_emojis {
+                        format!(" {}", "🛡️")
+                    } else {
+                        "".to_string()
+                    },
+                ));
                 for perm in &meta.permissions {
                     let key: &'static str = perm.key.clone().into();
                     let level: &'static str = perm.level.clone().into();
-                    output.push_str(&format!("    · 👀 Key:     {}\n", key));
                     output.push_str(&format!(
-                        "    · {} Level:   {}\n",
-                        match perm.level {
-                            PermissionLevel::Sensitive => "🔴",
-                            PermissionLevel::Important => "🟡",
-                            PermissionLevel::Normal => "🔵",
+                        "    · {} Key:     {}\n",
+                        if show_emojis {
+                            format!(" {}", "👀")
+                        } else {
+                            "".to_string()
+                        },
+                        key
+                    ));
+                    output.push_str(&format!(
+                        "    ·{} Level:   {}\n",
+                        if show_emojis {
+                            match perm.level {
+                                PermissionLevel::Sensitive => " 🔴",
+                                PermissionLevel::Important => " 🟡",
+                                PermissionLevel::Normal => " 🔵",
+                            }
+                        } else {
+                            ""
                         },
                         level
                     ));
-                    output.push_str("    · 🎯 Targets: \n");
+                    output.push_str(&format!(
+                        "    ·{} Targets: \n",
+                        if show_emojis {
+                            format!(" {}", "🎯")
+                        } else {
+                            "".to_string()
+                        },
+                    ));
                     for target in &perm.targets {
                         output.push_str(&format!("      · {}\n", target));
                     }

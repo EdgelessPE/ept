@@ -87,6 +87,7 @@ pub struct Preference {
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct Interaction {
     pub enable_windows_terminal_status: bool,
+    pub show_emojis: bool,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
@@ -115,6 +116,7 @@ impl Default for Cfg {
             },
             interaction: Interaction {
                 enable_windows_terminal_status: false,
+                show_emojis: true,
             },
         }
     }
