@@ -221,7 +221,8 @@ fn router(action: Action, cfg: Cfg) -> Result<String> {
         Action::Info { package_matcher } => {
             auto_mirror_update_all(&cfg)?;
             let parse_res = PackageInputEnum::parse(package_matcher, true, true)?;
-            info(parse_res, verify_signature).map(|res| format!("{res:#?}"))
+            info(parse_res, verify_signature)
+                .map(|res| res.fmt_print(FmtPrintCaller::Info).unwrap())
         }
         Action::List => list().map(|list| {
             if list.is_empty() {
