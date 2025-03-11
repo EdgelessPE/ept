@@ -80,7 +80,7 @@ pub fn parse_install_inputs(
         // 检查对应包名有没有被安装过
         if let Some(local) = info.local {
             log!(
-                "Warning:Package '{}/{}' has been installed({}), its installation will be skipped",
+                "Warning:Package '{}/{}' has been installed ({}), its installation will be skipped",
                 info.scope,
                 info.name,
                 local.version
