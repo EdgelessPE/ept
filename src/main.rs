@@ -56,6 +56,11 @@ fn router(action: Action, cfg: Cfg) -> Result<String> {
         } => {
             // 解析输入
             let parsed = parse_install_inputs(packages, verify_signature)?;
+            if parsed.is_empty() {
+                return Ok(
+                    "Warning:All packages have been installed, installation skipped".to_string(),
+                );
+            }
             // 打印详细元信息
             log!("Info:Check the following information before installation:");
             println!();
