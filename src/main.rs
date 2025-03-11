@@ -354,8 +354,11 @@ fn main() {
         log!("Warning:Confirmation mode enabled");
         set_flag(Flag::Confirm, true);
     }
-    if cfg.local.enable_cache {
-        set_flag(Flag::Cache, true);
+    if !cfg.local.enable_cache {
+        log!("Debug:Cache disabled");
+        set_flag(Flag::Cache, false);
+    } else {
+        log!("Debug:Cache enabled");
     }
 
     // 清理缓存

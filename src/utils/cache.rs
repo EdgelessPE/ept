@@ -14,9 +14,11 @@ use crate::{
 use super::cfg::get_config;
 
 // （是否启用缓存，源文件，Option<(缓存目录, 缓存 key)>）
+#[derive(Debug)]
 pub struct CacheCtx(pub bool, pub PathBuf, pub Option<(PathBuf, String)>);
 
 pub fn spawn_cache(ctx: CacheCtx) -> Result<()> {
+    log!("Debug:Spawning cache with ctx: {ctx:?}");
     let CacheCtx(enabled_cache, at, cached) = ctx;
     if enabled_cache {
         if let Some((cache_path, cache_key)) = cached {
@@ -45,6 +47,7 @@ pub fn spawn_cache(ctx: CacheCtx) -> Result<()> {
 }
 
 pub fn restore_cache(ctx: CacheCtx, source: &str) -> Result<bool> {
+    log!("Debug:Restoring cache with ctx: {ctx:?}");
     let CacheCtx(enabled_cache, to, cached) = ctx;
     if enabled_cache {
         if let Some((cache_path, cache_key)) = cached.clone() {
