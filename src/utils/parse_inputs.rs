@@ -195,7 +195,7 @@ pub fn parse_uninstall_inputs(packages: Vec<String>) -> Result<Vec<Info>> {
             local_diff
         } else {
             InfoDiff {
-                version: "broken".to_string(),
+                version: "0.0.0.0".to_string(),
                 authors: vec![],
             }
         };
