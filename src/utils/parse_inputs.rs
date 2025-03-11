@@ -64,11 +64,31 @@ pub fn parse_install_inputs(
     verify_signature: bool,
 ) -> Result<Vec<ParseReturned>> {
     let mut res: Vec<ParseReturned> = Vec::new();
-    let mut mirror_updated = false;
     for p in packages {
+        // 解析输入
         let input_parsed = PackageInputEnum::parse(p, false, false)?;
+
+        // 更新镜像源
+        if matches!(input_parsed, PackageInputEnum::PackageMatcher(_)) {
+            let cfg = get_config();
+            auto_mirror_update_all(&cfg)?;
+        }
+
+        // 获取 Info
         let info = info(input_parsed.clone(), verify_signature)?;
-        // 首先解析输入类型
+
+        // 检查对应包名有没有被安装过
+        if let Some(local) = info.local {
+            log!(
+                "Warning:Package '{}/{}' has been installed({}), its installation will be skipped",
+                info.scope,
+                info.name,
+                local.version
+            );
+            continue;
+        }
+
+        // 解析输入类型
         match input_parsed {
             PackageInputEnum::Url(url) => res.push((ParseInputResEnum::Url(url), info)),
             PackageInputEnum::LocalPath(source_file) => {
@@ -76,26 +96,12 @@ pub fn parse_install_inputs(
             }
             // 如果是 PackageMatcher，则解析信息
             PackageInputEnum::PackageMatcher(matcher) => {
-                // 更新镜像源
-                if !mirror_updated {
-                    let cfg = get_config();
-                    auto_mirror_update_all(&cfg)?;
-                    mirror_updated = true;
-                }
-                // 查找 scope 并使用 scope 更新纠正大小写
-                let (scope, package_name) =
-                    find_scope_with_name(&matcher.name, matcher.scope.clone())?;
-                // 检查对应包名有没有被安装过
-                if let Ok((_, diff)) = info_local(&scope, &package_name) {
-                    log!("Warning:Package '{scope}/{package_name}' has been installed({ver}), its installation will be skipped",ver = diff.version);
-                    continue;
-                }
                 // 解析 url
                 let (url, target_release, mirror_name) = get_url_with_version_req(matcher)?;
                 res.push((
                     ParseInputResEnum::PackageMatcher(ParsePackageInputRes {
-                        name: package_name,
-                        scope,
+                        name: info.name.clone(),
+                        scope: info.scope.clone(),
                         current_version: None,
                         target_version: target_release.version.to_string(),
                         download_url: url,
@@ -114,11 +120,20 @@ pub fn parse_update_inputs(
     verify_signature: bool,
 ) -> Result<Vec<ParseReturned>> {
     let mut res: Vec<ParseReturned> = Vec::new();
-    let mut mirror_updated = false;
     for p in packages {
+        // 解析输入
         let input_parsed = PackageInputEnum::parse(p, false, false)?;
+
+        // 更新镜像源
+        if matches!(input_parsed, PackageInputEnum::PackageMatcher(_)) {
+            let cfg = get_config();
+            auto_mirror_update_all(&cfg)?;
+        }
+
+        // 获取 Info
         let info = info(input_parsed.clone(), verify_signature)?;
-        // 首先解析输入类型
+
+        // 解析输入类型
         match input_parsed {
             PackageInputEnum::Url(url) => res.push((ParseInputResEnum::Url(url), info)),
             PackageInputEnum::LocalPath(source_file) => {
@@ -126,15 +141,8 @@ pub fn parse_update_inputs(
             }
             // 如果是 PackageMatcher，则解析信息
             PackageInputEnum::PackageMatcher(matcher) => {
-                // 更新镜像源
-                if !mirror_updated {
-                    let cfg = get_config();
-                    auto_mirror_update_all(&cfg)?;
-                    mirror_updated = true;
-                }
-                // 查找 scope 并使用 scope 更新纠正大小写
-                let (scope, package_name) =
-                    find_scope_with_name(&matcher.name, matcher.scope.clone())?;
+                let scope = info.scope.clone();
+                let package_name = info.name.clone();
                 // 检查对应包名有没有被安装过
                 let (_global, local_diff) = info_local(&scope, &package_name).map_err(|_| {
                     anyhow!("Error:Package '{scope}/{package_name}' hasn't been installed, use 'ept install' instead")
