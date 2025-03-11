@@ -181,7 +181,8 @@ pub fn parse_uninstall_inputs(packages: Vec<String>) -> Result<Vec<Info>> {
         let parse_res = PackageMatcher::parse(&p, true, true)?;
 
         // 查找 scope 并使用 scope 更新纠正大小写
-        let (scope, package_name) = find_scope_with_name(&parse_res.name, parse_res.scope)?;
+        let (scope, package_name) = find_scope_with_name(&parse_res.name, parse_res.scope.clone())
+            .map_err(|e| anyhow!("Error:Failed to locate target package: {e}",))?;
 
         // 解析安装路径
         let app_path = get_path_apps(&scope, &package_name, false)?;
