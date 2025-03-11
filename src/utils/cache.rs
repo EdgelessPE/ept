@@ -36,3 +36,36 @@ pub fn spawn_cache(ctx: CacheCtx) -> Result<()> {
     }
     Ok(())
 }
+
+pub fn restore_cache(ctx: CacheCtx, source: &str) -> Result<bool> {
+    let CacheCtx(enabled_cache, to, cached) = ctx;
+    if enabled_cache {
+        if let Some((cache_path, cache_key)) = cached.clone() {
+            let cache_file_path = cache_path.join(&cache_key);
+            if cache_file_path.exists() {
+                copy(&cache_file_path, &to).map_err(|e: std::io::Error| {
+                    anyhow!(
+                        "Error:Failed to restore cache from '{}' to '{}' : {e}",
+                        p2s!(cache_file_path),
+                        p2s!(to)
+                    )
+                })?;
+                log!(
+                    "Info:Restored cache form '{}' to '{}'",
+                    p2s!(cache_file_path),
+                    p2s!(to)
+                );
+                return Ok(true);
+            } else {
+                log!(
+                    "Debug:Cache not found for '{source}' at '{}'",
+                    p2s!(cache_file_path)
+                );
+            }
+        }
+    } else {
+        log!("Debug:Cache disabled, skip restoring cache");
+    }
+
+    Ok(false)
+}

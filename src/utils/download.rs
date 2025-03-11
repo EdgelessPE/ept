@@ -2,12 +2,12 @@ use anyhow::{anyhow, Result};
 use indicatif::{ProgressBar, ProgressState, ProgressStyle};
 use reqwest::blocking::Client;
 use std::cmp::min;
-use std::fs::{copy, File};
+use std::fs::File;
 use std::io::{Read, Write};
 use std::path::PathBuf;
 
 use crate::p2s;
-use crate::utils::cache::CacheCtx;
+use crate::utils::cache::{restore_cache, CacheCtx};
 use crate::utils::cfg::get_config;
 use crate::utils::flags::{get_flag, Flag};
 
@@ -20,32 +20,8 @@ pub fn download(url: &str, to: PathBuf, cached: Option<(PathBuf, String)>) -> Re
     // 检查缓存
     let enabled_cache =
         (get_flag(Flag::Cache, false) || cfg.local.enable_cache) && cached.is_some();
-    if enabled_cache {
-        if let Some((cache_path, cache_key)) = cached.clone() {
-            let cache_file_path = cache_path.join(&cache_key);
-            if cache_file_path.exists() {
-                copy(&cache_file_path, &to).map_err(|e: std::io::Error| {
-                    anyhow!(
-                        "Error:Failed to restore cache from '{}' to '{}' : {e}",
-                        p2s!(cache_file_path),
-                        p2s!(to)
-                    )
-                })?;
-                log!(
-                    "Info:Restored cache form '{}' to '{}'",
-                    p2s!(cache_file_path),
-                    p2s!(to)
-                );
-                return Ok(CacheCtx(false, to, None));
-            } else {
-                log!(
-                    "Debug:Cache not found for '{url}' at '{}'",
-                    p2s!(cache_file_path)
-                );
-            }
-        }
-    } else {
-        log!("Debug:Cache disabled, skip restoring cache");
+    if restore_cache(CacheCtx(enabled_cache, to.clone(), cached.clone()), url)? {
+        return Ok(CacheCtx(false, to, None));
     }
 
     let url = url.replace('+', "%2B");
