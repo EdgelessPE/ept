@@ -276,7 +276,7 @@ impl FmtPrint for Info {
                     let key: &'static str = perm.key.clone().into();
                     let level: &'static str = perm.level.clone().into();
                     output.push_str(&format!(
-                        "    · {} Key:     {}\n",
+                        "    ·{} Key:     {}\n",
                         if show_emojis {
                             format!(" {}", "👀")
                         } else {
