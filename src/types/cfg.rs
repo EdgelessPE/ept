@@ -24,6 +24,7 @@ const FILE_NAME: &str = "eptrc.toml";
 pub struct Local {
     pub base: String,
     pub enable_cache: bool,
+    pub cache_valid_duration: String,
 }
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct Online {
@@ -103,11 +104,12 @@ impl Default for Cfg {
         Self {
             local: Local {
                 base: p2s!(USER_DIR),
-                enable_cache: false,
+                enable_cache: true,
+                cache_valid_duration: "30d".to_string(),
             },
             online: Online {
-                mirror_update_interval: "1d".to_string(),
                 auto_check_upgrade: true,
+                mirror_update_interval: "1d".to_string(),
             },
             preference: Preference {
                 installer: PreferenceEnum::LowPriority,

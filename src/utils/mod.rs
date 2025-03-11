@@ -26,6 +26,7 @@ pub mod upgrade;
 pub mod wild_match;
 
 use anyhow::{anyhow, Result};
+use cache::clean_cache;
 use flags::{get_flag, Flag};
 use regex::Regex;
 
@@ -140,6 +141,9 @@ pub fn launch_clean() -> Result<()> {
     if p.exists() {
         try_recycle(p)?;
     }
+
+    // 清理过期缓存
+    clean_cache()?;
 
     Ok(())
 }

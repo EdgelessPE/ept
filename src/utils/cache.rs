@@ -1,10 +1,17 @@
 use anyhow::{anyhow, Result};
+use humantime::parse_duration;
 use std::{
-    fs::{copy, create_dir_all},
+    fs::{copy, create_dir_all, read_dir},
     path::PathBuf,
+    time::SystemTime,
 };
 
-use crate::p2s;
+use crate::{
+    p2s,
+    utils::{fs::try_recycle, get_path_cache},
+};
+
+use super::cfg::get_config;
 
 // （是否启用缓存，源文件，Option<(缓存目录, 缓存 key)>）
 pub struct CacheCtx(pub bool, pub PathBuf, pub Option<(PathBuf, String)>);
@@ -68,4 +75,46 @@ pub fn restore_cache(ctx: CacheCtx, source: &str) -> Result<bool> {
     }
 
     Ok(false)
+}
+
+pub fn clean_cache() -> Result<()> {
+    let cfg = get_config();
+    let duration_cfg = parse_duration(&cfg.local.cache_valid_duration).map_err(|e| anyhow!("Error:Failed to parse config field 'local.cache_valid_duration' as valid time span : '{e}', e.g. '5d' '14m54s'"))?;
+    let now = SystemTime::now();
+    log!(
+        "Debug:Cache valid duration : '{i}'",
+        i = &cfg.local.cache_valid_duration
+    );
+
+    let cache_dir = get_path_cache()?;
+    let mut cache_files = Vec::new();
+    for entry in read_dir(cache_dir)? {
+        let entry = entry?;
+        let path = entry.path();
+        if path.is_file() {
+            let metadata = entry.metadata()?;
+            let modified = metadata.modified()?;
+            if now.duration_since(modified).unwrap() > duration_cfg {
+                cache_files.push(path);
+            }
+        }
+    }
+
+    log!(
+        "Debug:Found {} cache files to clean : {cache_files:?}",
+        cache_files.len()
+    );
+
+    for file in cache_files {
+        let res = try_recycle(file.clone());
+        if res.is_err() {
+            log!(
+                "Warning:Failed to clean cache file '{}' : {}",
+                p2s!(file),
+                res.unwrap_err()
+            );
+        }
+    }
+
+    Ok(())
 }

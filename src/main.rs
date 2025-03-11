@@ -326,12 +326,10 @@ fn router(action: Action, cfg: Cfg) -> Result<String> {
 #[cfg(not(tarpaulin_include))]
 fn main() {
     use entrances::mirror_list;
-    // 清理缓存
     use utils::{
         term::write_windows_terminal_status,
         upgrade::{check_has_upgrade, print_upgradable, print_upgradable_cross_wid_gap},
     };
-    launch_clean().unwrap();
 
     // 启用虚拟终端
     colored::control::set_virtual_terminal(true).unwrap();
@@ -356,6 +354,9 @@ fn main() {
 
     // 获取配置
     let cfg = get_config();
+
+    // 清理缓存
+    launch_clean().unwrap();
 
     // 判断是否需要检查更新
     let need_check_update = cfg.online.auto_check_upgrade

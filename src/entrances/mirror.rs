@@ -147,7 +147,7 @@ pub fn mirror_update_all() -> Result<Vec<String>> {
 // 根据 config 中的超时配置自动判断是否需要更新镜像
 pub fn auto_mirror_update_all(cfg: &Cfg) -> Result<bool> {
     // 读取配置
-    let duration_cfg = parse_duration(&cfg.online.mirror_update_interval).map_err(|e| anyhow!("Error:Failed to parse config field 'online.mirror_update_interval' as valid time span : {e}, e.g. '5d' '14m54s'"))?;
+    let duration_cfg = parse_duration(&cfg.online.mirror_update_interval).map_err(|e| anyhow!("Error:Failed to parse config field 'online.mirror_update_interval' as valid time span : '{e}', e.g. '5d' '14m54s'"))?;
     let now = SystemTime::now();
     log!(
         "Debug:Mirror update interval : '{i}'",
