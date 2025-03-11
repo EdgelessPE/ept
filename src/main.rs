@@ -56,6 +56,7 @@ fn router(action: Action, cfg: Cfg) -> Result<String> {
         } => {
             // 解析输入
             let parsed = parse_install_inputs(packages, verify_signature)?;
+            log!("Debug:Parsed install packages: {parsed:?}");
             if parsed.is_empty() {
                 return Ok(
                     "Warning:All packages have been installed, installation skipped".to_string(),
@@ -110,6 +111,7 @@ fn router(action: Action, cfg: Cfg) -> Result<String> {
             if let Some(packages) = packages {
                 // 解析输入
                 let parsed = parse_update_inputs(packages, verify_signature)?;
+                log!("Debug:Parsed update packages: {parsed:?}");
                 // 打印详细元信息
                 log!("Info:Check the following information before update:");
                 println!();
@@ -168,6 +170,7 @@ fn router(action: Action, cfg: Cfg) -> Result<String> {
         Action::Uninstall { package_matchers } => {
             // 解析输入
             let parsed = parse_uninstall_inputs(package_matchers)?;
+            log!("Debug:Parsed uninstall packages: {parsed:?}");
             // 询问是否执行
             let tip = &parsed
                 .iter()
