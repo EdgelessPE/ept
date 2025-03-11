@@ -8,7 +8,6 @@ use std::path::PathBuf;
 
 use crate::p2s;
 use crate::utils::cache::{restore_cache, CacheCtx};
-use crate::utils::cfg::get_config;
 use crate::utils::flags::{get_flag, Flag};
 
 use super::allocate_path_temp;
@@ -16,10 +15,8 @@ use super::allocate_path_temp;
 // cached 接受参数为 (存放缓存的路径，缓存 key)
 // 函数返回的是缓存上下文，当文件被验证可用后可以使用这个上下文传递给 spawn_cache 函数进行缓存
 pub fn download(url: &str, to: PathBuf, cached: Option<(PathBuf, String)>) -> Result<CacheCtx> {
-    let cfg = get_config();
     // 检查缓存
-    let enabled_cache =
-        (get_flag(Flag::Cache, false) || cfg.local.enable_cache) && cached.is_some();
+    let enabled_cache = get_flag(Flag::Cache, true) && cached.is_some();
     if restore_cache(CacheCtx(enabled_cache, to.clone(), cached.clone()), url)? {
         return Ok(CacheCtx(false, to, None));
     }

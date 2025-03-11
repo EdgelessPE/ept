@@ -354,6 +354,9 @@ fn main() {
         log!("Warning:Confirmation mode enabled");
         set_flag(Flag::Confirm, true);
     }
+    if cfg.local.enable_cache {
+        set_flag(Flag::Cache, true);
+    }
 
     // 清理缓存
     launch_clean().unwrap();
