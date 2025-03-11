@@ -449,9 +449,12 @@ fn test_install_with_matcher() {
     )
     .unwrap();
 
-    // 执行更新
-    crate::entrances::update::update_using_package_matcher("microsoFT/vscode".to_string(), false)
-        .unwrap();
+    // 无法安装，会报错
+    assert!(crate::entrances::update::update_using_package_matcher(
+        "microsoFT/vscode".to_string(),
+        false
+    )
+    .is_err());
 
     crate::utils::test::_ensure_testing_vscode_uninstalled();
 

@@ -268,9 +268,8 @@ fn test_parse_inputs() {
     // 测试更新的解析
     assert!(parse_update_inputs(vec!["vscode".to_string()], false).is_err());
 
-    // 安装 vscode
-    crate::utils::test::_ensure_testing_vscode();
-    // 测试安装的解析
+    crate::utils::test::_ensure_testing_vscode_uninstalled();
+    // 测试解析
     let res = parse_install_inputs(
         vec![
             "examples/VSCode".to_string(),
@@ -288,7 +287,7 @@ fn test_parse_inputs() {
                 name: "VSCode".to_string(),
                 scope: "Microsoft".to_string(),
                 mirror: "mock-server".to_string(),
-                current_version: Some("1.75.4.0".to_string()),
+                current_version: None,
                 target_version: "1.75.4.2".to_string(),
                 download_url: "http://localhost:19191/static/VSCode_1.75.4.2_Cno.nep?scope=Microsoft&software=VSCode".to_string()
             }),
@@ -296,6 +295,7 @@ fn test_parse_inputs() {
         ]
     );
     // 测试更新的解析
+    crate::utils::test::_ensure_testing_vscode();
     let res = parse_update_inputs(
         vec![
             "examples/VSCode".to_string(),

@@ -190,7 +190,7 @@ fn test_download() {
     // 下载地址错误
     assert!(StepDownload {
         url: format!("{addr}/download-test.apk"),
-        hash_blake3: "0218ef74c47f601d555499bcc3b02564d9de34ad1e2ee712af10957e2799f0fd".to_string(),
+        hash_blake3: "9218ef74c47f601d555499bcc3b02564d9de34ad1e2ee712af10957e2799f0fd".to_string(),
         to: "test/target-test.apk".to_string(),
     }
     .run(&mut cx)
