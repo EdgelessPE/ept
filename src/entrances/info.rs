@@ -172,7 +172,7 @@ pub fn info(target_input: PackageInputEnum, verify_signature: bool) -> Result<In
             let (p, pkg) = unpack_nep(&p_str, verify_signature)?;
             let p_str = p2s!(p);
             let package = pkg.package;
-            let meta_res = meta(PackageInputEnum::LocalPath(p_str), verify_signature)?;
+            let meta_res = meta(PackageInputEnum::LocalPath(p_str), false)?;
 
             (
                 package.scope,
