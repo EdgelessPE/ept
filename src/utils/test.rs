@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use crate::types::matcher::PackageMatcher;
+use crate::{types::matcher::PackageMatcher, utils::get_path_cache};
 use anyhow::anyhow;
 use httpmock::prelude::*;
 use which::which;
@@ -64,6 +64,12 @@ pub fn _ensure_clear_test_dir() {
         std::fs::remove_dir_all("test").unwrap();
     }
     std::fs::create_dir_all("test").unwrap();
+
+    // 清理缓存
+    let cache_path = get_path_cache().unwrap();
+    if cache_path.exists() {
+        std::fs::remove_dir_all(cache_path).unwrap();
+    }
 }
 
 pub fn _run_mirror_mock_server() -> String {
