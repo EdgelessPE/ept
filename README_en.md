@@ -9,6 +9,8 @@
 
 <div align="center">
 
+[简体中文](https://github.com/EdgelessPE/ept) | English
+
 (WIP) Next-generation Windows package management solution - built based on the Nep specification
 
 [![codecov](https://codecov.io/github/EdgelessPE/ept/graph/badge.svg?token=KF7Z1SSF3Q)](https://codecov.io/github/EdgelessPE/ept)
