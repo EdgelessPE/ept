@@ -204,7 +204,7 @@ pub fn update_using_parsed(
             }
             ParseInputResEnum::Url(u, temp_dir) => {
                 if let Some(temp_dir) = temp_dir {
-                    update_using_package(&p2s!(temp_dir), verify_signature)?
+                    update_using_package(&p2s!(temp_dir), false)?
                 } else {
                     update_using_url(&u, verify_signature)?
                 }
