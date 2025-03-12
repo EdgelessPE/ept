@@ -70,7 +70,7 @@ pub fn fn_log(msg: String) {
 pub fn fn_log_ok_last(msg: String) {
     #[cfg(test)]
     {
-        println!("{}", msg)
+        println!("{} ok", msg)
     }
     #[cfg(not(test))]
     {
