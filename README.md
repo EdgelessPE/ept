@@ -9,7 +9,7 @@
 
 <div align="center">
 
-简体中文 | [English](https://github.com/EdgelessPE/ept/blob/master/README_en.md)
+简体中文 | [English](https://github.com/EdgelessPE/ept/blob/main/README_en.md)
 
 （WIP）新一代 Windows 包管理解决方案 - 基于 Nep 规范打造
 
