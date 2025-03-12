@@ -171,7 +171,7 @@ fn test_uninstall() {
     let mut cx = WorkflowContext::_demo();
     StepExecute {
         command: "notepad.exe".to_string(),
-        pwd: Some(pwd.clone()),
+        pwd: Some(p2s!(pwd)),
         call_installer: None,
         wait: Some("Abandon".to_string()),
         ignore_exit_code: None,

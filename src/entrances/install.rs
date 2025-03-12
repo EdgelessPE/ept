@@ -169,8 +169,20 @@ pub fn install_using_parsed(
     for parsed in parsed {
         log!("Info:Start installing {}", parsed.preview());
         let (scope, name) = match parsed {
-            ParseInputResEnum::LocalPath(p) => install_using_package(&p, false)?,
-            ParseInputResEnum::Url(u) => install_using_url(&u, false)?,
+            ParseInputResEnum::LocalPath(p, temp_dir) => {
+                if let Some(temp_dir) = temp_dir {
+                    install_using_package(&p2s!(temp_dir), false)?
+                } else {
+                    install_using_package(&p, verify_signature)?
+                }
+            }
+            ParseInputResEnum::Url(u, temp_dir) => {
+                if let Some(temp_dir) = temp_dir {
+                    install_using_package(&p2s!(temp_dir), false)?
+                } else {
+                    install_using_url(&u, verify_signature)?
+                }
+            }
             ParseInputResEnum::PackageMatcher(p) => {
                 install_using_url(&p.download_url, verify_signature)?
             }
@@ -357,6 +369,7 @@ fn test_reg_entry() {
             false
         )
         .unwrap()
+        .0
         .local
         .unwrap()
         .version,

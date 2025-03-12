@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use anyhow::{anyhow, Result};
 use colored::Colorize;
 use serde::{Deserialize, Serialize};
@@ -29,8 +31,8 @@ pub struct ParsePackageInputRes {
 }
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub enum ParseInputResEnum {
-    LocalPath(String),
-    Url(String),
+    LocalPath(String, Option<PathBuf>),
+    Url(String, Option<PathBuf>),
     PackageMatcher(ParsePackageInputRes),
 }
 pub type ParseReturned = (ParseInputResEnum, Info);
@@ -39,8 +41,8 @@ impl ParseInputResEnum {
     // 打印内联的预览语句
     pub fn preview(&self) -> String {
         match self {
-            ParseInputResEnum::LocalPath(p) => format!("{}: {p}", "local path"),
-            ParseInputResEnum::Url(u) => format!("{}: {u}", "url"),
+            ParseInputResEnum::LocalPath(p, _) => format!("{}: {p}", "local path"),
+            ParseInputResEnum::Url(u, _) => format!("{}: {u}", "url"),
             ParseInputResEnum::PackageMatcher(p) => {
                 let version_tip = if let Some(cur) = &p.current_version {
                     format!("{cur} → {}", p.target_version)
@@ -75,7 +77,7 @@ pub fn parse_install_inputs(
         }
 
         // 获取 Info
-        let info = info(input_parsed.clone(), verify_signature)?;
+        let (info, temp_dir) = info(input_parsed.clone(), verify_signature)?;
 
         // 检查对应包名有没有被安装过
         if let Some(local) = info.local {
@@ -90,9 +92,9 @@ pub fn parse_install_inputs(
 
         // 解析输入类型
         match input_parsed {
-            PackageInputEnum::Url(url) => res.push((ParseInputResEnum::Url(url), info)),
+            PackageInputEnum::Url(url) => res.push((ParseInputResEnum::Url(url, temp_dir), info)),
             PackageInputEnum::LocalPath(source_file) => {
-                res.push((ParseInputResEnum::LocalPath(source_file), info))
+                res.push((ParseInputResEnum::LocalPath(source_file, temp_dir), info))
             }
             // 如果是 PackageMatcher，则解析信息
             PackageInputEnum::PackageMatcher(matcher) => {
@@ -131,13 +133,13 @@ pub fn parse_update_inputs(
         }
 
         // 获取 Info
-        let info = info(input_parsed.clone(), verify_signature)?;
+        let (info, temp_dir) = info(input_parsed.clone(), verify_signature)?;
 
         // 解析输入类型
         match input_parsed {
-            PackageInputEnum::Url(url) => res.push((ParseInputResEnum::Url(url), info)),
+            PackageInputEnum::Url(url) => res.push((ParseInputResEnum::Url(url, temp_dir), info)),
             PackageInputEnum::LocalPath(source_file) => {
-                res.push((ParseInputResEnum::LocalPath(source_file), info))
+                res.push((ParseInputResEnum::LocalPath(source_file, temp_dir), info))
             }
             // 如果是 PackageMatcher，则解析信息
             PackageInputEnum::PackageMatcher(matcher) => {
@@ -251,9 +253,16 @@ fn test_parse_inputs() {
     )
     .unwrap();
     assert_eq!(
-        res.into_iter().map(|p| p.0).collect::<Vec<_>>(),
+        res.into_iter().map(|p| {
+            let (input, _) = p;
+            match input {
+                ParseInputResEnum::LocalPath(p, _) => ParseInputResEnum::LocalPath(p, None),
+                ParseInputResEnum::Url(u, _) => ParseInputResEnum::Url(u, None),
+                ParseInputResEnum::PackageMatcher(p) => ParseInputResEnum::PackageMatcher(p),
+            }
+        }).collect::<Vec<_>>(),
         vec![
-            ParseInputResEnum::LocalPath("examples/VSCode".to_string()),
+            ParseInputResEnum::LocalPath("examples/VSCode".to_string(), None),
             ParseInputResEnum::PackageMatcher(ParsePackageInputRes {
                 name: "VSCode".to_string(),
                 scope: "Microsoft".to_string(),
@@ -262,7 +271,7 @@ fn test_parse_inputs() {
                 target_version: "1.75.4.2".to_string(),
                 download_url: "http://localhost:19191/static/VSCode_1.75.4.2_Cno.nep?scope=Microsoft&software=VSCode".to_string()
             }),
-            ParseInputResEnum::Url(format!("{base_url}/vscode.nep")),
+            ParseInputResEnum::Url(format!("{base_url}/vscode.nep"), None),
         ]
     );
     // 测试更新的解析
@@ -280,9 +289,16 @@ fn test_parse_inputs() {
     )
     .unwrap();
     assert_eq!(
-        res.into_iter().map(|p| p.0).collect::<Vec<_>>(),
+        res.into_iter().map(|p| {
+            let (input, _) = p;
+            match input {
+                ParseInputResEnum::LocalPath(p, _) => ParseInputResEnum::LocalPath(p, None),
+                ParseInputResEnum::Url(u, _) => ParseInputResEnum::Url(u, None),
+                ParseInputResEnum::PackageMatcher(p) => ParseInputResEnum::PackageMatcher(p),
+            }
+        }).collect::<Vec<_>>(),
         vec![
-            ParseInputResEnum::LocalPath("examples/VSCode".to_string()),
+            ParseInputResEnum::LocalPath("examples/VSCode".to_string(), None),
             ParseInputResEnum::PackageMatcher(ParsePackageInputRes {
                 name: "VSCode".to_string(),
                 scope: "Microsoft".to_string(),
@@ -291,7 +307,7 @@ fn test_parse_inputs() {
                 target_version: "1.75.4.2".to_string(),
                 download_url: "http://localhost:19191/static/VSCode_1.75.4.2_Cno.nep?scope=Microsoft&software=VSCode".to_string()
             }),
-            ParseInputResEnum::Url(format!("{base_url}/vscode.nep")),
+            ParseInputResEnum::Url(format!("{base_url}/vscode.nep"), None),
         ]
     );
     // 测试更新的解析
@@ -306,9 +322,16 @@ fn test_parse_inputs() {
     )
     .unwrap();
     assert_eq!(
-        res.into_iter().map(|p| p.0).collect::<Vec<_>>(),
+        res.into_iter().map(|p| {
+            let (input, _) = p;
+            match input {
+                ParseInputResEnum::LocalPath(p, _) => ParseInputResEnum::LocalPath(p, None),
+                ParseInputResEnum::Url(u, _) => ParseInputResEnum::Url(u, None),
+                ParseInputResEnum::PackageMatcher(p) => ParseInputResEnum::PackageMatcher(p),
+            }
+        }).collect::<Vec<_>>(),
         vec![
-            ParseInputResEnum::LocalPath("examples/VSCode".to_string()),
+            ParseInputResEnum::LocalPath("examples/VSCode".to_string(), None),
             ParseInputResEnum::PackageMatcher(ParsePackageInputRes {
                 name: "VSCode".to_string(),
                 scope: "Microsoft".to_string(),
@@ -317,7 +340,7 @@ fn test_parse_inputs() {
                 target_version: "1.75.4.2".to_string(),
                 download_url: "http://localhost:19191/static/VSCode_1.75.4.2_Cno.nep?scope=Microsoft&software=VSCode".to_string()
             }),
-            ParseInputResEnum::Url(format!("{base_url}/vscode.nep")),
+            ParseInputResEnum::Url(format!("{base_url}/vscode.nep"), None),
         ]
     );
 

@@ -224,7 +224,7 @@ fn router(action: Action, cfg: Cfg) -> Result<String> {
         } => {
             auto_mirror_update_all(&cfg)?;
             let parse_res = PackageInputEnum::parse(package_matcher, true, true)?;
-            let info = info(parse_res, verify_signature)?;
+            let (info, _) = info(parse_res, verify_signature)?;
             if let Some(into) = save_at {
                 let text = toml::to_string_pretty(&info)?;
                 write(&into, text)

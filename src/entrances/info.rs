@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use anyhow::{anyhow, Result};
 use semver::VersionReq;
@@ -113,7 +113,10 @@ pub fn info_online(
     ))
 }
 
-pub fn info(target_input: PackageInputEnum, verify_signature: bool) -> Result<Info> {
+pub fn info(
+    target_input: PackageInputEnum,
+    verify_signature: bool,
+) -> Result<(Info, Option<PathBuf>)> {
     let mut mirror = None;
     let (scope, package_name, target, meta_res) = match target_input {
         PackageInputEnum::PackageMatcher(matcher) => {
@@ -186,6 +189,11 @@ pub fn info(target_input: PackageInputEnum, verify_signature: bool) -> Result<In
         }
     };
 
+    let temp_dir = if let Some(meta_res) = meta_res.clone() {
+        meta_res.temp_dir
+    } else {
+        None
+    };
     // 创建结果结构体
     let mut info = Info {
         scope: scope.clone(),
@@ -208,7 +216,7 @@ pub fn info(target_input: PackageInputEnum, verify_signature: bool) -> Result<In
         }
     }
 
-    Ok(info)
+    Ok((info, temp_dir))
 }
 
 #[test]

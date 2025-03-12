@@ -28,7 +28,7 @@ pub fn list() -> Result<Vec<Info>> {
                 }),
                 false,
             );
-            if let Ok(r) = info_res {
+            if let Ok((r, _)) = info_res {
                 res.push(r);
             } else {
                 log!(

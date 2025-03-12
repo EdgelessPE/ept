@@ -45,8 +45,8 @@ pub enum PackageSource {
 impl From<ParseInputResEnum> for PackageSource {
     fn from(value: ParseInputResEnum) -> Self {
         match value {
-            ParseInputResEnum::Url(url) => PackageSource::Url(url),
-            ParseInputResEnum::LocalPath(path) => PackageSource::LocalPath(path),
+            ParseInputResEnum::Url(url, _) => PackageSource::Url(url),
+            ParseInputResEnum::LocalPath(path, _) => PackageSource::LocalPath(path),
             ParseInputResEnum::PackageMatcher(res) => PackageSource::Mirror(res.mirror),
         }
     }

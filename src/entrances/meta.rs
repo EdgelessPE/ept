@@ -156,7 +156,7 @@ pub fn meta(input: PackageInputEnum, verify_signature: bool) -> Result<MetaResul
             let global: GlobalPackage = toml::from_str(&std::fs::read_to_string(package_path)?)?;
 
             Ok(MetaResult {
-                temp_dir: Some(temp_dir),
+                temp_dir: Some(temp_dir_inner_path),
                 permissions,
                 workflows: exists_workflows.into_iter().map(|(name, _)| name).collect(),
                 package: global,
@@ -321,7 +321,7 @@ fn test_meta() {
         )
         .unwrap(),
         MetaResult {
-            temp_dir: Some("C:/Users/Public/Music/apps/Microsoft/VSCode".to_string()),
+            temp_dir: Some(Path::new("C:/Users/Public/Music/apps/Microsoft/VSCode").to_path_buf()),
             permissions: vec![
                 Permission {
                     key: PermissionKey::path_entrances,
@@ -452,6 +452,8 @@ fn test_meta() {
     );
 
     // Firefox 没有提供 Meta，因此无法获取
+    crate::utils::test::_ensure_testing_uninstalled("Mozilla", "Firefox");
+    crate::utils::test::_ensure_testing_uninstalled("PortableApps", "Firefox");
     assert!(meta(
         PackageInputEnum::PackageMatcher(PackageMatcher::parse("firefox", false, false).unwrap()),
         false
