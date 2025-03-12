@@ -16,6 +16,7 @@ lazy_static! {
     static ref LAST_LOG: Mutex<String> = Mutex::new("".to_string());
 }
 
+#[allow(dead_code)]
 fn gen_log(msg: &String, replace_head: Option<String>) -> Option<String> {
     if let Some(cap) = RE.captures_iter(msg).next() {
         if cap.len() != 4 {
