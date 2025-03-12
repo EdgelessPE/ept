@@ -401,6 +401,9 @@ fn test_parse_inputs() {
 
 #[test]
 fn test_parse_inputs_offline() {
+    crate::utils::flags::set_flag(crate::utils::flags::Flag::Confirm, true);
+    crate::utils::test::_ensure_testing_vscode_uninstalled();
     assert!(parse_install_inputs(vec!["examples/vscode".to_string()], true).is_err());
+    crate::utils::test::_ensure_testing_vscode();
     assert!(parse_update_inputs(vec!["examples/vscode".to_string()], true).is_err());
 }

@@ -274,6 +274,8 @@ fn test_info() {
 
 #[test]
 fn test_info_offline() {
+    crate::utils::flags::set_flag(crate::utils::flags::Flag::Confirm, true);
+    crate::utils::test::_ensure_testing_vscode_uninstalled();
     assert!(info(
         PackageInputEnum::LocalPath("examples/vscode".to_string()),
         true

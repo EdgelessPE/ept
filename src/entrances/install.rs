@@ -508,3 +508,10 @@ fn test_install_expandable() {
     crate::utils::test::_ensure_testing_uninstalled("Microsoft", "VSCodeE");
     handler.kill().unwrap();
 }
+
+#[test]
+fn test_install_offline() {
+    crate::utils::flags::set_flag(crate::utils::flags::Flag::Confirm, true);
+    crate::utils::test::_ensure_testing_vscode_uninstalled();
+    assert!(install_using_package(&"examples/vscode".to_string(), true).is_err());
+}

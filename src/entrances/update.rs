@@ -567,3 +567,10 @@ fn test_update_expandable() {
     crate::utils::test::_ensure_testing_uninstalled("Microsoft", "VSCodeE");
     handler.kill().unwrap();
 }
+
+#[test]
+fn test_update_offline() {
+    crate::utils::flags::set_flag(crate::utils::flags::Flag::Confirm, true);
+    crate::utils::test::_ensure_testing_vscode();
+    assert!(update_using_package(&"examples/vscode".to_string(), true).is_err());
+}
