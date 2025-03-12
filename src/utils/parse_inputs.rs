@@ -398,3 +398,9 @@ fn test_parse_inputs() {
     crate::utils::test::_ensure_testing_vscode_uninstalled();
     handler.kill().unwrap();
 }
+
+#[test]
+fn test_parse_inputs_offline() {
+    assert!(parse_install_inputs(vec!["examples/vscode".to_string()], true).is_err());
+    assert!(parse_update_inputs(vec!["examples/vscode".to_string()], true).is_err());
+}

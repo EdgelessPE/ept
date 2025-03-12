@@ -271,3 +271,12 @@ fn test_info() {
     // 换回原镜像源
     crate::utils::test::_unmount_custom_mirror(custom_mirror_ctx);
 }
+
+#[test]
+fn test_info_offline() {
+    assert!(info(
+        PackageInputEnum::LocalPath("examples/vscode".to_string()),
+        true
+    )
+    .is_err());
+}
