@@ -63,6 +63,8 @@ pub enum Action {
     Info {
         /// Package matcher, expect pattern ((MIRROR/)SCOPE/)NAME(@SEMVER)）or Nep package url or Nep package local path
         package_matcher: String,
+        /// (Optional) Save info in toml format at
+        save_at: Option<String>,
     },
 
     /// List information of installed packages [alias 'ls']

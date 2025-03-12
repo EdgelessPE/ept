@@ -218,11 +218,22 @@ fn router(action: Action, cfg: Cfg) -> Result<String> {
                 res
             })
         }
-        Action::Info { package_matcher } => {
+        Action::Info {
+            package_matcher,
+            save_at,
+        } => {
             auto_mirror_update_all(&cfg)?;
             let parse_res = PackageInputEnum::parse(package_matcher, true, true)?;
-            info(parse_res, verify_signature)
-                .map(|res| res.fmt_print(FmtPrintCaller::Info).unwrap())
+            let info = info(parse_res, verify_signature)?;
+            if let Some(into) = save_at {
+                let text = toml::to_string_pretty(&info)?;
+                write(&into, text)
+                    .map_err(|e| anyhow!("Error:Failed to write to '{into}' : {e}"))?;
+                Ok(format!("Success:Info report saved at '{into}'"))
+            } else {
+                let text = info.fmt_print(FmtPrintCaller::Info)?;
+                Ok(text)
+            }
         }
         Action::List => list().map(|list| {
             if list.is_empty() {
