@@ -19,7 +19,7 @@
 
 ## Features
 
-- 🚀 **Rusty Everything**: Built with Rust, the compiled size is less than 20MB and does not require any runtime or dynamic library dependencies, offering excellent performance
+- 🚀 **Rusty Everything**: Built with Rust, the compiled size is around 20MB and does not require any runtime or dynamic library dependencies, offering excellent performance
 - 🔒 **Efficient Signature**: Uses the BLAKE3 hashing algorithm, combined with the Ed25519 digital signature algorithm to provide a secure and extremely fast signing experience
 - 📦 **Efficient Compression**: Utilizes the Zstandard compression algorithm, achieving efficient data compression and decompression capabilities
 - 🛠️ **Streamlined Workflow**: Complete workflow design, elegantly describing the installation, update, and uninstallation processes of packages; supports automatic generation of reverse workflows, permission information, and packing lists from workflows
