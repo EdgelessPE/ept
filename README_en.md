@@ -20,7 +20,7 @@
 ## Features
 
 - 🚀 **Rusty Everything**: Built with Rust, the compiled size is around 20MB and does not require any runtime or dynamic library dependencies, offering excellent performance
-- 🔒 **Efficient Signature**: Uses the BLAKE3 hashing algorithm, combined with the Ed25519 digital signature algorithm to provide a secure and extremely fast signing experience
+- 🔒 **Efficient Signature**: Utilizes the BLAKE3 hashing algorithm, combined with the Ed25519 digital signature algorithm to provide a secure and extremely fast signing experience
 - 📦 **Efficient Compression**: Utilizes the Zstandard compression algorithm, achieving efficient data compression and decompression capabilities
 - 🛠️ **Streamlined Workflow**: Complete workflow design, elegantly describing the installation, update, and uninstallation processes of packages; supports automatic generation of reverse workflows, permission information, and packing lists from workflows
 - 📝 **‌Comprehensive Features**: Comprehensive metadata management capabilities, supporting tags, permission control, etc.; supports recognizing program self-updates, recognizing registry entries to obtain the main program path and uninstall commands; supports installation package and portable software packages, supports expandable software packages, supports custom package type preferences
@@ -28,10 +28,10 @@
 
 ## Unit Testing
 
-- (Optional) Create an `eptrc.toml` file in the project root directory and specify `local.base` to isolate the test installation environment
+- (Optional) Create `eptrc.toml` in the project root directory and specify `local.base` to isolate the test installation environment
 - Install [miniserve](https://github.com/svenstaro/miniserve) with `scoop install miniserve` or `cargo install --locked miniserve`
-- Execute `pnpm rs:ut`
-- If you need to view the single test coverage, install [tarpaulin](https://github.com/xd009642/tarpaulin) with `cargo install cargo-tarpaulin` and then execute `pnpm rs:ut:html`
+- Execute command `pnpm rs:ut`
+- To view the unit test coverage, install [tarpaulin](https://github.com/xd009642/tarpaulin) with `cargo install cargo-tarpaulin` and then execute `pnpm rs:ut:html`
 
 ## Building
 
