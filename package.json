@@ -42,7 +42,7 @@
     "@rspress/plugin-shiki": "^1.43.3",
     "@types/node": "^22.13.10",
     "chatgpt-md-translator": "^1.7.1",
-    "lint-staged": "^15.4.1",
+    "lint-staged": "^15.5.0",
     "simple-git-hooks": "^2.11.1",
     "ts-results": "^3.3.0",
     "tsx": "^4.19.2"
