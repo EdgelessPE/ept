@@ -55,8 +55,8 @@ importers:
         specifier: ^19.5.0
         version: 19.8.0
       '@modern-js/tsconfig':
-        specifier: 2.65.3
-        version: 2.65.3
+        specifier: 2.65.4
+        version: 2.65.4
       '@rspress/plugin-shiki':
         specifier: ^1.43.3
         version: 1.43.3
@@ -456,8 +456,8 @@ packages:
     peerDependencies:
       react: '>=16'
 
-  '@modern-js/tsconfig@2.65.3':
-    resolution: {integrity: sha512-7sdewlaK823wH8BahbDqBSjvVHu5dNkmplB/MepsZtpY5+whEBOl2EfTpuoKuJykK3A23jwx7mVvE3izH4VJKg==}
+  '@modern-js/tsconfig@2.65.4':
+    resolution: {integrity: sha512-M38GMHYVxe+QXwdBQki/RjcBEVVus+rCazorzN/NPiuVm09lUDWpONd8VCUNDD940pbh8/IyBYryma8jD1XUYw==}
 
   '@module-federation/error-codes@0.8.4':
     resolution: {integrity: sha512-55LYmrDdKb4jt+qr8qE8U3al62ZANp3FhfVaNPOaAmdTh0jHdD8M3yf5HKFlr5xVkVO4eV/F/J2NCfpbh+pEXQ==}
@@ -893,6 +893,9 @@ packages:
   caniuse-lite@1.0.30001703:
     resolution: {integrity: sha512-kRlAGTRWgPsOj7oARC9m1okJEXdL/8fekFVcxA8Hl7GH4r/sN4OJn/i6Flde373T50KS7Y37oFbMwlE8+F42kQ==}
 
+  caniuse-lite@1.0.30001705:
+    resolution: {integrity: sha512-S0uyMMiYvA7CxNgomYBwwwPUnWzFD83f3B1ce5jHUfHTH//QL6hHsreI8RVC5606R4ssqravelYO5TU6t8sEyg==}
+
   ccount@2.0.1:
     resolution: {integrity: sha512-eyrF0jiFpY+3drT6383f1qhkbGsLSifNAjA61IUjZjmLCWjItY6LB9ft9YhoDgwfmclB2zhu51Lc7+95b8NRAg==}
 
@@ -1091,8 +1094,8 @@ packages:
     resolution: {integrity: sha512-47qPchRCykZC03FhkYAhrvwU4xDBFIj1QPqaarj6mdM/hgUzfPHcpkHJOn3mJAufFeeAxAzeGsr5X0M4k6fLZQ==}
     engines: {node: '>=12'}
 
-  electron-to-chromium@1.5.114:
-    resolution: {integrity: sha512-DFptFef3iktoKlFQK/afbo274/XNWD00Am0xa7M8FZUepHlHT8PEuiNBoRfFHbH1okqN58AlhbJ4QTkcnXorjA==}
+  electron-to-chromium@1.5.119:
+    resolution: {integrity: sha512-Ku4NMzUjz3e3Vweh7PhApPrZSS4fyiCIbcIrG9eKrriYVLmbMepETR/v6SU7xPm98QTqMSYiCwfO89QNjXLkbQ==}
 
   emoji-regex@10.4.0:
     resolution: {integrity: sha512-EC+0oUMY1Rqm4O6LLrgjtYDvcVYTy7chDnM4Q7030tP4Kwj3u/pR6gP9ygnp2CJMK5Gq+9Q2oqmrFJAz01DXjw==}
@@ -2958,7 +2961,7 @@ snapshots:
       '@types/react': 19.0.10
       react: 18.3.1
 
-  '@modern-js/tsconfig@2.65.3': {}
+  '@modern-js/tsconfig@2.65.4': {}
 
   '@module-federation/error-codes@0.8.4': {}
 
@@ -3449,8 +3452,8 @@ snapshots:
 
   browserslist@4.24.4:
     dependencies:
-      caniuse-lite: 1.0.30001703
-      electron-to-chromium: 1.5.114
+      caniuse-lite: 1.0.30001705
+      electron-to-chromium: 1.5.119
       node-releases: 2.0.19
       update-browserslist-db: 1.1.3(browserslist@4.24.4)
 
@@ -3463,6 +3466,8 @@ snapshots:
   callsites@3.1.0: {}
 
   caniuse-lite@1.0.30001703: {}
+
+  caniuse-lite@1.0.30001705: {}
 
   ccount@2.0.1: {}
 
@@ -3662,7 +3667,7 @@ snapshots:
 
   dotenv@16.4.7: {}
 
-  electron-to-chromium@1.5.114: {}
+  electron-to-chromium@1.5.119: {}
 
   emoji-regex@10.4.0: {}
 
