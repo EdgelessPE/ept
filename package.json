@@ -38,7 +38,7 @@
     "@commitlint/cli": "^19.8.0",
     "@commitlint/config-conventional": "^19.8.0",
     "@commitlint/types": "^19.5.0",
-    "@modern-js/tsconfig": "2.65.3",
+    "@modern-js/tsconfig": "2.66.0",
     "@rspress/plugin-shiki": "^1.43.3",
     "@types/node": "^22.13.10",
     "chatgpt-md-translator": "^1.7.1",
