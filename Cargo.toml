@@ -39,7 +39,7 @@ shell-words = "1.1.0"
 strum = "0.27.1"
 strum_macros = "0.27.1"
 sysinfo = "0.34.2"
-tantivy = "0.22.0"
+tantivy = "0.24.0"
 tar = "0.4.44"
 toml = { version = "0.8.20", features = ["preserve_order"] }
 trash = "5.2.2"
