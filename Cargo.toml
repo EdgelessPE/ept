@@ -12,7 +12,7 @@ lto = true
 Inflector = "0.11.4"
 anyhow = "1.0.98"
 base64 = "0.22.1"
-blake3 = { version = "1.6.1", features = ["rayon"] }
+blake3 = { version = "1.8.2", features = ["rayon"] }
 chrono = "0.4.39"
 clap = { version = "4.5.37", features = ["derive"] }
 colored = "3.0.0"
