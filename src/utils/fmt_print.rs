@@ -80,7 +80,7 @@ pub fn fmt_print_mirror_line(mirror_info: MirrorInfo) -> String {
     let root_str = format!("Root URL: '{}'", mirror_info.root_url);
     let update_str = format!("Last Update: {time_str}");
     format!(
-        "· {}\n  {}\n  {}",
+        "· {}\n  {}\n  {}\n",
         mirror_info.name.bold(),
         root_str.as_str().truecolor(100, 100, 100),
         update_str.as_str().truecolor(100, 100, 100)
