@@ -69,7 +69,7 @@ fn find_scope_with_name_locally(name: &String, scope: Option<String>) -> Result<
             continue;
         }
         for dir_name in read_sub_dir(app_dir.join(&scope_dir_name))? {
-            if dir_name.to_ascii_lowercase() == name.to_ascii_lowercase() {
+            if dir_name.eq_ignore_ascii_case(name) {
                 return Ok((scope_dir_name, dir_name));
             }
         }
