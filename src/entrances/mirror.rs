@@ -1,6 +1,6 @@
+use crate::utils::request::get;
 use anyhow::{anyhow, Result};
 use humantime::parse_duration;
-use reqwest::blocking::get;
 use std::{
     fs::{metadata, write},
     time::SystemTime,

@@ -20,6 +20,7 @@ pub mod permissions;
 pub mod process;
 pub mod random;
 pub mod reg_entry;
+pub mod request;
 pub mod term;
 pub mod test;
 pub mod upgrade;
