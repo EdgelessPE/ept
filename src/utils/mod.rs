@@ -35,7 +35,6 @@ use std::env::var;
 use std::fs::create_dir_all;
 use std::path::{Path, PathBuf};
 
-use self::fs::try_recycle;
 use self::path::parse_relative_path_with_base;
 use self::random::random_short_string;
 
@@ -140,7 +139,8 @@ pub fn launch_clean() -> Result<()> {
     // 删除 temp 目录
     let p = parse_bare_temp()?;
     if p.exists() {
-        try_recycle(p)?;
+        std::fs::remove_dir_all(p)
+            .map_err(|e| anyhow!("Error:Failed to remove temp directory : {e}"))?;
     }
 
     // 清理过期缓存
