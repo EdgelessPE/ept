@@ -4325,9 +4325,9 @@ checksum = "943ce29a8a743eb10d6082545d861b24f9d1b160b7d741e0f2cdf726bec909c5"
 
 [[package]]
 name = "vc-ltl"
-version = "5.2.1"
+version = "5.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fc2541a77e8b48e7273b00f30aaec739dd867e4514225286ae8e361890433893"
+checksum = "952e87999b59993e0bd8a02c65abff374daf3f44a1643c414f93dbab6d03c052"
 
 [[package]]
 name = "vcpkg"
