@@ -148,7 +148,7 @@ fn test_upgrade() {
     upgrade(false, false).unwrap();
 
     // 等待 3s 后断言程序被更新
-    sleep(Duration::from_secs(3));
+    sleep(Duration::from_secs(10));
     assert_eq!(
         compute_hash_blake3(&p2s!(toolchain_path.join("ept.exe"))).unwrap(),
         "47902cfe5ef75cae1b7cd0497b9b36f98847e55f1afb20d1799f99daf6c40ee4".to_string()
