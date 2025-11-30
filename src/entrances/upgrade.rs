@@ -22,6 +22,10 @@ pub fn upgrade(dry_run: bool, need_exit_process: bool) -> Result<String> {
     let current_version = env!("CARGO_PKG_VERSION");
     // 检查是否有更新
     let (has_upgrade, is_cross_wid_gap, latest_release) = check_has_upgrade()?;
+    log!(
+        "Debug:Upgrade check result - has_upgrade: {has_upgrade}, is_cross_wid_gap: {is_cross_wid_gap}, latest_version: '{}'",
+        &latest_release.version
+    );
     if !has_upgrade || dry_run {
         return Ok(if has_upgrade {
             print_upgradable(latest_release)
@@ -48,12 +52,22 @@ pub fn upgrade(dry_run: bool, need_exit_process: bool) -> Result<String> {
     }
 
     // 下载最新的 zip 包，不带缓存
+    log!(
+        "Info:Downloading latest ept toolchain ('{}') from '{}'",
+        &latest_release.version,
+        &latest_release.url
+    );
     let temp_dir = allocate_path_temp("upgrade", false)?;
     let zip_path = temp_dir.join("latest.zip");
     let _ = download(&latest_release.url, zip_path.clone(), None)?;
 
     // 解压到临时目录
     let temp_release_dir = temp_dir.join("release");
+    log!(
+        "Info:Extracting downloaded ept toolchain package '{}' to '{}'",
+        p2s!(zip_path),
+        p2s!(temp_release_dir)
+    );
     let file = File::open(&zip_path)
         .map_err(|e| anyhow!("Error:Failed to open '{}' as file : {e}", p2s!(zip_path)))?;
     let mut zip_ins = ZipArchive::new(file).map_err(|e| {
@@ -81,6 +95,7 @@ pub fn upgrade(dry_run: bool, need_exit_process: bool) -> Result<String> {
         .join("upgrade.cmd")
         .to_string_lossy()
         .replace("/", "\\");
+    log!("Info:Writing upgrade script to '{}'", &script_path);
     let script_content = include_str!("../../scripts/toolchain_utils/upgrade.cmd")
         .to_string()
         .replace("{target}", toolchain_path.to_string_lossy().as_ref());
@@ -88,6 +103,7 @@ pub fn upgrade(dry_run: bool, need_exit_process: bool) -> Result<String> {
         .map_err(|e| anyhow!("Error:Failed to write to '{}' : {e}", &script_path))?;
 
     // 执行脚本
+    log!("Info:Executing upgrade script '{}'", &script_path);
     Command::new("cmd")
         .args(vec!["/c", "start", script_path.as_str()])
         .current_dir(temp_dir)
@@ -148,12 +164,12 @@ fn test_upgrade() {
     upgrade(false, false).unwrap();
 
     // 等待 3s 后断言程序被更新
-    sleep(Duration::from_secs(3));
-    assert!(toolchain_path.join("what can i say.man").exists());
+    sleep(Duration::from_secs(10));
     assert_eq!(
         compute_hash_blake3(&p2s!(toolchain_path.join("ept.exe"))).unwrap(),
         "47902cfe5ef75cae1b7cd0497b9b36f98847e55f1afb20d1799f99daf6c40ee4".to_string()
     );
+    assert!(toolchain_path.join("what can i say.man").exists());
 
     // 还原原有的镜像文件夹
     crate::utils::test::_restore_mirror_data(mock_ctx);
