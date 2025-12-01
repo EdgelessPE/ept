@@ -42,7 +42,7 @@ sysinfo = "0.37.2"
 tantivy = "0.25.0"
 tar = "0.4.44"
 toml = { version = "0.9.8", features = ["preserve_order"] }
-trash = "5.2.3"
+trash = "5.2.5"
 ts-rs = "11.1.0"
 url = "2.5.7"
 which = "8.0.0"
