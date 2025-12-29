@@ -3935,9 +3935,9 @@ dependencies = [
 
 [[package]]
 name = "vc-ltl"
-version = "5.2.2"
+version = "5.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "952e87999b59993e0bd8a02c65abff374daf3f44a1643c414f93dbab6d03c052"
+checksum = "53fe54ba3aacc582bc3a665a6f1ce0a36faf69faaf4f514e800ed5425b010a7b"
 
 [[package]]
 name = "vcpkg"
