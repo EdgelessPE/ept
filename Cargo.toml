@@ -44,7 +44,7 @@ tar = "0.4.44"
 toml = { version = "0.9.10", features = ["preserve_order"] }
 trash = "5.2.5"
 ts-rs = "11.1.0"
-url = "2.5.7"
+url = "2.5.8"
 which = "8.0.0"
 wildmatch = "2.6.1"
 zstd = "0.13.3"
