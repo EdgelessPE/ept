@@ -34,7 +34,7 @@ reqwest = { version = "0.13.1", features = ["blocking", "json", "zstd"] }
 rustyline = "17.0.2"
 semver = "1.0.27"
 serde = { version = "1.0.228", features = ["derive"] }
-serde_json = "1.0.148"
+serde_json = "1.0.149"
 shell-words = "1.1.1"
 strum = "0.27.2"
 strum_macros = "0.27.2"
