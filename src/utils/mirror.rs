@@ -223,14 +223,11 @@ pub fn build_index_for_mirror(content: MirrorPkgSoftware, dir: PathBuf) -> Resul
     }
 
     // 写索引
-    let serialized_quick_map = bincode::serde::encode_to_vec(
-        &QuickMaps {
-            scope_map,
-            full_map,
-            url_template: content.url_template,
-        },
-        bincode::config::standard(),
-    )?;
+    let serialized_quick_map = postcard::to_stdvec(&QuickMaps {
+        scope_map,
+        full_map,
+        url_template: content.url_template,
+    })?;
     let quick_path = dir.join(MIRROR_FILE_QUICK_MAP);
     std::fs::write(&quick_path, serialized_quick_map).map_err(|e| {
         anyhow!(
@@ -318,13 +315,12 @@ pub fn read_quick_maps(mirror_name: &str) -> Result<QuickMaps> {
             p2s!(quick_path)
         )
     })?;
-    let (quick_map, _): (QuickMaps, usize) =
-        bincode::serde::decode_from_slice(&bin_data, bincode::config::standard()).map_err(|e| {
-            anyhow!(
-                "Error:Invalid quick map bin at '{}' : {e}",
-                p2s!(quick_path)
-            )
-        })?;
+    let quick_map: QuickMaps = postcard::from_bytes(&bin_data).map_err(|e| {
+        anyhow!(
+            "Error:Invalid quick map bin at '{}' : {e}",
+            p2s!(quick_path)
+        )
+    })?;
 
     Ok(quick_map)
 }
