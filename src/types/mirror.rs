@@ -250,11 +250,10 @@ pub struct MirrorPkgSoftwareRelease {
 impl MirrorPkgSoftwareRelease {
     pub fn get_flags(&self) -> Option<String> {
         // 正则匹配 flags
-        let matches: Vec<&str> = FLAGS_RE
-            .captures_iter(&self.file_name)
-            .filter_map(|cap| cap.get(1).map(|c| c.as_str()))
-            .collect();
-        matches.first().map(|flags| flags.to_string())
+        FLAGS_RE
+            .captures(&self.file_name)
+            .and_then(|cap| cap.get(1))
+            .map(|m| m.as_str().to_string())
     }
 }
 

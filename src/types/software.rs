@@ -109,21 +109,22 @@ impl Verifiable for Software {
         }
 
         // tags 不应该与 software 表中的字段重复
-        let mut fields = vec![("category", self.category.to_owned())];
-        if let Some(alias) = &self.alias {
-            fields.push(("alias", alias.to_owned()));
-        }
-        let tag_checker = |tag: &String| {
-            for (field, text) in fields.clone() {
+        let fields: Vec<(&str, &str)> = [
+            Some(("category", self.category.as_str())),
+            self.alias.as_ref().map(|a| ("alias", a.as_str())),
+        ]
+        .into_iter()
+        .flatten()
+        .collect();
+
+        for tag in self.tags.as_ref().unwrap_or(&vec![]) {
+            for (field, text) in &fields {
                 if text.contains(tag) {
-                    return Err(anyhow!("Error:Value '{tag}' in field 'tags' contains duplicated key word found in field '{field}' : '{text}'"));
+                    return Err(err_wrapper(anyhow!(
+                        "Value '{tag}' in field 'tags' contains duplicated key word found in field '{field}' : '{text}'"
+                    )));
                 }
             }
-
-            Ok(())
-        };
-        for tag in self.tags.to_owned().unwrap_or_default() {
-            tag_checker(&tag)?;
         }
 
         Ok(())

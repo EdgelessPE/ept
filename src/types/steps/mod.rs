@@ -47,8 +47,8 @@ fn toml_try_into<'de, T>(key: String, val: Value) -> Result<T>
 where
     T: de::Deserialize<'de>,
 {
-    val.to_owned().try_into().map_err(|err| {
-        let step = val["step"].as_str().unwrap_or("unknown step");
+    let step = val["step"].as_str().unwrap_or("unknown step").to_string();
+    val.try_into().map_err(|err| {
         anyhow!("Error:Can't parse workflow node '{key}' into step '{step}' : {err}")
     })
 }

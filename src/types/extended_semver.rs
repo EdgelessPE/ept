@@ -82,20 +82,21 @@ impl ExSemVer {
         pre: Prerelease,
         build: BuildMetadata,
     ) -> Self {
+        let semver_instance = semver::Version {
+            major,
+            minor,
+            patch,
+            pre: pre.clone(),
+            build: build.clone(),
+        };
         ExSemVer {
             major,
             minor,
             patch,
             reserved,
-            pre: pre.clone(),
-            build: build.clone(),
-            semver_instance: semver::Version {
-                major,
-                minor,
-                patch,
-                pre,
-                build,
-            },
+            pre,
+            build,
+            semver_instance,
         }
     }
     pub fn parse(text: &String) -> Result<Self> {
@@ -167,12 +168,7 @@ impl FromStr for ExSemVer {
 
 impl PartialEq for ExSemVer {
     fn eq(&self, other: &Self) -> bool {
-        let res = self.semver_instance.eq(&other.semver_instance);
-        if res {
-            self.reserved == other.reserved
-        } else {
-            res
-        }
+        self.semver_instance.eq(&other.semver_instance) && self.reserved == other.reserved
     }
 }
 

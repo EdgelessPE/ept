@@ -88,32 +88,32 @@ impl Info {
         // 更新提示
         let has_installed = self.local.is_some();
 
-        let target_ver = self.target.version.clone();
-        let local_ver = self.local.clone().unwrap_or_default().version;
-        let online_ver = self.online.clone().unwrap_or_default().version;
+        let target_ver = &self.target.version;
+        let local_ver = self.local.as_ref().map(|l| &l.version);
+        let online_ver = self.online.as_ref().map(|o| &o.version);
 
-        let has_update = ExSemVer::parse(&local_ver)? < ExSemVer::parse(&online_ver)?;
-
-        let target_tip = format!("({target_ver})");
-        let local_tip = format!("({local_ver})");
-        let online_tip = format!("({online_ver})");
-        let updated_tip = format!("(✅ {local_ver})");
-        let has_update_tip = format!("({local_ver} ➡️  {online_ver})");
-        let update_to_tip = format!("({local_ver} ➡️  {target_ver})");
+        let has_update = match (&local_ver, &online_ver) {
+            (Some(local), Some(online)) => ExSemVer::parse(local)? < ExSemVer::parse(online)?,
+            _ => false,
+        };
 
         let version_tip = match fmt_caller {
-            FmtPrintCaller::Info => {
-                if !has_installed {
-                    online_tip
-                } else if has_update {
-                    has_update_tip
-                } else {
-                    updated_tip
-                }
+            FmtPrintCaller::Info => match (has_installed, has_update, online_ver, local_ver) {
+                (false, _, Some(ver), _) => format!("({ver})"),
+                (true, true, _, Some(local)) => format!("({local} ➡️  {})", online_ver.unwrap()),
+                (true, false, _, Some(local)) => format!("(✅ {local})"),
+                _ => format!("({})", target_ver),
+            },
+            FmtPrintCaller::Install(_) => format!("({target_ver})"),
+            FmtPrintCaller::Update(_) => {
+                format!(
+                    "({} ➡️  {target_ver})",
+                    local_ver.unwrap_or(&"0.0.0.0".to_string())
+                )
             }
-            FmtPrintCaller::Install(_) => target_tip,
-            FmtPrintCaller::Update(_) => update_to_tip,
-            FmtPrintCaller::Uninstall => local_tip,
+            FmtPrintCaller::Uninstall => {
+                format!("({})", local_ver.unwrap_or(&"0.0.0.0".to_string()))
+            }
         };
 
         // 标题
