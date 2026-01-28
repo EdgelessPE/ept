@@ -124,7 +124,9 @@ pub fn get_path_toolchain() -> Result<PathBuf> {
 
 pub fn get_system_drive() -> Result<String> {
     let root = var("SystemRoot")?;
-    Ok(root[0..2].to_string())
+    root.get(0..2)
+        .map(|s| s.to_string())
+        .ok_or_else(|| anyhow!("Error:SystemRoot environment variable is too short"))
 }
 
 pub fn is_url(text: &str) -> bool {

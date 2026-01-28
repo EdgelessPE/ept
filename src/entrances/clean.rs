@@ -62,12 +62,9 @@ pub fn clean() -> Result<usize> {
                 if app_path.is_dir() {
                     // 尝试读取 info
                     let info_res = info_local(&scope_name, &app_name);
-                    if info_res.is_ok() {
+                    if let Ok((global, _)) = info_res {
                         // 有效应用计数
                         valid_apps_count += 1;
-
-                        // 读取 package
-                        let (global, _) = info_res.unwrap();
 
                         // 读取工作流
                         let setup_path = p2s!(get_path_apps(&scope_name, &app_name, false)?

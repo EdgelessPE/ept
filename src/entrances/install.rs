@@ -265,7 +265,7 @@ fn test_install() {
 
     // 准备测试 main_program 校验
     crate::utils::test::_ensure_testing_uninstalled("Microsoft", "CallInstaller");
-    let binding = crate::utils::env::env_desktop() + "/Call.exe";
+    let binding = crate::utils::env::env_desktop().unwrap() + "/Call.exe";
     let desktop_call_path = Path::new(&binding);
     if desktop_call_path.exists() {
         remove_file(desktop_call_path).unwrap();
@@ -302,7 +302,10 @@ fn test_install_dism() {
         SysArch::X86 => "Dism++x86",
         SysArch::ARM64 => "Dism++ARM64",
     };
-    let p = format!("{d}/{stem_name}.lnk", d = crate::utils::env::env_desktop());
+    let p = format!(
+        "{d}/{stem_name}.lnk",
+        d = crate::utils::env::env_desktop().unwrap()
+    );
     println!("{p}");
     assert!(Path::new(&p).exists());
     std::fs::remove_file(&p).unwrap();

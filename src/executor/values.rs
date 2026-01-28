@@ -173,34 +173,34 @@ define_values! {
     //- 系统盘符
     //@ C:
     //# to = "${SystemDrive}/Windows/system32"
-    {"${SystemDrive}",env_system_drive(),PermissionLevel::Sensitive},
+    {"${SystemDrive}",env_system_drive().unwrap(),PermissionLevel::Sensitive},
     //- 用户主目录
     //@ C:/Users/UserName
     //# to = "${Home}/Document"
-    {"${Home}",env_home(),PermissionLevel::Important},
+    {"${Home}",env_home().unwrap(),PermissionLevel::Important},
     //- 应用数据目录
     //- :::warning
     //- 注意：此变量和 Windows 系统内的 `%appdata%` 变量表示的目录位置不同，其不会自动在末尾加上`Roaming`
     //- :::
     //@ C:/Users/UserName/AppData
     //# to = "${AppData}/Roaming/Microsoft/Windows/Start Menu"
-    {"${AppData}",env_appdata(),PermissionLevel::Sensitive},
+    {"${AppData}",env_appdata().unwrap(),PermissionLevel::Sensitive},
     //- ProgramFiles 目录
     //@ C:/Program Files
     //# to = "${ProgramFiles_X64}/Microsoft/Windows"
-    {"${ProgramFiles_X64}",env_program_files_x64(),PermissionLevel::Sensitive},
+    {"${ProgramFiles_X64}",env_program_files_x64().unwrap(),PermissionLevel::Sensitive},
     //- ProgramFiles (x86) 目录
     //@ C:/Program Files (x86)
     //# to = "${ProgramFiles_X86}/Microsoft"
-    {"${ProgramFiles_X86}",env_program_files_x86(),PermissionLevel::Sensitive},
+    {"${ProgramFiles_X86}",env_program_files_x86().unwrap(),PermissionLevel::Sensitive},
     //- 当前用户桌面目录
     //@ C:/Users/UserName/Desktop
     //# to = "${Desktop}"
-    {"${Desktop}",env_desktop(),PermissionLevel::Important},
+    {"${Desktop}",env_desktop().unwrap(),PermissionLevel::Important},
     //- 公用桌面目录
     //@ C:/Users/Public/Desktop
     //# to = "${PublicDesktop}"
-    {"${PublicDesktop}",env_public_desktop(),PermissionLevel::Important},
+    {"${PublicDesktop}",env_public_desktop().unwrap(),PermissionLevel::Important},
     //- 运行时系统架构，可能的值：`X64` `X86` `ARM64`
     //@ X64
     {"${Arch}",SysArch::get_current_arch().unwrap().to_string(),PermissionLevel::Normal}

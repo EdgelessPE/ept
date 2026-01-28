@@ -409,8 +409,8 @@ fn test_update_all() {
 #[test]
 fn test_update_workflow_executions() {
     use std::path::Path;
-    let desktop = crate::utils::env::env_desktop();
-    assert!(crate::utils::wild_match::parse_wild_match("vsc*.lnk".to_string(), &desktop).is_err());
+    let desktop = crate::utils::env::env_desktop().unwrap();
+    assert!(crate::utils::wild_match::parse_wild_match("vsc*.lnk", &desktop).is_err());
     set_flag(Flag::Confirm, true);
 
     // (旧包类型，新包类型，更新后断言存在的文件)
@@ -461,9 +461,7 @@ fn test_update_workflow_executions() {
             assert!(p.exists());
             std::fs::remove_file(p).unwrap();
         }
-        assert!(
-            crate::utils::wild_match::parse_wild_match("vsc*.lnk".to_string(), &desktop).is_err()
-        );
+        assert!(crate::utils::wild_match::parse_wild_match("vsc*.lnk", &desktop).is_err());
 
         // 卸载
         crate::utils::test::_ensure_testing_vscode_uninstalled();
@@ -477,8 +475,8 @@ fn test_update_workflow_executions() {
 #[test]
 fn test_update_with_different_author() {
     set_flag(Flag::Confirm, true);
-    let desktop = crate::utils::env::env_desktop();
-    assert!(crate::utils::wild_match::parse_wild_match("vsc*.lnk".to_string(), &desktop).is_err());
+    let desktop = crate::utils::env::env_desktop().unwrap();
+    assert!(crate::utils::wild_match::parse_wild_match("vsc*.lnk", &desktop).is_err());
     let desktop_path = std::path::Path::new(&desktop);
 
     // 卸载

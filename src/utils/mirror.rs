@@ -413,7 +413,7 @@ pub fn get_url_with_version_req(
     matcher: PackageMatcher,
 ) -> Result<(String, MirrorPkgSoftwareRelease, String)> {
     // 查找 scope 并使用 scope 更新纠正大小写
-    let (scope, package_name) = find_scope_with_name(&matcher.name, matcher.scope)?;
+    let (scope, package_name) = find_scope_with_name(&matcher.name, matcher.scope.as_deref())?;
     // 拿到 info online
     let (info, url_template, mirror_name) = info_online(&scope, &package_name, matcher.mirror)?;
     // 匹配版本

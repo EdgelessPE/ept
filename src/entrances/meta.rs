@@ -47,7 +47,7 @@ fn find_meta_target(input: PackageInputEnum, verify_signature: bool) -> Result<M
         }
         PackageInputEnum::PackageMatcher(matcher) => {
             if let Ok((scope, package_name)) =
-                find_scope_with_name(&matcher.name, matcher.scope.clone())
+                find_scope_with_name(&matcher.name, matcher.scope.as_deref())
             {
                 // 先尝试在本地已安装列表中搜索
                 let path = get_path_apps(&scope, &package_name, false)?;

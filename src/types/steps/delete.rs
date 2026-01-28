@@ -64,7 +64,7 @@ impl TStep for StepDelete {
         //- 删除文件/文件夹。
         let force = self.force.unwrap_or(false);
         if contains_wild_match(&self.at) {
-            for target in parse_wild_match(self.at, &cx.located)? {
+            for target in parse_wild_match(&self.at, &cx.located)? {
                 delete(&p2s!(target), force)?;
             }
         } else {

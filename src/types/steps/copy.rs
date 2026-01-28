@@ -146,7 +146,7 @@ impl TStep for StepCopy {
         //- 复制文件/文件夹。
         let overwrite = self.overwrite.unwrap_or(false);
         if contains_wild_match(&self.from) {
-            for from in parse_wild_match(self.from, &cx.located)? {
+            for from in parse_wild_match(&self.from, &cx.located)? {
                 copy(&p2s!(from), &self.to, &cx.located, overwrite, true)?;
             }
         } else {

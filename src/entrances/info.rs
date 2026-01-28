@@ -124,7 +124,7 @@ pub fn info(
             let package_name = matcher.name.clone();
             mirror = matcher.mirror.clone();
             // 查找 scope 并使用 scope 更新纠正大小写
-            let (scope, package_name) = find_scope_with_name(&package_name, scope)?;
+            let (scope, package_name) = find_scope_with_name(&package_name, scope.as_deref())?;
             // 获取在线信息
             if let Ok((item, _, _)) = info_online(&scope, &package_name, mirror.clone()) {
                 let (info_diff, meta) = consume_info_diff(&item, matcher.version_req)?;

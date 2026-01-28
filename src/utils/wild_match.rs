@@ -11,7 +11,7 @@ pub fn contains_wild_match(raw: &str) -> bool {
 }
 
 /// 返回 Ok(bool) 表示路径有效，bool 表示是否使用到了通配符；返回 Err(e) 表示使用方式非法
-pub fn is_valid_wild_match(raw: &String, located: &String) -> Result<bool> {
+pub fn is_valid_wild_match(raw: &str, located: &str) -> Result<bool> {
     // 检查是否存在通配符
     if !contains_wild_match(raw) {
         return Ok(false);
@@ -30,9 +30,9 @@ pub fn is_valid_wild_match(raw: &String, located: &String) -> Result<bool> {
 }
 
 /// 将给定的带有通配符的路径解析为文件匹配数组
-pub fn parse_wild_match(raw: String, located: &String) -> Result<Vec<PathBuf>> {
+pub fn parse_wild_match(raw: &str, located: &str) -> Result<Vec<PathBuf>> {
     // 拆分父子路径
-    let (parent, child) = split_parent(&raw, located);
+    let (parent, child) = split_parent(raw, located);
 
     // 判断父目录存在
     if !parent.exists() {
@@ -80,7 +80,7 @@ pub fn parse_wild_match(raw: String, located: &String) -> Result<Vec<PathBuf>> {
 }
 
 /// 支持通配符步骤的通用校验函数
-pub fn common_wild_match_verify(from: &String, to: &String, located: &String) -> Result<()> {
+pub fn common_wild_match_verify(from: &str, to: &str, located: &str) -> Result<()> {
     is_valid_wild_match(from, located)?;
     if contains_wild_match(to) {
         return Err(anyhow!(
@@ -98,56 +98,31 @@ pub fn common_wild_match_verify(from: &String, to: &String, located: &String) ->
 
 #[test]
 fn test_is_valid_wild_match() {
-    let located = String::from("./");
-    assert!(is_valid_wild_match(&"*.toml".to_string(), &located).is_ok());
-    assert!(is_valid_wild_match(&"src/*.rs".to_string(), &located).is_ok());
-    assert!(is_valid_wild_match(&"src/*s/mod.rs".to_string(), &located).is_err());
-    assert!(is_valid_wild_match(&"src/types/mod?rs".to_string(), &located).is_ok());
+    let located = "./";
+    assert!(is_valid_wild_match("*.toml", located).is_ok());
+    assert!(is_valid_wild_match("src/*.rs", located).is_ok());
+    assert!(is_valid_wild_match("src/*s/mod.rs", located).is_err());
+    assert!(is_valid_wild_match("src/types/mod?rs", located).is_ok());
 }
 
 #[test]
 fn test_parse_wild_match() {
     use std::env::current_dir;
     let located = p2s!(current_dir().unwrap());
+    assert_eq!(parse_wild_match("*.yaml", &located).unwrap().len(), 1);
+    assert_eq!(parse_wild_match("src/*.rs", &located).unwrap().len(), 1);
     assert_eq!(
-        parse_wild_match("*.yaml".to_string(), &located)
+        parse_wild_match("src/types/mod?rs", &located)
             .unwrap()
             .len(),
         1
     );
-    assert_eq!(
-        parse_wild_match("src/*.rs".to_string(), &located)
-            .unwrap()
-            .len(),
-        1
-    );
-    assert_eq!(
-        parse_wild_match("src/types/mod?rs".to_string(), &located)
-            .unwrap()
-            .len(),
-        1
-    );
-    assert!(parse_wild_match("src/*s/mod.rs".to_string(), &located).is_err());
+    assert!(parse_wild_match("src/*s/mod.rs", &located).is_err());
 }
 
 #[test]
 fn test_common_wild_match_verify() {
-    assert!(common_wild_match_verify(
-        &"./src/*".to_string(),
-        &"./test/".to_string(),
-        &"".to_string()
-    )
-    .is_ok());
-    assert!(common_wild_match_verify(
-        &"./src/*".to_string(),
-        &"./test/*".to_string(),
-        &"".to_string()
-    )
-    .is_err());
-    assert!(common_wild_match_verify(
-        &"./src/*".to_string(),
-        &"./test".to_string(),
-        &"".to_string()
-    )
-    .is_err());
+    assert!(common_wild_match_verify("./src/*", "./test/", "").is_ok());
+    assert!(common_wild_match_verify("./src/*", "./test/*", "").is_err());
+    assert!(common_wild_match_verify("./src/*", "./test", "").is_err());
 }

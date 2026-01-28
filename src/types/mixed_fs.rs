@@ -106,7 +106,7 @@ impl MixedFS {
         if !is_starts_with_inner_value(&from) {
             if contains_wild_match(&from) {
                 // 直接根据真实文件系统拓展 from，拼接到 MixedFS 内
-                for exact_path in parse_wild_match(from, &self.located).unwrap_or_default() {
+                for exact_path in parse_wild_match(&from, &self.located).unwrap_or_default() {
                     let exact_from = p2s!(exact_path);
                     let merged_path = merge_path(&exact_from, path.clone());
                     if exact_path.is_dir() {
@@ -144,7 +144,7 @@ impl MixedFS {
         }
         let path = format_path(path);
         if contains_wild_match(&path) {
-            for exact_path in parse_wild_match(path, &self.located).unwrap_or_default() {
+            for exact_path in parse_wild_match(&path, &self.located).unwrap_or_default() {
                 let str = p2s!(exact_path);
                 let str = &str[format_path(&self.located).len()..str.len()];
                 self.a_remove(str.to_string());

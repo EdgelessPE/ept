@@ -47,18 +47,18 @@ pub fn download(url: &str, to: PathBuf, cached: Option<(PathBuf, String)>) -> Re
 
     let mut buf = vec![0; 1024];
     let mut downloaded = 0;
-    while let Ok(n) = response.read(&mut buf) {
+    loop {
+        let n = response.read(&mut buf)?;
         if n == 0 {
             break;
         }
 
         // 更新进度条
-        let new = min(downloaded + n as u64, content_length);
-        downloaded = new;
-        pb.set_position(new);
+        downloaded = min(downloaded + n as u64, content_length);
+        pb.set_position(downloaded);
 
         // 写入文件
-        file.write_all(&buf[0..n])?;
+        file.write_all(&buf[..n])?;
     }
     // 下载完成，清除进度条
     pb.finish_and_clear();

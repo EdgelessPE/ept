@@ -76,8 +76,11 @@ pub fn fn_log_ok_last(msg: String) {
     {
         let g = gen_log(&format!("{msg}   {ok}", ok = "ok".green()), None);
         if let Some(content) = g {
-            let last_log = LAST_LOG.lock().unwrap();
-            if last_log.clone() == msg {
+            let should_update = {
+                let last_log = LAST_LOG.lock().unwrap();
+                last_log.clone() == msg
+            };
+            if should_update {
                 TERM.move_cursor_up(1).unwrap();
                 TERM.clear_line().unwrap();
             }

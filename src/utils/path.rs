@@ -8,7 +8,7 @@ use super::{
     format_path, fs::read_sub_dir, get_bare_apps, get_path_mirror, mirror::read_quick_maps,
 };
 
-pub fn split_parent(raw: &str, located: &String) -> (PathBuf, String) {
+pub fn split_parent(raw: &str, located: &str) -> (PathBuf, String) {
     // 解析为绝对路径
     let abs_path = parse_relative_path_with_located(raw, located);
 
@@ -45,9 +45,9 @@ pub fn parse_relative_path_with_base(relative: &str) -> Result<PathBuf> {
 }
 
 /// 使用给定的 located 解析相对路径
-pub fn parse_relative_path_with_located(relative: &str, located: &String) -> PathBuf {
+pub fn parse_relative_path_with_located(relative: &str, located: &str) -> PathBuf {
     // debug_assert!(Path::new(located).is_absolute());
-    debug_assert!(located.clone() == "" || Path::new(located).exists());
+    debug_assert!(located.is_empty() || Path::new(located).exists());
 
     let relative = format_path(relative);
     let located = format_path(located);
@@ -55,18 +55,19 @@ pub fn parse_relative_path_with_located(relative: &str, located: &String) -> Pat
     if path.is_absolute() {
         path.to_path_buf()
     } else {
-        Path::new(&located).join(relative).to_path_buf()
+        Path::new(&located).join(relative)
     }
 }
 
 /// name 大小写不敏感
-fn find_scope_with_name_locally(name: &String, scope: Option<String>) -> Result<(String, String)> {
-    let scope_input_str = scope.clone().unwrap_or("".to_string());
+fn find_scope_with_name_locally(name: &str, scope: Option<&str>) -> Result<(String, String)> {
     let app_dir = get_bare_apps()?;
 
     for scope_dir_name in read_sub_dir(app_dir.clone())? {
-        if scope.is_some() && scope_dir_name.to_lowercase() != scope_input_str.to_lowercase() {
-            continue;
+        if let Some(s) = scope {
+            if scope_dir_name.to_lowercase() != s.to_lowercase() {
+                continue;
+            }
         }
         for dir_name in read_sub_dir(app_dir.join(&scope_dir_name))? {
             if dir_name.eq_ignore_ascii_case(name) {
@@ -82,7 +83,7 @@ fn find_scope_with_name_locally(name: &String, scope: Option<String>) -> Result<
     })
 }
 
-fn find_scope_with_name_online(name: &String, scope: Option<String>) -> Result<(String, String)> {
+fn find_scope_with_name_online(name: &str, scope: Option<&str>) -> Result<(String, String)> {
     // 遍历 mirrors
     let p = get_path_mirror()?;
     let mirror_names = read_sub_dir(p)?;
@@ -92,10 +93,10 @@ fn find_scope_with_name_online(name: &String, scope: Option<String>) -> Result<(
     for mirror_name in mirror_names {
         let quick_maps = read_quick_maps(&mirror_name)?;
         if let Some((possible_scopes, true_name)) = quick_maps.scope_map.get(&name.to_lowercase()) {
-            if let Some(dirty_scope) = scope.clone() {
+            if let Some(dirty_scope) = scope {
                 for s in possible_scopes {
                     if s.to_lowercase() == dirty_scope.to_lowercase() {
-                        return Ok((s.clone(), name.clone()));
+                        return Ok((s.clone(), name.to_string()));
                     }
                 }
             } else if possible_scopes.len() == 1 {
@@ -112,10 +113,9 @@ fn find_scope_with_name_online(name: &String, scope: Option<String>) -> Result<(
     })
 }
 
-pub fn find_scope_with_name(name: &String, scope: Option<String>) -> Result<(String, String)> {
-    let local_res = find_scope_with_name_locally(name, scope.clone());
-    if local_res.is_ok() {
-        return local_res;
+pub fn find_scope_with_name(name: &str, scope: Option<&str>) -> Result<(String, String)> {
+    if let Ok(res) = find_scope_with_name_locally(name, scope) {
+        return Ok(res);
     }
     find_scope_with_name_online(name, scope)
 }
@@ -159,14 +159,14 @@ fn test_find_scope_with_name() {
     assert_eq!(res, ("Microsoft".to_string(), "VSCode".to_string()));
 
     // 命名冲突
-    assert!(find_scope_with_name(&"NameA".to_string(), None).is_err());
-    assert!(find_scope_with_name(&"NameA".to_string(), Some("ScopeA".to_string())).is_ok());
-    assert!(find_scope_with_name(&"NameA".to_string(), Some("ScopeB".to_string())).is_ok());
+    assert!(find_scope_with_name("NameA", None).is_err());
+    assert!(find_scope_with_name("NameA", Some("ScopeA")).is_ok());
+    assert!(find_scope_with_name("NameA", Some("ScopeB")).is_ok());
 
     // 命名和别名冲突
-    assert!(find_scope_with_name(&"NameB".to_string(), None).is_err());
-    assert!(find_scope_with_name(&"NameB".to_string(), Some("ScopeA".to_string())).is_ok());
-    assert!(find_scope_with_name(&"NameB".to_string(), Some("ScopeB".to_string())).is_ok());
+    assert!(find_scope_with_name("NameB", None).is_err());
+    assert!(find_scope_with_name("NameB", Some("ScopeA")).is_ok());
+    assert!(find_scope_with_name("NameB", Some("ScopeB")).is_ok());
 
     _unmount_custom_mirror(tup);
 }

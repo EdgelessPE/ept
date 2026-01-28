@@ -175,11 +175,11 @@ impl TStep for StepLink {
             HashSet::from_iter(self.at.clone().unwrap_or(vec!["Desktop".to_string()]));
         if set.contains("Desktop") {
             log!("Info(Link):Adding shortcut '{target_name}' to desktop");
-            create_shortcut(&sl, &target_name, &env_desktop())?;
+            create_shortcut(&sl, &target_name, &env_desktop()?)?;
         }
         if set.contains("StartMenu") {
             log!("Info(Link):Adding shortcut '{target_name}' to start menu");
-            create_shortcut(&sl, &target_name, &env_start_menu())?;
+            create_shortcut(&sl, &target_name, &env_start_menu()?)?;
             update_start_menu();
         }
 
@@ -191,10 +191,10 @@ impl TStep for StepLink {
             HashSet::from_iter(self.at.clone().unwrap_or(vec!["Desktop".to_string()]));
         let target_name = self.get_target_name();
         if set.contains("Desktop") {
-            delete_shortcut(&target_name, &env_desktop())?;
+            delete_shortcut(&target_name, &env_desktop()?)?;
         }
         if set.contains("StartMenu") {
-            delete_shortcut(&target_name, &env_start_menu())?;
+            delete_shortcut(&target_name, &env_start_menu()?)?;
             update_start_menu();
         }
         Ok(())
@@ -303,7 +303,7 @@ fn test_link() {
 
     let desktop_path = dirs::desktop_dir().unwrap().join("ms_ept_test/VSC.lnk");
     let desktop_folder_path = dirs::desktop_dir().unwrap().join("ms_ept_test");
-    let start_path = Path::new(&env_start_menu()).join("ms_ept_test/VSC.lnk");
+    let start_path = Path::new(&env_start_menu().unwrap()).join("ms_ept_test/VSC.lnk");
 
     assert!(desktop_path.exists());
     assert!(start_path.exists());

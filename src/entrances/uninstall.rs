@@ -37,7 +37,7 @@ pub fn uninstall(scope: Option<String>, package_name: &String) -> Result<(String
     log!("Info:Preparing to uninstall '{package_name}'");
 
     // 查找 scope 并使用 scope 更新纠正大小写
-    let (scope, package_name) = find_scope_with_name(package_name, scope)?;
+    let (scope, package_name) = find_scope_with_name(package_name, scope.as_deref())?;
 
     // 解析安装路径
     let app_path = get_path_apps(&scope, &package_name, false)?;
