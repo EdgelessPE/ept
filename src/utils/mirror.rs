@@ -126,7 +126,7 @@ fn get_schema() -> Result<SchemaFields> {
 }
 
 fn register_tokenizer(index: &mut Index) {
-    let tokenizer = tantivy_jieba::JiebaTokenizer {};
+    let tokenizer = tantivy_jieba::JiebaTokenizer::new();
     let analyzer = TextAnalyzer::builder(tokenizer)
         .filter(RemoveLongFilter::limit(40))
         .filter(LowerCaser)
