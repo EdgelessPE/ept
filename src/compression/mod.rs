@@ -26,7 +26,7 @@ fn test_get_temp_tar() {
     );
 }
 
-pub fn compress(source_dir: &String, into_file: &String) -> Result<()> {
+pub fn compress(source_dir: &str, into_file: &str) -> Result<()> {
     let temp_tar = get_temp_tar(Path::new(into_file));
     pack_tar(source_dir, &temp_tar)
         .map_err(|res| anyhow!("Error:Can't archive '{source_dir}' into '{temp_tar}' : {res}"))?;
@@ -41,7 +41,7 @@ pub fn compress(source_dir: &String, into_file: &String) -> Result<()> {
     Ok(())
 }
 
-pub fn decompress(source_file: &String, into_dir: &String) -> Result<()> {
+pub fn decompress(source_file: &str, into_dir: &str) -> Result<()> {
     let temp_tar = get_temp_tar(Path::new(source_file));
     decompress_zstd(source_file, &temp_tar).map_err(|res| {
         anyhow!("Error:Can't decompress '{source_file}' into '{temp_tar}' : {res}")

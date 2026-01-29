@@ -3,7 +3,7 @@ use std::fs::{create_dir_all, remove_dir_all, File};
 use std::path::Path;
 use tar::{Archive, Builder};
 
-pub fn release_tar(source: &String, into: &String) -> Result<()> {
+pub fn release_tar(source: &str, into: &str) -> Result<()> {
     let file = File::open(source)?;
     let mut archive = Archive::new(file);
 
@@ -18,7 +18,7 @@ pub fn release_tar(source: &String, into: &String) -> Result<()> {
     Ok(())
 }
 
-pub fn pack_tar(source: &String, store_at: &String) -> Result<()> {
+pub fn pack_tar(source: &str, store_at: &str) -> Result<()> {
     let file = File::create(store_at)
         .map_err(|e| anyhow!("Error:Failed to create file at '{store_at}' : {e}"))?;
     let mut archive = Builder::new(file);
@@ -32,7 +32,7 @@ fn test_pack_tar() {
     crate::utils::test::_ensure_clear_test_dir();
     let p = Path::new("./test/VSCode_1.0.0.0_Cno.tar");
     if p.exists() {
-        crate::compression::remove_file(p).unwrap();
+        std::fs::remove_file(p).unwrap();
     }
     pack_tar(
         &"examples/VSCode".to_string(),
