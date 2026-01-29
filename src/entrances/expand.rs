@@ -2,10 +2,7 @@ use crate::{
     executor::workflow_executor,
     log, log_ok_last, p2s,
     parsers::{parse_package, parse_workflow},
-    types::{
-        constants::{DIR_WORKFLOWS, FILE_PACKAGE},
-        workflow::WORKFLOW_EXPAND,
-    },
+    types::constants::{DIR_WORKFLOWS, FILE_PACKAGE, WORKFLOW_EXPAND},
     utils::fs::try_recycle,
 };
 use anyhow::{anyhow, Result};

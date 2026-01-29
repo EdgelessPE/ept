@@ -1,5 +1,6 @@
 use crate::{
     log, p2s,
+    types::constants::FILE_PACKAGE,
     utils::{
         exe_version::get_exe_version, is_starts_with_inner_value, is_url,
         path::parse_relative_path_with_located,
@@ -65,7 +66,7 @@ pub struct Software {
 impl Verifiable for Software {
     fn verify_self(&self, mixed_fs: &MixedFS) -> Result<()> {
         let err_wrapper = |e: anyhow::Error| {
-            anyhow!("Error:Failed to verify table 'software' in 'package.toml' : {e}")
+            anyhow!("Error:Failed to verify table 'software' in '{FILE_PACKAGE}' : {e}",)
         };
 
         // 检查 arch 枚举

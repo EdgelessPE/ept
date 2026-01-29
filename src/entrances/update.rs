@@ -5,9 +5,8 @@ use super::{
         validator::installed_validator,
     },
 };
-use crate::types::{
-    constants::{DIR_NEP_CONTEXT, DIR_WORKFLOWS},
-    workflow::{WORKFLOW_REMOVE, WORKFLOW_SETUP, WORKFLOW_UPDATE},
+use crate::types::constants::{
+    DIR_NEP_CONTEXT, DIR_WORKFLOWS, WORKFLOW_REMOVE, WORKFLOW_SETUP, WORKFLOW_UPDATE,
 };
 use crate::utils::flags::{set_flag, Flag};
 use crate::{

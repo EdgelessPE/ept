@@ -1,11 +1,12 @@
 use crate::parsers::{parse_package, parse_workflow};
+use crate::types::constants::DIR_WORKFLOWS;
 use crate::types::{
-    constants::FILE_PACKAGE,
+    constants::{FILE_PACKAGE, WORKFLOW_EXPAND, WORKFLOW_REMOVE, WORKFLOW_SETUP, WORKFLOW_UPDATE},
     extended_semver::ExSemVer,
     mixed_fs::MixedFS,
     package::GlobalPackage,
     steps::{Step, VerifyStepCtx},
-    workflow::{WorkflowNode, WORKFLOW_REMOVE, WORKFLOW_SETUP, WORKFLOW_UPDATE},
+    workflow::WorkflowNode,
 };
 use crate::utils::exe_version::get_exe_version;
 use crate::utils::is_starts_with_inner_value;
@@ -45,7 +46,7 @@ fn get_manifest(flow: Vec<WorkflowNode>, fs: &mut MixedFS) -> Vec<String> {
 
 fn get_workflow_path(source_dir: &String, file_name: &str) -> PathBuf {
     Path::new(source_dir)
-        .join("workflows")
+        .join(DIR_WORKFLOWS)
         .join(file_name)
         .to_path_buf()
 }
@@ -105,16 +106,16 @@ pub fn verify(source_dir: &String) -> Result<GlobalPackage> {
     if check_call_installer && software.registry_entry.is_none() {
         // 必须有卸载流
         if !get_workflow_path(source_dir, WORKFLOW_REMOVE).exists() {
-            return Err(anyhow!("Error:Workflow '{wr}' should include 'Execute' step with 'call_installer' field enabled when workflow '{ws}' includes such step", wr = WORKFLOW_REMOVE, ws = WORKFLOW_SETUP));
+            return Err(anyhow!("Error:Workflow '{WORKFLOW_REMOVE}' should include 'Execute' step with 'call_installer' field enabled when workflow '{WORKFLOW_SETUP}' includes such step"));
         }
 
         // 必须提供绝对路径的 main_program
         if let Some(mp) = software.main_program.clone() {
             if !Path::new(&mp).is_absolute() {
-                return Err(anyhow!("Error:Field 'main_program' in table 'software' should starts with inner value when workflow '{ws}' includes 'Execute' step with 'call_installer' field, got '{mp}'", ws = WORKFLOW_SETUP));
+                return Err(anyhow!("Error:Field 'main_program' in table 'software' should starts with inner value when workflow '{WORKFLOW_SETUP}' includes 'Execute' step with 'call_installer' field, got '{mp}'"));
             }
         } else {
-            return Err(anyhow!("Error:Field 'main_program' or 'registry_entry' in table 'software' should be provided when workflow '{ws}' includes 'Execute' step with 'call_installer' field", ws = WORKFLOW_SETUP));
+            return Err(anyhow!("Error:Field 'main_program' or 'registry_entry' in table 'software' should be provided when workflow '{WORKFLOW_SETUP}' includes 'Execute' step with 'call_installer' field"));
         }
     }
 
@@ -130,7 +131,7 @@ pub fn verify(source_dir: &String) -> Result<GlobalPackage> {
             let flow = parse_workflow(&p2s!(opt_path))?;
             let call_installer = verify_workflow(flow, &ctx)?;
             if check_call_installer && !call_installer {
-                return Err(anyhow!("Error:Workflow '{opt_workflow}' should include 'Execute' step with 'call_installer' field enabled when workflow 'setup.toml' includes such step"));
+                return Err(anyhow!("Error:Workflow '{opt_workflow}' should include 'Execute' step with 'call_installer' field enabled when workflow '{WORKFLOW_SETUP}' includes such step"));
             }
         }
     }
@@ -140,7 +141,7 @@ pub fn verify(source_dir: &String) -> Result<GlobalPackage> {
         mixed_fs: MixedFS::new(source_dir),
         is_expand_flow: true,
     };
-    let expand_path = get_workflow_path(source_dir, "expand.toml");
+    let expand_path = get_workflow_path(source_dir, WORKFLOW_EXPAND);
     if expand_path.exists() {
         let flow = parse_workflow(&p2s!(expand_path))?;
         verify_workflow(flow, &ctx)?;
@@ -158,7 +159,7 @@ pub fn verify(source_dir: &String) -> Result<GlobalPackage> {
     }
     let mut setup_manifest = get_manifest(setup_flow, &mut fs);
     // 加上 update 工作流的装箱单
-    let update_path = get_workflow_path(source_dir, "update.toml");
+    let update_path = get_workflow_path(source_dir, WORKFLOW_UPDATE);
     if update_path.exists() {
         let update_flow = parse_workflow(&p2s!(update_path))?;
         let mut update_manifest = get_manifest(update_flow, &mut fs);

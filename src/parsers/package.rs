@@ -1,4 +1,5 @@
 use crate::executor::values_replacer;
+use crate::types::constants::FILE_PACKAGE;
 use crate::types::interpretable::Interpretable;
 use crate::types::mixed_fs::MixedFS;
 use crate::types::verifiable::Verifiable;
@@ -96,7 +97,7 @@ pub fn parse_package(
     log!("Debug:Parse package '{p}' with located '{located}'");
     let package_path = Path::new(p);
     if !package_path.exists() {
-        return Err(anyhow!("Error:Fatal:Can't find package.toml path : {p}"));
+        return Err(anyhow!("Error:Fatal:Can't find {FILE_PACKAGE} path : {p}",));
     }
 
     let mut text = String::new();
@@ -116,7 +117,7 @@ pub fn parse_package(
     // 序列化
     let pkg: GlobalPackage = dirty_toml
         .try_into()
-        .map_err(|res| anyhow!("Error:Can't validate package.toml at '{p}' : {res}"))?;
+        .map_err(|res| anyhow!("Error:Can't validate {FILE_PACKAGE} at '{p}' : {res}",))?;
     let software = pkg.software.clone().unwrap();
 
     // 逐一解析作者
@@ -124,12 +125,12 @@ pub fn parse_package(
         let author = parse_author(&raw)?;
         // 第一作者必须提供邮箱
         if i == 0 && author.email.is_none() {
-            return Err(anyhow!("Error:Can't validate package.toml : first author '{name}' in field 'package.authors' should have email (e.g. \"Cno <cno@edgeless.top>\")",name=author.name));
+            return Err(anyhow!("Error:Can't validate {FILE_PACKAGE} : first author '{name}' in field 'package.authors' should have email (e.g. \"Cno <cno@edgeless.top>\")", name=author.name));
         }
     }
 
     // 支持智能识别 located 指的 "根目录" 还是 "根目录/名称"
-    let mixed_located = if Path::new(&(located.to_owned() + "/package.toml")).exists() {
+    let mixed_located = if Path::new(&(located.to_owned() + "/" + FILE_PACKAGE)).exists() {
         &format!("{located}/{name}", name = pkg.package.name)
     } else {
         located

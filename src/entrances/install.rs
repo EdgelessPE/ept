@@ -9,10 +9,7 @@ use super::{
         validator::installed_validator,
     },
 };
-use crate::types::{
-    constants::DIR_NEP_CONTEXT,
-    workflow::WORKFLOW_SETUP,
-};
+use crate::types::constants::{DIR_NEP_CONTEXT, DIR_WORKFLOWS, WORKFLOW_SETUP};
 use crate::{entrances::update_using_package, utils::parse_inputs::ParseInputResEnum};
 use crate::{
     entrances::{expand_workshop, is_workshop_expandable},
@@ -141,7 +138,7 @@ pub fn install_using_package(
 
     // 加载安装工作流
     log!("Info:Resolving package...");
-    let setup_file_path = temp_dir_inner_path.join("workflows").join(WORKFLOW_SETUP);
+    let setup_file_path = temp_dir_inner_path.join(DIR_WORKFLOWS).join(WORKFLOW_SETUP);
     let setup_workflow = parse_workflow(&p2s!(setup_file_path))?;
 
     // 检查是否已全局安装

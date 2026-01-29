@@ -1,5 +1,6 @@
 use std::path::PathBuf;
 
+use crate::types::constants::FILE_PACKAGE;
 use crate::{types::matcher::PackageMatcher, utils::get_path_cache};
 use anyhow::anyhow;
 use httpmock::prelude::*;
@@ -544,7 +545,7 @@ pub fn _unmount_custom_mirror(tup: (bool, PathBuf, PathBuf)) {
 
 pub fn _modify_package_dir_version(dir: &str, to_version: &str) {
     let dir = dir.to_string();
-    let pkg_path = format!("{dir}/package.toml");
+    let pkg_path = format!("{dir}/{FILE_PACKAGE}");
     let version = to_version.to_string();
     let mut pkg = crate::parsers::parse_package(&pkg_path, &dir, false).unwrap();
     pkg.package.version = version;
@@ -558,7 +559,7 @@ pub fn _fork_example_with_version(origin_dir: &str, to_version: &str) -> String 
     crate::utils::fs::copy_dir(origin_dir, &temp_dir).unwrap();
 
     let dir = crate::p2s!(temp_dir);
-    let pkg_path = format!("{dir}/package.toml");
+    let pkg_path = format!("{dir}/{FILE_PACKAGE}");
     let version = to_version.to_string();
     let mut pkg = crate::parsers::parse_package(&pkg_path, &dir, false).unwrap();
     pkg.package.version = version;

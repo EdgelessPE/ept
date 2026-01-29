@@ -1,4 +1,4 @@
-use crate::types::software::Software;
+use crate::types::{constants::FILE_PACKAGE, software::Software};
 use crate::verify_enum;
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
@@ -54,7 +54,7 @@ pub struct Package {
 impl Verifiable for Package {
     fn verify_self(&self, _: &MixedFS) -> Result<()> {
         let err_wrapper = |e: anyhow::Error| {
-            anyhow!("Error:Failed to verify table 'package' in 'package.toml' : {e}")
+            anyhow!("Error:Failed to verify table 'package' in '{FILE_PACKAGE}' : {e}")
         };
 
         // name 不能包含下划线

@@ -12,10 +12,12 @@ use crate::{
     log, log_ok_last, p2s,
     parsers::{parse_package, parse_workflow},
     types::{
-        constants::{DIR_NEP_CONTEXT, DIR_WORKFLOWS, FILE_PACKAGE},
+        constants::{
+            DIR_NEP_CONTEXT, DIR_WORKFLOWS, FILE_PACKAGE, WORKFLOW_REMOVE, WORKFLOW_SETUP,
+        },
         mixed_fs::MixedFS,
         steps::{StepExecute, TStep},
-        workflow::{WorkflowContext, WorkflowNode, WORKFLOW_REMOVE, WORKFLOW_SETUP},
+        workflow::{WorkflowContext, WorkflowNode},
     },
     utils::{
         get_bare_apps, get_path_apps, path::find_scope_with_name, process::kill_with_name,

@@ -8,7 +8,10 @@ use crate::{
     parsers::parse_workflow,
     signature::blake3::compute_hash_blake3_from_string,
     types::{
-        constants::{DIR_NEP_CONTEXT, DIR_WORKFLOWS},
+        constants::{
+            DIR_NEP_CONTEXT, DIR_WORKFLOWS, WORKFLOW_EXPAND, WORKFLOW_REMOVE, WORKFLOW_SETUP,
+            WORKFLOW_UPDATE,
+        },
         matcher::PackageInputEnum,
         meta::MetaResult,
         package::GlobalPackage,
@@ -42,7 +45,7 @@ fn find_meta_target(input: PackageInputEnum, verify_signature: bool) -> Result<M
                 // verify(&p2s!(path))?;
                 return Ok(MetaTargetResult::Local(
                     path.clone(),
-                    path.join("workflows"),
+                    path.join(DIR_WORKFLOWS),
                 ));
             }
         }
@@ -85,7 +88,7 @@ fn find_meta_target(input: PackageInputEnum, verify_signature: bool) -> Result<M
             let (path, _) = unpack_nep(&p2s!(p), verify_signature)?;
             return Ok(MetaTargetResult::Local(
                 path.clone(),
-                path.join("workflows"),
+                path.join(DIR_WORKFLOWS),
             ));
         }
     }
@@ -101,18 +104,23 @@ pub fn meta(input: PackageInputEnum, verify_signature: bool) -> Result<MetaResul
             let temp_dir = p2s!(temp_dir_inner_path);
 
             // 检查工作流存在
-            let exists_workflows: Vec<(String, String)> =
-                vec!["setup.toml", "update.toml", "remove.toml", "expand.toml"]
-                    .into_iter()
-                    .filter_map(|name| {
-                        let p = workflow_path.join(name);
-                        if p.exists() {
-                            Some((name.to_string(), p2s!(p)))
-                        } else {
-                            None
-                        }
-                    })
-                    .collect();
+            let workflow_files = [
+                WORKFLOW_SETUP,
+                WORKFLOW_UPDATE,
+                WORKFLOW_REMOVE,
+                WORKFLOW_EXPAND,
+            ];
+            let exists_workflows: Vec<(String, String)> = workflow_files
+                .iter()
+                .filter_map(|&name| {
+                    let p = workflow_path.join(name);
+                    if p.exists() {
+                        Some((name.to_string(), p2s!(p)))
+                    } else {
+                        None
+                    }
+                })
+                .collect();
 
             // 收集所有工作流
             let total_workflow = exists_workflows
@@ -338,7 +346,7 @@ fn test_meta() {
             }
         ]
     );
-    assert_eq!(meta_result.workflows, vec!["setup.toml".to_string()]);
+    assert_eq!(meta_result.workflows, vec![WORKFLOW_SETUP.to_string()]);
     assert_eq!(
         meta_result.package,
         GlobalPackage {
@@ -404,7 +412,7 @@ fn test_meta() {
     assert_eq!(res.package.package.name, "VSCodeE");
     assert_eq!(
         res.workflows,
-        vec!["setup.toml".to_string(), "expand.toml".to_string()]
+        vec![WORKFLOW_SETUP.to_string(), WORKFLOW_EXPAND.to_string()]
     );
     handler.kill().unwrap();
 
@@ -425,7 +433,7 @@ fn test_meta() {
                 level: PermissionLevel::Normal,
                 targets: vec!["ntpd.exe".to_string()],
             }],
-            workflows: vec!["setup.toml".to_string(), "remove.toml".to_string()],
+            workflows: vec![WORKFLOW_SETUP.to_string(), WORKFLOW_REMOVE.to_string()],
             package: GlobalPackage {
                 nep: "0".to_string(),
                 package: Package {

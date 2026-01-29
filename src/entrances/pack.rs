@@ -2,6 +2,7 @@ use crate::compression::{compress, pack_tar};
 use crate::entrances::verify::verify;
 use crate::parsers::parse_author;
 use crate::signature::sign;
+use crate::types::constants::EXT_NEP;
 use crate::types::{
     constants::EXT_TAR_ZST,
     signature::{Signature, SignatureNode},
@@ -26,7 +27,7 @@ pub fn pack(source_dir: &String, into_file: Option<String>, need_sign: bool) -> 
     );
 
     // 校验 into_file 是否存在
-    let into_file = into_file.unwrap_or(String::from("./") + &file_stem + ".nep");
+    let into_file = into_file.unwrap_or(String::from("./") + &file_stem + EXT_NEP);
     let into_file_path = Path::new(&into_file);
     if into_file_path.exists() {
         if into_file_path.is_dir() {

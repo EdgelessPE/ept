@@ -406,7 +406,7 @@ fn test_info() {
                     targets: vec!["Install".to_string()],
                 },
             ],
-            workflows: vec!["setup.toml".to_string(), "remove.toml".to_string()],
+            workflows: vec![WORKFLOW_SETUP.to_string(), WORKFLOW_REMOVE.to_string()],
             package: demo_pkg,
         }),
     };

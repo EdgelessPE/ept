@@ -8,9 +8,8 @@ use crate::{
     executor::values_validator_path,
     p2s,
     types::{
-        constants::{DIR_NEP_CONTEXT, DIR_WORKFLOWS, EXT_TAR_ZST, FILE_PACKAGE},
+        constants::{DIR_NEP_CONTEXT, DIR_WORKFLOWS, EXT_TAR_ZST, FILE_PACKAGE, WORKFLOW_SETUP},
         mixed_fs::MixedFS,
-        workflow::WORKFLOW_SETUP,
     },
     utils::{term::ask_yn, wild_match::contains_wild_match},
 };

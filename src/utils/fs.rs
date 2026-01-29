@@ -134,14 +134,14 @@ where
 fn test_read_sub_dir() {
     assert_eq!(
         read_sub_dir("examples/VSCode").unwrap(),
-        vec!["VSCode".to_string(), "workflows".to_string()]
+        vec!["VSCode".to_string(), DIR_WORKFLOWS.to_string()]
     );
 }
 
 #[test]
 fn test_count_sub_files() {
     assert_eq!(
-        count_sub_files("examples/VSCode", |name| name == *"package.toml").unwrap(),
+        count_sub_files("examples/VSCode", |name| name == *FILE_PACKAGE).unwrap(),
         1
     );
     assert_eq!(count_sub_files("examples/VSCode", |_| false).unwrap(), 0);

@@ -9,9 +9,9 @@ use crate::{
     log, log_ok_last, p2s,
     parsers::parse_workflow,
     types::{
-        constants::{DIR_NEP_CONTEXT, DIR_WORKFLOWS},
+        constants::{DIR_NEP_CONTEXT, DIR_WORKFLOWS, WORKFLOW_SETUP},
         steps::Step,
-        workflow::{WorkflowNode, WORKFLOW_SETUP},
+        workflow::WorkflowNode,
     },
     utils::{
         get_bare_apps, get_path_apps, get_path_bin, get_path_cache, get_path_meta, parse_bare_temp,
