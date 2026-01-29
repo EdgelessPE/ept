@@ -57,7 +57,7 @@ fn test_expand_workshop() {
     crate::utils::fs::copy_dir("examples/VSCodeE", "test/VSCodeE").unwrap();
 
     // 对工作目录进行展开
-    expand_workshop(&"test/VSCodeE".to_string()).unwrap();
+    expand_workshop("test/VSCodeE").unwrap();
 
     // 断言文件是否存在
     assert!(Path::new("test/VSCodeE/VSCodeE/Code.exe").exists());

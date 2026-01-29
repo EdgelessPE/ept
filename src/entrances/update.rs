@@ -356,22 +356,22 @@ fn test_update_using_package() {
 
     // 安装旧版本
     crate::pack(
-        &"./examples/VSCode".to_string(),
+        "./examples/VSCode",
         Some("./test/VSCode_1.75.0.0_Cno.nep".to_string()),
         true,
     )
     .unwrap();
-    install_using_package(&"./test/VSCode_1.75.0.0_Cno.nep".to_string(), true).unwrap();
+    install_using_package("./test/VSCode_1.75.0.0_Cno.nep", true).unwrap();
 
     // 手动更新版本号
     crate::utils::fs::copy_dir("examples/VSCode", "test/VSCode").unwrap();
     crate::utils::test::_modify_package_dir_version("test/VSCode", "1.75.4.1");
 
     // 更新文件
-    let old_ico = get_path_apps(&"Microsoft".to_string(), &"VSCode".to_string(), false)
+    let old_ico = get_path_apps("Microsoft", "VSCode", false)
         .unwrap()
         .join("favicon.ico");
-    let new_ico = get_path_apps(&"Microsoft".to_string(), &"VSCode".to_string(), false)
+    let new_ico = get_path_apps("Microsoft", "VSCode", false)
         .unwrap()
         .join("icon.ico");
     assert!(old_ico.exists());
@@ -382,12 +382,12 @@ fn test_update_using_package() {
     .unwrap();
 
     // 安装新版本
-    update_using_package(&"test/VSCode".to_string(), false).unwrap();
+    update_using_package("test/VSCode", false).unwrap();
     assert!(!old_ico.exists());
     assert!(new_ico.exists());
 
     // 卸载
-    crate::uninstall(None, &"VSCode".to_string()).unwrap();
+    crate::uninstall(None, "VSCode").unwrap();
 }
 
 #[test]
@@ -407,8 +407,8 @@ fn test_update_all() {
     crate::utils::test::_modify_package_dir_version("test/Notepad", "22.0.0.0");
 
     // 安装旧版本
-    install_using_package(&"examples/VSCode".to_string(), false).unwrap();
-    install_using_package(&"test/Notepad".to_string(), false).unwrap();
+    install_using_package("examples/VSCode", false).unwrap();
+    install_using_package("test/Notepad", false).unwrap();
 
     // 生成新包
     let source_dir = crate::utils::test::_fork_example_with_version("examples/VSCode", "1.75.4.2");
@@ -420,7 +420,7 @@ fn test_update_all() {
     )
     .unwrap();
     crate::pack(
-        &"./examples/Notepad".to_string(),
+        "./examples/Notepad",
         Some("./test/static/Notepad_22.1.0.0_Cno.nep".to_string()),
         false,
     )
@@ -429,20 +429,8 @@ fn test_update_all() {
     // 更新全部
     let (_, failure_count) = update_all(false).unwrap();
     assert_eq!(failure_count, 0);
-    assert!(
-        info_local(&"Microsoft".to_string(), &"VSCode".to_string())
-            .unwrap()
-            .1
-            .version
-            == *"1.75.4.2"
-    );
-    assert!(
-        info_local(&"Microsoft".to_string(), &"Notepad".to_string())
-            .unwrap()
-            .1
-            .version
-            == *"22.1.0.0"
-    );
+    assert!(info_local("Microsoft", "VSCode").unwrap().1.version == *"1.75.4.2");
+    assert!(info_local("Microsoft", "Notepad").unwrap().1.version == *"22.1.0.0");
 
     // 卸载
     crate::utils::test::_ensure_testing_vscode_uninstalled();
@@ -530,8 +518,7 @@ fn test_update_with_different_author() {
     crate::utils::test::_ensure_testing_vscode_uninstalled();
 
     // 安装旧版本
-    crate::entrances::install_using_package(&"examples/UpdateSuit/VSCode3".to_string(), false)
-        .unwrap();
+    crate::entrances::install_using_package("examples/UpdateSuit/VSCode3", false).unwrap();
     assert!(desktop_path.join("vsc3-setup-1.75.4.0.lnk").exists());
 
     // 安装新版本
@@ -572,17 +559,17 @@ fn test_update_expandable() {
 
     // 安装
     crate::utils::fs::copy_dir("examples/VSCodeE", "test/VSCodeE").unwrap();
-    install_using_package(&"test/VSCodeE".to_string(), false).unwrap();
+    install_using_package("test/VSCodeE", false).unwrap();
 
     // 断言安装成功
-    assert!(info_local(&"Microsoft".to_string(), &"VSCodeE".to_string()).is_ok());
-    let app_exe_path = get_path_apps(&"Microsoft".to_string(), &"VSCodeE".to_string(), false)
+    assert!(info_local("Microsoft", "VSCodeE").is_ok());
+    let app_exe_path = get_path_apps("Microsoft", "VSCodeE", false)
         .unwrap()
         .join("Code.exe");
     assert!(app_exe_path.exists());
 
     // 手动删除一个依赖文件
-    let ico_path = get_path_apps(&"Microsoft".to_string(), &"VSCodeE".to_string(), false)
+    let ico_path = get_path_apps("Microsoft", "VSCodeE", false)
         .unwrap()
         .join("favicon.ico");
     std::fs::remove_file(&ico_path).unwrap();
@@ -599,13 +586,7 @@ fn test_update_expandable() {
     update_using_package(&pkg_path, false).unwrap();
 
     // 断言安装成功
-    assert!(
-        info_local(&"Microsoft".to_string(), &"VSCodeE".to_string())
-            .unwrap()
-            .1
-            .version
-            == "1.75.5.0"
-    );
+    assert!(info_local("Microsoft", "VSCodeE").unwrap().1.version == "1.75.5.0");
     assert!(app_exe_path.exists());
     assert!(ico_path.exists());
 
@@ -617,5 +598,5 @@ fn test_update_expandable() {
 fn test_update_offline() {
     crate::utils::flags::set_flag(crate::utils::flags::Flag::Confirm, true);
     crate::utils::test::_ensure_testing_vscode();
-    assert!(update_using_package(&"examples/vscode".to_string(), true).is_err());
+    assert!(update_using_package("examples/vscode", true).is_err());
 }

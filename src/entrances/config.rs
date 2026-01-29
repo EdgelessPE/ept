@@ -147,17 +147,11 @@ fn test_config() {
     let mut new_cfg = answer_cfg_init.clone();
     let new_base = "C:/Users/Public/Music".to_string();
     new_cfg.local.base.clone_from(&new_base);
-    assert!(config_set(
-        &"local".to_string(),
-        &"base".to_string(),
-        &"114514".to_string()
-    )
-    .is_err());
-    config_set(&"local".to_string(), &"base".to_string(), &new_base).unwrap();
-    checker(new_cfg.clone());
+    assert!(config_set("local", "base", "114514").is_err());
+    config_set("local", "base", &new_base).unwrap();
 
     // 测试 get
-    let get_base = config_get(&"local".to_string(), &"base".to_string()).unwrap();
+    let get_base = config_get("local", "base").unwrap();
     assert_eq!(get_base, new_base);
 
     // 测试 list

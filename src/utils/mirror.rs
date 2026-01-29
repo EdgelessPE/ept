@@ -435,7 +435,7 @@ fn test_filter_release() {
     let arr = vec![
         MirrorPkgSoftwareRelease {
             file_name: "VSCode_1.85.1.0_Cno.nep".to_string(),
-            version: ExSemVer::parse(&"1.85.1.0".to_string()).unwrap(),
+            version: ExSemVer::parse("1.85.1.0").unwrap(),
             size: 94245376,
             timestamp: 1704554724,
             integrity: None,
@@ -443,7 +443,7 @@ fn test_filter_release() {
         },
         MirrorPkgSoftwareRelease {
             file_name: "VSCode_1.86.1.0_Cno.nep".to_string(),
-            version: ExSemVer::parse(&"1.86.1.0".to_string()).unwrap(),
+            version: ExSemVer::parse("1.86.1.0").unwrap(),
             size: 94245376,
             timestamp: 1704554724,
             integrity: None,
@@ -451,7 +451,7 @@ fn test_filter_release() {
         },
         MirrorPkgSoftwareRelease {
             file_name: "VSCode_1.85.2.0_Cno.nep".to_string(),
-            version: ExSemVer::parse(&"1.85.2.0".to_string()).unwrap(),
+            version: ExSemVer::parse("1.85.2.0").unwrap(),
             size: 94245376,
             timestamp: 1704554724,
             integrity: None,
@@ -465,7 +465,7 @@ fn test_filter_release() {
     let arr = vec![
         MirrorPkgSoftwareRelease {
             file_name: "Chrome_120.0.6099.200_Cno.nep".to_string(),
-            version: ExSemVer::parse(&"120.0.6099.200".to_string()).unwrap(),
+            version: ExSemVer::parse("120.0.6099.200").unwrap(),
             size: 133763072,
             timestamp: 1704554608,
             integrity: None,
@@ -473,7 +473,7 @@ fn test_filter_release() {
         },
         MirrorPkgSoftwareRelease {
             file_name: "Chrome_121.0.6099.200_Cno.nep".to_string(),
-            version: ExSemVer::parse(&"121.0.6099.200".to_string()).unwrap(),
+            version: ExSemVer::parse("121.0.6099.200").unwrap(),
             size: 133763072,
             timestamp: 1704554608,
             integrity: None,
@@ -481,7 +481,7 @@ fn test_filter_release() {
         },
         MirrorPkgSoftwareRelease {
             file_name: "Chrome_122.0.6099.200_Cno.nep".to_string(),
-            version: ExSemVer::parse(&"122.0.6099.200".to_string()).unwrap(),
+            version: ExSemVer::parse("122.0.6099.200").unwrap(),
             size: 133763072,
             timestamp: 1704554608,
             integrity: None,
@@ -595,6 +595,6 @@ fn test_filter_release_with_flags() {
 // #[test]
 // fn test_search_index_for_mirror() {
 //     let p = get_path_mirror().unwrap().join("official").join("index");
-//     let r = search_index_for_mirror(&"Code".to_string(), p.clone()).unwrap();
+//     let r = search_index_for_mirror("Code", p.clone()).unwrap();
 //     println!("{r:#?}");
 // }

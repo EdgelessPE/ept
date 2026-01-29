@@ -200,7 +200,7 @@ fn test_update_main_program() {
     update_ver_with_main_program(
         &mut pkg,
         &software.main_program.unwrap(),
-        &"examples/Dism++/Dism++".to_string(),
+        "examples/Dism++/Dism++",
         Path::new("test/nul.toml"),
     )
     .unwrap();
@@ -208,8 +208,8 @@ fn test_update_main_program() {
 
     update_ver_with_main_program(
         &mut pkg,
-        &"${SystemDrive}/Windows/notepad.exe".to_string(),
-        &"examples/Dism++/Dism++".to_string(),
+        "${SystemDrive}/Windows/notepad.exe",
+        "examples/Dism++/Dism++",
         Path::new("test/nul.toml"),
     )
     .unwrap();

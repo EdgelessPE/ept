@@ -236,9 +236,9 @@ fn test_mixed_fs() {
     assert!(!mfs.exists("./target/debug/ept.exe"));
 
     // 增删通配目录(暂不支持复杂操作)
-    // mfs.add(&"./234/".to_string(), &"./src/util?".to_string());
-    // assert!(mfs.exists(&"234/utils/exe_version.ts".to_string()));
-    // mfs.remove(&"./23?".to_string());
-    // assert!(!mfs.exists(&"234/utils/exe_version.ts".to_string()));
-    // assert!(!mfs.exists(&"233".to_string()));
+    // mfs.add("./234/", "./src/util?");
+    // assert!(mfs.exists("234/utils/exe_version.ts"));
+    // mfs.remove("./23?");
+    // assert!(!mfs.exists("234/utils/exe_version.ts"));
+    // assert!(!mfs.exists("233"));
 }

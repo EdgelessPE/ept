@@ -124,7 +124,7 @@ fn test_condition() {
     .collect();
 
     // verify_conditions
-    verify_conditions(conditions.clone(), &located, &"1.0.0.0".to_string()).unwrap();
+    verify_conditions(conditions.clone(), &located, "1.0.0.0").unwrap();
 
     // capture_function_info
     let res = capture_function_info(&conditions.clone()).unwrap();

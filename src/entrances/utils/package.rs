@@ -278,13 +278,13 @@ fn test_unpack_nep() {
     crate::utils::test::_ensure_clear_test_dir();
 
     crate::pack(
-        &"./examples/VSCode".to_string(),
+        "./examples/VSCode",
         Some("./test/VSCode_1.75.0.0_Cno.nep".to_string()),
         true,
     )
     .unwrap();
 
-    let res = unpack_nep(&"./test/VSCode_1.75.0.0_Cno.nep".to_string(), true).unwrap();
+    let res = unpack_nep("./test/VSCode_1.75.0.0_Cno.nep", true).unwrap();
     println!("{res:#?}");
 }
 
@@ -298,13 +298,13 @@ fn test_normal_unpack_nep() {
     crate::utils::test::_ensure_clear_test_dir();
 
     crate::pack(
-        &"./examples/VSCode".to_string(),
+        "./examples/VSCode",
         Some("./test/VSCode_1.75.0.0_Cno.nep".to_string()),
         true,
     )
     .unwrap();
 
-    let res = normal_unpack_nep(&"./test/VSCode_1.75.0.0_Cno.nep".to_string(), true).unwrap();
+    let res = normal_unpack_nep("./test/VSCode_1.75.0.0_Cno.nep", true).unwrap();
     println!("{res:#?}");
 }
 
@@ -318,13 +318,13 @@ fn test_fast_unpack_nep() {
     crate::utils::test::_ensure_clear_test_dir();
 
     crate::pack(
-        &"./examples/VSCode".to_string(),
+        "./examples/VSCode",
         Some("./test/VSCode_1.75.0.0_Cno.nep".to_string()),
         true,
     )
     .unwrap();
 
-    let res = fast_unpack_nep(&"./test/VSCode_1.75.0.0_Cno.nep".to_string(), true).unwrap();
+    let res = fast_unpack_nep("./test/VSCode_1.75.0.0_Cno.nep", true).unwrap();
     println!("{res:#?}");
 }
 
@@ -335,7 +335,7 @@ fn test_fast_unpack_nep() {
 //     crate::utils::test::_ensure_clear_test_dir();
 
 //     crate::pack(
-//         &"examples/Dism++".to_string(),
+//         "examples/Dism++",
 //         Some("./test/Dism++_10.1.1002.1_Cno.nep".to_string()),
 //         true,
 //     )
@@ -344,12 +344,12 @@ fn test_fast_unpack_nep() {
 //     use std::time::Instant;
 //     let normal = Instant::now();
 //     for _ in 0..10 {
-//         normal_unpack_nep(&"./test/Dism++_10.1.1002.1_Cno.nep".to_string(), true).unwrap();
+//         normal_unpack_nep("./test/Dism++_10.1.1002.1_Cno.nep", true).unwrap();
 //     }
 
 //     let fast = Instant::now();
 //     for _ in 0..10 {
-//         fast_unpack_nep(&"./test/Dism++_10.1.1002.1_Cno.nep".to_string(), true).unwrap();
+//         fast_unpack_nep("./test/Dism++_10.1.1002.1_Cno.nep", true).unwrap();
 //     }
 //     println!(
 //         "Normal unpack cost {n}ms, fast unpack cost {f}ms",
@@ -364,7 +364,7 @@ fn test_bad_package() {
 
     // 生成基础目录
     crate::pack(
-        &"./examples/Dism++".to_string(),
+        "./examples/Dism++",
         Some("./test/Normal.nep".to_string()),
         true,
     )
@@ -373,13 +373,13 @@ fn test_bad_package() {
 
     // 未签名
     crate::pack(
-        &"./examples/Dism++".to_string(),
+        "./examples/Dism++",
         Some("./test/UnSig++_10.1.1002.1_Cno.nep".to_string()),
         false,
     )
     .unwrap();
-    assert!(normal_unpack_nep(&"./test/UnSig++_10.1.1002.1_Cno.nep".to_string(), true).is_err());
-    assert!(fast_unpack_nep(&"./test/UnSig++_10.1.1002.1_Cno.nep".to_string(), true).is_err());
+    assert!(normal_unpack_nep("./test/UnSig++_10.1.1002.1_Cno.nep", true).is_err());
+    assert!(fast_unpack_nep("./test/UnSig++_10.1.1002.1_Cno.nep", true).is_err());
 
     // 被篡改的签名
     copy_dir("test/Normal", "test/BadSig").unwrap();
@@ -391,15 +391,15 @@ fn test_bad_package() {
     let text = toml::to_string_pretty(&signature_struct).unwrap();
     std::fs::write("test/BadSig/signature.toml", text).unwrap();
     crate::compression::pack_tar("test/BadSig", "test/BadSig++_10.1.1002.1_Cno.nep").unwrap();
-    assert!(normal_unpack_nep(&"test/BadSig++_10.1.1002.1_Cno.nep".to_string(), true).is_err());
-    assert!(fast_unpack_nep(&"test/BadSig++_10.1.1002.1_Cno.nep".to_string(), true).is_err());
+    assert!(normal_unpack_nep("test/BadSig++_10.1.1002.1_Cno.nep", true).is_err());
+    assert!(fast_unpack_nep("test/BadSig++_10.1.1002.1_Cno.nep", true).is_err());
 
     // 缺失签名文件
     copy_dir("test/Normal", "test/NoSig").unwrap();
     std::fs::remove_file("test/NoSig/signature.toml").unwrap();
     crate::compression::pack_tar("test/NoSig", "test/NoSig++_10.1.1002.1_Cno.nep").unwrap();
-    assert!(normal_unpack_nep(&"test/NoSig++_10.1.1002.1_Cno.nep".to_string(), true).is_err());
-    assert!(fast_unpack_nep(&"test/NoSig++_10.1.1002.1_Cno.nep".to_string(), true).is_err());
+    assert!(normal_unpack_nep("test/NoSig++_10.1.1002.1_Cno.nep", true).is_err());
+    assert!(fast_unpack_nep("test/NoSig++_10.1.1002.1_Cno.nep", true).is_err());
 
     // 错误的打包者
     copy_dir("test/Normal", "test/BadAuth").unwrap();
@@ -408,6 +408,6 @@ fn test_bad_package() {
     let text = toml::to_string_pretty(&signature_struct).unwrap();
     std::fs::write("test/BadAuth/signature.toml", text).unwrap();
     crate::compression::pack_tar("test/BadAuth", "test/BadAuth++_10.1.1002.1_Cno.nep").unwrap();
-    assert!(normal_unpack_nep(&"test/BadAuth++_10.1.1002.1_Cno.nep".to_string(), true).is_err());
-    assert!(fast_unpack_nep(&"test/BadAuth++_10.1.1002.1_Cno.nep".to_string(), true).is_err());
+    assert!(normal_unpack_nep("test/BadAuth++_10.1.1002.1_Cno.nep", true).is_err());
+    assert!(fast_unpack_nep("test/BadAuth++_10.1.1002.1_Cno.nep", true).is_err());
 }

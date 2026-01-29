@@ -228,10 +228,10 @@ fn test_verify() {
     use crate::utils::flags::{set_flag, Flag};
     set_flag(Flag::Debug, true);
     use std::fs::write;
-    verify(&"./examples/VSCode".to_string()).unwrap();
-    verify(&"./examples/VSCodeE".to_string()).unwrap();
-    verify(&"./examples/CallInstaller".to_string()).unwrap();
-    verify(&"./examples/PermissionsTest".to_string()).unwrap();
+    verify("./examples/VSCode").unwrap();
+    verify("./examples/VSCodeE").unwrap();
+    verify("./examples/CallInstaller").unwrap();
+    verify("./examples/PermissionsTest").unwrap();
 
     // 手动添加没有 call_installer 的 update.toml
     std::fs::copy(
@@ -239,7 +239,7 @@ fn test_verify() {
         "./examples/CallInstaller/workflows/update.toml",
     )
     .unwrap();
-    assert!(verify(&"./examples/CallInstaller".to_string()).is_err());
+    assert!(verify("./examples/CallInstaller").is_err());
     std::fs::remove_file("./examples/CallInstaller/workflows/update.toml").unwrap();
 
     // 调用了 call_installer 但是不提供 remove.toml
@@ -248,7 +248,7 @@ fn test_verify() {
         "examples/CallInstaller/workflows/_remove.toml",
     )
     .unwrap();
-    assert!(verify(&"./examples/CallInstaller".to_string()).is_err());
+    assert!(verify("./examples/CallInstaller").is_err());
     std::fs::rename(
         "examples/CallInstaller/workflows/_remove.toml",
         "examples/CallInstaller/workflows/remove.toml",
@@ -258,7 +258,7 @@ fn test_verify() {
     // 保存现场
     let package_scene = std::fs::read_to_string("examples/CallInstaller/package.toml").unwrap();
     // 读取 package
-    let pkg_path = &"examples/CallInstaller/package.toml".to_string();
+    let pkg_path = "examples/CallInstaller/package.toml";
     let mut raw_pkg = parse_package(pkg_path, "examples/CallInstaller", false).unwrap();
 
     // 删除 CallInstaller 的 main_program
@@ -267,7 +267,7 @@ fn test_verify() {
         soft
     });
     write(pkg_path, toml::to_string_pretty(&raw_pkg).unwrap()).unwrap();
-    assert!(verify(&"./examples/CallInstaller".to_string()).is_err());
+    assert!(verify("./examples/CallInstaller").is_err());
 
     // 令 CallInstaller 的 main_program 为相对路径
     raw_pkg.software = raw_pkg.software.map(|mut soft| {
@@ -275,7 +275,7 @@ fn test_verify() {
         soft
     });
     write(pkg_path, toml::to_string_pretty(&raw_pkg).unwrap()).unwrap();
-    assert!(verify(&"./examples/CallInstaller".to_string()).is_err());
+    assert!(verify("./examples/CallInstaller").is_err());
 
     // 还原现场
     write(pkg_path, package_scene).unwrap();

@@ -201,7 +201,7 @@ fn test_mirror() {
     assert!(mirror_list().unwrap().is_empty());
 
     // 此时搜不到内容
-    assert!(search(&"vscode".to_string(), false).is_err());
+    assert!(search("vscode", false).is_err());
 
     // 启动 mock 服务器
     let mock_url = _run_mirror_mock_server();
@@ -225,13 +225,13 @@ fn test_mirror() {
         from_mirror: Some("mock-server".to_string()),
     }];
     // 精准名称
-    let search_res = search(&"vscode".to_string(), false).unwrap();
+    let search_res = search("vscode", false).unwrap();
     assert_eq!(search_res, expected_res);
     // 大小写不敏感别名
-    let search_res = search(&"Code".to_string(), false).unwrap();
+    let search_res = search("Code", false).unwrap();
     assert_eq!(search_res, expected_res);
     // 大小写不敏感名称
-    let search_res = search(&"FIREFOx".to_string(), false).unwrap();
+    let search_res = search("FIREFOx", false).unwrap();
     assert_eq!(
         search_res,
         vec![crate::types::mirror::SearchResult {
@@ -243,10 +243,10 @@ fn test_mirror() {
         }]
     );
     // Tag 搜索
-    let search_res = search(&"ELECTRON".to_string(), false).unwrap();
+    let search_res = search("ELECTRON", false).unwrap();
     assert_eq!(search_res, expected_res);
     // 二进制搜索
-    let search_res = search(&"ntpd".to_string(), false).unwrap();
+    let search_res = search("ntpd", false).unwrap();
     assert_eq!(
         search_res,
         vec![crate::types::mirror::SearchResult {
@@ -260,11 +260,11 @@ fn test_mirror() {
     // 正则名称
     let search_res = search(&r"vs\w+".to_string(), true).unwrap();
     assert_eq!(search_res, expected_res);
-    assert!(search(&"microsoft".to_string(), false).is_err());
+    assert!(search("microsoft", false).is_err());
 
     // 测试更新
     sleep(Duration::from_micros(100));
-    mirror_update(&"mock-server".to_string()).unwrap();
+    mirror_update("mock-server").unwrap();
     let ls = mirror_list().unwrap();
     let mirror_info = ls.first().unwrap();
     assert!(
@@ -276,7 +276,7 @@ fn test_mirror() {
     );
 
     // 测试移除
-    mirror_remove(&"mock-server".to_string()).unwrap();
+    mirror_remove("mock-server").unwrap();
     assert!(mirror_list().unwrap().is_empty());
 
     // 还原原有的镜像文件夹
@@ -331,12 +331,12 @@ fn test_auto_mirror_update_all() {
 
 // #[test]
 // fn test_mirror_add() {
-//     mirror_add(&"http://localhost:3000/".to_string(), None).unwrap();
+//     mirror_add("http://localhost:3000/", None).unwrap();
 // }
 
 // #[test]
 // fn test_mirror_update() {
-//     mirror_update(&"official".to_string()).unwrap();
+//     mirror_update("official").unwrap();
 // }
 
 // #[test]
@@ -347,5 +347,5 @@ fn test_auto_mirror_update_all() {
 
 // #[test]
 // fn test_mirror_remove() {
-//     mirror_remove(&"official".to_string()).unwrap();
+//     mirror_remove("official").unwrap();
 // }

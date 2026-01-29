@@ -19,7 +19,7 @@ pub fn is_alive_with_name(name: &str) -> bool {
 
 #[test]
 fn test_kill_with_name() {
-    // let res = kill_with_name(&"哔哩哔哩.exe".to_string());
+    // let res = kill_with_name("哔哩哔哩.exe");
     // assert!(res);
 }
 

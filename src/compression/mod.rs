@@ -64,11 +64,7 @@ fn test_compress() {
     if p.exists() {
         remove_file(p).unwrap();
     }
-    compress(
-        &"examples/VSCode".to_string(),
-        &"./test/VSCode_1.0.0.0_Cno.tar.zst".to_string(),
-    )
-    .unwrap();
+    compress("examples/VSCode", "./test/VSCode_1.0.0.0_Cno.tar.zst").unwrap();
     assert!(p.exists());
 }
 
@@ -84,8 +80,8 @@ fn test_decompress() {
     }
 
     decompress(
-        &"./test/VSCode_1.0.0.0_Cno.tar.zst".to_string(),
-        &"./test/VSCode_1.0.0.0_Cno".to_string(),
+        "./test/VSCode_1.0.0.0_Cno.tar.zst",
+        "./test/VSCode_1.0.0.0_Cno",
     )
     .unwrap();
 

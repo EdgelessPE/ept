@@ -238,8 +238,7 @@ pub fn install_using_parsed(
 // #[test]
 // fn test_install_using_url() {
 //     install_using_url(
-//         &"http:/localhost:3000/api/redirect?path=/nep/Google/Chrome/Chrome_120.0.6099.200_Cno.nep"
-//             .to_string(),
+//         "http:/localhost:3000/api/redirect?path=/nep/Google/Chrome/Chrome_120.0.6099.200_Cno.nep"
 //         false,
 //     )
 //     .unwrap();
@@ -260,7 +259,7 @@ fn test_install() {
     let entry2_path = crate::utils::get_path_bin()
         .unwrap()
         .join("Microsoft-Code.cmd");
-    let app_path = get_path_apps(&"Microsoft".to_string(), &"VSCode".to_string(), false).unwrap();
+    let app_path = get_path_apps("Microsoft", "VSCode", false).unwrap();
     let mp_path = app_path.join("Code.exe");
     let cx_path = app_path.join(DIR_NEP_CONTEXT).join(FILE_PACKAGE);
 
@@ -276,18 +275,18 @@ fn test_install() {
     }
 
     // 卸载
-    if info_local(&"Microsoft".to_string(), &"VSCode".to_string()).is_ok() {
-        crate::uninstall(Some("Microsoft".to_string()), &"VSCode".to_string()).unwrap();
+    if info_local("Microsoft", "VSCode").is_ok() {
+        crate::uninstall(Some("Microsoft".to_string()), "VSCode").unwrap();
     }
 
     // 打包并安装
     crate::pack(
-        &"./examples/VSCode".to_string(),
+        "./examples/VSCode",
         Some("./test/VSCode_1.75.0.0_Cno (1).nep".to_string()),
         true,
     )
     .unwrap();
-    install_using_package(&"./test/VSCode_1.75.0.0_Cno (1).nep".to_string(), true).unwrap();
+    install_using_package("./test/VSCode_1.75.0.0_Cno (1).nep", true).unwrap();
 
     assert!(shortcut_path.exists());
     assert!(entry1_path.exists() || entry2_path.exists());
@@ -295,11 +294,9 @@ fn test_install() {
     assert!(cx_path.exists());
 
     // 重复安装，会被要求使用升级，但是会由于同版本导致升级失败
-    assert!(
-        install_using_package(&"./test/VSCode_1.75.0.0_Cno (1).nep".to_string(), true).is_err()
-    );
+    assert!(install_using_package("./test/VSCode_1.75.0.0_Cno (1).nep", true).is_err());
 
-    crate::uninstall(None, &"VSCode".to_string()).unwrap();
+    crate::uninstall(None, "VSCode").unwrap();
 
     assert!(!shortcut_path.exists());
     assert!(!entry1_path.exists() || entry2_path.exists());
@@ -317,18 +314,18 @@ fn test_install() {
     // 安装 CallInstaller，预期会因为不存在主程序 ${Desktop}/Call.exe 而安装失败
     copy_dir("examples/CallInstaller", "test/CallInstaller1").unwrap();
 
-    assert!(install_using_package(&"test/CallInstaller1".to_string(), false).is_err());
+    assert!(install_using_package("test/CallInstaller1", false).is_err());
     crate::clean().unwrap();
 
     // 提供指定的主程序后安装成功
     std::fs::write(desktop_call_path, "114514").unwrap();
-    crate::uninstall(None, &"CallInstaller".to_string()).unwrap();
+    crate::uninstall(None, "CallInstaller").unwrap();
     copy_dir("examples/CallInstaller", "test/CallInstaller2").unwrap();
-    install_using_package(&"test/CallInstaller2".to_string(), false).unwrap();
+    install_using_package("test/CallInstaller2", false).unwrap();
 
     // 清理
     remove_file(desktop_call_path).unwrap();
-    crate::uninstall(None, &"CallInstaller".to_string()).unwrap();
+    crate::uninstall(None, "CallInstaller").unwrap();
 }
 
 #[test]
@@ -339,7 +336,7 @@ fn test_install_dism() {
 
     crate::utils::fs::copy_dir("examples/Dism++", "test/Dism++").unwrap();
 
-    install_using_package(&"test/Dism++".to_string(), false).unwrap();
+    install_using_package("test/Dism++", false).unwrap();
     let stem_name = match SysArch::get_current_arch().unwrap() {
         SysArch::X64 => "Dism++x64",
         SysArch::X86 => "Dism++x86",
@@ -394,7 +391,7 @@ fn test_reg_entry() {
     .unwrap();
 
     // 校验
-    assert!(crate::entrances::verify::verify(&"examples/RegEntry".to_string()).is_ok());
+    assert!(crate::entrances::verify::verify("examples/RegEntry").is_ok());
 
     // 安装
     use crate::utils::test::{_ensure_testing, _ensure_testing_uninstalled};
@@ -423,7 +420,7 @@ fn test_reg_entry() {
     );
 
     // 执行卸载
-    crate::entrances::uninstall(None, &"RegEntry".to_string()).unwrap();
+    crate::entrances::uninstall(None, "RegEntry").unwrap();
 
     // 断言 flag 的存在
     assert!(flag_path.exists());
@@ -454,7 +451,7 @@ fn test_install_with_matcher() {
         std::fs::create_dir_all(static_path).unwrap();
     }
     crate::pack(
-        &"./examples/VSCode".to_string(),
+        "./examples/VSCode",
         Some(
             static_path
                 .join("VSCode_1.75.4.2_Cno.nep")
@@ -471,26 +468,14 @@ fn test_install_with_matcher() {
         crate::utils::parse_inputs::parse_install_inputs(vec!["vscode".to_string()], false)
             .unwrap();
     install_using_parsed(parsed.into_iter().map(|p| p.0).collect(), false).unwrap();
-    assert!(
-        info_local(&"Microsoft".to_string(), &"VSCode".to_string())
-            .unwrap()
-            .1
-            .version
-            == *"1.75.4.0"
-    );
+    assert!(info_local("Microsoft", "VSCode").unwrap().1.version == *"1.75.4.0");
 
     // 使用大小写不敏感的别名直接安装
     crate::utils::test::_ensure_testing_vscode_uninstalled();
     let parsed =
         crate::utils::parse_inputs::parse_install_inputs(vec!["CODE".to_string()], false).unwrap();
     install_using_parsed(parsed.into_iter().map(|p| p.0).collect(), false).unwrap();
-    assert!(
-        info_local(&"Microsoft".to_string(), &"VSCode".to_string())
-            .unwrap()
-            .1
-            .version
-            == *"1.75.4.0"
-    );
+    assert!(info_local("Microsoft", "VSCode").unwrap().1.version == *"1.75.4.0");
 
     // 手动升版本号
     let source_dir = crate::utils::test::_fork_example_with_version("examples/VSCode", "1.75.4.1");
@@ -540,16 +525,14 @@ fn test_install_expandable() {
 
     // 安装
     crate::utils::fs::copy_dir("examples/VSCodeE", "test/VSCodeE").unwrap();
-    install_using_package(&"test/VSCodeE".to_string(), false).unwrap();
+    install_using_package("test/VSCodeE", false).unwrap();
 
     // 断言安装成功
-    assert!(info_local(&"Microsoft".to_string(), &"VSCodeE".to_string()).is_ok());
-    assert!(
-        get_path_apps(&"Microsoft".to_string(), &"VSCodeE".to_string(), false)
-            .unwrap()
-            .join("Code.exe")
-            .exists()
-    );
+    assert!(info_local("Microsoft", "VSCodeE").is_ok());
+    assert!(get_path_apps("Microsoft", "VSCodeE", false)
+        .unwrap()
+        .join("Code.exe")
+        .exists());
 
     crate::utils::test::_ensure_testing_uninstalled("Microsoft", "VSCodeE");
     handler.kill().unwrap();
@@ -559,5 +542,5 @@ fn test_install_expandable() {
 fn test_install_offline() {
     crate::utils::flags::set_flag(crate::utils::flags::Flag::Confirm, true);
     crate::utils::test::_ensure_testing_vscode_uninstalled();
-    assert!(install_using_package(&"examples/vscode".to_string(), true).is_err());
+    assert!(install_using_package("examples/vscode", true).is_err());
 }

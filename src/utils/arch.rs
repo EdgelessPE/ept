@@ -86,22 +86,22 @@ fn test_is_current_arch_match() {
 
     #[cfg(target_arch = "x86")]
     {
-        assert!(is_current_arch_match(&"X64".to_string()).is_err());
-        assert!(is_current_arch_match(&"x86".to_string()).is_ok());
-        assert!(is_current_arch_match(&"ARM64".to_string()).is_err());
+        assert!(is_current_arch_match("X64").is_err());
+        assert!(is_current_arch_match("x86").is_ok());
+        assert!(is_current_arch_match("ARM64").is_err());
     }
 
     #[cfg(target_arch = "x86_64")]
     {
-        assert!(is_current_arch_match(&"x64".to_string()).is_ok());
-        assert!(is_current_arch_match(&"X86".to_string()).is_ok());
-        assert!(is_current_arch_match(&"ARM64".to_string()).is_err());
+        assert!(is_current_arch_match("x64").is_ok());
+        assert!(is_current_arch_match("X86").is_ok());
+        assert!(is_current_arch_match("ARM64").is_err());
     }
 
     #[cfg(target_arch = "aarch64")]
     {
-        assert!(is_current_arch_match(&"x64".to_string()).is_ok());
-        assert!(is_current_arch_match(&"X86".to_string()).is_ok());
-        assert!(is_current_arch_match(&"arm64".to_string()).is_ok());
+        assert!(is_current_arch_match("x64").is_ok());
+        assert!(is_current_arch_match("X86").is_ok());
+        assert!(is_current_arch_match("arm64").is_ok());
     }
 }

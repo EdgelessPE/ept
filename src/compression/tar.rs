@@ -34,11 +34,7 @@ fn test_pack_tar() {
     if p.exists() {
         std::fs::remove_file(p).unwrap();
     }
-    pack_tar(
-        &"examples/VSCode".to_string(),
-        &"./test/VSCode_1.0.0.0_Cno.tar".to_string(),
-    )
-    .unwrap();
+    pack_tar("examples/VSCode", "./test/VSCode_1.0.0.0_Cno.tar").unwrap();
     assert!(p.exists());
 }
 
@@ -49,22 +45,14 @@ fn test_release_tar() {
         test_pack_tar();
     }
 
-    release_tar(
-        &"./test/VSCode_1.0.0.0_Cno.tar".to_string(),
-        &"./test/VSCode_1.0.0.0_Cno".to_string(),
-    )
-    .unwrap();
+    release_tar("./test/VSCode_1.0.0.0_Cno.tar", "./test/VSCode_1.0.0.0_Cno").unwrap();
 
     assert!(Path::new("test/VSCode_1.0.0.0_Cno/package.toml").exists());
 
     // 测试覆盖
     use crate::utils::fs::try_recycle;
     try_recycle("test/VSCode_1.0.0.0_Cno/package.toml").unwrap();
-    release_tar(
-        &"./test/VSCode_1.0.0.0_Cno.tar".to_string(),
-        &"./test/VSCode_1.0.0.0_Cno".to_string(),
-    )
-    .unwrap();
+    release_tar("./test/VSCode_1.0.0.0_Cno.tar", "./test/VSCode_1.0.0.0_Cno").unwrap();
 
     assert!(Path::new("test/VSCode_1.0.0.0_Cno/package.toml").exists());
 }

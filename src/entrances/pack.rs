@@ -105,14 +105,14 @@ fn test_pack() {
     set_flag(Flag::Debug, false);
     set_flag(Flag::Confirm, true);
     pack(
-        &"./examples/ComplexFS".to_string(),
+        "./examples/ComplexFS",
         Some("./test/ComplexFS_1.75.0.0_Cno.nep".to_string()),
         true,
     )
     .unwrap();
     set_flag(Flag::Debug, true);
     pack(
-        &"./examples/ComplexFS".to_string(),
+        "./examples/ComplexFS",
         Some("./test/ComplexFS_1.75.0.0_Cno.nep".to_string()),
         false,
     )

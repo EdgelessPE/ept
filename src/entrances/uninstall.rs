@@ -194,6 +194,6 @@ fn test_uninstall() {
     .run(&mut cx)
     .unwrap();
 
-    uninstall(None, &"Notepad".to_string()).unwrap();
+    uninstall(None, "Notepad").unwrap();
     assert!(!Path::new(&pwd).exists());
 }

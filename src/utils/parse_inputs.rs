@@ -235,7 +235,7 @@ fn test_parse_inputs() {
         std::fs::create_dir_all(static_path).unwrap();
     }
     crate::pack(
-        &"./examples/VSCode".to_string(),
+        "./examples/VSCode",
         Some(static_path.join("vscode.nep").to_string_lossy().to_string()),
         true,
     )

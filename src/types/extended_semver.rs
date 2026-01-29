@@ -253,32 +253,32 @@ fn test_ex_semver() {
     assert_eq!(v1.to_string(), String::from("1.2.3.4"));
     assert_eq!(format!("{v2}"), "1.2.3.4".to_string());
 
-    assert!(ExSemVer::parse(&"1.12".to_string()).is_err());
-    assert!(ExSemVer::parse(&"1.12.3".to_string()).is_ok());
-    assert!(ExSemVer::parse(&"1.12.3.9.0".to_string()).is_err());
+    assert!(ExSemVer::parse("1.12").is_err());
+    assert!(ExSemVer::parse("1.12.3").is_ok());
+    assert!(ExSemVer::parse("1.12.3.9.0").is_err());
 
     let v1 = ExSemVer::default();
-    let v2 = ExSemVer::parse(&"0.0.0.0".to_string()).unwrap();
+    let v2 = ExSemVer::parse("0.0.0.0").unwrap();
     assert!(v1 == v2);
 
-    let v1 = ExSemVer::parse(&"1.2.3.4".to_string()).unwrap();
-    let v2 = ExSemVer::parse(&"1.3.3.1".to_string()).unwrap();
+    let v1 = ExSemVer::parse("1.2.3.4").unwrap();
+    let v2 = ExSemVer::parse("1.3.3.1").unwrap();
     assert!(v1 < v2);
     assert_eq!(v1.clone().max(v2.clone()), v2);
     assert_eq!(v1.clone().min(v2.clone()), v1);
     assert_eq!(v2.clone().max(v1.clone()), v2);
     assert_eq!(v2.clone().min(v1.clone()), v1);
 
-    let v1 = ExSemVer::parse(&"9.114.2.1".to_string()).unwrap();
-    let v2 = ExSemVer::parse(&"10.0.0.0".to_string()).unwrap();
+    let v1 = ExSemVer::parse("9.114.2.1").unwrap();
+    let v2 = ExSemVer::parse("10.0.0.0").unwrap();
     assert!(v1 <= v2);
 
-    let v1 = ExSemVer::parse(&"114.514.1919.810".to_string()).unwrap();
-    let v2 = ExSemVer::parse(&"114.514.1919.810".to_string()).unwrap();
+    let v1 = ExSemVer::parse("114.514.1919.810").unwrap();
+    let v2 = ExSemVer::parse("114.514.1919.810").unwrap();
     assert_eq!(v1, v2);
 
-    let v1 = ExSemVer::parse(&"1.2.3.10".to_string()).unwrap();
-    let v2 = ExSemVer::parse(&"1.2.3.2".to_string()).unwrap();
+    let v1 = ExSemVer::parse("1.2.3.10").unwrap();
+    let v2 = ExSemVer::parse("1.2.3.2").unwrap();
     assert!(v1 >= v2);
 
     let sv = semver::Version::from_str("114.514.19").unwrap();
@@ -290,11 +290,11 @@ fn test_ex_semver() {
     assert_eq!(v2, v3);
 
     // 带 pre 和 build
-    let v1 = ExSemVer::parse(&"1.2.3.4-alpha".to_string()).unwrap();
-    let v2 = ExSemVer::parse(&"1.2.3.4-beta".to_string()).unwrap();
+    let v1 = ExSemVer::parse("1.2.3.4-alpha").unwrap();
+    let v2 = ExSemVer::parse("1.2.3.4-beta").unwrap();
     assert!(v1 != v2);
 
-    let v1 = ExSemVer::parse(&"1.2.3.4-alpha.2.turing".to_string()).unwrap();
+    let v1 = ExSemVer::parse("1.2.3.4-alpha.2.turing").unwrap();
     assert_eq!(
         v1,
         ExSemVer::_new(
@@ -307,7 +307,7 @@ fn test_ex_semver() {
         )
     );
 
-    let v2 = ExSemVer::parse(&"1.20.3.4+build114514".to_string()).unwrap();
+    let v2 = ExSemVer::parse("1.20.3.4+build114514").unwrap();
     assert_eq!(
         v2,
         ExSemVer::_new(
@@ -320,7 +320,7 @@ fn test_ex_semver() {
         )
     );
 
-    let v3 = ExSemVer::parse(&"1.12.3.4-beta.2.edgeless+blake456".to_string()).unwrap();
+    let v3 = ExSemVer::parse("1.12.3.4-beta.2.edgeless+blake456").unwrap();
     assert_eq!(
         v3,
         ExSemVer::_new(
@@ -346,13 +346,13 @@ fn test_ex_semver() {
         "1.12.3.4-beta.2.edgeless+blake456".to_string()
     );
 
-    assert!(ExSemVer::parse(&"1.12.3-alpha".to_string()).is_ok());
-    assert!(ExSemVer::parse(&"1.12.3-alpha-beta".to_string()).is_ok());
-    assert!(ExSemVer::parse(&"1.12.3+alpha-beta".to_string()).is_ok());
+    assert!(ExSemVer::parse("1.12.3-alpha").is_ok());
+    assert!(ExSemVer::parse("1.12.3-alpha-beta").is_ok());
+    assert!(ExSemVer::parse("1.12.3+alpha-beta").is_ok());
 
-    assert!(ExSemVer::parse(&"1.12-alpha".to_string()).is_err());
-    assert!(ExSemVer::parse(&"1.12-alpha-beta".to_string()).is_err());
-    assert!(ExSemVer::parse(&"1.12+alpha-beta".to_string()).is_err());
+    assert!(ExSemVer::parse("1.12-alpha").is_err());
+    assert!(ExSemVer::parse("1.12-alpha-beta").is_err());
+    assert!(ExSemVer::parse("1.12+alpha-beta").is_err());
 
     // 测试 pre 与 build比较关系
     let arr: Vec<ExSemVer> = vec![

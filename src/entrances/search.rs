@@ -40,6 +40,6 @@ pub fn search(text: &str, is_regex: bool) -> Result<Vec<SearchResult>> {
 
 // #[test]
 // fn test_search() {
-//     let res = search(&"vscode".to_string()).unwrap();
+//     let res = search("vscode").unwrap();
 //     println!("{res:#?}");
 // }
