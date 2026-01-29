@@ -285,7 +285,7 @@ fn test_copy() {
 
     // 通配符目录-目录
     StepCopy {
-        from: "key?".to_string(),
+        from: "../../key?".to_string(),
         to: "test/keys".to_string(),
         overwrite: None,
     }

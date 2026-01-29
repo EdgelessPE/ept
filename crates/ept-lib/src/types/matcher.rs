@@ -138,7 +138,7 @@ impl PackageInputEnum {
 
         // 如果路径以 ./ 或 .\ 开头，也作为本地路径处理（即使文件不存在）
         if text.starts_with("./") || text.starts_with(".\\") {
-            log!("Debug:Parsed '{text}' as package matcher : '{text}'");
+            log!("Debug:Parsed '{text}' as local path : '{text}'");
             return Ok(PackageInputEnum::LocalPath(format_path(&text)));
         }
 
@@ -237,7 +237,6 @@ fn test_parse_package_input_enum() {
         .unwrap(),
         PackageInputEnum::Url("https://nep.edgeless.top/static/test.nep".to_string())
     );
-    // Windows 路径格式测试 - 使用正斜杠
     assert_eq!(
         PackageInputEnum::parse(".\\Cargo.lock".to_string(), false, false).unwrap(),
         PackageInputEnum::LocalPath("Cargo.lock".to_string())
