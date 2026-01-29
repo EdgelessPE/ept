@@ -99,7 +99,7 @@ impl ExSemVer {
             semver_instance,
         }
     }
-    pub fn parse(text: &String) -> Result<Self> {
+    pub fn parse(text: &str) -> Result<Self> {
         // 分割 pre 和 build
         let (clear_text, pre_build) = split_pre_build(text);
 

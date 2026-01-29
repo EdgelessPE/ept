@@ -20,7 +20,7 @@ use super::parse_author;
 // 输入读到的版本号，判断是否需要更新 pkg 并自动写文件系统
 fn update_pkg_version(
     pkg: &mut GlobalPackage,
-    read_ver: &String,
+    read_ver: &str,
     package_path: &Path,
     according_to: String,
 ) -> Result<()> {
@@ -45,8 +45,8 @@ fn update_pkg_version(
 
 fn update_ver_with_main_program(
     pkg: &mut GlobalPackage,
-    main_program: &String,
-    located: &String,
+    main_program: &str,
+    located: &str,
     package_path: &Path,
 ) -> Result<()> {
     // 解释内置变量
@@ -69,7 +69,7 @@ fn update_ver_with_main_program(
 
 fn update_ver_with_reg_entry(
     pkg: &mut GlobalPackage,
-    entry_id: &String,
+    entry_id: &str,
     package_path: &Path,
 ) -> Result<()> {
     let e = get_reg_entry(entry_id);
@@ -89,8 +89,8 @@ fn update_ver_with_reg_entry(
 
 /// p 输入 package.toml 所在位置
 pub fn parse_package(
-    p: &String,
-    located: &String,
+    p: &str,
+    located: &str,
     need_update_main_program: bool,
 ) -> Result<GlobalPackage> {
     log!("Debug:Parse package '{p}' with located '{located}'");
@@ -172,7 +172,7 @@ pub fn parse_package(
     Ok(pkg)
 }
 
-fn is_nep_version_compatible(pkg_str: &String, ept_str: &str) -> Result<()> {
+fn is_nep_version_compatible(pkg_str: &str, ept_str: &str) -> Result<()> {
     // 检查 nep 版本号是一位数字
     if pkg_str.len() != 1 || pkg_str.parse::<u32>().is_err() {
         return Err(anyhow!("Error:Invalid nep version '{pkg_str}'"));
@@ -191,9 +191,8 @@ fn is_nep_version_compatible(pkg_str: &String, ept_str: &str) -> Result<()> {
 
 #[test]
 fn test_update_main_program() {
-    let located = &"examples/Dism++".to_string();
-    let mut pkg =
-        parse_package(&"examples/Dism++/package.toml".to_string(), located, true).unwrap();
+    let located = "examples/Dism++";
+    let mut pkg = parse_package("examples/Dism++/package.toml", located, true).unwrap();
     pkg.package.version = "10.1.112.1".to_string();
     let software = pkg.clone().software.unwrap();
 
@@ -217,19 +216,19 @@ fn test_update_main_program() {
 
 #[test]
 fn test_is_nep_version_compatible() {
-    assert!(is_nep_version_compatible(&"0".to_string(), "0.2.1").is_ok());
-    assert!(is_nep_version_compatible(&"1".to_string(), "1.10.3").is_ok());
-    assert!(is_nep_version_compatible(&"1".to_string(), "1.0.30").is_ok());
-    assert!(is_nep_version_compatible(&"1".to_string(), "1.0.30").is_ok());
-    assert!(is_nep_version_compatible(&"1".to_string(), "2.0.0").is_err());
+    assert!(is_nep_version_compatible("0", "0.2.1").is_ok());
+    assert!(is_nep_version_compatible("1", "1.10.3").is_ok());
+    assert!(is_nep_version_compatible("1", "1.0.30").is_ok());
+    assert!(is_nep_version_compatible("1", "1.0.30").is_ok());
+    assert!(is_nep_version_compatible("1", "2.0.0").is_err());
 }
 
 #[test]
 fn test_parse_package() {
     use crate::utils::flags::{set_flag, Flag};
     set_flag(Flag::Debug, true);
-    let located = &"examples/VSCode".to_string();
-    let pkg = parse_package(&"examples/VSCode/package.toml".to_string(), located, false).unwrap();
+    let located = "examples/VSCode";
+    let pkg = parse_package("examples/VSCode/package.toml", located, false).unwrap();
     let answer = GlobalPackage {
         nep: "0".to_string(),
         package: crate::types::package::Package {

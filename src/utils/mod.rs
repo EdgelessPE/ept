@@ -166,7 +166,7 @@ pub fn get_manifest_path(located: &String) -> Result<PathBuf> {
     Err(anyhow!("Error:Failed to find 'package.toml' in {located}"))
 }
 
-pub fn get_workflows_path(located: &String) -> Result<PathBuf> {
+pub fn get_workflows_path(located: &str) -> Result<PathBuf> {
     let possible_path = vec![
         format!("{located}/workflows"),
         format!("{located}/.nep_context/workflows"),

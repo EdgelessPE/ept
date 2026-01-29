@@ -7,7 +7,7 @@ lazy_static! {
     static ref RE: Regex = Regex::new(r"([^<\s]+)\s*(<\s*([\w@\.]+)\s*>)?").unwrap();
 }
 
-pub fn parse_author(raw: &String) -> Result<Author> {
+pub fn parse_author(raw: &str) -> Result<Author> {
     if let Some(cap) = RE.captures_iter(raw).next() {
         if cap.len() != 4 {
             return Err(anyhow!("Error:Can't parse '{raw}' as valid author"));
@@ -32,13 +32,13 @@ fn test_parse_author() {
             name: "Cno".to_string(),
             email: None
         },
-        parse_author(&"Cno".to_string()).unwrap()
+        parse_author("Cno").unwrap()
     );
     assert_eq!(
         Author {
             name: "Cno".to_string(),
             email: Some("dsyourshy@qq.com".to_string())
         },
-        parse_author(&"Cno <dsyourshy@qq.com>".to_string()).unwrap()
+        parse_author("Cno <dsyourshy@qq.com>").unwrap()
     );
 }

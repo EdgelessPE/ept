@@ -7,7 +7,7 @@ use toml::Value;
 use crate::types::steps::Step;
 use crate::types::workflow::{WorkflowHeader, WorkflowNode};
 
-pub fn parse_workflow(p: &String) -> Result<Vec<WorkflowNode>> {
+pub fn parse_workflow(p: &str) -> Result<Vec<WorkflowNode>> {
     let workflow_path = Path::new(p);
     if !workflow_path.exists() {
         return Err(anyhow!("Error:Fatal:Can't find workflow path : {p}"));
@@ -53,7 +53,7 @@ fn test_parse_workflow() {
     use crate::types::steps::{Step, StepLink, StepPath, StepWait};
     use crate::types::workflow::{WorkflowHeader, WorkflowNode};
 
-    let res = parse_workflow(&"examples/ComplexSteps/workflows/setup.toml".to_string()).unwrap();
+    let res = parse_workflow("examples/ComplexSteps/workflows/setup.toml").unwrap();
     let answer = vec![
         WorkflowNode {
             header: WorkflowHeader {

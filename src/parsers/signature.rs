@@ -3,7 +3,7 @@ use anyhow::{anyhow, Result};
 use std::path::Path;
 use std::{fs::File, io::Read};
 
-pub fn parse_signature(p: &String) -> Result<Signature> {
+pub fn parse_signature(p: &str) -> Result<Signature> {
     let signature_path = Path::new(p);
     if !signature_path.exists() {
         return Err(anyhow!("Error:Fatal:Can't find signature.toml path : {p}"));

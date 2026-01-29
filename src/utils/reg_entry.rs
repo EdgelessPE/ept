@@ -31,7 +31,7 @@ fn possible_tables() -> Vec<RegKey> {
         .collect()
 }
 
-pub fn get_reg_entry(entry_id: &String) -> UninstallRegEntry {
+pub fn get_reg_entry(entry_id: &str) -> UninstallRegEntry {
     for table in possible_tables() {
         // 尝试打开指定 id
         if let Ok(entry) = table.open_subkey(entry_id) {
