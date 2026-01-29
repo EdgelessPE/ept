@@ -11,7 +11,7 @@ fn slice_to_array_64<T>(slice: &[T]) -> Result<&[T; 64]> {
     }
 }
 
-pub fn sign_with_ecdsa(private_key: &str, digest: &String) -> Result<String> {
+pub fn sign_with_ecdsa(private_key: &str, digest: &str) -> Result<String> {
     let private = SecretKey::from_pem(private_key)?;
     let signature = private.sign(digest.as_bytes(), Some(Noise::generate()));
     let signature_base64 = general_purpose::STANDARD.encode(signature);
@@ -19,7 +19,7 @@ pub fn sign_with_ecdsa(private_key: &str, digest: &String) -> Result<String> {
     Ok(signature_base64)
 }
 
-pub fn verify_with_ecdsa(public_key: &str, digest: &String, signature: &String) -> Result<bool> {
+pub fn verify_with_ecdsa(public_key: &str, digest: &str, signature: &str) -> Result<bool> {
     let public = PublicKey::from_pem(public_key)?;
     let signature_decoded = general_purpose::STANDARD.decode(signature)?;
     let arr = slice_to_array_64(&signature_decoded[..])?;
@@ -39,25 +39,23 @@ MC4CAQAwBQYDK2VwBCIEIBiVVXXhLTr/EY/FROnl67TVJz/jGV1WWN9HgptLMNWO
 -----END PRIVATE KEY-----"
         .to_string();
 
-    let signature = sign_with_ecdsa(&private_key, &"114514".to_string()).unwrap();
+    let signature = sign_with_ecdsa(&private_key, "114514").unwrap();
     println!("{signature}");
-    let res = verify_with_ecdsa(&public_key, &"114514".to_string(), &signature).unwrap();
+    let res = verify_with_ecdsa(&public_key, "114514", &signature).unwrap();
     assert!(res);
 
     let res = verify_with_ecdsa(
         &public_key,
-        &"114514".to_string(),
-        &"eHmzHbsBLeMq7uXkEpwNVruztSl0rQ1417CxxwdS3H/IOtn0N77MsgaZszNxDkOtP0kO0bz/t0+no+V2G/eiDQ=="
-            .to_string(),
+        "114514",
+        "eHmzHbsBLeMq7uXkEpwNVruztSl0rQ1417CxxwdS3H/IOtn0N77MsgaZszNxDkOtP0kO0bz/t0+no+V2G/eiDQ==",
     )
     .unwrap();
     assert!(!res);
 
     let res = verify_with_ecdsa(
         &public_key,
-        &"19810".to_string(),
-        &"lrpkTJOdhdbzNMqklJIFxBLMmT6PIRggdEoW99XhKdbABOVasBGNH8LGaK7Ry6bvTQbhqMd/gn7Knul38weJAQ=="
-            .to_string(),
+        "19810",
+        "lrpkTJOdhdbzNMqklJIFxBLMmT6PIRggdEoW99XhKdbABOVasBGNH8LGaK7Ry6bvTQbhqMd/gn7Knul38weJAQ==",
     )
     .unwrap();
     assert!(!res);

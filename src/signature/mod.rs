@@ -7,7 +7,7 @@ use self::ecdsa::{sign_with_ecdsa, verify_with_ecdsa};
 use crate::ca::{get_own_pair, query_others_public};
 use anyhow::Result;
 
-pub fn sign(target_file: &String) -> Result<String> {
+pub fn sign(target_file: &str) -> Result<String> {
     // 获取私钥
     let (_, private) = get_own_pair()?;
     // 计算 blake3 摘要值
@@ -16,7 +16,7 @@ pub fn sign(target_file: &String) -> Result<String> {
     sign_with_ecdsa(&private, &digest)
 }
 
-pub fn verify(target_file: &String, package_signer: &str, signature: &String) -> Result<bool> {
+pub fn verify(target_file: &str, package_signer: &str, signature: &str) -> Result<bool> {
     // 查询公钥
     let public = query_others_public(package_signer)?;
     // 计算 blake3 摘要值
@@ -25,7 +25,7 @@ pub fn verify(target_file: &String, package_signer: &str, signature: &String) ->
     verify_with_ecdsa(&public, &digest, signature)
 }
 
-pub fn fast_verify(raw: &[u8], package_signer: &str, signature: &String) -> Result<bool> {
+pub fn fast_verify(raw: &[u8], package_signer: &str, signature: &str) -> Result<bool> {
     // 查询公钥
     let public = query_others_public(package_signer)?;
     // 计算 blake3 摘要值
