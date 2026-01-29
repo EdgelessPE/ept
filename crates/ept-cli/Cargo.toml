@@ -1,0 +1,32 @@
+[package]
+name = "ept-cli"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Edgeless Package Tool - CLI"
+
+[[bin]]
+name = "ept"
+path = "src/main.rs"
+
+[dependencies]
+ept-lib.workspace = true
+anyhow.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+toml.workspace = true
+
+# CLI
+clap = { version = "4.5.54", features = ["derive"] }
+
+# 其他依赖
+console = "0.16.2"
+colored = "3.0.0"
+dialoguer = "0.12.0"
+indicatif = "0.18.3"
+rustyline = "17.0.2"
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(tarpaulin_include)'] }

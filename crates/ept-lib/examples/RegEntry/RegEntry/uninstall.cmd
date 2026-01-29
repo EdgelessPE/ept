@@ -1,0 +1,1 @@
+echo 1919810 > D:/Desktop/Projects/EdgelessPE/ept/crates/ept-lib\_reg_entry_success.log
