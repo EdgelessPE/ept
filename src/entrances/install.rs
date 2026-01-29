@@ -6,13 +6,14 @@ use super::{
     info_local,
     utils::{
         package::{clean_temp, unpack_nep},
-        validator::installed_validator,
+        validator::{installed_validator, WORKFLOW_SETUP},
     },
 };
 use crate::{entrances::update_using_package, utils::parse_inputs::ParseInputResEnum};
 use crate::{
     entrances::{expand_workshop, is_workshop_expandable},
     signature::blake3::compute_hash_blake3_from_string,
+    types::package::GlobalPackage,
     utils::{
         cache::spawn_cache, download::download_nep, fs::move_or_copy, get_path_cache, is_qa_mode,
         path::parse_relative_path_with_located, term::ask_yn,
@@ -20,6 +21,106 @@ use crate::{
 };
 use crate::{executor::workflow_executor, parsers::parse_workflow, utils::get_path_apps};
 use crate::{log, log_ok_last, p2s};
+
+// 检查软件是否已通过绝对路径的 main_program 字段全局安装
+fn check_global_installation(package: &GlobalPackage) -> Result<bool> {
+    if let Some(ref software) = package.software {
+        if let Some(ref installed) = software.main_program {
+            let p = Path::new(installed);
+            if p.is_absolute() && p.exists() {
+                return Ok(ask_yn(
+                    format!(
+                        "Package '{name}' has been installed at '{installed}', continue?",
+                        name = package.package.name
+                    ),
+                    false,
+                ));
+            }
+        }
+    }
+    Ok(true)
+}
+
+// 检查包是否已安装，如果是则重定向到更新流程
+fn check_existing_installation(
+    source_file: &String,
+    package: &GlobalPackage,
+    verify_signature: bool,
+) -> Result<Option<(String, String)>> {
+    if let Ok((_, diff)) = info_local(&package.package.scope, &package.package.name) {
+        log!(
+            "Warning:Package '{name}' has been installed({ver}), switch to update entrance",
+            name = package.package.name,
+            ver = diff.version,
+        );
+        let res = update_using_package(source_file, verify_signature)?;
+        return Ok(Some((res.scope, res.name)));
+    }
+    Ok(None)
+}
+
+// 将应用文件从临时目录部署到 apps 目录
+fn deploy_app_files(temp_dir: &Path, package: &GlobalPackage) -> Result<String> {
+    let into_dir = get_path_apps(&package.package.scope, &package.package.name, true)?;
+    if into_dir.exists() {
+        remove_dir_all(into_dir.clone()).map_err(|_| {
+            anyhow!(
+                "Error:Can't keep target directory '{dir}' clear, manually delete it then try again",
+                dir = p2s!(into_dir.as_os_str())
+            )
+        })?;
+    }
+
+    let app_path = temp_dir.join(&package.package.name);
+    if !app_path.exists() {
+        return Err(anyhow!(
+            "Error:App folder not found : {dir}",
+            dir = p2s!(app_path)
+        ));
+    }
+    move_or_copy(app_path, into_dir.clone())?;
+
+    Ok(p2s!(into_dir))
+}
+
+// 验证指定的 main_program 是否存在
+fn validate_main_program(into_dir: &str, package: &GlobalPackage) -> Result<()> {
+    if let Some(ref software) = package.software {
+        if let Some(ref installed) = software.main_program {
+            let p = parse_relative_path_with_located(installed, into_dir);
+            log!("Debug:Checking main program at '{}'", p2s!(p));
+            if !p.exists() {
+                if is_qa_mode() {
+                    log!("Warning:Validating failed : field 'main_program' provided in table 'software' not exist : '{installed}'")
+                } else {
+                    return Err(anyhow!("Error:Validating failed : field 'main_program' provided in table 'software' not exist : '{installed}'"));
+                }
+            }
+        }
+    }
+    Ok(())
+}
+
+// 安装完成后的最终验证
+fn finalize_installation(into_dir: &String, package: &GlobalPackage) -> Result<()> {
+    installed_validator(into_dir)?;
+    validate_main_program(into_dir, package)?;
+
+    log!(
+        "Debug:Try to get info of '{scope}/{name}'",
+        scope = package.package.scope,
+        name = package.package.name
+    );
+    info_local(&package.package.scope, &package.package.name).map_err(|e| {
+        anyhow!(
+            "Error:Validating failed : failed to get info of '{scope}/{name}' : {e}",
+            scope = package.package.scope,
+            name = package.package.name
+        )
+    })?;
+
+    Ok(())
+}
 
 pub fn install_using_package(
     source_file: &String,
@@ -31,119 +132,59 @@ pub fn install_using_package(
     let (temp_dir_inner_path, package_struct) = unpack_nep(source_file, verify_signature)?;
     log!(
         "Info:If installation fails, use 'ept uninstall \"{name}\"' to roll back",
-        name = &package_struct.package.name
+        name = package_struct.package.name
     );
 
-    // 读入安装工作流
+    // 加载安装工作流
     log!("Info:Resolving package...");
-    let setup_file_path = temp_dir_inner_path.join("workflows/setup.toml");
+    let setup_file_path = temp_dir_inner_path.join("workflows").join(WORKFLOW_SETUP);
     let setup_workflow = parse_workflow(&p2s!(setup_file_path))?;
-    let package = package_struct.package.clone();
-    let software = package_struct.software.clone().unwrap();
 
-    // 使用绝对路径的 main_program 字段，检查是否已经全局安装过该软件
-    if let Some(installed) = &software.main_program {
-        let p = Path::new(installed);
-        if p.is_absolute()
-            && p.exists()
-            && !ask_yn(
-                format!(
-                    "Package '{name}' has been installed at '{installed}', continue?",
-                    name = package.name
-                ),
-                false,
-            )
-        {
-            return Err(anyhow!("Error:Operation canceled by user"));
-        }
+    // 检查是否已全局安装
+    if !check_global_installation(&package_struct)? {
+        return Err(anyhow!("Error:Operation canceled by user"));
     }
 
-    // 检查对应包名有没有被安装过
-    if let Ok((_, diff)) = info_local(&package.scope, &package.name) {
-        log!(
-            "Warning:Package '{name}' has been installed({ver}), switch to update entrance",
-            name = package.name,
-            ver = diff.version,
-        );
-        let res = update_using_package(source_file, verify_signature)?;
-        return Ok((res.scope, res.name));
+    // 检查是否已安装并重定向到更新
+    if let Some(result) =
+        check_existing_installation(source_file, &package_struct, verify_signature)?
+    {
+        return Ok(result);
     }
     log_ok_last!("Info:Resolving package...");
 
-    // 执行展开工作流
+    // 如有展开工作流则执行
     let temp_dir_inner = p2s!(temp_dir_inner_path);
     if is_workshop_expandable(&temp_dir_inner) {
         expand_workshop(&temp_dir_inner)?;
     }
 
-    // 解析最终安装位置
+    // 部署文件
     log!("Info:Deploying files...");
-    let into_dir = get_path_apps(&package.scope, &package.name, true)?;
-    if into_dir.exists() {
-        remove_dir_all(into_dir.clone()).map_err(|_| {
-            anyhow!(
-                "Error:Can't keep target directory '{dir}' clear, manually delete it then try again",
-                dir = p2s!(into_dir.as_os_str())
-            )
-        })?;
-    }
-
-    // 移动程序至 apps 目录
-    let app_path = temp_dir_inner_path.join(&package.name);
-    if !app_path.exists() {
-        return Err(anyhow!(
-            "Error:App folder not found : {dir}",
-            dir = p2s!(app_path)
-        ));
-    }
-    move_or_copy(app_path.clone(), into_dir.clone())?;
+    let into_dir = deploy_app_files(&temp_dir_inner_path, &package_struct)?;
     log_ok_last!("Info:Deploying files...");
 
-    // 执行安装工作流
-    let into_dir = p2s!(into_dir);
+    // 运行安装工作流
     log!("Info:Running setup workflow...");
-    workflow_executor(setup_workflow, into_dir.clone(), package_struct)?;
+    workflow_executor(setup_workflow, into_dir.clone(), package_struct.clone())?;
     log_ok_last!("Info:Running setup workflow...");
 
-    // 保存 nep 包的元信息
+    // 保存 nep 上下文
     let ctx_path = Path::new(&into_dir).join(".nep_context");
     move_or_copy(temp_dir_inner_path, ctx_path)?;
 
-    // 检查安装是否完整
+    // 验证安装
     log!("Info:Validating setup...");
-    installed_validator(&into_dir)?;
-    // 如果提供了主程序检查是否存在
-    if let Some(installed) = &software.main_program {
-        let p = parse_relative_path_with_located(installed, &into_dir);
-        log!("Debug:Checking main program at '{}'", p2s!(p));
-        if !p.exists() {
-            if is_qa_mode() {
-                log!("Warning:Validating failed : field 'main_program' provided in table 'software' not exist : '{installed}'")
-            } else {
-                return Err(anyhow!("Error:Validating failed : field 'main_program' provided in table 'software' not exist : '{installed}'"));
-            }
-        }
-    }
-
-    // 执行一次 info
-    log!(
-        "Debug:Try to get info of '{scope}/{name}'",
-        scope = package.scope,
-        name = package.name
-    );
-    info_local(&package.scope, &package.name).map_err(|e| {
-        anyhow!(
-            "Error:Validating failed : failed to get info of '{scope}/{name}' : {e}",
-            scope = package.scope,
-            name = package.name
-        )
-    })?;
+    finalize_installation(&into_dir, &package_struct)?;
     log_ok_last!("Info:Validating setup...");
 
-    // 清理临时文件夹
+    // 清理
     clean_temp(source_file)?;
 
-    Ok((package.scope, package.name))
+    Ok((
+        package_struct.package.scope.clone(),
+        package_struct.package.name.clone(),
+    ))
 }
 
 pub fn install_using_url(url: &str, verify_signature: bool) -> Result<(String, String)> {

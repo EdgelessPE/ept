@@ -113,90 +113,112 @@ pub fn info_online(
     ))
 }
 
+// 不同类型输入的 info 结果类型别名
+type InfoResult = (String, String, InfoDiff, Option<MetaResult>);
+
+fn info_from_matcher(
+    matcher: crate::types::matcher::PackageMatcher,
+    _verify: bool,
+) -> Result<InfoResult> {
+    let mirror = matcher.mirror.clone();
+    let (scope, package_name) = find_scope_with_name(&matcher.name, matcher.scope.as_deref())?;
+
+    // 先尝试在线获取
+    if let Ok((item, _, _)) = info_online(&scope, &package_name, mirror.clone()) {
+        let (info_diff, meta) = consume_info_diff(&item, matcher.version_req)?;
+        return Ok((scope, package_name, info_diff, meta));
+    }
+
+    // 回退到本地获取
+    let local_path = get_path_apps(&scope, &package_name, false)?;
+    if local_path.exists() {
+        let (_global, local) = info_local(&scope, &package_name)?;
+        let meta_res = meta(PackageInputEnum::PackageMatcher(matcher), false)?;
+        return Ok((scope, package_name, local, Some(meta_res)));
+    }
+
+    Err(anyhow!(
+        "Error:Can't locate package '{scope}/{package_name}'"
+    ))
+}
+
+fn info_from_local_path(path: String, verify: bool) -> Result<InfoResult> {
+    let meta_res = meta(PackageInputEnum::LocalPath(path), verify)?;
+    let package = &meta_res.package.package;
+    Ok((
+        package.scope.clone(),
+        package.name.clone(),
+        InfoDiff {
+            version: package.version.clone(),
+            authors: package.authors.clone(),
+        },
+        Some(meta_res),
+    ))
+}
+
+fn info_from_url(url: String, verify: bool) -> Result<InfoResult> {
+    let cache_path = get_path_cache()?;
+    let url_hash = compute_hash_blake3_from_string(&url)?;
+    let (p, cache_ctx) = download_nep(&url, Some((cache_path, url_hash)))?;
+    let p_str = p2s!(p);
+
+    spawn_cache(cache_ctx)?;
+
+    let (p, pkg) = unpack_nep(&p_str, verify)?;
+    let p_str = p2s!(p);
+    let meta_res = meta(PackageInputEnum::LocalPath(p_str), false)?;
+    let package = pkg.package;
+
+    Ok((
+        package.scope,
+        package.name,
+        InfoDiff {
+            version: package.version,
+            authors: package.authors,
+        },
+        Some(meta_res),
+    ))
+}
+
+// 使用本地和在线数据丰富 info 信息
+fn enrich_info(mut info: Info, mirror: Option<String>) -> Result<Info> {
+    if let Ok((_, local)) = info_local(&info.scope, &info.name) {
+        info.local = Some(local);
+    }
+    if let Ok((item, _, _)) = info_online(&info.scope, &info.name, mirror) {
+        let (info_diff, meta) = consume_info_diff(&item, None)?;
+        info.online = Some(info_diff);
+        if info.meta.is_none() {
+            info.meta = meta;
+        }
+    }
+    Ok(info)
+}
+
 pub fn info(
     target_input: PackageInputEnum,
     verify_signature: bool,
 ) -> Result<(Info, Option<PathBuf>)> {
-    let mut mirror = None;
-    let (scope, package_name, target, meta_res) = match target_input {
+    let (scope, package_name, target, meta_res, mirror) = match target_input {
         PackageInputEnum::PackageMatcher(matcher) => {
-            let scope = matcher.scope.clone();
-            let package_name = matcher.name.clone();
-            mirror = matcher.mirror.clone();
-            // 查找 scope 并使用 scope 更新纠正大小写
-            let (scope, package_name) = find_scope_with_name(&package_name, scope.as_deref())?;
-            // 获取在线信息
-            if let Ok((item, _, _)) = info_online(&scope, &package_name, mirror.clone()) {
-                let (info_diff, meta) = consume_info_diff(&item, matcher.version_req)?;
-                (scope, package_name, info_diff, meta)
-            } else {
-                // 扫描本地安装目录
-                let local_path = get_path_apps(&scope, &package_name, false)?;
-                if local_path.exists() {
-                    let (_global, local) = info_local(&scope, &package_name)?;
-                    (
-                        scope,
-                        package_name,
-                        local,
-                        Some(meta(
-                            PackageInputEnum::PackageMatcher(matcher.clone()),
-                            false,
-                        )?),
-                    )
-                } else {
-                    return Err(anyhow!(
-                        "Error:Can't locate package '{scope}/{package_name}'"
-                    ));
-                }
-            }
+            let mirror = matcher.mirror.clone();
+            let (scope, name, target, meta) = info_from_matcher(matcher, verify_signature)?;
+            (scope, name, target, meta, mirror)
         }
-        PackageInputEnum::LocalPath(_) => {
-            let meta_res = meta(target_input, verify_signature)?;
-            let package = meta_res.package.package.clone();
-            (
-                package.scope,
-                package.name,
-                InfoDiff {
-                    version: package.version,
-                    authors: package.authors,
-                },
-                Some(meta_res),
-            )
+        PackageInputEnum::LocalPath(path) => {
+            let (scope, name, target, meta) = info_from_local_path(path, verify_signature)?;
+            (scope, name, target, meta, None)
         }
         PackageInputEnum::Url(url) => {
-            // 下载文件到临时目录
-            let cache_path = get_path_cache()?;
-            let url_hash = compute_hash_blake3_from_string(&url)?;
-            let (p, cache_ctx) = download_nep(&url, Some((cache_path, url_hash)))?;
-            let p_str = p2s!(p);
-            // 缓存下载的包
-            spawn_cache(cache_ctx)?;
-
-            let (p, pkg) = unpack_nep(&p_str, verify_signature)?;
-            let p_str = p2s!(p);
-            let package = pkg.package;
-            let meta_res = meta(PackageInputEnum::LocalPath(p_str), false)?;
-
-            (
-                package.scope,
-                package.name,
-                InfoDiff {
-                    version: package.version,
-                    authors: package.authors,
-                },
-                Some(meta_res),
-            )
+            let (scope, name, target, meta) = info_from_url(url, verify_signature)?;
+            (scope, name, target, meta, None)
         }
     };
 
-    let temp_dir = if let Some(meta_res) = meta_res.clone() {
-        meta_res.temp_dir
-    } else {
-        None
-    };
-    // 创建结果结构体
-    let mut info = Info {
-        scope: scope.clone(),
+    let temp_dir = meta_res.as_ref().and_then(|m| m.temp_dir.clone());
+
+    let info = Info {
+        scope,
         name: package_name.clone(),
         target,
         local: None,
@@ -204,19 +226,8 @@ pub fn info(
         meta: meta_res,
     };
 
-    // 检查包的本地安装情况、在线情况
-    if let Ok((_, local)) = info_local(&scope, &package_name) {
-        info.local = Some(local);
-    }
-    if let Ok((item, _, _)) = info_online(&scope, &package_name, mirror) {
-        let (info_diff, meta) = consume_info_diff(&item, None)?;
-        info.online = Some(info_diff);
-        if info.meta.is_none() {
-            info.meta = meta;
-        }
-    }
-
-    Ok((info, temp_dir))
+    let enriched = enrich_info(info, mirror)?;
+    Ok((enriched, temp_dir))
 }
 
 #[test]

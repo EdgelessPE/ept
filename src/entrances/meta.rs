@@ -308,60 +308,64 @@ fn test_meta() {
     use crate::types::package::Package;
     use crate::types::software::Software;
     crate::utils::test::_ensure_testing_vscode_uninstalled();
-    crate::utils::test::_ensure_testing_vscode();
+    let vscode_path = crate::utils::test::_ensure_testing_vscode();
+    let meta_result = meta(
+        PackageInputEnum::PackageMatcher(PackageMatcher {
+            name: "VSCode".to_string(),
+            scope: None,
+            mirror: None,
+            version_req: None,
+        }),
+        false,
+    )
+    .unwrap();
+
+    // 验证返回的 meta 数据（使用 assert_eq! 分别验证各个字段，避免硬编码路径）
+    assert_eq!(meta_result.temp_dir, Some(vscode_path));
     assert_eq!(
-        meta(
-            PackageInputEnum::PackageMatcher(PackageMatcher {
-                name: "VSCode".to_string(),
-                scope: None,
-                mirror: None,
-                version_req: None,
-            }),
-            false,
-        )
-        .unwrap(),
-        MetaResult {
-            temp_dir: Some(Path::new("C:/Users/Public/Music/apps/Microsoft/VSCode").to_path_buf()),
-            permissions: vec![
-                Permission {
-                    key: PermissionKey::path_entrances,
-                    level: PermissionLevel::Normal,
-                    targets: vec!["Code.exe".to_string()],
-                },
-                Permission {
-                    key: PermissionKey::link_desktop,
-                    level: PermissionLevel::Normal,
-                    targets: vec!["Visual Studio Code".to_string()],
-                }
-            ],
-            workflows: vec!["setup.toml".to_string()],
-            package: GlobalPackage {
-                nep: "0".to_string(),
-                package: Package {
-                    name: "VSCode".to_string(),
-                    template: "Software".to_string(),
-                    version: "1.75.4.0".to_string(),
-                    authors: vec![
-                        "Cno <dsyourshy@qq.com>".to_string(),
-                        "Microsoft".to_string()
-                    ],
-                    license: Some("MIT".to_string()),
-                    description: "Visual Studio Code".to_string(),
-                    scope: "Microsoft".to_string(),
-                    icon: None,
-                    strict: None,
-                },
-                software: Some(Software {
-                    upstream: "https://code.visualstudio.com/".to_string(),
-                    category: "办公编辑".to_string(),
-                    tags: Some(vec!["Electron".to_string()]),
-                    language: "Multi".to_string(),
-                    arch: None,
-                    main_program: Some("Code.exe".to_string()),
-                    alias: None,
-                    registry_entry: None,
-                }),
+        meta_result.permissions,
+        vec![
+            Permission {
+                key: PermissionKey::path_entrances,
+                level: PermissionLevel::Normal,
+                targets: vec!["Code.exe".to_string()],
             },
+            Permission {
+                key: PermissionKey::link_desktop,
+                level: PermissionLevel::Normal,
+                targets: vec!["Visual Studio Code".to_string()],
+            }
+        ]
+    );
+    assert_eq!(meta_result.workflows, vec!["setup.toml".to_string()]);
+    assert_eq!(
+        meta_result.package,
+        GlobalPackage {
+            nep: "0".to_string(),
+            package: Package {
+                name: "VSCode".to_string(),
+                template: "Software".to_string(),
+                version: "1.75.4.0".to_string(),
+                authors: vec![
+                    "Cno <dsyourshy@qq.com>".to_string(),
+                    "Microsoft".to_string()
+                ],
+                license: Some("MIT".to_string()),
+                description: "Visual Studio Code".to_string(),
+                scope: "Microsoft".to_string(),
+                icon: None,
+                strict: None,
+            },
+            software: Some(Software {
+                upstream: "https://code.visualstudio.com/".to_string(),
+                category: "办公编辑".to_string(),
+                tags: Some(vec!["Electron".to_string()]),
+                language: "Multi".to_string(),
+                arch: None,
+                main_program: Some("Code.exe".to_string()),
+                alias: None,
+                registry_entry: None,
+            }),
         }
     );
 

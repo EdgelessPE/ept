@@ -2,17 +2,17 @@ use super::{
     info_local, install_using_package, list, uninstall,
     utils::{
         package::{clean_temp, unpack_nep},
-        validator::installed_validator,
+        validator::{installed_validator, WORKFLOW_REMOVE, WORKFLOW_SETUP, WORKFLOW_UPDATE},
     },
 };
 use crate::utils::flags::{set_flag, Flag};
 use crate::{
     entrances::{expand_workshop, is_workshop_expandable},
-    executor::workflow_executor,
+    executor::{workflow_executor, workflow_reverse_executor},
     p2s,
     parsers::{parse_author, parse_workflow},
     signature::blake3::compute_hash_blake3_from_string,
-    types::{author::Author, extended_semver::ExSemVer},
+    types::{author::Author, extended_semver::ExSemVer, info::UpdateInfo, package::GlobalPackage},
     utils::{
         cache::spawn_cache,
         download::download_nep,
@@ -22,16 +22,121 @@ use crate::{
         term::ask_yn,
     },
 };
-use crate::{executor::workflow_reverse_executor, types::info::UpdateInfo};
 use crate::{log, log_ok_last};
 use anyhow::{anyhow, Result};
-use std::{fs::remove_dir_all, str::FromStr};
+use std::{fs::remove_dir_all, path::Path, str::FromStr};
 
 fn same_authors(a: &[String], b: &[String]) -> bool {
     let ai: Vec<Author> = a.iter().map(|raw| parse_author(raw).unwrap()).collect();
     let bi: Vec<Author> = b.iter().map(|raw| parse_author(raw).unwrap()).collect();
 
     ai.eq(&bi)
+}
+
+// 验证版本升级是否允许
+fn validate_version_update(name: &str, local_ver: &str, fresh_ver: &str) -> Result<()> {
+    let local_version = ExSemVer::from_str(local_ver)?;
+    let fresh_version = ExSemVer::from_str(fresh_ver)?;
+    if local_version >= fresh_version {
+        return Err(anyhow!("Error:Package '{name}' has been up to date ({local_version}), can't update to the version of given package ({fresh_version})"));
+    }
+    Ok(())
+}
+
+// 处理作者不匹配的情况，需要卸载后重新安装
+fn handle_author_mismatch(
+    source_file: &String,
+    local: &GlobalPackage,
+    fresh: &GlobalPackage,
+    local_ver: String,
+    verify_signature: bool,
+) -> Result<Option<UpdateInfo>> {
+    if same_authors(&local.package.authors, &fresh.package.authors) {
+        return Ok(None);
+    }
+
+    if !ask_yn(format!("The given package is not the same as the author of the installed package (local:{:?}, given:{:?}), uninstall the installed package first?",local.package.authors,fresh.package.authors),true) {
+        return Err(anyhow!("Error:Update canceled by user"));
+    }
+
+    uninstall(Some(local.package.scope.clone()), &local.package.name)?;
+    install_using_package(source_file, verify_signature)?;
+
+    Ok(Some(UpdateInfo {
+        name: fresh.package.name.clone(),
+        scope: fresh.package.scope.clone(),
+        from_version: local_ver,
+        to_version: fresh.package.version.clone(),
+    }))
+}
+
+// 如有需要，执行旧包的移除工作流
+fn run_old_remove_if_needed(
+    located: &Path,
+    temp_dir: &Path,
+    local_pkg: &GlobalPackage,
+) -> Result<()> {
+    let remove_path = located
+        .join(".nep_context")
+        .join("workflows")
+        .join(WORKFLOW_REMOVE);
+    let update_path = temp_dir.join("workflows").join(WORKFLOW_UPDATE);
+
+    if remove_path.exists() && !update_path.exists() {
+        log!("Info:Running remove workflow...");
+        let remove_workflow = parse_workflow(&p2s!(remove_path))?;
+        let located_str = p2s!(located);
+        workflow_executor(remove_workflow, located_str, local_pkg.clone())?;
+        log_ok_last!("Info:Running remove workflow...");
+    }
+    Ok(())
+}
+
+// 逆向执行安装工作流
+fn reverse_setup_workflow(located: &Path, local_pkg: GlobalPackage) -> Result<()> {
+    let setup_path = located
+        .join(".nep_context")
+        .join("workflows")
+        .join(WORKFLOW_SETUP);
+    let setup_workflow = parse_workflow(&p2s!(setup_path))?;
+    let located_str = p2s!(located);
+
+    log!("Info:Running reverse setup workflow...");
+    workflow_reverse_executor(setup_workflow, located_str, local_pkg)?;
+    log_ok_last!("Info:Running reverse setup workflow...");
+    Ok(())
+}
+
+// 部署新版本文件
+fn deploy_update(temp_dir: &Path, located: &Path, name: &str) -> Result<()> {
+    log!("Info:Removing old package...");
+    remove_dir_all(located)?;
+    log_ok_last!("Info:Removing old package...");
+
+    log!("Info:Deploying files...");
+    move_or_copy(temp_dir.join(name), located.to_path_buf())?;
+    log_ok_last!("Info:Deploying files...");
+    Ok(())
+}
+
+// 执行新包的 update 或 setup 工作流
+fn run_new_workflow(temp_dir: &Path, located: &Path, fresh_pkg: GlobalPackage) -> Result<()> {
+    let update_path = temp_dir.join("workflows").join(WORKFLOW_UPDATE);
+    let located_str = p2s!(located);
+
+    if update_path.exists() {
+        log!("Info:Running update workflow...");
+        let update_workflow = parse_workflow(&p2s!(update_path))?;
+        workflow_executor(update_workflow, located_str, fresh_pkg)?;
+        log_ok_last!("Info:Running update workflow...");
+    } else {
+        log!("Info:Running setup workflow...");
+        let setup_path = update_path.with_file_name(WORKFLOW_SETUP);
+        let setup_workflow = parse_workflow(&p2s!(setup_path))?;
+        workflow_executor(setup_workflow, located_str, fresh_pkg)?;
+        log_ok_last!("Info:Running setup workflow...");
+    }
+    Ok(())
 }
 
 pub fn update_using_package(source_file: &String, verify_signature: bool) -> Result<UpdateInfo> {
@@ -42,120 +147,59 @@ pub fn update_using_package(source_file: &String, verify_signature: bool) -> Res
     let name = fresh_package.package.name.clone();
     let fresh_scope = fresh_package.package.scope.clone();
 
-    // 确认包是否已安装
+    // 验证包是否已安装
     log!("Info:Resolving package...");
     let (local_package, local_diff) = info_local(&fresh_scope, &name).map_err(|e| {
         anyhow!("Error:Package '{name}' hasn't been installed or installation broken, use 'ept install' or 'ept uninstall' instead : '{e}'")
     })?;
 
-    // 确认是否允许升级
-    let local_version = ExSemVer::from_str(&local_diff.version)?;
-    let fresh_version_str = fresh_package.package.version.clone();
-    let fresh_version = ExSemVer::from_str(&fresh_version_str)?;
-    if local_version >= fresh_version {
-        return Err(anyhow!("Error:Package '{name}' has been up to date ({local_version}), can't update to the version of given package ({fresh_version})"));
+    // 验证版本
+    validate_version_update(&name, &local_diff.version, &fresh_package.package.version)?;
+
+    // 处理作者不匹配
+    if let Some(result) = handle_author_mismatch(
+        source_file,
+        &local_package,
+        &fresh_package,
+        local_diff.version.clone(),
+        verify_signature,
+    )? {
+        return Ok(result);
     }
 
-    // 确认作者是否一致
-    if !same_authors(
-        &local_package.package.authors,
-        &fresh_package.package.authors,
-    ) {
-        // 需要卸载然后重新安装
-        if !ask_yn(format!("The given package is not the same as the author of the installed package (local:{:?}, given:{:?}), uninstall the installed package first?",local_package.package.authors,fresh_package.package.authors),true) {
-            return Err(anyhow!("Error:Update canceled by user"));
-        }
-        // 卸载
-        uninstall(
-            Some(local_package.package.scope),
-            &local_package.package.name,
-        )?;
-        // 安装
-        install_using_package(source_file, verify_signature)?;
-        return Ok(UpdateInfo {
-            name,
-            scope: fresh_scope,
-            from_version: local_diff.version,
-            to_version: fresh_package.package.version,
-        });
-    }
-
-    let located = get_path_apps(&local_package.package.scope, &name, true)?;
-    let located_str = p2s!(located);
+    let located = get_path_apps(&local_package.package.scope, &name, false)?;
     log_ok_last!("Info:Resolving package...");
 
-    // 如果旧包有 remove 且新包没有 update 则执行旧包的 remove
-    let remove_path = located
-        .join(".nep_context")
-        .join("workflows")
-        .join("remove.toml");
-    let update_path = temp_dir_inner_path.join("workflows").join("update.toml");
-    if remove_path.exists() && !update_path.exists() {
-        log!("Info:Running remove workflow...");
-        let remove_workflow = parse_workflow(&p2s!(remove_path))?;
-        workflow_executor(remove_workflow, located_str.clone(), local_package.clone())?;
-        log_ok_last!("Info:Running remove workflow...");
-    };
+    // 执行工作流转换
+    run_old_remove_if_needed(&located, &temp_dir_inner_path, &local_package)?;
+    reverse_setup_workflow(&located, local_package)?;
 
-    // 逆向执行安装工作流
-    let setup_path = located
-        .join(".nep_context")
-        .join("workflows")
-        .join("setup.toml");
-    let setup_workflow = parse_workflow(&p2s!(setup_path))?;
-    log!("Info:Running reverse setup workflow...");
-    workflow_reverse_executor(setup_workflow, located_str.clone(), local_package)?;
-    log_ok_last!("Info:Running reverse setup workflow...");
-
-    // 执行展开工作流
+    // 如有展开工作流则执行
     let temp_dir_inner = p2s!(temp_dir_inner_path);
     if is_workshop_expandable(&temp_dir_inner) {
         expand_workshop(&temp_dir_inner)?;
     }
 
-    // 移除旧的 app 目录
-    // TODO:尽可能提前检查占用，避免无法删除
-    log!("Info:Removing old package...");
-    remove_dir_all(&located)?;
-    log_ok_last!("Info:Removing old package...");
+    // 部署并运行新工作流
+    deploy_update(&temp_dir_inner_path, &located, &name)?;
+    run_new_workflow(&temp_dir_inner_path, &located, fresh_package.clone())?;
 
-    // 移动程序至 apps 目录
-    log!("Info:Deploying files...");
-    move_or_copy(temp_dir_inner_path.join(&name), located.clone())?;
-    log_ok_last!("Info:Deploying files...");
-
-    // 执行新包的 update，如果没有则执行新包的 setup
-    if update_path.exists() {
-        // 执行 update 工作流
-        log!("Info:Running update workflow...");
-        let update_workflow = parse_workflow(&p2s!(update_path))?;
-        workflow_executor(update_workflow, located_str.clone(), fresh_package)?;
-        log_ok_last!("Info:Running update workflow...");
-    } else {
-        // 执行 setup 工作流
-        log!("Info:Running setup workflow...");
-        let setup_workflow = parse_workflow(&p2s!(update_path.with_file_name("setup.toml")))?;
-        workflow_executor(setup_workflow, located_str.clone(), fresh_package)?;
-        log_ok_last!("Info:Running setup workflow...");
-    }
-
-    // 保存上下文
+    // 保存上下文并验证
     let ctx_path = located.join(".nep_context");
     move_or_copy(temp_dir_inner_path, ctx_path)?;
 
-    // 检查更新是否完整
     log!("Info:Validating update...");
+    let located_str = p2s!(located);
     installed_validator(&located_str)?;
     log_ok_last!("Info:Validating update...");
 
-    // 清理临时文件夹
     clean_temp(source_file)?;
 
     Ok(UpdateInfo {
         name,
         scope: fresh_scope,
         from_version: local_diff.version,
-        to_version: fresh_version_str,
+        to_version: fresh_package.package.version,
     })
 }
 

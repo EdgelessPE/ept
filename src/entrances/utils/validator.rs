@@ -11,6 +11,12 @@ use crate::{
     utils::{term::ask_yn, wild_match::contains_wild_match},
 };
 
+// 工作流文件名常量
+pub const WORKFLOW_SETUP: &str = "setup.toml";
+pub const WORKFLOW_UPDATE: &str = "update.toml";
+pub const WORKFLOW_REMOVE: &str = "remove.toml";
+pub const WORKFLOW_EXPAND: &str = "expand.toml";
+
 pub fn inner_validator(dir: &String) -> Result<()> {
     let manifest = vec!["package.toml", "workflows/setup.toml"];
     for file_name in manifest {
