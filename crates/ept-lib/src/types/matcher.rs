@@ -239,7 +239,7 @@ fn test_parse_package_input_enum() {
     );
     // Windows 路径格式测试 - 使用正斜杠
     assert_eq!(
-        PackageInputEnum::parse("./Cargo.lock".to_string(), false, false).unwrap(),
+        PackageInputEnum::parse(".\\Cargo.lock".to_string(), false, false).unwrap(),
         PackageInputEnum::LocalPath("Cargo.lock".to_string())
     );
     assert_eq!(

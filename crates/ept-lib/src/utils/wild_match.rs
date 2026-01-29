@@ -115,6 +115,8 @@ fn test_parse_wild_match() {
         .and_then(|p| p.parent())
         .map(|p| p.to_string_lossy().to_string())
         .unwrap_or_else(|| located.clone());
+
+    // pnpm-lock.yaml
     assert_eq!(parse_wild_match("*.yaml", &project_root).unwrap().len(), 1);
     assert_eq!(parse_wild_match("src/*.rs", &located).unwrap().len(), 1);
     assert_eq!(
