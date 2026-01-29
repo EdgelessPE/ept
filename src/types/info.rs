@@ -367,6 +367,7 @@ impl FmtPrint for Info {
 
 #[test]
 fn test_info() {
+    use crate::types::constants::{WORKFLOW_REMOVE, WORKFLOW_SETUP};
     use crate::types::package::GlobalPackage;
     use crate::types::permissions::Permission;
     let demo_pkg = GlobalPackage::_demo();

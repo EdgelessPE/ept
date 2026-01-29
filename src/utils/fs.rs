@@ -132,6 +132,7 @@ where
 
 #[test]
 fn test_read_sub_dir() {
+    use crate::types::constants::DIR_WORKFLOWS;
     assert_eq!(
         read_sub_dir("examples/VSCode").unwrap(),
         vec!["VSCode".to_string(), DIR_WORKFLOWS.to_string()]
@@ -140,6 +141,7 @@ fn test_read_sub_dir() {
 
 #[test]
 fn test_count_sub_files() {
+    use crate::types::constants::FILE_PACKAGE;
     assert_eq!(
         count_sub_files("examples/VSCode", |name| name == *FILE_PACKAGE).unwrap(),
         1

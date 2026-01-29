@@ -247,6 +247,7 @@ pub fn install_using_parsed(
 
 #[test]
 fn test_install() {
+    use crate::types::constants::FILE_PACKAGE;
     use crate::utils::flags::{set_flag, Flag};
     use crate::utils::fs::copy_dir;
     set_flag(Flag::Debug, true);
