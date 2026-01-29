@@ -1,5 +1,0 @@
-[create_shortcut]
-name = "Create shortcut"
-step = "Link"
-source_file = "vsc-launcher.exe"
-target_name = "vsc0-setup-${PackageVersion}"

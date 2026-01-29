@@ -1,4 +1,0 @@
-[install]
-step = "Execute"
-command = "installer.exe /S"
-call_installer = true

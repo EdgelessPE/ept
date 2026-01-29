@@ -1,1 +1,0 @@
-echo 1919810 > ${CUR_DIR}\_reg_entry_success.log

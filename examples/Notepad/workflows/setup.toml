@@ -1,5 +1,0 @@
-[create_shortcut]
-name = "Create shortcut"
-step = "Link"
-source_file = "notepad.exe"
-target_name = "记事本"
