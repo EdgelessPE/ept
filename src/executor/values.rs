@@ -46,7 +46,7 @@ macro_rules! define_values {
             )*
         }
 
-        pub fn set_context_with_mutable_values(context: &mut HashMapContext, exit_code: i32, located: &String,package_version:&String){
+        pub fn set_context_with_mutable_values(context: &mut HashMapContext, exit_code: i32, located: &str,package_version:&str){
             context.set_value("ExitCode".to_string(),Value::Int(exit_code.into())).unwrap();
             context.set_value("PackageVersion".to_string(),Value::String(package_version.to_owned())).unwrap();
             context.set_value("DefaultLocation".to_string(),Value::String(located.to_owned())).unwrap();
@@ -63,7 +63,7 @@ macro_rules! define_values {
 }
 
 // 收集合法的内置变量
-pub fn collect_values(raw: &String) -> Result<Vec<String>> {
+pub fn collect_values(raw: &str) -> Result<Vec<String>> {
     let valid_values: HashSet<String> = HashSet::from_iter(get_arr(true));
 
     let collection: Vec<String> = RE
@@ -83,7 +83,7 @@ pub fn collect_values(raw: &String) -> Result<Vec<String>> {
 }
 
 /// 适用于路径入参的内置变量使用规范校验器
-pub fn values_validator_path(raw: &String) -> Result<()> {
+pub fn values_validator_path(raw: &str) -> Result<()> {
     // "${DefaultLocation}" 不是合法的路径内置变量，应该使用相对路径
     if raw.contains("${DefaultLocation}") {
         return Err(anyhow!(
@@ -153,7 +153,7 @@ pub fn values_validator_path(raw: &String) -> Result<()> {
 }
 
 /// 给定内置函数访问的 fs 目标（包含内置变量），需要的权限级别
-pub fn judge_perm_level(fs_target: &String) -> Result<PermissionLevel> {
+pub fn judge_perm_level(fs_target: &str) -> Result<PermissionLevel> {
     // 收集使用到的内置变量
     let values = collect_values(fs_target)?;
 
@@ -208,33 +208,33 @@ define_values! {
 
 #[test]
 fn test_collect_values() {
-    values_validator_path(&"${AppData}/${ExitCode}.${SystemData}/".to_string()).unwrap();
+    values_validator_path("${AppData}/${ExitCode}.${SystemData}/").unwrap();
 
-    let err_res = values_validator_path(&"${SystemData}${AppData}${ExitCode}./".to_string());
+    let err_res = values_validator_path("${SystemData}${AppData}${ExitCode}./");
     assert!(err_res.is_err());
     log!("{e}", e = err_res.unwrap_err());
 
-    let err_res = values_validator_path(&"C:/system".to_string());
+    let err_res = values_validator_path("C:/system");
     assert!(err_res.is_err());
     log!("{e}", e = err_res.unwrap_err());
 
-    let err_res = values_validator_path(&"${AppData}/../nep".to_string());
+    let err_res = values_validator_path("${AppData}/../nep");
     assert!(err_res.is_err());
     log!("{e}", e = err_res.unwrap_err());
 
-    let err_res = values_validator_path(&"114${DefaultLocation}/vscode".to_string());
+    let err_res = values_validator_path("114${DefaultLocation}/vscode");
     assert!(err_res.is_err());
     log!("{e}", e = err_res.unwrap_err());
 
-    let err_res = values_validator_path(&"${AppData}/./${ExitCode}${Home}/nep".to_string());
+    let err_res = values_validator_path("${AppData}/./${ExitCode}${Home}/nep");
     assert!(err_res.is_err());
     log!("{e}", e = err_res.unwrap_err());
 
-    let err_res = values_validator_path(&"$/{${Desktop}/vscode".to_string());
+    let err_res = values_validator_path("$/{${Desktop}/vscode");
     assert!(err_res.is_err());
     log!("{e}", e = err_res.unwrap_err());
 
-    let err_res = values_validator_path(&"${Desktop}vscode".to_string());
+    let err_res = values_validator_path("${Desktop}vscode");
     assert!(err_res.is_err());
     log!("{e}", e = err_res.unwrap_err());
 }

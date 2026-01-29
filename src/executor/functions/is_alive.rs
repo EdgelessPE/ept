@@ -20,14 +20,14 @@ impl EvalFunction for IsAlive {
             Ok(Value::Boolean(is_alive_with_name(&arg)))
         })
     }
-    fn get_permission(arg: String) -> Result<Permission> {
+    fn get_permission(arg: &str) -> Result<Permission> {
         Ok(Permission {
             key: PermissionKey::process_query,
             level: PermissionLevel::Normal,
-            targets: vec![arg],
+            targets: vec![arg.to_string()],
         })
     }
-    fn verify_arg(arg: String) -> Result<()> {
+    fn verify_arg(arg: &str) -> Result<()> {
         if !arg.to_ascii_lowercase().ends_with(".exe") {
             return Err(anyhow!(
                 "Error:Argument of 'IsAlive' should ends with '.exe', got '{arg}'"

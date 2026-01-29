@@ -34,7 +34,7 @@ fn capture_function_info(conditions: &Vec<String>) -> Result<Vec<(String, String
     let res = Arc::new(Mutex::new(Vec::new()));
     for cond in conditions {
         // 初始化上下文
-        let mut context = get_eval_context(0, &"".to_string(), &"0.0.0.0".to_string());
+        let mut context = get_eval_context(0, "", "0.0.0.0");
 
         // 迭代函数信息，创建收集闭包
         for name in info_arr.clone() {
@@ -70,7 +70,7 @@ pub fn get_permissions_from_conditions(conditions: Vec<String>) -> Result<Vec<Pe
     // 匹配生成权限信息
     let mut permissions = Vec::new();
     for (name, arg, _) in func_info {
-        permissions.push(get_eval_function_permission(name, arg)?);
+        permissions.push(get_eval_function_permission(&name, &arg)?);
     }
 
     Ok(permissions)
@@ -78,8 +78,8 @@ pub fn get_permissions_from_conditions(conditions: Vec<String>) -> Result<Vec<Pe
 
 pub fn verify_conditions(
     conditions: Vec<String>,
-    located: &String,
-    package_version: &String,
+    located: &str,
+    package_version: &str,
 ) -> Result<()> {
     // 检查模板字符串用法
     for cond in &conditions {
@@ -93,7 +93,7 @@ pub fn verify_conditions(
 
     // 匹配函数入参进行校验
     for (name, arg, _) in func_info {
-        verify_eval_function_arg(name, arg)?;
+        verify_eval_function_arg(&name, &arg)?;
     }
 
     // 对条件进行 eval 校验

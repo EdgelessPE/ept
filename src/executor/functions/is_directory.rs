@@ -23,14 +23,14 @@ impl EvalFunction for IsDirectory {
             Ok(Value::Boolean(p.is_dir()))
         })
     }
-    fn get_permission(arg: String) -> Result<Permission> {
+    fn get_permission(arg: &str) -> Result<Permission> {
         Ok(Permission {
             key: PermissionKey::fs_read,
-            level: judge_perm_level(&arg)?,
-            targets: vec![arg],
+            level: judge_perm_level(arg)?,
+            targets: vec![arg.to_string()],
         })
     }
-    fn verify_arg(arg: String) -> Result<()> {
-        values_validator_path(&arg)
+    fn verify_arg(arg: &str) -> Result<()> {
+        values_validator_path(arg)
     }
 }

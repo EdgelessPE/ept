@@ -168,7 +168,7 @@ impl MirrorPkgSoftware {
                 name: "Visual Studio Code".to_string(),
                 releases: vec![MirrorPkgSoftwareRelease {
                     file_name: "VSCode_1.85.1.0_Cno.nep".to_string(),
-                    version: ExSemVer::parse(&"1.85.1.0".to_string()).unwrap(),
+                    version: ExSemVer::parse("1.85.1.0").unwrap(),
                     size: 94245376,
                     timestamp: 1704554724,
                     integrity: None,
@@ -182,7 +182,7 @@ impl MirrorPkgSoftware {
                 name: "Visual Studio Code Portable".to_string(),
                 releases: vec![MirrorPkgSoftwareRelease {
                     file_name: "VSCode_1.85.1.0_Cno.P.nep".to_string(),
-                    version: ExSemVer::parse(&"1.85.1.0".to_string()).unwrap(),
+                    version: ExSemVer::parse("1.85.1.0").unwrap(),
                     size: 94245376,
                     timestamp: 1704554724,
                     integrity: None,
@@ -196,7 +196,7 @@ impl MirrorPkgSoftware {
                 name: "Chrome".to_string(),
                 releases: vec![MirrorPkgSoftwareRelease {
                     file_name: "Chrome_120.0.6099.200_Cno.EI.nep".to_string(),
-                    version: ExSemVer::parse(&"120.0.6099.200".to_string()).unwrap(),
+                    version: ExSemVer::parse("120.0.6099.200").unwrap(),
                     size: 133763072,
                     timestamp: 1704554608,
                     integrity: None,
@@ -210,7 +210,7 @@ impl MirrorPkgSoftware {
                 name: "Chrome".to_string(),
                 releases: vec![MirrorPkgSoftwareRelease {
                     file_name: "360极速浏览器X_22.1.1073.64_Cno.nep".to_string(),
-                    version: ExSemVer::parse(&"22.1.1073.64".to_string()).unwrap(),
+                    version: ExSemVer::parse("22.1.1073.64").unwrap(),
                     size: 192179712,
                     timestamp: 1704554110,
                     integrity: None,

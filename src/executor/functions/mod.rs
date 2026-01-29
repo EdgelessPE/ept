@@ -23,15 +23,15 @@ macro_rules! def_eval_functions {
             vec![$( stringify!($x) ),*]
         }
 
-        pub fn get_eval_function_permission(name:String,arg:String)->Result<Permission>{
-            match name.as_str() {
+        pub fn get_eval_function_permission(name:&str,arg:&str)->Result<Permission>{
+            match name {
                 $( stringify!($x) => $x::get_permission(arg) ),* ,
                 _=>Err(anyhow!("Error:Unknown eval function name '{name}'"))
             }
         }
 
-        pub fn verify_eval_function_arg(name:String,arg:String)->Result<()> {
-            match name.as_str() {
+        pub fn verify_eval_function_arg(name:&str,arg:&str)->Result<()> {
+            match name {
                 $( stringify!($x) => $x::verify_arg(arg) ),* ,
                 _=>Err(anyhow!("Error:Unknown eval function name '{name}'"))
             }
@@ -41,8 +41,8 @@ macro_rules! def_eval_functions {
 
 trait EvalFunction {
     fn get_closure(located: String) -> Function<DefaultNumericTypes>;
-    fn get_permission(arg: String) -> Result<Permission>;
-    fn verify_arg(arg: String) -> Result<()>;
+    fn get_permission(arg: &str) -> Result<Permission>;
+    fn verify_arg(arg: &str) -> Result<()>;
 }
 
 def_eval_functions!(Exist, IsDirectory, IsAlive, IsInstalled);

@@ -28,11 +28,7 @@ lazy_static! {
     static ref DEFAULT_LOCATION: String = p2s!(get_bare_apps().unwrap());
 }
 
-pub fn get_eval_context(
-    exit_code: i32,
-    located: &String,
-    package_version: &String,
-) -> HashMapContext {
+pub fn get_eval_context(exit_code: i32, located: &str, package_version: &str) -> HashMapContext {
     let mut context = HashMapContext::new();
     set_context_with_constant_values(&mut context);
     set_context_with_mutable_values(&mut context, exit_code, located, package_version);
@@ -42,10 +38,10 @@ pub fn get_eval_context(
 
 // 执行条件以判断是否成立
 pub fn condition_eval(
-    condition: &String,
+    condition: &str,
     exit_code: i32,
-    located: &String,
-    package_version: &String,
+    located: &str,
+    package_version: &str,
 ) -> Result<bool> {
     // 装饰变量与函数
     let condition_with_values_interpreted =
@@ -158,66 +154,60 @@ pub fn workflow_reverse_executor(
 
 #[test]
 fn test_condition_eval() {
-    let located = &String::from("./examples/VSCode");
+    let located = "./examples/VSCode";
     let r1 = condition_eval(
-        &String::from("\"${ExitCode}\"==\"114\" && ExitCode==114 && \"${PackageVersion}\"==\"1.0.0.0\" && PackageVersion==\"1.0.0.0\""),
+        "\"${ExitCode}\"==\"114\" && ExitCode==114 && \"${PackageVersion}\"==\"1.0.0.0\" && PackageVersion==\"1.0.0.0\"",
         114,
         located,
-        &"1.0.0.0".to_string(),
+        "1.0.0.0",
     )
     .unwrap();
     assert!(r1);
 
     let r2 = condition_eval(
-        &String::from("\"${ExitCode}\"!=\"114\" || ExitCode==514"),
+        "\"${ExitCode}\"!=\"114\" || ExitCode==514",
         114,
         located,
-        &"1.0.0.0".to_string(),
+        "1.0.0.0",
     )
     .unwrap();
     assert!(!r2);
 
     let r3 = condition_eval(
-        &String::from("\"${SystemDrive}\"==\"C:\" && SystemDrive==\"C:\""),
+        "\"${SystemDrive}\"==\"C:\" && SystemDrive==\"C:\"",
         0,
         located,
-        &"1.0.0.0".to_string(),
+        "1.0.0.0",
     )
     .unwrap();
     assert!(r3);
 
     let r4 = condition_eval(
-        &String::from("\"${DefaultLocation}\"==\"./unknown/VSCode\""),
+        "\"${DefaultLocation}\"==\"./unknown/VSCode\"",
         0,
         located,
-        &"1.0.0.0".to_string(),
+        "1.0.0.0",
     )
     .unwrap();
     assert!(!r4);
 
     let r5 = condition_eval(
-        &String::from("Exist(\"src/main.rs\") && IsDirectory(\"src\")"),
+        "Exist(\"src/main.rs\") && IsDirectory(\"src\")",
         0,
-        &String::from("./"),
-        &"1.0.0.0".to_string(),
+        "./",
+        "1.0.0.0",
     )
     .unwrap();
     assert!(r5);
 
-    let r6 = condition_eval(
-        &String::from("Exist(\"./src/main.ts\")"),
-        0,
-        located,
-        &"1.0.0.0".to_string(),
-    )
-    .unwrap();
+    let r6 = condition_eval("Exist(\"./src/main.ts\")", 0, located, "1.0.0.0").unwrap();
     assert!(!r6);
 
     let r7 = condition_eval(
-        &String::from("Exist(\"${AppData}\") && IsDirectory(\"${SystemDrive}/Windows\")"),
+        "Exist(\"${AppData}\") && IsDirectory(\"${SystemDrive}/Windows\")",
         0,
         located,
-        &"1.0.0.0".to_string(),
+        "1.0.0.0",
     )
     .unwrap();
     assert!(r7);

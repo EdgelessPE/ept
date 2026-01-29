@@ -34,15 +34,15 @@ impl EvalFunction for IsInstalled {
             Ok(Value::Boolean(info.is_ok()))
         })
     }
-    fn get_permission(arg: String) -> Result<Permission> {
+    fn get_permission(arg: &str) -> Result<Permission> {
         Ok(Permission {
             key: PermissionKey::nep_installed,
             level: PermissionLevel::Normal,
-            targets: vec![arg],
+            targets: vec![arg.to_string()],
         })
     }
-    fn verify_arg(arg: String) -> Result<()> {
-        if !RESOURCE_REGEX.is_match(&arg) {
+    fn verify_arg(arg: &str) -> Result<()> {
+        if !RESOURCE_REGEX.is_match(arg) {
             return Err(anyhow!("Error:Argument of 'IsAlive' should match pattern 'SCOPE/NAME' (e.g. Microsoft/VSCode)"));
         }
         Ok(())
