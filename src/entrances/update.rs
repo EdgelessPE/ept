@@ -2,9 +2,10 @@ use super::{
     info_local, install_using_package, list, uninstall,
     utils::{
         package::{clean_temp, unpack_nep},
-        validator::{installed_validator, WORKFLOW_REMOVE, WORKFLOW_SETUP, WORKFLOW_UPDATE},
+        validator::installed_validator,
     },
 };
+use crate::types::workflow::{WORKFLOW_REMOVE, WORKFLOW_SETUP, WORKFLOW_UPDATE};
 use crate::utils::flags::{set_flag, Flag};
 use crate::{
     entrances::{expand_workshop, is_workshop_expandable},

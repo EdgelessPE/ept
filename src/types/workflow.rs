@@ -1,5 +1,11 @@
 use std::{env::current_dir, process::Child};
 
+// Workflow filename constants
+pub const WORKFLOW_SETUP: &str = "setup.toml";
+pub const WORKFLOW_UPDATE: &str = "update.toml";
+pub const WORKFLOW_REMOVE: &str = "remove.toml";
+pub const WORKFLOW_EXPAND: &str = "expand.toml";
+
 use super::mixed_fs::MixedFS;
 use super::steps::VerifyStepCtx;
 use super::{

@@ -6,9 +6,10 @@ use super::{
     info_local,
     utils::{
         package::{clean_temp, unpack_nep},
-        validator::{installed_validator, WORKFLOW_SETUP},
+        validator::installed_validator,
     },
 };
+use crate::types::workflow::WORKFLOW_SETUP;
 use crate::{entrances::update_using_package, utils::parse_inputs::ParseInputResEnum};
 use crate::{
     entrances::{expand_workshop, is_workshop_expandable},
