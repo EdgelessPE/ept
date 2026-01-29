@@ -83,7 +83,7 @@ impl TStep for StepWait {
 
         // 校验跳出条件
         if let Some(cond) = &self.break_if {
-            verify_conditions(vec![cond.to_owned()], located, &"1.0.0.0".to_string())
+            verify_conditions(vec![cond.to_owned()], located, "1.0.0.0")
                 .map_err(|e| anyhow!("Error(Wait):Failed to valid field 'break_if' : {e}"))?;
         }
 

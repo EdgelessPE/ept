@@ -57,11 +57,7 @@ impl Generalizable for WorkflowHeader {
 impl Verifiable for WorkflowHeader {
     fn verify_self(&self, mixed_fs: &MixedFS) -> Result<()> {
         // 校验条件
-        verify_conditions(
-            self.get_conditions(),
-            &mixed_fs.located,
-            &"1.0.0.0".to_string(),
-        )
+        verify_conditions(self.get_conditions(), &mixed_fs.located, "1.0.0.0")
     }
 }
 
