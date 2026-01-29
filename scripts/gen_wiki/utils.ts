@@ -7,7 +7,10 @@ const __dirname = path.dirname(__filename);
 export function parseFilePath(_rawPath: string) {
 	let rawPath = _rawPath;
 	if (rawPath.startsWith("@/")) {
-		rawPath = rawPath.replace("@/", path.join(__dirname, "../../src/"));
+		rawPath = rawPath.replace(
+			"@/",
+			path.join(__dirname, "../../crates/ept-lib/src/"),
+		);
 	}
 	return rawPath;
 }
