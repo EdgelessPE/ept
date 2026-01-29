@@ -78,8 +78,8 @@ impl TStep for StepExecute {
         cmd.stdout(Stdio::piped()).stderr(Stdio::piped());
 
         // 异步执行分流
-        let wait = self.wait.unwrap_or("Sync".to_string());
-        if wait == *"Sync" {
+        let wait = self.wait.unwrap_or_else(|| "Sync".to_string());
+        if wait == "Sync" {
             // 同步执行并收集结果
             log!("Info(Execute):Running sync command '{command_str}' in '{workshop}'");
             let start_instant = Instant::now();
@@ -132,7 +132,7 @@ impl TStep for StepExecute {
                 anyhow!("Error(Execute):Command '{command_str}' spawn failed : {e}")
             })?;
             cx.async_execution_handlers
-                .push((command_str, handler, wait == *"Abandon"));
+                .push((command_str, handler, wait == "Abandon"));
 
             Ok(0)
         }

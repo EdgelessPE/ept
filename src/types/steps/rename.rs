@@ -36,12 +36,12 @@ pub struct StepRename {
 }
 
 // 将to的文件名替代拼接到from末尾
-fn concat_to(to: &String, from: &str, located: &String) -> String {
+fn concat_to(to: &str, from: &str, located: &str) -> String {
     let (parent, _) = split_parent(from, located);
     p2s!(parent.join(to))
 }
 
-fn rename(from: &String, to: &String, located: &String) -> Result<()> {
+fn rename(from: &str, to: &str, located: &str) -> Result<()> {
     let from_path = parse_relative_path_with_located(from, located);
     // 检查是否存在
     if !from_path.exists() {
@@ -86,7 +86,7 @@ impl TStep for StepRename {
     }
     fn get_manifest(&self, fs: &mut crate::types::mixed_fs::MixedFS) -> Vec<String> {
         fs.remove(&self.from);
-        fs.add(&concat_to(&self.to, &self.from, &String::new()), &self.from);
+        fs.add(&concat_to(&self.to, &self.from, ""), &self.from);
         Vec::new()
     }
     fn verify_step(&self, _ctx: &super::VerifyStepCtx) -> Result<()> {

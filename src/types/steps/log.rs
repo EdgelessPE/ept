@@ -27,7 +27,7 @@ impl TStep for StepLog {
         log!("{level}(Log):{m}", m = self.msg);
         Ok(0)
     }
-    fn reverse_run(self, _: &mut WorkflowContext) -> Result<()> {
+    fn reverse_run(self, _cx: &mut WorkflowContext) -> Result<()> {
         Ok(())
     }
     fn get_manifest(&self, _fs: &mut MixedFS) -> Vec<String> {

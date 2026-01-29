@@ -22,22 +22,22 @@ pub struct StepKill {
     pub target: String,
 }
 
-fn kill(target: &String) -> Result<()> {
+fn kill(target: &str) -> Result<()> {
     let s = System::new_all();
-    let mut count_suc = 0;
-    let mut count_fail = 0;
-    for process in s.processes_by_exact_name(target.as_ref()) {
-        if process.kill() {
-            count_suc += 1;
-        } else {
-            count_fail += 1;
-        }
-    }
-    if count_suc + count_fail == 0 {
+    let processes: Vec<_> = s.processes_by_exact_name(target.as_ref()).collect();
+
+    if processes.is_empty() {
         log!("Warning(Kill):No process named '{target}' found.Tip for developer : note that field 'target' is case-sensitive and generally end with '.exe'");
-    } else {
-        log!("{level}(Kill):Killing '{target}' finished with {count_suc} succeeded, {count_fail} failed",level=if count_fail>0 {"Warning"}else{"Info"});
+        return Ok(());
     }
+
+    let count_suc = processes.iter().filter(|p| p.kill()).count();
+    let count_fail = processes.len() - count_suc;
+
+    let level = if count_fail > 0 { "Warning" } else { "Info" };
+    log!(
+        "{level}(Kill):Killing '{target}' finished with {count_suc} succeeded, {count_fail} failed"
+    );
 
     Ok(())
 }

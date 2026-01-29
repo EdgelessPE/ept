@@ -26,26 +26,21 @@ lazy_static! {
 }
 
 // 返回的第二参数表示是否创建了父目录
-fn parse_target(name: &String, base: &String) -> Result<(String, bool)> {
-    // 匹配 target_name 模式
-    let sp: Vec<&str> = name.split('/').collect();
+fn parse_target(name: &str, base: &str) -> Result<(String, bool)> {
+    let (lnk_folder_opt, lnk_name) = name
+        .split_once('/')
+        .map(|(folder, name)| (Some(folder), name))
+        .unwrap_or((None, name));
 
-    let (lnk_folder_opt, lnk_name) = match sp.len().cmp(&2) {
-        std::cmp::Ordering::Greater => {
-            return Err(anyhow!(
-                "Error(Link):Invalid field 'target_name', expect 'NAME' or 'FOLDER/NAME', got '{name}'",
-            ));
-        }
-        std::cmp::Ordering::Equal => (
-            Some(sp.first().unwrap().to_string()),
-            sp.get(1).unwrap().to_string(),
-        ),
-        std::cmp::Ordering::Less => (None, sp.first().unwrap().to_string()),
-    };
+    if lnk_name.contains('/') {
+        return Err(anyhow!(
+            "Error(Link):Invalid field 'target_name', expect 'NAME' or 'FOLDER/NAME', got '{name}'",
+        ));
+    }
 
     // 解析目标位置
     let target = if let Some(lnk_folder) = lnk_folder_opt {
-        let dir = Path::new(base).join(&lnk_folder);
+        let dir = Path::new(base).join(lnk_folder);
         if !dir.exists() {
             create_dir_all(dir).map_err(|e| {
                 anyhow!("Error(Link):Failed to create directory '{base}/{lnk_folder}' : {e}")
@@ -59,7 +54,7 @@ fn parse_target(name: &String, base: &String) -> Result<(String, bool)> {
     Ok(target)
 }
 
-fn create_shortcut(sl: &ShellLink, name: &String, base: &String) -> Result<()> {
+fn create_shortcut(sl: &ShellLink, name: &str, base: &str) -> Result<()> {
     let (target, _) = parse_target(name, base)?;
     sl.create_lnk(&target)
         .map_err(|err| anyhow!("Error(Link):Can't create shortcut {target} : {err}"))?;
@@ -67,7 +62,7 @@ fn create_shortcut(sl: &ShellLink, name: &String, base: &String) -> Result<()> {
     Ok(())
 }
 
-fn delete_shortcut(name: &String, base: &String) -> Result<()> {
+fn delete_shortcut(name: &str, base: &str) -> Result<()> {
     let (target, parent) = parse_target(name, base)?;
     try_recycle(&target)?;
     if parent {

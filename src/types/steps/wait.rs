@@ -65,7 +65,7 @@ impl TStep for StepWait {
         }
         Ok(0)
     }
-    fn reverse_run(self, _: &mut WorkflowContext) -> Result<()> {
+    fn reverse_run(self, _cx: &mut WorkflowContext) -> Result<()> {
         Ok(())
     }
     fn get_manifest(&self, _: &mut MixedFS) -> Vec<String> {
