@@ -78,7 +78,7 @@ pub fn get_bare_apps() -> Result<PathBuf> {
 }
 
 /// 不确保目录存在，可选确保 scope 目录存在
-pub fn get_path_apps(scope: &String, name: &String, ensure_scope: bool) -> Result<PathBuf> {
+pub fn get_path_apps(scope: &str, name: &str, ensure_scope: bool) -> Result<PathBuf> {
     let scope_p = parse_relative_path_with_base("apps")?.join(scope);
     Ok(if ensure_scope {
         ensure_exist(scope_p)?
@@ -153,7 +153,7 @@ pub fn launch_clean() -> Result<()> {
 
 use crate::types::constants::{DIR_NEP_CONTEXT, DIR_WORKFLOWS, FILE_PACKAGE};
 
-pub fn get_manifest_path(located: &String) -> Result<PathBuf> {
+pub fn get_manifest_path(located: &str) -> Result<PathBuf> {
     let possible_path = vec![
         format!("{located}/{}", FILE_PACKAGE),
         format!("{located}/{}/{}", DIR_NEP_CONTEXT, FILE_PACKAGE),

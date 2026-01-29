@@ -12,7 +12,7 @@ use anyhow::{anyhow, Error, Result};
 use toml::Value;
 
 // 返回（key 指向的 value，整个 Cfg）
-fn get_toml_value(table: &String, key: &String) -> Result<(Value, Value)> {
+fn get_toml_value(table: &str, key: &str) -> Result<(Value, Value)> {
     let cfg = get_config();
     // 序列化为 toml 对象
     let toml = Value::try_from(cfg)?;
@@ -28,7 +28,7 @@ fn get_toml_value(table: &String, key: &String) -> Result<(Value, Value)> {
     Ok((val.to_owned(), toml))
 }
 
-pub fn config_set(table: &String, key: &String, value: &String) -> Result<()> {
+pub fn config_set(table: &str, key: &str, value: &str) -> Result<()> {
     // 错误处理闭包
     let err_wrapper =
         |e: Error| anyhow!("Error:Failed to set value of '${key}' as '${value}' : ${e}");
@@ -74,7 +74,7 @@ pub fn config_set(table: &String, key: &String, value: &String) -> Result<()> {
     Ok(())
 }
 
-pub fn config_get(table: &String, key: &String) -> Result<String> {
+pub fn config_get(table: &str, key: &str) -> Result<String> {
     let (val, _) = get_toml_value(table, key)?;
 
     let str = val

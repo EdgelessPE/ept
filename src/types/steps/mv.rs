@@ -39,13 +39,7 @@ pub struct StepMove {
     pub overwrite: Option<bool>,
 }
 
-fn mv(
-    from: &String,
-    to: &String,
-    located: &String,
-    overwrite: bool,
-    wild_match_mode: bool,
-) -> Result<()> {
+fn mv(from: &str, to: &str, located: &str, overwrite: bool, wild_match_mode: bool) -> Result<()> {
     let (to_path, _) = parse_target_for_copy(from, to, located, wild_match_mode, "Move")?;
     if to_path.exists() {
         if overwrite {

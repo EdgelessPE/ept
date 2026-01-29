@@ -99,7 +99,7 @@ fn test_header_valid() {
         step: "Step".to_string(),
         c_if: Some("Exist(\"./mc/vsc.exe\") && IsDirectory(\"${SystemDrive}/Windows\") || Exist(\"${AppData}/Roaming/Edgeless/ept\")".to_string()),
     };
-    let mixed_fs = MixedFS::new(&String::from("./examples/VSCode"));
+    let mixed_fs = MixedFS::new("./examples/VSCode");
 
     flow.verify_self(&mixed_fs).unwrap();
 
@@ -147,7 +147,7 @@ impl WorkflowContext {
         Self::new(&p2s!(current_dir().unwrap()), GlobalPackage::_demo())
     }
 
-    pub fn new(located: &String, pkg: GlobalPackage) -> Self {
+    pub fn new(located: &str, pkg: GlobalPackage) -> Self {
         Self {
             pkg,
             located: located.to_owned(),

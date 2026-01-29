@@ -44,7 +44,7 @@ fn get_manifest(flow: Vec<WorkflowNode>, fs: &mut MixedFS) -> Vec<String> {
     manifest
 }
 
-fn get_workflow_path(source_dir: &String, file_name: &str) -> PathBuf {
+fn get_workflow_path(source_dir: &str, file_name: &str) -> PathBuf {
     Path::new(source_dir)
         .join(DIR_WORKFLOWS)
         .join(file_name)
@@ -65,7 +65,7 @@ fn verify_workflow(flow: Vec<WorkflowNode>, ctx: &VerifyStepCtx) -> Result<bool>
     Ok(have_call_installer)
 }
 
-pub fn verify(source_dir: &String) -> Result<GlobalPackage> {
+pub fn verify(source_dir: &str) -> Result<GlobalPackage> {
     // 打包检查
     log!("Info:Validating source directory...");
     // 如果目录中文件数量超过 3 个则拒绝
@@ -206,8 +206,7 @@ pub fn verify(source_dir: &String) -> Result<GlobalPackage> {
 #[test]
 fn test_get_manifest() {
     let mut fs = MixedFS::new("./examples/VSCode");
-    let setup_workflow =
-        parse_workflow(&"examples/PermissionsTest/workflows/setup.toml".to_string()).unwrap();
+    let setup_workflow = parse_workflow("examples/PermissionsTest/workflows/setup.toml").unwrap();
     assert_eq!(
         get_manifest(setup_workflow, &mut fs),
         vec![
@@ -217,8 +216,7 @@ fn test_get_manifest() {
         ]
     );
 
-    let update_workflow =
-        parse_workflow(&"examples/PermissionsTest/workflows/update.toml".to_string()).unwrap();
+    let update_workflow = parse_workflow("examples/PermissionsTest/workflows/update.toml").unwrap();
     assert_eq!(
         get_manifest(update_workflow, &mut fs),
         vec!["bin".to_string(), "updater.exe".to_string()]
@@ -261,8 +259,7 @@ fn test_verify() {
     let package_scene = std::fs::read_to_string("examples/CallInstaller/package.toml").unwrap();
     // 读取 package
     let pkg_path = &"examples/CallInstaller/package.toml".to_string();
-    let mut raw_pkg =
-        parse_package(pkg_path, &"examples/CallInstaller".to_string(), false).unwrap();
+    let mut raw_pkg = parse_package(pkg_path, "examples/CallInstaller", false).unwrap();
 
     // 删除 CallInstaller 的 main_program
     raw_pkg.software = raw_pkg.software.map(|mut soft| {

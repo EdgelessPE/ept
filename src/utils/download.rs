@@ -78,12 +78,12 @@ pub fn download_nep(url: &str, cached: Option<(PathBuf, String)>) -> Result<(Pat
 }
 
 pub fn fill_url_template(
-    url_template: &String,
+    url_template: &str,
     scope: &str,
     software: &str,
     file_name: &str,
 ) -> Result<String> {
-    let mut res = url_template.clone();
+    let mut res = url_template.to_string();
     if res.contains("{scope}") {
         res = res.replace("{scope}", scope);
     } else {

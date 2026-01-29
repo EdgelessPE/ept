@@ -41,7 +41,7 @@ use super::path::find_scope_with_name;
 use super::permissions::filter_permissions;
 
 // 读取 meta
-pub fn read_local_mirror_hello(name: &String) -> Result<(MirrorHello, PathBuf)> {
+pub fn read_local_mirror_hello(name: &str) -> Result<(MirrorHello, PathBuf)> {
     let dir_path = get_path_mirror()?.join(name);
     let p = dir_path.join(MIRROR_FILE_HELLO);
     if !p.exists() {
@@ -55,7 +55,7 @@ pub fn read_local_mirror_hello(name: &String) -> Result<(MirrorHello, PathBuf)> 
 }
 
 // 读取 pkg-software
-// pub fn read_local_mirror_pkg_software(name: &String) -> Result<MirrorPkgSoftware> {
+// pub fn read_local_mirror_pkg_software(name: &str) -> Result<MirrorPkgSoftware> {
 //     let p = get_path_mirror()?.join(name).join(MIRROR_FILE_PKG_SOFTWARE);
 //     if !p.exists() {
 //         return Err(anyhow!("Error:Mirror '{name}' hasn't been added"));

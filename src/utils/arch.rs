@@ -44,7 +44,7 @@ impl SysArch {
     }
 }
 
-pub fn is_current_arch_match(pkg_arch: &String) -> Result<()> {
+pub fn is_current_arch_match(pkg_arch: &str) -> Result<()> {
     let sys_arch = SysArch::get_current_arch()?;
     let allowed_arch = match sys_arch {
         SysArch::X64 => {

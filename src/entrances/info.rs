@@ -55,7 +55,7 @@ fn consume_info_diff(
     })
 }
 
-pub fn info_local(scope: &String, package_name: &String) -> Result<(GlobalPackage, InfoDiff)> {
+pub fn info_local(scope: &str, package_name: &str) -> Result<(GlobalPackage, InfoDiff)> {
     let local_path = get_path_apps(scope, package_name, false)?;
     if !local_path.exists() {
         return Err(anyhow!(
@@ -80,18 +80,22 @@ pub fn info_local(scope: &String, package_name: &String) -> Result<(GlobalPackag
 
 // 第二个参数为 URL 模板，第三个参数为 mirror
 pub fn info_online(
-    scope: &String,
-    package_name: &String,
+    scope: &str,
+    package_name: &str,
     mirror: Option<String>,
 ) -> Result<(TreeItem, String, String)> {
     // 定义匹配函数
-    let item_matcher = |mirror_name: &String| {
+    let item_matcher = |mirror_name: &str| {
         let quick_maps = read_quick_maps(mirror_name)?;
         let res = quick_maps
             .full_map
             .get(&(scope.to_lowercase(), package_name.to_lowercase()));
         if let Some(item) = res {
-            Ok((item.clone(), quick_maps.url_template, mirror_name.clone()))
+            Ok((
+                item.clone(),
+                quick_maps.url_template,
+                mirror_name.to_string(),
+            ))
         } else {
             Err(anyhow!("Error:Failed to find '{scope}/{package_name}'"))
         }

@@ -34,7 +34,7 @@ pub struct StepDelete {
     pub force: Option<bool>,
 }
 
-fn delete(target: &String, force: bool) -> Result<()> {
+fn delete(target: &str, force: bool) -> Result<()> {
     let p = Path::new(target);
     if !p.exists() {
         log!("Warning(Delete):Target '{target}' not exist, skip deleting");

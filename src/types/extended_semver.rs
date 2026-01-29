@@ -162,7 +162,7 @@ impl From<semver::Version> for ExSemVer {
 impl FromStr for ExSemVer {
     type Err = Error;
     fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
-        ExSemVer::parse(&String::from(s))
+        ExSemVer::parse(s)
     }
 }
 

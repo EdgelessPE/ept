@@ -48,7 +48,7 @@ fn validate_version_update(name: &str, local_ver: &str, fresh_ver: &str) -> Resu
 
 // 处理作者不匹配的情况，需要卸载后重新安装
 fn handle_author_mismatch(
-    source_file: &String,
+    source_file: &str,
     local: &GlobalPackage,
     fresh: &GlobalPackage,
     local_ver: String,
@@ -142,7 +142,7 @@ fn run_new_workflow(temp_dir: &Path, located: &Path, fresh_pkg: GlobalPackage) -
     Ok(())
 }
 
-pub fn update_using_package(source_file: &String, verify_signature: bool) -> Result<UpdateInfo> {
+pub fn update_using_package(source_file: &str, verify_signature: bool) -> Result<UpdateInfo> {
     log!("Info:Preparing to update with package '{source_file}'");
 
     // 解包

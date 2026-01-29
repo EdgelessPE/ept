@@ -44,7 +44,7 @@ fn check_global_installation(package: &GlobalPackage) -> Result<bool> {
 
 // 检查包是否已安装，如果是则重定向到更新流程
 fn check_existing_installation(
-    source_file: &String,
+    source_file: &str,
     package: &GlobalPackage,
     verify_signature: bool,
 ) -> Result<Option<(String, String)>> {
@@ -103,7 +103,7 @@ fn validate_main_program(into_dir: &str, package: &GlobalPackage) -> Result<()> 
 }
 
 // 安装完成后的最终验证
-fn finalize_installation(into_dir: &String, package: &GlobalPackage) -> Result<()> {
+fn finalize_installation(into_dir: &str, package: &GlobalPackage) -> Result<()> {
     installed_validator(into_dir)?;
     validate_main_program(into_dir, package)?;
 
@@ -124,7 +124,7 @@ fn finalize_installation(into_dir: &String, package: &GlobalPackage) -> Result<(
 }
 
 pub fn install_using_package(
-    source_file: &String,
+    source_file: &str,
     verify_signature: bool,
 ) -> Result<(String, String)> {
     log!("Info:Preparing to install with package '{source_file}'");

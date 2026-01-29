@@ -8,14 +8,14 @@ use crate::{
 use anyhow::{anyhow, Result};
 use std::path::Path;
 
-pub fn is_workshop_expandable(workshop_path: &String) -> bool {
+pub fn is_workshop_expandable(workshop_path: &str) -> bool {
     let base = Path::new(workshop_path);
     let expand_workflow_path = base.join(DIR_WORKFLOWS).join(WORKFLOW_EXPAND);
     expand_workflow_path.exists()
 }
 
 // 给定一个工作目录，对该目录执行展开
-pub fn expand_workshop(workshop_path: &String) -> Result<()> {
+pub fn expand_workshop(workshop_path: &str) -> Result<()> {
     log!("Info:Expanding nep package...");
     let base = Path::new(workshop_path);
     // 检查展开工作流是否存在

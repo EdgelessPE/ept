@@ -17,11 +17,11 @@ lazy_static! {
 }
 
 #[allow(dead_code)]
-fn gen_log(msg: &String, replace_head: Option<String>) -> Option<String> {
+fn gen_log(msg: &str, replace_head: Option<String>) -> Option<String> {
     if let Some(cap) = RE.captures_iter(msg).next() {
         if cap.len() != 4 {
             debug_assert!(false);
-            return Some(msg.clone());
+            return Some(msg.to_string());
         }
 
         let head = replace_head.unwrap_or(cap[1].to_string());

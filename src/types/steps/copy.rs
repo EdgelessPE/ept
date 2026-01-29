@@ -44,9 +44,9 @@ pub struct StepCopy {
 
 // 入参不应包含通配符，返回 （指向父目录存在的目标路径，是否在拷贝文件）
 pub fn parse_target_for_copy(
-    from: &String,
-    to: &String,
-    located: &String,
+    from: &str,
+    to: &str,
+    located: &str,
     wild_match_mode: bool,
     step_name: &str,
 ) -> Result<(PathBuf, bool)> {
@@ -107,13 +107,7 @@ pub fn parse_target_for_copy(
     }
 }
 
-fn copy(
-    from: &String,
-    to: &String,
-    located: &String,
-    overwrite: bool,
-    wild_match_mode: bool,
-) -> Result<()> {
+fn copy(from: &str, to: &str, located: &str, overwrite: bool, wild_match_mode: bool) -> Result<()> {
     let (to_path, is_copy_file) =
         parse_target_for_copy(from, to, located, wild_match_mode, "Copy")?;
     if to_path.exists() {

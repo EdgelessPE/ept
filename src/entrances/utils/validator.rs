@@ -14,7 +14,7 @@ use crate::{
     utils::{term::ask_yn, wild_match::contains_wild_match},
 };
 
-pub fn inner_validator(dir: &String) -> Result<()> {
+pub fn inner_validator(dir: &str) -> Result<()> {
     let setup_workflow = format!("{}/{}", DIR_WORKFLOWS, WORKFLOW_SETUP);
     let manifest = vec![FILE_PACKAGE, setup_workflow.as_str()];
     for file_name in manifest {
@@ -28,7 +28,7 @@ pub fn inner_validator(dir: &String) -> Result<()> {
     Ok(())
 }
 
-pub fn manifest_validator(base: &String, manifest: Vec<String>, fs: &mut MixedFS) -> Result<()> {
+pub fn manifest_validator(base: &str, manifest: Vec<String>, fs: &mut MixedFS) -> Result<()> {
     let mut missing_list = HashSet::new();
     for path in manifest {
         values_validator_path(&path)?;
@@ -68,7 +68,7 @@ macro_rules! def_outer_manifest {
 }
 
 // 返回内包路径
-pub fn outer_validator(dir: &String, stem: &String) -> Result<String> {
+pub fn outer_validator(dir: &str, stem: &str) -> Result<String> {
     let inner_pkg_name = stem.to_owned() + EXT_TAR_ZST;
     let manifest = def_outer_manifest!(inner_pkg_name);
     for file_name in manifest {
@@ -84,7 +84,7 @@ pub fn outer_validator(dir: &String, stem: &String) -> Result<String> {
     Ok(p2s!(inner_path))
 }
 
-pub fn outer_hashmap_validator(map: &HashMap<String, Vec<u8>>, stem: &String) -> Result<()> {
+pub fn outer_hashmap_validator(map: &HashMap<String, Vec<u8>>, stem: &str) -> Result<()> {
     let inner_pkg_name = stem.to_owned() + EXT_TAR_ZST;
     let manifest = def_outer_manifest!(inner_pkg_name);
     for file_name in manifest {
@@ -100,7 +100,7 @@ pub fn outer_hashmap_validator(map: &HashMap<String, Vec<u8>>, stem: &String) ->
 }
 
 // 返回上下文目录路径
-pub fn installed_validator(dir: &String) -> Result<String> {
+pub fn installed_validator(dir: &str) -> Result<String> {
     let ctx_path = Path::new(dir).join(DIR_NEP_CONTEXT);
     if !ctx_path.exists() || ctx_path.is_file() {
         return Err(anyhow!(

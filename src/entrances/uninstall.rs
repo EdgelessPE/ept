@@ -36,7 +36,7 @@ fn get_manifest(flow: Vec<WorkflowNode>) -> Vec<String> {
     manifest
 }
 
-pub fn uninstall(scope: Option<String>, package_name: &String) -> Result<(String, String)> {
+pub fn uninstall(scope: Option<String>, package_name: &str) -> Result<(String, String)> {
     log!("Info:Preparing to uninstall '{package_name}'");
 
     // 查找 scope 并使用 scope 更新纠正大小写

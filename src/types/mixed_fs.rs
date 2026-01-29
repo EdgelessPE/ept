@@ -38,7 +38,7 @@ fn is_match_wild_match_set(path: &str, set: &HashSet<String>) -> bool {
 }
 
 // 拼接路径，解析出虚拟添加路径
-fn merge_path(exact_from: &String, to: String) -> String {
+fn merge_path(exact_from: &str, to: String) -> String {
     let file_name = p2s!(Path::new(exact_from).file_name().unwrap());
 
     to + &file_name

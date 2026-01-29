@@ -37,7 +37,7 @@ pub struct StepPath {
     pub alias: Option<String>,
 }
 
-fn conflict_resolver(bin_abs: &String, stem: &String, scope: &String) -> String {
+fn conflict_resolver(bin_abs: &str, stem: &str, scope: &str) -> String {
     let origin = format!("{bin_abs}/{stem}.cmd");
     let scoped = format!("{bin_abs}/{scope}-{stem}.cmd");
 

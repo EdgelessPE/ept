@@ -33,13 +33,13 @@ pub struct StepNew {
     pub overwrite: Option<bool>,
 }
 
-fn new_file(at: &String) -> Result<()> {
+fn new_file(at: &str) -> Result<()> {
     File::create(at).map_err(|e| anyhow!("Error(New):Failed to create file at '{at}' : {e}"))?;
 
     Ok(())
 }
 
-fn new_dir(at: &String) -> Result<()> {
+fn new_dir(at: &str) -> Result<()> {
     create_dir_all(at)
         .map_err(|e| anyhow!("Error(New):Failed to create directory at '{at}' : {e}"))?;
 

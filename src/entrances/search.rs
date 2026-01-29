@@ -6,7 +6,7 @@ use crate::{
     utils::{fs::read_sub_dir, get_path_mirror, mirror::search_index_for_mirror},
 };
 
-pub fn search(text: &String, is_regex: bool) -> Result<Vec<SearchResult>> {
+pub fn search(text: &str, is_regex: bool) -> Result<Vec<SearchResult>> {
     // 扫描出所有的镜像源目录
     let root = get_path_mirror()?;
     let mirror_dirs = read_sub_dir(&root)?;

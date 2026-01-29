@@ -26,7 +26,7 @@ use crate::{
 use crate::{log, log_ok_last};
 
 /// 根据源文件路径创建临时目录
-fn get_temp_dir_path(source_file: &String) -> Result<PathBuf> {
+fn get_temp_dir_path(source_file: &str) -> Result<PathBuf> {
     let file_stem = p2s!(Path::new(source_file).file_stem().unwrap());
     let temp_dir_path = allocate_path_temp(&file_stem, true)?;
 
@@ -34,7 +34,7 @@ fn get_temp_dir_path(source_file: &String) -> Result<PathBuf> {
 }
 
 /// 清理临时目录(会判断 debug)
-pub fn clean_temp(source_file: &String) -> Result<()> {
+pub fn clean_temp(source_file: &str) -> Result<()> {
     let temp_dir_path = get_temp_dir_path(source_file)?;
     if !is_debug_mode() {
         log!("Info:Cleaning...");
@@ -58,7 +58,7 @@ pub fn clean_temp(source_file: &String) -> Result<()> {
 }
 
 /// 返回 (Inner 临时目录,package 结构体)
-pub fn unpack_nep(source: &String, verify_signature: bool) -> Result<(PathBuf, GlobalPackage)> {
+pub fn unpack_nep(source: &str, verify_signature: bool) -> Result<(PathBuf, GlobalPackage)> {
     // 处理输入目录的情况
     let source_path = Path::new(source);
     if source_path.is_dir() {
@@ -106,7 +106,7 @@ pub fn unpack_nep(source: &String, verify_signature: bool) -> Result<(PathBuf, G
 }
 
 fn normal_unpack_nep(
-    source_file: &String,
+    source_file: &str,
     verify_signature: bool,
 ) -> Result<(PathBuf, GlobalPackage)> {
     // 创建临时目录
@@ -175,10 +175,7 @@ fn normal_unpack_nep(
 
     Ok((temp_dir_inner_path, package_struct))
 }
-fn fast_unpack_nep(
-    source_file: &String,
-    verify_signature: bool,
-) -> Result<(PathBuf, GlobalPackage)> {
+fn fast_unpack_nep(source_file: &str, verify_signature: bool) -> Result<(PathBuf, GlobalPackage)> {
     // 创建临时目录
     let temp_dir_path = get_temp_dir_path(source_file)?;
     let temp_dir_inner_path = temp_dir_path.join("Inner");
@@ -372,11 +369,7 @@ fn test_bad_package() {
         true,
     )
     .unwrap();
-    release_tar(
-        &"./test/Normal.nep".to_string(),
-        &"./test/Normal".to_string(),
-    )
-    .unwrap();
+    release_tar("./test/Normal.nep", "./test/Normal").unwrap();
 
     // 未签名
     crate::pack(
@@ -390,43 +383,31 @@ fn test_bad_package() {
 
     // 被篡改的签名
     copy_dir("test/Normal", "test/BadSig").unwrap();
-    let mut signature_struct = parse_signature(&"test/BadSig/signature.toml".to_string()).unwrap();
+    let mut signature_struct = parse_signature("test/BadSig/signature.toml").unwrap();
     signature_struct.package.signature = signature_struct
         .package
         .signature
         .map(|s| s.chars().rev().collect());
     let text = toml::to_string_pretty(&signature_struct).unwrap();
     std::fs::write("test/BadSig/signature.toml", text).unwrap();
-    crate::compression::pack_tar(
-        &"test/BadSig".to_string(),
-        &"test/BadSig++_10.1.1002.1_Cno.nep".to_string(),
-    )
-    .unwrap();
+    crate::compression::pack_tar("test/BadSig", "test/BadSig++_10.1.1002.1_Cno.nep").unwrap();
     assert!(normal_unpack_nep(&"test/BadSig++_10.1.1002.1_Cno.nep".to_string(), true).is_err());
     assert!(fast_unpack_nep(&"test/BadSig++_10.1.1002.1_Cno.nep".to_string(), true).is_err());
 
     // 缺失签名文件
     copy_dir("test/Normal", "test/NoSig").unwrap();
     std::fs::remove_file("test/NoSig/signature.toml").unwrap();
-    crate::compression::pack_tar(
-        &"test/NoSig".to_string(),
-        &"test/NoSig++_10.1.1002.1_Cno.nep".to_string(),
-    )
-    .unwrap();
+    crate::compression::pack_tar("test/NoSig", "test/NoSig++_10.1.1002.1_Cno.nep").unwrap();
     assert!(normal_unpack_nep(&"test/NoSig++_10.1.1002.1_Cno.nep".to_string(), true).is_err());
     assert!(fast_unpack_nep(&"test/NoSig++_10.1.1002.1_Cno.nep".to_string(), true).is_err());
 
     // 错误的打包者
     copy_dir("test/Normal", "test/BadAuth").unwrap();
-    let mut signature_struct = parse_signature(&"test/BadAuth/signature.toml".to_string()).unwrap();
+    let mut signature_struct = parse_signature("test/BadAuth/signature.toml").unwrap();
     signature_struct.package.signer = "Jack".to_string();
     let text = toml::to_string_pretty(&signature_struct).unwrap();
     std::fs::write("test/BadAuth/signature.toml", text).unwrap();
-    crate::compression::pack_tar(
-        &"test/BadAuth".to_string(),
-        &"test/BadAuth++_10.1.1002.1_Cno.nep".to_string(),
-    )
-    .unwrap();
+    crate::compression::pack_tar("test/BadAuth", "test/BadAuth++_10.1.1002.1_Cno.nep").unwrap();
     assert!(normal_unpack_nep(&"test/BadAuth++_10.1.1002.1_Cno.nep".to_string(), true).is_err());
     assert!(fast_unpack_nep(&"test/BadAuth++_10.1.1002.1_Cno.nep".to_string(), true).is_err());
 }

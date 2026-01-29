@@ -28,7 +28,7 @@ use crate::{
 };
 
 // 返回远程镜像源申明的名称
-pub fn mirror_add(url: &String, should_match_name: Option<String>) -> Result<String> {
+pub fn mirror_add(url: &str, should_match_name: Option<String>) -> Result<String> {
     // 尝试解析为 URL 对象
     let parsed_url =
         Url::parse(url).map_err(|e| anyhow!("Error:Failed to parse '{url}' as valid URL : {e}"))?;
@@ -108,7 +108,7 @@ pub fn mirror_add(url: &String, should_match_name: Option<String>) -> Result<Str
     Ok(mirror_name)
 }
 
-pub fn mirror_update(name: &String) -> Result<String> {
+pub fn mirror_update(name: &str) -> Result<String> {
     // 读取 meta 文件
     let (meta, _) = read_local_mirror_hello(name)?;
     // 筛选出 hello 服务
@@ -170,7 +170,7 @@ pub fn auto_mirror_update_all(cfg: &Cfg) -> Result<bool> {
     }
 }
 
-pub fn mirror_remove(name: &String) -> Result<()> {
+pub fn mirror_remove(name: &str) -> Result<()> {
     // 获取目录路径
     let (_, p) = read_local_mirror_hello(name)?;
     // 移除目录

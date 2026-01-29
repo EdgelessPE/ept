@@ -13,7 +13,7 @@ use anyhow::{anyhow, Result};
 use std::fs::{remove_dir_all, write};
 use std::path::Path;
 
-pub fn pack(source_dir: &String, into_file: Option<String>, need_sign: bool) -> Result<String> {
+pub fn pack(source_dir: &str, into_file: Option<String>, need_sign: bool) -> Result<String> {
     log!("Info:Preparing to pack '{source_dir}'");
 
     // 通用校验

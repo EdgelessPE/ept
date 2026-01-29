@@ -7,9 +7,9 @@ use httpmock::prelude::*;
 use which::which;
 
 pub fn _ensure_testing_vscode() -> PathBuf {
-    if crate::entrances::info_local(&"Microsoft".to_string(), &"VSCode".to_string()).is_err() {
+    if crate::entrances::info_local("Microsoft", "VSCode").is_err() {
         crate::utils::fs::copy_dir("examples/VSCode", "test/VSCode").unwrap();
-        crate::install_using_package(&"test/VSCode".to_string(), false).unwrap();
+        crate::install_using_package("test/VSCode", false).unwrap();
     }
 
     crate::meta(
@@ -27,13 +27,13 @@ pub fn _ensure_testing_vscode() -> PathBuf {
 }
 
 pub fn _ensure_testing_vscode_uninstalled() {
-    if crate::entrances::info_local(&"Microsoft".to_string(), &"VSCode".to_string()).is_ok() {
-        crate::uninstall(Some("Microsoft".to_string()), &"VSCode".to_string()).unwrap();
+    if crate::entrances::info_local("Microsoft", "VSCode").is_ok() {
+        crate::uninstall(Some("Microsoft".to_string()), "VSCode").unwrap();
     }
 }
 
 pub fn _ensure_testing(scope: &str, name: &str) -> PathBuf {
-    if crate::entrances::info_local(&scope.to_string(), &name.to_string()).is_err() {
+    if crate::entrances::info_local(scope, name).is_err() {
         crate::utils::fs::copy_dir(format!("examples/{name}"), format!("test/{name}")).unwrap();
         crate::install_using_package(&format!("test/{name}"), false).unwrap();
     }
@@ -54,8 +54,8 @@ pub fn _ensure_testing(scope: &str, name: &str) -> PathBuf {
 
 pub fn _ensure_testing_uninstalled(scope: &str, name: &str) {
     let s = scope.to_string();
-    if crate::entrances::info_local(&s, &name.to_string()).is_ok() {
-        crate::uninstall(Some(s), &name.to_string()).unwrap();
+    if crate::entrances::info_local(&s, name).is_ok() {
+        crate::uninstall(Some(s), name).unwrap();
     }
 }
 
