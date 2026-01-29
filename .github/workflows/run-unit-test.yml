@@ -1,15 +1,19 @@
 name: Run unit test
 
-on: 
+on:
   push:
     paths:
-      - "src/**"
+      - "crates/**"
       - "examples/**"
-      - ".github/workflows/ut.yml"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - ".github/workflows/run-unit-test.yml"
   pull_request:
     paths:
-      - "src/**"
+      - "crates/**"
       - "examples/**"
+      - "Cargo.toml"
+      - "crates/**/Cargo.toml"
       - "Cargo.lock"
   workflow_dispatch:
 

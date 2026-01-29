@@ -5,8 +5,10 @@ on:
     branches: [ develop ]
     paths:
       - "doc/**"
-      - ".github/workflows/wiki.yml"
-      - "./package.json"
+      - ".github/workflows/deploy-wiki.yml"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "rspress.config.ts"
   workflow_dispatch:
 
 permissions:
