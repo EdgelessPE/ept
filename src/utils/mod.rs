@@ -151,10 +151,12 @@ pub fn launch_clean() -> Result<()> {
     Ok(())
 }
 
+use crate::types::constants::{DIR_NEP_CONTEXT, DIR_WORKFLOWS, FILE_PACKAGE};
+
 pub fn get_manifest_path(located: &String) -> Result<PathBuf> {
     let possible_path = vec![
-        format!("{located}/package.toml"),
-        format!("{located}/.nep_context/package.toml"),
+        format!("{located}/{}", FILE_PACKAGE),
+        format!("{located}/{}/{}", DIR_NEP_CONTEXT, FILE_PACKAGE),
     ];
 
     for p in possible_path {
@@ -163,13 +165,16 @@ pub fn get_manifest_path(located: &String) -> Result<PathBuf> {
             return Ok(p.to_path_buf());
         }
     }
-    Err(anyhow!("Error:Failed to find 'package.toml' in {located}"))
+    Err(anyhow!(
+        "Error:Failed to find '{}' in {located}",
+        FILE_PACKAGE
+    ))
 }
 
 pub fn get_workflows_path(located: &str) -> Result<PathBuf> {
     let possible_path = vec![
-        format!("{located}/workflows"),
-        format!("{located}/.nep_context/workflows"),
+        format!("{located}/{}", DIR_WORKFLOWS),
+        format!("{located}/{}/{}", DIR_NEP_CONTEXT, DIR_WORKFLOWS),
     ];
 
     for p in possible_path {

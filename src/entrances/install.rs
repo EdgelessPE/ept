@@ -9,7 +9,10 @@ use super::{
         validator::installed_validator,
     },
 };
-use crate::types::workflow::WORKFLOW_SETUP;
+use crate::types::{
+    constants::DIR_NEP_CONTEXT,
+    workflow::WORKFLOW_SETUP,
+};
 use crate::{entrances::update_using_package, utils::parse_inputs::ParseInputResEnum};
 use crate::{
     entrances::{expand_workshop, is_workshop_expandable},
@@ -171,7 +174,7 @@ pub fn install_using_package(
     log_ok_last!("Info:Running setup workflow...");
 
     // 保存 nep 上下文
-    let ctx_path = Path::new(&into_dir).join(".nep_context");
+    let ctx_path = Path::new(&into_dir).join(DIR_NEP_CONTEXT);
     move_or_copy(temp_dir_inner_path, ctx_path)?;
 
     // 验证安装
@@ -261,7 +264,7 @@ fn test_install() {
         .join("Microsoft-Code.cmd");
     let app_path = get_path_apps(&"Microsoft".to_string(), &"VSCode".to_string(), false).unwrap();
     let mp_path = app_path.join("Code.exe");
-    let cx_path = app_path.join(".nep_context").join("package.toml");
+    let cx_path = app_path.join(DIR_NEP_CONTEXT).join(FILE_PACKAGE);
 
     use std::fs::remove_file;
     if shortcut_path.exists() {

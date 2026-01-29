@@ -7,12 +7,17 @@ use std::{
 use crate::{
     executor::values_validator_path,
     p2s,
-    types::mixed_fs::MixedFS,
+    types::{
+        constants::{DIR_NEP_CONTEXT, DIR_WORKFLOWS, EXT_TAR_ZST, FILE_PACKAGE},
+        mixed_fs::MixedFS,
+        workflow::WORKFLOW_SETUP,
+    },
     utils::{term::ask_yn, wild_match::contains_wild_match},
 };
 
 pub fn inner_validator(dir: &String) -> Result<()> {
-    let manifest = vec!["package.toml", "workflows/setup.toml"];
+    let setup_workflow = format!("{}/{}", DIR_WORKFLOWS, WORKFLOW_SETUP);
+    let manifest = vec![FILE_PACKAGE, setup_workflow.as_str()];
     for file_name in manifest {
         let p = Path::new(dir).join(file_name);
         if !p.exists() {
@@ -65,7 +70,7 @@ macro_rules! def_outer_manifest {
 
 // 返回内包路径
 pub fn outer_validator(dir: &String, stem: &String) -> Result<String> {
-    let inner_pkg_name = stem.to_owned() + ".tar.zst";
+    let inner_pkg_name = stem.to_owned() + EXT_TAR_ZST;
     let manifest = def_outer_manifest!(inner_pkg_name);
     for file_name in manifest {
         let p = Path::new(dir).join(file_name);
@@ -81,7 +86,7 @@ pub fn outer_validator(dir: &String, stem: &String) -> Result<String> {
 }
 
 pub fn outer_hashmap_validator(map: &HashMap<String, Vec<u8>>, stem: &String) -> Result<()> {
-    let inner_pkg_name = stem.to_owned() + ".tar.zst";
+    let inner_pkg_name = stem.to_owned() + EXT_TAR_ZST;
     let manifest = def_outer_manifest!(inner_pkg_name);
     for file_name in manifest {
         let entry = map.get(file_name);
@@ -97,10 +102,11 @@ pub fn outer_hashmap_validator(map: &HashMap<String, Vec<u8>>, stem: &String) ->
 
 // 返回上下文目录路径
 pub fn installed_validator(dir: &String) -> Result<String> {
-    let ctx_path = Path::new(dir).join(".nep_context");
+    let ctx_path = Path::new(dir).join(DIR_NEP_CONTEXT);
     if !ctx_path.exists() || ctx_path.is_file() {
         return Err(anyhow!(
-            "Error:Invalid nep app folder : missing '.nep_context' folder in '{dir}'"
+            "Error:Invalid nep app folder : missing '{ctx}' folder in '{dir}'",
+            ctx = DIR_NEP_CONTEXT
         ));
     }
 
@@ -112,7 +118,7 @@ pub fn installed_validator(dir: &String) -> Result<String> {
 #[test]
 fn test_manifest_validator() {
     let base = "examples/VSCode";
-    let manifest = vec!["VSCode", "Microsoft", "VScode", "package.toml"];
+    let manifest = vec!["VSCode", "Microsoft", "VScode", FILE_PACKAGE];
     assert!(manifest_validator(
         &base.to_string(),
         manifest.into_iter().map(|s| s.to_string()).collect(),

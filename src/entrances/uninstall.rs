@@ -12,9 +12,10 @@ use crate::{
     log, log_ok_last, p2s,
     parsers::{parse_package, parse_workflow},
     types::{
+        constants::{DIR_NEP_CONTEXT, DIR_WORKFLOWS, FILE_PACKAGE},
         mixed_fs::MixedFS,
         steps::{StepExecute, TStep},
-        workflow::{WorkflowContext, WorkflowNode},
+        workflow::{WorkflowContext, WorkflowNode, WORKFLOW_REMOVE, WORKFLOW_SETUP},
     },
     utils::{
         get_bare_apps, get_path_apps, path::find_scope_with_name, process::kill_with_name,
@@ -60,7 +61,7 @@ pub fn uninstall(scope: Option<String>, package_name: &String) -> Result<(String
 
     // 读入 package.toml
     let global = parse_package(
-        &p2s!(app_path.join(".nep_context/package.toml")),
+        &p2s!(app_path.join(DIR_NEP_CONTEXT).join(FILE_PACKAGE)),
         &app_str,
         false,
     )?;
@@ -86,7 +87,10 @@ pub fn uninstall(scope: Option<String>, package_name: &String) -> Result<(String
     }
 
     // 读入卸载工作流
-    let remove_flow_path = app_path.join(".nep_context/workflows/remove.toml");
+    let remove_flow_path = app_path
+        .join(DIR_NEP_CONTEXT)
+        .join(DIR_WORKFLOWS)
+        .join(WORKFLOW_REMOVE);
     if remove_flow_path.exists() {
         let remove_flow = parse_workflow(&p2s!(remove_flow_path))?;
 
@@ -97,7 +101,10 @@ pub fn uninstall(scope: Option<String>, package_name: &String) -> Result<(String
     }
 
     // 读入安装工作流
-    let setup_flow_path = app_path.join(".nep_context/workflows/setup.toml");
+    let setup_flow_path = app_path
+        .join(DIR_NEP_CONTEXT)
+        .join(DIR_WORKFLOWS)
+        .join(WORKFLOW_SETUP);
     let setup_flow = parse_workflow(&p2s!(setup_flow_path))?;
 
     // 逆向执行安装工作流

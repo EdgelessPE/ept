@@ -2,6 +2,10 @@ use crate::{
     executor::workflow_executor,
     log, log_ok_last, p2s,
     parsers::{parse_package, parse_workflow},
+    types::{
+        constants::{DIR_WORKFLOWS, FILE_PACKAGE},
+        workflow::WORKFLOW_EXPAND,
+    },
     utils::fs::try_recycle,
 };
 use anyhow::{anyhow, Result};
@@ -9,7 +13,7 @@ use std::path::Path;
 
 pub fn is_workshop_expandable(workshop_path: &String) -> bool {
     let base = Path::new(workshop_path);
-    let expand_workflow_path = base.join("workflows/expand.toml");
+    let expand_workflow_path = base.join(DIR_WORKFLOWS).join(WORKFLOW_EXPAND);
     expand_workflow_path.exists()
 }
 
@@ -18,7 +22,7 @@ pub fn expand_workshop(workshop_path: &String) -> Result<()> {
     log!("Info:Expanding nep package...");
     let base = Path::new(workshop_path);
     // 检查展开工作流是否存在
-    let expand_workflow_path = base.join("workflows/expand.toml");
+    let expand_workflow_path = base.join(DIR_WORKFLOWS).join(WORKFLOW_EXPAND);
     if !expand_workflow_path.exists() {
         return Err(anyhow!(
             "Error:Invalid expandable nep package : can't find expand workflow"
@@ -26,7 +30,7 @@ pub fn expand_workshop(workshop_path: &String) -> Result<()> {
     }
 
     // 读取包
-    let package_struct = parse_package(&p2s!(base.join("package.toml")), workshop_path, false)?;
+    let package_struct = parse_package(&p2s!(base.join(FILE_PACKAGE)), workshop_path, false)?;
 
     // 执行展开工作流
     let expand_workflow = parse_workflow(&p2s!(expand_workflow_path))?;

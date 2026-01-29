@@ -8,6 +8,7 @@ use crate::{
     parsers::parse_workflow,
     signature::blake3::compute_hash_blake3_from_string,
     types::{
+        constants::{DIR_NEP_CONTEXT, DIR_WORKFLOWS},
         matcher::PackageInputEnum,
         meta::MetaResult,
         package::GlobalPackage,
@@ -55,7 +56,7 @@ fn find_meta_target(input: PackageInputEnum, verify_signature: bool) -> Result<M
                     installed_validator(&p2s!(path))?;
                     return Ok(MetaTargetResult::Local(
                         path.clone(),
-                        path.join(".nep_context/workflows"),
+                        path.join(DIR_NEP_CONTEXT).join(DIR_WORKFLOWS),
                     ));
                 }
 

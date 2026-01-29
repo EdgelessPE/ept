@@ -1,9 +1,12 @@
 use crate::parsers::{parse_package, parse_workflow};
-use crate::types::extended_semver::ExSemVer;
-use crate::types::mixed_fs::MixedFS;
-use crate::types::package::GlobalPackage;
-use crate::types::steps::{Step, VerifyStepCtx};
-use crate::types::workflow::WorkflowNode;
+use crate::types::{
+    constants::FILE_PACKAGE,
+    extended_semver::ExSemVer,
+    mixed_fs::MixedFS,
+    package::GlobalPackage,
+    steps::{Step, VerifyStepCtx},
+    workflow::{WorkflowNode, WORKFLOW_REMOVE, WORKFLOW_SETUP, WORKFLOW_UPDATE},
+};
 use crate::utils::exe_version::get_exe_version;
 use crate::utils::is_starts_with_inner_value;
 use crate::utils::path::parse_relative_path_with_located;
@@ -78,7 +81,7 @@ pub fn verify(source_dir: &String) -> Result<GlobalPackage> {
 
     // 读取包信息
     log!("Info:Resolving data...");
-    let pkg_path = Path::new(source_dir).join("package.toml");
+    let pkg_path = Path::new(source_dir).join(FILE_PACKAGE);
     let global = parse_package(&p2s!(pkg_path), source_dir, false)?;
     let software = global.software.clone().unwrap();
     let pkg_content_path = p2s!(Path::new(source_dir).join(&global.package.name));
@@ -86,7 +89,7 @@ pub fn verify(source_dir: &String) -> Result<GlobalPackage> {
 
     // 校验工作流
     log!("Info:Verifying workflows...");
-    let setup_path = get_workflow_path(source_dir, "setup.toml");
+    let setup_path = get_workflow_path(source_dir, WORKFLOW_SETUP);
     let setup_flow = parse_workflow(&p2s!(setup_path))?;
 
     // 记录 setup 中是否用到 call_installer
@@ -101,22 +104,22 @@ pub fn verify(source_dir: &String) -> Result<GlobalPackage> {
     // 如果用到了 call_installer 则有一些特殊逻辑，除非提供了 registry_entry：
     if check_call_installer && software.registry_entry.is_none() {
         // 必须有卸载流
-        if !get_workflow_path(source_dir, "remove.toml").exists() {
-            return Err(anyhow!("Error:Workflow 'remove.toml' should include 'Execute' step with 'call_installer' field enabled when workflow 'setup.toml' includes such step"));
+        if !get_workflow_path(source_dir, WORKFLOW_REMOVE).exists() {
+            return Err(anyhow!("Error:Workflow '{wr}' should include 'Execute' step with 'call_installer' field enabled when workflow '{ws}' includes such step", wr = WORKFLOW_REMOVE, ws = WORKFLOW_SETUP));
         }
 
         // 必须提供绝对路径的 main_program
         if let Some(mp) = software.main_program.clone() {
             if !Path::new(&mp).is_absolute() {
-                return Err(anyhow!("Error:Field 'main_program' in table 'software' should starts with inner value when workflow 'setup.toml' includes 'Execute' step with 'call_installer' field, got '{mp}'"));
+                return Err(anyhow!("Error:Field 'main_program' in table 'software' should starts with inner value when workflow '{ws}' includes 'Execute' step with 'call_installer' field, got '{mp}'", ws = WORKFLOW_SETUP));
             }
         } else {
-            return Err(anyhow!("Error:Field 'main_program' or 'registry_entry' in table 'software' should be provided when workflow 'setup.toml' includes 'Execute' step with 'call_installer' field"));
+            return Err(anyhow!("Error:Field 'main_program' or 'registry_entry' in table 'software' should be provided when workflow '{ws}' includes 'Execute' step with 'call_installer' field", ws = WORKFLOW_SETUP));
         }
     }
 
     // 检查更新、卸载工作流
-    let optional_workflows = vec!["update.toml", "remove.toml"];
+    let optional_workflows = vec![WORKFLOW_UPDATE, WORKFLOW_REMOVE];
     let ctx = VerifyStepCtx {
         mixed_fs: MixedFS::new(source_dir),
         is_expand_flow: false,

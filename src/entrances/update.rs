@@ -5,7 +5,10 @@ use super::{
         validator::installed_validator,
     },
 };
-use crate::types::workflow::{WORKFLOW_REMOVE, WORKFLOW_SETUP, WORKFLOW_UPDATE};
+use crate::types::{
+    constants::{DIR_NEP_CONTEXT, DIR_WORKFLOWS},
+    workflow::{WORKFLOW_REMOVE, WORKFLOW_SETUP, WORKFLOW_UPDATE},
+};
 use crate::utils::flags::{set_flag, Flag};
 use crate::{
     entrances::{expand_workshop, is_workshop_expandable},
@@ -78,10 +81,10 @@ fn run_old_remove_if_needed(
     local_pkg: &GlobalPackage,
 ) -> Result<()> {
     let remove_path = located
-        .join(".nep_context")
-        .join("workflows")
+        .join(DIR_NEP_CONTEXT)
+        .join(DIR_WORKFLOWS)
         .join(WORKFLOW_REMOVE);
-    let update_path = temp_dir.join("workflows").join(WORKFLOW_UPDATE);
+    let update_path = temp_dir.join(DIR_WORKFLOWS).join(WORKFLOW_UPDATE);
 
     if remove_path.exists() && !update_path.exists() {
         log!("Info:Running remove workflow...");
@@ -96,8 +99,8 @@ fn run_old_remove_if_needed(
 // 逆向执行安装工作流
 fn reverse_setup_workflow(located: &Path, local_pkg: GlobalPackage) -> Result<()> {
     let setup_path = located
-        .join(".nep_context")
-        .join("workflows")
+        .join(DIR_NEP_CONTEXT)
+        .join(DIR_WORKFLOWS)
         .join(WORKFLOW_SETUP);
     let setup_workflow = parse_workflow(&p2s!(setup_path))?;
     let located_str = p2s!(located);
@@ -122,7 +125,7 @@ fn deploy_update(temp_dir: &Path, located: &Path, name: &str) -> Result<()> {
 
 // 执行新包的 update 或 setup 工作流
 fn run_new_workflow(temp_dir: &Path, located: &Path, fresh_pkg: GlobalPackage) -> Result<()> {
-    let update_path = temp_dir.join("workflows").join(WORKFLOW_UPDATE);
+    let update_path = temp_dir.join(DIR_WORKFLOWS).join(WORKFLOW_UPDATE);
     let located_str = p2s!(located);
 
     if update_path.exists() {
@@ -186,7 +189,7 @@ pub fn update_using_package(source_file: &String, verify_signature: bool) -> Res
     run_new_workflow(&temp_dir_inner_path, &located, fresh_package.clone())?;
 
     // 保存上下文并验证
-    let ctx_path = located.join(".nep_context");
+    let ctx_path = located.join(DIR_NEP_CONTEXT);
     move_or_copy(temp_dir_inner_path, ctx_path)?;
 
     log!("Info:Validating update...");

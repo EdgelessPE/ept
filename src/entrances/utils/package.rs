@@ -17,7 +17,10 @@ use crate::{
     p2s,
     parsers::{fast_parse_signature, parse_author, parse_package, parse_signature},
     signature::{fast_verify, verify},
-    types::package::GlobalPackage,
+    types::{
+        constants::{EXT_TAR_ZST, FILE_PACKAGE},
+        package::GlobalPackage,
+    },
     utils::{allocate_path_temp, fs::copy_dir, is_debug_mode},
 };
 use crate::{log, log_ok_last};
@@ -67,7 +70,7 @@ pub fn unpack_nep(source: &String, verify_signature: bool) -> Result<(PathBuf, G
             entrances::verify::verify(source)?;
 
             // 读取 package.toml
-            let package_path = Path::new(source).join("package.toml");
+            let package_path = Path::new(source).join(FILE_PACKAGE);
             let global = parse_package(&p2s!(package_path), source, false)?;
 
             // 复制到临时目录
@@ -151,7 +154,7 @@ fn normal_unpack_nep(
 
     // 读取 package.toml
     let package_struct = parse_package(
-        &p2s!(temp_dir_inner_path.join("package.toml")),
+        &p2s!(temp_dir_inner_path.join(FILE_PACKAGE)),
         &temp_dir_inner_str,
         false,
     )?;
@@ -213,7 +216,7 @@ fn fast_unpack_nep(
     let signature_struct = fast_parse_signature(signature_raw)?.package;
     outer_hashmap_validator(&outer_map, &signature_struct.raw_name_stem)?;
     let inner_pkg_raw = outer_map
-        .get(&(signature_struct.raw_name_stem + ".tar.zst"))
+        .get(&(signature_struct.raw_name_stem + EXT_TAR_ZST))
         .unwrap();
     if verify_signature {
         log!("Info:Verifying package signature...");
@@ -246,7 +249,7 @@ fn fast_unpack_nep(
 
     // 读取 package.toml
     let package_struct = parse_package(
-        &p2s!(temp_dir_inner_path.join("package.toml")),
+        &p2s!(temp_dir_inner_path.join(FILE_PACKAGE)),
         &temp_dir_inner_str,
         false,
     )?;

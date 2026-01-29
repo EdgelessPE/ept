@@ -8,7 +8,11 @@ use std::{
 use crate::{
     log, log_ok_last, p2s,
     parsers::parse_workflow,
-    types::{steps::Step, workflow::WorkflowNode},
+    types::{
+        constants::{DIR_NEP_CONTEXT, DIR_WORKFLOWS},
+        steps::Step,
+        workflow::{WorkflowNode, WORKFLOW_SETUP},
+    },
     utils::{
         get_bare_apps, get_path_apps, get_path_bin, get_path_cache, get_path_meta, parse_bare_temp,
         term::ask_yn,
@@ -68,7 +72,9 @@ pub fn clean() -> Result<usize> {
 
                         // 读取工作流
                         let setup_path = p2s!(get_path_apps(&scope_name, &app_name, false)?
-                            .join(".nep_context/workflows/setup.toml"));
+                            .join(DIR_NEP_CONTEXT)
+                            .join(DIR_WORKFLOWS)
+                            .join(WORKFLOW_SETUP));
                         let setup = parse_workflow(&setup_path)?;
 
                         // 解析有效的入口名称
