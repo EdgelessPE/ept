@@ -1078,7 +1078,24 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c7f84e12ccf0a7ddc17a6c41c93326024c42920d7ee630d04950e6926645c0fe"
 
 [[package]]
-name = "ept"
+name = "ept-cli"
+version = "0.3.1"
+dependencies = [
+ "anyhow",
+ "clap",
+ "colored",
+ "console",
+ "dialoguer",
+ "ept-lib",
+ "indicatif",
+ "rustyline",
+ "serde",
+ "serde_json",
+ "toml",
+]
+
+[[package]]
+name = "ept-lib"
 version = "0.3.1"
 dependencies = [
  "Inflector",

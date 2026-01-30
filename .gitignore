@@ -10,6 +10,7 @@
 /eptrc.toml
 /test
 /bindings
+/.claude
 
 # Logs
 logs

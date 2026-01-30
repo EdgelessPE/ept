@@ -107,8 +107,8 @@ export async function getCurrentVersion(): Promise<string> {
 
 	const packageVersion = JSON.parse(packageText).version;
 	const cargoVersion = (
-		TOML.parse(cargoText) as { package: { version: string } }
-	).package.version;
+		TOML.parse(cargoText) as { workspace: { package: { version: string } } }
+	).workspace.package.version;
 
 	if (packageVersion !== cargoVersion) {
 		throw new Error(
