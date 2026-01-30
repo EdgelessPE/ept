@@ -41,6 +41,7 @@ pub fn uninstall(scope: Option<String>, package_name: &str) -> Result<(String, S
 
     // 查找 scope 并使用 scope 更新纠正大小写
     let (scope, package_name) = find_scope_with_name(package_name, scope.as_deref())?;
+    log!("Debug:Resolved scope as '{scope}' for package '{package_name}'");
 
     // 解析安装路径
     let app_path = get_path_apps(&scope, &package_name, false)?;
@@ -48,11 +49,12 @@ pub fn uninstall(scope: Option<String>, package_name: &str) -> Result<(String, S
         return Err(anyhow!("Error:Package '{package_name}' not installed"));
     }
     let app_str = p2s!(app_path);
+    log!("Debug:Found installation at '{app_str}'");
 
     // 判断安装路径是否完整
     if let Err(e) = installed_validator(&app_str) {
         // 简单的删除目录
-        log!("Warning:Incomplete folder found, simply perform a deletion : {e}");
+        log!("Warning:Incomplete folder found at '{app_str}', simply perform a deletion : {e}");
         remove_dir_all(&app_str).map_err(|e| {
             anyhow!(
                 "Warning:Can't clean the directory, please delete '{app_str}' manually later : {e}"
@@ -62,12 +64,18 @@ pub fn uninstall(scope: Option<String>, package_name: &str) -> Result<(String, S
     }
 
     // 读入 package.toml
+    log!("Debug:Reading package.toml from '{app_str}'");
     let global = parse_package(
         &p2s!(app_path.join(DIR_NEP_CONTEXT).join(FILE_PACKAGE)),
         &app_str,
         false,
     )?;
     let software = global.clone().software.unwrap();
+    log!(
+        "Debug:Loaded package '{name}' version '{ver}'",
+        name = global.package.name,
+        ver = global.package.version
+    );
 
     // 如果提供了注册表入口，则先跑卸载命令（独立的工作流上下文）
     if let Some(entry_id) = software.registry_entry {
@@ -160,10 +168,12 @@ pub fn uninstall(scope: Option<String>, package_name: &str) -> Result<(String, S
     // 删除空的 scope
     let scope_dir = get_bare_apps()?.join(&scope);
     if read_dir(scope_dir.clone())?.next().is_none() {
+        log!("Debug:Removing empty scope directory '{scope}'");
         let _ = remove_dir(scope_dir);
     }
 
     log_ok_last!("Info:Cleaning...");
+    log!("Success:Package '{scope}/{package_name}' uninstalled successfully");
 
     Ok((scope, package_name))
 }

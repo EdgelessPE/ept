@@ -40,6 +40,7 @@ fn same_authors(a: &[String], b: &[String]) -> bool {
 fn validate_version_update(name: &str, local_ver: &str, fresh_ver: &str) -> Result<()> {
     let local_version = ExSemVer::from_str(local_ver)?;
     let fresh_version = ExSemVer::from_str(fresh_ver)?;
+    log!("Debug:Comparing versions for '{name}': local={local_version}, fresh={fresh_version}");
     if local_version >= fresh_version {
         return Err(anyhow!("Error:Package '{name}' has been up to date ({local_version}), can't update to the version of given package ({fresh_version})"));
     }
@@ -57,6 +58,13 @@ fn handle_author_mismatch(
     if same_authors(&local.package.authors, &fresh.package.authors) {
         return Ok(None);
     }
+
+    log!(
+        "Debug:Author mismatch detected for '{name}': local={local:?}, fresh={fresh:?}",
+        name = local.package.name,
+        local = local.package.authors,
+        fresh = fresh.package.authors
+    );
 
     if !ask_yn(format!("The given package is not the same as the author of the installed package (local:{:?}, given:{:?}), uninstall the installed package first?",local.package.authors,fresh.package.authors),true) {
         return Err(anyhow!("Error:Update canceled by user"));
@@ -113,10 +121,16 @@ fn reverse_setup_workflow(located: &Path, local_pkg: GlobalPackage) -> Result<()
 // 部署新版本文件
 fn deploy_update(temp_dir: &Path, located: &Path, name: &str) -> Result<()> {
     log!("Info:Removing old package...");
+    log!("Debug:Removing directory '{path}'", path = p2s!(located));
     remove_dir_all(located)?;
     log_ok_last!("Info:Removing old package...");
 
     log!("Info:Deploying files...");
+    log!(
+        "Debug:Deploying from '{src}' to '{dst}'",
+        src = p2s!(temp_dir.join(name)),
+        dst = p2s!(located)
+    );
     move_or_copy(temp_dir.join(name), located.to_path_buf())?;
     log_ok_last!("Info:Deploying files...");
     Ok(())
@@ -149,6 +163,10 @@ pub fn update_using_package(source_file: &str, verify_signature: bool) -> Result
     let (temp_dir_inner_path, fresh_package) = unpack_nep(source_file, verify_signature)?;
     let name = fresh_package.package.name.clone();
     let fresh_scope = fresh_package.package.scope.clone();
+    log!(
+        "Debug:Unpacked package '{name}' version '{ver}' from '{source_file}'",
+        ver = fresh_package.package.version
+    );
 
     // 验证包是否已安装
     log!("Info:Resolving package...");
@@ -171,9 +189,14 @@ pub fn update_using_package(source_file: &str, verify_signature: bool) -> Result
     }
 
     let located = get_path_apps(&local_package.package.scope, &name, false)?;
+    log!(
+        "Debug:Located installation at '{path}'",
+        path = p2s!(&located)
+    );
     log_ok_last!("Info:Resolving package...");
 
     // 执行工作流转换
+    log!("Debug:Running workflow transitions for update");
     run_old_remove_if_needed(&located, &temp_dir_inner_path, &local_package)?;
     reverse_setup_workflow(&located, local_package)?;
 
@@ -239,8 +262,13 @@ pub fn update_using_parsed(
     verify_signature: bool,
 ) -> Result<Vec<UpdateInfo>> {
     let mut arr = Vec::new();
-    for parsed in parsed {
-        log!("Info:Start updating with {}", parsed.preview());
+    let total = parsed.len();
+    log!("Debug:Starting batch update for {total} packages");
+    for (idx, parsed) in parsed.into_iter().enumerate() {
+        log!(
+            "Info:Start updating ({idx}/{total}) with {}",
+            parsed.preview()
+        );
         let res = match parsed {
             ParseInputResEnum::LocalPath(p, temp_dir) => {
                 if let Some(temp_dir) = temp_dir {

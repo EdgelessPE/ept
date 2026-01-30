@@ -27,6 +27,7 @@ fn test_get_temp_tar() {
 }
 
 pub fn compress(source_dir: &str, into_file: &str) -> Result<()> {
+    log!("Debug:Compressing directory '{source_dir}' into '{into_file}'");
     let temp_tar = get_temp_tar(Path::new(into_file));
     pack_tar(source_dir, &temp_tar)
         .map_err(|res| anyhow!("Error:Can't archive '{source_dir}' into '{temp_tar}' : {res}"))?;
@@ -37,11 +38,13 @@ pub fn compress(source_dir: &str, into_file: &str) -> Result<()> {
     if let Err(e) = remove_file(&temp_tar) {
         log!("Warning:Can't remove temp tar '{temp_tar}' : {e}");
     }
+    log!("Debug:Successfully compressed '{source_dir}' to '{into_file}'");
 
     Ok(())
 }
 
 pub fn decompress(source_file: &str, into_dir: &str) -> Result<()> {
+    log!("Debug:Decompressing file '{source_file}' into '{into_dir}'");
     let temp_tar = get_temp_tar(Path::new(source_file));
     decompress_zstd(source_file, &temp_tar).map_err(|res| {
         anyhow!("Error:Can't decompress '{source_file}' into '{temp_tar}' : {res}")
@@ -53,6 +56,7 @@ pub fn decompress(source_file: &str, into_dir: &str) -> Result<()> {
     if let Err(e) = remove_file(&temp_tar) {
         log!("Warning:Can't remove temp tar '{temp_tar}' : {e}");
     }
+    log!("Debug:Successfully decompressed '{source_file}' to '{into_dir}'");
 
     Ok(())
 }

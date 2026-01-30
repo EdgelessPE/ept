@@ -1,19 +1,24 @@
+use crate::log;
 use std::{cmp::max, fs::File};
 
 use anyhow::{anyhow, Result};
 use zstd::stream::{copy_decode, copy_encode};
 
 pub fn compress_zstd(source: &str, into: &str) -> Result<()> {
+    log!("Debug:Compressing with zstd '{source}' to '{into}'");
     let source_file = File::open(source)?;
     let into_file = File::create(into)?;
     copy_encode(source_file, into_file, 0)?;
+    log!("Debug:Successfully compressed '{source}'");
     Ok(())
 }
 
 pub fn decompress_zstd(source: &str, into: &str) -> Result<()> {
+    log!("Debug:Decompressing with zstd '{source}' to '{into}'");
     let source_file = File::open(source)?;
     let into_file = File::create(into)?;
     copy_decode(source_file, into_file)?;
+    log!("Debug:Successfully decompressed '{source}'");
     Ok(())
 }
 
