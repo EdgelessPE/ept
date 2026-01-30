@@ -157,11 +157,13 @@ impl TStep for StepPath {
         }
 
         // 添加系统 PATH 变量
-        let add_res = set_system_path(&bin_abs, true);
-        if add_res.is_err() {
-            log!("Warning(Path):Failed to add system PATH for '{bin_abs}', manually add later to enable bin function of nep");
-        } else if add_res.unwrap() {
-            log!("Warning(Path):Added system PATH for '{bin_abs}'");
+        match set_system_path(&bin_abs, true) {
+            Err(_) => {
+                log!("Warning(Path):Failed to add system PATH for '{bin_abs}', manually add later to enable bin function of nep");
+            }
+            Ok(_) => {
+                log!("Warning(Path):Added system PATH for '{bin_abs}'");
+            }
         }
 
         // 解析目标绝对路径
@@ -176,11 +178,13 @@ impl TStep for StepPath {
                     r = &self.record
                 );
             }
-            let add_res = set_system_path(&abs_target_str, true);
-            if add_res.is_err() {
-                log!("Warning(Path):Failed to add system PATH '{bin_abs}', manually add later");
-            } else if add_res.unwrap() {
-                log!("Warning(Path):Added system PATH for '{bin_abs}'");
+            match set_system_path(&abs_target_str, true) {
+                Err(_) => {
+                    log!("Warning(Path):Failed to add system PATH '{bin_abs}', manually add later");
+                }
+                Ok(_) => {
+                    log!("Warning(Path):Added system PATH for '{bin_abs}'");
+                }
             }
             return Ok(0);
         }
@@ -221,13 +225,15 @@ impl TStep for StepPath {
 
         // 处理为目录的情况
         if abs_target_path.is_dir() {
-            let add_res = set_system_path(&abs_target_str, false);
-            if add_res.is_err() {
-                log!(
-                    "Warning(Path):Failed to remove system PATH for '{bin_abs}', manually remove later"
-                );
-            } else if add_res.unwrap() {
-                log!("Info(Path):Removed system PATH '{bin_abs}'");
+            match set_system_path(&abs_target_str, false) {
+                Err(_) => {
+                    log!(
+                        "Warning(Path):Failed to remove system PATH for '{bin_abs}', manually remove later"
+                    );
+                }
+                Ok(_) => {
+                    log!("Info(Path):Removed system PATH '{bin_abs}'");
+                }
             }
             return Ok(());
         }

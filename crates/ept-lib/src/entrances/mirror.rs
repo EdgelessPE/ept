@@ -258,7 +258,7 @@ fn test_mirror() {
         }]
     );
     // 正则名称
-    let search_res = search(&r"vs\w+".to_string(), true).unwrap();
+    let search_res = search(r"vs\w+", true).unwrap();
     assert_eq!(search_res, expected_res);
     assert!(search("microsoft", false).is_err());
 

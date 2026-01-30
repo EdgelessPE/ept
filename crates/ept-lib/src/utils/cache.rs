@@ -109,12 +109,11 @@ pub fn clean_cache() -> Result<()> {
     );
 
     for file in cache_files {
-        let res = try_recycle(file.clone());
-        if res.is_err() {
+        if let Err(e) = try_recycle(file.clone()) {
             log!(
                 "Warning:Failed to clean cache file '{}' : {}",
                 p2s!(file),
-                res.unwrap_err()
+                e
             );
         }
     }

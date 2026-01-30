@@ -119,7 +119,7 @@ fn test_manifest_validator() {
     let base = "examples/VSCode";
     let manifest = vec!["VSCode", "Microsoft", "VScode", FILE_PACKAGE];
     assert!(manifest_validator(
-        &base.to_string(),
+        base,
         manifest.into_iter().map(|s| s.to_string()).collect(),
         &mut MixedFS::new(base)
     )
