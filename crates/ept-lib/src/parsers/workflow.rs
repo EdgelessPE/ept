@@ -4,10 +4,12 @@ use std::path::Path;
 use std::{fs::File, io::Read};
 use toml::Value;
 
+use crate::log;
 use crate::types::steps::Step;
 use crate::types::workflow::{WorkflowHeader, WorkflowNode};
 
 pub fn parse_workflow(p: &str) -> Result<Vec<WorkflowNode>> {
+    log!("Debug:Parsing workflow from '{p}'");
     let workflow_path = Path::new(p);
     if !workflow_path.exists() {
         return Err(anyhow!("Error:Fatal:Can't find workflow path : {p}"));
@@ -24,6 +26,11 @@ pub fn parse_workflow(p: &str) -> Result<Vec<WorkflowNode>> {
         .as_table()
         .ok_or(anyhow!("Error:Failed to convert workflow as valid table"))?
         .to_owned();
+
+    log!(
+        "Debug:Found {count} workflow steps in '{p}'",
+        count = table.len()
+    );
 
     // 解析工作流步骤，生成已解析数组
     let mut res = Vec::new();

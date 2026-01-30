@@ -38,6 +38,7 @@ fn get_valid_entrances(setup: Vec<WorkflowNode>) -> Vec<String> {
 }
 
 pub fn clean() -> Result<usize> {
+    log!("Debug:Starting clean operation");
     let mut clean_list = Vec::new();
     let mut valid_entrances = HashSet::new();
 
@@ -45,6 +46,10 @@ pub fn clean() -> Result<usize> {
     let dirs_to_clean = vec![parse_bare_temp()?, get_path_cache()?, get_path_meta()?];
     for p in dirs_to_clean {
         if p.exists() {
+            log!(
+                "Debug:Adding temporary directory '{path}' to clean list",
+                path = p2s!(&p)
+            );
             clean_list.push(p);
         }
     }
@@ -65,10 +70,12 @@ pub fn clean() -> Result<usize> {
 
                 if app_path.is_dir() {
                     // 尝试读取 info
+                    log!("Debug:Checking application '{scope_name}/{app_name}'");
                     let info_res = info_local(&scope_name, &app_name);
                     if let Ok((global, _)) = info_res {
                         // 有效应用计数
                         valid_apps_count += 1;
+                        log!("Debug:Valid application found: '{scope_name}/{app_name}'");
 
                         // 读取工作流
                         let setup_path = p2s!(get_path_apps(&scope_name, &app_name, false)?
@@ -88,6 +95,9 @@ pub fn clean() -> Result<usize> {
                             });
                     } else {
                         // 清理读取失败的
+                        log!(
+                            "Debug:Invalid application directory found: '{scope_name}/{app_name}'"
+                        );
                         clean_list.push(app_path)
                     }
                 } else {
@@ -97,23 +107,45 @@ pub fn clean() -> Result<usize> {
             }
             // 如果没有有效应用直接删除 scope
             if valid_apps_count == 0 {
+                log!("Debug:No valid applications in scope '{scope_name}', adding to clean list");
                 clean_list.push(scope_path);
+            } else {
+                log!(
+                    "Debug:Scope '{scope_name}' has {count} valid applications",
+                    count = valid_apps_count
+                );
             }
         } else {
             // 非目录的 apps 内容
+            log!(
+                "Debug:Non-directory item in apps: '{path}'",
+                path = p2s!(&scope_path)
+            );
             clean_list.push(scope_path);
         }
     }
 
     // bin 目录，删除名称非法的文件
     // TODO:考虑检查指向的绝对路径是否存在
-    for entry in read_dir(get_path_bin()?)? {
+    let bin_path = get_path_bin()?;
+    log!(
+        "Debug:Scanning bin directory '{path}' for invalid entrances",
+        path = p2s!(&bin_path)
+    );
+    let mut invalid_bin_count = 0;
+    for entry in read_dir(bin_path)? {
         let entry = entry?;
         let name = p2s!(entry.file_name());
         if !valid_entrances.contains(&name) {
+            log!("Debug:Invalid entrance found: '{name}'");
             clean_list.push(entry.path());
+            invalid_bin_count += 1;
         }
     }
+    log!(
+        "Debug:Found {count} invalid entrances in bin directory",
+        count = invalid_bin_count
+    );
 
     // 尝试移动到回收站
     let clean_list_len = clean_list.len();

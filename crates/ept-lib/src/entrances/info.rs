@@ -4,7 +4,7 @@ use anyhow::{anyhow, Result};
 use semver::VersionReq;
 
 use crate::{
-    p2s,
+    log, p2s,
     parsers::parse_package,
     signature::blake3::compute_hash_blake3_from_string,
     types::{
@@ -56,6 +56,7 @@ fn consume_info_diff(
 }
 
 pub fn info_local(scope: &str, package_name: &str) -> Result<(GlobalPackage, InfoDiff)> {
+    log!("Debug:Reading local info for '{scope}/{package_name}'");
     let local_path = get_path_apps(scope, package_name, false)?;
     if !local_path.exists() {
         return Err(anyhow!(
@@ -75,6 +76,10 @@ pub fn info_local(scope: &str, package_name: &str) -> Result<(GlobalPackage, Inf
         version: global.package.version.clone(),
         authors,
     };
+    log!(
+        "Debug:Found local package '{scope}/{package_name}' version '{ver}'",
+        ver = &local.version
+    );
     Ok((global.clone(), local))
 }
 
@@ -84,6 +89,7 @@ pub fn info_online(
     package_name: &str,
     mirror: Option<String>,
 ) -> Result<(TreeItem, String, String)> {
+    log!("Debug:Reading online info for '{scope}/{package_name}'");
     // 定义匹配函数
     let item_matcher = |mirror_name: &str| {
         let quick_maps = read_quick_maps(mirror_name)?;
@@ -91,6 +97,7 @@ pub fn info_online(
             .full_map
             .get(&(scope.to_lowercase(), package_name.to_lowercase()));
         if let Some(item) = res {
+            log!("Debug:Found '{scope}/{package_name}' in mirror '{mirror_name}'");
             Ok((
                 item.clone(),
                 quick_maps.url_template,
@@ -127,14 +134,17 @@ fn info_from_matcher(
 ) -> Result<InfoResult> {
     let mirror = matcher.mirror.clone();
     let (scope, package_name) = find_scope_with_name(&matcher.name, matcher.scope.as_deref())?;
+    log!("Debug:Resolving matcher for '{scope}/{package_name}'");
 
     // 先尝试在线获取
     if let Ok((item, _, _)) = info_online(&scope, &package_name, mirror.clone()) {
+        log!("Debug:Found online info for '{scope}/{package_name}'");
         let (info_diff, meta) = consume_info_diff(&item, matcher.version_req)?;
         return Ok((scope, package_name, info_diff, meta));
     }
 
     // 回退到本地获取
+    log!("Debug:Trying local fallback for '{scope}/{package_name}'");
     let local_path = get_path_apps(&scope, &package_name, false)?;
     if local_path.exists() {
         let (_global, local) = info_local(&scope, &package_name)?;
@@ -162,6 +172,7 @@ fn info_from_local_path(path: String, verify: bool) -> Result<InfoResult> {
 }
 
 fn info_from_url(url: String, verify: bool) -> Result<InfoResult> {
+    log!("Debug:Fetching info from URL '{url}'");
     let cache_path = get_path_cache()?;
     let url_hash = compute_hash_blake3_from_string(&url)?;
     let (p, cache_ctx) = download_nep(&url, Some((cache_path, url_hash)))?;
@@ -173,6 +184,12 @@ fn info_from_url(url: String, verify: bool) -> Result<InfoResult> {
     let p_str = p2s!(p);
     let meta_res = meta(PackageInputEnum::LocalPath(p_str), false)?;
     let package = pkg.package;
+    log!(
+        "Debug:Got info from URL for '{scope}/{name}' version '{ver}'",
+        scope = &package.scope,
+        name = &package.name,
+        ver = &package.version
+    );
 
     Ok((
         package.scope,
@@ -187,6 +204,11 @@ fn info_from_url(url: String, verify: bool) -> Result<InfoResult> {
 
 // 使用本地和在线数据丰富 info 信息
 fn enrich_info(mut info: Info, mirror: Option<String>) -> Result<Info> {
+    log!(
+        "Debug:Enriching info for '{scope}/{name}'",
+        scope = &info.scope,
+        name = &info.name
+    );
     if let Ok((_, local)) = info_local(&info.scope, &info.name) {
         info.local = Some(local);
     }

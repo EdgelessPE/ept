@@ -1,3 +1,4 @@
+use crate::log;
 use crate::types::author::Author;
 use anyhow::{anyhow, Result};
 use lazy_static::lazy_static;
@@ -12,14 +13,20 @@ pub fn parse_author(raw: &str) -> Result<Author> {
         if cap.len() != 4 {
             return Err(anyhow!("Error:Can't parse '{raw}' as valid author"));
         }
-        return Ok(Author {
+        let author = Author {
             name: cap[1].to_string(),
             email: if cap.get(3).is_some() {
                 Some(cap[3].to_string())
             } else {
                 None
             },
-        });
+        };
+        log!(
+            "Debug:Parsed author '{name}' with email '{email:?}'",
+            name = &author.name,
+            email = &author.email
+        );
+        return Ok(author);
     }
 
     Err(anyhow!("Error:Can't parse '{raw}' as valid author"))

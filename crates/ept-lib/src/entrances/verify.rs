@@ -66,11 +66,13 @@ fn verify_workflow(flow: Vec<WorkflowNode>, ctx: &VerifyStepCtx) -> Result<bool>
 }
 
 pub fn verify(source_dir: &str) -> Result<GlobalPackage> {
+    log!("Debug:Starting verification for source directory '{source_dir}'");
     // 打包检查
     log!("Info:Validating source directory...");
     // 如果目录中文件数量超过 3 个则拒绝
     let dir_list = read_dir(source_dir)?;
     let dir_count = dir_list.into_iter().fold(0, |acc, _| acc + 1);
+    log!("Debug:Found {dir_count} items in source directory");
     if dir_count != 3 {
         return Err(anyhow!(
             "Error:Expected 3 items in '{source_dir}', got {dir_count} items"
@@ -86,11 +88,20 @@ pub fn verify(source_dir: &str) -> Result<GlobalPackage> {
     let global = parse_package(&p2s!(pkg_path), source_dir, false)?;
     let software = global.software.clone().unwrap();
     let pkg_content_path = p2s!(Path::new(source_dir).join(&global.package.name));
+    log!(
+        "Debug:Resolved package '{name}' version '{ver}' from '{source_dir}'",
+        name = global.package.name,
+        ver = global.package.version
+    );
     log_ok_last!("Info:Resolving data...");
 
     // 校验工作流
     log!("Info:Verifying workflows...");
     let setup_path = get_workflow_path(source_dir, WORKFLOW_SETUP);
+    log!(
+        "Debug:Parsing setup workflow at '{path}'",
+        path = p2s!(&setup_path)
+    );
     let setup_flow = parse_workflow(&p2s!(setup_path))?;
 
     // 记录 setup 中是否用到 call_installer
@@ -148,6 +159,7 @@ pub fn verify(source_dir: &str) -> Result<GlobalPackage> {
     }
 
     log_ok_last!("Info:Verifying workflows...");
+    log!("Debug:All workflows verified successfully for '{source_dir}'");
 
     // 校验 setup 工作流装箱单
     log!("Info:Checking manifest...");
@@ -167,6 +179,7 @@ pub fn verify(source_dir: &str) -> Result<GlobalPackage> {
     }
     manifest_validator(&pkg_content_path, setup_manifest, &mut fs)?;
     log_ok_last!("Info:Checking manifest...");
+    log!("Debug:Manifest validation completed for '{pkg_content_path}'");
 
     // 如果显式提供了相对路径的主程序，检查该主程序是否可以正常读取版本号
     if let Some(mp) = software.main_program {
