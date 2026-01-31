@@ -18,7 +18,7 @@ pub fn is_workshop_expandable(workshop_path: &str) -> bool {
 }
 
 // 给定一个工作目录，对该目录执行展开
-pub fn expand_workshop(workshop_path: &str, _cfg: &Cfg) -> Result<()> {
+pub fn expand_workshop(_cfg: &Cfg, workshop_path: &str) -> Result<()> {
     log!("Info:Expanding nep package...");
     let base = Path::new(workshop_path);
     // 检查展开工作流是否存在
@@ -59,8 +59,10 @@ fn test_expand_workshop() {
     copy("examples/VSCode/VSCode/Code.exe", "test/Code.exe").unwrap();
     crate::utils::fs::copy_dir("examples/VSCodeE", "test/VSCodeE").unwrap();
 
+    let cfg = &crate::types::cfg::Cfg::default();
+
     // 对工作目录进行展开
-    expand_workshop("test/VSCodeE").unwrap();
+    expand_workshop(cfg, "test/VSCodeE").unwrap();
 
     // 断言文件是否存在
     assert!(Path::new("test/VSCodeE/VSCodeE/Code.exe").exists());

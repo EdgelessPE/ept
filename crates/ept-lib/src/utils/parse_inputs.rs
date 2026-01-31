@@ -77,7 +77,7 @@ pub fn parse_install_inputs(
         }
 
         // 获取 Info
-        let (info, temp_dir) = info(input_parsed.clone(), verify_signature, cfg)?;
+        let (info, temp_dir) = info(cfg, input_parsed.clone(), verify_signature)?;
 
         // 检查对应包名有没有被安装过
         if let Some(local) = info.local {
@@ -133,7 +133,7 @@ pub fn parse_update_inputs(
         }
 
         // 获取 Info
-        let (info, temp_dir) = info(input_parsed.clone(), verify_signature, cfg)?;
+        let (info, temp_dir) = info(cfg, input_parsed.clone(), verify_signature)?;
 
         // 解析输入类型
         match input_parsed {
@@ -146,12 +146,12 @@ pub fn parse_update_inputs(
                 let scope = info.scope.clone();
                 let package_name = info.name.clone();
                 // 检查对应包名有没有被安装过
-                let (_global, local_diff) = info_local(&scope, &package_name, cfg).map_err(|_| {
+                let (_global, local_diff) = info_local(cfg, &scope, &package_name).map_err(|_| {
                     anyhow!("Error:Package '{scope}/{package_name}' hasn't been installed, use 'ept install' instead")
                 })?;
                 // 检查包的版本号是否允许升级
                 let (online_item, _url_template, _) =
-                    info_online(&scope, &package_name, matcher.mirror.clone(), cfg)?;
+                    info_online(cfg, &scope, &package_name, matcher.mirror.clone())?;
                 let selected_release =
                     filter_release(cfg, online_item.releases, matcher.version_req.clone(), true)?;
                 if selected_release.version <= ExSemVer::parse(&local_diff.version)? {
@@ -194,7 +194,7 @@ pub fn parse_uninstall_inputs(cfg: &Cfg, packages: Vec<String>) -> Result<Vec<In
         }
 
         // 查询 Info
-        let info = if let Ok((_, local_diff)) = info_local(&scope, &package_name, cfg) {
+        let info = if let Ok((_, local_diff)) = info_local(cfg, &scope, &package_name) {
             local_diff
         } else {
             InfoDiff {
@@ -238,7 +238,6 @@ fn test_parse_inputs() {
         std::fs::create_dir_all(static_path).unwrap();
     }
     crate::pack(
-        &cfg,
         "./examples/VSCode",
         Some(static_path.join("vscode.nep").to_string_lossy().to_string()),
         true,

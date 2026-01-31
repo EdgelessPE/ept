@@ -19,7 +19,7 @@ use zip::ZipArchive;
 
 // dry_run: 干运行，仅检查是否有更新
 // need_exit_process: 仅当单测时传入 false，以此防止跑单测时进程退出
-pub fn upgrade(dry_run: bool, need_exit_process: bool, cfg: &Cfg) -> Result<String> {
+pub fn upgrade(cfg: &Cfg, dry_run: bool, need_exit_process: bool) -> Result<String> {
     let current_version = env!("CARGO_PKG_VERSION");
     // 检查是否有更新
     let (has_upgrade, is_cross_wid_gap, latest_release) = check_has_upgrade(cfg)?;
@@ -134,6 +134,8 @@ fn test_upgrade() {
     set_flag(Flag::Debug, true);
     crate::utils::test::_ensure_clear_test_dir();
 
+    let test_cfg = crate::types::cfg::Cfg::default();
+
     // 使用 mock 的镜像数据
     let mock_ctx = crate::utils::test::_use_mock_mirror_data();
 
@@ -162,8 +164,8 @@ fn test_upgrade() {
     let (_, mut handler) = crate::utils::test::_run_static_file_server();
 
     // 运行 upgrade
-    upgrade(true, false).unwrap();
-    upgrade(false, false).unwrap();
+    upgrade(&test_cfg, true, false).unwrap();
+    upgrade(&test_cfg, false, false).unwrap();
 
     // 等待 3s 后断言程序被更新
     sleep(Duration::from_secs(10));

@@ -32,9 +32,9 @@ use super::{
 };
 
 fn consume_info_diff(
+    cfg: &Cfg,
     item: &TreeItem,
     semver_matcher: Option<VersionReq>,
-    cfg: &Cfg,
 ) -> Result<(InfoDiff, Option<MetaResult>)> {
     let latest = filter_release(cfg, item.releases.clone(), semver_matcher, true)?;
     let version = latest.version.to_string();
@@ -57,7 +57,7 @@ fn consume_info_diff(
     })
 }
 
-pub fn info_local(scope: &str, package_name: &str, cfg: &Cfg) -> Result<(GlobalPackage, InfoDiff)> {
+pub fn info_local(cfg: &Cfg, scope: &str, package_name: &str) -> Result<(GlobalPackage, InfoDiff)> {
     log!("Debug:Reading local info for '{scope}/{package_name}'");
     let local_path = get_path_apps(cfg, scope, package_name, false)?;
     if !local_path.exists() {
@@ -87,10 +87,10 @@ pub fn info_local(scope: &str, package_name: &str, cfg: &Cfg) -> Result<(GlobalP
 
 // 第二个参数为 URL 模板，第三个参数为 mirror
 pub fn info_online(
+    cfg: &Cfg,
     scope: &str,
     package_name: &str,
     mirror: Option<String>,
-    cfg: &Cfg,
 ) -> Result<(TreeItem, String, String)> {
     log!("Debug:Reading online info for '{scope}/{package_name}'");
     // 定义匹配函数
@@ -132,18 +132,18 @@ pub fn info_online(
 type InfoResult = (String, String, InfoDiff, Option<MetaResult>);
 
 fn info_from_matcher(
+    cfg: &Cfg,
     matcher: crate::types::matcher::PackageMatcher,
     _verify: bool,
-    cfg: &Cfg,
 ) -> Result<InfoResult> {
     let mirror = matcher.mirror.clone();
     let (scope, package_name) = find_scope_with_name(cfg, &matcher.name, matcher.scope.as_deref())?;
     log!("Debug:Resolving matcher for '{scope}/{package_name}'");
 
     // 先尝试在线获取
-    if let Ok((item, _, _)) = info_online(&scope, &package_name, mirror.clone(), cfg) {
+    if let Ok((item, _, _)) = info_online(cfg, &scope, &package_name, mirror.clone()) {
         log!("Debug:Found online info for '{scope}/{package_name}'");
-        let (info_diff, meta) = consume_info_diff(&item, matcher.version_req, cfg)?;
+        let (info_diff, meta) = consume_info_diff(cfg, &item, matcher.version_req)?;
         return Ok((scope, package_name, info_diff, meta));
     }
 
@@ -151,8 +151,8 @@ fn info_from_matcher(
     log!("Debug:Trying local fallback for '{scope}/{package_name}'");
     let local_path = get_path_apps(cfg, &scope, &package_name, false)?;
     if local_path.exists() {
-        let (_global, local) = info_local(&scope, &package_name, cfg)?;
-        let meta_res = meta(PackageInputEnum::PackageMatcher(matcher), false, cfg)?;
+        let (_global, local) = info_local(cfg, &scope, &package_name)?;
+        let meta_res = meta(cfg, PackageInputEnum::PackageMatcher(matcher), false)?;
         return Ok((scope, package_name, local, Some(meta_res)));
     }
 
@@ -161,8 +161,8 @@ fn info_from_matcher(
     ))
 }
 
-fn info_from_local_path(path: String, verify: bool, cfg: &Cfg) -> Result<InfoResult> {
-    let meta_res = meta(PackageInputEnum::LocalPath(path), verify, cfg)?;
+fn info_from_local_path(cfg: &Cfg, path: String, verify: bool) -> Result<InfoResult> {
+    let meta_res = meta(cfg, PackageInputEnum::LocalPath(path), verify)?;
     let package = &meta_res.package.package;
     Ok((
         package.scope.clone(),
@@ -175,7 +175,7 @@ fn info_from_local_path(path: String, verify: bool, cfg: &Cfg) -> Result<InfoRes
     ))
 }
 
-fn info_from_url(url: String, verify: bool, cfg: &Cfg) -> Result<InfoResult> {
+fn info_from_url(cfg: &Cfg, url: String, verify: bool) -> Result<InfoResult> {
     log!("Debug:Fetching info from URL '{url}'");
     let cache_path = get_path_cache(cfg)?;
     let url_hash = compute_hash_blake3_from_string(&url)?;
@@ -184,9 +184,9 @@ fn info_from_url(url: String, verify: bool, cfg: &Cfg) -> Result<InfoResult> {
 
     spawn_cache(cache_ctx)?;
 
-    let (p, pkg) = unpack_nep(&p_str, verify, cfg)?;
+    let (p, pkg) = unpack_nep(cfg, &p_str, verify)?;
     let p_str = p2s!(p);
-    let meta_res = meta(PackageInputEnum::LocalPath(p_str), false, cfg)?;
+    let meta_res = meta(cfg, PackageInputEnum::LocalPath(p_str), false)?;
     let package = pkg.package;
     log!(
         "Debug:Got info from URL for '{scope}/{name}' version '{ver}'",
@@ -207,17 +207,17 @@ fn info_from_url(url: String, verify: bool, cfg: &Cfg) -> Result<InfoResult> {
 }
 
 // 使用本地和在线数据丰富 info 信息
-fn enrich_info(mut info: Info, mirror: Option<String>, cfg: &Cfg) -> Result<Info> {
+fn enrich_info(cfg: &Cfg, mut info: Info, mirror: Option<String>) -> Result<Info> {
     log!(
         "Debug:Enriching info for '{scope}/{name}'",
         scope = &info.scope,
         name = &info.name
     );
-    if let Ok((_, local)) = info_local(&info.scope, &info.name, cfg) {
+    if let Ok((_, local)) = info_local(cfg, &info.scope, &info.name) {
         info.local = Some(local);
     }
-    if let Ok((item, _, _)) = info_online(&info.scope, &info.name, mirror, cfg) {
-        let (info_diff, meta) = consume_info_diff(&item, None, cfg)?;
+    if let Ok((item, _, _)) = info_online(cfg, &info.scope, &info.name, mirror) {
+        let (info_diff, meta) = consume_info_diff(cfg, &item, None)?;
         info.online = Some(info_diff);
         if info.meta.is_none() {
             info.meta = meta;
@@ -227,22 +227,22 @@ fn enrich_info(mut info: Info, mirror: Option<String>, cfg: &Cfg) -> Result<Info
 }
 
 pub fn info(
+    cfg: &Cfg,
     target_input: PackageInputEnum,
     verify_signature: bool,
-    cfg: &Cfg,
 ) -> Result<(Info, Option<PathBuf>)> {
     let (scope, package_name, target, meta_res, mirror) = match target_input {
         PackageInputEnum::PackageMatcher(matcher) => {
             let mirror = matcher.mirror.clone();
-            let (scope, name, target, meta) = info_from_matcher(matcher, verify_signature, cfg)?;
+            let (scope, name, target, meta) = info_from_matcher(cfg, matcher, verify_signature)?;
             (scope, name, target, meta, mirror)
         }
         PackageInputEnum::LocalPath(path) => {
-            let (scope, name, target, meta) = info_from_local_path(path, verify_signature, cfg)?;
+            let (scope, name, target, meta) = info_from_local_path(cfg, path, verify_signature)?;
             (scope, name, target, meta, None)
         }
         PackageInputEnum::Url(url) => {
-            let (scope, name, target, meta) = info_from_url(url, verify_signature, cfg)?;
+            let (scope, name, target, meta) = info_from_url(cfg, url, verify_signature)?;
             (scope, name, target, meta, None)
         }
     };
@@ -258,7 +258,7 @@ pub fn info(
         meta: meta_res,
     };
 
-    let enriched = enrich_info(info, mirror, cfg)?;
+    let enriched = enrich_info(cfg, info, mirror)?;
     Ok((enriched, temp_dir))
 }
 
@@ -274,6 +274,7 @@ fn test_info() {
 
     // 带 scope
     let base = info(
+        &crate::types::cfg::Cfg::default(),
         PackageInputEnum::PackageMatcher(PackageMatcher {
             scope: Some("Microsoft".to_string()),
             name: "VSCode".to_string(),
@@ -287,6 +288,7 @@ fn test_info() {
 
     // 单纯名字
     let res = info(
+        &crate::types::cfg::Cfg::default(),
         PackageInputEnum::PackageMatcher(PackageMatcher {
             scope: None,
             name: "vscode".to_string(),
@@ -300,6 +302,7 @@ fn test_info() {
 
     // 别名
     let res = info(
+        &crate::types::cfg::Cfg::default(),
         PackageInputEnum::PackageMatcher(PackageMatcher {
             scope: None,
             name: "CoDe".to_string(),
@@ -320,6 +323,7 @@ fn test_info_offline() {
     crate::utils::flags::set_flag(crate::utils::flags::Flag::Confirm, true);
     crate::utils::test::_ensure_testing_vscode_uninstalled();
     assert!(info(
+        &crate::types::cfg::Cfg::default(),
         PackageInputEnum::LocalPath("examples/vscode".to_string()),
         true
     )

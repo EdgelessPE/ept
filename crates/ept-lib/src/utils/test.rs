@@ -8,12 +8,13 @@ use which::which;
 
 pub fn _ensure_testing_vscode() -> PathBuf {
     let cfg = crate::types::cfg::Cfg::default();
-    if crate::entrances::info_local("Microsoft", "VSCode", &cfg).is_err() {
+    if crate::entrances::info_local(&cfg, "Microsoft", "VSCode").is_err() {
         crate::utils::fs::copy_dir("examples/VSCode", "test/VSCode").unwrap();
-        crate::install_using_package("test/VSCode", false, &cfg).unwrap();
+        crate::install_using_package(&cfg, "test/VSCode", false).unwrap();
     }
 
     crate::meta(
+        &cfg,
         crate::types::matcher::PackageInputEnum::PackageMatcher(PackageMatcher {
             name: "VSCode".to_string(),
             scope: None,
@@ -21,7 +22,6 @@ pub fn _ensure_testing_vscode() -> PathBuf {
             version_req: None,
         }),
         false,
-        &cfg,
     )
     .unwrap()
     .temp_dir
@@ -30,19 +30,20 @@ pub fn _ensure_testing_vscode() -> PathBuf {
 
 pub fn _ensure_testing_vscode_uninstalled() {
     let cfg = crate::types::cfg::Cfg::default();
-    if crate::entrances::info_local("Microsoft", "VSCode", &cfg).is_ok() {
-        crate::uninstall(Some("Microsoft".to_string()), "VSCode", &cfg).unwrap();
+    if crate::entrances::info_local(&cfg, "Microsoft", "VSCode").is_ok() {
+        crate::uninstall(&cfg, Some("Microsoft".to_string()), "VSCode").unwrap();
     }
 }
 
 pub fn _ensure_testing(scope: &str, name: &str) -> PathBuf {
     let cfg = crate::types::cfg::Cfg::default();
-    if crate::entrances::info_local(scope, name, &cfg).is_err() {
+    if crate::entrances::info_local(&cfg, scope, name).is_err() {
         crate::utils::fs::copy_dir(format!("examples/{name}"), format!("test/{name}")).unwrap();
-        crate::install_using_package(&format!("test/{name}"), false, &cfg).unwrap();
+        crate::install_using_package(&cfg, &format!("test/{name}"), false).unwrap();
     }
 
     crate::meta(
+        &cfg,
         crate::types::matcher::PackageInputEnum::PackageMatcher(PackageMatcher {
             name: name.to_string(),
             scope: Some(scope.to_string()),
@@ -50,7 +51,6 @@ pub fn _ensure_testing(scope: &str, name: &str) -> PathBuf {
             version_req: None,
         }),
         false,
-        &cfg,
     )
     .unwrap()
     .temp_dir
@@ -60,8 +60,8 @@ pub fn _ensure_testing(scope: &str, name: &str) -> PathBuf {
 pub fn _ensure_testing_uninstalled(scope: &str, name: &str) {
     let cfg = crate::types::cfg::Cfg::default();
     let s = scope.to_string();
-    if crate::entrances::info_local(&s, name, &cfg).is_ok() {
-        crate::uninstall(Some(s), name, &cfg).unwrap();
+    if crate::entrances::info_local(&cfg, &s, name).is_ok() {
+        crate::uninstall(&cfg, Some(s), name).unwrap();
     }
 }
 
@@ -537,7 +537,7 @@ pub fn _mount_custom_mirror() -> (bool, PathBuf, PathBuf) {
     let mock_url = _run_mirror_mock_server();
 
     // 添加镜像
-    mirror_add(&mock_url, None, &cfg).unwrap();
+    mirror_add(&cfg, &mock_url, None).unwrap();
     (has_origin_mirror, origin_p, bak_p)
 }
 
@@ -597,7 +597,7 @@ pub fn _use_mock_mirror_data() -> (bool, PathBuf, PathBuf) {
 
     // 使用 mock 的镜像数据
     let mock_url = _run_mirror_mock_server();
-    crate::entrances::mirror_add(&mock_url, None, &cfg).unwrap();
+    crate::entrances::mirror_add(&cfg, &mock_url, None).unwrap();
 
     (has_origin_mirror, origin_p, bak_p)
 }

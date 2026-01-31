@@ -76,7 +76,7 @@ pub fn clean(cfg: &Cfg) -> Result<usize> {
                 if app_path.is_dir() {
                     // 尝试读取 info
                     log!("Debug:Checking application '{scope_name}/{app_name}'");
-                    let info_res = info_local(&scope_name, &app_name, cfg);
+                    let info_res = info_local(cfg, &scope_name, &app_name);
                     if let Ok((global, _)) = info_res {
                         // 有效应用计数
                         valid_apps_count += 1;
@@ -198,10 +198,12 @@ fn test_clean() {
     use std::fs::{copy, create_dir_all, write};
     set_flag(Flag::Confirm, true);
 
+    let cfg = &crate::types::cfg::Cfg::default();
+
     // 安装 vscode
     crate::utils::test::_ensure_testing_vscode_uninstalled();
     crate::utils::test::_ensure_testing_vscode();
-    let bin_path = get_path_bin().unwrap();
+    let bin_path = get_path_bin(cfg).unwrap();
     let (vscode_entrance_name, another_entrance_name) =
         if bin_path.join("Microsoft-Code.cmd").exists() {
             ("Microsoft-Code.cmd", "Code.cmd")
@@ -222,7 +224,7 @@ fn test_clean() {
     copy(&vscode_entrance_path, bin_path.join(another_entrance_name)).unwrap();
 
     // 在 apps 目录中添加无效文件
-    let apps_path = get_bare_apps().unwrap();
+    let apps_path = get_bare_apps(cfg).unwrap();
     let fake_scope_foo = apps_path.join("FakeScopeFoo");
     let fake_scope_bar = apps_path.join("FakeScopeBar");
     let fake_scope_foz = apps_path.join("FakeScopeFoz");
@@ -235,7 +237,7 @@ fn test_clean() {
     write(fake_scope_foz.join("README.md"), "# Man!").unwrap();
 
     // 执行清理
-    clean().unwrap();
+    clean(cfg).unwrap();
 
     // 断言清理结果
     assert!(!bin_path.join("invalid.cmd").exists());

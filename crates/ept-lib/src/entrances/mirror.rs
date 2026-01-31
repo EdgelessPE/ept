@@ -25,7 +25,7 @@ use crate::{
 };
 
 // 返回远程镜像源申明的名称
-pub fn mirror_add(url: &str, should_match_name: Option<String>, cfg: &Cfg) -> Result<String> {
+pub fn mirror_add(cfg: &Cfg, url: &str, should_match_name: Option<String>) -> Result<String> {
     // 尝试解析为 URL 对象
     let parsed_url =
         Url::parse(url).map_err(|e| anyhow!("Error:Failed to parse '{url}' as valid URL : {e}"))?;
@@ -105,13 +105,13 @@ pub fn mirror_add(url: &str, should_match_name: Option<String>, cfg: &Cfg) -> Re
     Ok(mirror_name)
 }
 
-pub fn mirror_update(name: &str, cfg: &Cfg) -> Result<String> {
+pub fn mirror_update(cfg: &Cfg, name: &str) -> Result<String> {
     // 读取 meta 文件
     let (meta, _) = read_local_mirror_hello(cfg, name)?;
     // 筛选出 hello 服务
     let (hello_path, _) = filter_service_from_meta(&meta, ServiceKeys::Hello)?;
     // 调用 add
-    mirror_add(&hello_path, Some(name.to_string()), cfg)
+    mirror_add(cfg, &hello_path, Some(name.to_string()))
 }
 
 pub fn mirror_list(cfg: &Cfg) -> Result<Vec<MirrorInfo>> {
@@ -135,7 +135,7 @@ pub fn mirror_update_all(cfg: &Cfg) -> Result<Vec<String>> {
     let p = get_path_mirror(cfg)?;
     let mut names = Vec::new();
     for name in read_sub_dir(p)? {
-        let n = mirror_update(&name, cfg)?;
+        let n = mirror_update(cfg, &name)?;
         names.push(n);
     }
     Ok(names)
@@ -167,7 +167,7 @@ pub fn auto_mirror_update_all(cfg: &Cfg) -> Result<bool> {
     }
 }
 
-pub fn mirror_remove(name: &str, cfg: &Cfg) -> Result<()> {
+pub fn mirror_remove(cfg: &Cfg, name: &str) -> Result<()> {
     // 获取目录路径
     let (_, p) = read_local_mirror_hello(cfg, name)?;
     // 移除目录
@@ -184,8 +184,10 @@ fn test_mirror() {
     use std::thread::sleep;
     use std::time::Duration;
 
+    let cfg = &crate::types::cfg::Cfg::default();
+
     // 备份原有的镜像文件夹
-    let origin_p = get_path_mirror().unwrap();
+    let origin_p = get_path_mirror(cfg).unwrap();
     let bak_p = origin_p.parent().unwrap().join("mirror_bak");
     let has_origin_mirror = origin_p.exists();
     if has_origin_mirror {
@@ -195,19 +197,19 @@ fn test_mirror() {
             rename(&origin_p, &bak_p).unwrap();
         }
     }
-    assert!(mirror_list().unwrap().is_empty());
+    assert!(mirror_list(cfg).unwrap().is_empty());
 
     // 此时搜不到内容
-    assert!(search("vscode", false).is_err());
+    assert!(search(cfg, "vscode", false).is_err());
 
     // 启动 mock 服务器
     let mock_url = _run_mirror_mock_server();
 
     // 测试添加
-    mirror_add(&mock_url, None).unwrap();
+    mirror_add(cfg, &mock_url, None).unwrap();
 
     // 测试列出
-    let ls = mirror_list().unwrap();
+    let ls = mirror_list(cfg).unwrap();
     assert_eq!(ls.len(), 1);
     let mirror_info = ls.first().unwrap();
     let old_update_time = mirror_info.updated_at;
@@ -222,13 +224,13 @@ fn test_mirror() {
         from_mirror: Some("mock-server".to_string()),
     }];
     // 精准名称
-    let search_res = search("vscode", false).unwrap();
+    let search_res = search(cfg, "vscode", false).unwrap();
     assert_eq!(search_res, expected_res);
     // 大小写不敏感别名
-    let search_res = search("Code", false).unwrap();
+    let search_res = search(cfg, "Code", false).unwrap();
     assert_eq!(search_res, expected_res);
     // 大小写不敏感名称
-    let search_res = search("FIREFOx", false).unwrap();
+    let search_res = search(cfg, "FIREFOx", false).unwrap();
     assert_eq!(
         search_res,
         vec![crate::types::mirror::SearchResult {
@@ -240,10 +242,10 @@ fn test_mirror() {
         }]
     );
     // Tag 搜索
-    let search_res = search("ELECTRON", false).unwrap();
+    let search_res = search(cfg, "ELECTRON", false).unwrap();
     assert_eq!(search_res, expected_res);
     // 二进制搜索
-    let search_res = search("ntpd", false).unwrap();
+    let search_res = search(cfg, "ntpd", false).unwrap();
     assert_eq!(
         search_res,
         vec![crate::types::mirror::SearchResult {
@@ -255,14 +257,14 @@ fn test_mirror() {
         }]
     );
     // 正则名称
-    let search_res = search(r"vs\w+", true).unwrap();
+    let search_res = search(cfg, r"vs\w+", true).unwrap();
     assert_eq!(search_res, expected_res);
-    assert!(search("microsoft", false).is_err());
+    assert!(search(cfg, "microsoft", false).is_err());
 
     // 测试更新
     sleep(Duration::from_micros(100));
-    mirror_update("mock-server").unwrap();
-    let ls = mirror_list().unwrap();
+    mirror_update(cfg, "mock-server").unwrap();
+    let ls = mirror_list(cfg).unwrap();
     let mirror_info = ls.first().unwrap();
     assert!(
         mirror_info
@@ -273,8 +275,8 @@ fn test_mirror() {
     );
 
     // 测试移除
-    mirror_remove("mock-server").unwrap();
-    assert!(mirror_list().unwrap().is_empty());
+    mirror_remove(cfg, "mock-server").unwrap();
+    assert!(mirror_list(cfg).unwrap().is_empty());
 
     // 还原原有的镜像文件夹
     if has_origin_mirror {
@@ -292,7 +294,7 @@ fn test_auto_mirror_update_all() {
     let cfg = Cfg::default();
 
     // 备份原有的镜像文件夹
-    let origin_p = get_path_mirror().unwrap();
+    let origin_p = get_path_mirror(&cfg).unwrap();
     let bak_p = origin_p.parent().unwrap().join("mirror_bak");
     let has_origin_mirror = origin_p.exists();
     if has_origin_mirror {
@@ -302,12 +304,12 @@ fn test_auto_mirror_update_all() {
             rename(&origin_p, &bak_p).unwrap();
         }
     }
-    assert!(mirror_list().unwrap().is_empty());
+    assert!(mirror_list(&cfg).unwrap().is_empty());
 
     // 启动 mock 服务器
     let mock_url = _run_mirror_mock_server();
 
-    mirror_add(&mock_url, None).unwrap();
+    mirror_add(&cfg, &mock_url, None).unwrap();
 
     // 使用默认的 1d 过期配置，不会导致更新
     assert!(!auto_mirror_update_all(&cfg).unwrap());

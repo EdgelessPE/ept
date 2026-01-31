@@ -37,16 +37,16 @@ enum MetaTargetResult {
 
 // 返回 (临时目录，工作流所在目录，全局包)
 fn find_meta_target(
+    cfg: &Cfg,
     input: PackageInputEnum,
     verify_signature: bool,
-    cfg: &Cfg,
 ) -> Result<MetaTargetResult> {
     match input {
         PackageInputEnum::LocalPath(local_path) => {
             // 作为路径使用，可以是一个包或者已经解包的目录
             let p = Path::new(&local_path);
             if p.exists() {
-                let (path, _) = unpack_nep(&local_path, verify_signature, cfg)?;
+                let (path, _) = unpack_nep(cfg, &local_path, verify_signature)?;
                 // verify(&p2s!(path))?;
                 return Ok(MetaTargetResult::Local(
                     path.clone(),
@@ -60,7 +60,7 @@ fn find_meta_target(
             {
                 // 先尝试在本地已安装列表中搜索
                 let path = get_path_apps(cfg, &scope, &package_name, false)?;
-                if info_local(&scope, &package_name, cfg).is_ok() {
+                if info_local(cfg, &scope, &package_name).is_ok() {
                     installed_validator(&p2s!(path))?;
                     return Ok(MetaTargetResult::Local(
                         path.clone(),
@@ -70,7 +70,7 @@ fn find_meta_target(
 
                 // 直接使用在线 Info 的 Meta 信息
                 let (tree_item, _, mirror) =
-                    info_online(&scope, &package_name, matcher.mirror, cfg)?;
+                    info_online(cfg, &scope, &package_name, matcher.mirror)?;
                 let release = filter_release(cfg, tree_item.releases, matcher.version_req, true)?;
                 if let Some(meta) = release.meta {
                     log!("Debug:Found meta for '{scope}/{package_name}' in mirror '{mirror}'");
@@ -91,7 +91,7 @@ fn find_meta_target(
             // 缓存下载的包
             spawn_cache(cache_ctx)?;
 
-            let (path, _) = unpack_nep(&p2s!(p), verify_signature, cfg)?;
+            let (path, _) = unpack_nep(cfg, &p2s!(p), verify_signature)?;
             return Ok(MetaTargetResult::Local(
                 path.clone(),
                 path.join(DIR_WORKFLOWS),
@@ -104,8 +104,8 @@ fn find_meta_target(
     ))
 }
 
-pub fn meta(input: PackageInputEnum, verify_signature: bool, cfg: &Cfg) -> Result<MetaResult> {
-    match find_meta_target(input, verify_signature, cfg)? {
+pub fn meta(cfg: &Cfg, input: PackageInputEnum, verify_signature: bool) -> Result<MetaResult> {
+    match find_meta_target(cfg, input, verify_signature)? {
         MetaTargetResult::Local(temp_dir_inner_path, workflow_path) => {
             let temp_dir = p2s!(temp_dir_inner_path);
 
@@ -186,9 +186,11 @@ fn test_meta() {
     use crate::types::matcher::PackageMatcher;
     use crate::utils::flags::{set_flag, Flag};
     set_flag(Flag::Confirm, true);
+    let cfg = &crate::types::cfg::Cfg::default();
 
     // 从本地路径中生成 meta
     let res = meta(
+        cfg,
         PackageInputEnum::LocalPath("examples/PermissionsTest".to_string()),
         false,
     )
@@ -291,6 +293,7 @@ fn test_meta() {
     );
     // package 不应该被解释
     let res = meta(
+        cfg,
         PackageInputEnum::LocalPath("examples/VSCodeI".to_string()),
         false,
     )
@@ -325,6 +328,7 @@ fn test_meta() {
     crate::utils::test::_ensure_testing_vscode_uninstalled();
     let vscode_path = crate::utils::test::_ensure_testing_vscode();
     let meta_result = meta(
+        cfg,
         PackageInputEnum::PackageMatcher(PackageMatcher {
             name: "VSCode".to_string(),
             scope: None,
@@ -394,7 +398,12 @@ fn test_meta() {
         false,
     )
     .unwrap();
-    let res = meta(PackageInputEnum::Url(format!("{url}/VSCodeE.nep")), false).unwrap();
+    let res = meta(
+        cfg,
+        PackageInputEnum::Url(format!("{url}/VSCodeE.nep")),
+        false,
+    )
+    .unwrap();
     assert_eq!(
         res.permissions,
         vec![
@@ -426,6 +435,7 @@ fn test_meta() {
     let tup = crate::utils::test::_mount_custom_mirror();
     assert_eq!(
         meta(
+            cfg,
             PackageInputEnum::PackageMatcher(
                 PackageMatcher::parse("notepad", false, false).unwrap()
             ),
@@ -474,6 +484,7 @@ fn test_meta() {
     crate::utils::test::_ensure_testing_uninstalled("Mozilla", "Firefox");
     crate::utils::test::_ensure_testing_uninstalled("PortableApps", "Firefox");
     assert!(meta(
+        cfg,
         PackageInputEnum::PackageMatcher(PackageMatcher::parse("firefox", false, false).unwrap()),
         false
     )

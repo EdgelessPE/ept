@@ -24,7 +24,7 @@ use crate::{executor::workflow_executor, parsers::parse_workflow, utils::get_pat
 use crate::{log, log_ok_last, p2s};
 
 // 检查软件是否已通过绝对路径的 main_program 字段全局安装
-fn check_global_installation(package: &GlobalPackage, cfg: &Cfg) -> Result<bool> {
+fn check_global_installation(cfg: &Cfg, package: &GlobalPackage) -> Result<bool> {
     if let Some(ref software) = package.software {
         if let Some(ref installed) = software.main_program {
             let p = Path::new(installed);
@@ -45,25 +45,25 @@ fn check_global_installation(package: &GlobalPackage, cfg: &Cfg) -> Result<bool>
 
 // 检查包是否已安装，如果是则重定向到更新流程
 fn check_existing_installation(
+    cfg: &Cfg,
     source_file: &str,
     package: &GlobalPackage,
     verify_signature: bool,
-    cfg: &Cfg,
 ) -> Result<Option<(String, String)>> {
-    if let Ok((_, diff)) = info_local(&package.package.scope, &package.package.name, cfg) {
+    if let Ok((_, diff)) = info_local(cfg, &package.package.scope, &package.package.name) {
         log!(
             "Warning:Package '{name}' has been installed({ver}), switch to update entrance",
             name = package.package.name,
             ver = diff.version,
         );
-        let res = update_using_package(source_file, verify_signature, cfg)?;
+        let res = update_using_package(cfg, source_file, verify_signature)?;
         return Ok(Some((res.scope, res.name)));
     }
     Ok(None)
 }
 
 // 将应用文件从临时目录部署到 apps 目录
-fn deploy_app_files(temp_dir: &Path, package: &GlobalPackage, cfg: &Cfg) -> Result<String> {
+fn deploy_app_files(cfg: &Cfg, temp_dir: &Path, package: &GlobalPackage) -> Result<String> {
     let into_dir = get_path_apps(cfg, &package.package.scope, &package.package.name, true)?;
     if into_dir.exists() {
         remove_dir_all(into_dir.clone()).map_err(|_| {
@@ -105,7 +105,7 @@ fn validate_main_program(into_dir: &str, package: &GlobalPackage) -> Result<()> 
 }
 
 // 安装完成后的最终验证
-fn finalize_installation(into_dir: &str, package: &GlobalPackage, cfg: &Cfg) -> Result<()> {
+fn finalize_installation(cfg: &Cfg, into_dir: &str, package: &GlobalPackage) -> Result<()> {
     installed_validator(into_dir)?;
     validate_main_program(into_dir, package)?;
 
@@ -114,7 +114,7 @@ fn finalize_installation(into_dir: &str, package: &GlobalPackage, cfg: &Cfg) -> 
         scope = package.package.scope,
         name = package.package.name
     );
-    info_local(&package.package.scope, &package.package.name, cfg).map_err(|e| {
+    info_local(cfg, &package.package.scope, &package.package.name).map_err(|e| {
         anyhow!(
             "Error:Validating failed : failed to get info of '{scope}/{name}' : {e}",
             scope = package.package.scope,
@@ -126,14 +126,14 @@ fn finalize_installation(into_dir: &str, package: &GlobalPackage, cfg: &Cfg) -> 
 }
 
 pub fn install_using_package(
+    cfg: &Cfg,
     source_file: &str,
     verify_signature: bool,
-    cfg: &Cfg,
 ) -> Result<(String, String)> {
     log!("Info:Preparing to install with package '{source_file}'");
 
     // 解包
-    let (temp_dir_inner_path, package_struct) = unpack_nep(source_file, verify_signature, cfg)?;
+    let (temp_dir_inner_path, package_struct) = unpack_nep(cfg, source_file, verify_signature)?;
     log!(
         "Info:If installation fails, use 'ept uninstall \"{name}\"' to roll back",
         name = package_struct.package.name
@@ -145,13 +145,13 @@ pub fn install_using_package(
     let setup_workflow = parse_workflow(&p2s!(setup_file_path))?;
 
     // 检查是否已全局安装
-    if !check_global_installation(&package_struct, cfg)? {
+    if !check_global_installation(cfg, &package_struct)? {
         return Err(anyhow!("Error:Operation canceled by user"));
     }
 
     // 检查是否已安装并重定向到更新
     if let Some(result) =
-        check_existing_installation(source_file, &package_struct, verify_signature, cfg)?
+        check_existing_installation(cfg, source_file, &package_struct, verify_signature)?
     {
         return Ok(result);
     }
@@ -160,12 +160,12 @@ pub fn install_using_package(
     // 如有展开工作流则执行
     let temp_dir_inner = p2s!(temp_dir_inner_path);
     if is_workshop_expandable(&temp_dir_inner) {
-        expand_workshop(&temp_dir_inner, cfg)?;
+        expand_workshop(cfg, &temp_dir_inner)?;
     }
 
     // 部署文件
     log!("Info:Deploying files...");
-    let into_dir = deploy_app_files(&temp_dir_inner_path, &package_struct, cfg)?;
+    let into_dir = deploy_app_files(cfg, &temp_dir_inner_path, &package_struct)?;
     log_ok_last!("Info:Deploying files...");
 
     // 运行安装工作流
@@ -179,11 +179,11 @@ pub fn install_using_package(
 
     // 验证安装
     log!("Info:Validating setup...");
-    finalize_installation(&into_dir, &package_struct, cfg)?;
+    finalize_installation(cfg, &into_dir, &package_struct)?;
     log_ok_last!("Info:Validating setup...");
 
     // 清理
-    clean_temp(source_file, cfg)?;
+    clean_temp(cfg, source_file)?;
 
     Ok((
         package_struct.package.scope.clone(),
@@ -191,14 +191,14 @@ pub fn install_using_package(
     ))
 }
 
-pub fn install_using_url(url: &str, verify_signature: bool, cfg: &Cfg) -> Result<(String, String)> {
+pub fn install_using_url(cfg: &Cfg, url: &str, verify_signature: bool) -> Result<(String, String)> {
     // 下载文件到临时目录
     let cache_path = get_path_cache(cfg)?;
     let url_hash = compute_hash_blake3_from_string(url)?;
     let (p, cache_ctx) = download_nep(cfg, url, Some((cache_path, url_hash)))?;
 
     // 安装
-    let info = install_using_package(&p2s!(p), verify_signature, cfg)?;
+    let info = install_using_package(cfg, &p2s!(p), verify_signature)?;
 
     // 缓存下载的包
     spawn_cache(cache_ctx)?;
@@ -207,9 +207,9 @@ pub fn install_using_url(url: &str, verify_signature: bool, cfg: &Cfg) -> Result
 }
 
 pub fn install_using_parsed(
+    cfg: &Cfg,
     parsed: Vec<ParseInputResEnum>,
     verify_signature: bool,
-    cfg: &Cfg,
 ) -> Result<Vec<(String, String)>> {
     let mut arr = Vec::new();
     for parsed in parsed {
@@ -217,20 +217,20 @@ pub fn install_using_parsed(
         let (scope, name) = match parsed {
             ParseInputResEnum::LocalPath(p, temp_dir) => {
                 if let Some(temp_dir) = temp_dir {
-                    install_using_package(&p2s!(temp_dir), false, cfg)?
+                    install_using_package(cfg, &p2s!(temp_dir), false)?
                 } else {
-                    install_using_package(&p, verify_signature, cfg)?
+                    install_using_package(cfg, &p, verify_signature)?
                 }
             }
             ParseInputResEnum::Url(u, temp_dir) => {
                 if let Some(temp_dir) = temp_dir {
-                    install_using_package(&p2s!(temp_dir), false, cfg)?
+                    install_using_package(cfg, &p2s!(temp_dir), false)?
                 } else {
-                    install_using_url(&u, verify_signature, cfg)?
+                    install_using_url(cfg, &u, verify_signature)?
                 }
             }
             ParseInputResEnum::PackageMatcher(p) => {
-                install_using_url(&p.download_url, verify_signature, cfg)?
+                install_using_url(cfg, &p.download_url, verify_signature)?
             }
         };
         log!("Success:Package '{scope}/{name}' installed successfully");
@@ -279,18 +279,20 @@ fn test_install() {
     }
 
     // 卸载
-    if info_local("Microsoft", "VSCode").is_ok() {
-        crate::uninstall(Some("Microsoft".to_string()), "VSCode").unwrap();
+    let cfg = &crate::types::cfg::Cfg::default();
+    if info_local(cfg, "Microsoft", "VSCode").is_ok() {
+        crate::uninstall(cfg, Some("Microsoft".to_string()), "VSCode").unwrap();
     }
 
     // 打包并安装
+    let cfg = &crate::types::cfg::Cfg::default();
     crate::pack(
         "./examples/VSCode",
         Some("./test/VSCode_1.75.0.0_Cno (1).nep".to_string()),
         true,
     )
     .unwrap();
-    install_using_package("./test/VSCode_1.75.0.0_Cno (1).nep", true).unwrap();
+    install_using_package(cfg, "./test/VSCode_1.75.0.0_Cno (1).nep", true).unwrap();
 
     assert!(shortcut_path.exists());
     assert!(entry1_path.exists() || entry2_path.exists());
@@ -298,9 +300,9 @@ fn test_install() {
     assert!(cx_path.exists());
 
     // 重复安装，会被要求使用升级，但是会由于同版本导致升级失败
-    assert!(install_using_package("./test/VSCode_1.75.0.0_Cno (1).nep", true).is_err());
+    assert!(install_using_package(cfg, "./test/VSCode_1.75.0.0_Cno (1).nep", true).is_err());
 
-    crate::uninstall(None, "VSCode").unwrap();
+    crate::uninstall(cfg, None, "VSCode").unwrap();
 
     assert!(!shortcut_path.exists());
     assert!(!entry1_path.exists() || entry2_path.exists());
@@ -318,29 +320,30 @@ fn test_install() {
     // 安装 CallInstaller，预期会因为不存在主程序 ${Desktop}/Call.exe 而安装失败
     copy_dir("examples/CallInstaller", "test/CallInstaller1").unwrap();
 
-    assert!(install_using_package("test/CallInstaller1", false).is_err());
+    assert!(install_using_package(cfg, "test/CallInstaller1", false).is_err());
     crate::clean().unwrap();
 
     // 提供指定的主程序后安装成功
     std::fs::write(desktop_call_path, "114514").unwrap();
-    crate::uninstall(None, "CallInstaller").unwrap();
+    crate::uninstall(cfg, None, "CallInstaller").unwrap();
     copy_dir("examples/CallInstaller", "test/CallInstaller2").unwrap();
-    install_using_package("test/CallInstaller2", false).unwrap();
+    install_using_package(cfg, "test/CallInstaller2", false).unwrap();
 
     // 清理
     remove_file(desktop_call_path).unwrap();
-    crate::uninstall(None, "CallInstaller").unwrap();
+    crate::uninstall(cfg, None, "CallInstaller").unwrap();
 }
 
 #[test]
 fn test_install_dism() {
     use crate::utils::arch::SysArch;
     use crate::utils::test::_ensure_testing_uninstalled;
+    let cfg = &crate::types::cfg::Cfg::default();
     _ensure_testing_uninstalled("Chuyu", "Dism++");
 
     crate::utils::fs::copy_dir("examples/Dism++", "test/Dism++").unwrap();
 
-    install_using_package("test/Dism++", false).unwrap();
+    install_using_package(cfg, "test/Dism++", false).unwrap();
     let stem_name = match SysArch::get_current_arch().unwrap() {
         SysArch::X64 => "Dism++x64",
         SysArch::X86 => "Dism++x86",
@@ -353,6 +356,7 @@ fn test_install_dism() {
     println!("{p}");
     assert!(Path::new(&p).exists());
     std::fs::remove_file(&p).unwrap();
+    crate::uninstall(cfg, None, "Dism++").unwrap();
 }
 
 #[test]
@@ -403,8 +407,10 @@ fn test_reg_entry() {
     _ensure_testing("Cno", "RegEntry");
 
     // 确认版本号已经更新
+    let cfg = &crate::types::cfg::Cfg::default();
     assert_eq!(
         crate::entrances::info(
+            cfg,
             crate::types::matcher::PackageInputEnum::PackageMatcher(
                 crate::types::matcher::PackageMatcher {
                     scope: Some("Cno".to_string()),
@@ -424,7 +430,7 @@ fn test_reg_entry() {
     );
 
     // 执行卸载
-    crate::entrances::uninstall(None, "RegEntry").unwrap();
+    crate::entrances::uninstall(cfg, None, "RegEntry").unwrap();
 
     // 断言 flag 的存在
     assert!(flag_path.exists());
@@ -467,19 +473,21 @@ fn test_install_with_matcher() {
     .unwrap();
 
     // 执行安装
+    let cfg = &crate::types::cfg::Cfg::default();
     crate::utils::test::_ensure_testing_vscode_uninstalled();
     let parsed =
-        crate::utils::parse_inputs::parse_install_inputs(vec!["vscode".to_string()], false)
+        crate::utils::parse_inputs::parse_install_inputs(cfg, vec!["vscode".to_string()], false)
             .unwrap();
-    install_using_parsed(parsed.into_iter().map(|p| p.0).collect(), false).unwrap();
-    assert!(info_local("Microsoft", "VSCode").unwrap().1.version == *"1.75.4.0");
+    install_using_parsed(cfg, parsed.into_iter().map(|p| p.0).collect(), false).unwrap();
+    assert!(info_local(cfg, "Microsoft", "VSCode").unwrap().1.version == *"1.75.4.0");
 
     // 使用大小写不敏感的别名直接安装
     crate::utils::test::_ensure_testing_vscode_uninstalled();
     let parsed =
-        crate::utils::parse_inputs::parse_install_inputs(vec!["CODE".to_string()], false).unwrap();
-    install_using_parsed(parsed.into_iter().map(|p| p.0).collect(), false).unwrap();
-    assert!(info_local("Microsoft", "VSCode").unwrap().1.version == *"1.75.4.0");
+        crate::utils::parse_inputs::parse_install_inputs(cfg, vec!["CODE".to_string()], false)
+            .unwrap();
+    install_using_parsed(cfg, parsed.into_iter().map(|p| p.0).collect(), false).unwrap();
+    assert!(info_local(cfg, "Microsoft", "VSCode").unwrap().1.version == *"1.75.4.0");
 
     // 手动升版本号
     let source_dir = crate::utils::test::_fork_example_with_version("examples/VSCode", "1.75.4.1");
@@ -499,6 +507,7 @@ fn test_install_with_matcher() {
 
     // 无法安装，会报错
     assert!(crate::entrances::update::update_using_package_matcher(
+        cfg,
         "microsoFT/vscode".to_string(),
         false
     )
@@ -518,6 +527,7 @@ fn test_install_expandable() {
     use crate::utils::flags::{set_flag, Flag};
     set_flag(Flag::Confirm, true);
     crate::utils::test::_ensure_clear_test_dir();
+    let cfg = &crate::types::cfg::Cfg::default();
     crate::utils::test::_ensure_testing_uninstalled("Microsoft", "VSCodeE");
 
     // 断言原来的包中不包含这个二进制文件
@@ -529,11 +539,11 @@ fn test_install_expandable() {
 
     // 安装
     crate::utils::fs::copy_dir("examples/VSCodeE", "test/VSCodeE").unwrap();
-    install_using_package("test/VSCodeE", false).unwrap();
+    install_using_package(cfg, "test/VSCodeE", false).unwrap();
 
     // 断言安装成功
-    assert!(info_local("Microsoft", "VSCodeE").is_ok());
-    assert!(get_path_apps("Microsoft", "VSCodeE", false)
+    assert!(info_local(cfg, "Microsoft", "VSCodeE").is_ok());
+    assert!(get_path_apps(cfg, "Microsoft", "VSCodeE", false)
         .unwrap()
         .join("Code.exe")
         .exists());
@@ -545,6 +555,7 @@ fn test_install_expandable() {
 #[test]
 fn test_install_offline() {
     crate::utils::flags::set_flag(crate::utils::flags::Flag::Confirm, true);
+    let cfg = &crate::types::cfg::Cfg::default();
     crate::utils::test::_ensure_testing_vscode_uninstalled();
-    assert!(install_using_package("examples/vscode", true).is_err());
+    assert!(install_using_package(cfg, "examples/vscode", true).is_err());
 }

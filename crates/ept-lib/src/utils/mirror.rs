@@ -417,7 +417,7 @@ pub fn get_url_with_version_req(
     let (scope, package_name) = find_scope_with_name(cfg, &matcher.name, matcher.scope.as_deref())?;
     // 拿到 info online
     let (info, url_template, mirror_name) =
-        info_online(&scope, &package_name, matcher.mirror, cfg)?;
+        info_online(cfg, &scope, &package_name, matcher.mirror)?;
     // 匹配版本
     let matched_release = filter_release(cfg, info.releases, matcher.version_req, true)?;
     // 填充模板获取 url

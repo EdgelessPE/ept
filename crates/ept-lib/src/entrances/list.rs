@@ -21,6 +21,7 @@ pub fn list(cfg: &Cfg) -> Result<Vec<Info>> {
         for name in read_sub_dir(app_dir.join(&scope))? {
             // 尝试将其作为合法的 nep 安装目录读取 info
             let info_res = info(
+                cfg,
                 PackageInputEnum::PackageMatcher(PackageMatcher {
                     scope: Some(scope.clone()),
                     name: name.clone(),
@@ -28,7 +29,6 @@ pub fn list(cfg: &Cfg) -> Result<Vec<Info>> {
                     version_req: None,
                 }),
                 false,
-                cfg,
             );
             if let Ok((r, _)) = info_res {
                 res.push(r);

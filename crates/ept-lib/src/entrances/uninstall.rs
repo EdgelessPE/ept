@@ -37,7 +37,7 @@ fn get_manifest(flow: Vec<WorkflowNode>) -> Vec<String> {
     manifest
 }
 
-pub fn uninstall(scope: Option<String>, package_name: &str, cfg: &Cfg) -> Result<(String, String)> {
+pub fn uninstall(cfg: &Cfg, scope: Option<String>, package_name: &str) -> Result<(String, String)> {
     log!("Info:Preparing to uninstall '{package_name}'");
 
     // 查找 scope 并使用 scope 更新纠正大小写
@@ -188,6 +188,7 @@ fn test_uninstall() {
     // 这里测试一下需要杀进程的案例
     use crate::types::steps::TStep;
     set_flag(Flag::Confirm, true);
+    let cfg = &crate::types::cfg::Cfg::default();
     let pwd = crate::utils::test::_ensure_testing("Microsoft", "Notepad");
     let mut cx = WorkflowContext::_demo();
     StepExecute {
@@ -206,6 +207,6 @@ fn test_uninstall() {
     .run(&mut cx)
     .unwrap();
 
-    uninstall(None, "Notepad").unwrap();
+    uninstall(cfg, None, "Notepad").unwrap();
     assert!(!Path::new(&pwd).exists());
 }

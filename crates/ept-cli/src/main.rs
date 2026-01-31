@@ -82,9 +82,9 @@ fn router(action: Action, cfg: &Cfg) -> Result<String> {
             }
             // 执行
             install_using_parsed(
+                cfg,
                 parsed.into_iter().map(|p| p.0).collect(),
                 verify_signature,
-                cfg,
             )
             .map(|arr| {
                 let length = arr.len();
@@ -139,9 +139,9 @@ fn router(action: Action, cfg: &Cfg) -> Result<String> {
                 }
                 // 执行
                 update_using_parsed(
+                    cfg,
                     parsed.into_iter().map(|p| p.0).collect(),
                     verify_signature,
-                    cfg,
                 )
                 .map(|arr| {
                     let length = arr.len();
@@ -152,7 +152,7 @@ fn router(action: Action, cfg: &Cfg) -> Result<String> {
                     }
                 })
             } else {
-                update_all(verify_signature, cfg).map(|(success_count, failure_count)| {
+                update_all(cfg, verify_signature).map(|(success_count, failure_count)| {
                     if failure_count == 0 {
                         if success_count == 0 {
                             "Info:No updatable packages".to_string()
@@ -190,7 +190,7 @@ fn router(action: Action, cfg: &Cfg) -> Result<String> {
             for info in parsed {
                 let scope = info.scope;
                 let name = info.name;
-                let tip = uninstall(Some(scope.clone()), &name, cfg).map(|(scope, name)| {
+                let tip = uninstall(cfg, Some(scope.clone()), &name).map(|(scope, name)| {
                     format!("Success:Package '{scope}/{name}' uninstalled successfully")
                 }).map_err(|e|{
                     // 卸载失败时提示用户如何手动解决坏包
@@ -207,7 +207,7 @@ fn router(action: Action, cfg: &Cfg) -> Result<String> {
         }
         Action::Search { keyword, regex } => {
             auto_mirror_update_all(cfg)?;
-            search(&keyword, regex, cfg).map(|results| {
+            search(cfg, &keyword, regex).map(|results| {
                 let len = results.len();
                 let res: String = results
                     .into_iter()
@@ -223,7 +223,7 @@ fn router(action: Action, cfg: &Cfg) -> Result<String> {
         } => {
             auto_mirror_update_all(cfg)?;
             let parse_res = PackageInputEnum::parse(package_matcher, true, true)?;
-            let (info, _) = info(parse_res, verify_signature, cfg)?;
+            let (info, _) = info(cfg, parse_res, verify_signature)?;
             if let Some(into) = save_at {
                 let text = toml::to_string_pretty(&info)?;
                 write(&into, text)
@@ -256,7 +256,7 @@ fn router(action: Action, cfg: &Cfg) -> Result<String> {
         } => {
             // 调用 meta
             let package_input_enum = PackageInputEnum::parse(package, true, true)?;
-            let res = meta(package_input_enum, verify_signature, cfg)?;
+            let res = meta(cfg, package_input_enum, verify_signature)?;
 
             // 移除 temp_dir
             let mut res_toml = toml::Value::try_from(res)?;
@@ -293,11 +293,11 @@ fn router(action: Action, cfg: &Cfg) -> Result<String> {
         },
         Action::Mirror { operation } => match operation {
             ActionMirror::Add { url } => {
-                mirror_add(&url, None, cfg).map(|name| format!("Success:Mirror '{name}' added"))
+                mirror_add(cfg, &url, None).map(|name| format!("Success:Mirror '{name}' added"))
             }
             ActionMirror::Update { name } => {
                 if let Some(n) = name {
-                    mirror_update(&n, cfg)
+                    mirror_update(cfg, &n)
                         .map(|name| format!("Success:Index of mirror '{name}' updated"))
                 } else {
                     mirror_update_all(cfg).map(|names| {
@@ -326,10 +326,10 @@ fn router(action: Action, cfg: &Cfg) -> Result<String> {
                 }
             }
             ActionMirror::Remove { name } => {
-                mirror_remove(&name, cfg).map(|_| format!("Success:Mirror '{name}' removed"))
+                mirror_remove(cfg, &name).map(|_| format!("Success:Mirror '{name}' removed"))
             }
         },
-        Action::Upgrade { check } => upgrade(check, true, cfg),
+        Action::Upgrade { check } => upgrade(cfg, check, true),
     }
 }
 

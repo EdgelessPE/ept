@@ -33,7 +33,7 @@ impl EvalFunction for IsInstalled {
                     "Invalid argument '{arg}' : expect 'SCOPE/NAME', e.g. 'Microsoft/VSCode'"
                 )));
             }
-            let info = info_local(sp[0], sp[1], &cfg);
+            let info = info_local(&cfg, sp[0], sp[1]);
 
             Ok(Value::Boolean(info.is_ok()))
         })
