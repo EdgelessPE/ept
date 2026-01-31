@@ -611,3 +611,28 @@ pub fn _restore_mirror_data(tup: (bool, PathBuf, PathBuf)) {
         rename(&bak_p, &origin_p).unwrap();
     }
 }
+
+// 默认测试配置
+pub fn _default_test_cfg() -> crate::types::cfg::Cfg {
+    crate::types::cfg::Cfg {
+        local: crate::types::cfg::Local {
+            base: "C:/Users/Public/Music".to_string(),
+            enable_cache: true,
+            cache_valid_duration: "30d".to_string(),
+        },
+        online: crate::types::cfg::Online {
+            mirror_update_interval: "1d".to_string(),
+            offline: false,
+            auto_check_upgrade: true,
+        },
+        preference: crate::types::cfg::Preference {
+            installer: crate::types::cfg::PreferenceEnum::LowPriority,
+            portable: crate::types::cfg::PreferenceEnum::HighPriority,
+            expandable: crate::types::cfg::PreferenceEnum::HighPriority,
+        },
+        interaction: crate::types::cfg::Interaction {
+            enable_windows_terminal_status: false,
+            show_emojis: true,
+        },
+    }
+}
