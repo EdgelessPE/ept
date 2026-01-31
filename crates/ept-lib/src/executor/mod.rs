@@ -5,12 +5,13 @@ use anyhow::{anyhow, Result};
 use evalexpr::*;
 
 use crate::{
-    log, p2s,
+    log,
     types::{
+        cfg::Cfg,
         package::GlobalPackage,
         workflow::{WorkflowContext, WorkflowNode},
     },
-    utils::{arch::is_current_arch_match, get_bare_apps, get_system_drive},
+    utils::{arch::is_current_arch_match, get_system_drive},
 };
 
 pub use self::functions::{
@@ -25,14 +26,14 @@ use self::{
 // 配置部分内置变量的值
 lazy_static! {
     static ref SYSTEM_DRIVE: String = get_system_drive().unwrap();
-    static ref DEFAULT_LOCATION: String = p2s!(get_bare_apps().unwrap());
 }
 
 pub fn get_eval_context(exit_code: i32, located: &str, package_version: &str) -> HashMapContext {
+    let cfg = Cfg::default();
     let mut context = HashMapContext::new();
     set_context_with_constant_values(&mut context);
     set_context_with_mutable_values(&mut context, exit_code, located, package_version);
-    set_context_with_function(&mut context, located);
+    set_context_with_function(&mut context, located, &cfg);
     context
 }
 
@@ -215,10 +216,10 @@ fn test_condition_eval() {
 
 #[test]
 fn test_workflow_executor() {
-    use crate::utils::flags::{set_flag, Flag};
-    set_flag(Flag::Debug, true);
     use crate::types::steps::{Step, StepExecute, StepLog};
     use crate::types::workflow::{WorkflowHeader, WorkflowNode};
+    use crate::utils::flags::{set_flag, Flag};
+    set_flag(Flag::Debug, true);
     let cx = WorkflowContext::_demo();
     let wf1 = vec![
         WorkflowNode {

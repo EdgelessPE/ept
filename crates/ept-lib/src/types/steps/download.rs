@@ -6,6 +6,7 @@ use crate::{
     p2s,
     signature::blake3::compute_hash_blake3,
     types::{
+        cfg::Cfg,
         interpretable::Interpretable,
         mixed_fs::MixedFS,
         permissions::{Generalizable, Permission, PermissionKey, PermissionLevel},
@@ -43,9 +44,11 @@ pub struct StepDownload {
 impl TStep for StepDownload {
     fn run(self, cx: &mut WorkflowContext) -> Result<i32> {
         //- （仅能在拓展工作流中使用）从 URL 下载文件并使用提供的 BLAKE3 Hash 校验完整性。
+        // 获取配置
+        let cfg = Cfg::default();
         // 下载
         let p = Path::new(&cx.located).join(&self.to).to_path_buf();
-        let cache_path = get_path_cache()?;
+        let cache_path = get_path_cache(&cfg)?;
         let cache_ctx = download(
             &self.url,
             p.clone(),

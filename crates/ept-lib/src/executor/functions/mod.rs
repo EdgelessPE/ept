@@ -4,17 +4,17 @@ mod is_directory;
 mod is_installed;
 
 use self::{exist::Exist, is_alive::IsAlive, is_directory::IsDirectory, is_installed::IsInstalled};
-use crate::types::permissions::Permission;
+use crate::types::{cfg::Cfg, permissions::Permission};
 use anyhow::{anyhow, Result};
 use evalexpr::*;
 
 macro_rules! def_eval_functions {
     ($($x:ident),*) => {
-        pub fn set_context_with_function(context: &mut HashMapContext,located: &str) {
+        pub fn set_context_with_function(context: &mut HashMapContext,located: &str,cfg:&Cfg) {
             $(
                 context.set_function(
                     stringify!($x).to_string(),
-                    $x::get_closure(located.to_string()),
+                    $x::get_closure(located.to_string(),cfg),
                 ).unwrap();
              )*
         }
@@ -40,7 +40,7 @@ macro_rules! def_eval_functions {
 }
 
 trait EvalFunction {
-    fn get_closure(located: String) -> Function<DefaultNumericTypes>;
+    fn get_closure(located: String, cfg: &Cfg) -> Function<DefaultNumericTypes>;
     fn get_permission(arg: &str) -> Result<Permission>;
     fn verify_arg(arg: &str) -> Result<()>;
 }

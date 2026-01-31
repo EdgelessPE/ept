@@ -8,6 +8,7 @@ use crate::{
     parsers::parse_workflow,
     signature::blake3::compute_hash_blake3_from_string,
     types::{
+        cfg::Cfg,
         constants::{
             DIR_NEP_CONTEXT, DIR_WORKFLOWS, WORKFLOW_EXPAND, WORKFLOW_REMOVE, WORKFLOW_SETUP,
             WORKFLOW_UPDATE,
@@ -35,13 +36,17 @@ enum MetaTargetResult {
 }
 
 // 返回 (临时目录，工作流所在目录，全局包)
-fn find_meta_target(input: PackageInputEnum, verify_signature: bool) -> Result<MetaTargetResult> {
+fn find_meta_target(
+    input: PackageInputEnum,
+    verify_signature: bool,
+    cfg: &Cfg,
+) -> Result<MetaTargetResult> {
     match input {
         PackageInputEnum::LocalPath(local_path) => {
             // 作为路径使用，可以是一个包或者已经解包的目录
             let p = Path::new(&local_path);
             if p.exists() {
-                let (path, _) = unpack_nep(&local_path, verify_signature)?;
+                let (path, _) = unpack_nep(&local_path, verify_signature, cfg)?;
                 // verify(&p2s!(path))?;
                 return Ok(MetaTargetResult::Local(
                     path.clone(),
@@ -51,11 +56,11 @@ fn find_meta_target(input: PackageInputEnum, verify_signature: bool) -> Result<M
         }
         PackageInputEnum::PackageMatcher(matcher) => {
             if let Ok((scope, package_name)) =
-                find_scope_with_name(&matcher.name, matcher.scope.as_deref())
+                find_scope_with_name(cfg, &matcher.name, matcher.scope.as_deref())
             {
                 // 先尝试在本地已安装列表中搜索
-                let path = get_path_apps(&scope, &package_name, false)?;
-                if info_local(&scope, &package_name).is_ok() {
+                let path = get_path_apps(cfg, &scope, &package_name, false)?;
+                if info_local(&scope, &package_name, cfg).is_ok() {
                     installed_validator(&p2s!(path))?;
                     return Ok(MetaTargetResult::Local(
                         path.clone(),
@@ -64,8 +69,9 @@ fn find_meta_target(input: PackageInputEnum, verify_signature: bool) -> Result<M
                 }
 
                 // 直接使用在线 Info 的 Meta 信息
-                let (tree_item, _, mirror) = info_online(&scope, &package_name, matcher.mirror)?;
-                let release = filter_release(tree_item.releases, matcher.version_req, true)?;
+                let (tree_item, _, mirror) =
+                    info_online(&scope, &package_name, matcher.mirror, cfg)?;
+                let release = filter_release(cfg, tree_item.releases, matcher.version_req, true)?;
                 if let Some(meta) = release.meta {
                     log!("Debug:Found meta for '{scope}/{package_name}' in mirror '{mirror}'");
                     return Ok(MetaTargetResult::Online(Box::new(meta)));
@@ -78,14 +84,14 @@ fn find_meta_target(input: PackageInputEnum, verify_signature: bool) -> Result<M
         }
         PackageInputEnum::Url(url) => {
             // 下载文件到临时目录
-            let cache_path = get_path_cache()?;
+            let cache_path = get_path_cache(cfg)?;
             let url_hash = compute_hash_blake3_from_string(&url)?;
-            let (p, cache_ctx) = download_nep(&url, Some((cache_path, url_hash)))?;
+            let (p, cache_ctx) = download_nep(cfg, &url, Some((cache_path, url_hash)))?;
 
             // 缓存下载的包
             spawn_cache(cache_ctx)?;
 
-            let (path, _) = unpack_nep(&p2s!(p), verify_signature)?;
+            let (path, _) = unpack_nep(&p2s!(p), verify_signature, cfg)?;
             return Ok(MetaTargetResult::Local(
                 path.clone(),
                 path.join(DIR_WORKFLOWS),
@@ -98,8 +104,8 @@ fn find_meta_target(input: PackageInputEnum, verify_signature: bool) -> Result<M
     ))
 }
 
-pub fn meta(input: PackageInputEnum, verify_signature: bool) -> Result<MetaResult> {
-    match find_meta_target(input, verify_signature)? {
+pub fn meta(input: PackageInputEnum, verify_signature: bool, cfg: &Cfg) -> Result<MetaResult> {
+    match find_meta_target(input, verify_signature, cfg)? {
         MetaTargetResult::Local(temp_dir_inner_path, workflow_path) => {
             let temp_dir = p2s!(temp_dir_inner_path);
 

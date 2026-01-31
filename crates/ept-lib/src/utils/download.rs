@@ -67,10 +67,16 @@ pub fn download(url: &str, to: PathBuf, cached: Option<(PathBuf, String)>) -> Re
     Ok(CacheCtx(enabled_cache, to, cached))
 }
 
+use crate::types::cfg::Cfg;
+
 // 返回 （文件存放路径，缓存上下文）
-pub fn download_nep(url: &str, cached: Option<(PathBuf, String)>) -> Result<(PathBuf, CacheCtx)> {
+pub fn download_nep(
+    cfg: &Cfg,
+    url: &str,
+    cached: Option<(PathBuf, String)>,
+) -> Result<(PathBuf, CacheCtx)> {
     // 下载文件到临时目录
-    let temp_dir = allocate_path_temp("download", false)?;
+    let temp_dir = allocate_path_temp(cfg, "download", false)?;
     let p = temp_dir.join("downloaded.nep");
     let cache_ctx = download(url, p.clone(), cached)?;
 
@@ -149,6 +155,7 @@ fn test_download() {
 #[test]
 fn test_download_nep() {
     let url = crate::utils::test::_run_mirror_mock_server();
-    let (path, _cache_ctx) = download_nep(&format!("{url}/api/hello"), None).unwrap();
+    let cfg = crate::types::cfg::Cfg::default();
+    let (path, _cache_ctx) = download_nep(&cfg, &format!("{url}/api/hello"), None).unwrap();
     assert!(path.exists() && path.metadata().unwrap().len() > 300);
 }

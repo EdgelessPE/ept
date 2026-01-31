@@ -1,6 +1,9 @@
 use crate::{
     entrances::info_local,
-    types::permissions::{Permission, PermissionKey, PermissionLevel},
+    types::{
+        cfg::Cfg,
+        permissions::{Permission, PermissionKey, PermissionLevel},
+    },
     utils::conditions::ensure_arg,
 };
 use anyhow::{anyhow, Result};
@@ -20,7 +23,8 @@ pub struct IsInstalled {
 }
 
 impl EvalFunction for IsInstalled {
-    fn get_closure(_: String) -> Function<DefaultNumericTypes> {
+    fn get_closure(_: String, cfg: &Cfg) -> Function<DefaultNumericTypes> {
+        let cfg = cfg.clone();
         Function::new(move |val| {
             let arg = ensure_arg(val)?;
             let sp: Vec<&str> = arg.split('/').collect();
@@ -29,7 +33,7 @@ impl EvalFunction for IsInstalled {
                     "Invalid argument '{arg}' : expect 'SCOPE/NAME', e.g. 'Microsoft/VSCode'"
                 )));
             }
-            let info = info_local(sp[0], sp[1]);
+            let info = info_local(sp[0], sp[1], &cfg);
 
             Ok(Value::Boolean(info.is_ok()))
         })

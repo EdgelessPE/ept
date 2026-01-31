@@ -1,5 +1,8 @@
 use crate::{
-    types::permissions::{Permission, PermissionKey, PermissionLevel},
+    types::{
+        cfg::Cfg,
+        permissions::{Permission, PermissionKey, PermissionLevel},
+    },
     utils::{conditions::ensure_arg, process::is_alive_with_name},
 };
 use anyhow::{anyhow, Result};
@@ -14,7 +17,7 @@ pub struct IsAlive {
 }
 
 impl EvalFunction for IsAlive {
-    fn get_closure(_: String) -> Function<DefaultNumericTypes> {
+    fn get_closure(_: String, _cfg: &Cfg) -> Function<DefaultNumericTypes> {
         Function::new(move |val| {
             let arg = ensure_arg(val)?;
             Ok(Value::Boolean(is_alive_with_name(&arg)))

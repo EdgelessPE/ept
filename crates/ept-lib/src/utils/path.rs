@@ -2,7 +2,7 @@ use anyhow::{anyhow, Result};
 use path_clean::PathClean;
 use std::path::{Path, PathBuf};
 
-use crate::{p2s, utils::cfg::get_config};
+use crate::{p2s, types::cfg::Cfg};
 
 use super::{
     format_path, fs::read_sub_dir, get_bare_apps, get_path_mirror, mirror::read_quick_maps,
@@ -24,16 +24,15 @@ pub fn split_parent(raw: &str, located: &str) -> (PathBuf, String) {
     (parent, base)
 }
 
-/// 使用配置文件中指定的 base 解析相对路径
-pub fn parse_relative_path_with_base(relative: &str) -> Result<PathBuf> {
+/// 使用给定的 base 解析相对路径
+pub fn parse_relative_path_with_base(relative: &str, base: &str) -> Result<PathBuf> {
     let relative = format_path(relative);
     let path = Path::new(&relative);
 
     let absolute_path = if path.is_absolute() {
         path.to_path_buf()
     } else {
-        let cfg = get_config();
-        Path::new(&cfg.local.base).join(&relative)
+        Path::new(base).join(&relative)
     }
     .clean();
 
@@ -60,8 +59,12 @@ pub fn parse_relative_path_with_located(relative: &str, located: &str) -> PathBu
 }
 
 /// name 大小写不敏感
-fn find_scope_with_name_locally(name: &str, scope: Option<&str>) -> Result<(String, String)> {
-    let app_dir = get_bare_apps()?;
+fn find_scope_with_name_locally(
+    cfg: &Cfg,
+    name: &str,
+    scope: Option<&str>,
+) -> Result<(String, String)> {
+    let app_dir = get_bare_apps(cfg)?;
 
     for scope_dir_name in read_sub_dir(app_dir.clone())? {
         if let Some(s) = scope {
@@ -83,15 +86,19 @@ fn find_scope_with_name_locally(name: &str, scope: Option<&str>) -> Result<(Stri
     })
 }
 
-fn find_scope_with_name_online(name: &str, scope: Option<&str>) -> Result<(String, String)> {
+fn find_scope_with_name_online(
+    cfg: &Cfg,
+    name: &str,
+    scope: Option<&str>,
+) -> Result<(String, String)> {
     // 遍历 mirrors
-    let p = get_path_mirror()?;
+    let p = get_path_mirror(cfg)?;
     let mirror_names = read_sub_dir(p)?;
     if mirror_names.is_empty() {
         return Err(anyhow!("Error:No mirror added yet"));
     }
     for mirror_name in mirror_names {
-        let quick_maps = read_quick_maps(&mirror_name)?;
+        let quick_maps = read_quick_maps(cfg, &mirror_name)?;
         if let Some((possible_scopes, true_name)) = quick_maps.scope_map.get(&name.to_lowercase()) {
             if let Some(dirty_scope) = scope {
                 for s in possible_scopes {
@@ -113,11 +120,15 @@ fn find_scope_with_name_online(name: &str, scope: Option<&str>) -> Result<(Strin
     })
 }
 
-pub fn find_scope_with_name(name: &str, scope: Option<&str>) -> Result<(String, String)> {
-    if let Ok(res) = find_scope_with_name_locally(name, scope) {
+pub fn find_scope_with_name(
+    cfg: &Cfg,
+    name: &str,
+    scope: Option<&str>,
+) -> Result<(String, String)> {
+    if let Ok(res) = find_scope_with_name_locally(cfg, name, scope) {
         return Ok(res);
     }
-    find_scope_with_name_online(name, scope)
+    find_scope_with_name_online(cfg, name, scope)
 }
 
 #[test]

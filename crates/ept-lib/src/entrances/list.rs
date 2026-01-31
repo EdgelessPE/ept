@@ -3,6 +3,7 @@ use anyhow::Result;
 use crate::{
     log,
     types::{
+        cfg::Cfg,
         info::Info,
         matcher::{PackageInputEnum, PackageMatcher},
     },
@@ -11,8 +12,8 @@ use crate::{
 
 use super::info::info;
 
-pub fn list() -> Result<Vec<Info>> {
-    let app_dir = get_bare_apps()?;
+pub fn list(cfg: &Cfg) -> Result<Vec<Info>> {
+    let app_dir = get_bare_apps(cfg)?;
     let mut res = vec![];
     // 扫描本地 apps 目录
     for scope in read_sub_dir(app_dir.clone())? {
@@ -27,6 +28,7 @@ pub fn list() -> Result<Vec<Info>> {
                     version_req: None,
                 }),
                 false,
+                cfg,
             );
             if let Ok((r, _)) = info_res {
                 res.push(r);

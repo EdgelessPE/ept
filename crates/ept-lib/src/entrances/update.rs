@@ -15,7 +15,10 @@ use crate::{
     p2s,
     parsers::{parse_author, parse_workflow},
     signature::blake3::compute_hash_blake3_from_string,
-    types::{author::Author, extended_semver::ExSemVer, info::UpdateInfo, package::GlobalPackage},
+    types::{
+        author::Author, cfg::Cfg, extended_semver::ExSemVer, info::UpdateInfo,
+        package::GlobalPackage,
+    },
     utils::{
         cache::spawn_cache,
         download::download_nep,
@@ -54,6 +57,7 @@ fn handle_author_mismatch(
     fresh: &GlobalPackage,
     local_ver: String,
     verify_signature: bool,
+    cfg: &Cfg,
 ) -> Result<Option<UpdateInfo>> {
     if same_authors(&local.package.authors, &fresh.package.authors) {
         return Ok(None);
@@ -66,12 +70,12 @@ fn handle_author_mismatch(
         fresh = fresh.package.authors
     );
 
-    if !ask_yn(format!("The given package is not the same as the author of the installed package (local:{:?}, given:{:?}), uninstall the installed package first?",local.package.authors,fresh.package.authors),true) {
+    if !ask_yn(cfg, format!("The given package is not the same as the author of the installed package (local:{:?}, given:{:?}), uninstall the installed package first?",local.package.authors,fresh.package.authors),true) {
         return Err(anyhow!("Error:Update canceled by user"));
     }
 
-    uninstall(Some(local.package.scope.clone()), &local.package.name)?;
-    install_using_package(source_file, verify_signature)?;
+    uninstall(Some(local.package.scope.clone()), &local.package.name, cfg)?;
+    install_using_package(source_file, verify_signature, cfg)?;
 
     Ok(Some(UpdateInfo {
         name: fresh.package.name.clone(),
@@ -156,11 +160,15 @@ fn run_new_workflow(temp_dir: &Path, located: &Path, fresh_pkg: GlobalPackage) -
     Ok(())
 }
 
-pub fn update_using_package(source_file: &str, verify_signature: bool) -> Result<UpdateInfo> {
+pub fn update_using_package(
+    source_file: &str,
+    verify_signature: bool,
+    cfg: &Cfg,
+) -> Result<UpdateInfo> {
     log!("Info:Preparing to update with package '{source_file}'");
 
     // 解包
-    let (temp_dir_inner_path, fresh_package) = unpack_nep(source_file, verify_signature)?;
+    let (temp_dir_inner_path, fresh_package) = unpack_nep(source_file, verify_signature, cfg)?;
     let name = fresh_package.package.name.clone();
     let fresh_scope = fresh_package.package.scope.clone();
     log!(
@@ -170,7 +178,7 @@ pub fn update_using_package(source_file: &str, verify_signature: bool) -> Result
 
     // 验证包是否已安装
     log!("Info:Resolving package...");
-    let (local_package, local_diff) = info_local(&fresh_scope, &name).map_err(|e| {
+    let (local_package, local_diff) = info_local(&fresh_scope, &name, cfg).map_err(|e| {
         anyhow!("Error:Package '{name}' hasn't been installed or installation broken, use 'ept install' or 'ept uninstall' instead : '{e}'")
     })?;
 
@@ -184,11 +192,12 @@ pub fn update_using_package(source_file: &str, verify_signature: bool) -> Result
         &fresh_package,
         local_diff.version.clone(),
         verify_signature,
+        cfg,
     )? {
         return Ok(result);
     }
 
-    let located = get_path_apps(&local_package.package.scope, &name, false)?;
+    let located = get_path_apps(cfg, &local_package.package.scope, &name, false)?;
     log!(
         "Debug:Located installation at '{path}'",
         path = p2s!(&located)
@@ -203,7 +212,7 @@ pub fn update_using_package(source_file: &str, verify_signature: bool) -> Result
     // 如有展开工作流则执行
     let temp_dir_inner = p2s!(temp_dir_inner_path);
     if is_workshop_expandable(&temp_dir_inner) {
-        expand_workshop(&temp_dir_inner)?;
+        expand_workshop(&temp_dir_inner, cfg)?;
     }
 
     // 部署并运行新工作流
@@ -219,7 +228,7 @@ pub fn update_using_package(source_file: &str, verify_signature: bool) -> Result
     installed_validator(&located_str)?;
     log_ok_last!("Info:Validating update...");
 
-    clean_temp(source_file)?;
+    clean_temp(source_file, cfg)?;
 
     Ok(UpdateInfo {
         name,
@@ -229,14 +238,14 @@ pub fn update_using_package(source_file: &str, verify_signature: bool) -> Result
     })
 }
 
-pub fn update_using_url(url: &str, verify_signature: bool) -> Result<UpdateInfo> {
+pub fn update_using_url(url: &str, verify_signature: bool, cfg: &Cfg) -> Result<UpdateInfo> {
     // 下载文件到临时目录
-    let cache_path = get_path_cache()?;
+    let cache_path = get_path_cache(cfg)?;
     let url_hash = compute_hash_blake3_from_string(url)?;
-    let (p, cache_ctx) = download_nep(url, Some((cache_path, url_hash)))?;
+    let (p, cache_ctx) = download_nep(cfg, url, Some((cache_path, url_hash)))?;
 
     // 更新
-    let info = update_using_package(&p2s!(p), verify_signature)?;
+    let info = update_using_package(&p2s!(p), verify_signature, cfg)?;
 
     // 缓存下载的包
     spawn_cache(cache_ctx)?;
@@ -244,12 +253,16 @@ pub fn update_using_url(url: &str, verify_signature: bool) -> Result<UpdateInfo>
     Ok(info)
 }
 
-pub fn update_using_package_matcher(matcher: String, verify_signature: bool) -> Result<UpdateInfo> {
+pub fn update_using_package_matcher(
+    matcher: String,
+    verify_signature: bool,
+    cfg: &Cfg,
+) -> Result<UpdateInfo> {
     // 解析
-    let parsed = parse_update_inputs(vec![matcher], verify_signature)?;
+    let parsed = parse_update_inputs(cfg, vec![matcher], verify_signature)?;
     // 执行更新
     if let ParseInputResEnum::PackageMatcher(p) = &parsed.first().unwrap().0 {
-        update_using_url(&p.download_url, verify_signature)
+        update_using_url(&p.download_url, verify_signature, cfg)
     } else {
         Err(anyhow!(
             "Error:Fatal:Input matcher can't be parsed as package matcher"
@@ -260,6 +273,7 @@ pub fn update_using_package_matcher(matcher: String, verify_signature: bool) -> 
 pub fn update_using_parsed(
     parsed: Vec<ParseInputResEnum>,
     verify_signature: bool,
+    cfg: &Cfg,
 ) -> Result<Vec<UpdateInfo>> {
     let mut arr = Vec::new();
     let total = parsed.len();
@@ -272,20 +286,20 @@ pub fn update_using_parsed(
         let res = match parsed {
             ParseInputResEnum::LocalPath(p, temp_dir) => {
                 if let Some(temp_dir) = temp_dir {
-                    update_using_package(&p2s!(temp_dir), false)?
+                    update_using_package(&p2s!(temp_dir), false, cfg)?
                 } else {
-                    update_using_package(&p, verify_signature)?
+                    update_using_package(&p, verify_signature, cfg)?
                 }
             }
             ParseInputResEnum::Url(u, temp_dir) => {
                 if let Some(temp_dir) = temp_dir {
-                    update_using_package(&p2s!(temp_dir), false)?
+                    update_using_package(&p2s!(temp_dir), false, cfg)?
                 } else {
-                    update_using_url(&u, verify_signature)?
+                    update_using_url(&u, verify_signature, cfg)?
                 }
             }
             ParseInputResEnum::PackageMatcher(p) => {
-                update_using_url(&p.download_url, verify_signature)?
+                update_using_url(&p.download_url, verify_signature, cfg)?
             }
         };
         log!("{}", res.format_success());
@@ -294,9 +308,9 @@ pub fn update_using_parsed(
     Ok(arr)
 }
 
-pub fn update_all(verify_signature: bool) -> Result<(i32, i32)> {
+pub fn update_all(verify_signature: bool, cfg: &Cfg) -> Result<(i32, i32)> {
     // 遍历 list 结果，生成更新列表
-    let list_res = list()?;
+    let list_res = list(cfg)?;
     let update_list: Vec<UpdateInfo> = list_res
         .iter()
         .filter_map(|node| {
@@ -331,6 +345,7 @@ pub fn update_all(verify_signature: bool) -> Result<(i32, i32)> {
             });
         println!("{tip}");
         if !ask_yn(
+            cfg,
             format!("Ready to update those {count} packages, continue?"),
             true,
         ) {
@@ -343,8 +358,11 @@ pub fn update_all(verify_signature: bool) -> Result<(i32, i32)> {
     let mut failure_count = 0;
     set_flag(Flag::Confirm, true);
     for info in update_list {
-        let res =
-            update_using_package_matcher(format!("{}/{}", info.scope, info.name), verify_signature);
+        let res = update_using_package_matcher(
+            format!("{}/{}", info.scope, info.name),
+            verify_signature,
+            cfg,
+        );
         if let Err(e) = res {
             failure_count += 1;
             log!("{}", info.format_failure(e));

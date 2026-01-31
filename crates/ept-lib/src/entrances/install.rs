@@ -14,7 +14,7 @@ use crate::{entrances::update_using_package, utils::parse_inputs::ParseInputResE
 use crate::{
     entrances::{expand_workshop, is_workshop_expandable},
     signature::blake3::compute_hash_blake3_from_string,
-    types::package::GlobalPackage,
+    types::{cfg::Cfg, package::GlobalPackage},
     utils::{
         cache::spawn_cache, download::download_nep, fs::move_or_copy, get_path_cache, is_qa_mode,
         path::parse_relative_path_with_located, term::ask_yn,
@@ -24,12 +24,13 @@ use crate::{executor::workflow_executor, parsers::parse_workflow, utils::get_pat
 use crate::{log, log_ok_last, p2s};
 
 // 检查软件是否已通过绝对路径的 main_program 字段全局安装
-fn check_global_installation(package: &GlobalPackage) -> Result<bool> {
+fn check_global_installation(package: &GlobalPackage, cfg: &Cfg) -> Result<bool> {
     if let Some(ref software) = package.software {
         if let Some(ref installed) = software.main_program {
             let p = Path::new(installed);
             if p.is_absolute() && p.exists() {
                 return Ok(ask_yn(
+                    cfg,
                     format!(
                         "Package '{name}' has been installed at '{installed}', continue?",
                         name = package.package.name
@@ -47,22 +48,23 @@ fn check_existing_installation(
     source_file: &str,
     package: &GlobalPackage,
     verify_signature: bool,
+    cfg: &Cfg,
 ) -> Result<Option<(String, String)>> {
-    if let Ok((_, diff)) = info_local(&package.package.scope, &package.package.name) {
+    if let Ok((_, diff)) = info_local(&package.package.scope, &package.package.name, cfg) {
         log!(
             "Warning:Package '{name}' has been installed({ver}), switch to update entrance",
             name = package.package.name,
             ver = diff.version,
         );
-        let res = update_using_package(source_file, verify_signature)?;
+        let res = update_using_package(source_file, verify_signature, cfg)?;
         return Ok(Some((res.scope, res.name)));
     }
     Ok(None)
 }
 
 // 将应用文件从临时目录部署到 apps 目录
-fn deploy_app_files(temp_dir: &Path, package: &GlobalPackage) -> Result<String> {
-    let into_dir = get_path_apps(&package.package.scope, &package.package.name, true)?;
+fn deploy_app_files(temp_dir: &Path, package: &GlobalPackage, cfg: &Cfg) -> Result<String> {
+    let into_dir = get_path_apps(cfg, &package.package.scope, &package.package.name, true)?;
     if into_dir.exists() {
         remove_dir_all(into_dir.clone()).map_err(|_| {
             anyhow!(
@@ -103,7 +105,7 @@ fn validate_main_program(into_dir: &str, package: &GlobalPackage) -> Result<()> 
 }
 
 // 安装完成后的最终验证
-fn finalize_installation(into_dir: &str, package: &GlobalPackage) -> Result<()> {
+fn finalize_installation(into_dir: &str, package: &GlobalPackage, cfg: &Cfg) -> Result<()> {
     installed_validator(into_dir)?;
     validate_main_program(into_dir, package)?;
 
@@ -112,7 +114,7 @@ fn finalize_installation(into_dir: &str, package: &GlobalPackage) -> Result<()> 
         scope = package.package.scope,
         name = package.package.name
     );
-    info_local(&package.package.scope, &package.package.name).map_err(|e| {
+    info_local(&package.package.scope, &package.package.name, cfg).map_err(|e| {
         anyhow!(
             "Error:Validating failed : failed to get info of '{scope}/{name}' : {e}",
             scope = package.package.scope,
@@ -126,11 +128,12 @@ fn finalize_installation(into_dir: &str, package: &GlobalPackage) -> Result<()> 
 pub fn install_using_package(
     source_file: &str,
     verify_signature: bool,
+    cfg: &Cfg,
 ) -> Result<(String, String)> {
     log!("Info:Preparing to install with package '{source_file}'");
 
     // 解包
-    let (temp_dir_inner_path, package_struct) = unpack_nep(source_file, verify_signature)?;
+    let (temp_dir_inner_path, package_struct) = unpack_nep(source_file, verify_signature, cfg)?;
     log!(
         "Info:If installation fails, use 'ept uninstall \"{name}\"' to roll back",
         name = package_struct.package.name
@@ -142,13 +145,13 @@ pub fn install_using_package(
     let setup_workflow = parse_workflow(&p2s!(setup_file_path))?;
 
     // 检查是否已全局安装
-    if !check_global_installation(&package_struct)? {
+    if !check_global_installation(&package_struct, cfg)? {
         return Err(anyhow!("Error:Operation canceled by user"));
     }
 
     // 检查是否已安装并重定向到更新
     if let Some(result) =
-        check_existing_installation(source_file, &package_struct, verify_signature)?
+        check_existing_installation(source_file, &package_struct, verify_signature, cfg)?
     {
         return Ok(result);
     }
@@ -157,12 +160,12 @@ pub fn install_using_package(
     // 如有展开工作流则执行
     let temp_dir_inner = p2s!(temp_dir_inner_path);
     if is_workshop_expandable(&temp_dir_inner) {
-        expand_workshop(&temp_dir_inner)?;
+        expand_workshop(&temp_dir_inner, cfg)?;
     }
 
     // 部署文件
     log!("Info:Deploying files...");
-    let into_dir = deploy_app_files(&temp_dir_inner_path, &package_struct)?;
+    let into_dir = deploy_app_files(&temp_dir_inner_path, &package_struct, cfg)?;
     log_ok_last!("Info:Deploying files...");
 
     // 运行安装工作流
@@ -176,11 +179,11 @@ pub fn install_using_package(
 
     // 验证安装
     log!("Info:Validating setup...");
-    finalize_installation(&into_dir, &package_struct)?;
+    finalize_installation(&into_dir, &package_struct, cfg)?;
     log_ok_last!("Info:Validating setup...");
 
     // 清理
-    clean_temp(source_file)?;
+    clean_temp(source_file, cfg)?;
 
     Ok((
         package_struct.package.scope.clone(),
@@ -188,14 +191,14 @@ pub fn install_using_package(
     ))
 }
 
-pub fn install_using_url(url: &str, verify_signature: bool) -> Result<(String, String)> {
+pub fn install_using_url(url: &str, verify_signature: bool, cfg: &Cfg) -> Result<(String, String)> {
     // 下载文件到临时目录
-    let cache_path = get_path_cache()?;
+    let cache_path = get_path_cache(cfg)?;
     let url_hash = compute_hash_blake3_from_string(url)?;
-    let (p, cache_ctx) = download_nep(url, Some((cache_path, url_hash)))?;
+    let (p, cache_ctx) = download_nep(cfg, url, Some((cache_path, url_hash)))?;
 
     // 安装
-    let info = install_using_package(&p2s!(p), verify_signature)?;
+    let info = install_using_package(&p2s!(p), verify_signature, cfg)?;
 
     // 缓存下载的包
     spawn_cache(cache_ctx)?;
@@ -206,6 +209,7 @@ pub fn install_using_url(url: &str, verify_signature: bool) -> Result<(String, S
 pub fn install_using_parsed(
     parsed: Vec<ParseInputResEnum>,
     verify_signature: bool,
+    cfg: &Cfg,
 ) -> Result<Vec<(String, String)>> {
     let mut arr = Vec::new();
     for parsed in parsed {
@@ -213,20 +217,20 @@ pub fn install_using_parsed(
         let (scope, name) = match parsed {
             ParseInputResEnum::LocalPath(p, temp_dir) => {
                 if let Some(temp_dir) = temp_dir {
-                    install_using_package(&p2s!(temp_dir), false)?
+                    install_using_package(&p2s!(temp_dir), false, cfg)?
                 } else {
-                    install_using_package(&p, verify_signature)?
+                    install_using_package(&p, verify_signature, cfg)?
                 }
             }
             ParseInputResEnum::Url(u, temp_dir) => {
                 if let Some(temp_dir) = temp_dir {
-                    install_using_package(&p2s!(temp_dir), false)?
+                    install_using_package(&p2s!(temp_dir), false, cfg)?
                 } else {
-                    install_using_url(&u, verify_signature)?
+                    install_using_url(&u, verify_signature, cfg)?
                 }
             }
             ParseInputResEnum::PackageMatcher(p) => {
-                install_using_url(&p.download_url, verify_signature)?
+                install_using_url(&p.download_url, verify_signature, cfg)?
             }
         };
         log!("Success:Package '{scope}/{name}' installed successfully");

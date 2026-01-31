@@ -37,6 +37,7 @@ use std::path::{Path, PathBuf};
 
 use self::path::parse_relative_path_with_base;
 use self::random::random_short_string;
+use crate::types::cfg::Cfg;
 
 lazy_static! {
     static ref URL_RE: Regex = Regex::new(r"^https?://").unwrap();
@@ -73,13 +74,13 @@ pub fn format_path(raw: &str) -> String {
     tmp.strip_prefix("./").map(|s| s.to_string()).unwrap_or(tmp)
 }
 
-pub fn get_bare_apps() -> Result<PathBuf> {
-    ensure_exist(parse_relative_path_with_base("apps")?)
+pub fn get_bare_apps(cfg: &Cfg) -> Result<PathBuf> {
+    ensure_exist(parse_relative_path_with_base("apps", &cfg.local.base)?)
 }
 
 /// 不确保目录存在，可选确保 scope 目录存在
-pub fn get_path_apps(scope: &str, name: &str, ensure_scope: bool) -> Result<PathBuf> {
-    let scope_p = parse_relative_path_with_base("apps")?.join(scope);
+pub fn get_path_apps(cfg: &Cfg, scope: &str, name: &str, ensure_scope: bool) -> Result<PathBuf> {
+    let scope_p = parse_relative_path_with_base("apps", &cfg.local.base)?.join(scope);
     Ok(if ensure_scope {
         ensure_exist(scope_p)?
     } else {
@@ -88,13 +89,13 @@ pub fn get_path_apps(scope: &str, name: &str, ensure_scope: bool) -> Result<Path
     .join(name))
 }
 
-pub fn parse_bare_temp() -> Result<PathBuf> {
-    parse_relative_path_with_base("temp")
+pub fn parse_bare_temp(cfg: &Cfg) -> Result<PathBuf> {
+    parse_relative_path_with_base("temp", &cfg.local.base)
 }
 
-pub fn allocate_path_temp(name: &str, sub_dir: bool) -> Result<PathBuf> {
+pub fn allocate_path_temp(cfg: &Cfg, name: &str, sub_dir: bool) -> Result<PathBuf> {
     let random_name = name.to_owned() + "_" + &random_short_string();
-    let p = parse_relative_path_with_base("temp")?.join(random_name);
+    let p = parse_relative_path_with_base("temp", &cfg.local.base)?.join(random_name);
     if sub_dir {
         ensure_exist(p.join("Outer"))?;
         ensure_exist(p.join("Inner"))?;
@@ -102,24 +103,24 @@ pub fn allocate_path_temp(name: &str, sub_dir: bool) -> Result<PathBuf> {
     ensure_exist(p)
 }
 
-pub fn get_path_bin() -> Result<PathBuf> {
-    ensure_exist(parse_relative_path_with_base("bin")?)
+pub fn get_path_bin(cfg: &Cfg) -> Result<PathBuf> {
+    ensure_exist(parse_relative_path_with_base("bin", &cfg.local.base)?)
 }
 
-pub fn get_path_mirror() -> Result<PathBuf> {
-    ensure_exist(parse_relative_path_with_base("mirror")?)
+pub fn get_path_mirror(cfg: &Cfg) -> Result<PathBuf> {
+    ensure_exist(parse_relative_path_with_base("mirror", &cfg.local.base)?)
 }
 
-pub fn get_path_cache() -> Result<PathBuf> {
-    ensure_exist(parse_relative_path_with_base("cache")?)
+pub fn get_path_cache(cfg: &Cfg) -> Result<PathBuf> {
+    ensure_exist(parse_relative_path_with_base("cache", &cfg.local.base)?)
 }
 
-pub fn get_path_meta() -> Result<PathBuf> {
-    ensure_exist(parse_relative_path_with_base("meta")?)
+pub fn get_path_meta(cfg: &Cfg) -> Result<PathBuf> {
+    ensure_exist(parse_relative_path_with_base("meta", &cfg.local.base)?)
 }
 
-pub fn get_path_toolchain() -> Result<PathBuf> {
-    ensure_exist(parse_relative_path_with_base("toolchain")?)
+pub fn get_path_toolchain(cfg: &Cfg) -> Result<PathBuf> {
+    ensure_exist(parse_relative_path_with_base("toolchain", &cfg.local.base)?)
 }
 
 pub fn get_system_drive() -> Result<String> {
@@ -137,16 +138,16 @@ pub fn is_starts_with_inner_value(p: &str) -> bool {
     p.starts_with("${") || p.starts_with("\"${")
 }
 
-pub fn launch_clean() -> Result<()> {
+pub fn launch_clean(cfg: &Cfg) -> Result<()> {
     // 删除 temp 目录
-    let p = parse_bare_temp()?;
+    let p = parse_bare_temp(cfg)?;
     if p.exists() {
         std::fs::remove_dir_all(p)
             .map_err(|e| anyhow!("Error:Failed to remove temp directory : {e}"))?;
     }
 
     // 清理过期缓存
-    clean_cache()?;
+    clean_cache(cfg)?;
 
     Ok(())
 }

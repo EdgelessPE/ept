@@ -2,6 +2,7 @@ use crate::compression::{compress, pack_tar};
 use crate::entrances::verify::verify;
 use crate::parsers::parse_author;
 use crate::signature::sign;
+use crate::types::cfg::Cfg;
 use crate::types::constants::EXT_NEP;
 use crate::types::{
     constants::EXT_TAR_ZST,
@@ -13,11 +14,16 @@ use anyhow::{anyhow, Result};
 use std::fs::{remove_dir_all, write};
 use std::path::Path;
 
-pub fn pack(source_dir: &str, into_file: Option<String>, need_sign: bool) -> Result<String> {
+pub fn pack(
+    source_dir: &str,
+    into_file: Option<String>,
+    need_sign: bool,
+    cfg: &Cfg,
+) -> Result<String> {
     log!("Info:Preparing to pack '{source_dir}'");
 
     // 通用校验
-    let global = verify(source_dir)?;
+    let global = verify(source_dir, cfg)?;
     let first_author = parse_author(&global.package.authors[0])?;
     let file_stem = format!(
         "{pn}_{pv}_{fa}",
@@ -34,13 +40,17 @@ pub fn pack(source_dir: &str, into_file: Option<String>, need_sign: bool) -> Res
             return Err(anyhow!(
                 "Error:Target '{into_file}' is a existing directory"
             ));
-        } else if !ask_yn(format!("Overwrite the existing file '{into_file}'?"), false) {
+        } else if !ask_yn(
+            cfg,
+            format!("Overwrite the existing file '{into_file}'?"),
+            false,
+        ) {
             return Err(anyhow!("Error:Pack canceled by user"));
         }
     }
 
     // 创建临时目录
-    let temp_dir_path = allocate_path_temp(&file_stem, false)?;
+    let temp_dir_path = allocate_path_temp(cfg, &file_stem, false)?;
 
     // 生成内包
     log!("Info:Compressing inner package...");

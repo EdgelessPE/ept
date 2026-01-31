@@ -2,13 +2,13 @@ use anyhow::{anyhow, Result};
 
 use crate::{
     log,
-    types::mirror::SearchResult,
+    types::{cfg::Cfg, mirror::SearchResult},
     utils::{fs::read_sub_dir, get_path_mirror, mirror::search_index_for_mirror},
 };
 
-pub fn search(text: &str, is_regex: bool) -> Result<Vec<SearchResult>> {
+pub fn search(text: &str, is_regex: bool, cfg: &Cfg) -> Result<Vec<SearchResult>> {
     // 扫描出所有的镜像源目录
-    let root = get_path_mirror()?;
+    let root = get_path_mirror(cfg)?;
     let mirror_dirs = read_sub_dir(&root)?;
     if mirror_dirs.is_empty() {
         return Err(anyhow!("Error:No mirror added yet"));

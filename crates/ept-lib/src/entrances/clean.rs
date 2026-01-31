@@ -9,6 +9,7 @@ use crate::{
     log, log_ok_last, p2s,
     parsers::parse_workflow,
     types::{
+        cfg::Cfg,
         constants::{DIR_NEP_CONTEXT, DIR_WORKFLOWS, WORKFLOW_SETUP},
         steps::Step,
         workflow::WorkflowNode,
@@ -37,13 +38,17 @@ fn get_valid_entrances(setup: Vec<WorkflowNode>) -> Vec<String> {
         .collect()
 }
 
-pub fn clean() -> Result<usize> {
+pub fn clean(cfg: &Cfg) -> Result<usize> {
     log!("Debug:Starting clean operation");
     let mut clean_list = Vec::new();
     let mut valid_entrances = HashSet::new();
 
     // 处理直接删除的目录
-    let dirs_to_clean = vec![parse_bare_temp()?, get_path_cache()?, get_path_meta()?];
+    let dirs_to_clean = vec![
+        parse_bare_temp(cfg)?,
+        get_path_cache(cfg)?,
+        get_path_meta(cfg)?,
+    ];
     for p in dirs_to_clean {
         if p.exists() {
             log!(
@@ -55,7 +60,7 @@ pub fn clean() -> Result<usize> {
     }
 
     // apps 目录，查找未安装成功的目录
-    for scope_entry in read_dir(get_bare_apps()?)? {
+    for scope_entry in read_dir(get_bare_apps(cfg)?)? {
         let scope_entry = scope_entry?;
         let scope_path = scope_entry.path();
         let scope_name = p2s!(scope_entry.file_name());
@@ -71,14 +76,14 @@ pub fn clean() -> Result<usize> {
                 if app_path.is_dir() {
                     // 尝试读取 info
                     log!("Debug:Checking application '{scope_name}/{app_name}'");
-                    let info_res = info_local(&scope_name, &app_name);
+                    let info_res = info_local(&scope_name, &app_name, cfg);
                     if let Ok((global, _)) = info_res {
                         // 有效应用计数
                         valid_apps_count += 1;
                         log!("Debug:Valid application found: '{scope_name}/{app_name}'");
 
                         // 读取工作流
-                        let setup_path = p2s!(get_path_apps(&scope_name, &app_name, false)?
+                        let setup_path = p2s!(get_path_apps(cfg, &scope_name, &app_name, false)?
                             .join(DIR_NEP_CONTEXT)
                             .join(DIR_WORKFLOWS)
                             .join(WORKFLOW_SETUP));
@@ -127,7 +132,7 @@ pub fn clean() -> Result<usize> {
 
     // bin 目录，删除名称非法的文件
     // TODO:考虑检查指向的绝对路径是否存在
-    let bin_path = get_path_bin()?;
+    let bin_path = get_path_bin(cfg)?;
     log!(
         "Debug:Scanning bin directory '{path}' for invalid entrances",
         path = p2s!(&bin_path)
@@ -152,7 +157,7 @@ pub fn clean() -> Result<usize> {
     if !clean_list.is_empty() {
         log!("Info:Trash list :");
         println!("{clean_list:#?}");
-        if !ask_yn(format!("Clean those {clean_list_len} trashes?"), true) {
+        if !ask_yn(cfg, format!("Clean those {clean_list_len} trashes?"), true) {
             return Err(anyhow!("Error:Operation cancelled by user"));
         }
         let tip = format!(
@@ -162,6 +167,7 @@ pub fn clean() -> Result<usize> {
         log!("{tip}");
         if let Err(e) = trash::delete_all(clean_list.clone()) {
             if ask_yn(
+                cfg,
                 format!("Failed to move some files to recycle bin : {e}, force delete all?"),
                 true,
             ) {

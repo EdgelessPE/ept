@@ -5,6 +5,7 @@ use std::{
 
 use crate::{
     log, p2s,
+    types::cfg::Cfg,
     utils::{
         allocate_path_temp,
         download::download,
@@ -18,10 +19,10 @@ use zip::ZipArchive;
 
 // dry_run: 干运行，仅检查是否有更新
 // need_exit_process: 仅当单测时传入 false，以此防止跑单测时进程退出
-pub fn upgrade(dry_run: bool, need_exit_process: bool) -> Result<String> {
+pub fn upgrade(dry_run: bool, need_exit_process: bool, cfg: &Cfg) -> Result<String> {
     let current_version = env!("CARGO_PKG_VERSION");
     // 检查是否有更新
-    let (has_upgrade, is_cross_wid_gap, latest_release) = check_has_upgrade()?;
+    let (has_upgrade, is_cross_wid_gap, latest_release) = check_has_upgrade(cfg)?;
     log!(
         "Debug:Upgrade check result - has_upgrade: {has_upgrade}, is_cross_wid_gap: {is_cross_wid_gap}, latest_version: '{}'",
         &latest_release.version
@@ -42,6 +43,7 @@ pub fn upgrade(dry_run: bool, need_exit_process: bool) -> Result<String> {
 
     // 确认执行自更新
     if !ask_yn(
+        cfg,
         format!(
             "Ready to upgrade ept toolchain from '{current_version}' to '{}', start now?",
             &latest_release.version
@@ -57,7 +59,7 @@ pub fn upgrade(dry_run: bool, need_exit_process: bool) -> Result<String> {
         &latest_release.version,
         &latest_release.url
     );
-    let temp_dir = allocate_path_temp("upgrade", false)?;
+    let temp_dir = allocate_path_temp(cfg, "upgrade", false)?;
     let zip_path = temp_dir.join("latest.zip");
     let _ = download(&latest_release.url, zip_path.clone(), None)?;
 
@@ -90,7 +92,7 @@ pub fn upgrade(dry_run: bool, need_exit_process: bool) -> Result<String> {
     }
 
     // 写 cmd 脚本
-    let toolchain_path = get_path_toolchain()?;
+    let toolchain_path = get_path_toolchain(cfg)?;
     let script_path = temp_dir
         .join("upgrade.cmd")
         .to_string_lossy()

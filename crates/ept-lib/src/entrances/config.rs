@@ -92,10 +92,11 @@ pub fn config_list() -> Result<String> {
     Ok(format!("{cfg:#?}"))
 }
 
-pub fn config_init() -> Result<String> {
+pub fn config_init(cfg: &Cfg) -> Result<String> {
     let file_path = config_which()?;
     if Path::new(&file_path).exists()
         && !ask_yn(
+            cfg,
             format!("Config file already exists at '{file_path}', overwrite it?"),
             false,
         )

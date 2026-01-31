@@ -8,10 +8,9 @@ use std::{
 
 use crate::{
     p2s,
+    types::cfg::Cfg,
     utils::{fs::try_recycle, get_path_cache},
 };
-
-use super::cfg::get_config;
 
 // （是否启用缓存，源文件，Option<(缓存目录, 缓存 key)>）
 #[derive(Debug)]
@@ -80,8 +79,7 @@ pub fn restore_cache(ctx: CacheCtx, source: &str) -> Result<bool> {
     Ok(false)
 }
 
-pub fn clean_cache() -> Result<()> {
-    let cfg = get_config();
+pub fn clean_cache(cfg: &Cfg) -> Result<()> {
     let duration_cfg = parse_duration(&cfg.local.cache_valid_duration).map_err(|e| anyhow!("Error:Failed to parse config field 'local.cache_valid_duration' as valid time span : '{e}', e.g. '5d' '14m54s'"))?;
     let now = SystemTime::now();
     log!(
@@ -89,7 +87,7 @@ pub fn clean_cache() -> Result<()> {
         i = &cfg.local.cache_valid_duration
     );
 
-    let cache_dir = get_path_cache()?;
+    let cache_dir = get_path_cache(cfg)?;
     let mut cache_files = Vec::new();
     for entry in read_dir(cache_dir)? {
         let entry = entry?;

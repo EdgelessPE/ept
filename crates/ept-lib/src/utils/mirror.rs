@@ -30,7 +30,6 @@ use crate::{
     utils::get_path_mirror,
 };
 
-use super::cfg::get_config;
 use super::cfg::get_flags_score;
 use super::constants::MIRROR_FILE_HELLO;
 use super::constants::MIRROR_FILE_QUICK_MAP;
@@ -39,10 +38,11 @@ use super::fs::ensure_dir_exist;
 use super::fs::try_recycle;
 use super::path::find_scope_with_name;
 use super::permissions::filter_permissions;
+use crate::types::cfg::Cfg;
 
 // 读取 meta
-pub fn read_local_mirror_hello(name: &str) -> Result<(MirrorHello, PathBuf)> {
-    let dir_path = get_path_mirror()?.join(name);
+pub fn read_local_mirror_hello(cfg: &Cfg, name: &str) -> Result<(MirrorHello, PathBuf)> {
+    let dir_path = get_path_mirror(cfg)?.join(name);
     let p = dir_path.join(MIRROR_FILE_HELLO);
     if !p.exists() {
         return Err(anyhow!("Error:Mirror '{name}' hasn't been added"));
@@ -136,7 +136,7 @@ fn register_tokenizer(index: &mut Index) {
 }
 
 // 为包构建索引
-pub fn build_index_for_mirror(content: MirrorPkgSoftware, dir: PathBuf) -> Result<()> {
+pub fn build_index_for_mirror(cfg: &Cfg, content: MirrorPkgSoftware, dir: PathBuf) -> Result<()> {
     let schema_fields = get_schema()?;
     if dir.exists() {
         try_recycle(&dir)?;
@@ -168,7 +168,7 @@ pub fn build_index_for_mirror(content: MirrorPkgSoftware, dir: PathBuf) -> Resul
             if releases.is_empty() {
                 continue;
             }
-            let release = filter_release(releases, None, false)?;
+            let release = filter_release(cfg, releases, None, false)?;
             let meta_res = if let Some(meta) = release.meta {
                 // 收集二进制文件
                 let mut bin_stems: Vec<String> = Vec::new();
@@ -301,8 +301,8 @@ pub fn search_index_for_mirror(
 }
 
 // 读取快查索引
-pub fn read_quick_maps(mirror_name: &str) -> Result<QuickMaps> {
-    let quick_path = get_path_mirror()?
+pub fn read_quick_maps(cfg: &Cfg, mirror_name: &str) -> Result<QuickMaps> {
+    let quick_path = get_path_mirror(cfg)?
         .join(mirror_name)
         .join("index")
         .join(MIRROR_FILE_QUICK_MAP);
@@ -328,11 +328,11 @@ pub fn read_quick_maps(mirror_name: &str) -> Result<QuickMaps> {
 // 匹配 release
 // 如果没有提供 semver matcher 则返回最大版本
 pub fn filter_release(
+    cfg: &Cfg,
     releases: Vec<MirrorPkgSoftwareRelease>,
     semver_matcher: Option<VersionReq>,
     enable_flags_score: bool,
 ) -> Result<MirrorPkgSoftwareRelease> {
-    let cfg = get_config();
     // 筛选 matcher
     let matcher_str = semver_matcher
         .clone()
@@ -356,7 +356,7 @@ pub fn filter_release(
             let score = if enable_flags_score {
                 node.get_flags()
                     .map(|flags| {
-                        get_flags_score(&flags, &cfg)
+                        get_flags_score(&flags, cfg)
                             .map_err(|e| {
                                 anyhow!(
                                     "Error:Failed to calculate flags score for '{}' : {e}",
@@ -410,14 +410,16 @@ pub fn filter_release(
 
 // 通过匹配 VersionReq 解析出包的 url
 pub fn get_url_with_version_req(
+    cfg: &Cfg,
     matcher: PackageMatcher,
 ) -> Result<(String, MirrorPkgSoftwareRelease, String)> {
     // 查找 scope 并使用 scope 更新纠正大小写
-    let (scope, package_name) = find_scope_with_name(&matcher.name, matcher.scope.as_deref())?;
+    let (scope, package_name) = find_scope_with_name(cfg, &matcher.name, matcher.scope.as_deref())?;
     // 拿到 info online
-    let (info, url_template, mirror_name) = info_online(&scope, &package_name, matcher.mirror)?;
+    let (info, url_template, mirror_name) =
+        info_online(&scope, &package_name, matcher.mirror, cfg)?;
     // 匹配版本
-    let matched_release = filter_release(info.releases, matcher.version_req, true)?;
+    let matched_release = filter_release(cfg, info.releases, matcher.version_req, true)?;
     // 填充模板获取 url
     let url = fill_url_template(
         &url_template,
@@ -430,7 +432,9 @@ pub fn get_url_with_version_req(
 
 #[test]
 fn test_filter_release() {
+    use crate::types::cfg::Cfg;
     use crate::types::extended_semver::ExSemVer;
+    let cfg = Cfg::default();
     // 直接筛选最高版本
     let arr = vec![
         MirrorPkgSoftwareRelease {
@@ -458,7 +462,7 @@ fn test_filter_release() {
             meta: None,
         },
     ];
-    let res = filter_release(arr, None, false).unwrap();
+    let res = filter_release(&cfg, arr, None, false).unwrap();
     assert_eq!(res.version.to_string(), "1.86.1.0".to_string());
 
     // 使用 matcher
@@ -488,7 +492,7 @@ fn test_filter_release() {
             meta: None,
         },
     ];
-    let res = filter_release(arr, Some(VersionReq::parse("121").unwrap()), false).unwrap();
+    let res = filter_release(&cfg, arr, Some(VersionReq::parse("121").unwrap()), false).unwrap();
     assert_eq!(res.version.to_string(), "121.0.6099.200".to_string());
 }
 
@@ -498,9 +502,7 @@ fn test_filter_release_with_flags() {
     set_flag(Flag::Debug, true);
     use crate::types::cfg::PreferenceEnum;
     use crate::types::extended_semver::ExSemVer;
-    use crate::utils::cfg::set_config;
     use std::str::FromStr;
-    let cfg_bak = get_config();
 
     let releases = vec![
         MirrorPkgSoftwareRelease {
@@ -538,49 +540,46 @@ fn test_filter_release_with_flags() {
     ];
 
     let modifier = |i: PreferenceEnum, p: PreferenceEnum, e: PreferenceEnum| {
-        let mut cfg = cfg_bak.clone();
+        let mut cfg = crate::types::cfg::Cfg::default();
         cfg.preference.installer = i;
         cfg.preference.portable = p;
         cfg.preference.expandable = e;
-        set_config(cfg).unwrap();
+        cfg
     };
 
     // 默认优先级配置，会匹配到 PE 版本
-    modifier(
+    let cfg = modifier(
         PreferenceEnum::LowPriority,
         PreferenceEnum::HighPriority,
         PreferenceEnum::HighPriority,
     );
     assert_eq!(
-        filter_release(releases.clone(), None, true)
+        filter_release(&cfg, releases.clone(), None, true)
             .unwrap()
             .file_name,
         "Firefox_127.0.0.1_Cno.PE.nep".to_string()
     );
 
     // 便携且不要可拓展模式，匹配到 P 版本
-    modifier(
+    let cfg = modifier(
         PreferenceEnum::Forbidden,
         PreferenceEnum::HighPriority,
         PreferenceEnum::Forbidden,
     );
     assert_eq!(
-        filter_release(releases.clone(), None, true)
+        filter_release(&cfg, releases.clone(), None, true)
             .unwrap()
             .file_name,
         "Firefox_127.0.0.1_Cno.P.nep".to_string()
     );
 
     // 全部禁用，会报错
-    modifier(
+    let cfg = modifier(
         PreferenceEnum::Forbidden,
         PreferenceEnum::Forbidden,
         PreferenceEnum::Forbidden,
     );
-    assert!(filter_release(releases.clone(), None, true).is_err());
-
-    // 恢复原有配置
-    set_config(cfg_bak).unwrap();
+    assert!(filter_release(&cfg, releases.clone(), None, true).is_err());
 }
 
 // #[test]

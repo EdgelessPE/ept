@@ -12,6 +12,7 @@ use crate::{
     log, log_ok_last, p2s,
     parsers::{parse_package, parse_workflow},
     types::{
+        cfg::Cfg,
         constants::{
             DIR_NEP_CONTEXT, DIR_WORKFLOWS, FILE_PACKAGE, WORKFLOW_REMOVE, WORKFLOW_SETUP,
         },
@@ -36,15 +37,15 @@ fn get_manifest(flow: Vec<WorkflowNode>) -> Vec<String> {
     manifest
 }
 
-pub fn uninstall(scope: Option<String>, package_name: &str) -> Result<(String, String)> {
+pub fn uninstall(scope: Option<String>, package_name: &str, cfg: &Cfg) -> Result<(String, String)> {
     log!("Info:Preparing to uninstall '{package_name}'");
 
     // 查找 scope 并使用 scope 更新纠正大小写
-    let (scope, package_name) = find_scope_with_name(package_name, scope.as_deref())?;
+    let (scope, package_name) = find_scope_with_name(cfg, package_name, scope.as_deref())?;
     log!("Debug:Resolved scope as '{scope}' for package '{package_name}'");
 
     // 解析安装路径
-    let app_path = get_path_apps(&scope, &package_name, false)?;
+    let app_path = get_path_apps(cfg, &scope, &package_name, false)?;
     if !app_path.exists() {
         return Err(anyhow!("Error:Package '{package_name}' not installed"));
     }
@@ -127,6 +128,7 @@ pub fn uninstall(scope: Option<String>, package_name: &str) -> Result<(String, S
     let try_rm_res = remove_dir_all(&app_str);
     if try_rm_res.is_err()
         && ask_yn(
+            cfg,
             "Can't clean the directory completely, try killing the related processes?".to_string(),
             true,
         )
@@ -166,7 +168,7 @@ pub fn uninstall(scope: Option<String>, package_name: &str) -> Result<(String, S
     }
 
     // 删除空的 scope
-    let scope_dir = get_bare_apps()?.join(&scope);
+    let scope_dir = get_bare_apps(cfg)?.join(&scope);
     if read_dir(scope_dir.clone())?.next().is_none() {
         log!("Debug:Removing empty scope directory '{scope}'");
         let _ = remove_dir(scope_dir);

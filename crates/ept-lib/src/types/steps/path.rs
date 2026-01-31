@@ -1,5 +1,6 @@
 use super::TStep;
 use crate::executor::values_validator_path;
+use crate::types::cfg::Cfg;
 use crate::types::interpretable::Interpretable;
 use crate::types::mixed_fs::MixedFS;
 use crate::types::permissions::{Generalizable, Permission, PermissionKey, PermissionLevel};
@@ -37,13 +38,14 @@ pub struct StepPath {
     pub alias: Option<String>,
 }
 
-fn conflict_resolver(bin_abs: &str, stem: &str, scope: &str) -> String {
+fn conflict_resolver(bin_abs: &str, stem: &str, scope: &str, cfg: &Cfg) -> String {
     let origin = format!("{bin_abs}/{stem}.cmd");
     let scoped = format!("{bin_abs}/{scope}-{stem}.cmd");
 
     // 检查入口文件冲突
     if Path::new(&origin).exists() {
         return if ask_yn_in_step(
+            cfg,
             "Path",
             format!("Entrance '{stem}.cmd' already exists in '{bin_abs}', overwrite?"),
             false,
@@ -60,6 +62,7 @@ fn conflict_resolver(bin_abs: &str, stem: &str, scope: &str) -> String {
     if let Ok(res) = which_res {
         let output = p2s!(res);
         return if ask_yn_in_step(
+            cfg,
             "Path",
             format!("Command '{stem}' already exists at '{output}', rename to '{scope}-{stem}'?"),
             false,
@@ -147,8 +150,10 @@ impl TStep for StepPath {
         //- 将可执行文件/文件夹暴露到 PATH 中：
         //- 若指定一个可执行文件，则会在统一管理的 bin 目录中创建一个入口；
         //- 若指定一个文件夹，则会将其添加到 PATH 变量中。
+        // 获取配置
+        let cfg = Cfg::default();
         // 解析 bin 绝对路径
-        let bin_path = get_path_bin()?;
+        let bin_path = get_path_bin(&cfg)?;
         let bin_abs = p2s!(bin_path);
 
         // 创建 bin 目录
@@ -193,7 +198,7 @@ impl TStep for StepPath {
         let stem = self
             .alias
             .unwrap_or_else(|| p2s!(Path::new(&self.record).file_stem().unwrap()));
-        let cmd_target_str = conflict_resolver(&bin_abs, &stem, &cx.pkg.package.scope);
+        let cmd_target_str = conflict_resolver(&bin_abs, &stem, &cx.pkg.package.scope, &cfg);
         if !abs_target_path.exists() {
             return Err(anyhow!(
                 "Error(Path):Failed to add path : final target '{abs_target_str}' not exist"
@@ -210,8 +215,10 @@ impl TStep for StepPath {
     }
     fn reverse_run(self, cx: &mut WorkflowContext) -> Result<()> {
         //- 删除生成的可执行文件入口或从 PATH 变量中移除目录。
+        // 获取配置
+        let cfg = Cfg::default();
         // 解析 bin 绝对路径
-        let bin_path = get_path_bin()?;
+        let bin_path = get_path_bin(&cfg)?;
         let bin_abs = p2s!(bin_path);
 
         // 创建 bin 目录
@@ -311,8 +318,9 @@ impl Generalizable for StepPath {
 
 #[test]
 fn test_set_system_path() {
-    set_system_path(&p2s!(get_path_bin().unwrap().join("2333")), true).unwrap();
-    set_system_path(&p2s!(get_path_bin().unwrap().join("2333")), false).unwrap();
+    let cfg = Cfg::default();
+    set_system_path(&p2s!(get_path_bin(&cfg).unwrap().join("2333")), true).unwrap();
+    set_system_path(&p2s!(get_path_bin(&cfg).unwrap().join("2333")), false).unwrap();
 }
 
 #[test]
@@ -321,10 +329,11 @@ fn test_path() {
     set_flag(Flag::Debug, true);
     set_flag(Flag::Confirm, true);
     let mut cx = WorkflowContext::_demo();
+    let cfg = Cfg::default();
 
     // 添加目录
     StepPath {
-        record: p2s!(get_path_bin().unwrap()),
+        record: p2s!(get_path_bin(&cfg).unwrap()),
         alias: None,
     }
     .run(&mut cx)
@@ -338,7 +347,7 @@ fn test_path() {
     .run(&mut cx)
     .unwrap();
 
-    let p1 = get_path_bin().unwrap().join("vsc-launcher.cmd");
+    let p1 = get_path_bin(&cfg).unwrap().join("vsc-launcher.cmd");
     assert!(p1.exists());
 
     // 别名
@@ -349,7 +358,7 @@ fn test_path() {
     .run(&mut cx)
     .unwrap();
 
-    let p2 = get_path_bin().unwrap().join("msvsc.cmd");
+    let p2 = get_path_bin(&cfg).unwrap().join("msvsc.cmd");
     assert!(p2.exists());
 
     // 冲突
@@ -365,7 +374,7 @@ fn test_path() {
     } else {
         "Code.cmd"
     };
-    let p3 = get_path_bin().unwrap().join(entry_name);
+    let p3 = get_path_bin(&cfg).unwrap().join(entry_name);
     assert!(p3.exists());
 
     use crate::utils::fs::try_recycle;
@@ -375,7 +384,7 @@ fn test_path() {
 
     // 删除目录
     StepPath {
-        record: p2s!(get_path_bin().unwrap()),
+        record: p2s!(get_path_bin(&cfg).unwrap()),
         alias: None,
     }
     .reverse_run(&mut cx)

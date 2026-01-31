@@ -1,6 +1,7 @@
 use crate::parsers::{parse_package, parse_workflow};
 use crate::types::constants::DIR_WORKFLOWS;
 use crate::types::{
+    cfg::Cfg,
     constants::{FILE_PACKAGE, WORKFLOW_EXPAND, WORKFLOW_REMOVE, WORKFLOW_SETUP, WORKFLOW_UPDATE},
     extended_semver::ExSemVer,
     mixed_fs::MixedFS,
@@ -65,7 +66,7 @@ fn verify_workflow(flow: Vec<WorkflowNode>, ctx: &VerifyStepCtx) -> Result<bool>
     Ok(have_call_installer)
 }
 
-pub fn verify(source_dir: &str) -> Result<GlobalPackage> {
+pub fn verify(source_dir: &str, cfg: &Cfg) -> Result<GlobalPackage> {
     log!("Debug:Starting verification for source directory '{source_dir}'");
     // 打包检查
     log!("Info:Validating source directory...");
@@ -177,7 +178,7 @@ pub fn verify(source_dir: &str) -> Result<GlobalPackage> {
         let mut update_manifest = get_manifest(update_flow, &mut fs);
         setup_manifest.append(&mut update_manifest);
     }
-    manifest_validator(&pkg_content_path, setup_manifest, &mut fs)?;
+    manifest_validator(&pkg_content_path, setup_manifest, &mut fs, cfg)?;
     log_ok_last!("Info:Checking manifest...");
     log!("Debug:Manifest validation completed for '{pkg_content_path}'");
 

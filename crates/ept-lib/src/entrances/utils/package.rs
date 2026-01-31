@@ -18,6 +18,7 @@ use crate::{
     parsers::{fast_parse_signature, parse_author, parse_package, parse_signature},
     signature::{fast_verify, verify},
     types::{
+        cfg::Cfg,
         constants::{EXT_TAR_ZST, FILE_PACKAGE},
         package::GlobalPackage,
     },
@@ -26,16 +27,16 @@ use crate::{
 use crate::{log, log_ok_last};
 
 /// 根据源文件路径创建临时目录
-fn get_temp_dir_path(source_file: &str) -> Result<PathBuf> {
+fn get_temp_dir_path(source_file: &str, cfg: &Cfg) -> Result<PathBuf> {
     let file_stem = p2s!(Path::new(source_file).file_stem().unwrap());
-    let temp_dir_path = allocate_path_temp(&file_stem, true)?;
+    let temp_dir_path = allocate_path_temp(cfg, &file_stem, true)?;
 
     Ok(temp_dir_path)
 }
 
 /// 清理临时目录(会判断 debug)
-pub fn clean_temp(source_file: &str) -> Result<()> {
-    let temp_dir_path = get_temp_dir_path(source_file)?;
+pub fn clean_temp(source_file: &str, cfg: &Cfg) -> Result<()> {
+    let temp_dir_path = get_temp_dir_path(source_file, cfg)?;
     if !is_debug_mode() {
         log!("Info:Cleaning...");
         let clean_res = remove_dir_all(&temp_dir_path);
@@ -58,7 +59,11 @@ pub fn clean_temp(source_file: &str) -> Result<()> {
 }
 
 /// 返回 (Inner 临时目录,package 结构体)
-pub fn unpack_nep(source: &str, verify_signature: bool) -> Result<(PathBuf, GlobalPackage)> {
+pub fn unpack_nep(
+    source: &str,
+    verify_signature: bool,
+    cfg: &Cfg,
+) -> Result<(PathBuf, GlobalPackage)> {
     // 处理输入目录的情况
     let source_path = Path::new(source);
     if source_path.is_dir() {
@@ -67,14 +72,14 @@ pub fn unpack_nep(source: &str, verify_signature: bool) -> Result<(PathBuf, Glob
         } else {
             // 检查是否为合法的输入目录
             inner_validator(source)?;
-            entrances::verify::verify(source)?;
+            entrances::verify::verify(source, cfg)?;
 
             // 读取 package.toml
             let package_path = Path::new(source).join(FILE_PACKAGE);
             let global = parse_package(&p2s!(package_path), source, false)?;
 
             // 复制到临时目录
-            let temp_path = allocate_path_temp(&global.package.name, false)?;
+            let temp_path = allocate_path_temp(cfg, &global.package.name, false)?;
             copy_dir(source_path, &temp_path)?;
 
             Ok((temp_path, global))
@@ -91,10 +96,10 @@ pub fn unpack_nep(source: &str, verify_signature: bool) -> Result<(PathBuf, Glob
 
     let res = if size <= size_limit {
         log!("Debug:Use fast unpack method ({size}/{size_limit})");
-        fast_unpack_nep(source, verify_signature)?
+        fast_unpack_nep(source, verify_signature, cfg)?
     } else {
         log!("Debug:Use normal unpack method ({size}/{size_limit})");
-        normal_unpack_nep(source, verify_signature)?
+        normal_unpack_nep(source, verify_signature, cfg)?
     };
 
     // 离线模式下强制执行一次检查
@@ -108,9 +113,10 @@ pub fn unpack_nep(source: &str, verify_signature: bool) -> Result<(PathBuf, Glob
 fn normal_unpack_nep(
     source_file: &str,
     verify_signature: bool,
+    cfg: &Cfg,
 ) -> Result<(PathBuf, GlobalPackage)> {
     // 创建临时目录
-    let temp_dir_path = get_temp_dir_path(source_file)?;
+    let temp_dir_path = get_temp_dir_path(source_file, cfg)?;
     let temp_dir_outer_path = temp_dir_path.join("Outer");
     let temp_dir_inner_path = temp_dir_path.join("Inner");
 
@@ -175,9 +181,13 @@ fn normal_unpack_nep(
 
     Ok((temp_dir_inner_path, package_struct))
 }
-fn fast_unpack_nep(source_file: &str, verify_signature: bool) -> Result<(PathBuf, GlobalPackage)> {
+fn fast_unpack_nep(
+    source_file: &str,
+    verify_signature: bool,
+    cfg: &Cfg,
+) -> Result<(PathBuf, GlobalPackage)> {
     // 创建临时目录
-    let temp_dir_path = get_temp_dir_path(source_file)?;
+    let temp_dir_path = get_temp_dir_path(source_file, cfg)?;
     let temp_dir_inner_path = temp_dir_path.join("Inner");
 
     // 读取外包，生成 hashmap

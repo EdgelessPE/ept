@@ -11,24 +11,21 @@ use url::Url;
 use crate::{
     log, log_ok_last,
     types::{
-        mirror::{MirrorHello, MirrorInfo, MirrorPkgSoftware, ServiceKeys},
+        cfg::Cfg,
+        mirror::{MirrorEptToolchain, MirrorHello, MirrorInfo, MirrorPkgSoftware, ServiceKeys},
         mixed_fs::MixedFS,
         verifiable::Verifiable,
     },
     utils::{
-        constants::MIRROR_FILE_EPT_TOOLCHAIN,
+        constants::{MIRROR_FILE_EPT_TOOLCHAIN, MIRROR_FILE_HELLO},
         fs::{ensure_dir_exist, read_sub_dir, try_recycle},
         get_path_mirror,
         mirror::{build_index_for_mirror, filter_service_from_meta, read_local_mirror_hello},
     },
 };
-use crate::{
-    types::{cfg::Cfg, mirror::MirrorEptToolchain},
-    utils::constants::MIRROR_FILE_HELLO,
-};
 
 // 返回远程镜像源申明的名称
-pub fn mirror_add(url: &str, should_match_name: Option<String>) -> Result<String> {
+pub fn mirror_add(url: &str, should_match_name: Option<String>, cfg: &Cfg) -> Result<String> {
     // 尝试解析为 URL 对象
     let parsed_url =
         Url::parse(url).map_err(|e| anyhow!("Error:Failed to parse '{url}' as valid URL : {e}"))?;
@@ -77,8 +74,8 @@ pub fn mirror_add(url: &str, should_match_name: Option<String>) -> Result<String
     pkg_software_res.verify_self(&mixed_fs)?;
 
     // 更新索引并写 pkg-software.toml
-    let p = get_path_mirror()?.join(&mirror_name);
-    build_index_for_mirror(pkg_software_res.clone(), p.join("index"))?;
+    let p = get_path_mirror(cfg)?.join(&mirror_name);
+    build_index_for_mirror(cfg, pkg_software_res.clone(), p.join("index"))?;
     // let value = Value::try_from(pkg_software_res)?;
     // let text = to_string_pretty(&value)?;
     // write(p.join(MIRROR_FILE_PKG_SOFTWARE), text)?;
@@ -108,22 +105,22 @@ pub fn mirror_add(url: &str, should_match_name: Option<String>) -> Result<String
     Ok(mirror_name)
 }
 
-pub fn mirror_update(name: &str) -> Result<String> {
+pub fn mirror_update(name: &str, cfg: &Cfg) -> Result<String> {
     // 读取 meta 文件
-    let (meta, _) = read_local_mirror_hello(name)?;
+    let (meta, _) = read_local_mirror_hello(cfg, name)?;
     // 筛选出 hello 服务
     let (hello_path, _) = filter_service_from_meta(&meta, ServiceKeys::Hello)?;
     // 调用 add
-    mirror_add(&hello_path, Some(name.to_string()))
+    mirror_add(&hello_path, Some(name.to_string()), cfg)
 }
 
-pub fn mirror_list() -> Result<Vec<MirrorInfo>> {
-    let p = get_path_mirror()?;
+pub fn mirror_list(cfg: &Cfg) -> Result<Vec<MirrorInfo>> {
+    let p = get_path_mirror(cfg)?;
     let mut res = Vec::new();
     for name in read_sub_dir(&p)? {
         let file_path = p.join(&name).join(MIRROR_FILE_HELLO);
         let time = metadata(file_path)?.modified()?;
-        let (meta, _) = read_local_mirror_hello(&name)?;
+        let (meta, _) = read_local_mirror_hello(cfg, &name)?;
 
         res.push(MirrorInfo {
             name,
@@ -134,11 +131,11 @@ pub fn mirror_list() -> Result<Vec<MirrorInfo>> {
     Ok(res)
 }
 
-pub fn mirror_update_all() -> Result<Vec<String>> {
-    let p = get_path_mirror()?;
+pub fn mirror_update_all(cfg: &Cfg) -> Result<Vec<String>> {
+    let p = get_path_mirror(cfg)?;
     let mut names = Vec::new();
     for name in read_sub_dir(p)? {
-        let n = mirror_update(&name)?;
+        let n = mirror_update(&name, cfg)?;
         names.push(n);
     }
     Ok(names)
@@ -155,13 +152,13 @@ pub fn auto_mirror_update_all(cfg: &Cfg) -> Result<bool> {
     );
 
     // 列出镜像源，如果其中有一个过期就更新全部
-    let ls = mirror_list()?;
+    let ls = mirror_list(cfg)?;
     let res = ls
         .into_iter()
         .find(|mirror_info| now.duration_since(mirror_info.updated_at).unwrap() > duration_cfg);
     if res.is_some() {
         log!("Info:Automatically updating mirror index...");
-        mirror_update_all()?;
+        mirror_update_all(cfg)?;
         log_ok_last!("Info:Automatically updating mirror index...");
         Ok(true)
     } else {
@@ -170,9 +167,9 @@ pub fn auto_mirror_update_all(cfg: &Cfg) -> Result<bool> {
     }
 }
 
-pub fn mirror_remove(name: &str) -> Result<()> {
+pub fn mirror_remove(name: &str, cfg: &Cfg) -> Result<()> {
     // 获取目录路径
-    let (_, p) = read_local_mirror_hello(name)?;
+    let (_, p) = read_local_mirror_hello(cfg, name)?;
     // 移除目录
     try_recycle(p)
 }

@@ -8,6 +8,7 @@ use crate::{
     executor::values_validator_path,
     p2s,
     types::{
+        cfg::Cfg,
         constants::{DIR_NEP_CONTEXT, DIR_WORKFLOWS, EXT_TAR_ZST, FILE_PACKAGE, WORKFLOW_SETUP},
         mixed_fs::MixedFS,
     },
@@ -28,7 +29,12 @@ pub fn inner_validator(dir: &str) -> Result<()> {
     Ok(())
 }
 
-pub fn manifest_validator(base: &str, manifest: Vec<String>, fs: &mut MixedFS) -> Result<()> {
+pub fn manifest_validator(
+    base: &str,
+    manifest: Vec<String>,
+    fs: &mut MixedFS,
+    cfg: &Cfg,
+) -> Result<()> {
     let mut missing_list = HashSet::new();
     for path in manifest {
         values_validator_path(&path)?;
@@ -45,6 +51,7 @@ pub fn manifest_validator(base: &str, manifest: Vec<String>, fs: &mut MixedFS) -
         let items: Vec<String> = missing_list.into_iter().collect();
         if fs.var_warn_manifest {
             if !ask_yn(
+                cfg,
                 format!("May missing these flow items '{items:?}' in '{base}', continue?"),
                 false,
             ) {

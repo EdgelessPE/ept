@@ -1,6 +1,9 @@
 use crate::{
     executor::{judge_perm_level, values_validator_path},
-    types::permissions::{Permission, PermissionKey},
+    types::{
+        cfg::Cfg,
+        permissions::{Permission, PermissionKey},
+    },
     utils::{conditions::ensure_arg, path::parse_relative_path_with_located},
 };
 use anyhow::Result;
@@ -15,7 +18,7 @@ pub struct Exist {
 }
 
 impl EvalFunction for Exist {
-    fn get_closure(located: String) -> Function<DefaultNumericTypes> {
+    fn get_closure(located: String, _cfg: &Cfg) -> Function<DefaultNumericTypes> {
         Function::new(move |val| {
             let arg = ensure_arg(val)?;
             let p = parse_relative_path_with_located(&arg, &located);
