@@ -5,7 +5,6 @@ use std::sync::Mutex;
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Flag {
     Debug,
-    Offline,
 }
 
 lazy_static! {

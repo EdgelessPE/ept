@@ -14,7 +14,7 @@ use ept_lib::{
         matcher::PackageInputEnum,
     },
     utils::{
-        flags::{get_flag, set_flag, Flag},
+        flags::{set_flag, Flag},
         fmt_print::{fmt_print_mirror_line, FmtPrint, FmtPrintCaller, PackageSource},
         get_path_apps, launch_clean,
         parse_inputs::{parse_install_inputs, parse_uninstall_inputs, parse_update_inputs},
@@ -29,7 +29,7 @@ use std::process::exit;
 
 #[cfg(not(tarpaulin_include))]
 fn router(action: Action, cfg: &Cfg) -> Result<String> {
-    let verify_signature = !get_flag(Flag::Offline, false);
+    let verify_signature = !cfg.mode.offline;
 
     // 匹配入口
     match action {
@@ -352,9 +352,9 @@ fn main() {
         log!("Warning:Debug mode enabled");
         set_flag(Flag::Debug, true);
     }
-    if args.offline || cfg.online.offline {
+    if args.offline {
         log!("Warning:Offline mode enabled, ept couldn't guarantee security or integrality of packages");
-        set_flag(Flag::Offline, true);
+        cfg.mode.offline = true;
     }
     if args.qa || args.yes {
         log!("Warning:Confirmation mode enabled");

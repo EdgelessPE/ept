@@ -16,7 +16,6 @@ pub fn _default_test_cfg() -> crate::types::cfg::Cfg {
         },
         online: crate::types::cfg::Online {
             mirror_update_interval: "1d".to_string(),
-            offline: false,
             auto_check_upgrade: true,
         },
         preference: crate::types::cfg::Preference {
@@ -32,6 +31,7 @@ pub fn _default_test_cfg() -> crate::types::cfg::Cfg {
         mode: crate::types::cfg::Mode {
             qa: false,
             debug: true,
+            offline: false,
         },
     }
 }

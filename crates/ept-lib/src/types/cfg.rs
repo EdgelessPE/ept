@@ -32,7 +32,6 @@ pub struct Local {
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct Online {
     pub mirror_update_interval: String,
-    pub offline: bool,
     pub auto_check_upgrade: bool,
 }
 #[derive(Clone, Debug, PartialEq)]
@@ -100,6 +99,7 @@ pub struct Interaction {
 pub struct Mode {
     pub qa: bool,
     pub debug: bool,
+    pub offline: bool,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
@@ -121,7 +121,6 @@ impl Default for Cfg {
             },
             online: Online {
                 auto_check_upgrade: true,
-                offline: false,
                 mirror_update_interval: "1d".to_string(),
             },
             preference: Preference {
@@ -137,6 +136,7 @@ impl Default for Cfg {
             mode: Mode {
                 qa: false,
                 debug: false,
+                offline: false,
             },
         }
     }
