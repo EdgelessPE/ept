@@ -16,7 +16,7 @@ use crate::{
     signature::blake3::compute_hash_blake3_from_string,
     types::{cfg::Cfg, package::GlobalPackage},
     utils::{
-        cache::spawn_cache, download::download_nep, fs::move_or_copy, get_path_cache, is_qa_mode,
+        cache::spawn_cache, download::download_nep, fs::move_or_copy, get_path_cache,
         path::parse_relative_path_with_located, term::ask_yn,
     },
 };
@@ -87,13 +87,13 @@ fn deploy_app_files(cfg: &Cfg, temp_dir: &Path, package: &GlobalPackage) -> Resu
 }
 
 // 验证指定的 main_program 是否存在
-fn validate_main_program(into_dir: &str, package: &GlobalPackage) -> Result<()> {
+fn validate_main_program(cfg: &Cfg, into_dir: &str, package: &GlobalPackage) -> Result<()> {
     if let Some(ref software) = package.software {
         if let Some(ref installed) = software.main_program {
             let p = parse_relative_path_with_located(installed, into_dir);
             log!("Debug:Checking main program at '{}'", p2s!(p));
             if !p.exists() {
-                if is_qa_mode() {
+                if cfg.mode.qa {
                     log!("Warning:Validating failed : field 'main_program' provided in table 'software' not exist : '{installed}'")
                 } else {
                     return Err(anyhow!("Error:Validating failed : field 'main_program' provided in table 'software' not exist : '{installed}'"));
@@ -107,7 +107,7 @@ fn validate_main_program(into_dir: &str, package: &GlobalPackage) -> Result<()> 
 // 安装完成后的最终验证
 fn finalize_installation(cfg: &Cfg, into_dir: &str, package: &GlobalPackage) -> Result<()> {
     installed_validator(into_dir)?;
-    validate_main_program(into_dir, package)?;
+    validate_main_program(cfg, into_dir, package)?;
 
     log!(
         "Debug:Try to get info of '{scope}/{name}'",

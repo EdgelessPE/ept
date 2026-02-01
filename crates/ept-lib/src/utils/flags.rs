@@ -6,7 +6,6 @@ use std::sync::Mutex;
 pub enum Flag {
     Debug,
     Offline,
-    QA,
 }
 
 lazy_static! {

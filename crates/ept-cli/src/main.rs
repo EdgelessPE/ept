@@ -346,7 +346,7 @@ fn main() {
     // 配置环境变量
     let args = Args::parse();
     if args.qa {
-        set_flag(Flag::QA, true);
+        cfg.mode.qa = true;
     }
     if args.debug || args.qa || cfg!(debug_assertions) {
         log!("Warning:Debug mode enabled");
