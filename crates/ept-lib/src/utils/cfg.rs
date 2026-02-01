@@ -1,35 +1,8 @@
-use std::sync::{Arc, RwLock};
-
 use anyhow::{anyhow, Result};
 
 use crate::types::cfg::{Cfg, PreferenceEnum};
 
 use super::arch::SysArch;
-
-lazy_static! {
-    static ref CFG: Arc<RwLock<Cfg>> = Arc::new(RwLock::new(Cfg::init().unwrap()));
-}
-
-pub fn get_config() -> Cfg {
-    CFG.read().unwrap().clone()
-}
-
-pub fn set_config(next: Cfg) -> Result<()> {
-    Cfg::overwrite(next.clone())?;
-    let mut lock = CFG.write().unwrap();
-    *lock = next;
-
-    Ok(())
-}
-
-#[test]
-fn test_config() {
-    let mut cfg = get_config();
-    println!("{cfg:#?}");
-    cfg.local.base = "2333".to_string();
-    println!("{cfg:#?}");
-    assert!(set_config(cfg).is_err());
-}
 
 pub fn get_flags_score(flags: &str, cfg: &Cfg) -> Result<i32> {
     let mut score = 0;
@@ -63,7 +36,9 @@ pub fn get_flags_score(flags: &str, cfg: &Cfg) -> Result<i32> {
 #[test]
 fn test_get_flags_score() {
     use crate::types::cfg::PreferenceEnum;
-    let cfg_bak = get_config();
+    use crate::utils::test::_default_test_cfg;
+
+    let cfg_bak = _default_test_cfg();
 
     let getter = |i: PreferenceEnum, p: PreferenceEnum, e: PreferenceEnum| {
         let mut cfg = cfg_bak.clone();

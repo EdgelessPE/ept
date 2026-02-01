@@ -32,7 +32,6 @@ pub use entrances::{
 
 // Re-export utility functions
 pub use utils::{
-    cfg::get_config,
     flags::{get_flag, set_flag, Flag},
     launch_clean,
 };
