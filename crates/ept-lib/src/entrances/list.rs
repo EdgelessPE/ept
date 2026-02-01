@@ -46,6 +46,8 @@ pub fn list(cfg: &Cfg) -> Result<Vec<Info>> {
 
 #[test]
 fn test_list() {
-    let res = list().unwrap();
+    use crate::utils::test::_default_test_cfg;
+    let cfg = _default_test_cfg();
+    let res = list(&cfg).unwrap();
     println!("{res:#?}");
 }

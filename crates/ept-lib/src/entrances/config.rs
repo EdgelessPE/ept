@@ -115,7 +115,13 @@ pub fn config_which() -> Result<String> {
 
 #[test]
 fn test_config() {
+    use crate::utils::flags::{set_flag, Flag};
+    use crate::utils::test::_default_test_cfg;
     use std::{fs, path::Path};
+
+    set_flag(Flag::Confirm, true);
+    let cfg = _default_test_cfg();
+
     // 校对函数，同时检查 API 返回和本地文件
     fn checker(answer: Cfg) {
         let cfg = get_config();
@@ -141,7 +147,7 @@ fn test_config() {
     let answer_cfg_init = Cfg::default();
 
     // 测试初始化
-    config_init().unwrap();
+    config_init(&cfg).unwrap();
     checker(answer_cfg_init.clone());
 
     // 测试 set

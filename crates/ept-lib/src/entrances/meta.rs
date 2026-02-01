@@ -396,6 +396,7 @@ fn test_meta() {
         "examples/VSCodeE",
         Some("test/VSCodeE.nep".to_string()),
         false,
+        cfg,
     )
     .unwrap();
     let res = meta(

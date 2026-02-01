@@ -123,12 +123,15 @@ pub fn installed_validator(dir: &str) -> Result<String> {
 
 #[test]
 fn test_manifest_validator() {
+    use crate::utils::test::_default_test_cfg;
     let base = "examples/VSCode";
+    let cfg = _default_test_cfg();
     let manifest = vec!["VSCode", "Microsoft", "VScode", FILE_PACKAGE];
     assert!(manifest_validator(
         base,
         manifest.into_iter().map(|s| s.to_string()).collect(),
-        &mut MixedFS::new(base)
+        &mut MixedFS::new(base),
+        &cfg,
     )
     .is_err())
 }

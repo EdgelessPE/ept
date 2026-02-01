@@ -281,63 +281,69 @@ fn fast_unpack_nep(
 #[test]
 fn test_unpack_nep() {
     use crate::utils::flags::{set_flag, Flag};
+    use crate::utils::test::_default_test_cfg;
     if cfg!(debug_assertions) {
         log!("Warning:Debug mode enabled");
         set_flag(Flag::Debug, true);
     }
     crate::utils::test::_ensure_clear_test_dir();
-    let cfg = &crate::types::cfg::Cfg::default();
+    let cfg = _default_test_cfg();
 
     crate::pack(
         "./examples/VSCode",
         Some("./test/VSCode_1.75.0.0_Cno.nep".to_string()),
         true,
+        &cfg,
     )
     .unwrap();
 
-    let res = unpack_nep(cfg, "./test/VSCode_1.75.0.0_Cno.nep", true).unwrap();
+    let res = unpack_nep(&cfg, "./test/VSCode_1.75.0.0_Cno.nep", true).unwrap();
     println!("{res:#?}");
 }
 
 #[test]
 fn test_normal_unpack_nep() {
     use crate::utils::flags::{set_flag, Flag};
+    use crate::utils::test::_default_test_cfg;
     if cfg!(debug_assertions) {
         log!("Warning:Debug mode enabled");
         set_flag(Flag::Debug, true);
     }
     crate::utils::test::_ensure_clear_test_dir();
-    let cfg = &crate::types::cfg::Cfg::default();
+    let cfg = _default_test_cfg();
 
     crate::pack(
         "./examples/VSCode",
         Some("./test/VSCode_1.75.0.0_Cno.nep".to_string()),
         true,
+        &cfg,
     )
     .unwrap();
 
-    let res = normal_unpack_nep(cfg, "./test/VSCode_1.75.0.0_Cno.nep", true).unwrap();
+    let res = normal_unpack_nep(&cfg, "./test/VSCode_1.75.0.0_Cno.nep", true).unwrap();
     println!("{res:#?}");
 }
 
 #[test]
 fn test_fast_unpack_nep() {
     use crate::utils::flags::{set_flag, Flag};
+    use crate::utils::test::_default_test_cfg;
     if cfg!(debug_assertions) {
         log!("Warning:Debug mode enabled");
         set_flag(Flag::Debug, true);
     }
     crate::utils::test::_ensure_clear_test_dir();
-    let cfg = &crate::types::cfg::Cfg::default();
+    let cfg = _default_test_cfg();
 
     crate::pack(
         "./examples/VSCode",
         Some("./test/VSCode_1.75.0.0_Cno.nep".to_string()),
         true,
+        &cfg,
     )
     .unwrap();
 
-    let res = fast_unpack_nep(cfg, "./test/VSCode_1.75.0.0_Cno.nep", true).unwrap();
+    let res = fast_unpack_nep(&cfg, "./test/VSCode_1.75.0.0_Cno.nep", true).unwrap();
     println!("{res:#?}");
 }
 
@@ -373,14 +379,16 @@ fn test_fast_unpack_nep() {
 
 #[test]
 fn test_bad_package() {
+    use crate::utils::test::_default_test_cfg;
     crate::utils::test::_ensure_clear_test_dir();
-    let test_cfg = &crate::types::cfg::Cfg::default();
+    let test_cfg = _default_test_cfg();
 
     // 生成基础目录
     crate::pack(
         "./examples/Dism++",
         Some("./test/Normal.nep".to_string()),
         true,
+        &test_cfg,
     )
     .unwrap();
     release_tar("./test/Normal.nep", "./test/Normal").unwrap();
@@ -390,10 +398,11 @@ fn test_bad_package() {
         "./examples/Dism++",
         Some("./test/UnSig++_10.1.1002.1_Cno.nep".to_string()),
         false,
+        &test_cfg,
     )
     .unwrap();
-    assert!(normal_unpack_nep(test_cfg, "./test/UnSig++_10.1.1002.1_Cno.nep", true).is_err());
-    assert!(fast_unpack_nep(test_cfg, "./test/UnSig++_10.1.1002.1_Cno.nep", true).is_err());
+    assert!(normal_unpack_nep(&test_cfg, "./test/UnSig++_10.1.1002.1_Cno.nep", true).is_err());
+    assert!(fast_unpack_nep(&test_cfg, "./test/UnSig++_10.1.1002.1_Cno.nep", true).is_err());
 
     // 被篡改的签名
     copy_dir("test/Normal", "test/BadSig").unwrap();
@@ -405,15 +414,15 @@ fn test_bad_package() {
     let text = toml::to_string_pretty(&signature_struct).unwrap();
     std::fs::write("test/BadSig/signature.toml", text).unwrap();
     crate::compression::pack_tar("test/BadSig", "test/BadSig++_10.1.1002.1_Cno.nep").unwrap();
-    assert!(normal_unpack_nep(test_cfg, "test/BadSig++_10.1.1002.1_Cno.nep", true).is_err());
-    assert!(fast_unpack_nep(test_cfg, "test/BadSig++_10.1.1002.1_Cno.nep", true).is_err());
+    assert!(normal_unpack_nep(&test_cfg, "test/BadSig++_10.1.1002.1_Cno.nep", true).is_err());
+    assert!(fast_unpack_nep(&test_cfg, "test/BadSig++_10.1.1002.1_Cno.nep", true).is_err());
 
     // 缺失签名文件
     copy_dir("test/Normal", "test/NoSig").unwrap();
     std::fs::remove_file("test/NoSig/signature.toml").unwrap();
     crate::compression::pack_tar("test/NoSig", "test/NoSig++_10.1.1002.1_Cno.nep").unwrap();
-    assert!(normal_unpack_nep(test_cfg, "test/NoSig++_10.1.1002.1_Cno.nep", true).is_err());
-    assert!(fast_unpack_nep(test_cfg, "test/NoSig++_10.1.1002.1_Cno.nep", true).is_err());
+    assert!(normal_unpack_nep(&test_cfg, "test/NoSig++_10.1.1002.1_Cno.nep", true).is_err());
+    assert!(fast_unpack_nep(&test_cfg, "test/NoSig++_10.1.1002.1_Cno.nep", true).is_err());
 
     // 错误的打包者
     copy_dir("test/Normal", "test/BadAuth").unwrap();
@@ -422,6 +431,6 @@ fn test_bad_package() {
     let text = toml::to_string_pretty(&signature_struct).unwrap();
     std::fs::write("test/BadAuth/signature.toml", text).unwrap();
     crate::compression::pack_tar("test/BadAuth", "test/BadAuth++_10.1.1002.1_Cno.nep").unwrap();
-    assert!(normal_unpack_nep(test_cfg, "test/BadAuth++_10.1.1002.1_Cno.nep", true).is_err());
-    assert!(fast_unpack_nep(test_cfg, "test/BadAuth++_10.1.1002.1_Cno.nep", true).is_err());
+    assert!(normal_unpack_nep(&test_cfg, "test/BadAuth++_10.1.1002.1_Cno.nep", true).is_err());
+    assert!(fast_unpack_nep(&test_cfg, "test/BadAuth++_10.1.1002.1_Cno.nep", true).is_err());
 }

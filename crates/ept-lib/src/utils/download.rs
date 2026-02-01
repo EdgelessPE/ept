@@ -117,9 +117,11 @@ pub fn fill_url_template(
 #[test]
 fn test_download() {
     use crate::set_flag;
+    use crate::utils::test::_default_test_cfg;
     set_flag(Flag::Cache, true);
+    let cfg = _default_test_cfg();
     // 删除下载缓存
-    let cache_dir = crate::utils::get_path_cache().unwrap();
+    let cache_dir = crate::utils::get_path_cache(&cfg).unwrap();
     if cache_dir.exists() {
         std::fs::remove_dir_all(&cache_dir).unwrap();
     }

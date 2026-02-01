@@ -112,12 +112,15 @@ pub fn pack(
 #[test]
 fn test_pack() {
     use crate::utils::flags::{set_flag, Flag};
+    use crate::utils::test::_default_test_cfg;
+    let cfg = _default_test_cfg();
     set_flag(Flag::Debug, false);
     set_flag(Flag::Confirm, true);
     pack(
         "./examples/ComplexFS",
         Some("./test/ComplexFS_1.75.0.0_Cno.nep".to_string()),
         true,
+        &cfg,
     )
     .unwrap();
     set_flag(Flag::Debug, true);
@@ -125,6 +128,7 @@ fn test_pack() {
         "./examples/ComplexFS",
         Some("./test/ComplexFS_1.75.0.0_Cno.nep".to_string()),
         false,
+        &cfg,
     )
     .unwrap();
 }

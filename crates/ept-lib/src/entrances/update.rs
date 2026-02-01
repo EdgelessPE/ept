@@ -397,7 +397,8 @@ fn test_update_using_package() {
     set_flag(Flag::Confirm, true);
     crate::utils::test::_ensure_clear_test_dir();
 
-    let cfg = &crate::types::cfg::Cfg::default();
+    use crate::utils::test::_default_test_cfg;
+    let cfg = &_default_test_cfg();
 
     // 卸载
     crate::utils::test::_ensure_testing_vscode_uninstalled();
@@ -407,6 +408,7 @@ fn test_update_using_package() {
         "./examples/VSCode",
         Some("./test/VSCode_1.75.0.0_Cno.nep".to_string()),
         true,
+        cfg,
     )
     .unwrap();
     install_using_package(cfg, "./test/VSCode_1.75.0.0_Cno.nep", true).unwrap();
@@ -446,7 +448,8 @@ fn test_update_all() {
     set_flag(Flag::Confirm, true);
     crate::utils::test::_ensure_clear_test_dir();
 
-    let cfg = &crate::types::cfg::Cfg::default();
+    use crate::utils::test::_default_test_cfg;
+    let cfg = &_default_test_cfg();
 
     // 确保已卸载
     crate::utils::test::_ensure_testing_vscode_uninstalled();
@@ -467,12 +470,14 @@ fn test_update_all() {
         &source_dir,
         Some("./test/static/VSCode_1.75.4.2_Cno.nep".to_string()),
         false,
+        cfg,
     )
     .unwrap();
     crate::pack(
         "./examples/Notepad",
         Some("./test/static/Notepad_22.1.0.0_Cno.nep".to_string()),
         false,
+        cfg,
     )
     .unwrap();
 

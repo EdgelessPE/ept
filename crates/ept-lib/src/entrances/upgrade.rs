@@ -126,6 +126,7 @@ pub fn upgrade(cfg: &Cfg, dry_run: bool, need_exit_process: bool) -> Result<Stri
 fn test_upgrade() {
     use crate::signature::blake3::compute_hash_blake3;
     use crate::utils::flags::{set_flag, Flag};
+    use crate::utils::test::_default_test_cfg;
     use crate::utils::test::_run_mirror_mock_server;
     use std::fs::{copy, remove_dir_all, rename};
     use std::{thread::sleep, time::Duration};
@@ -134,13 +135,13 @@ fn test_upgrade() {
     set_flag(Flag::Debug, true);
     crate::utils::test::_ensure_clear_test_dir();
 
-    let test_cfg = crate::types::cfg::Cfg::default();
+    let test_cfg = _default_test_cfg();
 
     // 使用 mock 的镜像数据
     let mock_ctx = crate::utils::test::_use_mock_mirror_data();
 
     // 备份原工具链
-    let toolchain_path = get_path_toolchain().unwrap();
+    let toolchain_path = get_path_toolchain(&test_cfg).unwrap();
     let bak_toolchain_path = toolchain_path.parent().unwrap().join("toolchain_bak");
     let has_origin_toolchain = toolchain_path.exists();
     if has_origin_toolchain {

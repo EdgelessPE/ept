@@ -133,17 +133,20 @@ pub fn find_scope_with_name(
 
 #[test]
 fn test_parse_relative_path() {
+    use crate::utils::test::_default_test_cfg;
+    let cfg = _default_test_cfg();
     let p1 = String::from("./VSCode/VSCode.exe");
     let p2 = String::from(r"D:\Desktop\Projects\") + "./code.exe";
     let p3 = p2s!(std::env::current_dir().unwrap().join("./code.exe"));
 
-    println!("{:?}", parse_relative_path_with_base(&p1));
-    println!("{:?}", parse_relative_path_with_base(&p2));
-    println!("{:?}", parse_relative_path_with_base(&p3));
+    println!("{:?}", parse_relative_path_with_base(&p1, &cfg.local.base));
+    println!("{:?}", parse_relative_path_with_base(&p2, &cfg.local.base));
+    println!("{:?}", parse_relative_path_with_base(&p3, &cfg.local.base));
 }
 
 #[test]
 fn test_find_scope_with_name() {
+    use crate::types::cfg::Cfg;
     use crate::utils::flags::{set_flag, Flag};
     use crate::utils::test::{
         _ensure_testing_vscode, _mount_custom_mirror, _unmount_custom_mirror,
@@ -154,30 +157,33 @@ fn test_find_scope_with_name() {
     _ensure_testing_vscode();
     let tup = _mount_custom_mirror();
 
+    // 使用 Cfg::default() 因为 _mount_custom_mirror 使用的是 Cfg::default()
+    let cfg = Cfg::default();
+
     // 本地信息
     let name = String::from("vscode");
-    let res = find_scope_with_name(&name, None).unwrap();
+    let res = find_scope_with_name(&cfg, &name, None).unwrap();
     assert_eq!(res, ("Microsoft".to_string(), "VSCode".to_string()));
 
     // 在线信息
     let name = String::from("Notepad");
-    let res = find_scope_with_name(&name, None).unwrap();
+    let res = find_scope_with_name(&cfg, &name, None).unwrap();
     assert_eq!(res, ("Microsoft".to_string(), "Notepad".to_string()));
 
     // 别名
     let name = String::from("code");
-    let res = find_scope_with_name(&name, None).unwrap();
+    let res = find_scope_with_name(&cfg, &name, None).unwrap();
     assert_eq!(res, ("Microsoft".to_string(), "VSCode".to_string()));
 
     // 命名冲突
-    assert!(find_scope_with_name("NameA", None).is_err());
-    assert!(find_scope_with_name("NameA", Some("ScopeA")).is_ok());
-    assert!(find_scope_with_name("NameA", Some("ScopeB")).is_ok());
+    assert!(find_scope_with_name(&cfg, "NameA", None).is_err());
+    assert!(find_scope_with_name(&cfg, "NameA", Some("ScopeA")).is_ok());
+    assert!(find_scope_with_name(&cfg, "NameA", Some("ScopeB")).is_ok());
 
     // 命名和别名冲突
-    assert!(find_scope_with_name("NameB", None).is_err());
-    assert!(find_scope_with_name("NameB", Some("ScopeA")).is_ok());
-    assert!(find_scope_with_name("NameB", Some("ScopeB")).is_ok());
+    assert!(find_scope_with_name(&cfg, "NameB", None).is_err());
+    assert!(find_scope_with_name(&cfg, "NameB", Some("ScopeA")).is_ok());
+    assert!(find_scope_with_name(&cfg, "NameB", Some("ScopeB")).is_ok());
 
     _unmount_custom_mirror(tup);
 }
