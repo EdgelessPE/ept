@@ -432,9 +432,9 @@ pub fn get_url_with_version_req(
 
 #[test]
 fn test_filter_release() {
-    use crate::types::cfg::Cfg;
     use crate::types::extended_semver::ExSemVer;
-    let cfg = Cfg::default();
+    use crate::utils::test::_default_test_cfg;
+    let cfg = _default_test_cfg();
     // 直接筛选最高版本
     let arr = vec![
         MirrorPkgSoftwareRelease {
@@ -499,6 +499,7 @@ fn test_filter_release() {
 #[test]
 fn test_filter_release_with_flags() {
     use crate::utils::flags::{set_flag, Flag};
+    use crate::utils::test::_default_test_cfg;
     set_flag(Flag::Debug, true);
     use crate::types::cfg::PreferenceEnum;
     use crate::types::extended_semver::ExSemVer;
@@ -540,7 +541,7 @@ fn test_filter_release_with_flags() {
     ];
 
     let modifier = |i: PreferenceEnum, p: PreferenceEnum, e: PreferenceEnum| {
-        let mut cfg = crate::types::cfg::Cfg::default();
+        let mut cfg = _default_test_cfg();
         cfg.preference.installer = i;
         cfg.preference.portable = p;
         cfg.preference.expandable = e;

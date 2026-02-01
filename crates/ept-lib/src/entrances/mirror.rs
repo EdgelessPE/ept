@@ -179,12 +179,13 @@ fn test_mirror() {
     use crate::utils::flags::{set_flag, Flag};
     set_flag(Flag::Debug, true);
     use crate::entrances::search;
+    use crate::utils::test::_default_test_cfg;
     use crate::utils::test::_run_mirror_mock_server;
     use std::fs::{remove_dir_all, rename};
     use std::thread::sleep;
     use std::time::Duration;
 
-    let cfg = &crate::types::cfg::Cfg::default();
+    let cfg = &_default_test_cfg();
 
     // 备份原有的镜像文件夹
     let origin_p = get_path_mirror(cfg).unwrap();
@@ -286,12 +287,13 @@ fn test_mirror() {
 }
 #[test]
 fn test_auto_mirror_update_all() {
+    use crate::utils::test::_default_test_cfg;
     use crate::utils::test::_run_mirror_mock_server;
     use std::fs::{remove_dir_all, rename};
     use std::thread::sleep;
     use std::time::Duration;
 
-    let cfg = Cfg::default();
+    let cfg = _default_test_cfg();
 
     // 备份原有的镜像文件夹
     let origin_p = get_path_mirror(&cfg).unwrap();

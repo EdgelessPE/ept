@@ -49,6 +49,7 @@ pub fn expand_workshop(_cfg: &Cfg, workshop_path: &str) -> Result<()> {
 
 #[test]
 fn test_expand_workshop() {
+    use crate::utils::test::_default_test_cfg;
     use crate::utils::test::{_ensure_clear_test_dir, _run_static_file_server};
     use std::fs::copy;
 
@@ -59,7 +60,7 @@ fn test_expand_workshop() {
     copy("examples/VSCode/VSCode/Code.exe", "test/Code.exe").unwrap();
     crate::utils::fs::copy_dir("examples/VSCodeE", "test/VSCodeE").unwrap();
 
-    let cfg = &crate::types::cfg::Cfg::default();
+    let cfg = &_default_test_cfg();
 
     // 对工作目录进行展开
     expand_workshop(cfg, "test/VSCodeE").unwrap();

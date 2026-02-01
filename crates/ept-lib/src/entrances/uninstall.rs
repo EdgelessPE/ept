@@ -183,12 +183,13 @@ pub fn uninstall(cfg: &Cfg, scope: Option<String>, package_name: &str) -> Result
 #[test]
 fn test_uninstall() {
     use crate::utils::flags::{set_flag, Flag};
+    use crate::utils::test::_default_test_cfg;
     // 完整的安装和卸载流程案例位于entrances::install::test_install
 
     // 这里测试一下需要杀进程的案例
     use crate::types::steps::TStep;
     set_flag(Flag::Confirm, true);
-    let cfg = &crate::types::cfg::Cfg::default();
+    let cfg = &_default_test_cfg();
     let pwd = crate::utils::test::_ensure_testing("Microsoft", "Notepad");
     let mut cx = WorkflowContext::_demo();
     StepExecute {

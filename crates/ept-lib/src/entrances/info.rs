@@ -266,7 +266,9 @@ pub fn info(
 fn test_info() {
     use crate::types::matcher::PackageMatcher;
     use crate::utils::flags::{set_flag, Flag};
+    use crate::utils::test::_default_test_cfg;
     use crate::utils::test::_ensure_testing_vscode;
+    let cfg = _default_test_cfg();
     set_flag(Flag::Confirm, true);
     // 替换测试镜像源
     let custom_mirror_ctx = crate::utils::test::_mount_custom_mirror();
@@ -274,7 +276,7 @@ fn test_info() {
 
     // 带 scope
     let base = info(
-        &crate::types::cfg::Cfg::default(),
+        &cfg,
         PackageInputEnum::PackageMatcher(PackageMatcher {
             scope: Some("Microsoft".to_string()),
             name: "VSCode".to_string(),
@@ -288,7 +290,7 @@ fn test_info() {
 
     // 单纯名字
     let res = info(
-        &crate::types::cfg::Cfg::default(),
+        &cfg,
         PackageInputEnum::PackageMatcher(PackageMatcher {
             scope: None,
             name: "vscode".to_string(),
@@ -302,7 +304,7 @@ fn test_info() {
 
     // 别名
     let res = info(
-        &crate::types::cfg::Cfg::default(),
+        &cfg,
         PackageInputEnum::PackageMatcher(PackageMatcher {
             scope: None,
             name: "CoDe".to_string(),
@@ -320,10 +322,13 @@ fn test_info() {
 
 #[test]
 fn test_info_offline() {
+    use crate::utils::test::_default_test_cfg;
+
     crate::utils::flags::set_flag(crate::utils::flags::Flag::Confirm, true);
     crate::utils::test::_ensure_testing_vscode_uninstalled();
+
     assert!(info(
-        &crate::types::cfg::Cfg::default(),
+        &_default_test_cfg(),
         PackageInputEnum::LocalPath("examples/vscode".to_string()),
         true
     )

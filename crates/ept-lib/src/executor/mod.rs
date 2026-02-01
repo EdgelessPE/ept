@@ -29,6 +29,7 @@ lazy_static! {
 }
 
 pub fn get_eval_context(exit_code: i32, located: &str, package_version: &str) -> HashMapContext {
+    // TODO: cfg 要从顶层传入，而不是在这里 new 出来
     let cfg = Cfg::default();
     let mut context = HashMapContext::new();
     set_context_with_constant_values(&mut context);

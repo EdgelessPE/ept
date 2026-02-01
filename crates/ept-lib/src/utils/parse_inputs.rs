@@ -219,6 +219,7 @@ pub fn parse_uninstall_inputs(cfg: &Cfg, packages: Vec<String>) -> Result<Vec<In
 #[test]
 fn test_parse_inputs() {
     use crate::utils::flags::{set_flag, Flag};
+    use crate::utils::test::_default_test_cfg;
     use crate::utils::test::_run_static_file_server;
     use crate::utils::Path;
 
@@ -229,7 +230,7 @@ fn test_parse_inputs() {
     let mock_ctx = crate::utils::test::_use_mock_mirror_data();
     let (base_url, mut handler) = _run_static_file_server();
 
-    let cfg = crate::types::cfg::Cfg::default();
+    let cfg = _default_test_cfg();
 
     // 准备 vscode 包
     let static_path = Path::new("test");
@@ -408,8 +409,8 @@ fn test_parse_inputs() {
 
 #[test]
 fn test_parse_inputs_offline() {
-    use crate::types::cfg::Cfg;
-    let cfg = Cfg::default();
+    use crate::utils::test::_default_test_cfg;
+    let cfg = _default_test_cfg();
     crate::utils::flags::set_flag(crate::utils::flags::Flag::Confirm, true);
     crate::utils::test::_ensure_testing_vscode_uninstalled();
     assert!(parse_install_inputs(&cfg, vec!["examples/vscode".to_string()], true).is_err());

@@ -318,7 +318,8 @@ impl Generalizable for StepPath {
 
 #[test]
 fn test_set_system_path() {
-    let cfg = Cfg::default();
+    use crate::utils::test::_default_test_cfg;
+    let cfg = _default_test_cfg();
     set_system_path(&p2s!(get_path_bin(&cfg).unwrap().join("2333")), true).unwrap();
     set_system_path(&p2s!(get_path_bin(&cfg).unwrap().join("2333")), false).unwrap();
 }
@@ -326,10 +327,12 @@ fn test_set_system_path() {
 #[test]
 fn test_path() {
     use crate::utils::flags::{set_flag, Flag};
+    use crate::utils::test::_default_test_cfg;
+
     set_flag(Flag::Debug, true);
     set_flag(Flag::Confirm, true);
     let mut cx = WorkflowContext::_demo();
-    let cfg = Cfg::default();
+    let cfg = _default_test_cfg();
 
     // 添加目录
     StepPath {

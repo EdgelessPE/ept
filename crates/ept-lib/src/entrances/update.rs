@@ -498,7 +498,9 @@ fn test_update_all() {
 
 #[test]
 fn test_update_workflow_executions() {
+    use crate::utils::test::_default_test_cfg;
     use std::path::Path;
+
     let desktop = crate::utils::env::env_desktop().unwrap();
     assert!(crate::utils::wild_match::parse_wild_match("vsc*.lnk", &desktop).is_err());
     set_flag(Flag::Confirm, true);
@@ -523,7 +525,7 @@ fn test_update_workflow_executions() {
         (3, 3, vec!["vsc3-update-1.75.4.1"]),
     ];
 
-    let cfg = &crate::types::cfg::Cfg::default();
+    let cfg = &_default_test_cfg();
 
     for (old_type, new_type, assert_files) in test_arr {
         log!("Info:Testing updating {old_type} -> {new_type}");
@@ -567,12 +569,14 @@ fn test_update_workflow_executions() {
 
 #[test]
 fn test_update_with_different_author() {
+    use crate::utils::test::_default_test_cfg;
+
     set_flag(Flag::Confirm, true);
     let desktop = crate::utils::env::env_desktop().unwrap();
     assert!(crate::utils::wild_match::parse_wild_match("vsc*.lnk", &desktop).is_err());
     let desktop_path = std::path::Path::new(&desktop);
 
-    let cfg = &crate::types::cfg::Cfg::default();
+    let cfg = &_default_test_cfg();
 
     // 卸载
     crate::utils::test::_ensure_testing_vscode_uninstalled();
@@ -604,13 +608,14 @@ fn test_update_with_different_author() {
 
 #[test]
 fn test_update_expandable() {
+    use crate::utils::test::_default_test_cfg;
     use std::path::Path;
     set_flag(Flag::Confirm, true);
     set_flag(Flag::Debug, true);
     crate::utils::test::_ensure_clear_test_dir();
     crate::utils::test::_ensure_testing_uninstalled("Microsoft", "VSCodeE");
 
-    let cfg = &crate::types::cfg::Cfg::default();
+    let cfg = &_default_test_cfg();
 
     // 断言原来的包中不包含这个二进制文件
     assert!(!Path::new("examples/VSCodeE/VSCodeE/Code.exe").exists());
@@ -658,8 +663,10 @@ fn test_update_expandable() {
 
 #[test]
 fn test_update_offline() {
+    use crate::utils::test::_default_test_cfg;
+
     crate::utils::flags::set_flag(crate::utils::flags::Flag::Confirm, true);
-    let cfg = &crate::types::cfg::Cfg::default();
+    let cfg = &_default_test_cfg();
     crate::utils::test::_ensure_testing_vscode();
     assert!(update_using_package(cfg, "examples/vscode", true).is_err());
 }

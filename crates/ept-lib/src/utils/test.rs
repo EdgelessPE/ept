@@ -6,8 +6,33 @@ use anyhow::anyhow;
 use httpmock::prelude::*;
 use which::which;
 
+// 默认测试配置
+pub fn _default_test_cfg() -> crate::types::cfg::Cfg {
+    crate::types::cfg::Cfg {
+        local: crate::types::cfg::Local {
+            base: "C:/Users/Public/Music".to_string(),
+            enable_cache: true,
+            cache_valid_duration: "30d".to_string(),
+        },
+        online: crate::types::cfg::Online {
+            mirror_update_interval: "1d".to_string(),
+            offline: false,
+            auto_check_upgrade: true,
+        },
+        preference: crate::types::cfg::Preference {
+            installer: crate::types::cfg::PreferenceEnum::LowPriority,
+            portable: crate::types::cfg::PreferenceEnum::HighPriority,
+            expandable: crate::types::cfg::PreferenceEnum::HighPriority,
+        },
+        interaction: crate::types::cfg::Interaction {
+            enable_windows_terminal_status: false,
+            show_emojis: true,
+        },
+    }
+}
+
 pub fn _ensure_testing_vscode() -> PathBuf {
-    let cfg = crate::types::cfg::Cfg::default();
+    let cfg = _default_test_cfg();
     if crate::entrances::info_local(&cfg, "Microsoft", "VSCode").is_err() {
         crate::utils::fs::copy_dir("examples/VSCode", "test/VSCode").unwrap();
         crate::install_using_package(&cfg, "test/VSCode", false).unwrap();
@@ -29,14 +54,14 @@ pub fn _ensure_testing_vscode() -> PathBuf {
 }
 
 pub fn _ensure_testing_vscode_uninstalled() {
-    let cfg = crate::types::cfg::Cfg::default();
+    let cfg = _default_test_cfg();
     if crate::entrances::info_local(&cfg, "Microsoft", "VSCode").is_ok() {
         crate::uninstall(&cfg, Some("Microsoft".to_string()), "VSCode").unwrap();
     }
 }
 
 pub fn _ensure_testing(scope: &str, name: &str) -> PathBuf {
-    let cfg = crate::types::cfg::Cfg::default();
+    let cfg = _default_test_cfg();
     if crate::entrances::info_local(&cfg, scope, name).is_err() {
         crate::utils::fs::copy_dir(format!("examples/{name}"), format!("test/{name}")).unwrap();
         crate::install_using_package(&cfg, &format!("test/{name}"), false).unwrap();
@@ -58,7 +83,7 @@ pub fn _ensure_testing(scope: &str, name: &str) -> PathBuf {
 }
 
 pub fn _ensure_testing_uninstalled(scope: &str, name: &str) {
-    let cfg = crate::types::cfg::Cfg::default();
+    let cfg = _default_test_cfg();
     let s = scope.to_string();
     if crate::entrances::info_local(&cfg, &s, name).is_ok() {
         crate::uninstall(&cfg, Some(s), name).unwrap();
@@ -67,7 +92,7 @@ pub fn _ensure_testing_uninstalled(scope: &str, name: &str) {
 
 pub fn _ensure_clear_test_dir() {
     use std::path::Path;
-    let cfg = crate::types::cfg::Cfg::default();
+    let cfg = _default_test_cfg();
     if Path::new("test").exists() {
         std::fs::remove_dir_all("test").unwrap();
     }
@@ -521,7 +546,7 @@ pub fn _mount_custom_mirror() -> (bool, PathBuf, PathBuf) {
     use std::fs::{remove_dir_all, rename};
 
     // 备份原有的镜像文件夹
-    let cfg = crate::types::cfg::Cfg::default();
+    let cfg = _default_test_cfg();
     let origin_p = get_path_mirror(&cfg).unwrap();
     let bak_p = origin_p.parent().unwrap().join("mirror_bak");
     let has_origin_mirror = origin_p.exists();
@@ -582,7 +607,7 @@ pub fn _use_mock_mirror_data() -> (bool, PathBuf, PathBuf) {
     use std::fs::{remove_dir_all, rename};
 
     // 备份原有的镜像文件夹
-    let cfg = crate::types::cfg::Cfg::default();
+    let cfg = _default_test_cfg();
     let origin_p = crate::utils::get_path_mirror(&cfg).unwrap();
     let bak_p = origin_p.parent().unwrap().join("mirror_bak");
     let has_origin_mirror = origin_p.exists();
@@ -609,30 +634,5 @@ pub fn _restore_mirror_data(tup: (bool, PathBuf, PathBuf)) {
     if has_origin_mirror {
         remove_dir_all(&origin_p).unwrap();
         rename(&bak_p, &origin_p).unwrap();
-    }
-}
-
-// 默认测试配置
-pub fn _default_test_cfg() -> crate::types::cfg::Cfg {
-    crate::types::cfg::Cfg {
-        local: crate::types::cfg::Local {
-            base: "C:/Users/Public/Music".to_string(),
-            enable_cache: true,
-            cache_valid_duration: "30d".to_string(),
-        },
-        online: crate::types::cfg::Online {
-            mirror_update_interval: "1d".to_string(),
-            offline: false,
-            auto_check_upgrade: true,
-        },
-        preference: crate::types::cfg::Preference {
-            installer: crate::types::cfg::PreferenceEnum::LowPriority,
-            portable: crate::types::cfg::PreferenceEnum::HighPriority,
-            expandable: crate::types::cfg::PreferenceEnum::HighPriority,
-        },
-        interaction: crate::types::cfg::Interaction {
-            enable_windows_terminal_status: false,
-            show_emojis: true,
-        },
     }
 }

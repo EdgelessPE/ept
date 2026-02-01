@@ -156,8 +156,10 @@ fn test_download() {
 
 #[test]
 fn test_download_nep() {
+    use crate::utils::test::_default_test_cfg;
+
     let url = crate::utils::test::_run_mirror_mock_server();
-    let cfg = crate::types::cfg::Cfg::default();
+    let cfg = _default_test_cfg();
     let (path, _cache_ctx) = download_nep(&cfg, &format!("{url}/api/hello"), None).unwrap();
     assert!(path.exists() && path.metadata().unwrap().len() > 300);
 }
