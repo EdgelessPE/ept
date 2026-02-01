@@ -90,8 +90,7 @@ impl TStep for StepWait {
 
         // 校验跳出条件
         if let Some(cond) = &self.break_if {
-            let cfg = crate::types::cfg::Cfg::default();
-            verify_conditions(&cfg, vec![cond.to_owned()], located, "1.0.0.0")
+            verify_conditions(&ctx.cfg, vec![cond.to_owned()], located, "1.0.0.0")
                 .map_err(|e| anyhow!("Error(Wait):Failed to valid field 'break_if' : {e}"))?;
         }
 
