@@ -101,7 +101,7 @@ pub fn verify_conditions(
 
     // 对条件进行 eval 校验
     for cond in conditions {
-        condition_eval(&cond, 0, located, package_version, cfg)
+        condition_eval(cfg, &cond, 0, located, package_version)
             .map_err(|e| anyhow!("Error:Failed to validate condition '{cond}' : {e}"))?;
     }
 
@@ -110,6 +110,8 @@ pub fn verify_conditions(
 
 #[test]
 fn test_condition() {
+    use crate::utils::test::_default_test_cfg;
+
     let located = "examples/VSCode".to_string();
 
     let conditions: Vec<String> = vec![
@@ -127,7 +129,7 @@ fn test_condition() {
     .collect();
 
     // verify_conditions
-    let cfg = Cfg::default();
+    let cfg = _default_test_cfg();
     verify_conditions(&cfg, conditions.clone(), &located, "1.0.0.0").unwrap();
 
     // capture_function_info

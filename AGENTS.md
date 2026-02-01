@@ -52,6 +52,21 @@ cargo check
   // ❌ 错误
   pub fn install(source: &str, verify: bool, cfg: &Cfg) -> Result<()>
   ```
+- **配置来源**: 如果函数中需要使用 `cfg`，则必须从祖先处获取（通过参数传递），而不是调用 `Cfg::default()`
+  ```rust
+  // ✅ 正确 - 从祖先处获取
+  pub fn some_function(cfg: &Cfg, ...) -> Result<()> {
+      let path = get_path_mirror(cfg)?;
+      ...
+  }
+  
+  // ❌ 错误 - 在函数内部创建默认配置
+  pub fn some_function(...) -> Result<()> {
+      let cfg = Cfg::default();
+      let path = get_path_mirror(&cfg)?;
+      ...
+  }
+  ```
 
 ### 类型与 Trait
 - 拥有的字符串使用 `String`，函数参数中的字符串切片使用 `&str`
@@ -78,6 +93,14 @@ cargo check
 - 集成风格测试使用 `test_<module>_corelation` 命名
 - 通过 `pub fn _demo()` 方法提供演示/测试数据
 - 测试工具函数放在 `src/utils/test.rs`
+- **在单测函数中创建 `Cfg` 结构体时，必须使用 `crate::utils::test::_default_test_cfg()`，而不是 `Cfg::default()`**
+  ```rust
+  // ✅ 正确
+  let cfg = crate::utils::test::_default_test_cfg();
+  
+  // ❌ 错误
+  let cfg = Cfg::default();
+  ```
 
 ### 宏
 - 使用 `p2s!()` 宏进行路径到字符串的转换

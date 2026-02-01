@@ -1,10 +1,12 @@
 use std::{env::current_dir, process::Child};
 
 use super::cfg::Cfg;
-use super::mixed_fs::MixedFS;
 use super::steps::VerifyStepCtx;
 use super::{
-    package::GlobalPackage, permissions::Generalizable, steps::Step, verifiable::Verifiable,
+    package::GlobalPackage,
+    permissions::Generalizable,
+    steps::Step,
+    verifiable::{Verifiable, VerifiableCtx},
 };
 use crate::log;
 use crate::utils::test::_default_test_cfg;
@@ -57,10 +59,14 @@ impl Generalizable for WorkflowHeader {
 }
 
 impl Verifiable for WorkflowHeader {
-    fn verify_self(&self, mixed_fs: &MixedFS) -> Result<()> {
-        // 校验条件，使用默认配置
-        let cfg = Cfg::default();
-        verify_conditions(&cfg, self.get_conditions(), &mixed_fs.located, "1.0.0.0")
+    fn verify_self(&self, ctx: &VerifiableCtx) -> Result<()> {
+        // 校验条件，使用上下文中的配置
+        verify_conditions(
+            ctx.cfg,
+            self.get_conditions(),
+            &ctx.mixed_fs.located,
+            "1.0.0.0",
+        )
     }
 }
 
@@ -97,14 +103,21 @@ fn test_header_perm() {
 
 #[test]
 fn test_header_valid() {
+    use crate::utils::test::_default_test_cfg;
+
     let flow=WorkflowHeader{
         name: Some("Name".to_string()),
         step: "Step".to_string(),
         c_if: Some("Exist(\"./mc/vsc.exe\") && IsDirectory(\"${SystemDrive}/Windows\") || Exist(\"${AppData}/Roaming/Edgeless/ept\")".to_string()),
     };
+    use crate::types::mixed_fs::MixedFS;
     let mixed_fs = MixedFS::new("./examples/VSCode");
+    let ctx = VerifiableCtx {
+        mixed_fs: &mixed_fs,
+        cfg: &_default_test_cfg(),
+    };
 
-    flow.verify_self(&mixed_fs).unwrap();
+    flow.verify_self(&ctx).unwrap();
 
     let flow = WorkflowHeader {
         name: Some("Name".to_string()),
@@ -112,7 +125,11 @@ fn test_header_valid() {
         c_if: Some("${Arch}==\"X64\"".to_string()),
     };
 
-    assert!(flow.verify_self(&mixed_fs).is_err());
+    let ctx2 = VerifiableCtx {
+        mixed_fs: &mixed_fs,
+        cfg: &_default_test_cfg(),
+    };
+    assert!(flow.verify_self(&ctx2).is_err());
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
@@ -133,7 +150,11 @@ impl Generalizable for WorkflowNode {
 
 impl WorkflowNode {
     pub fn verify_step(&self, ctx: &VerifyStepCtx) -> Result<()> {
-        self.header.verify_self(&ctx.mixed_fs)?;
+        let verifiable_ctx = VerifiableCtx {
+            mixed_fs: &ctx.mixed_fs,
+            cfg: &crate::types::cfg::Cfg::default(),
+        };
+        self.header.verify_self(&verifiable_ctx)?;
         self.body.verify_step(ctx)
     }
 }

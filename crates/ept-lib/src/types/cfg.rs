@@ -10,7 +10,10 @@ use humantime::parse_duration;
 use serde::{Deserialize, Deserializer, Serialize};
 use toml::{to_string_pretty, Value};
 
-use crate::{log, p2s, types::verifiable::Verifiable};
+use crate::{
+    log, p2s,
+    types::verifiable::{Verifiable, VerifiableCtx},
+};
 
 use super::mixed_fs::MixedFS;
 
@@ -173,8 +176,12 @@ impl Cfg {
             )
         })?;
         let mixed_fs = MixedFS::new("");
+        let verifiable_ctx = VerifiableCtx {
+            mixed_fs: &mixed_fs,
+            cfg: &cfg,
+        };
         // 校验
-        cfg.verify_self(&mixed_fs)
+        cfg.verify_self(&verifiable_ctx)
             .map_err(|e| anyhow!("Error:Invalid config '{f}' : {e}", f = p2s!(from)))?;
 
         Ok(cfg)
@@ -182,8 +189,12 @@ impl Cfg {
     pub fn overwrite(other: Self) -> Result<()> {
         // 校验
         let mixed_fs = MixedFS::new("");
+        let verifiable_ctx = VerifiableCtx {
+            mixed_fs: &mixed_fs,
+            cfg: &other,
+        };
         other
-            .verify_self(&mixed_fs)
+            .verify_self(&verifiable_ctx)
             .map_err(|e| anyhow!("Error:Invalid overwrite config : {e}"))?;
 
         let from = Self::use_which(false)?;
@@ -195,7 +206,7 @@ impl Cfg {
 }
 
 impl Verifiable for Cfg {
-    fn verify_self(&self, _: &MixedFS) -> Result<()> {
+    fn verify_self(&self, _: &VerifiableCtx) -> Result<()> {
         // base 必须为存在的绝对路径
         let base_path = Path::new(&self.local.base);
         if !base_path.is_absolute() {

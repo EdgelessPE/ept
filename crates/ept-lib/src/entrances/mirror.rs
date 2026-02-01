@@ -14,7 +14,7 @@ use crate::{
         cfg::Cfg,
         mirror::{MirrorEptToolchain, MirrorHello, MirrorInfo, MirrorPkgSoftware, ServiceKeys},
         mixed_fs::MixedFS,
-        verifiable::Verifiable,
+        verifiable::{Verifiable, VerifiableCtx},
     },
     utils::{
         constants::{MIRROR_FILE_EPT_TOOLCHAIN, MIRROR_FILE_HELLO},
@@ -56,7 +56,11 @@ pub fn mirror_add(cfg: &Cfg, url: &str, should_match_name: Option<String>) -> Re
 
     // 校验
     let mixed_fs = MixedFS::new("");
-    res.verify_self(&mixed_fs)?;
+    let ctx = VerifiableCtx {
+        mixed_fs: &mixed_fs,
+        cfg,
+    };
+    res.verify_self(&ctx)?;
 
     // 请求软件包列表
     let (ps_url, _) = filter_service_from_meta(&res, ServiceKeys::PkgSoftware)?;
@@ -71,7 +75,7 @@ pub fn mirror_add(cfg: &Cfg, url: &str, should_match_name: Option<String>) -> Re
         })?;
 
     // 校验
-    pkg_software_res.verify_self(&mixed_fs)?;
+    pkg_software_res.verify_self(&ctx)?;
 
     // 更新索引并写 pkg-software.toml
     let p = get_path_mirror(cfg)?.join(&mirror_name);

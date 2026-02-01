@@ -43,11 +43,11 @@ pub fn get_eval_context(
 
 // 执行条件以判断是否成立
 pub fn condition_eval(
+    cfg: &Cfg,
     condition: &str,
     exit_code: i32,
     located: &str,
     package_version: &str,
-    cfg: &Cfg,
 ) -> Result<bool> {
     // 装饰变量与函数
     let condition_with_values_interpreted =
@@ -86,7 +86,7 @@ pub fn workflow_executor(
         log!("Debug:Start step '{name}'");
         // 解释节点条件，判断是否需要跳过执行
         if let Some(c_if) = flow_node.header.c_if {
-            if !condition_eval(&c_if, cx.exit_code, &located, &package_version, &cx.cfg)? {
+            if !condition_eval(&cx.cfg, &c_if, cx.exit_code, &located, &package_version)? {
                 continue;
             }
         }
@@ -162,67 +162,69 @@ pub fn workflow_reverse_executor(
 
 #[test]
 fn test_condition_eval() {
+    use crate::utils::test::_default_test_cfg;
+
     let located = "./examples/VSCode";
-    let cfg = Cfg::default();
+    let cfg = _default_test_cfg();
     let r1 = condition_eval(
+        &cfg,
         "\"${ExitCode}\"==\"114\" && ExitCode==114 && \"${PackageVersion}\"==\"1.0.0.0\" && PackageVersion==\"1.0.0.0\"",
         114,
         located,
         "1.0.0.0",
-        &cfg,
     )
     .unwrap();
     assert!(r1);
 
     let r2 = condition_eval(
+        &cfg,
         "\"${ExitCode}\"!=\"114\" || ExitCode==514",
         114,
         located,
         "1.0.0.0",
-        &cfg,
     )
     .unwrap();
     assert!(!r2);
 
     let r3 = condition_eval(
+        &cfg,
         "\"${SystemDrive}\"==\"C:\" && SystemDrive==\"C:\"",
         0,
         located,
         "1.0.0.0",
-        &cfg,
     )
     .unwrap();
     assert!(r3);
 
     let r4 = condition_eval(
+        &cfg,
         "\"${DefaultLocation}\"==\"./unknown/VSCode\"",
         0,
         located,
         "1.0.0.0",
-        &cfg,
     )
     .unwrap();
     assert!(!r4);
 
     let r5 = condition_eval(
+        &cfg,
         "Exist(\"src/lib.rs\") && IsDirectory(\"src\")",
         0,
         "./",
         "1.0.0.0",
-        &cfg,
     )
     .unwrap();
     assert!(r5);
 
-    let r6 = condition_eval("Exist(\"./src/main.ts\")", 0, located, "1.0.0.0", &cfg).unwrap();
+    let r6 = condition_eval(&cfg, "Exist(\"./src/main.ts\")", 0, located, "1.0.0.0").unwrap();
     assert!(!r6);
 
     let r7 = condition_eval(
+        &cfg,
         "Exist(\"${AppData}\") && IsDirectory(\"${SystemDrive}/Windows\")",
         0,
         located,
         "1.0.0.0",
-        &cfg,
     )
     .unwrap();
     assert!(r7);

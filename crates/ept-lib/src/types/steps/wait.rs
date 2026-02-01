@@ -42,11 +42,11 @@ impl TStep for StepWait {
                     sleep(step_d);
                     if start_instant.elapsed() >= d
                         || condition_eval(
+                            &cx.cfg,
                             &cond,
                             cx.exit_code,
                             &cx.located,
                             &cx.pkg.package.version,
-                            &cx.cfg,
                         )?
                     {
                         break;
@@ -54,11 +54,11 @@ impl TStep for StepWait {
                 }
                 // 最终检查一次条件并配置 ExitCode
                 return if condition_eval(
+                    &cx.cfg,
                     &cond,
                     cx.exit_code,
                     &cx.located,
                     &cx.pkg.package.version,
-                    &cx.cfg,
                 )? {
                     Ok(0)
                 } else {

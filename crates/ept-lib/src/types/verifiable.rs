@@ -1,9 +1,16 @@
 use anyhow::Result;
 
+use super::cfg::Cfg;
 use super::mixed_fs::MixedFS;
 
+/// 用于校验的上下文
+pub struct VerifiableCtx<'a> {
+    pub mixed_fs: &'a MixedFS,
+    pub cfg: &'a Cfg,
+}
+
 pub trait Verifiable {
-    fn verify_self(&self, mixed_fs: &MixedFS) -> Result<()>;
+    fn verify_self(&self, ctx: &VerifiableCtx) -> Result<()>;
 }
 
 /// 校验字符串的枚举值是否有效

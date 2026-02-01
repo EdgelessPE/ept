@@ -10,7 +10,10 @@ use crate::{
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
 
-use super::{interpretable::Interpretable, mixed_fs::MixedFS, verifiable::Verifiable};
+use super::{
+    interpretable::Interpretable,
+    verifiable::{Verifiable, VerifiableCtx},
+};
 use ts_rs::TS;
 
 #[derive(Serialize, Deserialize, Clone, Debug, TS, PartialEq)]
@@ -64,7 +67,7 @@ pub struct Software {
 }
 
 impl Verifiable for Software {
-    fn verify_self(&self, mixed_fs: &MixedFS) -> Result<()> {
+    fn verify_self(&self, ctx: &VerifiableCtx) -> Result<()> {
         let err_wrapper = |e: anyhow::Error| {
             anyhow!("Error:Failed to verify table 'software' in '{FILE_PACKAGE}' : {e}",)
         };
@@ -90,14 +93,14 @@ impl Verifiable for Software {
             // 区分是绝对路径还是相对路径，仅校验相对路径的主程序
             if !is_starts_with_inner_value(main_program) {
                 // 相对路径的主程序应该存在
-                if !mixed_fs.exists(main_program) {
+                if !ctx.mixed_fs.exists(main_program) {
                     return Err(err_wrapper(anyhow!(
                         "given main program '{main_program}' doesn't exist"
                     )));
                 }
 
                 // 对于相对路径的主程序，尝试进行读取
-                let mp_path = parse_relative_path_with_located(main_program, &mixed_fs.located);
+                let mp_path = parse_relative_path_with_located(main_program, &ctx.mixed_fs.located);
                 if mp_path.exists() {
                     if let Err(e) = get_exe_version(p2s!(mp_path)) {
                         // 读不了版本号则警告
@@ -144,26 +147,33 @@ impl Interpretable for Software {
 
 #[test]
 fn test_verify_software() {
-    use crate::types::package::GlobalPackage;
+    use crate::types::{mixed_fs::MixedFS, package::GlobalPackage, verifiable::VerifiableCtx};
+    use crate::utils::test::_default_test_cfg;
+
     let base = GlobalPackage::_demo().software.unwrap();
     let mixed_fs = MixedFS::new("");
-    assert!(base.verify_self(&mixed_fs).is_ok());
+    let cfg = _default_test_cfg();
+    let ctx = VerifiableCtx {
+        mixed_fs: &mixed_fs,
+        cfg: &cfg,
+    };
+    assert!(base.verify_self(&ctx).is_ok());
 
     // 校验架构
     let mut s1 = base.clone();
     s1.arch = Some("X32".to_string());
-    assert!(s1.verify_self(&mixed_fs).is_err());
+    assert!(s1.verify_self(&ctx).is_err());
 
     // 校验语言
     let mut s2 = base.clone();
     s2.language = "ZH-CN".to_string();
-    assert!(s2.verify_self(&mixed_fs).is_err());
+    assert!(s2.verify_self(&ctx).is_err());
 
     // 校验 tags 重复
     let mut s3 = base.clone();
     s3.tags = Some(vec!["Visual Studio".to_string(), "Microsoft".to_string()]);
     s3.alias = Some("Visual Studio Code".to_string());
-    assert!(s3.verify_self(&mixed_fs).is_err());
+    assert!(s3.verify_self(&ctx).is_err());
     s3.alias = None;
-    assert!(s3.verify_self(&mixed_fs).is_ok());
+    assert!(s3.verify_self(&ctx).is_ok());
 }
