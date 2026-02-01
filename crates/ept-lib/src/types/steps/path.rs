@@ -326,11 +326,8 @@ fn test_set_system_path() {
 
 #[test]
 fn test_path() {
-    use crate::utils::flags::{set_flag, Flag};
     use crate::utils::test::_default_test_cfg;
 
-    set_flag(Flag::Debug, true);
-    set_flag(Flag::Confirm, true);
     let mut cx = WorkflowContext::_demo();
     let cfg = _default_test_cfg();
 

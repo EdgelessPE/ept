@@ -265,11 +265,9 @@ pub fn info(
 #[test]
 fn test_info() {
     use crate::types::matcher::PackageMatcher;
-    use crate::utils::flags::{set_flag, Flag};
     use crate::utils::test::_default_test_cfg;
     use crate::utils::test::_ensure_testing_vscode;
     let cfg = _default_test_cfg();
-    set_flag(Flag::Confirm, true);
     // 替换测试镜像源
     let custom_mirror_ctx = crate::utils::test::_mount_custom_mirror();
     _ensure_testing_vscode();
@@ -324,7 +322,6 @@ fn test_info() {
 fn test_info_offline() {
     use crate::utils::test::_default_test_cfg;
 
-    crate::utils::flags::set_flag(crate::utils::flags::Flag::Confirm, true);
     crate::utils::test::_ensure_testing_vscode_uninstalled();
 
     assert!(info(

@@ -27,6 +27,7 @@ pub fn _default_test_cfg() -> crate::types::cfg::Cfg {
         interaction: crate::types::cfg::Interaction {
             enable_windows_terminal_status: false,
             show_emojis: true,
+            auto_confirm_all: true,
         },
     }
 }

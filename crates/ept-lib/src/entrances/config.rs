@@ -106,12 +106,10 @@ pub fn config_which() -> Result<String> {
 
 #[test]
 fn test_config() {
-    use crate::utils::flags::{set_flag, Flag};
     use crate::utils::test::_default_test_cfg;
     use std::{fs, path::Path};
 
-    set_flag(Flag::Confirm, true);
-    let cfg = _default_test_cfg();
+    let config = _default_test_cfg();
 
     // 校对函数，同时检查 API 返回和本地文件
     fn checker(answer: Cfg) {
@@ -136,22 +134,22 @@ fn test_config() {
     let answer_cfg_init = Cfg::default();
 
     // 测试初始化
-    config_init(&cfg).unwrap();
+    config_init(&config).unwrap();
     checker(answer_cfg_init.clone());
 
     // 测试 set
     let mut new_cfg = answer_cfg_init.clone();
     let new_base = "C:/Users/Public/Music".to_string();
     new_cfg.local.base.clone_from(&new_base);
-    assert!(config_set(&cfg, "local", "base", "114514").is_err());
-    config_set(&cfg, "local", "base", &new_base).unwrap();
+    assert!(config_set(&config, "local", "base", "114514").is_err());
+    config_set(&config, "local", "base", &new_base).unwrap();
 
     // 测试 get
-    let get_base = config_get(&cfg, "local", "base").unwrap();
+    let get_base = config_get(&config, "local", "base").unwrap();
     assert_eq!(get_base, new_base);
 
     // 测试 list
-    assert_eq!(config_list(&cfg).unwrap(), format!("{new_cfg:#?}"));
+    assert_eq!(config_list(&config).unwrap(), format!("{new_cfg:#?}"));
 
     // 测试 which
     assert_eq!(config_which().unwrap(), "eptrc.toml".to_string());

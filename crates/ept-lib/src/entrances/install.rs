@@ -256,11 +256,8 @@ pub fn install_using_parsed(
 #[test]
 fn test_install() {
     use crate::types::constants::FILE_PACKAGE;
-    use crate::utils::flags::{set_flag, Flag};
     use crate::utils::fs::copy_dir;
     use crate::utils::test::_default_test_cfg;
-    set_flag(Flag::Debug, true);
-    set_flag(Flag::Confirm, true);
     crate::utils::test::_ensure_clear_test_dir();
 
     let cfg = _default_test_cfg();
@@ -456,9 +453,7 @@ fn test_reg_entry() {
 
 #[test]
 fn test_install_with_matcher() {
-    use crate::utils::flags::{set_flag, Flag};
     use crate::utils::test::_default_test_cfg;
-    set_flag(Flag::Confirm, true);
     // 替换测试镜像源
     let custom_mirror_ctx = crate::utils::test::_mount_custom_mirror();
 
@@ -537,9 +532,7 @@ fn test_install_with_matcher() {
 
 #[test]
 fn test_install_expandable() {
-    use crate::utils::flags::{set_flag, Flag};
     use crate::utils::test::_default_test_cfg;
-    set_flag(Flag::Confirm, true);
     crate::utils::test::_ensure_clear_test_dir();
     let cfg = _default_test_cfg();
     crate::utils::test::_ensure_testing_uninstalled("Microsoft", "VSCodeE");
@@ -569,7 +562,6 @@ fn test_install_expandable() {
 #[test]
 fn test_install_offline() {
     use crate::utils::test::_default_test_cfg;
-    crate::utils::flags::set_flag(crate::utils::flags::Flag::Confirm, true);
     let cfg = _default_test_cfg();
     crate::utils::test::_ensure_testing_vscode_uninstalled();
     assert!(install_using_package(&cfg, "examples/vscode", true).is_err());

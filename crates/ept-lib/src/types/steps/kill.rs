@@ -89,9 +89,6 @@ impl Generalizable for StepKill {
 #[test]
 fn test_kill() {
     use crate::types::workflow::WorkflowContext;
-    use crate::utils::flags::{set_flag, Flag};
-    set_flag(Flag::Debug, true);
-    set_flag(Flag::Confirm, true);
     let mut cx = WorkflowContext::_demo();
 
     crate::utils::test::_ensure_clear_test_dir();

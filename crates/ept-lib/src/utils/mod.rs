@@ -65,8 +65,8 @@ pub fn is_qa_mode() -> bool {
     get_flag(Flag::QA, false)
 }
 
-pub fn is_confirm_mode() -> bool {
-    get_flag(Flag::Confirm, false)
+pub fn is_confirm_mode(cfg: &Cfg) -> bool {
+    cfg.interaction.auto_confirm_all
 }
 
 pub fn format_path(raw: &str) -> String {

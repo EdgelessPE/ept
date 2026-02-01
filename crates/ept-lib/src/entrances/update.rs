@@ -8,7 +8,7 @@ use super::{
 use crate::types::constants::{
     DIR_NEP_CONTEXT, DIR_WORKFLOWS, WORKFLOW_REMOVE, WORKFLOW_SETUP, WORKFLOW_UPDATE,
 };
-use crate::utils::flags::{set_flag, Flag};
+
 use crate::{
     entrances::{expand_workshop, is_workshop_expandable},
     executor::{workflow_executor, workflow_reverse_executor},
@@ -314,7 +314,7 @@ pub fn update_using_parsed(
     Ok(arr)
 }
 
-pub fn update_all(cfg: &Cfg, verify_signature: bool) -> Result<(i32, i32)> {
+pub fn update_all(cfg: &mut Cfg, verify_signature: bool) -> Result<(i32, i32)> {
     // 遍历 list 结果，生成更新列表
     let list_res = list(cfg)?;
     let update_list: Vec<UpdateInfo> = list_res
@@ -362,7 +362,8 @@ pub fn update_all(cfg: &Cfg, verify_signature: bool) -> Result<(i32, i32)> {
     // 依次更新
     let mut success_count = 0;
     let mut failure_count = 0;
-    set_flag(Flag::Confirm, true);
+    let original_auto_confirm = cfg.interaction.auto_confirm_all;
+    cfg.interaction.auto_confirm_all = true;
     for info in update_list {
         let res = update_using_package_matcher(
             cfg,
@@ -377,7 +378,7 @@ pub fn update_all(cfg: &Cfg, verify_signature: bool) -> Result<(i32, i32)> {
             log!("{}", info.format_success());
         }
     }
-    set_flag(Flag::Confirm, false);
+    cfg.interaction.auto_confirm_all = original_auto_confirm;
 
     Ok((success_count, failure_count))
 }
@@ -399,8 +400,6 @@ fn test_same_author() {
 
 #[test]
 fn test_update_using_package() {
-    set_flag(Flag::Debug, true);
-    set_flag(Flag::Confirm, true);
     crate::utils::test::_ensure_clear_test_dir();
 
     use crate::utils::test::_default_test_cfg;
@@ -450,12 +449,10 @@ fn test_update_using_package() {
 fn test_update_all() {
     let tup = crate::utils::test::_mount_custom_mirror();
     let (_, mut handler) = crate::utils::test::_run_static_file_server();
-    set_flag(Flag::Debug, true);
-    set_flag(Flag::Confirm, true);
     crate::utils::test::_ensure_clear_test_dir();
 
     use crate::utils::test::_default_test_cfg;
-    let cfg = &_default_test_cfg();
+    let mut cfg = _default_test_cfg();
 
     // 确保已卸载
     crate::utils::test::_ensure_testing_vscode_uninstalled();
@@ -466,21 +463,21 @@ fn test_update_all() {
     crate::utils::test::_modify_package_dir_version("test/Notepad", "22.0.0.0");
 
     // 安装旧版本
-    install_using_package(cfg, "examples/VSCode", false).unwrap();
-    install_using_package(cfg, "test/Notepad", false).unwrap();
+    install_using_package(&cfg, "examples/VSCode", false).unwrap();
+    install_using_package(&cfg, "test/Notepad", false).unwrap();
 
     // 生成新包
     let source_dir = crate::utils::test::_fork_example_with_version("examples/VSCode", "1.75.4.2");
     std::fs::create_dir("test/static").unwrap();
     crate::pack(
-        cfg,
+        &cfg,
         &source_dir,
         Some("./test/static/VSCode_1.75.4.2_Cno.nep".to_string()),
         false,
     )
     .unwrap();
     crate::pack(
-        cfg,
+        &cfg,
         "./examples/Notepad",
         Some("./test/static/Notepad_22.1.0.0_Cno.nep".to_string()),
         false,
@@ -488,10 +485,16 @@ fn test_update_all() {
     .unwrap();
 
     // 更新全部
-    let (_, failure_count) = update_all(cfg, false).unwrap();
+    let (_, failure_count) = update_all(&mut cfg, false).unwrap();
     assert_eq!(failure_count, 0);
-    assert!(info_local(cfg, "Microsoft", "VSCode").unwrap().1.version == *"1.75.4.2");
-    assert!(info_local(cfg, "Microsoft", "Notepad").unwrap().1.version == *"22.1.0.0");
+    assert_eq!(
+        info_local(&cfg, "Microsoft", "VSCode").unwrap().1.version,
+        *"1.75.4.2"
+    );
+    assert_eq!(
+        info_local(&cfg, "Microsoft", "Notepad").unwrap().1.version,
+        *"22.1.0.0"
+    );
 
     // 卸载
     crate::utils::test::_ensure_testing_vscode_uninstalled();
@@ -509,8 +512,6 @@ fn test_update_workflow_executions() {
 
     let desktop = crate::utils::env::env_desktop().unwrap();
     assert!(crate::utils::wild_match::parse_wild_match("vsc*.lnk", &desktop).is_err());
-    set_flag(Flag::Confirm, true);
-
     // (旧包类型，新包类型，更新后断言存在的文件)
     let test_arr = vec![
         (0, 0, vec!["vsc0-setup-1.75.4.1"]),
@@ -577,7 +578,6 @@ fn test_update_workflow_executions() {
 fn test_update_with_different_author() {
     use crate::utils::test::_default_test_cfg;
 
-    set_flag(Flag::Confirm, true);
     let desktop = crate::utils::env::env_desktop().unwrap();
     assert!(crate::utils::wild_match::parse_wild_match("vsc*.lnk", &desktop).is_err());
     let desktop_path = std::path::Path::new(&desktop);
@@ -616,8 +616,6 @@ fn test_update_with_different_author() {
 fn test_update_expandable() {
     use crate::utils::test::_default_test_cfg;
     use std::path::Path;
-    set_flag(Flag::Confirm, true);
-    set_flag(Flag::Debug, true);
     crate::utils::test::_ensure_clear_test_dir();
     crate::utils::test::_ensure_testing_uninstalled("Microsoft", "VSCodeE");
 
@@ -671,7 +669,6 @@ fn test_update_expandable() {
 fn test_update_offline() {
     use crate::utils::test::_default_test_cfg;
 
-    crate::utils::flags::set_flag(crate::utils::flags::Flag::Confirm, true);
     let cfg = &_default_test_cfg();
     crate::utils::test::_ensure_testing_vscode();
     assert!(update_using_package(cfg, "examples/vscode", true).is_err());

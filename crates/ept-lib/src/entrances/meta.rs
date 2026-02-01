@@ -184,10 +184,8 @@ pub fn meta(cfg: &Cfg, input: PackageInputEnum, verify_signature: bool) -> Resul
 #[test]
 fn test_meta() {
     use crate::types::matcher::PackageMatcher;
-    use crate::utils::flags::{set_flag, Flag};
     use crate::utils::test::_default_test_cfg;
 
-    set_flag(Flag::Confirm, true);
     let cfg = &_default_test_cfg();
 
     // 从本地路径中生成 meta

@@ -16,7 +16,7 @@ fn get_question_head(default_value: bool) -> ColoredString {
 }
 
 fn ask_yn_impl(cfg: &Cfg, prompt: String, default_value: bool) -> bool {
-    if is_confirm_mode() {
+    if is_confirm_mode(cfg) {
         log!("{prompt} (confirmed)");
         true
     } else {
@@ -75,10 +75,8 @@ pub fn write_windows_terminal_status(cfg: &Cfg, status: u8) {
 
 #[test]
 fn test_ask_yn() {
-    use crate::utils::flags::{set_flag, Flag};
     use crate::utils::test::_default_test_cfg;
 
-    set_flag(Flag::Confirm, true);
     let cfg = _default_test_cfg();
     assert!(ask_yn(
         &cfg,

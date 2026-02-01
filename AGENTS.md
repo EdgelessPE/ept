@@ -5,6 +5,9 @@
 ## 构建/检查/测试命令
 
 ```bash
+# 每次修改代码后，构建测试目标以检查问题
+cargo build --tests
+
 # 构建项目
 cargo build
 cargo build --release

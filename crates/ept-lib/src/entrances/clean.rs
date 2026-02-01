@@ -193,12 +193,9 @@ pub fn clean(cfg: &Cfg) -> Result<usize> {
 
 #[test]
 fn test_clean() {
-    use crate::utils::flags::{set_flag, Flag};
     use crate::utils::fs::copy_dir;
     use crate::utils::test::_default_test_cfg;
     use std::fs::{copy, create_dir_all, write};
-
-    set_flag(Flag::Confirm, true);
 
     let cfg = &_default_test_cfg();
 

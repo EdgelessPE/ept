@@ -111,11 +111,8 @@ pub fn pack(
 
 #[test]
 fn test_pack() {
-    use crate::utils::flags::{set_flag, Flag};
     use crate::utils::test::_default_test_cfg;
     let cfg = _default_test_cfg();
-    set_flag(Flag::Debug, false);
-    set_flag(Flag::Confirm, true);
     pack(
         &cfg,
         "./examples/ComplexFS",
@@ -123,7 +120,6 @@ fn test_pack() {
         true,
     )
     .unwrap();
-    set_flag(Flag::Debug, true);
     pack(
         &cfg,
         "./examples/ComplexFS",

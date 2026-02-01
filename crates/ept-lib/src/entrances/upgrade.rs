@@ -125,14 +125,11 @@ pub fn upgrade(cfg: &Cfg, dry_run: bool, need_exit_process: bool) -> Result<Stri
 #[test]
 fn test_upgrade() {
     use crate::signature::blake3::compute_hash_blake3;
-    use crate::utils::flags::{set_flag, Flag};
     use crate::utils::test::_default_test_cfg;
     use crate::utils::test::_run_mirror_mock_server;
     use std::fs::{copy, remove_dir_all, rename};
     use std::{thread::sleep, time::Duration};
 
-    set_flag(Flag::Confirm, true);
-    set_flag(Flag::Debug, true);
     crate::utils::test::_ensure_clear_test_dir();
 
     let test_cfg = _default_test_cfg();

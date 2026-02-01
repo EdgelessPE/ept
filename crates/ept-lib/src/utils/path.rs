@@ -146,14 +146,11 @@ fn test_parse_relative_path() {
 
 #[test]
 fn test_find_scope_with_name() {
-    use crate::utils::flags::{set_flag, Flag};
     use crate::utils::test::_default_test_cfg;
     use crate::utils::test::{
         _ensure_testing_vscode, _mount_custom_mirror, _unmount_custom_mirror,
     };
 
-    set_flag(Flag::Debug, true);
-    set_flag(Flag::Confirm, true);
     _ensure_testing_vscode();
     let tup = _mount_custom_mirror();
 

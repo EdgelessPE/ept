@@ -151,7 +151,7 @@ fn router(action: Action, cfg: &Cfg) -> Result<String> {
                     }
                 })
             } else {
-                update_all(cfg, verify_signature).map(|(success_count, failure_count)| {
+                update_all(&mut cfg.clone(), verify_signature).map(|(success_count, failure_count)| {
                     if failure_count == 0 {
                         if success_count == 0 {
                             "Info:No updatable packages".to_string()
@@ -338,7 +338,7 @@ fn main() {
     colored::control::set_virtual_terminal(true).unwrap();
 
     // 初始化配置
-    let cfg = Cfg::init().unwrap_or_else(|e| {
+    let mut cfg = Cfg::init().unwrap_or_else(|e| {
         log!("Error:Failed to initialize config : {e}");
         exit(1);
     });
@@ -358,7 +358,7 @@ fn main() {
     }
     if args.qa || args.yes {
         log!("Warning:Confirmation mode enabled");
-        set_flag(Flag::Confirm, true);
+        cfg.interaction.auto_confirm_all = true;
     }
 
     // 清理缓存
