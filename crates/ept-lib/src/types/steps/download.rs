@@ -49,6 +49,7 @@ impl TStep for StepDownload {
         // 下载
         let p = Path::new(&cx.located).join(&self.to).to_path_buf();
         let cache_ctx = download(
+            &cx.cfg,
             &self.url,
             p.clone(),
             Some((cache_path, self.hash_blake3.clone())),

@@ -4,7 +4,6 @@ use std::sync::Mutex;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Flag {
-    Cache,
     Confirm,
     Debug,
     Offline,

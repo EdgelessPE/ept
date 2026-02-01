@@ -61,7 +61,7 @@ pub fn upgrade(cfg: &Cfg, dry_run: bool, need_exit_process: bool) -> Result<Stri
     );
     let temp_dir = allocate_path_temp(cfg, "upgrade", false)?;
     let zip_path = temp_dir.join("latest.zip");
-    let _ = download(&latest_release.url, zip_path.clone(), None)?;
+    let _ = download(cfg, &latest_release.url, zip_path.clone(), None)?;
 
     // 解压到临时目录
     let temp_release_dir = temp_dir.join("release");

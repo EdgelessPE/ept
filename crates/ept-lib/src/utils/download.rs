@@ -7,16 +7,21 @@ use std::io::{Read, Write};
 use std::path::PathBuf;
 
 use crate::p2s;
+use crate::types::cfg::Cfg;
 use crate::utils::cache::{restore_cache, CacheCtx};
-use crate::utils::flags::{get_flag, Flag};
 
 use super::allocate_path_temp;
 
 // cached 接受参数为 (存放缓存的路径，缓存 key)
 // 函数返回的是缓存上下文，当文件被验证可用后可以使用这个上下文传递给 spawn_cache 函数进行缓存
-pub fn download(url: &str, to: PathBuf, cached: Option<(PathBuf, String)>) -> Result<CacheCtx> {
+pub fn download(
+    cfg: &Cfg,
+    url: &str,
+    to: PathBuf,
+    cached: Option<(PathBuf, String)>,
+) -> Result<CacheCtx> {
     // 检查缓存
-    let enabled_cache = get_flag(Flag::Cache, true) && cached.is_some();
+    let enabled_cache = cfg.local.enable_cache && cached.is_some();
     if restore_cache(CacheCtx(enabled_cache, to.clone(), cached.clone()), url)? {
         return Ok(CacheCtx(false, to, None));
     }
@@ -67,8 +72,6 @@ pub fn download(url: &str, to: PathBuf, cached: Option<(PathBuf, String)>) -> Re
     Ok(CacheCtx(enabled_cache, to, cached))
 }
 
-use crate::types::cfg::Cfg;
-
 // 返回 （文件存放路径，缓存上下文）
 pub fn download_nep(
     cfg: &Cfg,
@@ -78,7 +81,7 @@ pub fn download_nep(
     // 下载文件到临时目录
     let temp_dir = allocate_path_temp(cfg, "download", false)?;
     let p = temp_dir.join("downloaded.nep");
-    let cache_ctx = download(url, p.clone(), cached)?;
+    let cache_ctx = download(cfg, url, p.clone(), cached)?;
 
     Ok((p, cache_ctx))
 }
@@ -116,9 +119,7 @@ pub fn fill_url_template(
 
 #[test]
 fn test_download() {
-    use crate::set_flag;
     use crate::utils::test::_default_test_cfg;
-    set_flag(Flag::Cache, true);
     let cfg = _default_test_cfg();
     // 删除下载缓存
     let cache_dir = crate::utils::get_path_cache(&cfg).unwrap();
@@ -137,7 +138,7 @@ fn test_download() {
 
     // 首次下载
     let cached = Some((cache_dir.clone(), hash.clone()));
-    let cache_ctx = download(&url, at.to_path_buf(), cached.clone()).unwrap();
+    let cache_ctx = download(&cfg, &url, at.to_path_buf(), cached.clone()).unwrap();
 
     // 断言下载成功
     assert!(at.exists());
@@ -150,7 +151,7 @@ fn test_download() {
     // 关闭服务器后仍能正常下载
     handler.kill().unwrap();
     std::fs::remove_file(at).unwrap();
-    download(&url, at.to_path_buf(), cached).unwrap();
+    download(&cfg, &url, at.to_path_buf(), cached).unwrap();
     assert!(at.exists());
 }
 
