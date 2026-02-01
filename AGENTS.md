@@ -42,6 +42,17 @@ cargo check
 - **模块**: snake_case（如 `package.rs`, `extended_semver.rs`）
 - **泛型参数**: 单个大写字母（如 `T`, `F`）
 
+### 函数参数规范
+- **配置参数位置**: 如果函数需要 `cfg: &Cfg` 入参，则该入参始终位于**第一位**（类似 `self` 的约定）
+  ```rust
+  // ✅ 正确
+  pub fn install(cfg: &Cfg, source: &str, verify: bool) -> Result<()>
+  pub fn workflow_executor(cfg: Cfg, flow: Vec<WorkflowNode>, located: String, pkg: GlobalPackage)
+  
+  // ❌ 错误
+  pub fn install(source: &str, verify: bool, cfg: &Cfg) -> Result<()>
+  ```
+
 ### 类型与 Trait
 - 拥有的字符串使用 `String`，函数参数中的字符串切片使用 `&str`
 - 优先使用 `Option<T>` 而非可空值

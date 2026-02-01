@@ -18,7 +18,7 @@ pub fn is_workshop_expandable(workshop_path: &str) -> bool {
 }
 
 // 给定一个工作目录，对该目录执行展开
-pub fn expand_workshop(_cfg: &Cfg, workshop_path: &str) -> Result<()> {
+pub fn expand_workshop(cfg: &Cfg, workshop_path: &str) -> Result<()> {
     log!("Info:Expanding nep package...");
     let base = Path::new(workshop_path);
     // 检查展开工作流是否存在
@@ -35,6 +35,7 @@ pub fn expand_workshop(_cfg: &Cfg, workshop_path: &str) -> Result<()> {
     // 执行展开工作流
     let expand_workflow = parse_workflow(&p2s!(expand_workflow_path))?;
     workflow_executor(
+        cfg.clone(),
         expand_workflow,
         p2s!(base.join(&package_struct.package.name)),
         package_struct,

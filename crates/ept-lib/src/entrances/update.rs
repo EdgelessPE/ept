@@ -87,6 +87,7 @@ fn handle_author_mismatch(
 
 // 如有需要，执行旧包的移除工作流
 fn run_old_remove_if_needed(
+    cfg: &Cfg,
     located: &Path,
     temp_dir: &Path,
     local_pkg: &GlobalPackage,
@@ -101,14 +102,14 @@ fn run_old_remove_if_needed(
         log!("Info:Running remove workflow...");
         let remove_workflow = parse_workflow(&p2s!(remove_path))?;
         let located_str = p2s!(located);
-        workflow_executor(remove_workflow, located_str, local_pkg.clone())?;
+        workflow_executor(cfg.clone(), remove_workflow, located_str, local_pkg.clone())?;
         log_ok_last!("Info:Running remove workflow...");
     }
     Ok(())
 }
 
 // 逆向执行安装工作流
-fn reverse_setup_workflow(located: &Path, local_pkg: GlobalPackage) -> Result<()> {
+fn reverse_setup_workflow(cfg: &Cfg, located: &Path, local_pkg: GlobalPackage) -> Result<()> {
     let setup_path = located
         .join(DIR_NEP_CONTEXT)
         .join(DIR_WORKFLOWS)
@@ -117,7 +118,7 @@ fn reverse_setup_workflow(located: &Path, local_pkg: GlobalPackage) -> Result<()
     let located_str = p2s!(located);
 
     log!("Info:Running reverse setup workflow...");
-    workflow_reverse_executor(setup_workflow, located_str, local_pkg)?;
+    workflow_reverse_executor(cfg.clone(), setup_workflow, located_str, local_pkg)?;
     log_ok_last!("Info:Running reverse setup workflow...");
     Ok(())
 }
@@ -141,20 +142,25 @@ fn deploy_update(temp_dir: &Path, located: &Path, name: &str) -> Result<()> {
 }
 
 // 执行新包的 update 或 setup 工作流
-fn run_new_workflow(temp_dir: &Path, located: &Path, fresh_pkg: GlobalPackage) -> Result<()> {
+fn run_new_workflow(
+    cfg: &Cfg,
+    temp_dir: &Path,
+    located: &Path,
+    fresh_pkg: GlobalPackage,
+) -> Result<()> {
     let update_path = temp_dir.join(DIR_WORKFLOWS).join(WORKFLOW_UPDATE);
     let located_str = p2s!(located);
 
     if update_path.exists() {
         log!("Info:Running update workflow...");
         let update_workflow = parse_workflow(&p2s!(update_path))?;
-        workflow_executor(update_workflow, located_str, fresh_pkg)?;
+        workflow_executor(cfg.clone(), update_workflow, located_str, fresh_pkg)?;
         log_ok_last!("Info:Running update workflow...");
     } else {
         log!("Info:Running setup workflow...");
         let setup_path = update_path.with_file_name(WORKFLOW_SETUP);
         let setup_workflow = parse_workflow(&p2s!(setup_path))?;
-        workflow_executor(setup_workflow, located_str, fresh_pkg)?;
+        workflow_executor(cfg.clone(), setup_workflow, located_str, fresh_pkg)?;
         log_ok_last!("Info:Running setup workflow...");
     }
     Ok(())
@@ -206,8 +212,8 @@ pub fn update_using_package(
 
     // 执行工作流转换
     log!("Debug:Running workflow transitions for update");
-    run_old_remove_if_needed(&located, &temp_dir_inner_path, &local_package)?;
-    reverse_setup_workflow(&located, local_package)?;
+    run_old_remove_if_needed(cfg, &located, &temp_dir_inner_path, &local_package)?;
+    reverse_setup_workflow(cfg, &located, local_package)?;
 
     // 如有展开工作流则执行
     let temp_dir_inner = p2s!(temp_dir_inner_path);
@@ -217,7 +223,7 @@ pub fn update_using_package(
 
     // 部署并运行新工作流
     deploy_update(&temp_dir_inner_path, &located, &name)?;
-    run_new_workflow(&temp_dir_inner_path, &located, fresh_package.clone())?;
+    run_new_workflow(cfg, &temp_dir_inner_path, &located, fresh_package.clone())?;
 
     // 保存上下文并验证
     let ctx_path = located.join(DIR_NEP_CONTEXT);

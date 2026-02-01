@@ -1,11 +1,13 @@
 use std::{env::current_dir, process::Child};
 
+use super::cfg::Cfg;
 use super::mixed_fs::MixedFS;
 use super::steps::VerifyStepCtx;
 use super::{
     package::GlobalPackage, permissions::Generalizable, steps::Step, verifiable::Verifiable,
 };
 use crate::log;
+use crate::utils::test::_default_test_cfg;
 use crate::utils::{
     conditions::{get_permissions_from_conditions, verify_conditions},
     term::read_console,
@@ -56,8 +58,9 @@ impl Generalizable for WorkflowHeader {
 
 impl Verifiable for WorkflowHeader {
     fn verify_self(&self, mixed_fs: &MixedFS) -> Result<()> {
-        // 校验条件
-        verify_conditions(self.get_conditions(), &mixed_fs.located, "1.0.0.0")
+        // 校验条件，使用默认配置
+        let cfg = Cfg::default();
+        verify_conditions(&cfg, self.get_conditions(), &mixed_fs.located, "1.0.0.0")
     }
 }
 
@@ -140,19 +143,25 @@ pub struct WorkflowContext {
     pub pkg: GlobalPackage,
     pub async_execution_handlers: Vec<(String, Child, bool)>, // 命令，handler，是否被抛弃
     pub exit_code: i32,
+    pub cfg: Cfg,
 }
 
 impl WorkflowContext {
     pub fn _demo() -> Self {
-        Self::new(&p2s!(current_dir().unwrap()), GlobalPackage::_demo())
+        Self::new(
+            _default_test_cfg(),
+            &p2s!(current_dir().unwrap()),
+            GlobalPackage::_demo(),
+        )
     }
 
-    pub fn new(located: &str, pkg: GlobalPackage) -> Self {
+    pub fn new(cfg: Cfg, located: &str, pkg: GlobalPackage) -> Self {
         Self {
             pkg,
             located: located.to_owned(),
             async_execution_handlers: Vec::new(),
             exit_code: 0,
+            cfg,
         }
     }
 

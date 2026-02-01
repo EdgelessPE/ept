@@ -46,14 +46,20 @@ impl TStep for StepWait {
                             cx.exit_code,
                             &cx.located,
                             &cx.pkg.package.version,
+                            &cx.cfg,
                         )?
                     {
                         break;
                     }
                 }
                 // 最终检查一次条件并配置 ExitCode
-                return if condition_eval(&cond, cx.exit_code, &cx.located, &cx.pkg.package.version)?
-                {
+                return if condition_eval(
+                    &cond,
+                    cx.exit_code,
+                    &cx.located,
+                    &cx.pkg.package.version,
+                    &cx.cfg,
+                )? {
                     Ok(0)
                 } else {
                     Ok(1)
@@ -83,7 +89,8 @@ impl TStep for StepWait {
 
         // 校验跳出条件
         if let Some(cond) = &self.break_if {
-            verify_conditions(vec![cond.to_owned()], located, "1.0.0.0")
+            let cfg = crate::types::cfg::Cfg::default();
+            verify_conditions(&cfg, vec![cond.to_owned()], located, "1.0.0.0")
                 .map_err(|e| anyhow!("Error(Wait):Failed to valid field 'break_if' : {e}"))?;
         }
 

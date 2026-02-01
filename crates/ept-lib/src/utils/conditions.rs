@@ -8,7 +8,7 @@ use crate::{
         condition_eval, get_eval_context, get_eval_function_names, get_eval_function_permission,
         verify_eval_function_arg,
     },
-    types::permissions::Permission,
+    types::{cfg::Cfg, permissions::Permission},
 };
 
 lazy_static! {
@@ -32,9 +32,11 @@ fn capture_function_info(conditions: &Vec<String>) -> Result<Vec<(String, String
 
     // 迭代所有条件语句
     let res = Arc::new(Mutex::new(Vec::new()));
+    // 使用默认配置创建上下文
+    let cfg = Cfg::default();
     for cond in conditions {
         // 初始化上下文
-        let mut context = get_eval_context(0, "", "0.0.0.0");
+        let mut context = get_eval_context(0, "", "0.0.0.0", &cfg);
 
         // 迭代函数信息，创建收集闭包
         for name in info_arr.clone() {
@@ -77,6 +79,7 @@ pub fn get_permissions_from_conditions(conditions: Vec<String>) -> Result<Vec<Pe
 }
 
 pub fn verify_conditions(
+    cfg: &Cfg,
     conditions: Vec<String>,
     located: &str,
     package_version: &str,
@@ -84,7 +87,7 @@ pub fn verify_conditions(
     // 检查模板字符串用法
     for cond in &conditions {
         if !check_proper_template_inner_value(cond) {
-            return Err(anyhow!("Error:Failed to validate condition '{cond}' : invalid inner value usage, e.g. 'Arch==\\\"X64\\\" && \\\"${{SystemDrive}}/Windows\\\"==\\\"C:/Windows\\\"'"));
+            return Err(anyhow!("Error:Failed to validate condition '{cond}' : invalid inner value usage, e.g. 'Arch==\"X64\" && \"${{SystemDrive}}/Windows\"==\"C:/Windows\"'"));
         }
     }
 
@@ -98,7 +101,7 @@ pub fn verify_conditions(
 
     // 对条件进行 eval 校验
     for cond in conditions {
-        condition_eval(&cond, 0, located, package_version)
+        condition_eval(&cond, 0, located, package_version, cfg)
             .map_err(|e| anyhow!("Error:Failed to validate condition '{cond}' : {e}"))?;
     }
 
@@ -124,7 +127,8 @@ fn test_condition() {
     .collect();
 
     // verify_conditions
-    verify_conditions(conditions.clone(), &located, "1.0.0.0").unwrap();
+    let cfg = Cfg::default();
+    verify_conditions(&cfg, conditions.clone(), &located, "1.0.0.0").unwrap();
 
     // capture_function_info
     let res = capture_function_info(&conditions.clone()).unwrap();

@@ -170,7 +170,12 @@ pub fn install_using_package(
 
     // 运行安装工作流
     log!("Info:Running setup workflow...");
-    workflow_executor(setup_workflow, into_dir.clone(), package_struct.clone())?;
+    workflow_executor(
+        cfg.clone(),
+        setup_workflow,
+        into_dir.clone(),
+        package_struct.clone(),
+    )?;
     log_ok_last!("Info:Running setup workflow...");
 
     // 保存 nep 上下文

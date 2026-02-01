@@ -28,13 +28,16 @@ lazy_static! {
     static ref SYSTEM_DRIVE: String = get_system_drive().unwrap();
 }
 
-pub fn get_eval_context(exit_code: i32, located: &str, package_version: &str) -> HashMapContext {
-    // TODO: cfg 要从顶层传入，而不是在这里 new 出来
-    let cfg = Cfg::default();
+pub fn get_eval_context(
+    exit_code: i32,
+    located: &str,
+    package_version: &str,
+    cfg: &Cfg,
+) -> HashMapContext {
     let mut context = HashMapContext::new();
     set_context_with_constant_values(&mut context);
     set_context_with_mutable_values(&mut context, exit_code, located, package_version);
-    set_context_with_function(&mut context, located, &cfg);
+    set_context_with_function(&mut context, located, cfg);
     context
 }
 
@@ -44,11 +47,12 @@ pub fn condition_eval(
     exit_code: i32,
     located: &str,
     package_version: &str,
+    cfg: &Cfg,
 ) -> Result<bool> {
     // 装饰变量与函数
     let condition_with_values_interpreted =
         values_replacer(condition.to_owned(), exit_code, located, package_version);
-    let context = get_eval_context(exit_code, located, package_version);
+    let context = get_eval_context(exit_code, located, package_version, cfg);
 
     // 执行 eval
     eval_boolean_with_context(&condition_with_values_interpreted, &context).map_err(|res| {
@@ -58,6 +62,7 @@ pub fn condition_eval(
 
 // 执行工作流，返回最后一个步骤的退出码
 pub fn workflow_executor(
+    cfg: Cfg,
     flow: Vec<WorkflowNode>,
     located: String,
     pkg: GlobalPackage,
@@ -73,7 +78,7 @@ pub fn workflow_executor(
 
     // 准备上下文
     let package_version = pkg.package.version.clone();
-    let mut cx = WorkflowContext::new(&located, pkg);
+    let mut cx = WorkflowContext::new(cfg, &located, pkg);
 
     // 遍历流节点
     for flow_node in flow {
@@ -81,7 +86,7 @@ pub fn workflow_executor(
         log!("Debug:Start step '{name}'");
         // 解释节点条件，判断是否需要跳过执行
         if let Some(c_if) = flow_node.header.c_if {
-            if !condition_eval(&c_if, cx.exit_code, &located, &package_version)? {
+            if !condition_eval(&c_if, cx.exit_code, &located, &package_version, &cx.cfg)? {
                 continue;
             }
         }
@@ -125,12 +130,13 @@ pub fn workflow_executor(
 
 // 宽容地逆向执行 setup 工作流
 pub fn workflow_reverse_executor(
+    cfg: Cfg,
     flow: Vec<WorkflowNode>,
     located: String,
     pkg: GlobalPackage,
 ) -> Result<()> {
     let package_version = pkg.package.version.clone();
-    let mut cx = WorkflowContext::new(&located, pkg);
+    let mut cx = WorkflowContext::new(cfg, &located, pkg);
 
     // 遍历流节点
     for flow_node in flow {
@@ -157,11 +163,13 @@ pub fn workflow_reverse_executor(
 #[test]
 fn test_condition_eval() {
     let located = "./examples/VSCode";
+    let cfg = Cfg::default();
     let r1 = condition_eval(
         "\"${ExitCode}\"==\"114\" && ExitCode==114 && \"${PackageVersion}\"==\"1.0.0.0\" && PackageVersion==\"1.0.0.0\"",
         114,
         located,
         "1.0.0.0",
+        &cfg,
     )
     .unwrap();
     assert!(r1);
@@ -171,6 +179,7 @@ fn test_condition_eval() {
         114,
         located,
         "1.0.0.0",
+        &cfg,
     )
     .unwrap();
     assert!(!r2);
@@ -180,6 +189,7 @@ fn test_condition_eval() {
         0,
         located,
         "1.0.0.0",
+        &cfg,
     )
     .unwrap();
     assert!(r3);
@@ -189,6 +199,7 @@ fn test_condition_eval() {
         0,
         located,
         "1.0.0.0",
+        &cfg,
     )
     .unwrap();
     assert!(!r4);
@@ -198,11 +209,12 @@ fn test_condition_eval() {
         0,
         "./",
         "1.0.0.0",
+        &cfg,
     )
     .unwrap();
     assert!(r5);
 
-    let r6 = condition_eval("Exist(\"./src/main.ts\")", 0, located, "1.0.0.0").unwrap();
+    let r6 = condition_eval("Exist(\"./src/main.ts\")", 0, located, "1.0.0.0", &cfg).unwrap();
     assert!(!r6);
 
     let r7 = condition_eval(
@@ -210,6 +222,7 @@ fn test_condition_eval() {
         0,
         located,
         "1.0.0.0",
+        &cfg,
     )
     .unwrap();
     assert!(r7);
@@ -262,7 +275,7 @@ fn test_workflow_executor() {
             }),
         },
     ];
-    assert!(workflow_executor(wf1, cx.located, cx.pkg).is_err());
+    assert!(workflow_executor(cx.cfg.clone(), wf1, cx.located, cx.pkg).is_err());
 }
 
 #[test]
@@ -301,7 +314,7 @@ fn test_workflow_executor_interpreter() {
     ];
     let mut cx = WorkflowContext::_demo();
     cx.pkg.package.strict = Some(false);
-    let code = workflow_executor(flow, cx.located, cx.pkg).unwrap();
+    let code = workflow_executor(cx.cfg.clone(), flow, cx.located, cx.pkg).unwrap();
     assert_eq!(code, 0);
 }
 
@@ -329,11 +342,11 @@ fn test_workflow_with_strict_mode() {
 
     // 默认情况下是严格模式
     let cx = WorkflowContext::_demo();
-    assert!(workflow_executor(flow.clone(), cx.located, cx.pkg).is_err());
+    assert!(workflow_executor(cx.cfg.clone(), flow.clone(), cx.located, cx.pkg).is_err());
 
     // 显式申明禁用严格模式
     let mut cx = WorkflowContext::_demo();
     cx.pkg.package.strict = Some(false);
-    let code = workflow_executor(flow.clone(), cx.located, cx.pkg).unwrap();
+    let code = workflow_executor(cx.cfg.clone(), flow.clone(), cx.located, cx.pkg).unwrap();
     assert_eq!(code, 3);
 }
