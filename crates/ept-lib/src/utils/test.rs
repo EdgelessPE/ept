@@ -29,6 +29,10 @@ pub fn _default_test_cfg() -> crate::types::cfg::Cfg {
             show_emojis: true,
             auto_confirm_all: true,
         },
+        mode: crate::types::cfg::Mode {
+            qa: false,
+            debug: true,
+        },
     }
 }
 

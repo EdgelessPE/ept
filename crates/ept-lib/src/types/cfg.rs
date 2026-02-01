@@ -97,11 +97,18 @@ pub struct Interaction {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
+pub struct Mode {
+    pub qa: bool,
+    pub debug: bool,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct Cfg {
     pub local: Local,
     pub online: Online,
     pub preference: Preference,
     pub interaction: Interaction,
+    pub mode: Mode,
 }
 
 impl Default for Cfg {
@@ -126,6 +133,10 @@ impl Default for Cfg {
                 enable_windows_terminal_status: false,
                 show_emojis: true,
                 auto_confirm_all: false,
+            },
+            mode: Mode {
+                qa: false,
+                debug: false,
             },
         }
     }
