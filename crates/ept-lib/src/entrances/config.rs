@@ -1,17 +1,11 @@
 use std::path::Path;
 
-use crate::{
-    p2s,
-    types::cfg::Cfg,
-    utils::{
-        term::ask_yn,
-    },
-};
+use crate::{p2s, types::cfg::Cfg, utils::term::ask_yn};
 use anyhow::{anyhow, Error, Result};
 use toml::Value;
 
 // 返回（key 指向的 value，整个 Cfg）
-fn get_toml_value(cfg: &Cfg,table: &str, key: &str) -> Result<(Value, Value)> {
+fn get_toml_value(cfg: &Cfg, table: &str, key: &str) -> Result<(Value, Value)> {
     // 序列化为 toml 对象
     let toml = Value::try_from(cfg)?;
     // 读 table
@@ -26,12 +20,12 @@ fn get_toml_value(cfg: &Cfg,table: &str, key: &str) -> Result<(Value, Value)> {
     Ok((val.to_owned(), toml))
 }
 
-pub fn config_set(cfg: &Cfg,table: &str, key: &str, value: &str) -> Result<()> {
+pub fn config_set(cfg: &Cfg, table: &str, key: &str, value: &str) -> Result<()> {
     // 错误处理闭包
     let err_wrapper =
         |e: Error| anyhow!("Error:Failed to set value of '${key}' as '${value}' : ${e}");
     // 拿到这个值研究一下类型
-    let (val, mut cfg) = get_toml_value(cfg,table, key).map_err(err_wrapper)?;
+    let (val, mut cfg) = get_toml_value(cfg, table, key).map_err(err_wrapper)?;
     let table = cfg.get_mut(table).unwrap();
     match val {
         Value::String(_) => {
@@ -72,8 +66,8 @@ pub fn config_set(cfg: &Cfg,table: &str, key: &str, value: &str) -> Result<()> {
     Ok(())
 }
 
-pub fn config_get(cfg: &Cfg,table: &str, key: &str) -> Result<String> {
-    let (val, _) = get_toml_value(cfg,table, key)?;
+pub fn config_get(cfg: &Cfg, table: &str, key: &str) -> Result<String> {
+    let (val, _) = get_toml_value(cfg, table, key)?;
 
     let str = val
         .as_str()
@@ -149,15 +143,15 @@ fn test_config() {
     let mut new_cfg = answer_cfg_init.clone();
     let new_base = "C:/Users/Public/Music".to_string();
     new_cfg.local.base.clone_from(&new_base);
-    assert!(config_set("local", "base", "114514").is_err());
-    config_set("local", "base", &new_base).unwrap();
+    assert!(config_set(&cfg, "local", "base", "114514").is_err());
+    config_set(&cfg, "local", "base", &new_base).unwrap();
 
     // 测试 get
-    let get_base = config_get("local", "base").unwrap();
+    let get_base = config_get(&cfg, "local", "base").unwrap();
     assert_eq!(get_base, new_base);
 
     // 测试 list
-    assert_eq!(config_list().unwrap(), format!("{new_cfg:#?}"));
+    assert_eq!(config_list(&cfg).unwrap(), format!("{new_cfg:#?}"));
 
     // 测试 which
     assert_eq!(config_which().unwrap(), "eptrc.toml".to_string());

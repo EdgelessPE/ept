@@ -159,7 +159,8 @@ impl Cfg {
     pub fn init() -> Result<Self> {
         let from = Self::use_which(true)?;
         let f = p2s!(from);
-        let default_val = Value::try_from(Self::default()).unwrap();
+        let default_val = Value::try_from(Self::default())
+            .map_err(|e| anyhow!("Error:Failed to convert default config to Value : {e}"))?;
         let settings = Config::builder()
             .add_source(config::File::from_str(
                 &to_string_pretty(&default_val).unwrap(),

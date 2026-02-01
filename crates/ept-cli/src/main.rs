@@ -14,7 +14,6 @@ use ept_lib::{
         matcher::PackageInputEnum,
     },
     utils::{
-        cfg::get_config,
         flags::{get_flag, set_flag, Flag},
         fmt_print::{fmt_print_mirror_line, FmtPrint, FmtPrintCaller, PackageSource},
         get_path_apps, launch_clean,
@@ -283,10 +282,10 @@ fn router(action: Action, cfg: &Cfg) -> Result<String> {
         }),
 
         Action::Config { operation } => match operation {
-            ActionConfig::Set { table, key, value } => config_set(&table, &key, &value)
+            ActionConfig::Set { table, key, value } => config_set(cfg, &table, &key, &value)
                 .map(|_| format!("Success:Config value of '{key}' set to '{value}'")),
-            ActionConfig::Get { table, key } => config_get(&table, &key),
-            ActionConfig::List => config_list(),
+            ActionConfig::Get { table, key } => config_get(cfg, &table, &key),
+            ActionConfig::List => config_list(cfg),
             ActionConfig::Init => config_init(cfg)
                 .map(|location| format!("Success:Initial config stored at '{location}'")),
             ActionConfig::Which => config_which(),
@@ -338,8 +337,11 @@ fn main() {
     // 启用虚拟终端
     colored::control::set_virtual_terminal(true).unwrap();
 
-    // 获取配置
-    let cfg = get_config();
+    // 初始化配置
+    let cfg = Cfg::init().unwrap_or_else(|e| {
+        log!("Error:Failed to initialize config : {e}");
+        exit(1);
+    });
 
     // 配置环境变量
     let args = Args::parse();
