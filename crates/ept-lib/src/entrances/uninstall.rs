@@ -67,6 +67,7 @@ pub fn uninstall(cfg: &Cfg, scope: Option<String>, package_name: &str) -> Result
     // 读入 package.toml
     log!("Debug:Reading package.toml from '{app_str}'");
     let global = parse_package(
+        cfg,
         &p2s!(app_path.join(DIR_NEP_CONTEXT).join(FILE_PACKAGE)),
         &app_str,
         false,

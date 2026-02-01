@@ -76,7 +76,7 @@ pub fn unpack_nep(
 
             // 读取 package.toml
             let package_path = Path::new(source).join(FILE_PACKAGE);
-            let global = parse_package(&p2s!(package_path), source, false)?;
+            let global = parse_package(cfg, &p2s!(package_path), source, false)?;
 
             // 复制到临时目录
             let temp_path = allocate_path_temp(cfg, &global.package.name, false)?;
@@ -160,6 +160,7 @@ fn normal_unpack_nep(
 
     // 读取 package.toml
     let package_struct = parse_package(
+        cfg,
         &p2s!(temp_dir_inner_path.join(FILE_PACKAGE)),
         &temp_dir_inner_str,
         false,
@@ -256,6 +257,7 @@ fn fast_unpack_nep(
 
     // 读取 package.toml
     let package_struct = parse_package(
+        cfg,
         &p2s!(temp_dir_inner_path.join(FILE_PACKAGE)),
         &temp_dir_inner_str,
         false,

@@ -52,9 +52,9 @@ impl WorkflowHeader {
 }
 
 impl Generalizable for WorkflowHeader {
-    fn generalize_permissions(&self) -> Result<Vec<Permission>> {
+    fn generalize_permissions(&self, cfg: &Cfg) -> Result<Vec<Permission>> {
         // 获取条件语句所需的权限
-        get_permissions_from_conditions(self.get_conditions())
+        get_permissions_from_conditions(cfg, self.get_conditions())
     }
 }
 
@@ -78,7 +78,9 @@ fn test_header_perm() {
         step: "Step".to_string(),
         c_if: Some("Exist(\"./mc/vsc.exe\") && IsDirectory(\"${SystemDrive}/Windows\") || Exist(\"${AppData}/Roaming/Edgeless/ept\")".to_string()),
     };
-    let res = flow.generalize_permissions().unwrap();
+    let res = flow
+        .generalize_permissions(&crate::utils::test::_default_test_cfg())
+        .unwrap();
     assert_eq!(
         res,
         vec![
@@ -139,10 +141,10 @@ pub struct WorkflowNode {
 }
 
 impl Generalizable for WorkflowNode {
-    fn generalize_permissions(&self) -> Result<Vec<Permission>> {
+    fn generalize_permissions(&self, cfg: &Cfg) -> Result<Vec<Permission>> {
         let mut perm = Vec::new();
-        perm.append(&mut self.header.generalize_permissions()?);
-        perm.append(&mut self.body.generalize_permissions()?);
+        perm.append(&mut self.header.generalize_permissions(cfg)?);
+        perm.append(&mut self.body.generalize_permissions(cfg)?);
 
         Ok(perm)
     }
@@ -152,7 +154,7 @@ impl WorkflowNode {
     pub fn verify_step(&self, ctx: &VerifyStepCtx) -> Result<()> {
         let verifiable_ctx = VerifiableCtx {
             mixed_fs: &ctx.mixed_fs,
-            cfg: &crate::types::cfg::Cfg::default(),
+            cfg: &ctx.cfg,
         };
         self.header.verify_self(&verifiable_ctx)?;
         self.body.verify_step(ctx)

@@ -30,7 +30,7 @@ pub fn expand_workshop(cfg: &Cfg, workshop_path: &str) -> Result<()> {
     }
 
     // 读取包
-    let package_struct = parse_package(&p2s!(base.join(FILE_PACKAGE)), workshop_path, false)?;
+    let package_struct = parse_package(cfg, &p2s!(base.join(FILE_PACKAGE)), workshop_path, false)?;
 
     // 执行展开工作流
     let expand_workflow = parse_workflow(&p2s!(expand_workflow_path))?;

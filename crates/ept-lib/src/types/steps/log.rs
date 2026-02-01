@@ -1,3 +1,4 @@
+use crate::Cfg;
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
@@ -59,7 +60,7 @@ impl Interpretable for StepLog {
 }
 
 impl Generalizable for StepLog {
-    fn generalize_permissions(&self) -> Result<Vec<Permission>> {
+    fn generalize_permissions(&self, _cfg: &Cfg) -> Result<Vec<Permission>> {
         Ok(vec![])
     }
 }
@@ -101,7 +102,7 @@ fn test_log_corelation() {
         level: Some(String::from("Info")),
         msg: String::from("Hello nep!"),
     }
-    .generalize_permissions()
+    .generalize_permissions(&crate::utils::test::_default_test_cfg())
     .unwrap()
     .is_empty());
 }

@@ -7,6 +7,7 @@ use crate::types::workflow::WorkflowContext;
 use crate::utils::env::{env_desktop, env_start_menu};
 use crate::utils::fs::{count_sub_files, try_recycle};
 use crate::utils::is_starts_with_inner_value;
+use crate::Cfg;
 use crate::{log, p2s, utils::path::parse_relative_path_with_located};
 use anyhow::{anyhow, Result};
 use mslnk::ShellLink;
@@ -244,7 +245,7 @@ impl Interpretable for StepLink {
 }
 
 impl Generalizable for StepLink {
-    fn generalize_permissions(&self) -> Result<Vec<Permission>> {
+    fn generalize_permissions(&self, _cfg: &Cfg) -> Result<Vec<Permission>> {
         let mut keys = Vec::new();
         if let Some(ats) = &self.at {
             if ats.contains(&"Desktop".to_string()) {

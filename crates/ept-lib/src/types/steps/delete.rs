@@ -1,3 +1,4 @@
+use crate::Cfg;
 use std::{ffi::OsString, path::Path};
 
 use super::TStep;
@@ -102,7 +103,7 @@ impl Interpretable for StepDelete {
 }
 
 impl Generalizable for StepDelete {
-    fn generalize_permissions(&self) -> Result<Vec<Permission>> {
+    fn generalize_permissions(&self, _cfg: &Cfg) -> Result<Vec<Permission>> {
         Ok(vec![Permission {
             key: PermissionKey::fs_write,
             level: judge_perm_level(&self.at)?,

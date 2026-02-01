@@ -26,17 +26,19 @@ pub fn ensure_arg(val: &Value) -> std::result::Result<String, EvalexprError> {
 }
 
 /// 使用虚拟的函数定义捕获函数运行信息，返回（函数名，参数，所属表达式）
-fn capture_function_info(conditions: &Vec<String>) -> Result<Vec<(String, String, String)>> {
+fn capture_function_info(
+    cfg: &Cfg,
+    conditions: &Vec<String>,
+) -> Result<Vec<(String, String, String)>> {
     // 获取已注册的 eval 函数名称
     let info_arr = get_eval_function_names();
 
     // 迭代所有条件语句
     let res = Arc::new(Mutex::new(Vec::new()));
-    // 使用默认配置创建上下文
-    let cfg = Cfg::default();
+
     for cond in conditions {
         // 初始化上下文
-        let mut context = get_eval_context(0, "", "0.0.0.0", &cfg);
+        let mut context = get_eval_context(0, "", "0.0.0.0", cfg);
 
         // 迭代函数信息，创建收集闭包
         for name in info_arr.clone() {
@@ -65,9 +67,12 @@ fn capture_function_info(conditions: &Vec<String>) -> Result<Vec<(String, String
     Ok(res.clone())
 }
 
-pub fn get_permissions_from_conditions(conditions: Vec<String>) -> Result<Vec<Permission>> {
+pub fn get_permissions_from_conditions(
+    cfg: &Cfg,
+    conditions: Vec<String>,
+) -> Result<Vec<Permission>> {
     // 捕获函数执行信息
-    let func_info = capture_function_info(&conditions)?;
+    let func_info = capture_function_info(cfg, &conditions)?;
 
     // 匹配生成权限信息
     let mut permissions = Vec::new();
@@ -92,7 +97,7 @@ pub fn verify_conditions(
     }
 
     // 捕获函数执行信息
-    let func_info = capture_function_info(&conditions)?;
+    let func_info = capture_function_info(cfg, &conditions)?;
 
     // 匹配函数入参进行校验
     for (name, arg, _) in func_info {
@@ -133,7 +138,7 @@ fn test_condition() {
     verify_conditions(&cfg, conditions.clone(), &located, "1.0.0.0").unwrap();
 
     // capture_function_info
-    let res = capture_function_info(&conditions.clone()).unwrap();
+    let res = capture_function_info(&cfg, &conditions.clone()).unwrap();
     let answer: Vec<(String, String, String)> = vec![
         (
             "Exist",
@@ -179,7 +184,7 @@ fn test_condition() {
 
     // get_permissions_from_conditions
     use crate::types::permissions::{PermissionKey, PermissionLevel};
-    let res = get_permissions_from_conditions(conditions.clone()).unwrap();
+    let res = get_permissions_from_conditions(&cfg, conditions.clone()).unwrap();
     let answer = vec![
         Permission {
             key: PermissionKey::fs_read,

@@ -71,7 +71,7 @@ pub fn info_local(cfg: &Cfg, scope: &str, package_name: &str) -> Result<(GlobalP
     let ctx_path = Path::new(&ctx_str);
     // 读入包信息
     let pkg_path = ctx_path.join(FILE_PACKAGE);
-    let global = parse_package(&p2s!(pkg_path), &local_str, true)?;
+    let global = parse_package(cfg, &p2s!(pkg_path), &local_str, true)?;
     // 写本地信息
     let authors = global.package.authors.clone();
     let local = InfoDiff {

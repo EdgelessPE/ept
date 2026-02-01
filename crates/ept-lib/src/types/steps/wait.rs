@@ -5,6 +5,7 @@ use crate::types::interpretable::Interpretable;
 use crate::types::steps::Permission;
 use crate::types::{mixed_fs::MixedFS, permissions::Generalizable, workflow::WorkflowContext};
 use crate::utils::conditions::{get_permissions_from_conditions, verify_conditions};
+use crate::Cfg;
 use anyhow::{anyhow, Ok, Result};
 use serde::{Deserialize, Serialize};
 use std::time::Instant;
@@ -108,11 +109,11 @@ impl Interpretable for StepWait {
 }
 
 impl Generalizable for StepWait {
-    fn generalize_permissions(&self) -> Result<Vec<Permission>> {
+    fn generalize_permissions(&self, cfg: &Cfg) -> Result<Vec<Permission>> {
         let mut permissions = Vec::new();
 
         if let Some(cond) = &self.break_if {
-            let mut cond_permissions = get_permissions_from_conditions(vec![cond.to_owned()])?;
+            let mut cond_permissions = get_permissions_from_conditions(cfg, vec![cond.to_owned()])?;
             permissions.append(&mut cond_permissions);
         }
         //@ key: 由 `break_if` 条件语句产生
@@ -256,7 +257,7 @@ fn test_wait_corelation() {
             timeout: 100,
             break_if: Some("Exist(\"${SystemDrive}:/test\")".to_string())
         }
-        .generalize_permissions()
+        .generalize_permissions(&crate::utils::test::_default_test_cfg())
         .unwrap(),
         vec![Permission {
             key: crate::types::permissions::PermissionKey::fs_read,

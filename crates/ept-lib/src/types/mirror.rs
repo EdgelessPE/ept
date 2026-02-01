@@ -289,7 +289,7 @@ pub struct MirrorInfo {
 
 #[test]
 fn test_mirror_pkg_software() {
-    use crate::types::{cfg::Cfg, mixed_fs::MixedFS, verifiable::VerifiableCtx};
+    use crate::types::{mixed_fs::MixedFS, verifiable::VerifiableCtx};
     use crate::utils::test::_default_test_cfg;
 
     let mixed_fs = MixedFS::new("");

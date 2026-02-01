@@ -577,16 +577,18 @@ pub fn _unmount_custom_mirror(tup: (bool, PathBuf, PathBuf)) {
 }
 
 pub fn _modify_package_dir_version(dir: &str, to_version: &str) {
+    let cfg = _default_test_cfg();
     let dir = dir.to_string();
     let pkg_path = format!("{dir}/{FILE_PACKAGE}");
     let version = to_version.to_string();
-    let mut pkg = crate::parsers::parse_package(&pkg_path, &dir, false).unwrap();
+    let mut pkg = crate::parsers::parse_package(&cfg, &pkg_path, &dir, false).unwrap();
     pkg.package.version = version;
     let text = toml::to_string_pretty(&pkg).unwrap();
     std::fs::write(pkg_path, text).unwrap();
 }
 
 pub fn _fork_example_with_version(origin_dir: &str, to_version: &str) -> String {
+    let cfg = _default_test_cfg();
     let temp_dir = std::path::Path::new("test").join(super::random::random_short_string());
     std::fs::create_dir_all(&temp_dir).unwrap();
     crate::utils::fs::copy_dir(origin_dir, &temp_dir).unwrap();
@@ -594,7 +596,7 @@ pub fn _fork_example_with_version(origin_dir: &str, to_version: &str) -> String 
     let dir = crate::p2s!(temp_dir);
     let pkg_path = format!("{dir}/{FILE_PACKAGE}");
     let version = to_version.to_string();
-    let mut pkg = crate::parsers::parse_package(&pkg_path, &dir, false).unwrap();
+    let mut pkg = crate::parsers::parse_package(&cfg, &pkg_path, &dir, false).unwrap();
     pkg.package.version = version;
     let text = toml::to_string_pretty(&pkg).unwrap();
     std::fs::write(pkg_path, text).unwrap();

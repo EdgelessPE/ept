@@ -1,6 +1,7 @@
 use std::path::Path;
 
 use super::TStep;
+use crate::Cfg;
 use crate::{
     executor::values_validator_path,
     p2s,
@@ -138,7 +139,7 @@ impl TStep for StepDownload {
 }
 
 impl Generalizable for StepDownload {
-    fn generalize_permissions(&self) -> Result<Vec<Permission>> {
+    fn generalize_permissions(&self, _cfg: &Cfg) -> Result<Vec<Permission>> {
         Ok(vec![Permission {
             key: PermissionKey::download_file,
             level: PermissionLevel::Important,
@@ -242,7 +243,7 @@ fn test_download_corelation() {
                 .to_string(),
             to: "test/target-test.exe".to_string(),
         }
-        .generalize_permissions()
+        .generalize_permissions(&crate::utils::test::_default_test_cfg())
         .unwrap()
         .first()
         .unwrap(),

@@ -1,4 +1,5 @@
 use crate::executor::values_replacer;
+use crate::types::cfg::Cfg;
 use crate::types::constants::FILE_PACKAGE;
 use crate::types::interpretable::Interpretable;
 use crate::types::mixed_fs::MixedFS;
@@ -90,6 +91,7 @@ fn update_ver_with_reg_entry(
 
 /// p 输入 package.toml 所在位置
 pub fn parse_package(
+    cfg: &Cfg,
     p: &str,
     located: &str,
     need_update_main_program: bool,
@@ -139,10 +141,9 @@ pub fn parse_package(
     // 校验
     let workflows_path = get_workflows_path(located)?;
     let mixed_fs = get_expanded_mixed_fs(MixedFS::new(mixed_located), workflows_path)?;
-    let cfg = crate::types::cfg::Cfg::default();
     let ctx = VerifiableCtx {
         mixed_fs: &mixed_fs,
-        cfg: &cfg,
+        cfg,
     };
     pkg.verify_self(&ctx)?;
 
@@ -197,8 +198,10 @@ fn is_nep_version_compatible(pkg_str: &str, ept_str: &str) -> Result<()> {
 
 #[test]
 fn test_update_main_program() {
+    use crate::utils::test::_default_test_cfg;
+    let cfg = _default_test_cfg();
     let located = "examples/Dism++";
-    let mut pkg = parse_package("examples/Dism++/package.toml", located, true).unwrap();
+    let mut pkg = parse_package(&cfg, "examples/Dism++/package.toml", located, true).unwrap();
     pkg.package.version = "10.1.112.1".to_string();
     let software = pkg.clone().software.unwrap();
 
@@ -232,9 +235,11 @@ fn test_is_nep_version_compatible() {
 #[test]
 fn test_parse_package() {
     use crate::utils::flags::{set_flag, Flag};
+    use crate::utils::test::_default_test_cfg;
     set_flag(Flag::Debug, true);
+    let cfg = _default_test_cfg();
     let located = "examples/VSCode";
-    let pkg = parse_package("examples/VSCode/package.toml", located, false).unwrap();
+    let pkg = parse_package(&cfg, "examples/VSCode/package.toml", located, false).unwrap();
     let answer = GlobalPackage {
         nep: "0".to_string(),
         package: crate::types::package::Package {

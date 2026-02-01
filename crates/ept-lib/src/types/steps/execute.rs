@@ -6,6 +6,7 @@ use crate::types::workflow::WorkflowContext;
 use crate::utils::{
     command::split_command, format_path, is_starts_with_inner_value, term::read_console,
 };
+use crate::Cfg;
 use crate::{log, verify_enum};
 
 use super::TStep;
@@ -205,7 +206,7 @@ impl Interpretable for StepExecute {
 }
 
 impl Generalizable for StepExecute {
-    fn generalize_permissions(&self) -> Result<Vec<Permission>> {
+    fn generalize_permissions(&self, _cfg: &Cfg) -> Result<Vec<Permission>> {
         let node = if self.call_installer.unwrap_or(false) {
             Permission {
                 key: PermissionKey::execute_installer,

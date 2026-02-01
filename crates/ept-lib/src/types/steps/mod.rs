@@ -1,4 +1,6 @@
 use crate::types::permissions::{Generalizable, Permission};
+use crate::utils::test::_default_test_cfg;
+use crate::Cfg;
 use anyhow::{anyhow, Result};
 use serde::de;
 use serde::{Deserialize, Serialize};
@@ -20,6 +22,7 @@ mod wait;
 
 pub struct VerifyStepCtx {
     pub mixed_fs: MixedFS,
+    pub cfg: Cfg,
     pub is_expand_flow: bool,
 }
 
@@ -27,6 +30,7 @@ impl VerifyStepCtx {
     pub fn _demo() -> Self {
         Self {
             mixed_fs: MixedFS::new(""),
+            cfg: _default_test_cfg(),
             is_expand_flow: false,
         }
     }
@@ -106,9 +110,9 @@ macro_rules! def_enum_step {
         }
 
         impl Generalizable for Step {
-            fn generalize_permissions(&self)->Result<Vec<Permission>> {
+            fn generalize_permissions(&self, cfg: &Cfg)->Result<Vec<Permission>> {
                 match self {
-                    $( Step::$x(step) => step.generalize_permissions() ),*
+                    $( Step::$x(step) => step.generalize_permissions(cfg) ),*
                 }
             }
         }

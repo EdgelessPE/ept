@@ -86,7 +86,7 @@ pub fn verify(cfg: &Cfg, source_dir: &str) -> Result<GlobalPackage> {
     // 读取包信息
     log!("Info:Resolving data...");
     let pkg_path = Path::new(source_dir).join(FILE_PACKAGE);
-    let global = parse_package(&p2s!(pkg_path), source_dir, false)?;
+    let global = parse_package(cfg, &p2s!(pkg_path), source_dir, false)?;
     let software = global.software.clone().unwrap();
     let pkg_content_path = p2s!(Path::new(source_dir).join(&global.package.name));
     log!(
@@ -110,6 +110,7 @@ pub fn verify(cfg: &Cfg, source_dir: &str) -> Result<GlobalPackage> {
         setup_flow.clone(),
         &VerifyStepCtx {
             mixed_fs: MixedFS::new(&pkg_content_path),
+            cfg: cfg.clone(),
             is_expand_flow: false,
         },
     )?;
@@ -135,6 +136,7 @@ pub fn verify(cfg: &Cfg, source_dir: &str) -> Result<GlobalPackage> {
     let optional_workflows = vec![WORKFLOW_UPDATE, WORKFLOW_REMOVE];
     let ctx = VerifyStepCtx {
         mixed_fs: MixedFS::new(source_dir),
+        cfg: cfg.clone(),
         is_expand_flow: false,
     };
     for opt_workflow in optional_workflows {
@@ -151,6 +153,7 @@ pub fn verify(cfg: &Cfg, source_dir: &str) -> Result<GlobalPackage> {
     // 检查展开工作流
     let ctx = VerifyStepCtx {
         mixed_fs: MixedFS::new(source_dir),
+        cfg: cfg.clone(),
         is_expand_flow: true,
     };
     let expand_path = get_workflow_path(source_dir, WORKFLOW_EXPAND);
@@ -275,7 +278,7 @@ fn test_verify() {
     let package_scene = std::fs::read_to_string("examples/CallInstaller/package.toml").unwrap();
     // 读取 package
     let pkg_path = "examples/CallInstaller/package.toml";
-    let mut raw_pkg = parse_package(pkg_path, "examples/CallInstaller", false).unwrap();
+    let mut raw_pkg = parse_package(&cfg, pkg_path, "examples/CallInstaller", false).unwrap();
 
     // 删除 CallInstaller 的 main_program
     raw_pkg.software = raw_pkg.software.map(|mut soft| {

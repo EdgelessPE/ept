@@ -8,6 +8,7 @@ use crate::types::{
     permissions::{Generalizable, PermissionLevel},
     workflow::WorkflowContext,
 };
+use crate::Cfg;
 use anyhow::{anyhow, Ok, Result};
 use serde::{Deserialize, Serialize};
 use winrt_notification::{Duration, Sound, Toast};
@@ -70,7 +71,7 @@ impl Interpretable for StepToast {
 }
 
 impl Generalizable for StepToast {
-    fn generalize_permissions(&self) -> Result<Vec<Permission>> {
+    fn generalize_permissions(&self, _cfg: &Cfg) -> Result<Vec<Permission>> {
         Ok(vec![Permission {
             key: PermissionKey::notify_toast,
             level: PermissionLevel::Normal,
@@ -97,6 +98,8 @@ fn test_toast() {
 #[test]
 fn test_toast_corelation() {
     use crate::types::workflow::WorkflowContext;
+    use crate::utils::test::_default_test_cfg;
+
     let mut cx = WorkflowContext::_demo();
     let mut mixed_fs = MixedFS::new("");
 
@@ -123,6 +126,7 @@ fn test_toast_corelation() {
     }
     .verify_step(&super::VerifyStepCtx {
         mixed_fs: MixedFS::new(""),
+        cfg: _default_test_cfg(),
         is_expand_flow: false,
     })
     .is_ok());

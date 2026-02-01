@@ -50,10 +50,9 @@ pub fn read_local_mirror_hello(cfg: &Cfg, name: &str) -> Result<(MirrorHello, Pa
     let text = read_to_string(&p)?;
     let hello: MirrorHello = from_str(&text)
         .map_err(|e| anyhow!("Error:Invalid hello content at '{fp}' : {e}", fp = p2s!(p)))?;
-    let cfg_for_verify = crate::types::cfg::Cfg::default();
     let ctx = VerifiableCtx {
         mixed_fs: &MixedFS::new(""),
-        cfg: &cfg_for_verify,
+        cfg,
     };
     hello.verify_self(&ctx)?;
     Ok((hello, dir_path))
