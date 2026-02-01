@@ -94,8 +94,7 @@ pub fn config_init(cfg: &Cfg) -> Result<String> {
     {
         return Err(anyhow!("Error:Operation cancelled by user"));
     }
-    let init_cfg = Cfg::default();
-    Cfg::overwrite(init_cfg)?;
+    Cfg::overwrite(cfg.clone())?;
     Ok(file_path)
 }
 
