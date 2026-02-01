@@ -22,7 +22,7 @@ lazy_static! {
     static ref USER_DIR: PathBuf = home_dir().unwrap().join("ept");
 }
 
-const FILE_NAME: &str = "eptrc.toml";
+pub const FILE_NAME: &str = "eptrc.toml";
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct Local {
     pub base: String,

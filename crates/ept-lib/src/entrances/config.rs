@@ -106,6 +106,7 @@ pub fn config_which() -> Result<String> {
 
 #[test]
 fn test_config() {
+    use crate::types::cfg::FILE_NAME;
     use crate::utils::test::_default_test_cfg;
     use std::{fs, path::Path};
 
@@ -113,25 +114,25 @@ fn test_config() {
 
     // 校对函数，同时检查 API 返回和本地文件
     fn checker(answer: Cfg) {
-        let toml = fs::read_to_string("eptrc.toml").unwrap();
+        let toml = fs::read_to_string(FILE_NAME).unwrap();
         let file_cfg: Cfg = toml::from_str(&toml).unwrap();
         assert_eq!(file_cfg, answer);
     }
 
     // 先保存当前目录下 eptrc.toml 的现场
-    let scene_opt = if Path::new("eptrc.toml").exists() {
-        Some(fs::read_to_string("eptrc.toml").unwrap())
+    let scene_opt = if Path::new(FILE_NAME).exists() {
+        Some(fs::read_to_string(FILE_NAME).unwrap())
     } else {
         // 如果没有必须新建一个，不然默认会在用户目录里面新建配置文件
-        let mut default_cfg = Cfg::default();
+        let mut default_cfg = _default_test_cfg();
         default_cfg.local.base = "C:/Users/Public/Videos".to_string();
         let text = toml::to_string_pretty(&default_cfg).unwrap();
-        fs::write("eptrc.toml", text).unwrap();
+        fs::write(FILE_NAME, text).unwrap();
         None
     };
 
     // 拿到答案
-    let answer_cfg_init = Cfg::default();
+    let answer_cfg_init = _default_test_cfg();
 
     // 测试初始化
     config_init(&config).unwrap();
@@ -152,7 +153,7 @@ fn test_config() {
     assert_eq!(config_list(&config).unwrap(), format!("{new_cfg:#?}"));
 
     // 测试 which
-    assert_eq!(config_which().unwrap(), "eptrc.toml".to_string());
+    assert_eq!(config_which().unwrap(), FILE_NAME.to_string());
 
     // 还原现场
     if let Some(text) = scene_opt {
@@ -160,6 +161,6 @@ fn test_config() {
         let cfg: Cfg = toml::from_str(&text).unwrap();
         Cfg::overwrite(cfg).unwrap();
     } else {
-        fs::remove_file("eptrc.toml").unwrap();
+        fs::remove_file(FILE_NAME).unwrap();
     }
 }
