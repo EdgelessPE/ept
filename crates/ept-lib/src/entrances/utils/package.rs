@@ -72,7 +72,7 @@ pub fn unpack_nep(
         } else {
             // 检查是否为合法的输入目录
             inner_validator(source)?;
-            entrances::verify::verify(source, cfg)?;
+            entrances::verify::verify(cfg, source)?;
 
             // 读取 package.toml
             let package_path = Path::new(source).join(FILE_PACKAGE);
@@ -290,10 +290,10 @@ fn test_unpack_nep() {
     let cfg = _default_test_cfg();
 
     crate::pack(
+        &cfg,
         "./examples/VSCode",
         Some("./test/VSCode_1.75.0.0_Cno.nep".to_string()),
         true,
-        &cfg,
     )
     .unwrap();
 
@@ -313,10 +313,10 @@ fn test_normal_unpack_nep() {
     let cfg = _default_test_cfg();
 
     crate::pack(
+        &cfg,
         "./examples/VSCode",
         Some("./test/VSCode_1.75.0.0_Cno.nep".to_string()),
         true,
-        &cfg,
     )
     .unwrap();
 
@@ -336,10 +336,10 @@ fn test_fast_unpack_nep() {
     let cfg = _default_test_cfg();
 
     crate::pack(
+        &cfg,
         "./examples/VSCode",
         Some("./test/VSCode_1.75.0.0_Cno.nep".to_string()),
         true,
-        &cfg,
     )
     .unwrap();
 
@@ -385,20 +385,20 @@ fn test_bad_package() {
 
     // 生成基础目录
     crate::pack(
+        &test_cfg,
         "./examples/Dism++",
         Some("./test/Normal.nep".to_string()),
         true,
-        &test_cfg,
     )
     .unwrap();
     release_tar("./test/Normal.nep", "./test/Normal").unwrap();
 
     // 未签名
     crate::pack(
+        &test_cfg,
         "./examples/Dism++",
         Some("./test/UnSig++_10.1.1002.1_Cno.nep".to_string()),
         false,
-        &test_cfg,
     )
     .unwrap();
     assert!(normal_unpack_nep(&test_cfg, "./test/UnSig++_10.1.1002.1_Cno.nep", true).is_err());

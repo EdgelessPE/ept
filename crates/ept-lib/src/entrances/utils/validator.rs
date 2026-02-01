@@ -30,10 +30,10 @@ pub fn inner_validator(dir: &str) -> Result<()> {
 }
 
 pub fn manifest_validator(
+    cfg: &Cfg,
     base: &str,
     manifest: Vec<String>,
     fs: &mut MixedFS,
-    cfg: &Cfg,
 ) -> Result<()> {
     let mut missing_list = HashSet::new();
     for path in manifest {
@@ -128,10 +128,10 @@ fn test_manifest_validator() {
     let cfg = _default_test_cfg();
     let manifest = vec!["VSCode", "Microsoft", "VScode", FILE_PACKAGE];
     assert!(manifest_validator(
+        &cfg,
         base,
         manifest.into_iter().map(|s| s.to_string()).collect(),
         &mut MixedFS::new(base),
-        &cfg,
     )
     .is_err())
 }

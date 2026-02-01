@@ -288,10 +288,10 @@ fn test_install() {
 
     // 打包并安装
     crate::pack(
+        &cfg,
         "./examples/VSCode",
         Some("./test/VSCode_1.75.0.0_Cno (1).nep".to_string()),
         true,
-        &cfg,
     )
     .unwrap();
     install_using_package(&cfg, "./test/VSCode_1.75.0.0_Cno (1).nep", true).unwrap();
@@ -404,7 +404,7 @@ fn test_reg_entry() {
     .unwrap();
 
     // 校验
-    assert!(crate::entrances::verify::verify("examples/RegEntry", &cfg).is_ok());
+    assert!(crate::entrances::verify::verify(&cfg, "examples/RegEntry").is_ok());
 
     // 安装
     use crate::utils::test::{_ensure_testing, _ensure_testing_uninstalled};
@@ -468,6 +468,7 @@ fn test_install_with_matcher() {
         std::fs::create_dir_all(static_path).unwrap();
     }
     crate::pack(
+        &cfg,
         "./examples/VSCode",
         Some(
             static_path
@@ -476,7 +477,6 @@ fn test_install_with_matcher() {
                 .to_string(),
         ),
         true,
-        &cfg,
     )
     .unwrap();
 
@@ -501,6 +501,7 @@ fn test_install_with_matcher() {
 
     // 重新打包一个更高版本的
     crate::pack(
+        &cfg,
         &source_dir,
         Some(
             static_path
@@ -509,7 +510,6 @@ fn test_install_with_matcher() {
                 .to_string(),
         ),
         true,
-        &cfg,
     )
     .unwrap();
 

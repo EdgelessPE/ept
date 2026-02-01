@@ -66,7 +66,7 @@ fn verify_workflow(flow: Vec<WorkflowNode>, ctx: &VerifyStepCtx) -> Result<bool>
     Ok(have_call_installer)
 }
 
-pub fn verify(source_dir: &str, cfg: &Cfg) -> Result<GlobalPackage> {
+pub fn verify(cfg: &Cfg, source_dir: &str) -> Result<GlobalPackage> {
     log!("Debug:Starting verification for source directory '{source_dir}'");
     // 打包检查
     log!("Info:Validating source directory...");
@@ -178,7 +178,7 @@ pub fn verify(source_dir: &str, cfg: &Cfg) -> Result<GlobalPackage> {
         let mut update_manifest = get_manifest(update_flow, &mut fs);
         setup_manifest.append(&mut update_manifest);
     }
-    manifest_validator(&pkg_content_path, setup_manifest, &mut fs, cfg)?;
+    manifest_validator(cfg, &pkg_content_path, setup_manifest, &mut fs)?;
     log_ok_last!("Info:Checking manifest...");
     log!("Debug:Manifest validation completed for '{pkg_content_path}'");
 
@@ -244,10 +244,10 @@ fn test_verify() {
     set_flag(Flag::Debug, true);
     let cfg = _default_test_cfg();
     use std::fs::write;
-    verify("./examples/VSCode", &cfg).unwrap();
-    verify("./examples/VSCodeE", &cfg).unwrap();
-    verify("./examples/CallInstaller", &cfg).unwrap();
-    verify("./examples/PermissionsTest", &cfg).unwrap();
+    verify(&cfg, "./examples/VSCode").unwrap();
+    verify(&cfg, "./examples/VSCodeE").unwrap();
+    verify(&cfg, "./examples/CallInstaller").unwrap();
+    verify(&cfg, "./examples/PermissionsTest").unwrap();
 
     // 手动添加没有 call_installer 的 update.toml
     std::fs::copy(
@@ -255,7 +255,7 @@ fn test_verify() {
         "./examples/CallInstaller/workflows/update.toml",
     )
     .unwrap();
-    assert!(verify("./examples/CallInstaller", &cfg).is_err());
+    assert!(verify(&cfg, "./examples/CallInstaller").is_err());
     std::fs::remove_file("./examples/CallInstaller/workflows/update.toml").unwrap();
 
     // 调用了 call_installer 但是不提供 remove.toml
@@ -264,7 +264,7 @@ fn test_verify() {
         "examples/CallInstaller/workflows/_remove.toml",
     )
     .unwrap();
-    assert!(verify("./examples/CallInstaller", &cfg).is_err());
+    assert!(verify(&cfg, "./examples/CallInstaller").is_err());
     std::fs::rename(
         "examples/CallInstaller/workflows/_remove.toml",
         "examples/CallInstaller/workflows/remove.toml",
@@ -283,7 +283,7 @@ fn test_verify() {
         soft
     });
     write(pkg_path, toml::to_string_pretty(&raw_pkg).unwrap()).unwrap();
-    assert!(verify("./examples/CallInstaller", &cfg).is_err());
+    assert!(verify(&cfg, "./examples/CallInstaller").is_err());
 
     // 令 CallInstaller 的 main_program 为相对路径
     raw_pkg.software = raw_pkg.software.map(|mut soft| {
@@ -291,7 +291,7 @@ fn test_verify() {
         soft
     });
     write(pkg_path, toml::to_string_pretty(&raw_pkg).unwrap()).unwrap();
-    assert!(verify("./examples/CallInstaller", &cfg).is_err());
+    assert!(verify(&cfg, "./examples/CallInstaller").is_err());
 
     // 还原现场
     write(pkg_path, package_scene).unwrap();

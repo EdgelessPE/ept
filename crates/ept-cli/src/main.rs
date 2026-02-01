@@ -248,7 +248,7 @@ fn router(action: Action, cfg: &Cfg) -> Result<String> {
         Action::Pack {
             source_dir,
             into_file,
-        } => pack(&source_dir, into_file, verify_signature, cfg)
+        } => pack(cfg, &source_dir, into_file, verify_signature)
             .map(|location| format!("Success:Package stored at '{location}'")),
         Action::Meta {
             package_matcher: package,

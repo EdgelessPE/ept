@@ -393,10 +393,10 @@ fn test_meta() {
     crate::utils::test::_ensure_testing_uninstalled("Microsoft", "VSCodeE");
     let (url, mut handler) = crate::utils::test::_run_static_file_server();
     crate::entrances::pack(
+        cfg,
         "examples/VSCodeE",
         Some("test/VSCodeE.nep".to_string()),
         false,
-        cfg,
     )
     .unwrap();
     let res = meta(

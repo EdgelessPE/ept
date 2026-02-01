@@ -15,15 +15,15 @@ use std::fs::{remove_dir_all, write};
 use std::path::Path;
 
 pub fn pack(
+    cfg: &Cfg,
     source_dir: &str,
     into_file: Option<String>,
     need_sign: bool,
-    cfg: &Cfg,
 ) -> Result<String> {
     log!("Info:Preparing to pack '{source_dir}'");
 
     // 通用校验
-    let global = verify(source_dir, cfg)?;
+    let global = verify(cfg, source_dir)?;
     let first_author = parse_author(&global.package.authors[0])?;
     let file_stem = format!(
         "{pn}_{pv}_{fa}",
@@ -117,18 +117,18 @@ fn test_pack() {
     set_flag(Flag::Debug, false);
     set_flag(Flag::Confirm, true);
     pack(
+        &cfg,
         "./examples/ComplexFS",
         Some("./test/ComplexFS_1.75.0.0_Cno.nep".to_string()),
         true,
-        &cfg,
     )
     .unwrap();
     set_flag(Flag::Debug, true);
     pack(
+        &cfg,
         "./examples/ComplexFS",
         Some("./test/ComplexFS_1.75.0.0_Cno.nep".to_string()),
         false,
-        &cfg,
     )
     .unwrap();
 }

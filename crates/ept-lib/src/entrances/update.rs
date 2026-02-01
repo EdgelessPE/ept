@@ -405,10 +405,10 @@ fn test_update_using_package() {
 
     // 安装旧版本
     crate::pack(
+        cfg,
         "./examples/VSCode",
         Some("./test/VSCode_1.75.0.0_Cno.nep".to_string()),
         true,
-        cfg,
     )
     .unwrap();
     install_using_package(cfg, "./test/VSCode_1.75.0.0_Cno.nep", true).unwrap();
@@ -467,17 +467,17 @@ fn test_update_all() {
     let source_dir = crate::utils::test::_fork_example_with_version("examples/VSCode", "1.75.4.2");
     std::fs::create_dir("test/static").unwrap();
     crate::pack(
+        cfg,
         &source_dir,
         Some("./test/static/VSCode_1.75.4.2_Cno.nep".to_string()),
         false,
-        cfg,
     )
     .unwrap();
     crate::pack(
+        cfg,
         "./examples/Notepad",
         Some("./test/static/Notepad_22.1.0.0_Cno.nep".to_string()),
         false,
-        cfg,
     )
     .unwrap();
 
