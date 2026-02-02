@@ -235,9 +235,8 @@ fn test_is_nep_version_compatible() {
 
 #[test]
 fn test_parse_package() {
-    use crate::utils::flags::{set_flag, Flag};
     use crate::utils::test::_default_test_cfg;
-    set_flag(Flag::Debug, true);
+
     let cfg = _default_test_cfg();
     let located = "examples/VSCode";
     let pkg = parse_package(&cfg, "examples/VSCode/package.toml", located, false).unwrap();

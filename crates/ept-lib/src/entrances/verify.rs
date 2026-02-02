@@ -245,7 +245,6 @@ fn test_get_manifest() {
 fn test_verify() {
     use crate::utils::flags::{set_flag, Flag};
     use crate::utils::test::_default_test_cfg;
-    set_flag(Flag::Debug, true);
     let cfg = _default_test_cfg();
     use std::fs::write;
     verify(&cfg, "./examples/VSCode").unwrap();

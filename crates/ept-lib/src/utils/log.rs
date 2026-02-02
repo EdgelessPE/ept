@@ -4,16 +4,18 @@ use colored::Colorize;
 use console::Term;
 use regex::Regex;
 
-use super::{
-    fmt_print::{fmt_log, fmt_log_in_step},
-    is_debug_mode,
-};
+use super::fmt_print::{fmt_log, fmt_log_in_step};
 
 lazy_static! {
     static ref RE: Regex =
         Regex::new(r"(Question|Debug|Info|Warning|Error|Success)(\(\w+\))?:(.+)").unwrap();
     static ref TERM: Term = Term::stdout();
     static ref LAST_LOG: Mutex<String> = Mutex::new("".to_string());
+}
+
+fn is_debug_mode() -> bool {
+    // TODO: 替换为 tracing 实现
+    true
 }
 
 #[allow(dead_code)]
@@ -105,9 +107,6 @@ macro_rules! log_ok_last {
 
 #[test]
 fn test_log() {
-    use crate::utils::flags::{set_flag, Flag};
-    set_flag(Flag::Debug, true);
-
     fn_log("Question:This is a question".to_string());
     fn_log("Debug:This is a debug".to_string());
     fn_log("Info:This is a info".to_string());

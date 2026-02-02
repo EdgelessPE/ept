@@ -199,7 +199,6 @@ impl MixedFS {
 #[test]
 fn test_mixed_fs() {
     use crate::utils::flags::{set_flag, Flag};
-    set_flag(Flag::Debug, true);
     let mut mfs = MixedFS::new("./");
 
     // 基础判断能力

@@ -11,7 +11,6 @@ use ept_lib::{
         matcher::PackageInputEnum,
     },
     utils::{
-        flags::{set_flag, Flag},
         fmt_print::{fmt_print_mirror_line, FmtPrint, FmtPrintCaller, PackageSource},
         get_path_apps, launch_clean,
         parse_inputs::{parse_install_inputs, parse_uninstall_inputs, parse_update_inputs},
@@ -353,7 +352,7 @@ fn main() {
     }
     if args.debug || args.qa || cfg!(debug_assertions) {
         log!("Warning:Debug mode enabled");
-        set_flag(Flag::Debug, true);
+        runtime_ctx.cfg.mode.debug = true;
     }
     if args.offline {
         log!("Warning:Offline mode enabled, ept couldn't guarantee security or integrality of packages");

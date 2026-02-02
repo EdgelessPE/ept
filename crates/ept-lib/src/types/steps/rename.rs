@@ -140,7 +140,6 @@ fn test_rename() {
     use crate::types::context::WorkflowContext;
     use crate::utils::flags::{set_flag, Flag};
     use std::path::Path;
-    set_flag(Flag::Debug, true);
     let mut cx = WorkflowContext::_demo();
     crate::utils::test::_ensure_clear_test_dir();
 

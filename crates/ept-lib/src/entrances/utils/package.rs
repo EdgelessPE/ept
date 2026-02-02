@@ -22,7 +22,7 @@ use crate::{
         constants::{EXT_TAR_ZST, FILE_PACKAGE},
         package::GlobalPackage,
     },
-    utils::{allocate_path_temp, fs::copy_dir, is_debug_mode},
+    utils::{allocate_path_temp, fs::copy_dir},
 };
 use crate::{log, log_ok_last};
 
@@ -37,7 +37,7 @@ fn get_temp_dir_path(ctx: &RuntimeContext, source_file: &str) -> Result<PathBuf>
 /// 清理临时目录(会判断 debug)
 pub fn clean_temp(ctx: &RuntimeContext, source_file: &str) -> Result<()> {
     let temp_dir_path = get_temp_dir_path(ctx, source_file)?;
-    if !is_debug_mode() {
+    if !ctx.cfg.mode.debug {
         log!("Info:Cleaning...");
         let clean_res = remove_dir_all(&temp_dir_path);
         if clean_res.is_ok() {
@@ -282,12 +282,8 @@ fn fast_unpack_nep(
 
 #[test]
 fn test_unpack_nep() {
-    use crate::utils::flags::{set_flag, Flag};
     use crate::utils::test::_default_test_cfg;
-    if cfg!(debug_assertions) {
-        log!("Warning:Debug mode enabled");
-        set_flag(Flag::Debug, true);
-    }
+
     crate::utils::test::_ensure_clear_test_dir();
     let cfg = _default_test_cfg();
 
@@ -305,12 +301,8 @@ fn test_unpack_nep() {
 
 #[test]
 fn test_normal_unpack_nep() {
-    use crate::utils::flags::{set_flag, Flag};
     use crate::utils::test::_default_test_cfg;
-    if cfg!(debug_assertions) {
-        log!("Warning:Debug mode enabled");
-        set_flag(Flag::Debug, true);
-    }
+
     crate::utils::test::_ensure_clear_test_dir();
     let cfg = _default_test_cfg();
 
@@ -328,12 +320,8 @@ fn test_normal_unpack_nep() {
 
 #[test]
 fn test_fast_unpack_nep() {
-    use crate::utils::flags::{set_flag, Flag};
     use crate::utils::test::_default_test_cfg;
-    if cfg!(debug_assertions) {
-        log!("Warning:Debug mode enabled");
-        set_flag(Flag::Debug, true);
-    }
+
     crate::utils::test::_ensure_clear_test_dir();
     let cfg = _default_test_cfg();
 

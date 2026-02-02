@@ -125,7 +125,6 @@ fn test_new() {
     use crate::utils::flags::{set_flag, Flag};
     use std::fs::metadata;
     use std::path::Path;
-    set_flag(Flag::Debug, true);
     let mut cx = WorkflowContext::_demo();
     if Path::new("test").exists() {
         std::fs::remove_dir_all("test").unwrap();

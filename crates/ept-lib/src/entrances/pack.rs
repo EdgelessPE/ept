@@ -8,7 +8,7 @@ use crate::types::{
     constants::EXT_TAR_ZST,
     signature::{Signature, SignatureNode},
 };
-use crate::utils::{allocate_path_temp, is_debug_mode};
+use crate::utils::allocate_path_temp;
 use crate::{log, log_ok_last, p2s};
 use anyhow::{anyhow, Result};
 use std::fs::{remove_dir_all, write};
@@ -87,7 +87,7 @@ pub fn pack(
     log_ok_last!("Info:Packing outer package...");
 
     // 清理临时文件夹
-    if !is_debug_mode() {
+    if !ctx.cfg.mode.debug {
         log!("Info:Cleaning...");
         let clean_res = remove_dir_all(&temp_dir_path);
         if clean_res.is_ok() {

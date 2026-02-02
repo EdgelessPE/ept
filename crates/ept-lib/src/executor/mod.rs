@@ -243,8 +243,7 @@ fn test_condition_eval() {
 fn test_workflow_executor() {
     use crate::types::steps::{Step, StepExecute, StepLog};
     use crate::types::workflow::{WorkflowHeader, WorkflowNode};
-    use crate::utils::flags::{set_flag, Flag};
-    set_flag(Flag::Debug, true);
+
     let cx = WorkflowContext::_demo();
     let wf1 = vec![
         WorkflowNode {

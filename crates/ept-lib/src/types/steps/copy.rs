@@ -210,7 +210,6 @@ fn test_copy() {
     use crate::utils::flags::{set_flag, Flag};
     use std::fs::remove_dir_all;
     use std::path::Path;
-    set_flag(Flag::Debug, true);
     let mut cx = WorkflowContext::_demo();
     remove_dir_all("test").unwrap();
 

@@ -136,7 +136,6 @@ fn test_move() {
     use crate::utils::flags::{set_flag, Flag};
     use crate::utils::fs::copy_dir;
     use std::path::Path;
-    set_flag(Flag::Debug, true);
     let mut cx = WorkflowContext::_demo();
     crate::utils::test::_ensure_clear_test_dir();
 

@@ -28,7 +28,6 @@ pub mod wild_match;
 
 use anyhow::{anyhow, Result};
 use cache::clean_cache;
-use flags::{get_flag, Flag};
 use regex::Regex;
 
 use std::env::var;
@@ -54,10 +53,6 @@ fn ensure_exist(p: PathBuf) -> Result<PathBuf> {
         create_dir_all(p.clone()).map_err(|e| anyhow!("Error:Failed to create directory : {e}"))?;
     }
     Ok(p)
-}
-
-pub fn is_debug_mode() -> bool {
-    get_flag(Flag::Debug, false)
 }
 
 pub fn is_confirm_mode(ctx: &RuntimeContext) -> bool {

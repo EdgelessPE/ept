@@ -386,7 +386,6 @@ fn test_reg_entry() {
     use crate::utils::flags::{set_flag, Flag};
     use crate::utils::test::_default_test_cfg;
     use winreg::enums::HKEY_CURRENT_USER;
-    set_flag(Flag::Debug, true);
     let cur_dir_pb = std::env::current_dir().unwrap();
     let cur_dir = p2s!(cur_dir_pb);
     let flag_path = Path::new("_reg_entry_success.log");
