@@ -1,3 +1,5 @@
+mod utils;
+
 use anyhow::{anyhow, Result};
 use clap::Parser;
 use ept_lib::{log, p2s};
@@ -22,8 +24,7 @@ use std::fs::write;
 use std::process::exit;
 use std::sync::Arc;
 
-mod terminal_interaction;
-use terminal_interaction::TerminalInteraction;
+use utils::terminal_interaction::TerminalInteraction;
 
 #[cfg(not(tarpaulin_include))]
 fn router(action: Action, instance: &EptInstance) -> Result<String> {
