@@ -60,11 +60,11 @@ pub fn parse_relative_path_with_located(relative: &str, located: &str) -> PathBu
 
 /// name 大小写不敏感
 fn find_scope_with_name_locally(
-    cfg: &crate::types::context::RuntimeContext,
+    ctx: &crate::types::context::RuntimeContext,
     name: &str,
     scope: Option<&str>,
 ) -> Result<(String, String)> {
-    let app_dir = get_bare_apps(cfg)?;
+    let app_dir = get_bare_apps(ctx)?;
 
     for scope_dir_name in read_sub_dir(app_dir.clone())? {
         if let Some(s) = scope {
@@ -87,18 +87,18 @@ fn find_scope_with_name_locally(
 }
 
 fn find_scope_with_name_online(
-    cfg: &crate::types::context::RuntimeContext,
+    ctx: &crate::types::context::RuntimeContext,
     name: &str,
     scope: Option<&str>,
 ) -> Result<(String, String)> {
     // 遍历 mirrors
-    let p = get_path_mirror(cfg)?;
+    let p = get_path_mirror(ctx)?;
     let mirror_names = read_sub_dir(p)?;
     if mirror_names.is_empty() {
         return Err(anyhow!("Error:No mirror added yet"));
     }
     for mirror_name in mirror_names {
-        let quick_maps = read_quick_maps(cfg, &mirror_name)?;
+        let quick_maps = read_quick_maps(ctx, &mirror_name)?;
         if let Some((possible_scopes, true_name)) = quick_maps.scope_map.get(&name.to_lowercase()) {
             if let Some(dirty_scope) = scope {
                 for s in possible_scopes {
@@ -121,14 +121,14 @@ fn find_scope_with_name_online(
 }
 
 pub fn find_scope_with_name(
-    cfg: &crate::types::context::RuntimeContext,
+    ctx: &crate::types::context::RuntimeContext,
     name: &str,
     scope: Option<&str>,
 ) -> Result<(String, String)> {
-    if let Ok(res) = find_scope_with_name_locally(cfg, name, scope) {
+    if let Ok(res) = find_scope_with_name_locally(ctx, name, scope) {
         return Ok(res);
     }
-    find_scope_with_name_online(cfg, name, scope)
+    find_scope_with_name_online(ctx, name, scope)
 }
 
 #[test]

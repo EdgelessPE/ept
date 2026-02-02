@@ -61,7 +61,7 @@ impl ParseInputResEnum {
 }
 
 pub fn parse_install_inputs(
-    cfg: &crate::types::context::RuntimeContext,
+    ctx: &crate::types::context::RuntimeContext,
     packages: Vec<String>,
     verify_signature: bool,
 ) -> Result<Vec<ParseReturned>> {
@@ -72,11 +72,11 @@ pub fn parse_install_inputs(
 
         // 更新镜像源
         if matches!(input_parsed, PackageInputEnum::PackageMatcher(_)) {
-            auto_mirror_update_all(cfg)?;
+            auto_mirror_update_all(ctx)?;
         }
 
         // 获取 Info
-        let (info, temp_dir) = info(cfg, input_parsed.clone(), verify_signature)?;
+        let (info, temp_dir) = info(ctx, input_parsed.clone(), verify_signature)?;
 
         // 检查对应包名有没有被安装过
         if let Some(local) = info.local {
@@ -98,7 +98,7 @@ pub fn parse_install_inputs(
             // 如果是 PackageMatcher，则解析信息
             PackageInputEnum::PackageMatcher(matcher) => {
                 // 解析 url
-                let (url, target_release, mirror_name) = get_url_with_version_req(cfg, matcher)?;
+                let (url, target_release, mirror_name) = get_url_with_version_req(ctx, matcher)?;
                 res.push((
                     ParseInputResEnum::PackageMatcher(ParsePackageInputRes {
                         name: info.name.clone(),
@@ -117,7 +117,7 @@ pub fn parse_install_inputs(
 }
 
 pub fn parse_update_inputs(
-    cfg: &crate::types::context::RuntimeContext,
+    ctx: &crate::types::context::RuntimeContext,
     packages: Vec<String>,
     verify_signature: bool,
 ) -> Result<Vec<ParseReturned>> {
@@ -128,11 +128,11 @@ pub fn parse_update_inputs(
 
         // 更新镜像源
         if matches!(input_parsed, PackageInputEnum::PackageMatcher(_)) {
-            auto_mirror_update_all(cfg)?;
+            auto_mirror_update_all(ctx)?;
         }
 
         // 获取 Info
-        let (info, temp_dir) = info(cfg, input_parsed.clone(), verify_signature)?;
+        let (info, temp_dir) = info(ctx, input_parsed.clone(), verify_signature)?;
 
         // 解析输入类型
         match input_parsed {
@@ -145,19 +145,19 @@ pub fn parse_update_inputs(
                 let scope = info.scope.clone();
                 let package_name = info.name.clone();
                 // 检查对应包名有没有被安装过
-                let (_global, local_diff) = info_local(cfg, &scope, &package_name).map_err(|_| {
+                let (_global, local_diff) = info_local(ctx, &scope, &package_name).map_err(|_| {
                     anyhow!("Error:Package '{scope}/{package_name}' hasn't been installed, use 'ept install' instead")
                 })?;
                 // 检查包的版本号是否允许升级
                 let (online_item, _url_template, _) =
-                    info_online(cfg, &scope, &package_name, matcher.mirror.clone())?;
+                    info_online(ctx, &scope, &package_name, matcher.mirror.clone())?;
                 let selected_release =
-                    filter_release(cfg, online_item.releases, matcher.version_req.clone(), true)?;
+                    filter_release(ctx, online_item.releases, matcher.version_req.clone(), true)?;
                 if selected_release.version <= ExSemVer::parse(&local_diff.version)? {
                     return Err(anyhow!("Error:Package '{name}' has been up to date ({local_version}), can't update to the version of given package ({fresh_version})",name=package_name,local_version=&local_diff.version,fresh_version=&selected_release.version));
                 }
                 // 解析 url
-                let (url, target_release, mirror_name) = get_url_with_version_req(cfg, matcher)?;
+                let (url, target_release, mirror_name) = get_url_with_version_req(ctx, matcher)?;
                 res.push((
                     ParseInputResEnum::PackageMatcher(ParsePackageInputRes {
                         name: package_name,
@@ -176,7 +176,7 @@ pub fn parse_update_inputs(
 }
 
 pub fn parse_uninstall_inputs(
-    cfg: &crate::types::context::RuntimeContext,
+    ctx: &crate::types::context::RuntimeContext,
     packages: Vec<String>,
 ) -> Result<Vec<Info>> {
     let mut arr = Vec::new();
@@ -186,17 +186,17 @@ pub fn parse_uninstall_inputs(
 
         // 查找 scope 并使用 scope 更新纠正大小写
         let (scope, package_name) =
-            find_scope_with_name(cfg, &parse_res.name, parse_res.scope.as_deref())
+            find_scope_with_name(ctx, &parse_res.name, parse_res.scope.as_deref())
                 .map_err(|e| anyhow!("Error:Failed to locate target package: {e}",))?;
 
         // 解析安装路径
-        let app_path = get_path_apps(cfg, &scope, &package_name, false)?;
+        let app_path = get_path_apps(ctx, &scope, &package_name, false)?;
         if !app_path.exists() {
             return Err(anyhow!("Error:Package '{p}' not installed"));
         }
 
         // 查询 Info
-        let info = if let Ok((_, local_diff)) = info_local(cfg, &scope, &package_name) {
+        let info = if let Ok((_, local_diff)) = info_local(ctx, &scope, &package_name) {
             local_diff
         } else {
             InfoDiff {

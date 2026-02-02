@@ -111,25 +111,25 @@ pub fn get_path_bin(ctx: &crate::types::context::RuntimeContext) -> Result<PathB
     ensure_exist(parse_relative_path_with_base("bin", &ctx.cfg.local.base)?)
 }
 
-pub fn get_path_mirror(cfg: &crate::types::context::RuntimeContext) -> Result<PathBuf> {
+pub fn get_path_mirror(ctx: &crate::types::context::RuntimeContext) -> Result<PathBuf> {
     ensure_exist(parse_relative_path_with_base(
         "mirror",
-        &cfg.cfg.local.base,
+        &ctx.cfg.local.base,
     )?)
 }
 
-pub fn get_path_cache(cfg: &crate::types::context::RuntimeContext) -> Result<PathBuf> {
-    ensure_exist(parse_relative_path_with_base("cache", &cfg.cfg.local.base)?)
+pub fn get_path_cache(ctx: &crate::types::context::RuntimeContext) -> Result<PathBuf> {
+    ensure_exist(parse_relative_path_with_base("cache", &ctx.cfg.local.base)?)
 }
 
-pub fn get_path_meta(cfg: &crate::types::context::RuntimeContext) -> Result<PathBuf> {
-    ensure_exist(parse_relative_path_with_base("meta", &cfg.cfg.local.base)?)
+pub fn get_path_meta(ctx: &crate::types::context::RuntimeContext) -> Result<PathBuf> {
+    ensure_exist(parse_relative_path_with_base("meta", &ctx.cfg.local.base)?)
 }
 
-pub fn get_path_toolchain(cfg: &crate::types::context::RuntimeContext) -> Result<PathBuf> {
+pub fn get_path_toolchain(ctx: &crate::types::context::RuntimeContext) -> Result<PathBuf> {
     ensure_exist(parse_relative_path_with_base(
         "toolchain",
-        &cfg.cfg.local.base,
+        &ctx.cfg.local.base,
     )?)
 }
 
@@ -148,16 +148,16 @@ pub fn is_starts_with_inner_value(p: &str) -> bool {
     p.starts_with("${") || p.starts_with("\"${")
 }
 
-pub fn launch_clean(cfg: &crate::types::context::RuntimeContext) -> Result<()> {
+pub fn launch_clean(ctx: &crate::types::context::RuntimeContext) -> Result<()> {
     // 删除 temp 目录
-    let p = parse_bare_temp(cfg)?;
+    let p = parse_bare_temp(ctx)?;
     if p.exists() {
         std::fs::remove_dir_all(p)
             .map_err(|e| anyhow!("Error:Failed to remove temp directory : {e}"))?;
     }
 
     // 清理过期缓存
-    clean_cache(cfg)?;
+    clean_cache(ctx)?;
 
     Ok(())
 }
