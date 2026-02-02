@@ -245,7 +245,10 @@ impl Interpretable for StepLink {
 }
 
 impl Generalizable for StepLink {
-    fn generalize_permissions(&self, _cfg: &crate::types::context::RuntimeContext) -> Result<Vec<Permission>> {
+    fn generalize_permissions(
+        &self,
+        _cfg: &crate::types::context::RuntimeContext,
+    ) -> Result<Vec<Permission>> {
         let mut keys = Vec::new();
         if let Some(ats) = &self.at {
             if ats.contains(&"Desktop".to_string()) {
@@ -284,7 +287,7 @@ fn test_link() {
     use std::fs::{remove_dir, remove_file};
     let mut cx = WorkflowContext::_demo();
     let mut ctx = crate::types::steps::VerifyStepCtx::_demo();
-    ctx.mixed_fs = MixedFS::new("./examples/VSCode/VSCode");
+    ctx.mixed_fs = &MixedFS::new("./examples/VSCode/VSCode");
 
     // 配置拉满
     let step = StepLink {

@@ -5,6 +5,7 @@ use crate::types::package::GlobalPackage;
 use crate::utils::test::_default_test_cfg;
 use crate::{log, p2s};
 use anyhow::{anyhow, Result};
+use serde::{Deserialize, Serialize};
 use std::process::Child;
 use std::sync::Arc;
 
@@ -50,15 +51,6 @@ impl Default for RuntimeContext {
     }
 }
 
-/// 工作流执行上下文
-pub struct WorkflowContext<'a> {
-    pub located: String,
-    pub pkg: GlobalPackage,
-    pub async_execution_handlers: Vec<(String, Child, bool)>, // 命令，handler，是否被抛弃
-    pub exit_code: i32,
-    pub runtime_ctx: &'a RuntimeContext,
-}
-
 /// 用于校验的上下文
 pub struct VerifiableCtx<'a> {
     pub mixed_fs: &'a MixedFS,
@@ -81,19 +73,21 @@ pub struct CacheCtx(
     pub Option<(std::path::PathBuf, String)>,
 );
 
+/// 工作流执行上下文
+pub struct WorkflowContext<'a> {
+    pub located: String,
+    pub pkg: GlobalPackage,
+    pub async_execution_handlers: Vec<(String, Child, bool)>, // 命令，handler，是否被抛弃
+    pub exit_code: i32,
+    pub runtime_ctx: &'a RuntimeContext,
+}
+
 impl WorkflowContext {
     pub fn _demo() -> Self {
-        Self::new(
-            &_default_test_cfg(),
-            &p2s!(std::env::current_dir().unwrap()),
-            GlobalPackage::_demo(),
-        )
-    }
-
-    pub fn new(runtime_ctx: &RuntimeContext, located: &str, pkg: GlobalPackage) -> Self {
+        let runtime_ctx: &'static RuntimeContext = Box::leak(Box::new(_default_test_cfg()));
         Self {
-            pkg,
-            located: located.to_owned(),
+            pkg: GlobalPackage::_demo(),
+            located: p2s!(std::env::current_dir().unwrap()),
             async_execution_handlers: Vec::new(),
             exit_code: 0,
             runtime_ctx
@@ -139,11 +133,14 @@ impl WorkflowContext {
     }
 }
 
-impl VerifyStepCtx {
+impl<'a> VerifyStepCtx<'a> {
     pub fn _demo() -> Self {
+        use crate::utils::test::_default_test_cfg;
+        
+        let runtime_ctx: _default_test_cfg();
         Self {
             mixed_fs: &MixedFS::new(""),
-            runtime_ctx: &_default_test_cfg(),
+            runtime_ctx,
             is_expand_flow: false,
         }
     }

@@ -33,7 +33,7 @@ pub fn get_eval_context(
     let mut context = HashMapContext::new();
     set_context_with_constant_values(&mut context);
     set_context_with_mutable_values(&mut context, exit_code, located, package_version);
-    set_context_with_function(cfg,&mut context, located );
+    set_context_with_function(cfg, &mut context, located);
     context
 }
 
@@ -74,7 +74,13 @@ pub fn workflow_executor(
 
     // 准备上下文
     let package_version = pkg.package.version.clone();
-    let mut cx = WorkflowContext::new(*cfg.clone(), &located, pkg);
+    let mut cx = WorkflowContext{
+        pkg,
+        located:located.clone(),
+        async_execution_handlers: Vec::new(),
+        exit_code: 0,
+        runtime_ctx:cfg,
+    };
 
     // 遍历流节点
     for flow_node in flow {
@@ -132,7 +138,13 @@ pub fn workflow_reverse_executor(
     pkg: GlobalPackage,
 ) -> Result<()> {
     let package_version = pkg.package.version.clone();
-    let mut cx = WorkflowContext::new(cfg, &located, pkg);
+    let mut cx = WorkflowContext{
+        pkg,
+        located:located.clone(),
+        async_execution_handlers: Vec::new(),
+        exit_code: 0,
+        runtime_ctx:cfg,
+    };
 
     // 遍历流节点
     for flow_node in flow {
