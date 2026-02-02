@@ -47,27 +47,27 @@ cargo check
 - **泛型参数**: 单个大写字母（如 `T`, `F`）
 
 ### 函数参数规范
-- **配置参数位置**: 如果函数需要 `cfg: &Cfg` 入参，则该入参始终位于**第一位**（类似 `self` 的约定）
+- **上下文参数位置**: 如果函数需要 `ctx: &RuntimeContext` 入参，则该入参始终位于**第一位**（类似 `self` 的约定）
   ```rust
   // ✅ 正确
-  pub fn install(cfg: &Cfg, source: &str, verify: bool) -> Result<()>
-  pub fn workflow_executor(cfg: Cfg, flow: Vec<WorkflowNode>, located: String, pkg: GlobalPackage)
-  
+  pub fn install(ctx: &RuntimeContext, source: &str, verify: bool) -> Result<()>
+  pub fn workflow_executor(ctx: &RuntimeContext, flow: Vec<WorkflowNode>, located: String, pkg: GlobalPackage)
+
   // ❌ 错误
-  pub fn install(source: &str, verify: bool, cfg: &Cfg) -> Result<()>
+  pub fn install(source: &str, verify: bool, ctx: &RuntimeContext) -> Result<()>
   ```
-- **配置来源**: 如果函数中需要使用 `cfg`，则必须从祖先处获取（通过参数传递），而不是调用 `Cfg::default()`
+- **上下文来源**: 如果函数中需要使用 `ctx`，则必须从祖先处获取（通过参数传递），而不是调用 `RuntimeContext::default()`
   ```rust
   // ✅ 正确 - 从祖先处获取
-  pub fn some_function(cfg: &Cfg, ...) -> Result<()> {
-      let path = get_path_mirror(cfg)?;
+  pub fn some_function(ctx: &RuntimeContext, ...) -> Result<()> {
+      let path = get_path_mirror(ctx)?;
       ...
   }
-  
-  // ❌ 错误 - 在函数内部创建默认配置
+
+  // ❌ 错误 - 在函数内部创建默认上下文
   pub fn some_function(...) -> Result<()> {
-      let cfg = Cfg::default();
-      let path = get_path_mirror(&cfg)?;
+      let ctx = RuntimeContext::default();
+      let path = get_path_mirror(&ctx)?;
       ...
   }
   ```
