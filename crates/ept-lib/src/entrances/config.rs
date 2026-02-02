@@ -165,7 +165,7 @@ fn test_config() {
     assert_eq!(get_base, new_base);
 
     // 测试 list
-    assert_eq!(config_list(&config).unwrap(), format!("{new_cfg:#?}"));
+    assert_eq!(config_list(&config).unwrap(), format!("{:#?}", new_cfg.cfg));
 
     // 测试 which
     assert_eq!(config_which().unwrap(), FILE_NAME.to_string());
