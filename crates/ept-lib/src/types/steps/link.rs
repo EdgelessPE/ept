@@ -7,7 +7,6 @@ use crate::types::permissions::{Generalizable, Permission, PermissionKey, Permis
 use crate::utils::env::{env_desktop, env_start_menu};
 use crate::utils::fs::{count_sub_files, try_recycle};
 use crate::utils::is_starts_with_inner_value;
-use crate::Cfg;
 use crate::{log, p2s, utils::path::parse_relative_path_with_located};
 use anyhow::{anyhow, Result};
 use mslnk::ShellLink;
@@ -287,7 +286,8 @@ fn test_link() {
     use std::fs::{remove_dir, remove_file};
     let mut cx = WorkflowContext::_demo();
     let mut ctx = crate::types::steps::VerifyStepCtx::_demo();
-    ctx.mixed_fs = &MixedFS::new("./examples/VSCode/VSCode");
+    let mixed_fs = MixedFS::new("./examples/VSCode/VSCode");
+    ctx.mixed_fs = &mixed_fs;
 
     // 配置拉满
     let step = StepLink {

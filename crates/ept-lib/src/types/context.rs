@@ -57,13 +57,6 @@ pub struct VerifiableCtx<'a> {
     pub runtime_ctx: &'a RuntimeContext,
 }
 
-/// 步骤验证上下文
-pub struct VerifyStepCtx<'a> {
-    pub mixed_fs: &'a MixedFS,
-    pub runtime_ctx: &'a RuntimeContext,
-    pub is_expand_flow: bool,
-}
-
 /// 缓存操作上下文
 // （是否启用缓存，源文件，Option<(缓存目录, 缓存 key)>）
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
@@ -82,7 +75,7 @@ pub struct WorkflowContext<'a> {
     pub runtime_ctx: &'a RuntimeContext,
 }
 
-impl WorkflowContext {
+impl<'a> WorkflowContext<'a> {
     pub fn _demo() -> Self {
         let runtime_ctx: &'static RuntimeContext = Box::leak(Box::new(_default_test_cfg()));
         Self {
@@ -90,7 +83,7 @@ impl WorkflowContext {
             located: p2s!(std::env::current_dir().unwrap()),
             async_execution_handlers: Vec::new(),
             exit_code: 0,
-            runtime_ctx
+            runtime_ctx,
         }
     }
 
@@ -133,13 +126,21 @@ impl WorkflowContext {
     }
 }
 
-impl<'a> VerifyStepCtx<'a> {
+/// 步骤验证上下文
+pub struct VerifyStepCtx<'a> {
+    pub mixed_fs: &'a MixedFS,
+    pub runtime_ctx: &'a RuntimeContext,
+    pub is_expand_flow: bool,
+}
+
+impl VerifyStepCtx<'static> {
     pub fn _demo() -> Self {
         use crate::utils::test::_default_test_cfg;
-        
-        let runtime_ctx: _default_test_cfg();
+
+        let mixed_fs = Box::leak(Box::new(MixedFS::new("")));
+        let runtime_ctx = Box::leak(Box::new(_default_test_cfg()));
         Self {
-            mixed_fs: &MixedFS::new(""),
+            mixed_fs,
             runtime_ctx,
             is_expand_flow: false,
         }

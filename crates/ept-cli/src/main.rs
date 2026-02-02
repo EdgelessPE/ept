@@ -5,6 +5,7 @@ use ept_lib::{
     types::{
         cfg::Cfg,
         cli::{Action, ActionConfig, ActionMirror, Args},
+        context::RuntimeContext,
         matcher::PackageInputEnum,
     },
     utils::{
@@ -19,14 +20,15 @@ use ept_lib::{
 };
 use std::fs::write;
 use std::process::exit;
+use std::sync::Arc;
 
 mod terminal_interaction;
 use terminal_interaction::TerminalInteraction;
 
 #[cfg(not(tarpaulin_include))]
 fn router(action: Action, instance: &EptInstance) -> Result<String> {
-    let cfg = instance.cfg();
-    let verify_signature = !cfg.mode.offline;
+    let runtime_ctx = instance.runtime_ctx();
+    let verify_signature = !runtime_ctx.cfg.mode.offline;
 
     // 匹配入口
     match action {
@@ -34,7 +36,7 @@ fn router(action: Action, instance: &EptInstance) -> Result<String> {
             package_matchers: packages,
         } => {
             // 解析输入
-            let parsed = parse_install_inputs(cfg, packages, verify_signature)?;
+            let parsed = parse_install_inputs(runtime_ctx, packages, verify_signature)?;
             log!("Debug:Parsed install packages: {parsed:?}");
             if parsed.is_empty() {
                 return Ok(
@@ -66,7 +68,7 @@ fn router(action: Action, instance: &EptInstance) -> Result<String> {
                         .unwrap()
                 });
             println!("{tip}");
-            if !cfg.interaction().ask_yn(
+            if !runtime_ctx.interaction().ask_yn(
                 &format!(
                     "Ready to install those {} packages, continue?",
                     parsed.len()
@@ -92,7 +94,7 @@ fn router(action: Action, instance: &EptInstance) -> Result<String> {
         } => {
             if let Some(packages) = packages {
                 // 解析输入
-                let parsed = parse_update_inputs(cfg, packages, verify_signature)?;
+                let parsed = parse_update_inputs(runtime_ctx, packages, verify_signature)?;
                 log!("Debug:Parsed update packages: {parsed:?}");
                 // 打印详细元信息
                 log!("Info:Check the following information before update:");
@@ -119,7 +121,7 @@ fn router(action: Action, instance: &EptInstance) -> Result<String> {
                             .unwrap()
                     });
                 println!("{tip}");
-                if !cfg.interaction().ask_yn(
+                if !runtime_ctx.interaction().ask_yn(
                     &format!(
                         "Ready to update with those {} packages, continue?",
                         parsed.len()
@@ -160,7 +162,7 @@ fn router(action: Action, instance: &EptInstance) -> Result<String> {
         }
         Action::Uninstall { package_matchers } => {
             // 解析输入
-            let parsed = parse_uninstall_inputs(cfg, package_matchers)?;
+            let parsed = parse_uninstall_inputs(runtime_ctx, package_matchers)?;
             log!("Debug:Parsed uninstall packages: {parsed:?}");
             // 询问是否执行
             let tip = &parsed
@@ -169,7 +171,7 @@ fn router(action: Action, instance: &EptInstance) -> Result<String> {
                     acc + &info.fmt_brief_print(FmtPrintCaller::Uninstall).unwrap()
                 });
             println!("{tip}");
-            if !cfg.interaction().ask_yn(
+            if !runtime_ctx.interaction().ask_yn(
                 &format!(
                     "Ready to uninstall those {} packages, continue?",
                     parsed.len()
@@ -186,7 +188,7 @@ fn router(action: Action, instance: &EptInstance) -> Result<String> {
                     format!("Success:Package '{scope}/{name}' uninstalled successfully")
                 }).map_err(|e|{
                     // 卸载失败时提示用户如何手动解决坏包
-                    let app_path=get_path_apps(cfg, &scope, &name, false).unwrap();
+                    let app_path=get_path_apps(runtime_ctx, &scope, &name, false).unwrap();
                     anyhow!("Error:Failed to uninstall package '{scope}/{name}' : '{e}', try to manually delete '{}' if this package is broken",p2s!(app_path))
                 })?;
                 log!("{tip}");
@@ -335,18 +337,18 @@ fn main() {
     colored::control::set_virtual_terminal(true).unwrap();
 
     // 初始化配置
-    let mut cfg = Cfg::init().unwrap_or_else(|e| {
+    let cfg = Cfg::init().unwrap_or_else(|e| {
         log!("Error:Failed to initialize config : {e}");
         exit(1);
     });
 
-    // 注入终端交互实现
-    cfg = cfg.with_interaction_provider(TerminalInteraction);
+    // 创建 RuntimeContext
+    let mut runtime_ctx = RuntimeContext::new(cfg, Arc::new(TerminalInteraction));
 
     // 配置环境变量
     let args = Args::parse();
     if args.qa {
-        cfg.mode.qa = true;
+        runtime_ctx.cfg.mode.qa = true;
     }
     if args.debug || args.qa || cfg!(debug_assertions) {
         log!("Warning:Debug mode enabled");
@@ -354,28 +356,29 @@ fn main() {
     }
     if args.offline {
         log!("Warning:Offline mode enabled, ept couldn't guarantee security or integrality of packages");
-        cfg.mode.offline = true;
+        runtime_ctx.cfg.mode.offline = true;
     }
     if args.qa || args.yes {
         log!("Warning:Confirmation mode enabled");
-        cfg.interaction.auto_confirm_all = true;
+        runtime_ctx.cfg.interaction.auto_confirm_all = true;
     }
 
     // 创建 EptInstance 实例
-    let instance = EptInstance::new(cfg);
+    let instance = EptInstance::new(runtime_ctx);
+    let runtime_ctx = instance.runtime_ctx();
 
     // 清理缓存
-    launch_clean(instance.cfg()).unwrap();
+    launch_clean(runtime_ctx).unwrap();
 
     // 判断是否需要检查更新
-    let need_check_update = instance.cfg().online.auto_check_upgrade
+    let need_check_update = runtime_ctx.cfg.online.auto_check_upgrade
         && !matches!(&args.action, Action::Upgrade { check: _ })
         && !instance.mirror_list().unwrap_or_default().is_empty();
 
     // 使用路由器匹配入口
-    write_windows_terminal_status(instance.cfg(), 3);
+    write_windows_terminal_status(runtime_ctx, 3);
     let res = router(args.action, &instance);
-    write_windows_terminal_status(instance.cfg(), 0);
+    write_windows_terminal_status(runtime_ctx, 0);
 
     // 判断退出码
     let mut exit_code = 0;
@@ -391,7 +394,7 @@ fn main() {
 
     // 检查程序更新
     if need_check_update {
-        let check_res = check_has_upgrade(instance.cfg()).map_err(|e| anyhow!("Error:Failed to check self upgrade : '{e}'. If this error persists, consider changing 'online.auto_check_upgrade' to 'false' in config"));
+        let check_res = check_has_upgrade(runtime_ctx).map_err(|e| anyhow!("Error:Failed to check self upgrade : '{e}'. If this error persists, consider changing 'online.auto_check_upgrade' to 'false' in config"));
         if let Ok((has_upgrade, is_cross_wid_gap, latest_release)) = check_res {
             if has_upgrade {
                 println!();

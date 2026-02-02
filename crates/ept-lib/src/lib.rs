@@ -42,12 +42,12 @@ impl EptInstance {
     }
 
     /// 获取内部 RuntimeContext 的引用
-    pub fn cfg(&self) -> &RuntimeContext {
+    pub fn runtime_ctx(&self) -> &RuntimeContext {
         &self.runtime_ctx
     }
 
     /// 获取内部 RuntimeContext 的可变引用
-    pub fn cfg_mut(&mut self) -> &mut RuntimeContext {
+    pub fn runtime_ctx_mut(&mut self) -> &mut RuntimeContext {
         &mut self.runtime_ctx
     }
 
@@ -205,8 +205,8 @@ impl EptInstance {
 }
 
 // Re-export utility functions
+use crate::types::context::RuntimeContext;
 pub use utils::{
     flags::{get_flag, set_flag, Flag},
     launch_clean,
 };
-use crate::types::context::RuntimeContext;
