@@ -190,8 +190,8 @@ impl EptInstance {
     }
 
     /// 更新所有包
-    pub fn update_all(&mut self, verify_signature: bool) -> anyhow::Result<(i32, i32)> {
-        update_all(&mut self.cfg, verify_signature)
+    pub fn update_all(&self, verify_signature: bool) -> anyhow::Result<(i32, i32)> {
+        update_all(&self.cfg, verify_signature)
     }
 
     /// 使用解析后的输入更新

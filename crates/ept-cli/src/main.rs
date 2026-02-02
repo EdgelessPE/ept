@@ -21,7 +21,7 @@ use std::fs::write;
 use std::process::exit;
 
 #[cfg(not(tarpaulin_include))]
-fn router(action: Action, instance: &mut EptInstance) -> Result<String> {
+fn router(action: Action, instance: &EptInstance) -> Result<String> {
     let cfg = instance.cfg();
     let verify_signature = !cfg.mode.offline;
 
@@ -281,12 +281,9 @@ fn router(action: Action, instance: &mut EptInstance) -> Result<String> {
                 .map(|_| format!("Success:Config value of '{key}' set to '{value}'")),
             ActionConfig::Get { table, key } => instance.config_get(&table, &key),
             ActionConfig::List => instance.config_list(),
-            ActionConfig::Init => instance.config_init().map(|location| {
-                format!(
-                    "Success:Initial config stored at '{}'",
-                    location
-                )
-            }),
+            ActionConfig::Init => instance
+                .config_init()
+                .map(|location| format!("Success:Initial config stored at '{}'", location)),
             ActionConfig::Which => instance.config_which(),
         },
         Action::Mirror { operation } => match operation {
@@ -362,7 +359,7 @@ fn main() {
     }
 
     // 创建 EptInstance 实例
-    let mut instance = EptInstance::new(cfg);
+    let instance = EptInstance::new(cfg);
 
     // 清理缓存
     launch_clean(instance.cfg()).unwrap();
@@ -374,7 +371,7 @@ fn main() {
 
     // 使用路由器匹配入口
     write_windows_terminal_status(instance.cfg(), 3);
-    let res = router(args.action, &mut instance);
+    let res = router(args.action, &instance);
     write_windows_terminal_status(instance.cfg(), 0);
 
     // 判断退出码

@@ -314,7 +314,7 @@ pub fn update_using_parsed(
     Ok(arr)
 }
 
-pub fn update_all(cfg: &mut Cfg, verify_signature: bool) -> Result<(i32, i32)> {
+pub fn update_all(cfg: &Cfg, verify_signature: bool) -> Result<(i32, i32)> {
     // 遍历 list 结果，生成更新列表
     let list_res = list(cfg)?;
     let update_list: Vec<UpdateInfo> = list_res
@@ -362,11 +362,11 @@ pub fn update_all(cfg: &mut Cfg, verify_signature: bool) -> Result<(i32, i32)> {
     // 依次更新
     let mut success_count = 0;
     let mut failure_count = 0;
-    let original_auto_confirm = cfg.interaction.auto_confirm_all;
-    cfg.interaction.auto_confirm_all = true;
+    let mut temp_auto_confirm_cfg = cfg.clone();
+    temp_auto_confirm_cfg.interaction.auto_confirm_all = true;
     for info in update_list {
         let res = update_using_package_matcher(
-            cfg,
+            &temp_auto_confirm_cfg,
             format!("{}/{}", info.scope, info.name),
             verify_signature,
         );
@@ -378,7 +378,6 @@ pub fn update_all(cfg: &mut Cfg, verify_signature: bool) -> Result<(i32, i32)> {
             log!("{}", info.format_success());
         }
     }
-    cfg.interaction.auto_confirm_all = original_auto_confirm;
 
     Ok((success_count, failure_count))
 }
