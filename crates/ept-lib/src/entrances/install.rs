@@ -383,7 +383,6 @@ fn test_install_dism() {
 #[test]
 fn test_reg_entry() {
     use crate::types::{context::WorkflowContext, steps::TStep};
-    use crate::utils::flags::{set_flag, Flag};
     use crate::utils::test::_default_test_cfg;
     use winreg::enums::HKEY_CURRENT_USER;
     let cur_dir_pb = std::env::current_dir().unwrap();

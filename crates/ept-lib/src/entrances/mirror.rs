@@ -186,7 +186,6 @@ pub fn mirror_remove(ctx: &RuntimeContext, name: &str) -> Result<()> {
 #[test]
 fn test_mirror() {
     use crate::entrances::search;
-    use crate::utils::flags::{set_flag, Flag};
     use crate::utils::test::_default_test_cfg;
     use crate::utils::test::_run_mirror_mock_server;
     use std::fs::{remove_dir_all, rename};

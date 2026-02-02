@@ -509,7 +509,6 @@ fn test_filter_release() {
 fn test_filter_release_with_flags() {
     use crate::types::cfg::PreferenceEnum;
     use crate::types::extended_semver::ExSemVer;
-    use crate::utils::flags::{set_flag, Flag};
     use crate::utils::test::_default_test_cfg;
     use std::str::FromStr;
 

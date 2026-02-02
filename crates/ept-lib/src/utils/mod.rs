@@ -10,7 +10,6 @@ pub mod constants;
 pub mod download;
 pub mod env;
 pub mod expand;
-pub mod flags;
 pub mod fmt_print;
 pub mod fs;
 pub mod mirror;

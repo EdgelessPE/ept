@@ -206,7 +206,4 @@ impl EptInstance {
 
 // Re-export utility functions
 use crate::types::context::RuntimeContext;
-pub use utils::{
-    flags::{get_flag, set_flag, Flag},
-    launch_clean,
-};
+pub use utils::launch_clean;

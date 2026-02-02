@@ -133,7 +133,6 @@ impl Generalizable for StepMove {
 
 #[test]
 fn test_move() {
-    use crate::utils::flags::{set_flag, Flag};
     use crate::utils::fs::copy_dir;
     use std::path::Path;
     let mut cx = WorkflowContext::_demo();

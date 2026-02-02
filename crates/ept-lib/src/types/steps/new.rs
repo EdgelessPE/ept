@@ -122,7 +122,6 @@ impl Generalizable for StepNew {
 #[test]
 fn test_new() {
     use crate::types::context::WorkflowContext;
-    use crate::utils::flags::{set_flag, Flag};
     use std::fs::metadata;
     use std::path::Path;
     let mut cx = WorkflowContext::_demo();

@@ -114,7 +114,6 @@ impl Generalizable for StepDelete {
 
 #[test]
 fn test_delete() {
-    use crate::utils::flags::{set_flag, Flag};
     let mut cx = WorkflowContext::_demo();
     crate::utils::test::_ensure_clear_test_dir();
 
