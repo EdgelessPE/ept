@@ -36,16 +36,16 @@ fn get_valid_entrances(setup: Vec<WorkflowNode>) -> Vec<String> {
         .collect()
 }
 
-pub fn clean(cfg: &crate::types::context::RuntimeContext) -> Result<usize> {
+pub fn clean(ctx: &crate::types::context::RuntimeContext) -> Result<usize> {
     log!("Debug:Starting clean operation");
     let mut clean_list = Vec::new();
     let mut valid_entrances = HashSet::new();
 
     // 处理直接删除的目录
     let dirs_to_clean = vec![
-        parse_bare_temp(cfg)?,
-        get_path_cache(cfg)?,
-        get_path_meta(cfg)?,
+        parse_bare_temp(ctx)?,
+        get_path_cache(ctx)?,
+        get_path_meta(ctx)?,
     ];
     for p in dirs_to_clean {
         if p.exists() {
@@ -58,7 +58,7 @@ pub fn clean(cfg: &crate::types::context::RuntimeContext) -> Result<usize> {
     }
 
     // apps 目录，查找未安装成功的目录
-    for scope_entry in read_dir(get_bare_apps(cfg)?)? {
+    for scope_entry in read_dir(get_bare_apps(ctx)?)? {
         let scope_entry = scope_entry?;
         let scope_path = scope_entry.path();
         let scope_name = p2s!(scope_entry.file_name());
@@ -74,14 +74,14 @@ pub fn clean(cfg: &crate::types::context::RuntimeContext) -> Result<usize> {
                 if app_path.is_dir() {
                     // 尝试读取 info
                     log!("Debug:Checking application '{scope_name}/{app_name}'");
-                    let info_res = info_local(cfg, &scope_name, &app_name);
+                    let info_res = info_local(ctx, &scope_name, &app_name);
                     if let Ok((global, _)) = info_res {
                         // 有效应用计数
                         valid_apps_count += 1;
                         log!("Debug:Valid application found: '{scope_name}/{app_name}'");
 
                         // 读取工作流
-                        let setup_path = p2s!(get_path_apps(cfg, &scope_name, &app_name, false)?
+                        let setup_path = p2s!(get_path_apps(ctx, &scope_name, &app_name, false)?
                             .join(DIR_NEP_CONTEXT)
                             .join(DIR_WORKFLOWS)
                             .join(WORKFLOW_SETUP));
@@ -130,7 +130,7 @@ pub fn clean(cfg: &crate::types::context::RuntimeContext) -> Result<usize> {
 
     // bin 目录，删除名称非法的文件
     // TODO:考虑检查指向的绝对路径是否存在
-    let bin_path = get_path_bin(cfg)?;
+    let bin_path = get_path_bin(ctx)?;
     log!(
         "Debug:Scanning bin directory '{path}' for invalid entrances",
         path = p2s!(&bin_path)
@@ -155,7 +155,7 @@ pub fn clean(cfg: &crate::types::context::RuntimeContext) -> Result<usize> {
     if !clean_list.is_empty() {
         log!("Info:Trash list :");
         println!("{clean_list:#?}");
-        if !cfg
+        if !ctx
             .interaction()
             .ask_yn(&format!("Clean those {clean_list_len} trashes?"), true)
         {
@@ -167,7 +167,7 @@ pub fn clean(cfg: &crate::types::context::RuntimeContext) -> Result<usize> {
         );
         log!("{tip}");
         if let Err(e) = trash::delete_all(clean_list.clone()) {
-            if cfg.interaction().ask_yn(
+            if ctx.interaction().ask_yn(
                 &format!("Failed to move some files to recycle bin : {e}, force delete all?"),
                 true,
             ) {

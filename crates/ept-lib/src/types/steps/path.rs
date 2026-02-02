@@ -41,14 +41,14 @@ fn conflict_resolver(
     bin_abs: &str,
     stem: &str,
     scope: &str,
-    cfg: &crate::types::context::RuntimeContext,
+    ctx: &crate::types::context::RuntimeContext,
 ) -> String {
     let origin = format!("{bin_abs}/{stem}.cmd");
     let scoped = format!("{bin_abs}/{scope}-{stem}.cmd");
 
     // 检查入口文件冲突
     if Path::new(&origin).exists() {
-        return if cfg.interaction().ask_yn_in_step(
+        return if ctx.interaction().ask_yn_in_step(
             "Path",
             &format!("Entrance '{stem}.cmd' already exists in '{bin_abs}', overwrite?"),
             false,
@@ -64,7 +64,7 @@ fn conflict_resolver(
     let which_res = which(stem);
     if let Ok(res) = which_res {
         let output = p2s!(res);
-        return if cfg.interaction().ask_yn_in_step(
+        return if ctx.interaction().ask_yn_in_step(
             "Path",
             &format!("Command '{stem}' already exists at '{output}', rename to '{scope}-{stem}'?"),
             false,
@@ -298,7 +298,7 @@ impl Interpretable for StepPath {
 impl Generalizable for StepPath {
     fn generalize_permissions(
         &self,
-        _cfg: &crate::types::context::RuntimeContext,
+        _ctx: &crate::types::context::RuntimeContext,
     ) -> Result<Vec<Permission>> {
         // 检查是否有拓展名且不以 / 結尾，以此判断添加的是目录还是单文件
         let p = Path::new(&self.record);

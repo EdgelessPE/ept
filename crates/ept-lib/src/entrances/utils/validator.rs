@@ -29,7 +29,7 @@ pub fn inner_validator(dir: &str) -> Result<()> {
 }
 
 pub fn manifest_validator(
-    cfg: &crate::types::context::RuntimeContext,
+    ctx: &crate::types::context::RuntimeContext,
     base: &str,
     manifest: Vec<String>,
     fs: &mut MixedFS,
@@ -49,7 +49,7 @@ pub fn manifest_validator(
     if !missing_list.is_empty() {
         let items: Vec<String> = missing_list.into_iter().collect();
         if fs.var_warn_manifest {
-            if !cfg.interaction().ask_yn(
+            if !ctx.interaction().ask_yn(
                 &format!("May missing these flow items '{items:?}' in '{base}', continue?"),
                 false,
             ) {

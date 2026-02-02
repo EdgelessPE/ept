@@ -16,7 +16,7 @@ pub struct IsDirectory {
 
 impl EvalFunction for IsDirectory {
     fn get_closure(
-        _cfg: &crate::types::context::RuntimeContext,
+        _ctx: &crate::types::context::RuntimeContext,
         located: String,
     ) -> Function<DefaultNumericTypes> {
         Function::new(move |val| {

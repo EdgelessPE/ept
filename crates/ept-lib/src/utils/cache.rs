@@ -74,15 +74,15 @@ pub fn restore_cache(cx: CacheCtx, source: &str) -> Result<bool> {
     Ok(false)
 }
 
-pub fn clean_cache(cfg: &crate::types::context::RuntimeContext) -> Result<()> {
-    let duration_cfg = parse_duration(&cfg.cfg.local.cache_valid_duration).map_err(|e| anyhow!("Error:Failed to parse config field 'local.cache_valid_duration' as valid time span : '{e}', e.g. '5d' '14m54s'"))?;
+pub fn clean_cache(ctx: &crate::types::context::RuntimeContext) -> Result<()> {
+    let duration_cfg = parse_duration(&ctx.cfg.local.cache_valid_duration).map_err(|e| anyhow!("Error:Failed to parse config field 'local.cache_valid_duration' as valid time span : '{e}', e.g. '5d' '14m54s'"))?;
     let now = SystemTime::now();
     log!(
         "Debug:Cache valid duration : '{i}'",
-        i = &cfg.cfg.local.cache_valid_duration
+        i = &ctx.cfg.local.cache_valid_duration
     );
 
-    let cache_dir = get_path_cache(cfg)?;
+    let cache_dir = get_path_cache(ctx)?;
     let mut cache_files = Vec::new();
     for entry in read_dir(cache_dir)? {
         let entry = entry?;

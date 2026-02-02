@@ -16,7 +16,7 @@ pub fn is_workshop_expandable(workshop_path: &str) -> bool {
 
 // 给定一个工作目录，对该目录执行展开
 pub fn expand_workshop(
-    cfg: &crate::types::context::RuntimeContext,
+    ctx: &crate::types::context::RuntimeContext,
     workshop_path: &str,
 ) -> Result<()> {
     log!("Info:Expanding nep package...");
@@ -30,12 +30,12 @@ pub fn expand_workshop(
     }
 
     // 读取包
-    let package_struct = parse_package(cfg, &p2s!(base.join(FILE_PACKAGE)), workshop_path, false)?;
+    let package_struct = parse_package(ctx, &p2s!(base.join(FILE_PACKAGE)), workshop_path, false)?;
 
     // 执行展开工作流
     let expand_workflow = parse_workflow(&p2s!(expand_workflow_path))?;
     workflow_executor(
-        cfg,
+        ctx,
         expand_workflow,
         p2s!(base.join(&package_struct.package.name)),
         package_struct,

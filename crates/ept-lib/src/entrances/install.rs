@@ -25,14 +25,14 @@ use crate::{log, log_ok_last, p2s};
 
 // 检查软件是否已通过绝对路径的 main_program 字段全局安装
 fn check_global_installation(
-    cfg: &crate::types::context::RuntimeContext,
+    ctx: &crate::types::context::RuntimeContext,
     package: &GlobalPackage,
 ) -> Result<bool> {
     if let Some(ref software) = package.software {
         if let Some(ref installed) = software.main_program {
             let p = Path::new(installed);
             if p.is_absolute() && p.exists() {
-                return Ok(cfg.interaction().ask_yn(
+                return Ok(ctx.interaction().ask_yn(
                     &format!(
                         "Package '{name}' has been installed at '{installed}', continue?",
                         name = package.package.name
@@ -47,18 +47,18 @@ fn check_global_installation(
 
 // 检查包是否已安装，如果是则重定向到更新流程
 fn check_existing_installation(
-    cfg: &crate::types::context::RuntimeContext,
+    ctx: &crate::types::context::RuntimeContext,
     source_file: &str,
     package: &GlobalPackage,
     verify_signature: bool,
 ) -> Result<Option<(String, String)>> {
-    if let Ok((_, diff)) = info_local(cfg, &package.package.scope, &package.package.name) {
+    if let Ok((_, diff)) = info_local(ctx, &package.package.scope, &package.package.name) {
         log!(
             "Warning:Package '{name}' has been installed({ver}), switch to update entrance",
             name = package.package.name,
             ver = diff.version,
         );
-        let res = update_using_package(cfg, source_file, verify_signature)?;
+        let res = update_using_package(ctx, source_file, verify_signature)?;
         return Ok(Some((res.scope, res.name)));
     }
     Ok(None)
@@ -66,11 +66,11 @@ fn check_existing_installation(
 
 // 将应用文件从临时目录部署到 apps 目录
 fn deploy_app_files(
-    cfg: &crate::types::context::RuntimeContext,
+    ctx: &crate::types::context::RuntimeContext,
     temp_dir: &Path,
     package: &GlobalPackage,
 ) -> Result<String> {
-    let into_dir = get_path_apps(cfg, &package.package.scope, &package.package.name, true)?;
+    let into_dir = get_path_apps(ctx, &package.package.scope, &package.package.name, true)?;
     if into_dir.exists() {
         remove_dir_all(into_dir.clone()).map_err(|_| {
             anyhow!(
@@ -94,7 +94,7 @@ fn deploy_app_files(
 
 // 验证指定的 main_program 是否存在
 fn validate_main_program(
-    cfg: &crate::types::context::RuntimeContext,
+    ctx: &crate::types::context::RuntimeContext,
     into_dir: &str,
     package: &GlobalPackage,
 ) -> Result<()> {
@@ -103,7 +103,7 @@ fn validate_main_program(
             let p = parse_relative_path_with_located(installed, into_dir);
             log!("Debug:Checking main program at '{}'", p2s!(p));
             if !p.exists() {
-                if cfg.cfg.mode.qa {
+                if ctx.cfg.mode.qa {
                     log!("Warning:Validating failed : field 'main_program' provided in table 'software' not exist : '{installed}'")
                 } else {
                     return Err(anyhow!("Error:Validating failed : field 'main_program' provided in table 'software' not exist : '{installed}'"));
@@ -116,19 +116,19 @@ fn validate_main_program(
 
 // 安装完成后的最终验证
 fn finalize_installation(
-    cfg: &crate::types::context::RuntimeContext,
+    ctx: &crate::types::context::RuntimeContext,
     into_dir: &str,
     package: &GlobalPackage,
 ) -> Result<()> {
     installed_validator(into_dir)?;
-    validate_main_program(cfg, into_dir, package)?;
+    validate_main_program(ctx, into_dir, package)?;
 
     log!(
         "Debug:Try to get info of '{scope}/{name}'",
         scope = package.package.scope,
         name = package.package.name
     );
-    info_local(cfg, &package.package.scope, &package.package.name).map_err(|e| {
+    info_local(ctx, &package.package.scope, &package.package.name).map_err(|e| {
         anyhow!(
             "Error:Validating failed : failed to get info of '{scope}/{name}' : {e}",
             scope = package.package.scope,
@@ -140,14 +140,14 @@ fn finalize_installation(
 }
 
 pub fn install_using_package(
-    cfg: &crate::types::context::RuntimeContext,
+    ctx: &crate::types::context::RuntimeContext,
     source_file: &str,
     verify_signature: bool,
 ) -> Result<(String, String)> {
     log!("Info:Preparing to install with package '{source_file}'");
 
     // 解包
-    let (temp_dir_inner_path, package_struct) = unpack_nep(cfg, source_file, verify_signature)?;
+    let (temp_dir_inner_path, package_struct) = unpack_nep(ctx, source_file, verify_signature)?;
     log!(
         "Info:If installation fails, use 'ept uninstall \"{name}\"' to roll back",
         name = package_struct.package.name
@@ -159,13 +159,13 @@ pub fn install_using_package(
     let setup_workflow = parse_workflow(&p2s!(setup_file_path))?;
 
     // 检查是否已全局安装
-    if !check_global_installation(cfg, &package_struct)? {
+    if !check_global_installation(ctx, &package_struct)? {
         return Err(anyhow!("Error:Operation canceled by user"));
     }
 
     // 检查是否已安装并重定向到更新
     if let Some(result) =
-        check_existing_installation(cfg, source_file, &package_struct, verify_signature)?
+        check_existing_installation(ctx, source_file, &package_struct, verify_signature)?
     {
         return Ok(result);
     }
@@ -174,18 +174,18 @@ pub fn install_using_package(
     // 如有展开工作流则执行
     let temp_dir_inner = p2s!(temp_dir_inner_path);
     if is_workshop_expandable(&temp_dir_inner) {
-        expand_workshop(cfg, &temp_dir_inner)?;
+        expand_workshop(ctx, &temp_dir_inner)?;
     }
 
     // 部署文件
     log!("Info:Deploying files...");
-    let into_dir = deploy_app_files(cfg, &temp_dir_inner_path, &package_struct)?;
+    let into_dir = deploy_app_files(ctx, &temp_dir_inner_path, &package_struct)?;
     log_ok_last!("Info:Deploying files...");
 
     // 运行安装工作流
     log!("Info:Running setup workflow...");
     workflow_executor(
-        cfg,
+        ctx,
         setup_workflow,
         into_dir.clone(),
         package_struct.clone(),
@@ -198,11 +198,11 @@ pub fn install_using_package(
 
     // 验证安装
     log!("Info:Validating setup...");
-    finalize_installation(cfg, &into_dir, &package_struct)?;
+    finalize_installation(ctx, &into_dir, &package_struct)?;
     log_ok_last!("Info:Validating setup...");
 
     // 清理
-    clean_temp(cfg, source_file)?;
+    clean_temp(ctx, source_file)?;
 
     Ok((
         package_struct.package.scope.clone(),
@@ -211,17 +211,17 @@ pub fn install_using_package(
 }
 
 pub fn install_using_url(
-    cfg: &crate::types::context::RuntimeContext,
+    ctx: &crate::types::context::RuntimeContext,
     url: &str,
     verify_signature: bool,
 ) -> Result<(String, String)> {
     // 下载文件到临时目录
-    let cache_path = get_path_cache(cfg)?;
+    let cache_path = get_path_cache(ctx)?;
     let url_hash = compute_hash_blake3_from_string(url)?;
-    let (p, cache_ctx) = download_nep(cfg, url, Some((cache_path, url_hash)))?;
+    let (p, cache_ctx) = download_nep(ctx, url, Some((cache_path, url_hash)))?;
 
     // 安装
-    let info = install_using_package(cfg, &p2s!(p), verify_signature)?;
+    let info = install_using_package(ctx, &p2s!(p), verify_signature)?;
 
     // 缓存下载的包
     spawn_cache(cache_ctx)?;
@@ -230,7 +230,7 @@ pub fn install_using_url(
 }
 
 pub fn install_using_parsed(
-    cfg: &crate::types::context::RuntimeContext,
+    ctx: &crate::types::context::RuntimeContext,
     parsed: Vec<ParseInputResEnum>,
     verify_signature: bool,
 ) -> Result<Vec<(String, String)>> {
@@ -240,20 +240,20 @@ pub fn install_using_parsed(
         let (scope, name) = match parsed {
             ParseInputResEnum::LocalPath(p, temp_dir) => {
                 if let Some(temp_dir) = temp_dir {
-                    install_using_package(cfg, &p2s!(temp_dir), false)?
+                    install_using_package(ctx, &p2s!(temp_dir), false)?
                 } else {
-                    install_using_package(cfg, &p, verify_signature)?
+                    install_using_package(ctx, &p, verify_signature)?
                 }
             }
             ParseInputResEnum::Url(u, temp_dir) => {
                 if let Some(temp_dir) = temp_dir {
-                    install_using_package(cfg, &p2s!(temp_dir), false)?
+                    install_using_package(ctx, &p2s!(temp_dir), false)?
                 } else {
-                    install_using_url(cfg, &u, verify_signature)?
+                    install_using_url(ctx, &u, verify_signature)?
                 }
             }
             ParseInputResEnum::PackageMatcher(p) => {
-                install_using_url(cfg, &p.download_url, verify_signature)?
+                install_using_url(ctx, &p.download_url, verify_signature)?
             }
         };
         log!("Success:Package '{scope}/{name}' installed successfully");

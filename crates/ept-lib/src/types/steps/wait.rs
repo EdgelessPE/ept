@@ -109,12 +109,12 @@ impl Interpretable for StepWait {
 impl Generalizable for StepWait {
     fn generalize_permissions(
         &self,
-        cfg: &crate::types::context::RuntimeContext,
+        ctx: &crate::types::context::RuntimeContext,
     ) -> Result<Vec<Permission>> {
         let mut permissions = Vec::new();
 
         if let Some(cond) = &self.break_if {
-            let mut cond_permissions = get_permissions_from_conditions(cfg, vec![cond.to_owned()])?;
+            let mut cond_permissions = get_permissions_from_conditions(ctx, vec![cond.to_owned()])?;
             permissions.append(&mut cond_permissions);
         }
         //@ key: 由 `break_if` 条件语句产生

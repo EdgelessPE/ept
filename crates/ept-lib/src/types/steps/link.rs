@@ -246,7 +246,7 @@ impl Interpretable for StepLink {
 impl Generalizable for StepLink {
     fn generalize_permissions(
         &self,
-        _cfg: &crate::types::context::RuntimeContext,
+        _ctx: &crate::types::context::RuntimeContext,
     ) -> Result<Vec<Permission>> {
         let mut keys = Vec::new();
         if let Some(ats) = &self.at {

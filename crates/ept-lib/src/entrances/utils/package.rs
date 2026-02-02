@@ -27,18 +27,18 @@ use crate::{log, log_ok_last};
 
 /// 根据源文件路径创建临时目录
 fn get_temp_dir_path(
-    cfg: &crate::types::context::RuntimeContext,
+    ctx: &crate::types::context::RuntimeContext,
     source_file: &str,
 ) -> Result<PathBuf> {
     let file_stem = p2s!(Path::new(source_file).file_stem().unwrap());
-    let temp_dir_path = allocate_path_temp(cfg, &file_stem, true)?;
+    let temp_dir_path = allocate_path_temp(ctx, &file_stem, true)?;
 
     Ok(temp_dir_path)
 }
 
 /// 清理临时目录(会判断 debug)
-pub fn clean_temp(cfg: &crate::types::context::RuntimeContext, source_file: &str) -> Result<()> {
-    let temp_dir_path = get_temp_dir_path(cfg, source_file)?;
+pub fn clean_temp(ctx: &crate::types::context::RuntimeContext, source_file: &str) -> Result<()> {
+    let temp_dir_path = get_temp_dir_path(ctx, source_file)?;
     if !is_debug_mode() {
         log!("Info:Cleaning...");
         let clean_res = remove_dir_all(&temp_dir_path);
@@ -62,7 +62,7 @@ pub fn clean_temp(cfg: &crate::types::context::RuntimeContext, source_file: &str
 
 /// 返回 (Inner 临时目录,package 结构体)
 pub fn unpack_nep(
-    cfg: &crate::types::context::RuntimeContext,
+    ctx: &crate::types::context::RuntimeContext,
     source: &str,
     verify_signature: bool,
 ) -> Result<(PathBuf, GlobalPackage)> {
@@ -74,14 +74,14 @@ pub fn unpack_nep(
         } else {
             // 检查是否为合法的输入目录
             inner_validator(source)?;
-            entrances::verify::verify(cfg, source)?;
+            entrances::verify::verify(ctx, source)?;
 
             // 读取 package.toml
             let package_path = Path::new(source).join(FILE_PACKAGE);
-            let global = parse_package(cfg, &p2s!(package_path), source, false)?;
+            let global = parse_package(ctx, &p2s!(package_path), source, false)?;
 
             // 复制到临时目录
-            let temp_path = allocate_path_temp(cfg, &global.package.name, false)?;
+            let temp_path = allocate_path_temp(ctx, &global.package.name, false)?;
             copy_dir(source_path, &temp_path)?;
 
             Ok((temp_path, global))
@@ -98,10 +98,10 @@ pub fn unpack_nep(
 
     let res = if size <= size_limit {
         log!("Debug:Use fast unpack method ({size}/{size_limit})");
-        fast_unpack_nep(cfg, source, verify_signature)?
+        fast_unpack_nep(ctx, source, verify_signature)?
     } else {
         log!("Debug:Use normal unpack method ({size}/{size_limit})");
-        normal_unpack_nep(cfg, source, verify_signature)?
+        normal_unpack_nep(ctx, source, verify_signature)?
     };
 
     // 离线模式下强制执行一次检查
@@ -113,12 +113,12 @@ pub fn unpack_nep(
 }
 
 fn normal_unpack_nep(
-    cfg: &crate::types::context::RuntimeContext,
+    ctx: &crate::types::context::RuntimeContext,
     source_file: &str,
     verify_signature: bool,
 ) -> Result<(PathBuf, GlobalPackage)> {
     // 创建临时目录
-    let temp_dir_path = get_temp_dir_path(cfg, source_file)?;
+    let temp_dir_path = get_temp_dir_path(ctx, source_file)?;
     let temp_dir_outer_path = temp_dir_path.join("Outer");
     let temp_dir_inner_path = temp_dir_path.join("Inner");
 
@@ -162,7 +162,7 @@ fn normal_unpack_nep(
 
     // 读取 package.toml
     let package_struct = parse_package(
-        cfg,
+        ctx,
         &p2s!(temp_dir_inner_path.join(FILE_PACKAGE)),
         &temp_dir_inner_str,
         false,
@@ -185,12 +185,12 @@ fn normal_unpack_nep(
     Ok((temp_dir_inner_path, package_struct))
 }
 fn fast_unpack_nep(
-    cfg: &crate::types::context::RuntimeContext,
+    ctx: &crate::types::context::RuntimeContext,
     source_file: &str,
     verify_signature: bool,
 ) -> Result<(PathBuf, GlobalPackage)> {
     // 创建临时目录
-    let temp_dir_path = get_temp_dir_path(cfg, source_file)?;
+    let temp_dir_path = get_temp_dir_path(ctx, source_file)?;
     let temp_dir_inner_path = temp_dir_path.join("Inner");
 
     // 读取外包，生成 hashmap
@@ -259,7 +259,7 @@ fn fast_unpack_nep(
 
     // 读取 package.toml
     let package_struct = parse_package(
-        cfg,
+        ctx,
         &p2s!(temp_dir_inner_path.join(FILE_PACKAGE)),
         &temp_dir_inner_str,
         false,

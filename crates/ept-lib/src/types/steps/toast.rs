@@ -72,7 +72,7 @@ impl Interpretable for StepToast {
 impl Generalizable for StepToast {
     fn generalize_permissions(
         &self,
-        _cfg: &crate::types::context::RuntimeContext,
+        _ctx: &crate::types::context::RuntimeContext,
     ) -> Result<Vec<Permission>> {
         Ok(vec![Permission {
             key: PermissionKey::notify_toast,

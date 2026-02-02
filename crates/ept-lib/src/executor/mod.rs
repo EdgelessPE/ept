@@ -25,7 +25,7 @@ lazy_static! {
 }
 
 pub fn get_eval_context(
-    cfg: &crate::types::context::RuntimeContext,
+    ctx: &crate::types::context::RuntimeContext,
     exit_code: i32,
     located: &str,
     package_version: &str,
@@ -33,13 +33,13 @@ pub fn get_eval_context(
     let mut context = HashMapContext::new();
     set_context_with_constant_values(&mut context);
     set_context_with_mutable_values(&mut context, exit_code, located, package_version);
-    set_context_with_function(cfg, &mut context, located);
+    set_context_with_function(ctx, &mut context, located);
     context
 }
 
 // 执行条件以判断是否成立
 pub fn condition_eval(
-    cfg: &crate::types::context::RuntimeContext,
+    ctx: &crate::types::context::RuntimeContext,
     condition: &str,
     exit_code: i32,
     located: &str,
@@ -48,7 +48,7 @@ pub fn condition_eval(
     // 装饰变量与函数
     let condition_with_values_interpreted =
         values_replacer(condition.to_owned(), exit_code, located, package_version);
-    let context = get_eval_context(cfg, exit_code, located, package_version);
+    let context = get_eval_context(ctx, exit_code, located, package_version);
 
     // 执行 eval
     eval_boolean_with_context(&condition_with_values_interpreted, &context).map_err(|res| {
@@ -58,7 +58,7 @@ pub fn condition_eval(
 
 // 执行工作流，返回最后一个步骤的退出码
 pub fn workflow_executor(
-    cfg: &crate::types::context::RuntimeContext,
+    ctx: &crate::types::context::RuntimeContext,
     flow: Vec<WorkflowNode>,
     located: String,
     pkg: GlobalPackage,
@@ -79,7 +79,7 @@ pub fn workflow_executor(
         located: located.clone(),
         async_execution_handlers: Vec::new(),
         exit_code: 0,
-        runtime_ctx: cfg,
+        runtime_ctx: ctx,
     };
 
     // 遍历流节点
@@ -88,7 +88,7 @@ pub fn workflow_executor(
         log!("Debug:Start step '{name}'");
         // 解释节点条件，判断是否需要跳过执行
         if let Some(c_if) = flow_node.header.c_if {
-            if !condition_eval(cfg, &c_if, cx.exit_code, &located, &package_version)? {
+            if !condition_eval(ctx, &c_if, cx.exit_code, &located, &package_version)? {
                 continue;
             }
         }
@@ -132,7 +132,7 @@ pub fn workflow_executor(
 
 // 宽容地逆向执行 setup 工作流
 pub fn workflow_reverse_executor(
-    cfg: &crate::types::context::RuntimeContext,
+    ctx: &crate::types::context::RuntimeContext,
     flow: Vec<WorkflowNode>,
     located: String,
     pkg: GlobalPackage,
@@ -143,7 +143,7 @@ pub fn workflow_reverse_executor(
         located: located.clone(),
         async_execution_handlers: Vec::new(),
         exit_code: 0,
-        runtime_ctx: cfg,
+        runtime_ctx: ctx,
     };
 
     // 遍历流节点

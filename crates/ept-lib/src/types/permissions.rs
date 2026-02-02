@@ -80,6 +80,6 @@ pub struct Permission {
 pub trait Generalizable {
     fn generalize_permissions(
         &self,
-        cfg: &crate::types::context::RuntimeContext,
+        ctx: &crate::types::context::RuntimeContext,
     ) -> Result<Vec<Permission>>;
 }

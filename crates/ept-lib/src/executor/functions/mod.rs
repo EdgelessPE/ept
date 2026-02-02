@@ -41,7 +41,7 @@ macro_rules! def_eval_functions {
 
 trait EvalFunction {
     fn get_closure(
-        cfg: &crate::types::context::RuntimeContext,
+        ctx: &crate::types::context::RuntimeContext,
         located: String,
     ) -> Function<DefaultNumericTypes>;
     fn get_permission(arg: &str) -> Result<Permission>;

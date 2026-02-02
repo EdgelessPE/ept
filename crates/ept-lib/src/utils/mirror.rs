@@ -42,10 +42,10 @@ use super::permissions::filter_permissions;
 
 // 读取 meta
 pub fn read_local_mirror_hello(
-    cfg: &crate::types::context::RuntimeContext,
+    ctx: &crate::types::context::RuntimeContext,
     name: &str,
 ) -> Result<(MirrorHello, PathBuf)> {
-    let dir_path = get_path_mirror(cfg)?.join(name);
+    let dir_path = get_path_mirror(ctx)?.join(name);
     let p = dir_path.join(MIRROR_FILE_HELLO);
     if !p.exists() {
         return Err(anyhow!("Error:Mirror '{name}' hasn't been added"));
@@ -55,7 +55,7 @@ pub fn read_local_mirror_hello(
         .map_err(|e| anyhow!("Error:Invalid hello content at '{fp}' : {e}", fp = p2s!(p)))?;
     let cx = VerifiableCtx {
         mixed_fs: &MixedFS::new(""),
-        runtime_ctx: cfg,
+        runtime_ctx: ctx,
     };
     hello.verify_self(&cx)?;
     Ok((hello, dir_path))
@@ -144,7 +144,7 @@ fn register_tokenizer(index: &mut Index) {
 
 // 为包构建索引
 pub fn build_index_for_mirror(
-    cfg: &crate::types::context::RuntimeContext,
+    ctx: &crate::types::context::RuntimeContext,
     content: MirrorPkgSoftware,
     dir: PathBuf,
 ) -> Result<()> {
@@ -179,7 +179,7 @@ pub fn build_index_for_mirror(
             if releases.is_empty() {
                 continue;
             }
-            let release = filter_release(cfg, releases, None, false)?;
+            let release = filter_release(ctx, releases, None, false)?;
             let meta_res = if let Some(meta) = release.meta {
                 // 收集二进制文件
                 let mut bin_stems: Vec<String> = Vec::new();
@@ -313,10 +313,10 @@ pub fn search_index_for_mirror(
 
 // 读取快查索引
 pub fn read_quick_maps(
-    cfg: &crate::types::context::RuntimeContext,
+    ctx: &crate::types::context::RuntimeContext,
     mirror_name: &str,
 ) -> Result<QuickMaps> {
-    let quick_path = get_path_mirror(cfg)?
+    let quick_path = get_path_mirror(ctx)?
         .join(mirror_name)
         .join("index")
         .join(MIRROR_FILE_QUICK_MAP);
@@ -342,7 +342,7 @@ pub fn read_quick_maps(
 // 匹配 release
 // 如果没有提供 semver matcher 则返回最大版本
 pub fn filter_release(
-    cfg: &crate::types::context::RuntimeContext,
+    ctx: &crate::types::context::RuntimeContext,
     releases: Vec<MirrorPkgSoftwareRelease>,
     semver_matcher: Option<VersionReq>,
     enable_flags_score: bool,
@@ -370,7 +370,7 @@ pub fn filter_release(
             let score = if enable_flags_score {
                 node.get_flags()
                     .map(|flags| {
-                        get_flags_score(cfg, &flags)
+                        get_flags_score(ctx, &flags)
                             .map_err(|e| {
                                 anyhow!(
                                     "Error:Failed to calculate flags score for '{}' : {e}",
@@ -424,16 +424,16 @@ pub fn filter_release(
 
 // 通过匹配 VersionReq 解析出包的 url
 pub fn get_url_with_version_req(
-    cfg: &crate::types::context::RuntimeContext,
+    ctx: &crate::types::context::RuntimeContext,
     matcher: PackageMatcher,
 ) -> Result<(String, MirrorPkgSoftwareRelease, String)> {
     // 查找 scope 并使用 scope 更新纠正大小写
-    let (scope, package_name) = find_scope_with_name(cfg, &matcher.name, matcher.scope.as_deref())?;
+    let (scope, package_name) = find_scope_with_name(ctx, &matcher.name, matcher.scope.as_deref())?;
     // 拿到 info online
     let (info, url_template, mirror_name) =
-        info_online(cfg, &scope, &package_name, matcher.mirror)?;
+        info_online(ctx, &scope, &package_name, matcher.mirror)?;
     // 匹配版本
-    let matched_release = filter_release(cfg, info.releases, matcher.version_req, true)?;
+    let matched_release = filter_release(ctx, info.releases, matcher.version_req, true)?;
     // 填充模板获取 url
     let url = fill_url_template(
         &url_template,

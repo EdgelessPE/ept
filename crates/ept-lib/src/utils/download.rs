@@ -15,13 +15,13 @@ use super::allocate_path_temp;
 // cached 接受参数为 (存放缓存的路径，缓存 key)
 // 函数返回的是缓存上下文，当文件被验证可用后可以使用这个上下文传递给 spawn_cache 函数进行缓存
 pub fn download(
-    cfg: &crate::types::context::RuntimeContext,
+    ctx: &crate::types::context::RuntimeContext,
     url: &str,
     to: PathBuf,
     cached: Option<(PathBuf, String)>,
 ) -> Result<CacheCtx> {
     // 检查缓存
-    let enabled_cache = cfg.cfg.local.enable_cache && cached.is_some();
+    let enabled_cache = ctx.cfg.local.enable_cache && cached.is_some();
     if restore_cache(CacheCtx(enabled_cache, to.clone(), cached.clone()), url)? {
         return Ok(CacheCtx(false, to, None));
     }
@@ -74,14 +74,14 @@ pub fn download(
 
 // 返回 （文件存放路径，缓存上下文）
 pub fn download_nep(
-    cfg: &crate::types::context::RuntimeContext,
+    ctx: &crate::types::context::RuntimeContext,
     url: &str,
     cached: Option<(PathBuf, String)>,
 ) -> Result<(PathBuf, CacheCtx)> {
     // 下载文件到临时目录
-    let temp_dir = allocate_path_temp(cfg, "download", false)?;
+    let temp_dir = allocate_path_temp(ctx, "download", false)?;
     let p = temp_dir.join("downloaded.nep");
-    let cache_ctx = download(cfg, url, p.clone(), cached)?;
+    let cache_ctx = download(ctx, url, p.clone(), cached)?;
 
     Ok((p, cache_ctx))
 }

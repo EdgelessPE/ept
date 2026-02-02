@@ -15,7 +15,7 @@ pub struct IsAlive {
 
 impl EvalFunction for IsAlive {
     fn get_closure(
-        _cfg: &crate::types::context::RuntimeContext,
+        _ctx: &crate::types::context::RuntimeContext,
         _: String,
     ) -> Function<DefaultNumericTypes> {
         Function::new(move |val| {

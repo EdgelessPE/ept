@@ -67,7 +67,7 @@ fn verify_workflow(cx: &VerifyStepCtx, flow: Vec<WorkflowNode>) -> Result<bool> 
 }
 
 pub fn verify(
-    cfg: &crate::types::context::RuntimeContext,
+    ctx: &crate::types::context::RuntimeContext,
     source_dir: &str,
 ) -> Result<GlobalPackage> {
     log!("Debug:Starting verification for source directory '{source_dir}'");
@@ -89,7 +89,7 @@ pub fn verify(
     // 读取包信息
     log!("Info:Resolving data...");
     let pkg_path = Path::new(source_dir).join(FILE_PACKAGE);
-    let global = parse_package(cfg, &p2s!(pkg_path), source_dir, false)?;
+    let global = parse_package(ctx, &p2s!(pkg_path), source_dir, false)?;
     let software = global.software.clone().unwrap();
     let pkg_content_path = p2s!(Path::new(source_dir).join(&global.package.name));
     log!(
@@ -112,7 +112,7 @@ pub fn verify(
     let check_call_installer = verify_workflow(
         &VerifyStepCtx {
             mixed_fs: &MixedFS::new(&pkg_content_path),
-            runtime_ctx: cfg,
+            runtime_ctx: ctx,
             is_expand_flow: false,
         },
         setup_flow.clone(),
@@ -139,7 +139,7 @@ pub fn verify(
     let optional_workflows = vec![WORKFLOW_UPDATE, WORKFLOW_REMOVE];
     let cx = VerifyStepCtx {
         mixed_fs: &MixedFS::new(source_dir),
-        runtime_ctx: cfg,
+        runtime_ctx: ctx,
         is_expand_flow: false,
     };
     for opt_workflow in optional_workflows {
@@ -156,7 +156,7 @@ pub fn verify(
     // 检查展开工作流
     let cx = VerifyStepCtx {
         mixed_fs: &MixedFS::new(source_dir),
-        runtime_ctx: cfg,
+        runtime_ctx: ctx,
         is_expand_flow: true,
     };
     let expand_path = get_workflow_path(source_dir, WORKFLOW_EXPAND);
@@ -184,7 +184,7 @@ pub fn verify(
         let mut update_manifest = get_manifest(update_flow, &mut fs);
         setup_manifest.append(&mut update_manifest);
     }
-    manifest_validator(cfg, &pkg_content_path, setup_manifest, &mut fs)?;
+    manifest_validator(ctx, &pkg_content_path, setup_manifest, &mut fs)?;
     log_ok_last!("Info:Checking manifest...");
     log!("Debug:Manifest validation completed for '{pkg_content_path}'");
 

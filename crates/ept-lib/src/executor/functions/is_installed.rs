@@ -21,10 +21,10 @@ pub struct IsInstalled {
 
 impl EvalFunction for IsInstalled {
     fn get_closure(
-        cfg: &crate::types::context::RuntimeContext,
+        ctx: &crate::types::context::RuntimeContext,
         _: String,
     ) -> Function<DefaultNumericTypes> {
-        let cfg = cfg.clone();
+        let cfg = ctx.clone();
         Function::new(move |val| {
             let arg = ensure_arg(val)?;
             let sp: Vec<&str> = arg.split('/').collect();

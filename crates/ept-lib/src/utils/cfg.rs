@@ -4,7 +4,7 @@ use crate::types::cfg::PreferenceEnum;
 
 use super::arch::SysArch;
 
-pub fn get_flags_score(cfg: &crate::types::context::RuntimeContext, flags: &str) -> Result<i32> {
+pub fn get_flags_score(ctx: &crate::types::context::RuntimeContext, flags: &str) -> Result<i32> {
     let mut score = 0;
     for c in flags.chars() {
         let e = match c {
@@ -17,11 +17,11 @@ pub fn get_flags_score(cfg: &crate::types::context::RuntimeContext, flags: &str)
                 }
             }
             //- Expandable
-            'E' => &cfg.cfg.preference.expandable,
+            'E' => &ctx.cfg.preference.expandable,
             //- Installer
-            'I' => &cfg.cfg.preference.installer,
+            'I' => &ctx.cfg.preference.installer,
             //- Portable
-            'P' => &cfg.cfg.preference.portable,
+            'P' => &ctx.cfg.preference.portable,
             _ => {
                 return Err(anyhow!("Error:Invalid flag : '{c}'"));
             }

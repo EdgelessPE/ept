@@ -104,7 +104,7 @@ impl Interpretable for StepDelete {
 impl Generalizable for StepDelete {
     fn generalize_permissions(
         &self,
-        _cfg: &crate::types::context::RuntimeContext,
+        _ctx: &crate::types::context::RuntimeContext,
     ) -> Result<Vec<Permission>> {
         Ok(vec![Permission {
             key: PermissionKey::fs_write,

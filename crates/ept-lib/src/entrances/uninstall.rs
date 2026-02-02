@@ -38,18 +38,18 @@ fn get_manifest(flow: Vec<WorkflowNode>) -> Vec<String> {
 }
 
 pub fn uninstall(
-    cfg: &crate::types::context::RuntimeContext,
+    ctx: &crate::types::context::RuntimeContext,
     scope: Option<String>,
     package_name: &str,
 ) -> Result<(String, String)> {
     log!("Info:Preparing to uninstall '{package_name}'");
 
     // 查找 scope 并使用 scope 更新纠正大小写
-    let (scope, package_name) = find_scope_with_name(cfg, package_name, scope.as_deref())?;
+    let (scope, package_name) = find_scope_with_name(ctx, package_name, scope.as_deref())?;
     log!("Debug:Resolved scope as '{scope}' for package '{package_name}'");
 
     // 解析安装路径
-    let app_path = get_path_apps(cfg, &scope, &package_name, false)?;
+    let app_path = get_path_apps(ctx, &scope, &package_name, false)?;
     if !app_path.exists() {
         return Err(anyhow!("Error:Package '{package_name}' not installed"));
     }
@@ -71,7 +71,7 @@ pub fn uninstall(
     // 读入 package.toml
     log!("Debug:Reading package.toml from '{app_str}'");
     let global = parse_package(
-        cfg,
+        ctx,
         &p2s!(app_path.join(DIR_NEP_CONTEXT).join(FILE_PACKAGE)),
         &app_str,
         false,
@@ -93,7 +93,7 @@ pub fn uninstall(
                 located: app_str.clone(),
                 async_execution_handlers: Vec::new(),
                 exit_code: 0,
-                runtime_ctx: cfg,
+                runtime_ctx: ctx,
             };
             StepExecute {
                 command: uninstall_string,
@@ -118,7 +118,7 @@ pub fn uninstall(
 
         // 执行卸载工作流
         log!("Info:Running remove workflow...");
-        workflow_executor(cfg, remove_flow, app_str.clone(), global.clone())?;
+        workflow_executor(ctx, remove_flow, app_str.clone(), global.clone())?;
         log_ok_last!("Info:Running remove workflow...");
     }
 
@@ -131,14 +131,14 @@ pub fn uninstall(
 
     // 逆向执行安装工作流
     log!("Info:Running reverse setup workflow...");
-    workflow_reverse_executor(cfg, setup_flow.clone(), app_str.clone(), global.clone())?;
+    workflow_reverse_executor(ctx, setup_flow.clone(), app_str.clone(), global.clone())?;
     log_ok_last!("Info:Running reverse setup workflow...");
 
     // 删除 app 目录
     log!("Info:Cleaning...");
     let try_rm_res = remove_dir_all(&app_str);
     if try_rm_res.is_err()
-        && cfg.interaction().ask_yn(
+        && ctx.interaction().ask_yn(
             "Can't clean the directory completely, try killing the related processes?",
             true,
         )
@@ -178,7 +178,7 @@ pub fn uninstall(
     }
 
     // 删除空的 scope
-    let scope_dir = get_bare_apps(cfg)?.join(&scope);
+    let scope_dir = get_bare_apps(ctx)?.join(&scope);
     if read_dir(scope_dir.clone())?.next().is_none() {
         log!("Debug:Removing empty scope directory '{scope}'");
         let _ = remove_dir(scope_dir);

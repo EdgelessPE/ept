@@ -190,7 +190,7 @@ impl Interpretable for StepCopy {
 impl Generalizable for StepCopy {
     fn generalize_permissions(
         &self,
-        _cfg: &crate::types::context::RuntimeContext,
+        _ctx: &crate::types::context::RuntimeContext,
     ) -> Result<Vec<Permission>> {
         Ok(vec![
             Permission {

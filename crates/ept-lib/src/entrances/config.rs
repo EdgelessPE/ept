@@ -6,12 +6,12 @@ use toml::Value;
 
 // 返回（key 指向的 value，整个 Cfg）
 fn get_toml_value(
-    cfg: &crate::types::context::RuntimeContext,
+    ctx: &crate::types::context::RuntimeContext,
     table: &str,
     key: &str,
 ) -> Result<(Value, Value)> {
     // 序列化为 toml 对象
-    let toml = Value::try_from(cfg.cfg.clone())?;
+    let toml = Value::try_from(ctx.cfg.clone())?;
     // 读 table
     let tab = toml
         .get(table)
@@ -25,7 +25,7 @@ fn get_toml_value(
 }
 
 pub fn config_set(
-    cfg: &crate::types::context::RuntimeContext,
+    ctx: &crate::types::context::RuntimeContext,
     table: &str,
     key: &str,
     value: &str,
@@ -34,7 +34,7 @@ pub fn config_set(
     let err_wrapper =
         |e: Error| anyhow!("Error:Failed to set value of '${key}' as '${value}' : ${e}");
     // 拿到这个值研究一下类型
-    let (val, mut cfg) = get_toml_value(cfg, table, key).map_err(err_wrapper)?;
+    let (val, mut cfg) = get_toml_value(ctx, table, key).map_err(err_wrapper)?;
     let table = cfg.get_mut(table).unwrap();
     match val {
         Value::String(_) => {
@@ -78,11 +78,11 @@ pub fn config_set(
 }
 
 pub fn config_get(
-    cfg: &crate::types::context::RuntimeContext,
+    ctx: &crate::types::context::RuntimeContext,
     table: &str,
     key: &str,
 ) -> Result<String> {
-    let (val, _) = get_toml_value(cfg, table, key)?;
+    let (val, _) = get_toml_value(ctx, table, key)?;
 
     let str = val
         .as_str()
@@ -99,17 +99,17 @@ pub fn config_list(runtime_ctx: &crate::types::context::RuntimeContext) -> Resul
     Ok(format!("{cfg:#?}"))
 }
 
-pub fn config_init(cfg: &crate::types::context::RuntimeContext) -> Result<String> {
+pub fn config_init(ctx: &crate::types::context::RuntimeContext) -> Result<String> {
     let file_path = config_which()?;
     if Path::new(&file_path).exists()
-        && !cfg.interaction().ask_yn(
+        && !ctx.interaction().ask_yn(
             &format!("Config file already exists at '{file_path}', overwrite it?"),
             false,
         )
     {
         return Err(anyhow!("Error:Operation cancelled by user"));
     }
-    Cfg::overwrite(cfg.cfg.clone())?;
+    Cfg::overwrite(ctx.cfg.clone())?;
     Ok(file_path)
 }
 
