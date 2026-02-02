@@ -67,7 +67,7 @@ fn verify_workflow(flow: Vec<WorkflowNode>, ctx: &VerifyStepCtx) -> Result<bool>
     Ok(have_call_installer)
 }
 
-pub fn verify(cfg: &Cfg, source_dir: &str) -> Result<GlobalPackage> {
+pub fn verify(cfg: &crate::types::context::RuntimeContext, source_dir: &str) -> Result<GlobalPackage> {
     log!("Debug:Starting verification for source directory '{source_dir}'");
     // 打包检查
     log!("Info:Validating source directory...");
@@ -110,8 +110,8 @@ pub fn verify(cfg: &Cfg, source_dir: &str) -> Result<GlobalPackage> {
     let check_call_installer = verify_workflow(
         setup_flow.clone(),
         &VerifyStepCtx {
-            mixed_fs: MixedFS::new(&pkg_content_path),
-            cfg: cfg.clone(),
+            mixed_fs: &MixedFS::new(&pkg_content_path),
+            runtime_ctx: cfg,
             is_expand_flow: false,
         },
     )?;
@@ -136,8 +136,8 @@ pub fn verify(cfg: &Cfg, source_dir: &str) -> Result<GlobalPackage> {
     // 检查更新、卸载工作流
     let optional_workflows = vec![WORKFLOW_UPDATE, WORKFLOW_REMOVE];
     let ctx = VerifyStepCtx {
-        mixed_fs: MixedFS::new(source_dir),
-        cfg: cfg.clone(),
+        mixed_fs: &MixedFS::new(source_dir),
+        runtime_ctx: cfg,
         is_expand_flow: false,
     };
     for opt_workflow in optional_workflows {
@@ -153,8 +153,8 @@ pub fn verify(cfg: &Cfg, source_dir: &str) -> Result<GlobalPackage> {
 
     // 检查展开工作流
     let ctx = VerifyStepCtx {
-        mixed_fs: MixedFS::new(source_dir),
-        cfg: cfg.clone(),
+        mixed_fs: &MixedFS::new(source_dir),
+        runtime_ctx: cfg,
         is_expand_flow: true,
     };
     let expand_path = get_workflow_path(source_dir, WORKFLOW_EXPAND);

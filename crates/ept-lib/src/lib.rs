@@ -32,58 +32,53 @@ use entrances::{
 
 /// EptInstance 结构体，封装 Cfg 并提供所有 entrances 函数作为方法
 pub struct EptInstance {
-    cfg: Cfg,
+    runtime_ctx: RuntimeContext,
 }
 
 impl EptInstance {
     /// 创建新的 EptInstance 实例
-    pub fn new(cfg: Cfg) -> Self {
-        Self { cfg }
+    pub fn new(runtime_ctx: RuntimeContext) -> Self {
+        Self { runtime_ctx }
     }
 
-    /// 获取内部 Cfg 的引用
-    pub fn cfg(&self) -> &Cfg {
-        &self.cfg
+    /// 获取内部 RuntimeContext 的引用
+    pub fn cfg(&self) -> &RuntimeContext {
+        &self.runtime_ctx
     }
 
-    /// 获取内部 Cfg 的可变引用
-    pub fn cfg_mut(&mut self) -> &mut Cfg {
-        &mut self.cfg
-    }
-
-    /// 获取内部 Cfg 的所有权（消耗 self）
-    pub fn into_cfg(self) -> Cfg {
-        self.cfg
+    /// 获取内部 RuntimeContext 的可变引用
+    pub fn cfg_mut(&mut self) -> &mut RuntimeContext {
+        &mut self.runtime_ctx
     }
 
     /// 自动镜像更新
     pub fn auto_mirror_update_all(&self) -> anyhow::Result<bool> {
-        auto_mirror_update_all(&self.cfg)
+        auto_mirror_update_all(&self.runtime_ctx)
     }
 
     /// 清理临时文件和无效目录
     pub fn clean(&self) -> anyhow::Result<usize> {
-        clean(&self.cfg)
+        clean(&self.runtime_ctx)
     }
 
     /// 获取配置值
     pub fn config_get(&self, table: &str, key: &str) -> anyhow::Result<String> {
-        config_get(&self.cfg, table, key)
+        config_get(&self.runtime_ctx, table, key)
     }
 
     /// 初始化配置文件
     pub fn config_init(&self) -> anyhow::Result<String> {
-        config_init(&self.cfg)
+        config_init(&self.runtime_ctx)
     }
 
     /// 列出所有配置
     pub fn config_list(&self) -> anyhow::Result<String> {
-        config_list(&self.cfg)
+        config_list(&self.runtime_ctx)
     }
 
     /// 设置配置值
     pub fn config_set(&self, table: &str, key: &str, value: &str) -> anyhow::Result<()> {
-        config_set(&self.cfg, table, key, value)
+        config_set(&self.runtime_ctx, table, key, value)
     }
 
     /// 配置所在位置
@@ -97,7 +92,7 @@ impl EptInstance {
         target_input: types::matcher::PackageInputEnum,
         verify_signature: bool,
     ) -> anyhow::Result<(types::info::Info, Option<std::path::PathBuf>)> {
-        info(&self.cfg, target_input, verify_signature)
+        info(&self.runtime_ctx, target_input, verify_signature)
     }
 
     /// 使用包文件安装
@@ -106,7 +101,7 @@ impl EptInstance {
         source_file: &str,
         verify_signature: bool,
     ) -> anyhow::Result<(String, String)> {
-        install_using_package(&self.cfg, source_file, verify_signature)
+        install_using_package(&self.runtime_ctx, source_file, verify_signature)
     }
 
     /// 使用解析后的输入安装
@@ -115,12 +110,12 @@ impl EptInstance {
         parsed: Vec<utils::parse_inputs::ParseInputResEnum>,
         verify_signature: bool,
     ) -> anyhow::Result<Vec<(String, String)>> {
-        install_using_parsed(&self.cfg, parsed, verify_signature)
+        install_using_parsed(&self.runtime_ctx, parsed, verify_signature)
     }
 
     /// 列出已安装的包
     pub fn list(&self) -> anyhow::Result<Vec<types::info::Info>> {
-        list(&self.cfg)
+        list(&self.runtime_ctx)
     }
 
     /// 获取包的元数据
@@ -129,7 +124,7 @@ impl EptInstance {
         input: types::matcher::PackageInputEnum,
         verify_signature: bool,
     ) -> anyhow::Result<types::meta::MetaResult> {
-        meta(&self.cfg, input, verify_signature)
+        meta(&self.runtime_ctx, input, verify_signature)
     }
 
     /// 添加镜像源
@@ -138,27 +133,27 @@ impl EptInstance {
         url: &str,
         should_match_name: Option<String>,
     ) -> anyhow::Result<String> {
-        mirror_add(&self.cfg, url, should_match_name)
+        mirror_add(&self.runtime_ctx, url, should_match_name)
     }
 
     /// 列出所有镜像源
     pub fn mirror_list(&self) -> anyhow::Result<Vec<types::mirror::MirrorInfo>> {
-        mirror_list(&self.cfg)
+        mirror_list(&self.runtime_ctx)
     }
 
     /// 移除镜像源
     pub fn mirror_remove(&self, name: &str) -> anyhow::Result<()> {
-        mirror_remove(&self.cfg, name)
+        mirror_remove(&self.runtime_ctx, name)
     }
 
     /// 更新指定镜像源
     pub fn mirror_update(&self, name: &str) -> anyhow::Result<String> {
-        mirror_update(&self.cfg, name)
+        mirror_update(&self.runtime_ctx, name)
     }
 
     /// 更新所有镜像源
     pub fn mirror_update_all(&self) -> anyhow::Result<Vec<String>> {
-        mirror_update_all(&self.cfg)
+        mirror_update_all(&self.runtime_ctx)
     }
 
     /// 打包目录为 nep 文件
@@ -168,7 +163,7 @@ impl EptInstance {
         into_file: Option<String>,
         need_sign: bool,
     ) -> anyhow::Result<String> {
-        pack(&self.cfg, source_dir, into_file, need_sign)
+        pack(&self.runtime_ctx, source_dir, into_file, need_sign)
     }
 
     /// 搜索包
@@ -177,7 +172,7 @@ impl EptInstance {
         text: &str,
         is_regex: bool,
     ) -> anyhow::Result<Vec<types::mirror::SearchResult>> {
-        search(&self.cfg, text, is_regex)
+        search(&self.runtime_ctx, text, is_regex)
     }
 
     /// 卸载包
@@ -186,12 +181,12 @@ impl EptInstance {
         scope: Option<String>,
         package_name: &str,
     ) -> anyhow::Result<(String, String)> {
-        uninstall(&self.cfg, scope, package_name)
+        uninstall(&self.runtime_ctx, scope, package_name)
     }
 
     /// 更新所有包
     pub fn update_all(&self, verify_signature: bool) -> anyhow::Result<(i32, i32)> {
-        update_all(&self.cfg, verify_signature)
+        update_all(&self.runtime_ctx, verify_signature)
     }
 
     /// 使用解析后的输入更新
@@ -200,12 +195,12 @@ impl EptInstance {
         parsed: Vec<utils::parse_inputs::ParseInputResEnum>,
         verify_signature: bool,
     ) -> anyhow::Result<Vec<types::info::UpdateInfo>> {
-        update_using_parsed(&self.cfg, parsed, verify_signature)
+        update_using_parsed(&self.runtime_ctx, parsed, verify_signature)
     }
 
     /// 升级 ept 工具链
     pub fn upgrade(&self, dry_run: bool, need_exit_process: bool) -> anyhow::Result<String> {
-        upgrade(&self.cfg, dry_run, need_exit_process)
+        upgrade(&self.runtime_ctx, dry_run, need_exit_process)
     }
 }
 
@@ -214,3 +209,4 @@ pub use utils::{
     flags::{get_flag, set_flag, Flag},
     launch_clean,
 };
+use crate::types::context::RuntimeContext;

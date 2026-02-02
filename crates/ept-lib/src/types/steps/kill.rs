@@ -77,7 +77,7 @@ impl Interpretable for StepKill {
 }
 
 impl Generalizable for StepKill {
-    fn generalize_permissions(&self, _cfg: &Cfg) -> Result<Vec<Permission>> {
+    fn generalize_permissions(&self, _cfg: &crate::types::context::RuntimeContext) -> Result<Vec<Permission>> {
         Ok(vec![Permission {
             key: PermissionKey::process_kill,
             level: PermissionLevel::Sensitive,

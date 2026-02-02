@@ -45,11 +45,11 @@ impl TStep for StepDownload {
     fn run(self, cx: &mut WorkflowContext) -> Result<i32> {
         //- （仅能在拓展工作流中使用）从 URL 下载文件并使用提供的 BLAKE3 Hash 校验完整性。
         // 从 WorkflowContext 获取配置
-        let cache_path = get_path_cache(&cx.cfg)?;
+        let cache_path = get_path_cache(&cx.runtime_ctx)?;
         // 下载
         let p = Path::new(&cx.located).join(&self.to).to_path_buf();
         let cache_ctx = download(
-            &cx.cfg,
+            &cx.runtime_ctx,
             &self.url,
             p.clone(),
             Some((cache_path, self.hash_blake3.clone())),
@@ -140,7 +140,7 @@ impl TStep for StepDownload {
 }
 
 impl Generalizable for StepDownload {
-    fn generalize_permissions(&self, _cfg: &Cfg) -> Result<Vec<Permission>> {
+    fn generalize_permissions(&self, _cfg: &crate::types::context::RuntimeContext) -> Result<Vec<Permission>> {
         Ok(vec![Permission {
             key: PermissionKey::download_file,
             level: PermissionLevel::Important,

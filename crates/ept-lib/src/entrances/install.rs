@@ -24,7 +24,7 @@ use crate::{executor::workflow_executor, parsers::parse_workflow, utils::get_pat
 use crate::{log, log_ok_last, p2s};
 
 // 检查软件是否已通过绝对路径的 main_program 字段全局安装
-fn check_global_installation(cfg: &Cfg, package: &GlobalPackage) -> Result<bool> {
+fn check_global_installation(cfg: &crate::types::context::RuntimeContext, package: &GlobalPackage) -> Result<bool> {
     if let Some(ref software) = package.software {
         if let Some(ref installed) = software.main_program {
             let p = Path::new(installed);
@@ -44,7 +44,7 @@ fn check_global_installation(cfg: &Cfg, package: &GlobalPackage) -> Result<bool>
 
 // 检查包是否已安装，如果是则重定向到更新流程
 fn check_existing_installation(
-    cfg: &Cfg,
+    cfg: &crate::types::context::RuntimeContext,
     source_file: &str,
     package: &GlobalPackage,
     verify_signature: bool,
@@ -62,7 +62,7 @@ fn check_existing_installation(
 }
 
 // 将应用文件从临时目录部署到 apps 目录
-fn deploy_app_files(cfg: &Cfg, temp_dir: &Path, package: &GlobalPackage) -> Result<String> {
+fn deploy_app_files(cfg: &crate::types::context::RuntimeContext, temp_dir: &Path, package: &GlobalPackage) -> Result<String> {
     let into_dir = get_path_apps(cfg, &package.package.scope, &package.package.name, true)?;
     if into_dir.exists() {
         remove_dir_all(into_dir.clone()).map_err(|_| {
@@ -86,13 +86,13 @@ fn deploy_app_files(cfg: &Cfg, temp_dir: &Path, package: &GlobalPackage) -> Resu
 }
 
 // 验证指定的 main_program 是否存在
-fn validate_main_program(cfg: &Cfg, into_dir: &str, package: &GlobalPackage) -> Result<()> {
+fn validate_main_program(cfg: &crate::types::context::RuntimeContext, into_dir: &str, package: &GlobalPackage) -> Result<()> {
     if let Some(ref software) = package.software {
         if let Some(ref installed) = software.main_program {
             let p = parse_relative_path_with_located(installed, into_dir);
             log!("Debug:Checking main program at '{}'", p2s!(p));
             if !p.exists() {
-                if cfg.mode.qa {
+                if cfg.cfg.mode.qa {
                     log!("Warning:Validating failed : field 'main_program' provided in table 'software' not exist : '{installed}'")
                 } else {
                     return Err(anyhow!("Error:Validating failed : field 'main_program' provided in table 'software' not exist : '{installed}'"));
@@ -104,7 +104,7 @@ fn validate_main_program(cfg: &Cfg, into_dir: &str, package: &GlobalPackage) -> 
 }
 
 // 安装完成后的最终验证
-fn finalize_installation(cfg: &Cfg, into_dir: &str, package: &GlobalPackage) -> Result<()> {
+fn finalize_installation(cfg: &crate::types::context::RuntimeContext, into_dir: &str, package: &GlobalPackage) -> Result<()> {
     installed_validator(into_dir)?;
     validate_main_program(cfg, into_dir, package)?;
 
@@ -125,7 +125,7 @@ fn finalize_installation(cfg: &Cfg, into_dir: &str, package: &GlobalPackage) -> 
 }
 
 pub fn install_using_package(
-    cfg: &Cfg,
+    cfg: &crate::types::context::RuntimeContext,
     source_file: &str,
     verify_signature: bool,
 ) -> Result<(String, String)> {
@@ -170,7 +170,7 @@ pub fn install_using_package(
     // 运行安装工作流
     log!("Info:Running setup workflow...");
     workflow_executor(
-        cfg.clone(),
+        cfg,
         setup_workflow,
         into_dir.clone(),
         package_struct.clone(),
@@ -195,7 +195,7 @@ pub fn install_using_package(
     ))
 }
 
-pub fn install_using_url(cfg: &Cfg, url: &str, verify_signature: bool) -> Result<(String, String)> {
+pub fn install_using_url(cfg: &crate::types::context::RuntimeContext, url: &str, verify_signature: bool) -> Result<(String, String)> {
     // 下载文件到临时目录
     let cache_path = get_path_cache(cfg)?;
     let url_hash = compute_hash_blake3_from_string(url)?;
@@ -211,7 +211,7 @@ pub fn install_using_url(cfg: &Cfg, url: &str, verify_signature: bool) -> Result
 }
 
 pub fn install_using_parsed(
-    cfg: &Cfg,
+    cfg: &crate::types::context::RuntimeContext,
     parsed: Vec<ParseInputResEnum>,
     verify_signature: bool,
 ) -> Result<Vec<(String, String)>> {

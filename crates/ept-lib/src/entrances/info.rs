@@ -32,7 +32,7 @@ use super::{
 };
 
 fn consume_info_diff(
-    cfg: &Cfg,
+    cfg: &crate::types::context::RuntimeContext,
     item: &TreeItem,
     semver_matcher: Option<VersionReq>,
 ) -> Result<(InfoDiff, Option<MetaResult>)> {
@@ -57,7 +57,7 @@ fn consume_info_diff(
     })
 }
 
-pub fn info_local(cfg: &Cfg, scope: &str, package_name: &str) -> Result<(GlobalPackage, InfoDiff)> {
+pub fn info_local(cfg: &crate::types::context::RuntimeContext, scope: &str, package_name: &str) -> Result<(GlobalPackage, InfoDiff)> {
     log!("Debug:Reading local info for '{scope}/{package_name}'");
     let local_path = get_path_apps(cfg, scope, package_name, false)?;
     if !local_path.exists() {
@@ -87,7 +87,7 @@ pub fn info_local(cfg: &Cfg, scope: &str, package_name: &str) -> Result<(GlobalP
 
 // 第二个参数为 URL 模板，第三个参数为 mirror
 pub fn info_online(
-    cfg: &Cfg,
+    cfg: &crate::types::context::RuntimeContext,
     scope: &str,
     package_name: &str,
     mirror: Option<String>,
@@ -132,7 +132,7 @@ pub fn info_online(
 type InfoResult = (String, String, InfoDiff, Option<MetaResult>);
 
 fn info_from_matcher(
-    cfg: &Cfg,
+    cfg: &crate::types::context::RuntimeContext,
     matcher: crate::types::matcher::PackageMatcher,
     _verify: bool,
 ) -> Result<InfoResult> {
@@ -161,7 +161,7 @@ fn info_from_matcher(
     ))
 }
 
-fn info_from_local_path(cfg: &Cfg, path: String, verify: bool) -> Result<InfoResult> {
+fn info_from_local_path(cfg: &crate::types::context::RuntimeContext, path: String, verify: bool) -> Result<InfoResult> {
     let meta_res = meta(cfg, PackageInputEnum::LocalPath(path), verify)?;
     let package = &meta_res.package.package;
     Ok((
@@ -175,7 +175,7 @@ fn info_from_local_path(cfg: &Cfg, path: String, verify: bool) -> Result<InfoRes
     ))
 }
 
-fn info_from_url(cfg: &Cfg, url: String, verify: bool) -> Result<InfoResult> {
+fn info_from_url(cfg: &crate::types::context::RuntimeContext, url: String, verify: bool) -> Result<InfoResult> {
     log!("Debug:Fetching info from URL '{url}'");
     let cache_path = get_path_cache(cfg)?;
     let url_hash = compute_hash_blake3_from_string(&url)?;
@@ -207,7 +207,7 @@ fn info_from_url(cfg: &Cfg, url: String, verify: bool) -> Result<InfoResult> {
 }
 
 // 使用本地和在线数据丰富 info 信息
-fn enrich_info(cfg: &Cfg, mut info: Info, mirror: Option<String>) -> Result<Info> {
+fn enrich_info(cfg: &crate::types::context::RuntimeContext, mut info: Info, mirror: Option<String>) -> Result<Info> {
     log!(
         "Debug:Enriching info for '{scope}/{name}'",
         scope = &info.scope,
@@ -227,7 +227,7 @@ fn enrich_info(cfg: &Cfg, mut info: Info, mirror: Option<String>) -> Result<Info
 }
 
 pub fn info(
-    cfg: &Cfg,
+    cfg: &crate::types::context::RuntimeContext,
     target_input: PackageInputEnum,
     verify_signature: bool,
 ) -> Result<(Info, Option<PathBuf>)> {

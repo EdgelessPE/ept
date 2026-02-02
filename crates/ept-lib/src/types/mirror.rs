@@ -291,10 +291,9 @@ fn test_mirror_pkg_software() {
     use crate::utils::test::_default_test_cfg;
 
     let mixed_fs = MixedFS::new("");
-    let cfg = _default_test_cfg();
     let ctx = VerifiableCtx {
         mixed_fs: &mixed_fs,
-        cfg: &cfg,
+        runtime_ctx: &_default_test_cfg()
     };
     MirrorPkgSoftware::_demo().verify_self(&ctx).unwrap()
 }

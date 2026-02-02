@@ -71,7 +71,7 @@ impl Interpretable for StepToast {
 }
 
 impl Generalizable for StepToast {
-    fn generalize_permissions(&self, _cfg: &Cfg) -> Result<Vec<Permission>> {
+    fn generalize_permissions(&self, _cfg: &crate::types::context::RuntimeContext) -> Result<Vec<Permission>> {
         Ok(vec![Permission {
             key: PermissionKey::notify_toast,
             level: PermissionLevel::Normal,
@@ -125,8 +125,8 @@ fn test_toast_corelation() {
         content: "Hey, love from ept\n你好，爱来自乙烯丙烯三元聚合物".to_string(),
     }
     .verify_step(&super::VerifyStepCtx {
-        mixed_fs: MixedFS::new(""),
-        cfg: _default_test_cfg(),
+        mixed_fs: &MixedFS::new(""),
+        runtime_ctx: &_default_test_cfg(),
         is_expand_flow: false,
     })
     .is_ok());

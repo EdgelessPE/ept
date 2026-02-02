@@ -115,7 +115,7 @@ impl Interpretable for StepMove {
 }
 
 impl Generalizable for StepMove {
-    fn generalize_permissions(&self, _cfg: &Cfg) -> Result<Vec<Permission>> {
+    fn generalize_permissions(&self, _cfg: &crate::types::context::RuntimeContext) -> Result<Vec<Permission>> {
         Ok(vec![
             Permission {
                 key: PermissionKey::fs_write,

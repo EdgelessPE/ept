@@ -206,7 +206,7 @@ impl Interpretable for StepExecute {
 }
 
 impl Generalizable for StepExecute {
-    fn generalize_permissions(&self, _cfg: &Cfg) -> Result<Vec<Permission>> {
+    fn generalize_permissions(&self, _cfg: &crate::types::context::RuntimeContext) -> Result<Vec<Permission>> {
         let node = if self.call_installer.unwrap_or(false) {
             Permission {
                 key: PermissionKey::execute_installer,

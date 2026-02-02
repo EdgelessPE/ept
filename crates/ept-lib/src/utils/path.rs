@@ -60,7 +60,7 @@ pub fn parse_relative_path_with_located(relative: &str, located: &str) -> PathBu
 
 /// name 大小写不敏感
 fn find_scope_with_name_locally(
-    cfg: &Cfg,
+    cfg: &crate::types::context::RuntimeContext,
     name: &str,
     scope: Option<&str>,
 ) -> Result<(String, String)> {
@@ -87,7 +87,7 @@ fn find_scope_with_name_locally(
 }
 
 fn find_scope_with_name_online(
-    cfg: &Cfg,
+    cfg: &crate::types::context::RuntimeContext,
     name: &str,
     scope: Option<&str>,
 ) -> Result<(String, String)> {
@@ -121,7 +121,7 @@ fn find_scope_with_name_online(
 }
 
 pub fn find_scope_with_name(
-    cfg: &Cfg,
+    cfg: &crate::types::context::RuntimeContext,
     name: &str,
     scope: Option<&str>,
 ) -> Result<(String, String)> {
@@ -139,9 +139,9 @@ fn test_parse_relative_path() {
     let p2 = String::from(r"D:\Desktop\Projects\") + "./code.exe";
     let p3 = p2s!(std::env::current_dir().unwrap().join("./code.exe"));
 
-    println!("{:?}", parse_relative_path_with_base(&p1, &cfg.local.base));
-    println!("{:?}", parse_relative_path_with_base(&p2, &cfg.local.base));
-    println!("{:?}", parse_relative_path_with_base(&p3, &cfg.local.base));
+    println!("{:?}", parse_relative_path_with_base(&p1, &cfg.cfg.local.base));
+    println!("{:?}", parse_relative_path_with_base(&p2, &cfg.cfg.local.base));
+    println!("{:?}", parse_relative_path_with_base(&p3, &cfg.cfg.local.base));
 }
 
 #[test]

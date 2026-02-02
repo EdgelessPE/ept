@@ -126,7 +126,7 @@ impl Interpretable for StepRename {
 }
 
 impl Generalizable for StepRename {
-    fn generalize_permissions(&self, _cfg: &Cfg) -> Result<Vec<Permission>> {
+    fn generalize_permissions(&self, _cfg: &crate::types::context::RuntimeContext) -> Result<Vec<Permission>> {
         Ok(vec![Permission {
             key: PermissionKey::fs_write,
             level: judge_perm_level(&self.from)?,

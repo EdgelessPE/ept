@@ -15,7 +15,7 @@ use std::fs::{remove_dir_all, write};
 use std::path::Path;
 
 pub fn pack(
-    cfg: &Cfg,
+    cfg: &crate::types::context::RuntimeContext,
     source_dir: &str,
     into_file: Option<String>,
     need_sign: bool,

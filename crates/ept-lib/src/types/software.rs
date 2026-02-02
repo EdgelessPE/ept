@@ -152,7 +152,7 @@ fn test_verify_software() {
     let cfg = _default_test_cfg();
     let ctx = VerifiableCtx {
         mixed_fs: &mixed_fs,
-        cfg: &cfg,
+        runtime_ctx: &cfg,
     };
     assert!(base.verify_self(&ctx).is_ok());
 

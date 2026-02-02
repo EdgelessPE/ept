@@ -42,7 +42,7 @@ use super::permissions::filter_permissions;
 use crate::types::cfg::Cfg;
 
 // 读取 meta
-pub fn read_local_mirror_hello(cfg: &Cfg, name: &str) -> Result<(MirrorHello, PathBuf)> {
+pub fn read_local_mirror_hello(cfg: &crate::types::context::RuntimeContext, name: &str) -> Result<(MirrorHello, PathBuf)> {
     let dir_path = get_path_mirror(cfg)?.join(name);
     let p = dir_path.join(MIRROR_FILE_HELLO);
     if !p.exists() {
@@ -53,7 +53,7 @@ pub fn read_local_mirror_hello(cfg: &Cfg, name: &str) -> Result<(MirrorHello, Pa
         .map_err(|e| anyhow!("Error:Invalid hello content at '{fp}' : {e}", fp = p2s!(p)))?;
     let ctx = VerifiableCtx {
         mixed_fs: &MixedFS::new(""),
-        cfg,
+        runtime_ctx: cfg,
     };
     hello.verify_self(&ctx)?;
     Ok((hello, dir_path))
@@ -141,7 +141,7 @@ fn register_tokenizer(index: &mut Index) {
 }
 
 // 为包构建索引
-pub fn build_index_for_mirror(cfg: &Cfg, content: MirrorPkgSoftware, dir: PathBuf) -> Result<()> {
+pub fn build_index_for_mirror(cfg: &crate::types::context::RuntimeContext, content: MirrorPkgSoftware, dir: PathBuf) -> Result<()> {
     let schema_fields = get_schema()?;
     if dir.exists() {
         try_recycle(&dir)?;
@@ -306,7 +306,7 @@ pub fn search_index_for_mirror(
 }
 
 // 读取快查索引
-pub fn read_quick_maps(cfg: &Cfg, mirror_name: &str) -> Result<QuickMaps> {
+pub fn read_quick_maps(cfg: &crate::types::context::RuntimeContext, mirror_name: &str) -> Result<QuickMaps> {
     let quick_path = get_path_mirror(cfg)?
         .join(mirror_name)
         .join("index")
@@ -333,7 +333,7 @@ pub fn read_quick_maps(cfg: &Cfg, mirror_name: &str) -> Result<QuickMaps> {
 // 匹配 release
 // 如果没有提供 semver matcher 则返回最大版本
 pub fn filter_release(
-    cfg: &Cfg,
+    cfg: &crate::types::context::RuntimeContext,
     releases: Vec<MirrorPkgSoftwareRelease>,
     semver_matcher: Option<VersionReq>,
     enable_flags_score: bool,
@@ -361,7 +361,7 @@ pub fn filter_release(
             let score = if enable_flags_score {
                 node.get_flags()
                     .map(|flags| {
-                        get_flags_score(&flags, cfg)
+                        get_flags_score(cfg, &flags)
                             .map_err(|e| {
                                 anyhow!(
                                     "Error:Failed to calculate flags score for '{}' : {e}",
@@ -415,7 +415,7 @@ pub fn filter_release(
 
 // 通过匹配 VersionReq 解析出包的 url
 pub fn get_url_with_version_req(
-    cfg: &Cfg,
+    cfg: &crate::types::context::RuntimeContext,
     matcher: PackageMatcher,
 ) -> Result<(String, MirrorPkgSoftwareRelease, String)> {
     // 查找 scope 并使用 scope 更新纠正大小写
@@ -547,9 +547,9 @@ fn test_filter_release_with_flags() {
 
     let modifier = |i: PreferenceEnum, p: PreferenceEnum, e: PreferenceEnum| {
         let mut cfg = _default_test_cfg();
-        cfg.preference.installer = i;
-        cfg.preference.portable = p;
-        cfg.preference.expandable = e;
+        cfg.cfg.preference.installer = i;
+        cfg.cfg.preference.portable = p;
+        cfg.cfg.preference.expandable = e;
         cfg
     };
 

@@ -15,7 +15,7 @@ fn get_question_head(default_value: bool) -> ColoredString {
     }
 }
 
-fn ask_yn_impl(cfg: &Cfg, prompt: String, default_value: bool) -> bool {
+fn ask_yn_impl(cfg: &crate::types::context::RuntimeContext, prompt: String, default_value: bool) -> bool {
     if is_confirm_mode(cfg) {
         log!("{prompt} (confirmed)");
         true
@@ -32,7 +32,7 @@ fn ask_yn_impl(cfg: &Cfg, prompt: String, default_value: bool) -> bool {
     }
 }
 
-pub fn ask_yn(cfg: &Cfg, prompt: String, default_value: bool) -> bool {
+pub fn ask_yn(cfg: &crate::types::context::RuntimeContext, prompt: String, default_value: bool) -> bool {
     debug_assert!(prompt.as_bytes().first().unwrap().is_ascii_uppercase() && prompt.ends_with('?'));
     ask_yn_impl(
         cfg,
@@ -41,7 +41,7 @@ pub fn ask_yn(cfg: &Cfg, prompt: String, default_value: bool) -> bool {
     )
 }
 
-pub fn ask_yn_in_step(cfg: &Cfg, step_name: &str, prompt: String, default_value: bool) -> bool {
+pub fn ask_yn_in_step(cfg: &crate::types::context::RuntimeContext, step_name: &str, prompt: String, default_value: bool) -> bool {
     debug_assert!(prompt.as_bytes().first().unwrap().is_ascii_uppercase() && prompt.ends_with('?'));
     ask_yn_impl(
         cfg,
@@ -67,8 +67,8 @@ pub fn read_console(v: Vec<u8>) -> String {
    3：将任务栏设置为“不确定”状态。 这对于没有进度值但仍在运行的命令非常有用。 此状态忽略 <progress> 值。
    4：将进度值设置为 <progress>，处于“警告”状态。
 */
-pub fn write_windows_terminal_status(cfg: &Cfg, status: u8) {
-    if cfg.interaction.enable_windows_terminal_status {
+pub fn write_windows_terminal_status(cfg: &crate::types::context::RuntimeContext, status: u8) {
+    if cfg.cfg.interaction.enable_windows_terminal_status {
         println!("\x1b]9;4;{status};0\x07");
     }
 }

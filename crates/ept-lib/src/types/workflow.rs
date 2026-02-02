@@ -40,7 +40,7 @@ impl WorkflowHeader {
 }
 
 impl Generalizable for WorkflowHeader {
-    fn generalize_permissions(&self, cfg: &Cfg) -> Result<Vec<Permission>> {
+    fn generalize_permissions(&self, cfg: &crate::types::context::RuntimeContext) -> Result<Vec<Permission>> {
         // 获取条件语句所需的权限
         get_permissions_from_conditions(cfg, self.get_conditions())
     }
@@ -50,7 +50,7 @@ impl Verifiable for WorkflowHeader {
     fn verify_self(&self, ctx: &VerifiableCtx) -> Result<()> {
         // 校验条件，使用上下文中的配置
         verify_conditions(
-            ctx.cfg,
+            ctx.runtime_ctx,
             self.get_conditions(),
             &ctx.mixed_fs.located,
             "1.0.0.0",
@@ -104,7 +104,7 @@ fn test_header_valid() {
     let mixed_fs = MixedFS::new("./examples/VSCode");
     let ctx = VerifiableCtx {
         mixed_fs: &mixed_fs,
-        cfg: &_default_test_cfg(),
+        runtime_ctx: &_default_test_cfg(),
     };
 
     flow.verify_self(&ctx).unwrap();
@@ -117,7 +117,7 @@ fn test_header_valid() {
 
     let ctx2 = VerifiableCtx {
         mixed_fs: &mixed_fs,
-        cfg: &_default_test_cfg(),
+        runtime_ctx: &_default_test_cfg(),
     };
     assert!(flow.verify_self(&ctx2).is_err());
 }
@@ -129,7 +129,7 @@ pub struct WorkflowNode {
 }
 
 impl Generalizable for WorkflowNode {
-    fn generalize_permissions(&self, cfg: &Cfg) -> Result<Vec<Permission>> {
+    fn generalize_permissions(&self, cfg: &crate::types::context::RuntimeContext) -> Result<Vec<Permission>> {
         let mut perm = Vec::new();
         perm.append(&mut self.header.generalize_permissions(cfg)?);
         perm.append(&mut self.body.generalize_permissions(cfg)?);
@@ -142,7 +142,7 @@ impl WorkflowNode {
     pub fn verify_step(&self, ctx: &VerifyStepCtx) -> Result<()> {
         let verifiable_ctx = VerifiableCtx {
             mixed_fs: &ctx.mixed_fs,
-            cfg: &ctx.cfg,
+            runtime_ctx: &ctx.runtime_ctx,
         };
         self.header.verify_self(&verifiable_ctx)?;
         self.body.verify_step(ctx)

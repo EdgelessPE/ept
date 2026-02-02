@@ -17,7 +17,7 @@ pub struct IsAlive {
 }
 
 impl EvalFunction for IsAlive {
-    fn get_closure(_: String, _cfg: &Cfg) -> Function<DefaultNumericTypes> {
+    fn get_closure(_cfg: &crate::types::context::RuntimeContext,_: String) -> Function<DefaultNumericTypes> {
         Function::new(move |val| {
             let arg = ensure_arg(val)?;
             Ok(Value::Boolean(is_alive_with_name(&arg)))

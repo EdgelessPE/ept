@@ -18,7 +18,7 @@ use zip::ZipArchive;
 
 // dry_run: 干运行，仅检查是否有更新
 // need_exit_process: 仅当单测时传入 false，以此防止跑单测时进程退出
-pub fn upgrade(cfg: &Cfg, dry_run: bool, need_exit_process: bool) -> Result<String> {
+pub fn upgrade(cfg: &crate::types::context::RuntimeContext, dry_run: bool, need_exit_process: bool) -> Result<String> {
     let current_version = env!("CARGO_PKG_VERSION");
     // 检查是否有更新
     let (has_upgrade, is_cross_wid_gap, latest_release) = check_has_upgrade(cfg)?;

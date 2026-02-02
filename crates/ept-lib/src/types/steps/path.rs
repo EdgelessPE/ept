@@ -38,7 +38,7 @@ pub struct StepPath {
     pub alias: Option<String>,
 }
 
-fn conflict_resolver(bin_abs: &str, stem: &str, scope: &str, cfg: &Cfg) -> String {
+fn conflict_resolver(bin_abs: &str, stem: &str, scope: &str, cfg: &crate::types::context::RuntimeContext) -> String {
     let origin = format!("{bin_abs}/{stem}.cmd");
     let scoped = format!("{bin_abs}/{scope}-{stem}.cmd");
 
@@ -149,9 +149,9 @@ impl TStep for StepPath {
         //- 若指定一个可执行文件，则会在统一管理的 bin 目录中创建一个入口；
         //- 若指定一个文件夹，则会将其添加到 PATH 变量中。
         // 获取配置
-        let cfg = &cx.cfg;
+        let runtime_ctx = &cx.runtime_ctx;
         // 解析 bin 绝对路径
-        let bin_path = get_path_bin(cfg)?;
+        let bin_path = get_path_bin(runtime_ctx)?;
         let bin_abs = p2s!(bin_path);
 
         // 创建 bin 目录
@@ -196,7 +196,7 @@ impl TStep for StepPath {
         let stem = self
             .alias
             .unwrap_or_else(|| p2s!(Path::new(&self.record).file_stem().unwrap()));
-        let cmd_target_str = conflict_resolver(&bin_abs, &stem, &cx.pkg.package.scope, cfg);
+        let cmd_target_str = conflict_resolver(&bin_abs, &stem, &cx.pkg.package.scope, runtime_ctx);
         if !abs_target_path.exists() {
             return Err(anyhow!(
                 "Error(Path):Failed to add path : final target '{abs_target_str}' not exist"
@@ -214,9 +214,9 @@ impl TStep for StepPath {
     fn reverse_run(self, cx: &mut WorkflowContext) -> Result<()> {
         //- 删除生成的可执行文件入口或从 PATH 变量中移除目录。
         // 获取配置
-        let cfg = &cx.cfg;
+        let runtime_ctx = &cx.runtime_ctx;
         // 解析 bin 绝对路径
-        let bin_path = get_path_bin(cfg)?;
+        let bin_path = get_path_bin(runtime_ctx)?;
         let bin_abs = p2s!(bin_path);
 
         // 创建 bin 目录
@@ -292,7 +292,7 @@ impl Interpretable for StepPath {
 }
 
 impl Generalizable for StepPath {
-    fn generalize_permissions(&self, _cfg: &Cfg) -> Result<Vec<Permission>> {
+    fn generalize_permissions(&self, _cfg: &crate::types::context::RuntimeContext) -> Result<Vec<Permission>> {
         // 检查是否有拓展名且不以 / 結尾，以此判断添加的是目录还是单文件
         let p = Path::new(&self.record);
         let node = if p.extension().is_some() && !self.record.ends_with('/') {

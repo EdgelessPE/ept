@@ -30,7 +30,7 @@ pub fn inner_validator(dir: &str) -> Result<()> {
 }
 
 pub fn manifest_validator(
-    cfg: &Cfg,
+    cfg: &crate::types::context::RuntimeContext,
     base: &str,
     manifest: Vec<String>,
     fs: &mut MixedFS,

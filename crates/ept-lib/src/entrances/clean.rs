@@ -37,7 +37,7 @@ fn get_valid_entrances(setup: Vec<WorkflowNode>) -> Vec<String> {
         .collect()
 }
 
-pub fn clean(cfg: &Cfg) -> Result<usize> {
+pub fn clean(cfg: &crate::types::context::RuntimeContext) -> Result<usize> {
     log!("Debug:Starting clean operation");
     let mut clean_list = Vec::new();
     let mut valid_entrances = HashSet::new();

@@ -62,7 +62,7 @@ impl ParseInputResEnum {
 }
 
 pub fn parse_install_inputs(
-    cfg: &Cfg,
+    cfg: &crate::types::context::RuntimeContext,
     packages: Vec<String>,
     verify_signature: bool,
 ) -> Result<Vec<ParseReturned>> {
@@ -118,7 +118,7 @@ pub fn parse_install_inputs(
 }
 
 pub fn parse_update_inputs(
-    cfg: &Cfg,
+    cfg: &crate::types::context::RuntimeContext,
     packages: Vec<String>,
     verify_signature: bool,
 ) -> Result<Vec<ParseReturned>> {
@@ -176,7 +176,7 @@ pub fn parse_update_inputs(
     Ok(res)
 }
 
-pub fn parse_uninstall_inputs(cfg: &Cfg, packages: Vec<String>) -> Result<Vec<Info>> {
+pub fn parse_uninstall_inputs(cfg: &crate::types::context::RuntimeContext, packages: Vec<String>) -> Result<Vec<Info>> {
     let mut arr = Vec::new();
     for p in packages {
         // 简单校验是否可以卸载

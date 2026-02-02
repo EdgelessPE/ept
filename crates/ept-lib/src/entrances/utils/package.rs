@@ -27,7 +27,7 @@ use crate::{
 use crate::{log, log_ok_last};
 
 /// 根据源文件路径创建临时目录
-fn get_temp_dir_path(cfg: &Cfg, source_file: &str) -> Result<PathBuf> {
+fn get_temp_dir_path(cfg: &crate::types::context::RuntimeContext, source_file: &str) -> Result<PathBuf> {
     let file_stem = p2s!(Path::new(source_file).file_stem().unwrap());
     let temp_dir_path = allocate_path_temp(cfg, &file_stem, true)?;
 
@@ -35,7 +35,7 @@ fn get_temp_dir_path(cfg: &Cfg, source_file: &str) -> Result<PathBuf> {
 }
 
 /// 清理临时目录(会判断 debug)
-pub fn clean_temp(cfg: &Cfg, source_file: &str) -> Result<()> {
+pub fn clean_temp(cfg: &crate::types::context::RuntimeContext, source_file: &str) -> Result<()> {
     let temp_dir_path = get_temp_dir_path(cfg, source_file)?;
     if !is_debug_mode() {
         log!("Info:Cleaning...");
@@ -60,7 +60,7 @@ pub fn clean_temp(cfg: &Cfg, source_file: &str) -> Result<()> {
 
 /// 返回 (Inner 临时目录,package 结构体)
 pub fn unpack_nep(
-    cfg: &Cfg,
+    cfg: &crate::types::context::RuntimeContext,
     source: &str,
     verify_signature: bool,
 ) -> Result<(PathBuf, GlobalPackage)> {
@@ -111,7 +111,7 @@ pub fn unpack_nep(
 }
 
 fn normal_unpack_nep(
-    cfg: &Cfg,
+    cfg: &crate::types::context::RuntimeContext,
     source_file: &str,
     verify_signature: bool,
 ) -> Result<(PathBuf, GlobalPackage)> {
@@ -183,7 +183,7 @@ fn normal_unpack_nep(
     Ok((temp_dir_inner_path, package_struct))
 }
 fn fast_unpack_nep(
-    cfg: &Cfg,
+    cfg: &crate::types::context::RuntimeContext,
     source_file: &str,
     verify_signature: bool,
 ) -> Result<(PathBuf, GlobalPackage)> {

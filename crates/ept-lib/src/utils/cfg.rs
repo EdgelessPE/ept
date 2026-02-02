@@ -4,7 +4,7 @@ use crate::types::cfg::{Cfg, PreferenceEnum};
 
 use super::arch::SysArch;
 
-pub fn get_flags_score(flags: &str, cfg: &Cfg) -> Result<i32> {
+pub fn get_flags_score( cfg: &crate::types::context::RuntimeContext, flags: &str) -> Result<i32> {
     let mut score = 0;
     for c in flags.chars() {
         let e = match c {
@@ -17,11 +17,11 @@ pub fn get_flags_score(flags: &str, cfg: &Cfg) -> Result<i32> {
                 }
             }
             //- Expandable
-            'E' => &cfg.preference.expandable,
+            'E' => &cfg.cfg.preference.expandable,
             //- Installer
-            'I' => &cfg.preference.installer,
+            'I' => &cfg.cfg.preference.installer,
             //- Portable
-            'P' => &cfg.preference.portable,
+            'P' => &cfg.cfg.preference.portable,
             _ => {
                 return Err(anyhow!("Error:Invalid flag : '{c}'"));
             }
@@ -42,9 +42,9 @@ fn test_get_flags_score() {
 
     let getter = |i: PreferenceEnum, p: PreferenceEnum, e: PreferenceEnum| {
         let mut cfg = cfg_bak.clone();
-        cfg.preference.installer = i;
-        cfg.preference.portable = p;
-        cfg.preference.expandable = e;
+        cfg.cfg.preference.installer = i;
+        cfg.cfg.preference.portable = p;
+        cfg.cfg.preference.expandable = e;
         cfg
     };
 
@@ -54,10 +54,10 @@ fn test_get_flags_score() {
         PreferenceEnum::HighPriority,
         PreferenceEnum::HighPriority,
     );
-    assert_eq!(get_flags_score("I", &cfg).unwrap(), 2);
-    assert_eq!(get_flags_score("IE", &cfg).unwrap(), 18);
-    assert_eq!(get_flags_score("P", &cfg).unwrap(), 16);
-    assert_eq!(get_flags_score("EP", &cfg).unwrap(), 32);
+    assert_eq!(get_flags_score(&cfg,"I").unwrap(), 2);
+    assert_eq!(get_flags_score(&cfg,"IE").unwrap(), 18);
+    assert_eq!(get_flags_score(&cfg,"P").unwrap(), 16);
+    assert_eq!(get_flags_score(&cfg,"EP").unwrap(), 32);
 
     // scope 型偏好
     let cfg = getter(
@@ -65,10 +65,10 @@ fn test_get_flags_score() {
         PreferenceEnum::HighPriority,
         PreferenceEnum::HighPriority,
     );
-    assert_eq!(get_flags_score("I", &cfg).unwrap(), -1024);
-    assert_eq!(get_flags_score("IE", &cfg).unwrap(), -1008);
-    assert_eq!(get_flags_score("P", &cfg).unwrap(), 16);
-    assert_eq!(get_flags_score("EP", &cfg).unwrap(), 32);
+    assert_eq!(get_flags_score(&cfg,"I").unwrap(), -1024);
+    assert_eq!(get_flags_score(&cfg,"IE").unwrap(), -1008);
+    assert_eq!(get_flags_score(&cfg,"P").unwrap(), 16);
+    assert_eq!(get_flags_score(&cfg,"EP").unwrap(), 32);
 
     // 仅完整安装偏好
     let cfg = getter(
@@ -76,8 +76,8 @@ fn test_get_flags_score() {
         PreferenceEnum::Forbidden,
         PreferenceEnum::LowPriority,
     );
-    assert_eq!(get_flags_score("I", &cfg).unwrap(), 16);
-    assert_eq!(get_flags_score("IE", &cfg).unwrap(), 18);
-    assert_eq!(get_flags_score("P", &cfg).unwrap(), -1024);
-    assert_eq!(get_flags_score("EP", &cfg).unwrap(), -1022);
+    assert_eq!(get_flags_score(&cfg,"I").unwrap(), 16);
+    assert_eq!(get_flags_score(&cfg,"IE").unwrap(), 18);
+    assert_eq!(get_flags_score(&cfg,"P").unwrap(), -1024);
+    assert_eq!(get_flags_score(&cfg,"EP").unwrap(), -1022);
 }

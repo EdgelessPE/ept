@@ -27,7 +27,7 @@ pub fn ensure_arg(val: &Value) -> std::result::Result<String, EvalexprError> {
 
 /// 使用虚拟的函数定义捕获函数运行信息，返回（函数名，参数，所属表达式）
 fn capture_function_info(
-    cfg: &Cfg,
+    cfg: &crate::types::context::RuntimeContext,
     conditions: &Vec<String>,
 ) -> Result<Vec<(String, String, String)>> {
     // 获取已注册的 eval 函数名称
@@ -38,7 +38,7 @@ fn capture_function_info(
 
     for cond in conditions {
         // 初始化上下文
-        let mut context = get_eval_context(0, "", "0.0.0.0", cfg);
+        let mut context = get_eval_context(cfg,0, "", "0.0.0.0");
 
         // 迭代函数信息，创建收集闭包
         for name in info_arr.clone() {
@@ -68,7 +68,7 @@ fn capture_function_info(
 }
 
 pub fn get_permissions_from_conditions(
-    cfg: &Cfg,
+    cfg: &crate::types::context::RuntimeContext,
     conditions: Vec<String>,
 ) -> Result<Vec<Permission>> {
     // 捕获函数执行信息
@@ -84,7 +84,7 @@ pub fn get_permissions_from_conditions(
 }
 
 pub fn verify_conditions(
-    cfg: &Cfg,
+    cfg: &crate::types::context::RuntimeContext,
     conditions: Vec<String>,
     located: &str,
     package_version: &str,

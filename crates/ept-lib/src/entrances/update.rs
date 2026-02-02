@@ -51,7 +51,7 @@ fn validate_version_update(name: &str, local_ver: &str, fresh_ver: &str) -> Resu
 
 // 处理作者不匹配的情况，需要卸载后重新安装
 fn handle_author_mismatch(
-    cfg: &Cfg,
+    cfg: &crate::types::context::RuntimeContext,
     source_file: &str,
     local: &GlobalPackage,
     fresh: &GlobalPackage,
@@ -89,7 +89,7 @@ fn handle_author_mismatch(
 
 // 如有需要，执行旧包的移除工作流
 fn run_old_remove_if_needed(
-    cfg: &Cfg,
+    cfg: &crate::types::context::RuntimeContext,
     located: &Path,
     temp_dir: &Path,
     local_pkg: &GlobalPackage,
@@ -104,14 +104,14 @@ fn run_old_remove_if_needed(
         log!("Info:Running remove workflow...");
         let remove_workflow = parse_workflow(&p2s!(remove_path))?;
         let located_str = p2s!(located);
-        workflow_executor(cfg.clone(), remove_workflow, located_str, local_pkg.clone())?;
+        workflow_executor(cfg, remove_workflow, located_str, local_pkg.clone())?;
         log_ok_last!("Info:Running remove workflow...");
     }
     Ok(())
 }
 
 // 逆向执行安装工作流
-fn reverse_setup_workflow(cfg: &Cfg, located: &Path, local_pkg: GlobalPackage) -> Result<()> {
+fn reverse_setup_workflow(cfg: &crate::types::context::RuntimeContext, located: &Path, local_pkg: GlobalPackage) -> Result<()> {
     let setup_path = located
         .join(DIR_NEP_CONTEXT)
         .join(DIR_WORKFLOWS)
@@ -120,7 +120,7 @@ fn reverse_setup_workflow(cfg: &Cfg, located: &Path, local_pkg: GlobalPackage) -
     let located_str = p2s!(located);
 
     log!("Info:Running reverse setup workflow...");
-    workflow_reverse_executor(cfg.clone(), setup_workflow, located_str, local_pkg)?;
+    workflow_reverse_executor(cfg, setup_workflow, located_str, local_pkg)?;
     log_ok_last!("Info:Running reverse setup workflow...");
     Ok(())
 }
@@ -145,7 +145,7 @@ fn deploy_update(temp_dir: &Path, located: &Path, name: &str) -> Result<()> {
 
 // 执行新包的 update 或 setup 工作流
 fn run_new_workflow(
-    cfg: &Cfg,
+    cfg: &crate::types::context::RuntimeContext,
     temp_dir: &Path,
     located: &Path,
     fresh_pkg: GlobalPackage,
@@ -156,20 +156,20 @@ fn run_new_workflow(
     if update_path.exists() {
         log!("Info:Running update workflow...");
         let update_workflow = parse_workflow(&p2s!(update_path))?;
-        workflow_executor(cfg.clone(), update_workflow, located_str, fresh_pkg)?;
+        workflow_executor(cfg, update_workflow, located_str, fresh_pkg)?;
         log_ok_last!("Info:Running update workflow...");
     } else {
         log!("Info:Running setup workflow...");
         let setup_path = update_path.with_file_name(WORKFLOW_SETUP);
         let setup_workflow = parse_workflow(&p2s!(setup_path))?;
-        workflow_executor(cfg.clone(), setup_workflow, located_str, fresh_pkg)?;
+        workflow_executor(cfg, setup_workflow, located_str, fresh_pkg)?;
         log_ok_last!("Info:Running setup workflow...");
     }
     Ok(())
 }
 
 pub fn update_using_package(
-    cfg: &Cfg,
+    cfg: &crate::types::context::RuntimeContext,
     source_file: &str,
     verify_signature: bool,
 ) -> Result<UpdateInfo> {
@@ -246,7 +246,7 @@ pub fn update_using_package(
     })
 }
 
-pub fn update_using_url(cfg: &Cfg, url: &str, verify_signature: bool) -> Result<UpdateInfo> {
+pub fn update_using_url(cfg: &crate::types::context::RuntimeContext, url: &str, verify_signature: bool) -> Result<UpdateInfo> {
     // 下载文件到临时目录
     let cache_path = get_path_cache(cfg)?;
     let url_hash = compute_hash_blake3_from_string(url)?;
@@ -262,7 +262,7 @@ pub fn update_using_url(cfg: &Cfg, url: &str, verify_signature: bool) -> Result<
 }
 
 pub fn update_using_package_matcher(
-    cfg: &Cfg,
+    cfg: &crate::types::context::RuntimeContext,
     matcher: String,
     verify_signature: bool,
 ) -> Result<UpdateInfo> {
@@ -279,7 +279,7 @@ pub fn update_using_package_matcher(
 }
 
 pub fn update_using_parsed(
-    cfg: &Cfg,
+    cfg: &crate::types::context::RuntimeContext,
     parsed: Vec<ParseInputResEnum>,
     verify_signature: bool,
 ) -> Result<Vec<UpdateInfo>> {
@@ -316,7 +316,7 @@ pub fn update_using_parsed(
     Ok(arr)
 }
 
-pub fn update_all(cfg: &Cfg, verify_signature: bool) -> Result<(i32, i32)> {
+pub fn update_all(cfg: &crate::types::context::RuntimeContext, verify_signature: bool) -> Result<(i32, i32)> {
     // 遍历 list 结果，生成更新列表
     let list_res = list(cfg)?;
     let update_list: Vec<UpdateInfo> = list_res
@@ -364,7 +364,7 @@ pub fn update_all(cfg: &Cfg, verify_signature: bool) -> Result<(i32, i32)> {
     let mut success_count = 0;
     let mut failure_count = 0;
     let mut temp_auto_confirm_cfg = cfg.clone();
-    temp_auto_confirm_cfg.interaction.auto_confirm_all = true;
+    temp_auto_confirm_cfg.cfg.interaction.auto_confirm_all = true;
     for info in update_list {
         let res = update_using_package_matcher(
             &temp_auto_confirm_cfg,

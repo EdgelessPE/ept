@@ -8,9 +8,9 @@ use anyhow::{anyhow, Error, Result};
 use toml::Value;
 
 // 返回（key 指向的 value，整个 Cfg）
-fn get_toml_value(cfg: &Cfg, table: &str, key: &str) -> Result<(Value, Value)> {
+fn get_toml_value(cfg: &crate::types::context::RuntimeContext, table: &str, key: &str) -> Result<(Value, Value)> {
     // 序列化为 toml 对象
-    let toml = Value::try_from(cfg)?;
+    let toml = Value::try_from(cfg.cfg.clone())?;
     // 读 table
     let tab = toml
         .get(table)
@@ -23,7 +23,7 @@ fn get_toml_value(cfg: &Cfg, table: &str, key: &str) -> Result<(Value, Value)> {
     Ok((val.to_owned(), toml))
 }
 
-pub fn config_set(cfg: &Cfg, table: &str, key: &str, value: &str) -> Result<()> {
+pub fn config_set(cfg: &crate::types::context::RuntimeContext, table: &str, key: &str, value: &str) -> Result<()> {
     // 错误处理闭包
     let err_wrapper =
         |e: Error| anyhow!("Error:Failed to set value of '${key}' as '${value}' : ${e}");
@@ -71,7 +71,7 @@ pub fn config_set(cfg: &Cfg, table: &str, key: &str, value: &str) -> Result<()> 
     Ok(())
 }
 
-pub fn config_get(cfg: &Cfg, table: &str, key: &str) -> Result<String> {
+pub fn config_get(cfg: &crate::types::context::RuntimeContext, table: &str, key: &str) -> Result<String> {
     let (val, _) = get_toml_value(cfg, table, key)?;
 
     let str = val
@@ -84,11 +84,12 @@ pub fn config_get(cfg: &Cfg, table: &str, key: &str) -> Result<String> {
     Ok(str)
 }
 
-pub fn config_list(cfg: &Cfg) -> Result<String> {
+pub fn config_list(runtime_ctx: &crate::types::context::RuntimeContext) -> Result<String> {
+    let cfg=&runtime_ctx.cfg;
     Ok(format!("{cfg:#?}"))
 }
 
-pub fn config_init(cfg: &Cfg) -> Result<String> {
+pub fn config_init(cfg: &crate::types::context::RuntimeContext) -> Result<String> {
     let file_path = config_which()?;
     if Path::new(&file_path).exists()
         && !cfg.interaction().ask_yn(
@@ -98,7 +99,7 @@ pub fn config_init(cfg: &Cfg) -> Result<String> {
     {
         return Err(anyhow!("Error:Operation cancelled by user"));
     }
-    Cfg::overwrite(cfg.clone())?;
+    Cfg::overwrite(cfg.cfg.clone())?;
     Ok(file_path)
 }
 
@@ -129,8 +130,8 @@ fn test_config() {
     } else {
         // 如果没有必须新建一个，不然默认会在用户目录里面新建配置文件
         let mut default_cfg = _default_test_cfg();
-        default_cfg.local.base = "C:/Users/Public/Videos".to_string();
-        let text = toml::to_string_pretty(&default_cfg).unwrap();
+        default_cfg.cfg.local.base = "C:/Users/Public/Videos".to_string();
+        let text = toml::to_string_pretty(&default_cfg.cfg).unwrap();
         fs::write(FILE_NAME, text).unwrap();
         None
     };
@@ -140,12 +141,12 @@ fn test_config() {
 
     // 测试初始化
     config_init(&config).unwrap();
-    checker(answer_cfg_init.clone());
+    checker(answer_cfg_init.cfg.clone());
 
     // 测试 set
     let mut new_cfg = answer_cfg_init.clone();
     let new_base = "C:/Users/Public/Music".to_string();
-    new_cfg.local.base.clone_from(&new_base);
+    new_cfg.cfg.local.base.clone_from(&new_base);
     assert!(config_set(&config, "local", "base", "114514").is_err());
     config_set(&config, "local", "base", &new_base).unwrap();
 

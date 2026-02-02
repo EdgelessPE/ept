@@ -25,21 +25,21 @@ lazy_static! {
 }
 
 pub fn get_eval_context(
+    cfg: &crate::types::context::RuntimeContext,
     exit_code: i32,
     located: &str,
     package_version: &str,
-    cfg: &Cfg,
 ) -> HashMapContext {
     let mut context = HashMapContext::new();
     set_context_with_constant_values(&mut context);
     set_context_with_mutable_values(&mut context, exit_code, located, package_version);
-    set_context_with_function(&mut context, located, cfg);
+    set_context_with_function(cfg,&mut context, located );
     context
 }
 
 // 执行条件以判断是否成立
 pub fn condition_eval(
-    cfg: &Cfg,
+    cfg: &crate::types::context::RuntimeContext,
     condition: &str,
     exit_code: i32,
     located: &str,
@@ -48,7 +48,7 @@ pub fn condition_eval(
     // 装饰变量与函数
     let condition_with_values_interpreted =
         values_replacer(condition.to_owned(), exit_code, located, package_version);
-    let context = get_eval_context(exit_code, located, package_version, cfg);
+    let context = get_eval_context(cfg, exit_code, located, package_version);
 
     // 执行 eval
     eval_boolean_with_context(&condition_with_values_interpreted, &context).map_err(|res| {
@@ -58,7 +58,7 @@ pub fn condition_eval(
 
 // 执行工作流，返回最后一个步骤的退出码
 pub fn workflow_executor(
-    cfg: Cfg,
+    cfg: &crate::types::context::RuntimeContext,
     flow: Vec<WorkflowNode>,
     located: String,
     pkg: GlobalPackage,
@@ -74,7 +74,7 @@ pub fn workflow_executor(
 
     // 准备上下文
     let package_version = pkg.package.version.clone();
-    let mut cx = WorkflowContext::new(cfg, &located, pkg);
+    let mut cx = WorkflowContext::new(*cfg.clone(), &located, pkg);
 
     // 遍历流节点
     for flow_node in flow {
@@ -82,7 +82,7 @@ pub fn workflow_executor(
         log!("Debug:Start step '{name}'");
         // 解释节点条件，判断是否需要跳过执行
         if let Some(c_if) = flow_node.header.c_if {
-            if !condition_eval(&cx.cfg, &c_if, cx.exit_code, &located, &package_version)? {
+            if !condition_eval(cfg, &c_if, cx.exit_code, &located, &package_version)? {
                 continue;
             }
         }
@@ -126,7 +126,7 @@ pub fn workflow_executor(
 
 // 宽容地逆向执行 setup 工作流
 pub fn workflow_reverse_executor(
-    cfg: Cfg,
+    cfg: &crate::types::context::RuntimeContext,
     flow: Vec<WorkflowNode>,
     located: String,
     pkg: GlobalPackage,
@@ -273,7 +273,7 @@ fn test_workflow_executor() {
             }),
         },
     ];
-    assert!(workflow_executor(cx.cfg.clone(), wf1, cx.located, cx.pkg).is_err());
+    assert!(workflow_executor(cx.runtime_ctx, wf1, cx.located, cx.pkg).is_err());
 }
 
 #[test]
@@ -312,7 +312,7 @@ fn test_workflow_executor_interpreter() {
     ];
     let mut cx = WorkflowContext::_demo();
     cx.pkg.package.strict = Some(false);
-    let code = workflow_executor(cx.cfg.clone(), flow, cx.located, cx.pkg).unwrap();
+    let code = workflow_executor(cx.runtime_ctx, flow, cx.located, cx.pkg).unwrap();
     assert_eq!(code, 0);
 }
 
@@ -340,11 +340,11 @@ fn test_workflow_with_strict_mode() {
 
     // 默认情况下是严格模式
     let cx = WorkflowContext::_demo();
-    assert!(workflow_executor(cx.cfg.clone(), flow.clone(), cx.located, cx.pkg).is_err());
+    assert!(workflow_executor(cx.runtime_ctx, flow.clone(), cx.located, cx.pkg).is_err());
 
     // 显式申明禁用严格模式
     let mut cx = WorkflowContext::_demo();
     cx.pkg.package.strict = Some(false);
-    let code = workflow_executor(cx.cfg.clone(), flow.clone(), cx.located, cx.pkg).unwrap();
+    let code = workflow_executor(cx.runtime_ctx, flow.clone(), cx.located, cx.pkg).unwrap();
     assert_eq!(code, 3);
 }

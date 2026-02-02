@@ -38,7 +38,7 @@ fn get_manifest(flow: Vec<WorkflowNode>) -> Vec<String> {
     manifest
 }
 
-pub fn uninstall(cfg: &Cfg, scope: Option<String>, package_name: &str) -> Result<(String, String)> {
+pub fn uninstall(cfg: &crate::types::context::RuntimeContext, scope: Option<String>, package_name: &str) -> Result<(String, String)> {
     log!("Info:Preparing to uninstall '{package_name}'");
 
     // 查找 scope 并使用 scope 更新纠正大小写
@@ -85,7 +85,7 @@ pub fn uninstall(cfg: &Cfg, scope: Option<String>, package_name: &str) -> Result
         let e = get_reg_entry(&entry_id);
         if let Some(uninstall_string) = e.uninstall_string {
             log!("Info:Running uninstaller due to registry entry...");
-            let mut cx = WorkflowContext::new(cfg.clone(), &app_str, global.clone());
+            let mut cx = WorkflowContext::new(*cfg.cfg.clone(), &app_str, global.clone());
             StepExecute {
                 command: uninstall_string,
                 pwd: None,
@@ -109,7 +109,7 @@ pub fn uninstall(cfg: &Cfg, scope: Option<String>, package_name: &str) -> Result
 
         // 执行卸载工作流
         log!("Info:Running remove workflow...");
-        workflow_executor(cfg.clone(), remove_flow, app_str.clone(), global.clone())?;
+        workflow_executor(cfg, remove_flow, app_str.clone(), global.clone())?;
         log_ok_last!("Info:Running remove workflow...");
     }
 
@@ -123,7 +123,7 @@ pub fn uninstall(cfg: &Cfg, scope: Option<String>, package_name: &str) -> Result
     // 逆向执行安装工作流
     log!("Info:Running reverse setup workflow...");
     workflow_reverse_executor(
-        cfg.clone(),
+        cfg,
         setup_flow.clone(),
         app_str.clone(),
         global.clone(),

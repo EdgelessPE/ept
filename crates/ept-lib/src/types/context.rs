@@ -9,6 +9,7 @@ use std::process::Child;
 use std::sync::Arc;
 
 /// 通用上下文结构体，包含配置和交互提供者
+#[derive(Clone, Debug)]
 pub struct RuntimeContext {
     /// 配置信息
     pub cfg: Cfg,
@@ -50,30 +51,30 @@ impl Default for RuntimeContext {
 }
 
 /// 工作流执行上下文
-pub struct WorkflowContext {
+pub struct WorkflowContext<'a> {
     pub located: String,
     pub pkg: GlobalPackage,
     pub async_execution_handlers: Vec<(String, Child, bool)>, // 命令，handler，是否被抛弃
     pub exit_code: i32,
-    pub cfg: Cfg,
+    pub runtime_ctx: &'a RuntimeContext,
 }
 
 /// 用于校验的上下文
 pub struct VerifiableCtx<'a> {
     pub mixed_fs: &'a MixedFS,
-    pub cfg: &'a Cfg,
+    pub runtime_ctx: &'a RuntimeContext,
 }
 
 /// 步骤验证上下文
-pub struct VerifyStepCtx {
-    pub mixed_fs: MixedFS,
-    pub cfg: Cfg,
+pub struct VerifyStepCtx<'a> {
+    pub mixed_fs: &'a MixedFS,
+    pub runtime_ctx: &'a RuntimeContext,
     pub is_expand_flow: bool,
 }
 
 /// 缓存操作上下文
 // （是否启用缓存，源文件，Option<(缓存目录, 缓存 key)>）
-#[derive(Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct CacheCtx(
     pub bool,
     pub std::path::PathBuf,
@@ -83,19 +84,19 @@ pub struct CacheCtx(
 impl WorkflowContext {
     pub fn _demo() -> Self {
         Self::new(
-            _default_test_cfg(),
+            &_default_test_cfg(),
             &p2s!(std::env::current_dir().unwrap()),
             GlobalPackage::_demo(),
         )
     }
 
-    pub fn new(cfg: Cfg, located: &str, pkg: GlobalPackage) -> Self {
+    pub fn new(runtime_ctx: &RuntimeContext, located: &str, pkg: GlobalPackage) -> Self {
         Self {
             pkg,
             located: located.to_owned(),
             async_execution_handlers: Vec::new(),
             exit_code: 0,
-            cfg,
+            runtime_ctx
         }
     }
 
@@ -141,8 +142,8 @@ impl WorkflowContext {
 impl VerifyStepCtx {
     pub fn _demo() -> Self {
         Self {
-            mixed_fs: MixedFS::new(""),
-            cfg: _default_test_cfg(),
+            mixed_fs: &MixedFS::new(""),
+            runtime_ctx: &_default_test_cfg(),
             is_expand_flow: false,
         }
     }

@@ -26,7 +26,7 @@ use crate::{
 };
 
 // 返回远程镜像源申明的名称
-pub fn mirror_add(cfg: &Cfg, url: &str, should_match_name: Option<String>) -> Result<String> {
+pub fn mirror_add(cfg: &crate::types::context::RuntimeContext, url: &str, should_match_name: Option<String>) -> Result<String> {
     // 尝试解析为 URL 对象
     let parsed_url =
         Url::parse(url).map_err(|e| anyhow!("Error:Failed to parse '{url}' as valid URL : {e}"))?;
@@ -59,7 +59,7 @@ pub fn mirror_add(cfg: &Cfg, url: &str, should_match_name: Option<String>) -> Re
     let mixed_fs = MixedFS::new("");
     let ctx = VerifiableCtx {
         mixed_fs: &mixed_fs,
-        cfg,
+        runtime_ctx: &cfg,
     };
     res.verify_self(&ctx)?;
 
@@ -110,7 +110,7 @@ pub fn mirror_add(cfg: &Cfg, url: &str, should_match_name: Option<String>) -> Re
     Ok(mirror_name)
 }
 
-pub fn mirror_update(cfg: &Cfg, name: &str) -> Result<String> {
+pub fn mirror_update(cfg: &crate::types::context::RuntimeContext, name: &str) -> Result<String> {
     // 读取 meta 文件
     let (meta, _) = read_local_mirror_hello(cfg, name)?;
     // 筛选出 hello 服务
@@ -119,7 +119,7 @@ pub fn mirror_update(cfg: &Cfg, name: &str) -> Result<String> {
     mirror_add(cfg, &hello_path, Some(name.to_string()))
 }
 
-pub fn mirror_list(cfg: &Cfg) -> Result<Vec<MirrorInfo>> {
+pub fn mirror_list(cfg: &crate::types::context::RuntimeContext) -> Result<Vec<MirrorInfo>> {
     let p = get_path_mirror(cfg)?;
     let mut res = Vec::new();
     for name in read_sub_dir(&p)? {
@@ -136,7 +136,7 @@ pub fn mirror_list(cfg: &Cfg) -> Result<Vec<MirrorInfo>> {
     Ok(res)
 }
 
-pub fn mirror_update_all(cfg: &Cfg) -> Result<Vec<String>> {
+pub fn mirror_update_all(cfg: &crate::types::context::RuntimeContext) -> Result<Vec<String>> {
     let p = get_path_mirror(cfg)?;
     let mut names = Vec::new();
     for name in read_sub_dir(p)? {
@@ -147,13 +147,13 @@ pub fn mirror_update_all(cfg: &Cfg) -> Result<Vec<String>> {
 }
 
 // 根据 config 中的超时配置自动判断是否需要更新镜像
-pub fn auto_mirror_update_all(cfg: &Cfg) -> Result<bool> {
+pub fn auto_mirror_update_all(cfg: &crate::types::context::RuntimeContext) -> Result<bool> {
     // 读取配置
-    let duration_cfg = parse_duration(&cfg.online.mirror_update_interval).map_err(|e| anyhow!("Error:Failed to parse config field 'online.mirror_update_interval' as valid time span : '{e}', e.g. '5d' '14m54s'"))?;
+    let duration_cfg = parse_duration(&cfg.cfg.online.mirror_update_interval).map_err(|e| anyhow!("Error:Failed to parse config field 'online.mirror_update_interval' as valid time span : '{e}', e.g. '5d' '14m54s'"))?;
     let now = SystemTime::now();
     log!(
         "Debug:Mirror update interval : '{i}'",
-        i = &cfg.online.mirror_update_interval
+        i = &cfg.cfg.online.mirror_update_interval
     );
 
     // 列出镜像源，如果其中有一个过期就更新全部
@@ -172,7 +172,7 @@ pub fn auto_mirror_update_all(cfg: &Cfg) -> Result<bool> {
     }
 }
 
-pub fn mirror_remove(cfg: &Cfg, name: &str) -> Result<()> {
+pub fn mirror_remove(cfg: &crate::types::context::RuntimeContext, name: &str) -> Result<()> {
     // 获取目录路径
     let (_, p) = read_local_mirror_hello(cfg, name)?;
     // 移除目录
@@ -323,7 +323,7 @@ fn test_auto_mirror_update_all() {
 
     // 创建一个短过期配置，等 2s 后会导致更新
     let mut short_cfg = cfg.clone();
-    short_cfg.online.mirror_update_interval = "1s".to_string();
+    short_cfg.cfg.online.mirror_update_interval = "1s".to_string();
     sleep(Duration::from_secs(2));
 
     assert!(auto_mirror_update_all(&short_cfg).unwrap());

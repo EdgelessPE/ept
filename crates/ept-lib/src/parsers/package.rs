@@ -92,7 +92,7 @@ fn update_ver_with_reg_entry(
 
 /// p 输入 package.toml 所在位置
 pub fn parse_package(
-    cfg: &Cfg,
+    cfg: &crate::types::context::RuntimeContext,
     p: &str,
     located: &str,
     need_update_main_program: bool,
@@ -144,7 +144,7 @@ pub fn parse_package(
     let mixed_fs = get_expanded_mixed_fs(MixedFS::new(mixed_located), workflows_path)?;
     let ctx = VerifiableCtx {
         mixed_fs: &mixed_fs,
-        cfg,
+        runtime_ctx:cfg
     };
     pkg.verify_self(&ctx)?;
 

@@ -14,7 +14,7 @@ use super::{constants::MIRROR_FILE_EPT_TOOLCHAIN, fs::read_sub_dir, get_path_mir
 use crate::types::cfg::Cfg;
 
 // 从本地的第一个镜像缓存中读取工具链信息
-pub fn read_local_mirror_ept_toolchain(cfg: &Cfg) -> Result<MirrorEptToolchain> {
+pub fn read_local_mirror_ept_toolchain(cfg: &crate::types::context::RuntimeContext) -> Result<MirrorEptToolchain> {
     let mirror_base = get_path_mirror(cfg)?;
     let dir_list = read_sub_dir(&mirror_base)?;
     for mirror_name in dir_list {
@@ -73,7 +73,7 @@ fn check_has_upgrade_impl(
     }
 }
 
-pub fn check_has_upgrade(cfg: &Cfg) -> Result<(bool, bool, MirrorEptToolchainRelease)> {
+pub fn check_has_upgrade(cfg: &crate::types::context::RuntimeContext) -> Result<(bool, bool, MirrorEptToolchainRelease)> {
     let toolchain_data = read_local_mirror_ept_toolchain(cfg)?;
     let current_version = env!("CARGO_PKG_VERSION");
     check_has_upgrade_impl(current_version, toolchain_data)

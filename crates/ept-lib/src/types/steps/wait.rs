@@ -43,7 +43,7 @@ impl TStep for StepWait {
                     sleep(step_d);
                     if start_instant.elapsed() >= d
                         || condition_eval(
-                            &cx.cfg,
+                            &cx.runtime_ctx,
                             &cond,
                             cx.exit_code,
                             &cx.located,
@@ -55,7 +55,7 @@ impl TStep for StepWait {
                 }
                 // 最终检查一次条件并配置 ExitCode
                 return if condition_eval(
-                    &cx.cfg,
+                    &cx.runtime_ctx,
                     &cond,
                     cx.exit_code,
                     &cx.located,
@@ -90,7 +90,7 @@ impl TStep for StepWait {
 
         // 校验跳出条件
         if let Some(cond) = &self.break_if {
-            verify_conditions(&ctx.cfg, vec![cond.to_owned()], located, "1.0.0.0")
+            verify_conditions(&ctx.runtime_ctx, vec![cond.to_owned()], located, "1.0.0.0")
                 .map_err(|e| anyhow!("Error(Wait):Failed to valid field 'break_if' : {e}"))?;
         }
 
@@ -108,7 +108,7 @@ impl Interpretable for StepWait {
 }
 
 impl Generalizable for StepWait {
-    fn generalize_permissions(&self, cfg: &Cfg) -> Result<Vec<Permission>> {
+    fn generalize_permissions(&self, cfg: &crate::types::context::RuntimeContext) -> Result<Vec<Permission>> {
         let mut permissions = Vec::new();
 
         if let Some(cond) = &self.break_if {

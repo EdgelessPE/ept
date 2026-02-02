@@ -12,7 +12,7 @@ use serde::{Deserialize, Deserializer, Serialize};
 use toml::{to_string_pretty, Value};
 
 use crate::{log, p2s, types::context::VerifiableCtx, types::verifiable::Verifiable};
-
+use crate::types::context::RuntimeContext;
 use super::mixed_fs::MixedFS;
 
 lazy_static! {
@@ -191,7 +191,7 @@ impl Cfg {
         let mixed_fs = MixedFS::new("");
         let verifiable_ctx = VerifiableCtx {
             mixed_fs: &mixed_fs,
-            cfg: &cfg,
+            runtime_ctx: &RuntimeContext::default(),
         };
         // 校验
         cfg.verify_self(&verifiable_ctx)
@@ -204,7 +204,7 @@ impl Cfg {
         let mixed_fs = MixedFS::new("");
         let verifiable_ctx = VerifiableCtx {
             mixed_fs: &mixed_fs,
-            cfg: &other,
+            runtime_ctx: &RuntimeContext::default(),
         };
         other
             .verify_self(&verifiable_ctx)

@@ -94,7 +94,7 @@ macro_rules! def_enum_step {
         }
 
         impl Generalizable for Step {
-            fn generalize_permissions(&self, cfg: &Cfg)->Result<Vec<Permission>> {
+            fn generalize_permissions(&self, cfg: &crate::types::context::RuntimeContext)->Result<Vec<Permission>> {
                 match self {
                     $( Step::$x(step) => step.generalize_permissions(cfg) ),*
                 }
