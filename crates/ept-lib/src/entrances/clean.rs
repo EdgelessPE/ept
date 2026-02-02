@@ -16,7 +16,6 @@ use crate::{
     },
     utils::{
         get_bare_apps, get_path_apps, get_path_bin, get_path_cache, get_path_meta, parse_bare_temp,
-        term::ask_yn,
     },
 };
 
@@ -157,7 +156,10 @@ pub fn clean(cfg: &Cfg) -> Result<usize> {
     if !clean_list.is_empty() {
         log!("Info:Trash list :");
         println!("{clean_list:#?}");
-        if !ask_yn(cfg, format!("Clean those {clean_list_len} trashes?"), true) {
+        if !cfg
+            .interaction()
+            .ask_yn(&format!("Clean those {clean_list_len} trashes?"), true)
+        {
             return Err(anyhow!("Error:Operation cancelled by user"));
         }
         let tip = format!(
@@ -166,9 +168,8 @@ pub fn clean(cfg: &Cfg) -> Result<usize> {
         );
         log!("{tip}");
         if let Err(e) = trash::delete_all(clean_list.clone()) {
-            if ask_yn(
-                cfg,
-                format!("Failed to move some files to recycle bin : {e}, force delete all?"),
+            if cfg.interaction().ask_yn(
+                &format!("Failed to move some files to recycle bin : {e}, force delete all?"),
                 true,
             ) {
                 clean_list.into_iter().for_each(|p| {

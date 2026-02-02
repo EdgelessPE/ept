@@ -10,7 +10,6 @@ use crate::{
         allocate_path_temp,
         download::download,
         get_path_toolchain,
-        term::ask_yn,
         upgrade::{check_has_upgrade, print_upgradable, print_upgradable_cross_wid_gap},
     },
 };
@@ -42,9 +41,8 @@ pub fn upgrade(cfg: &Cfg, dry_run: bool, need_exit_process: bool) -> Result<Stri
     }
 
     // 确认执行自更新
-    if !ask_yn(
-        cfg,
-        format!(
+    if !cfg.interaction().ask_yn(
+        &format!(
             "Ready to upgrade ept toolchain from '{current_version}' to '{}', start now?",
             &latest_release.version
         ),

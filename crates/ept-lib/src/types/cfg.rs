@@ -1,6 +1,7 @@
 use std::{
     fs::{create_dir_all, write},
     path::{Path, PathBuf},
+    sync::Arc,
 };
 
 use anyhow::{anyhow, Result};
@@ -15,7 +16,10 @@ use crate::{
     types::verifiable::{Verifiable, VerifiableCtx},
 };
 
-use super::mixed_fs::MixedFS;
+use super::{
+    interaction::{InteractionProvider, NoInteraction},
+    mixed_fs::MixedFS,
+};
 
 lazy_static! {
     static ref CUR_DIR: PathBuf = Path::new("./").to_path_buf();
@@ -102,13 +106,50 @@ pub struct Mode {
     pub offline: bool,
 }
 
+// 用于序列化/反序列化 Cfg 的辅助结构体
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
+pub struct CfgSer {
+    pub local: Local,
+    pub online: Online,
+    pub preference: Preference,
+    pub interaction: Interaction,
+    pub mode: Mode,
+}
+
+impl From<Cfg> for CfgSer {
+    fn from(cfg: Cfg) -> Self {
+        Self {
+            local: cfg.local,
+            online: cfg.online,
+            preference: cfg.preference,
+            interaction: cfg.interaction,
+            mode: cfg.mode,
+        }
+    }
+}
+
+impl From<CfgSer> for Cfg {
+    fn from(ser: CfgSer) -> Self {
+        Self {
+            local: ser.local,
+            online: ser.online,
+            preference: ser.preference,
+            interaction: ser.interaction,
+            mode: ser.mode,
+            interaction_provider: Arc::new(NoInteraction),
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
 pub struct Cfg {
     pub local: Local,
     pub online: Online,
     pub preference: Preference,
     pub interaction: Interaction,
     pub mode: Mode,
+    // 交互提供者，不参与序列化
+    pub interaction_provider: Arc<dyn InteractionProvider>,
 }
 
 impl Default for Cfg {
@@ -138,11 +179,26 @@ impl Default for Cfg {
                 debug: false,
                 offline: false,
             },
+            interaction_provider: Arc::new(NoInteraction),
         }
     }
 }
 
 impl Cfg {
+    /// 设置交互提供者
+    pub fn with_interaction_provider<T: InteractionProvider + 'static>(
+        mut self,
+        provider: T,
+    ) -> Self {
+        self.interaction_provider = Arc::new(provider);
+        self
+    }
+
+    /// 获取交互提供者
+    pub fn interaction(&self) -> &dyn InteractionProvider {
+        self.interaction_provider.as_ref()
+    }
+
     pub fn use_which(is_initial: bool) -> Result<PathBuf> {
         let from = if CUR_DIR.join(FILE_NAME).exists() {
             CUR_DIR.join(FILE_NAME)
@@ -152,7 +208,7 @@ impl Cfg {
                 create_dir_all(USER_DIR.to_str().unwrap()).map_err(|e| {
                     anyhow!("Error:Can't create '{dir}' : {e}", dir = p2s!(USER_DIR),)
                 })?;
-                let default = Value::try_from(Self::default())?;
+                let default = Value::try_from(Self::default().to_ser())?;
                 write(from.clone(), to_string_pretty(&default)?).map_err(|e| {
                     anyhow!(
                         "Error:Can't write default config to '{f}' : {e}",
@@ -172,7 +228,7 @@ impl Cfg {
     pub fn init() -> Result<Self> {
         let from = Self::use_which(true)?;
         let f = p2s!(from);
-        let default_val = Value::try_from(Self::default())
+        let default_val = Value::try_from(Self::default().to_ser())
             .map_err(|e| anyhow!("Error:Failed to convert default config to Value : {e}"))?;
         let settings = Config::builder()
             .add_source(config::File::from_str(
@@ -183,12 +239,14 @@ impl Cfg {
             .add_source(config::Environment::with_prefix("EPT"))
             .build()
             .map_err(|e| anyhow!("Error:Failed to build config with located config '{f}' : {e}"))?;
-        let cfg: Self = settings.try_deserialize().map_err(|e| {
+        // 先反序列化为 CfgSer，再转换为 Cfg
+        let cfg_ser: CfgSer = settings.try_deserialize().map_err(|e| {
             anyhow!(
                 "Error:Invalid config content, try delete '{f}' : {e}",
                 f = p2s!(from),
             )
         })?;
+        let cfg: Self = cfg_ser.into();
         let mixed_fs = MixedFS::new("");
         let verifiable_ctx = VerifiableCtx {
             mixed_fs: &mixed_fs,
@@ -212,10 +270,21 @@ impl Cfg {
             .map_err(|e| anyhow!("Error:Invalid overwrite config : {e}"))?;
 
         let from = Self::use_which(false)?;
-        let value = Value::try_from(other)?;
+        let value = Value::try_from(other.to_ser())?;
         let text = to_string_pretty(&value)?;
         write(from, text)?;
         Ok(())
+    }
+
+    /// 转换为可序列化的 CfgSer
+    pub fn to_ser(&self) -> CfgSer {
+        CfgSer {
+            local: self.local.clone(),
+            online: self.online.clone(),
+            preference: self.preference.clone(),
+            interaction: self.interaction.clone(),
+            mode: self.mode.clone(),
+        }
     }
 }
 

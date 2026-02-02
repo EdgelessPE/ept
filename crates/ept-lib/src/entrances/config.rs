@@ -1,13 +1,16 @@
 use std::path::Path;
 
-use crate::{p2s, types::cfg::Cfg, utils::term::ask_yn};
+use crate::{
+    p2s,
+    types::cfg::{Cfg, CfgSer},
+};
 use anyhow::{anyhow, Error, Result};
 use toml::Value;
 
 // 返回（key 指向的 value，整个 Cfg）
 fn get_toml_value(cfg: &Cfg, table: &str, key: &str) -> Result<(Value, Value)> {
-    // 序列化为 toml 对象
-    let toml = Value::try_from(cfg)?;
+    // 序列化为 toml 对象（使用 CfgSer 来避免序列化 interaction_provider）
+    let toml = Value::try_from(cfg.to_ser())?;
     // 读 table
     let tab = toml
         .get(table)
@@ -58,9 +61,11 @@ pub fn config_set(cfg: &Cfg, table: &str, key: &str, value: &str) -> Result<()> 
     }
 
     // 写回
-    let updated_cfg = cfg.try_into().map_err(|e| {
+    // 从 toml Value 反序列化回 Cfg
+    let updated_cfg_ser: CfgSer = cfg.try_into().map_err(|e| {
         anyhow!("Error:Failed to convert modified config to valid config struct : {e}")
     })?;
+    let updated_cfg = Cfg::from(updated_cfg_ser);
     Cfg::overwrite(updated_cfg)?;
 
     Ok(())
@@ -86,9 +91,8 @@ pub fn config_list(cfg: &Cfg) -> Result<String> {
 pub fn config_init(cfg: &Cfg) -> Result<String> {
     let file_path = config_which()?;
     if Path::new(&file_path).exists()
-        && !ask_yn(
-            cfg,
-            format!("Config file already exists at '{file_path}', overwrite it?"),
+        && !cfg.interaction().ask_yn(
+            &format!("Config file already exists at '{file_path}', overwrite it?"),
             false,
         )
     {
@@ -114,8 +118,9 @@ fn test_config() {
     // 校对函数，同时检查 API 返回和本地文件
     fn checker(answer: Cfg) {
         let toml = fs::read_to_string(FILE_NAME).unwrap();
-        let file_cfg: Cfg = toml::from_str(&toml).unwrap();
-        assert_eq!(file_cfg, answer);
+        let file_cfg_ser: CfgSer = toml::from_str(&toml).unwrap();
+        let answer_ser: CfgSer = answer.into();
+        assert_eq!(file_cfg_ser, answer_ser);
     }
 
     // 先保存当前目录下 eptrc.toml 的现场
@@ -125,7 +130,7 @@ fn test_config() {
         // 如果没有必须新建一个，不然默认会在用户目录里面新建配置文件
         let mut default_cfg = _default_test_cfg();
         default_cfg.local.base = "C:/Users/Public/Videos".to_string();
-        let text = toml::to_string_pretty(&default_cfg).unwrap();
+        let text = toml::to_string_pretty(&default_cfg.to_ser()).unwrap();
         fs::write(FILE_NAME, text).unwrap();
         None
     };
@@ -157,7 +162,8 @@ fn test_config() {
     // 还原现场
     if let Some(text) = scene_opt {
         // 需要手动重置一次全局 Cfg，否则之后的测试无法正确进行
-        let cfg: Cfg = toml::from_str(&text).unwrap();
+        let cfg_ser: CfgSer = toml::from_str(&text).unwrap();
+        let cfg = Cfg::from(cfg_ser);
         Cfg::overwrite(cfg).unwrap();
     } else {
         fs::remove_file(FILE_NAME).unwrap();

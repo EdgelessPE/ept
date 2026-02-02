@@ -17,7 +17,7 @@ use crate::{
     types::{cfg::Cfg, package::GlobalPackage},
     utils::{
         cache::spawn_cache, download::download_nep, fs::move_or_copy, get_path_cache,
-        path::parse_relative_path_with_located, term::ask_yn,
+        path::parse_relative_path_with_located,
     },
 };
 use crate::{executor::workflow_executor, parsers::parse_workflow, utils::get_path_apps};
@@ -29,9 +29,8 @@ fn check_global_installation(cfg: &Cfg, package: &GlobalPackage) -> Result<bool>
         if let Some(ref installed) = software.main_program {
             let p = Path::new(installed);
             if p.is_absolute() && p.exists() {
-                return Ok(ask_yn(
-                    cfg,
-                    format!(
+                return Ok(cfg.interaction().ask_yn(
+                    &format!(
                         "Package '{name}' has been installed at '{installed}', continue?",
                         name = package.package.name
                     ),

@@ -6,7 +6,7 @@ use crate::types::mixed_fs::MixedFS;
 use crate::types::permissions::{Generalizable, Permission, PermissionKey, PermissionLevel};
 use crate::types::workflow::WorkflowContext;
 use crate::utils::is_starts_with_inner_value;
-use crate::utils::{get_path_bin, path::parse_relative_path_with_located, term::ask_yn_in_step};
+use crate::utils::{get_path_bin, path::parse_relative_path_with_located};
 use crate::{log, p2s};
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
@@ -44,10 +44,9 @@ fn conflict_resolver(bin_abs: &str, stem: &str, scope: &str, cfg: &Cfg) -> Strin
 
     // 检查入口文件冲突
     if Path::new(&origin).exists() {
-        return if ask_yn_in_step(
-            cfg,
+        return if cfg.interaction().ask_yn_in_step(
             "Path",
-            format!("Entrance '{stem}.cmd' already exists in '{bin_abs}', overwrite?"),
+            &format!("Entrance '{stem}.cmd' already exists in '{bin_abs}', overwrite?"),
             false,
         ) {
             origin
@@ -61,10 +60,9 @@ fn conflict_resolver(bin_abs: &str, stem: &str, scope: &str, cfg: &Cfg) -> Strin
     let which_res = which(stem);
     if let Ok(res) = which_res {
         let output = p2s!(res);
-        return if ask_yn_in_step(
-            cfg,
+        return if cfg.interaction().ask_yn_in_step(
             "Path",
-            format!("Command '{stem}' already exists at '{output}', rename to '{scope}-{stem}'?"),
+            &format!("Command '{stem}' already exists at '{output}', rename to '{scope}-{stem}'?"),
             false,
         ) {
             log!("Warning(Path):Renamed entrance to '{scope}-{stem}.cmd, use '{scope}-{stem}' instead to call this program later");

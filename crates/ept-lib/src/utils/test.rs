@@ -1,4 +1,5 @@
 use std::path::PathBuf;
+use std::sync::Arc;
 
 use crate::types::constants::FILE_PACKAGE;
 use crate::{types::matcher::PackageMatcher, utils::get_path_cache};
@@ -33,6 +34,7 @@ pub fn _default_test_cfg() -> crate::types::cfg::Cfg {
             debug: true,
             offline: false,
         },
+        interaction_provider: Arc::new(crate::types::interaction::NoInteraction),
     }
 }
 

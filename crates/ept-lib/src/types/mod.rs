@@ -4,6 +4,7 @@ pub mod cli;
 pub mod constants;
 pub mod extended_semver;
 pub mod info;
+pub mod interaction;
 pub mod interpretable;
 pub mod matcher;
 pub mod meta;

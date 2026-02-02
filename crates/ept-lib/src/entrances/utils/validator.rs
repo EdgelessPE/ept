@@ -12,7 +12,7 @@ use crate::{
         constants::{DIR_NEP_CONTEXT, DIR_WORKFLOWS, EXT_TAR_ZST, FILE_PACKAGE, WORKFLOW_SETUP},
         mixed_fs::MixedFS,
     },
-    utils::{term::ask_yn, wild_match::contains_wild_match},
+    utils::wild_match::contains_wild_match,
 };
 
 pub fn inner_validator(dir: &str) -> Result<()> {
@@ -50,9 +50,8 @@ pub fn manifest_validator(
     if !missing_list.is_empty() {
         let items: Vec<String> = missing_list.into_iter().collect();
         if fs.var_warn_manifest {
-            if !ask_yn(
-                cfg,
-                format!("May missing these flow items '{items:?}' in '{base}', continue?"),
+            if !cfg.interaction().ask_yn(
+                &format!("May missing these flow items '{items:?}' in '{base}', continue?"),
                 false,
             ) {
                 return Err(anyhow!("Error:Operation canceled by user"));

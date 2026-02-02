@@ -8,7 +8,7 @@ use crate::types::{
     constants::EXT_TAR_ZST,
     signature::{Signature, SignatureNode},
 };
-use crate::utils::{allocate_path_temp, is_debug_mode, term::ask_yn};
+use crate::utils::{allocate_path_temp, is_debug_mode};
 use crate::{log, log_ok_last, p2s};
 use anyhow::{anyhow, Result};
 use std::fs::{remove_dir_all, write};
@@ -40,9 +40,8 @@ pub fn pack(
             return Err(anyhow!(
                 "Error:Target '{into_file}' is a existing directory"
             ));
-        } else if !ask_yn(
-            cfg,
-            format!("Overwrite the existing file '{into_file}'?"),
+        } else if !cfg.interaction().ask_yn(
+            &format!("Overwrite the existing file '{into_file}'?"),
             false,
         ) {
             return Err(anyhow!("Error:Pack canceled by user"));

@@ -25,7 +25,6 @@ use crate::{
         fs::move_or_copy,
         get_path_apps, get_path_cache,
         parse_inputs::{parse_update_inputs, ParseInputResEnum},
-        term::ask_yn,
     },
 };
 use crate::{log, log_ok_last};
@@ -70,7 +69,10 @@ fn handle_author_mismatch(
         fresh = fresh.package.authors
     );
 
-    if !ask_yn(cfg, format!("The given package is not the same as the author of the installed package (local:{:?}, given:{:?}), uninstall the installed package first?",local.package.authors,fresh.package.authors),true) {
+    if !cfg.interaction().ask_yn(
+        &format!("The given package is not the same as the author of the installed package (local:{:?}, given:{:?}), uninstall the installed package first?",local.package.authors,fresh.package.authors),
+        true
+    ) {
         return Err(anyhow!("Error:Update canceled by user"));
     }
 
@@ -350,9 +352,8 @@ pub fn update_all(cfg: &Cfg, verify_signature: bool) -> Result<(i32, i32)> {
                 acc + &node.to_string()
             });
         println!("{tip}");
-        if !ask_yn(
-            cfg,
-            format!("Ready to update those {count} packages, continue?"),
+        if !cfg.interaction().ask_yn(
+            &format!("Ready to update those {count} packages, continue?"),
             true,
         ) {
             return Err(anyhow!("Error:Operation canceled by user"));

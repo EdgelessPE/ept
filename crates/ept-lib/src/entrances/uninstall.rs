@@ -22,7 +22,7 @@ use crate::{
     },
     utils::{
         get_bare_apps, get_path_apps, path::find_scope_with_name, process::kill_with_name,
-        reg_entry::get_reg_entry, term::ask_yn,
+        reg_entry::get_reg_entry,
     },
 };
 
@@ -133,9 +133,8 @@ pub fn uninstall(cfg: &Cfg, scope: Option<String>, package_name: &str) -> Result
     log!("Info:Cleaning...");
     let try_rm_res = remove_dir_all(&app_str);
     if try_rm_res.is_err()
-        && ask_yn(
-            cfg,
-            "Can't clean the directory completely, try killing the related processes?".to_string(),
+        && cfg.interaction().ask_yn(
+            "Can't clean the directory completely, try killing the related processes?",
             true,
         )
     {

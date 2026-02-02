@@ -74,19 +74,13 @@ pub fn write_windows_terminal_status(cfg: &Cfg, status: u8) {
 }
 
 #[test]
-fn test_ask_yn() {
-    use crate::utils::test::_default_test_cfg;
+fn test_no_interaction() {
+    use crate::types::interaction::{InteractionProvider, NoInteraction};
 
-    let cfg = _default_test_cfg();
-    assert!(ask_yn(
-        &cfg,
-        "Do you like what you see😘?".to_string(),
-        true
-    ));
-    assert!(ask_yn_in_step(
-        &cfg,
-        "Step",
-        "Do you like 玩游戏♂?".to_string(),
-        false
-    ));
+    let no_interaction = NoInteraction;
+    // NoInteraction 应该总是返回默认值
+    assert!(no_interaction.ask_yn("Test prompt?", true));
+    assert!(!no_interaction.ask_yn("Test prompt?", false));
+    assert!(no_interaction.ask_yn_in_step("Step", "Test prompt?", true));
+    assert!(!no_interaction.ask_yn_in_step("Step", "Test prompt?", false));
 }

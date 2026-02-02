@@ -12,13 +12,16 @@ use ept_lib::{
         fmt_print::{fmt_print_mirror_line, FmtPrint, FmtPrintCaller, PackageSource},
         get_path_apps, launch_clean,
         parse_inputs::{parse_install_inputs, parse_uninstall_inputs, parse_update_inputs},
-        term::{ask_yn, write_windows_terminal_status},
+        term::write_windows_terminal_status,
         upgrade::{check_has_upgrade, print_upgradable, print_upgradable_cross_wid_gap},
     },
     EptInstance,
 };
 use std::fs::write;
 use std::process::exit;
+
+mod terminal_interaction;
+use terminal_interaction::TerminalInteraction;
 
 #[cfg(not(tarpaulin_include))]
 fn router(action: Action, instance: &EptInstance) -> Result<String> {
@@ -63,9 +66,8 @@ fn router(action: Action, instance: &EptInstance) -> Result<String> {
                         .unwrap()
                 });
             println!("{tip}");
-            if !ask_yn(
-                cfg,
-                format!(
+            if !cfg.interaction().ask_yn(
+                &format!(
                     "Ready to install those {} packages, continue?",
                     parsed.len()
                 ),
@@ -117,9 +119,8 @@ fn router(action: Action, instance: &EptInstance) -> Result<String> {
                             .unwrap()
                     });
                 println!("{tip}");
-                if !ask_yn(
-                    cfg,
-                    format!(
+                if !cfg.interaction().ask_yn(
+                    &format!(
                         "Ready to update with those {} packages, continue?",
                         parsed.len()
                     ),
@@ -168,9 +169,8 @@ fn router(action: Action, instance: &EptInstance) -> Result<String> {
                     acc + &info.fmt_brief_print(FmtPrintCaller::Uninstall).unwrap()
                 });
             println!("{tip}");
-            if !ask_yn(
-                cfg,
-                format!(
+            if !cfg.interaction().ask_yn(
+                &format!(
                     "Ready to uninstall those {} packages, continue?",
                     parsed.len()
                 ),
@@ -339,6 +339,9 @@ fn main() {
         log!("Error:Failed to initialize config : {e}");
         exit(1);
     });
+
+    // 注入终端交互实现
+    cfg = cfg.with_interaction_provider(TerminalInteraction);
 
     // 配置环境变量
     let args = Args::parse();
