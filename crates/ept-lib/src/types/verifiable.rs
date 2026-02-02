@@ -1,7 +1,7 @@
 use crate::types::context::VerifiableCtx;
 
 pub trait Verifiable {
-    fn verify_self(&self, ctx: &VerifiableCtx) -> anyhow::Result<()>;
+    fn verify_self(&self, cx: &VerifiableCtx) -> anyhow::Result<()>;
 }
 
 /// 校验字符串的枚举值是否有效

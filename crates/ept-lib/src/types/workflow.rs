@@ -49,12 +49,12 @@ impl Generalizable for WorkflowHeader {
 }
 
 impl Verifiable for WorkflowHeader {
-    fn verify_self(&self, ctx: &VerifiableCtx) -> Result<()> {
+    fn verify_self(&self, cx: &VerifiableCtx) -> Result<()> {
         // 校验条件，使用上下文中的配置
         verify_conditions(
-            ctx.runtime_ctx,
+            cx.runtime_ctx,
             self.get_conditions(),
-            &ctx.mixed_fs.located,
+            &cx.mixed_fs.located,
             "1.0.0.0",
         )
     }
@@ -104,12 +104,12 @@ fn test_header_valid() {
     };
     use crate::types::mixed_fs::MixedFS;
     let mixed_fs = MixedFS::new("./examples/VSCode");
-    let ctx = VerifiableCtx {
+    let cx = VerifiableCtx {
         mixed_fs: &mixed_fs,
         runtime_ctx: &_default_test_cfg(),
     };
 
-    flow.verify_self(&ctx).unwrap();
+    flow.verify_self(&cx).unwrap();
 
     let flow = WorkflowHeader {
         name: Some("Name".to_string()),
@@ -144,12 +144,12 @@ impl Generalizable for WorkflowNode {
 }
 
 impl WorkflowNode {
-    pub fn verify_step(&self, ctx: &VerifyStepCtx) -> Result<()> {
+    pub fn verify_step(&self, cx: &VerifyStepCtx) -> Result<()> {
         let verifiable_ctx = VerifiableCtx {
-            mixed_fs: ctx.mixed_fs,
-            runtime_ctx: ctx.runtime_ctx,
+            mixed_fs: cx.mixed_fs,
+            runtime_ctx: cx.runtime_ctx,
         };
         self.header.verify_self(&verifiable_ctx)?;
-        self.body.verify_step(ctx)
+        self.body.verify_step(cx)
     }
 }

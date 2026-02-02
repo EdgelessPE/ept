@@ -27,7 +27,7 @@ pub trait TStep: Generalizable + Interpretable {
     /// Get manifest
     fn get_manifest(&self, fs: &mut MixedFS) -> Vec<String>;
     /// Verify step
-    fn verify_step(&self, ctx: &VerifyStepCtx) -> Result<()>;
+    fn verify_step(&self, cx: &VerifyStepCtx) -> Result<()>;
 }
 
 fn toml_try_into<'de, T>(key: String, val: Value) -> Result<T>
@@ -85,9 +85,9 @@ macro_rules! def_enum_step {
                     $( Step::$x(step) => step.get_manifest(fs) ),*
                 }
             }
-            pub fn verify_step(&self,ctx:&VerifyStepCtx) -> Result<()> {
+            pub fn verify_step(&self,cx:&VerifyStepCtx) -> Result<()> {
                 match self {
-                    $( Step::$x(step) => step.verify_step(ctx) ),*
+                    $( Step::$x(step) => step.verify_step(cx) ),*
                 }
             }
         }

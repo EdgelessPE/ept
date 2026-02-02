@@ -204,24 +204,24 @@ fn test_new_corelation() {
     );
 
     // 校验
-    let ctx = crate::types::steps::VerifyStepCtx::_demo();
+    let cx = crate::types::steps::VerifyStepCtx::_demo();
     assert!(StepNew {
         at: "C:/Users/Desktop".to_string(),
         overwrite: None,
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_err());
     assert!(StepNew {
         at: "C:/Users/Desktop/*".to_string(),
         overwrite: None,
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_err());
 
     assert!(StepNew {
         at: "${OtherDesktop}".to_string(),
         overwrite: None,
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_err());
 }

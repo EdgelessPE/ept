@@ -230,7 +230,7 @@ impl Generalizable for StepExecute {
 
 #[test]
 fn test_execute_validate() {
-    let ctx = crate::types::steps::VerifyStepCtx::_demo();
+    let cx = crate::types::steps::VerifyStepCtx::_demo();
     assert!(StepExecute {
         command: "${AppData}/Installer.exe /S".to_string(),
         pwd: None,
@@ -238,7 +238,7 @@ fn test_execute_validate() {
         wait: None,
         ignore_exit_code: None,
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_ok());
 
     assert!(StepExecute {
@@ -248,7 +248,7 @@ fn test_execute_validate() {
         wait: None,
         ignore_exit_code: None,
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_err());
 }
 

@@ -77,8 +77,8 @@ impl TStep for StepWait {
     fn get_manifest(&self, _: &mut MixedFS) -> Vec<String> {
         Vec::new()
     }
-    fn verify_step(&self, ctx: &super::VerifyStepCtx) -> Result<()> {
-        let located = &ctx.mixed_fs.located;
+    fn verify_step(&self, cx: &super::VerifyStepCtx) -> Result<()> {
+        let located = &cx.mixed_fs.located;
         // timeout 时间应当小于等于 30min
         if self.timeout > (30 * 60 * 1000) {
             return Err(anyhow!(
@@ -89,7 +89,7 @@ impl TStep for StepWait {
 
         // 校验跳出条件
         if let Some(cond) = &self.break_if {
-            verify_conditions(ctx.runtime_ctx, vec![cond.to_owned()], located, "1.0.0.0")
+            verify_conditions(cx.runtime_ctx, vec![cond.to_owned()], located, "1.0.0.0")
                 .map_err(|e| anyhow!("Error(Wait):Failed to valid field 'break_if' : {e}"))?;
         }
 
@@ -232,24 +232,24 @@ fn test_wait_corelation() {
     );
 
     // 校验
-    let ctx = crate::types::steps::VerifyStepCtx::_demo();
+    let cx = crate::types::steps::VerifyStepCtx::_demo();
     assert!(StepWait {
         timeout: 30 * 60 * 1000,
         break_if: Some("ExitCode == 1".to_string())
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_ok());
     assert!(StepWait {
         timeout: 30 * 60 * 1000 + 1,
         break_if: None
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_err());
     assert!(StepWait {
         timeout: 100,
         break_if: Some("Exit == 0".to_string())
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_err());
 
     // 生成权限

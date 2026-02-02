@@ -150,15 +150,15 @@ fn test_kill_corelation() {
     );
 
     // 校验
-    let ctx = crate::types::steps::VerifyStepCtx::_demo();
+    let cx = crate::types::steps::VerifyStepCtx::_demo();
     assert!(StepKill {
         target: "code.exe".to_string(),
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_ok());
     assert!(StepKill {
         target: "code".to_string(),
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_ok());
 }

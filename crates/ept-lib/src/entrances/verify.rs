@@ -53,10 +53,10 @@ fn get_workflow_path(source_dir: &str, file_name: &str) -> PathBuf {
 }
 
 // 返回是否调用了 call_installer
-fn verify_workflow(flow: Vec<WorkflowNode>, ctx: &VerifyStepCtx) -> Result<bool> {
+fn verify_workflow(cx: &VerifyStepCtx, flow: Vec<WorkflowNode>) -> Result<bool> {
     let mut have_call_installer = false;
     for node in flow {
-        node.verify_step(ctx)?;
+        node.verify_step(cx)?;
         if let Step::StepExecute(step) = node.body {
             if !have_call_installer {
                 have_call_installer = step.call_installer.unwrap_or(false);
@@ -110,12 +110,12 @@ pub fn verify(
 
     // 记录 setup 中是否用到 call_installer
     let check_call_installer = verify_workflow(
-        setup_flow.clone(),
         &VerifyStepCtx {
             mixed_fs: &MixedFS::new(&pkg_content_path),
             runtime_ctx: cfg,
             is_expand_flow: false,
         },
+        setup_flow.clone(),
     )?;
 
     // 如果用到了 call_installer 则有一些特殊逻辑，除非提供了 registry_entry：
@@ -137,7 +137,7 @@ pub fn verify(
 
     // 检查更新、卸载工作流
     let optional_workflows = vec![WORKFLOW_UPDATE, WORKFLOW_REMOVE];
-    let ctx = VerifyStepCtx {
+    let cx = VerifyStepCtx {
         mixed_fs: &MixedFS::new(source_dir),
         runtime_ctx: cfg,
         is_expand_flow: false,
@@ -146,7 +146,7 @@ pub fn verify(
         let opt_path = get_workflow_path(source_dir, opt_workflow);
         if opt_path.exists() {
             let flow = parse_workflow(&p2s!(opt_path))?;
-            let call_installer = verify_workflow(flow, &ctx)?;
+            let call_installer = verify_workflow(&cx, flow)?;
             if check_call_installer && !call_installer {
                 return Err(anyhow!("Error:Workflow '{opt_workflow}' should include 'Execute' step with 'call_installer' field enabled when workflow '{WORKFLOW_SETUP}' includes such step"));
             }
@@ -154,7 +154,7 @@ pub fn verify(
     }
 
     // 检查展开工作流
-    let ctx = VerifyStepCtx {
+    let cx = VerifyStepCtx {
         mixed_fs: &MixedFS::new(source_dir),
         runtime_ctx: cfg,
         is_expand_flow: true,
@@ -162,7 +162,7 @@ pub fn verify(
     let expand_path = get_workflow_path(source_dir, WORKFLOW_EXPAND);
     if expand_path.exists() {
         let flow = parse_workflow(&p2s!(expand_path))?;
-        verify_workflow(flow, &ctx)?;
+        verify_workflow(&cx, flow)?;
     }
 
     log_ok_last!("Info:Verifying workflows...");

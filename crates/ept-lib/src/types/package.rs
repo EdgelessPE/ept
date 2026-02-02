@@ -127,10 +127,10 @@ impl GlobalPackage {
 }
 
 impl Verifiable for GlobalPackage {
-    fn verify_self(&self, ctx: &VerifiableCtx) -> Result<()> {
-        self.package.verify_self(ctx)?;
+    fn verify_self(&self, cx: &VerifiableCtx) -> Result<()> {
+        self.package.verify_self(cx)?;
         if let Some(software) = &self.software {
-            software.verify_self(ctx)?;
+            software.verify_self(cx)?;
 
             // 别名不能和名称重复
             if let Some(alias) = &software.alias {

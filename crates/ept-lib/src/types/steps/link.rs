@@ -285,9 +285,9 @@ impl Generalizable for StepLink {
 fn test_link() {
     use std::fs::{remove_dir, remove_file};
     let mut cx = WorkflowContext::_demo();
-    let mut ctx = crate::types::steps::VerifyStepCtx::_demo();
+    let mut verify_step_cx = crate::types::steps::VerifyStepCtx::_demo();
     let mixed_fs = MixedFS::new("./examples/VSCode/VSCode");
-    ctx.mixed_fs = &mixed_fs;
+    verify_step_cx.mixed_fs = &mixed_fs;
 
     // 配置拉满
     let step = StepLink {
@@ -297,7 +297,7 @@ fn test_link() {
         target_icon: Some("examples/VSCode/VSCode/favicon.ico".to_string()),
         at: Some(vec!["Desktop".to_string(), "StartMenu".to_string()]),
     };
-    step.verify_step(&ctx).unwrap();
+    step.verify_step(&verify_step_cx).unwrap();
     step.clone().run(&mut cx).unwrap();
 
     let desktop_path = dirs::desktop_dir().unwrap().join("ms_ept_test/VSC.lnk");
@@ -371,7 +371,7 @@ fn test_link_corelation() {
     .is_empty());
 
     // 校验
-    let ctx = crate::types::steps::VerifyStepCtx::_demo();
+    let cx = crate::types::steps::VerifyStepCtx::_demo();
     assert!(StepLink {
         source_file: String::from("examples/VSCode/VSCode/Code.exe"),
         target_name: Some("vsc".to_string()),
@@ -379,7 +379,7 @@ fn test_link_corelation() {
         target_icon: None,
         at: None,
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_ok());
     assert!(StepLink {
         source_file: String::from("examples/VSCode/VSCode/Code.exe"),
@@ -388,7 +388,7 @@ fn test_link_corelation() {
         target_icon: None,
         at: None,
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_ok());
     assert!(StepLink {
         source_file: String::from("examples/VSCode/VSCode/Code.exe"),
@@ -397,7 +397,7 @@ fn test_link_corelation() {
         target_icon: None,
         at: None,
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_err());
     assert!(StepLink {
         source_file: String::from("examples/VSCode/VSCode/Code.exe"),
@@ -406,7 +406,7 @@ fn test_link_corelation() {
         target_icon: None,
         at: None,
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_err());
     assert!(StepLink {
         source_file: String::from("examples/VSCode/VSCode/Code.exe"),
@@ -415,7 +415,7 @@ fn test_link_corelation() {
         target_icon: None,
         at: None,
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_err());
     assert!(StepLink {
         source_file: String::from("examples/VSCode/VSCode/Code.exe"),
@@ -424,6 +424,6 @@ fn test_link_corelation() {
         target_icon: None,
         at: None,
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_err());
 }

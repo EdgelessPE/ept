@@ -60,11 +60,11 @@ pub fn mirror_add(
 
     // 校验
     let mixed_fs = MixedFS::new("");
-    let ctx = VerifiableCtx {
+    let cx = VerifiableCtx {
         mixed_fs: &mixed_fs,
         runtime_ctx: cfg,
     };
-    res.verify_self(&ctx)?;
+    res.verify_self(&cx)?;
 
     // 请求软件包列表
     let (ps_url, _) = filter_service_from_meta(&res, ServiceKeys::PkgSoftware)?;
@@ -79,7 +79,7 @@ pub fn mirror_add(
         })?;
 
     // 校验
-    pkg_software_res.verify_self(&ctx)?;
+    pkg_software_res.verify_self(&cx)?;
 
     // 更新索引并写 pkg-software.toml
     let p = get_path_mirror(cfg)?.join(&mirror_name);

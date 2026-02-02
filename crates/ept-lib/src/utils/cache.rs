@@ -11,9 +11,9 @@ use crate::{
     utils::{fs::try_recycle, get_path_cache},
 };
 
-pub fn spawn_cache(ctx: CacheCtx) -> Result<()> {
-    log!("Debug:Spawning cache with ctx: {ctx:?}");
-    let CacheCtx(enabled_cache, at, cached) = ctx;
+pub fn spawn_cache(cx: CacheCtx) -> Result<()> {
+    log!("Debug:Spawning cache with cx: {cx:?}");
+    let CacheCtx(enabled_cache, at, cached) = cx;
     if enabled_cache {
         if let Some((cache_path, cache_key)) = cached {
             if !cache_path.exists() {
@@ -40,9 +40,9 @@ pub fn spawn_cache(ctx: CacheCtx) -> Result<()> {
     Ok(())
 }
 
-pub fn restore_cache(ctx: CacheCtx, source: &str) -> Result<bool> {
-    log!("Debug:Restoring cache with ctx: {ctx:?}");
-    let CacheCtx(enabled_cache, to, cached) = ctx;
+pub fn restore_cache(cx: CacheCtx, source: &str) -> Result<bool> {
+    log!("Debug:Restoring cache with cx: {cx:?}");
+    let CacheCtx(enabled_cache, to, cached) = cx;
     if enabled_cache {
         if let Some((cache_path, cache_key)) = cached.clone() {
             let cache_file_path = cache_path.join(&cache_key);

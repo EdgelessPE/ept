@@ -53,11 +53,11 @@ pub fn read_local_mirror_hello(
     let text = read_to_string(&p)?;
     let hello: MirrorHello = from_str(&text)
         .map_err(|e| anyhow!("Error:Invalid hello content at '{fp}' : {e}", fp = p2s!(p)))?;
-    let ctx = VerifiableCtx {
+    let cx = VerifiableCtx {
         mixed_fs: &MixedFS::new(""),
         runtime_ctx: cfg,
     };
-    hello.verify_self(&ctx)?;
+    hello.verify_self(&cx)?;
     Ok((hello, dir_path))
 }
 

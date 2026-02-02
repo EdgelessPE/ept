@@ -74,8 +74,8 @@ fn test_log() {
         level: Some(String::from("Info")),
         msg: String::from("Hello nep!"),
     };
-    let ctx = crate::types::steps::VerifyStepCtx::_demo();
-    step.verify_step(&ctx).unwrap();
+    let verify_step_cx = crate::types::steps::VerifyStepCtx::_demo();
+    step.verify_step(&verify_step_cx).unwrap();
     step.run(&mut cx).unwrap();
 }
 

@@ -141,11 +141,11 @@ pub fn parse_package(
     // 校验
     let workflows_path = get_workflows_path(located)?;
     let mixed_fs = get_expanded_mixed_fs(MixedFS::new(mixed_located), workflows_path)?;
-    let ctx = VerifiableCtx {
+    let cx = VerifiableCtx {
         mixed_fs: &mixed_fs,
         runtime_ctx: cfg,
     };
-    pkg.verify_self(&ctx)?;
+    pkg.verify_self(&cx)?;
 
     // 解释
     let package_version = pkg.package.version.clone();

@@ -84,8 +84,8 @@ impl TStep for StepMove {
         fs.add(&self.to, &self.from);
         Vec::new()
     }
-    fn verify_step(&self, ctx: &super::VerifyStepCtx) -> Result<()> {
-        let located = &ctx.mixed_fs.located;
+    fn verify_step(&self, cx: &super::VerifyStepCtx) -> Result<()> {
+        let located = &cx.mixed_fs.located;
         values_validator_path(&self.from).map_err(|e| {
             anyhow!("Error(Move):Failed to validate field 'from' as valid path : {e}")
         })?;
@@ -322,27 +322,27 @@ fn test_move_corelation() {
     );
 
     // 校验
-    let ctx = crate::types::steps::VerifyStepCtx::_demo();
+    let cx = crate::types::steps::VerifyStepCtx::_demo();
     assert!(StepMove {
         from: "./bin".to_string(),
         to: "${Desktop}".to_string(),
         overwrite: None
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_ok());
     assert!(StepMove {
         from: "bin".to_string(),
         to: "${OtherDesktop}".to_string(),
         overwrite: None
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_err());
     assert!(StepMove {
         from: "C:/Users/Desktop".to_string(),
         to: "${Desktop}".to_string(),
         overwrite: None
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_err());
 
     assert!(StepMove {
@@ -350,13 +350,13 @@ fn test_move_corelation() {
         to: "C:/Users/Nep/Desktop".to_string(),
         overwrite: None
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_err());
     assert!(StepMove {
         from: "${Home}".to_string(),
         to: "${Desktop}/*".to_string(),
         overwrite: None
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_err());
 }

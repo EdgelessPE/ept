@@ -208,18 +208,18 @@ fn test_delete_corelation() {
     );
 
     // 校验
-    let ctx = crate::types::steps::VerifyStepCtx::_demo();
+    let cx = crate::types::steps::VerifyStepCtx::_demo();
     assert!(StepDelete {
         at: "C:/Users/Desktop".to_string(),
         force: None,
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_err());
 
     assert!(StepDelete {
         at: "${OtherDesktop}".to_string(),
         force: None,
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_err());
 }

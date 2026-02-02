@@ -45,6 +45,7 @@ cargo check
 - **常量**: UPPER_SNAKE_CASE（如 `FILE_NAME`）
 - **模块**: snake_case（如 `package.rs`, `extended_semver.rs`）
 - **泛型参数**: 单个大写字母（如 `T`, `F`）
+- **上下文变量**: `ctx` 专门用于指代 `RuntimeContext` 类型的变量；其他类似的上下文使用 `cx` 作为变量名。如果遇到上下文变量重名的情况，可以使用 `xxx_cx` 的形式（如 `workflow_cx`、`verify_cx`），但**不允许**对 `ctx` 添加此类前缀（即禁止使用 `xxx_ctx`）
 
 ### 函数参数规范
 - **上下文参数位置**: 如果函数需要 `ctx: &RuntimeContext` 入参，则该入参始终位于**第一位**（类似 `self` 的约定）

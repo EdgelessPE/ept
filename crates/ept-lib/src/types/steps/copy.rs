@@ -157,8 +157,8 @@ impl TStep for StepCopy {
         fs.add(&self.to, &self.from);
         Vec::new()
     }
-    fn verify_step(&self, ctx: &super::VerifyStepCtx) -> Result<()> {
-        let located = &ctx.mixed_fs.located;
+    fn verify_step(&self, cx: &super::VerifyStepCtx) -> Result<()> {
+        let located = &cx.mixed_fs.located;
 
         values_validator_path(&self.from).map_err(|e| {
             anyhow!("Error(Copy):Failed to validate field 'from' as valid path : {e}")
@@ -370,27 +370,27 @@ fn test_copy_corelation() {
     );
 
     // 校验
-    let ctx = crate::types::steps::VerifyStepCtx::_demo();
+    let cx = crate::types::steps::VerifyStepCtx::_demo();
     assert!(StepCopy {
         from: "./bin".to_string(),
         to: "${Desktop}".to_string(),
         overwrite: None
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_ok());
     assert!(StepCopy {
         from: "bin".to_string(),
         to: "${OtherDesktop}".to_string(),
         overwrite: None
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_err());
     assert!(StepCopy {
         from: "C:/Users/Desktop".to_string(),
         to: "${Desktop}".to_string(),
         overwrite: None
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_err());
 
     assert!(StepCopy {
@@ -398,13 +398,13 @@ fn test_copy_corelation() {
         to: "C:/Users/Nep/Desktop".to_string(),
         overwrite: None
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_err());
     assert!(StepCopy {
         from: "${Home}".to_string(),
         to: "${Desktop}/*".to_string(),
         overwrite: None
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_err());
 }

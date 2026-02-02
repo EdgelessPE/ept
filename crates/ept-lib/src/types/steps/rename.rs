@@ -235,60 +235,60 @@ fn test_rename_corelation() {
     );
 
     // 校验
-    let ctx = crate::types::steps::VerifyStepCtx::_demo();
+    let cx = crate::types::steps::VerifyStepCtx::_demo();
     assert!(StepRename {
         from: "./bin".to_string(),
         to: "temp".to_string(),
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_ok());
     assert!(StepRename {
         from: "./bin.exe".to_string(),
         to: "temp".to_string(),
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_ok());
     assert!(StepRename {
         from: "./bin.exe".to_string(),
         to: "temp/".to_string(),
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_err());
     assert!(StepRename {
         from: "./bin/*".to_string(),
         to: "temp".to_string(),
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_err());
     assert!(StepRename {
         from: "./bin".to_string(),
         to: "${Desktop}".to_string(),
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_err());
     assert!(StepRename {
         from: "bin".to_string(),
         to: "${OtherDesktop}".to_string(),
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_err());
     assert!(StepRename {
         from: "C:/Users/Desktop".to_string(),
         to: "${Desktop}".to_string(),
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_err());
 
     assert!(StepRename {
         from: "${Home}".to_string(),
         to: "C:/Users/Nep/Desktop".to_string(),
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_err());
     assert!(StepRename {
         from: "${Home}".to_string(),
         to: "${Desktop}/*".to_string(),
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_err());
 }
