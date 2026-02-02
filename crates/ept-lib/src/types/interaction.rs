@@ -59,3 +59,14 @@ impl InteractionProvider for NoInteraction {
 
 /// 交互提供者包装类型，用于在 Cfg 中存储
 pub type InteractionProviderArc = Arc<dyn InteractionProvider>;
+
+#[test]
+fn test_no_interaction() {
+    let no_interaction = NoInteraction;
+
+    // NoInteraction 会在测试模式下总是返回 true
+    assert!(no_interaction.ask_yn("Test prompt?", true));
+    assert!(no_interaction.ask_yn("Test prompt?", false));
+    assert!(no_interaction.ask_yn_in_step("Step", "Test prompt?", true));
+    assert!(no_interaction.ask_yn_in_step("Step", "Test prompt?", false));
+}

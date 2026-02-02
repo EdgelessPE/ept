@@ -1,59 +1,6 @@
 use crate::types::context::RuntimeContext;
-use crate::utils::fmt_print::{fmt_log, fmt_log_in_step};
-use crate::utils::is_confirm_mode;
-use anyhow::anyhow;
-use colored::{ColoredString, Colorize};
-use dialoguer::Confirm;
 use encoding::all::GBK;
 use encoding::{DecoderTrap, Encoding};
-
-fn get_question_head(default_value: bool) -> ColoredString {
-    if default_value {
-        "Question".truecolor(103, 58, 183)
-    } else {
-        "Question".truecolor(255, 87, 34)
-    }
-}
-
-fn ask_yn_impl(cfg: &RuntimeContext, prompt: String, default_value: bool) -> bool {
-    if is_confirm_mode(cfg) {
-        log!("{prompt} (confirmed)");
-        true
-    } else {
-        write_windows_terminal_status(cfg, 0);
-        let res = Confirm::new()
-            .with_prompt(&prompt)
-            .default(default_value)
-            .interact()
-            .map_err(|e| anyhow!("Error:Failed to ask yn question '{prompt}' : {e}"))
-            .unwrap();
-        write_windows_terminal_status(cfg, 3);
-        res
-    }
-}
-
-pub fn ask_yn(ctx: &RuntimeContext, prompt: String, default_value: bool) -> bool {
-    debug_assert!(prompt.as_bytes().first().unwrap().is_ascii_uppercase() && prompt.ends_with('?'));
-    ask_yn_impl(
-        ctx,
-        fmt_log(get_question_head(default_value), &prompt),
-        default_value,
-    )
-}
-
-pub fn ask_yn_in_step(
-    ctx: &RuntimeContext,
-    step_name: &str,
-    prompt: String,
-    default_value: bool,
-) -> bool {
-    debug_assert!(prompt.as_bytes().first().unwrap().is_ascii_uppercase() && prompt.ends_with('?'));
-    ask_yn_impl(
-        ctx,
-        fmt_log_in_step(step_name, get_question_head(default_value), &prompt),
-        default_value,
-    )
-}
 
 pub fn read_console(v: Vec<u8>) -> String {
     // 先尝试使用 GBK 编码转换
@@ -76,16 +23,4 @@ pub fn write_windows_terminal_status(ctx: &RuntimeContext, status: u8) {
     if ctx.cfg.interaction.enable_windows_terminal_status {
         println!("\x1b]9;4;{status};0\x07");
     }
-}
-
-#[test]
-fn test_no_interaction() {
-    use crate::types::interaction::{InteractionProvider, NoInteraction};
-
-    let no_interaction = NoInteraction;
-    // NoInteraction 会在测试模式下总是返回 true
-    assert!(no_interaction.ask_yn("Test prompt?", true));
-    assert!(no_interaction.ask_yn("Test prompt?", false));
-    assert!(no_interaction.ask_yn_in_step("Step", "Test prompt?", true));
-    assert!(no_interaction.ask_yn_in_step("Step", "Test prompt?", false));
 }
