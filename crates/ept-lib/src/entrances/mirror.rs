@@ -12,9 +12,10 @@ use crate::{
     log, log_ok_last,
     types::{
         cfg::Cfg,
+        context::VerifiableCtx,
         mirror::{MirrorEptToolchain, MirrorHello, MirrorInfo, MirrorPkgSoftware, ServiceKeys},
         mixed_fs::MixedFS,
-        verifiable::{Verifiable, VerifiableCtx},
+        verifiable::Verifiable,
     },
     utils::{
         constants::{MIRROR_FILE_EPT_TOOLCHAIN, MIRROR_FILE_HELLO},

@@ -24,8 +24,9 @@ use crate::types::permissions::PermissionKey;
 use crate::{
     p2s,
     types::{
+        context::VerifiableCtx,
         mirror::{MirrorHello, MirrorPkgSoftware, Service, ServiceKeys},
-        verifiable::{Verifiable, VerifiableCtx},
+        verifiable::Verifiable,
     },
     utils::get_path_mirror,
 };

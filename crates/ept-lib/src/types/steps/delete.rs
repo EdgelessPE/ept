@@ -8,7 +8,7 @@ use crate::types::steps::Permission;
 use crate::{
     executor::{judge_perm_level, values_validator_path},
     log, p2s,
-    types::{mixed_fs::MixedFS, permissions::Generalizable, workflow::WorkflowContext},
+    types::{context::WorkflowContext, mixed_fs::MixedFS, permissions::Generalizable},
     utils::{
         fs::try_recycle,
         wild_match::{contains_wild_match, parse_wild_match},

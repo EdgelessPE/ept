@@ -10,10 +10,7 @@ use crate::{
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
 
-use super::{
-    interpretable::Interpretable,
-    verifiable::{Verifiable, VerifiableCtx},
-};
+use super::{context::VerifiableCtx, interpretable::Interpretable, verifiable::Verifiable};
 use ts_rs::TS;
 
 #[derive(Serialize, Deserialize, Clone, Debug, TS, PartialEq)]
@@ -147,7 +144,7 @@ impl Interpretable for Software {
 
 #[test]
 fn test_verify_software() {
-    use crate::types::{mixed_fs::MixedFS, package::GlobalPackage, verifiable::VerifiableCtx};
+    use crate::types::{context::VerifiableCtx, mixed_fs::MixedFS, package::GlobalPackage};
     use crate::utils::test::_default_test_cfg;
 
     let base = GlobalPackage::_demo().software.unwrap();

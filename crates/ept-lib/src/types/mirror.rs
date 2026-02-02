@@ -10,9 +10,7 @@ use regex::Regex;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 use super::{
-    extended_semver::ExSemVer,
-    meta::MetaResult,
-    verifiable::{Verifiable, VerifiableCtx},
+    context::VerifiableCtx, extended_semver::ExSemVer, meta::MetaResult, verifiable::Verifiable,
 };
 
 lazy_static! {
@@ -289,7 +287,7 @@ pub struct MirrorInfo {
 
 #[test]
 fn test_mirror_pkg_software() {
-    use crate::types::{mixed_fs::MixedFS, verifiable::VerifiableCtx};
+    use crate::types::{context::VerifiableCtx, mixed_fs::MixedFS};
     use crate::utils::test::_default_test_cfg;
 
     let mixed_fs = MixedFS::new("");

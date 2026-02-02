@@ -11,10 +11,7 @@ use humantime::parse_duration;
 use serde::{Deserialize, Deserializer, Serialize};
 use toml::{to_string_pretty, Value};
 
-use crate::{
-    log, p2s,
-    types::verifiable::{Verifiable, VerifiableCtx},
-};
+use crate::{log, p2s, types::context::VerifiableCtx, types::verifiable::Verifiable};
 
 use super::{
     interaction::{InteractionProvider, NoInteraction},

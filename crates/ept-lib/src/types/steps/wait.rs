@@ -3,7 +3,7 @@ use crate::executor::condition_eval;
 use crate::log;
 use crate::types::interpretable::Interpretable;
 use crate::types::steps::Permission;
-use crate::types::{mixed_fs::MixedFS, permissions::Generalizable, workflow::WorkflowContext};
+use crate::types::{context::WorkflowContext, mixed_fs::MixedFS, permissions::Generalizable};
 use crate::utils::conditions::{get_permissions_from_conditions, verify_conditions};
 use crate::Cfg;
 use anyhow::{anyhow, Ok, Result};
@@ -126,7 +126,7 @@ impl Generalizable for StepWait {
 
 #[test]
 fn test_wait() {
-    use crate::types::workflow::WorkflowContext;
+    use crate::types::context::WorkflowContext;
     use crate::utils::flags::{set_flag, Flag};
     set_flag(Flag::Debug, true);
     let mut cx = WorkflowContext::_demo();

@@ -1,21 +1,9 @@
-use std::{env::current_dir, process::Child};
-
 use super::cfg::Cfg;
-use super::steps::VerifyStepCtx;
-use super::{
-    package::GlobalPackage,
-    permissions::Generalizable,
-    steps::Step,
-    verifiable::{Verifiable, VerifiableCtx},
-};
-use crate::log;
-use crate::utils::test::_default_test_cfg;
-use crate::utils::{
-    conditions::{get_permissions_from_conditions, verify_conditions},
-    term::read_console,
-};
-use crate::{p2s, types::permissions::Permission};
-use anyhow::{anyhow, Result};
+use super::context::{VerifiableCtx, VerifyStepCtx};
+use super::{permissions::Generalizable, steps::Step, verifiable::Verifiable};
+use crate::types::permissions::Permission;
+use crate::utils::conditions::{get_permissions_from_conditions, verify_conditions};
+use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
@@ -158,69 +146,5 @@ impl WorkflowNode {
         };
         self.header.verify_self(&verifiable_ctx)?;
         self.body.verify_step(ctx)
-    }
-}
-
-pub struct WorkflowContext {
-    pub located: String,
-    pub pkg: GlobalPackage,
-    pub async_execution_handlers: Vec<(String, Child, bool)>, // 命令，handler，是否被抛弃
-    pub exit_code: i32,
-    pub cfg: Cfg,
-}
-
-impl WorkflowContext {
-    pub fn _demo() -> Self {
-        Self::new(
-            _default_test_cfg(),
-            &p2s!(current_dir().unwrap()),
-            GlobalPackage::_demo(),
-        )
-    }
-
-    pub fn new(cfg: Cfg, located: &str, pkg: GlobalPackage) -> Self {
-        Self {
-            pkg,
-            located: located.to_owned(),
-            async_execution_handlers: Vec::new(),
-            exit_code: 0,
-            cfg,
-        }
-    }
-
-    pub fn finish(self) -> Result<i32> {
-        log!("Debug:Finish context");
-
-        // 等待异步 handlers
-        for (cmd, mut handler, abandon) in self.async_execution_handlers {
-            if abandon {
-                if let Err(e) = handler.kill() {
-                    log!("Warning(Execute):Failed to kill async abandoned command '{cmd}' : {e}");
-                } else {
-                    log!("Info(Execute):Killed async abandoned command '{cmd}'");
-                }
-            } else {
-                let output = handler.wait_with_output().map_err(|e| {
-                    anyhow!("Error(Execute):Failed to wait on async command '{cmd}' : {e}")
-                })?;
-                // 处理退出码
-                match output.status.code() {
-                    Some(val) => {
-                        if val == 0 {
-                            log!("Info(Execute):Async command '{cmd}' output :");
-                            println!("{output}", output = read_console(output.stdout));
-                        } else {
-                            log!("Error(Execute):Async command '{cmd}' failed, output :");
-                            println!("{output}", output = read_console(output.stdout));
-                        }
-                    }
-                    None => {
-                        log!("Error(Execute):Async command '{cmd}' terminated by signal");
-                    }
-                }
-            }
-        }
-
-        Ok(self.exit_code)
     }
 }

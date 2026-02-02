@@ -16,9 +16,10 @@ use crate::{
         constants::{
             DIR_NEP_CONTEXT, DIR_WORKFLOWS, FILE_PACKAGE, WORKFLOW_REMOVE, WORKFLOW_SETUP,
         },
+        context::WorkflowContext,
         mixed_fs::MixedFS,
         steps::{StepExecute, TStep},
-        workflow::{WorkflowContext, WorkflowNode},
+        workflow::WorkflowNode,
     },
     utils::{
         get_bare_apps, get_path_apps, path::find_scope_with_name, process::kill_with_name,

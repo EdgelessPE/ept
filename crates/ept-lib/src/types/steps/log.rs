@@ -2,10 +2,10 @@ use crate::Cfg;
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
+use crate::types::context::WorkflowContext;
 use crate::types::interpretable::Interpretable;
 use crate::types::mixed_fs::MixedFS;
 use crate::types::permissions::{Generalizable, Permission};
-use crate::types::workflow::WorkflowContext;
 use crate::{log, verify_enum};
 
 use super::TStep;

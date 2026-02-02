@@ -7,10 +7,10 @@ use crate::{
     p2s,
     signature::blake3::compute_hash_blake3,
     types::{
+        context::WorkflowContext,
         interpretable::Interpretable,
         mixed_fs::MixedFS,
         permissions::{Generalizable, Permission, PermissionKey, PermissionLevel},
-        workflow::WorkflowContext,
     },
     utils::{
         cache::spawn_cache, download::download, get_path_cache, wild_match::contains_wild_match,

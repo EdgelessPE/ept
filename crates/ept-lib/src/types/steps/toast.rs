@@ -4,9 +4,9 @@ use crate::types::interpretable::Interpretable;
 use crate::types::permissions::PermissionKey;
 use crate::types::steps::Permission;
 use crate::types::{
+    context::WorkflowContext,
     mixed_fs::MixedFS,
     permissions::{Generalizable, PermissionLevel},
-    workflow::WorkflowContext,
 };
 use crate::Cfg;
 use anyhow::{anyhow, Ok, Result};
@@ -82,7 +82,7 @@ impl Generalizable for StepToast {
 
 #[test]
 fn test_toast() {
-    use crate::types::workflow::WorkflowContext;
+    use crate::types::context::WorkflowContext;
     use crate::utils::flags::{set_flag, Flag};
     set_flag(Flag::Debug, true);
     let mut cx = WorkflowContext::_demo();
@@ -97,7 +97,7 @@ fn test_toast() {
 
 #[test]
 fn test_toast_corelation() {
-    use crate::types::workflow::WorkflowContext;
+    use crate::types::context::WorkflowContext;
     use crate::utils::test::_default_test_cfg;
 
     let mut cx = WorkflowContext::_demo();

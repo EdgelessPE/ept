@@ -1,5 +1,5 @@
+use crate::types::context::{VerifyStepCtx, WorkflowContext};
 use crate::types::permissions::{Generalizable, Permission};
-use crate::utils::test::_default_test_cfg;
 use crate::Cfg;
 use anyhow::{anyhow, Result};
 use serde::de;
@@ -19,22 +19,6 @@ mod path;
 mod rename;
 mod toast;
 mod wait;
-
-pub struct VerifyStepCtx {
-    pub mixed_fs: MixedFS,
-    pub cfg: Cfg,
-    pub is_expand_flow: bool,
-}
-
-impl VerifyStepCtx {
-    pub fn _demo() -> Self {
-        Self {
-            mixed_fs: MixedFS::new(""),
-            cfg: _default_test_cfg(),
-            is_expand_flow: false,
-        }
-    }
-}
 
 pub trait TStep: Generalizable + Interpretable {
     /// Run this step, return 0 by default
@@ -152,4 +136,3 @@ pub use self::wait::StepWait;
 
 use super::interpretable::Interpretable;
 use super::mixed_fs::MixedFS;
-use super::workflow::WorkflowContext;

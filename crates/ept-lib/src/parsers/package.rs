@@ -1,9 +1,10 @@
 use crate::executor::values_replacer;
 use crate::types::cfg::Cfg;
 use crate::types::constants::FILE_PACKAGE;
+use crate::types::context::VerifiableCtx;
 use crate::types::interpretable::Interpretable;
 use crate::types::mixed_fs::MixedFS;
-use crate::types::verifiable::{Verifiable, VerifiableCtx};
+use crate::types::verifiable::Verifiable;
 use crate::types::{extended_semver::ExSemVer, package::GlobalPackage};
 use crate::utils::expand::get_expanded_mixed_fs;
 use crate::utils::get_workflows_path;

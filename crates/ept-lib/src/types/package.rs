@@ -5,9 +5,8 @@ use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
 use super::{
-    extended_semver::ExSemVer,
-    interpretable::Interpretable,
-    verifiable::{Verifiable, VerifiableCtx},
+    context::VerifiableCtx, extended_semver::ExSemVer, interpretable::Interpretable,
+    verifiable::Verifiable,
 };
 
 #[derive(Serialize, Deserialize, Clone, Debug, TS, PartialEq)]

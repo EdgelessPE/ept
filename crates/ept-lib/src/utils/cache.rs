@@ -2,19 +2,15 @@ use anyhow::{anyhow, Result};
 use humantime::parse_duration;
 use std::{
     fs::{copy, create_dir_all, read_dir},
-    path::PathBuf,
     time::SystemTime,
 };
 
 use crate::{
     p2s,
     types::cfg::Cfg,
+    types::context::CacheCtx,
     utils::{fs::try_recycle, get_path_cache},
 };
-
-// （是否启用缓存，源文件，Option<(缓存目录, 缓存 key)>）
-#[derive(Debug)]
-pub struct CacheCtx(pub bool, pub PathBuf, pub Option<(PathBuf, String)>);
 
 pub fn spawn_cache(ctx: CacheCtx) -> Result<()> {
     log!("Debug:Spawning cache with ctx: {ctx:?}");

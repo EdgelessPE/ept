@@ -3,10 +3,11 @@ use crate::types::constants::DIR_WORKFLOWS;
 use crate::types::{
     cfg::Cfg,
     constants::{FILE_PACKAGE, WORKFLOW_EXPAND, WORKFLOW_REMOVE, WORKFLOW_SETUP, WORKFLOW_UPDATE},
+    context::VerifyStepCtx,
     extended_semver::ExSemVer,
     mixed_fs::MixedFS,
     package::GlobalPackage,
-    steps::{Step, VerifyStepCtx},
+    steps::Step,
     workflow::WorkflowNode,
 };
 use crate::utils::exe_version::get_exe_version;

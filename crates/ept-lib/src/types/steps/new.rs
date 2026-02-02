@@ -3,9 +3,9 @@ use crate::{
     executor::{judge_perm_level, values_validator_path},
     log,
     types::{
+        context::WorkflowContext,
         mixed_fs::MixedFS,
         permissions::{Generalizable, Permission, PermissionKey},
-        workflow::WorkflowContext,
     },
     utils::wild_match::contains_wild_match,
 };
@@ -121,7 +121,7 @@ impl Generalizable for StepNew {
 
 #[test]
 fn test_new() {
-    use crate::types::workflow::WorkflowContext;
+    use crate::types::context::WorkflowContext;
     use crate::utils::flags::{set_flag, Flag};
     use std::fs::metadata;
     use std::path::Path;

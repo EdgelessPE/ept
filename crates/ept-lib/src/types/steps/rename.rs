@@ -77,15 +77,15 @@ fn rename(from: &str, to: &str, located: &str) -> Result<()> {
 }
 
 impl TStep for StepRename {
-    fn run(self, cx: &mut crate::types::workflow::WorkflowContext) -> Result<i32> {
+    fn run(self, cx: &mut crate::types::context::WorkflowContext) -> Result<i32> {
         //- 重命名文件/文件夹。
         rename(&self.from, &self.to, &cx.located)?;
         Ok(0)
     }
-    fn reverse_run(self, _: &mut crate::types::workflow::WorkflowContext) -> Result<()> {
+    fn reverse_run(self, _: &mut crate::types::context::WorkflowContext) -> Result<()> {
         Ok(())
     }
-    fn get_manifest(&self, fs: &mut crate::types::mixed_fs::MixedFS) -> Vec<String> {
+    fn get_manifest(&self, fs: &mut super::MixedFS) -> Vec<String> {
         fs.remove(&self.from);
         fs.add(&concat_to(&self.to, &self.from, ""), &self.from);
         Vec::new()
@@ -137,7 +137,7 @@ impl Generalizable for StepRename {
 
 #[test]
 fn test_rename() {
-    use crate::types::workflow::WorkflowContext;
+    use crate::types::context::WorkflowContext;
     use crate::utils::flags::{set_flag, Flag};
     use std::path::Path;
     set_flag(Flag::Debug, true);
@@ -207,7 +207,7 @@ fn test_rename() {
 
 #[test]
 fn test_rename_corelation() {
-    let mut cx = crate::types::workflow::WorkflowContext::_demo();
+    let mut cx = crate::types::context::WorkflowContext::_demo();
 
     // 反向工作流
     StepRename {

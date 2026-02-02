@@ -6,11 +6,7 @@ use evalexpr::*;
 
 use crate::{
     log,
-    types::{
-        cfg::Cfg,
-        package::GlobalPackage,
-        workflow::{WorkflowContext, WorkflowNode},
-    },
+    types::{cfg::Cfg, context::WorkflowContext, package::GlobalPackage, workflow::WorkflowNode},
     utils::{arch::is_current_arch_match, get_system_drive},
 };
 

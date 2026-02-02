@@ -1,8 +1,8 @@
 use crate::executor::values_validator_path;
+use crate::types::context::WorkflowContext;
 use crate::types::interpretable::Interpretable;
 use crate::types::mixed_fs::MixedFS;
 use crate::types::permissions::{Generalizable, Permission, PermissionKey, PermissionLevel};
-use crate::types::workflow::WorkflowContext;
 use crate::utils::{
     command::split_command, format_path, is_starts_with_inner_value, term::read_console,
 };

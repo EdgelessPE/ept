@@ -8,7 +8,8 @@ use std::path::PathBuf;
 
 use crate::p2s;
 use crate::types::cfg::Cfg;
-use crate::utils::cache::{restore_cache, CacheCtx};
+use crate::types::context::CacheCtx;
+use crate::utils::cache::restore_cache;
 
 use super::allocate_path_temp;
 

@@ -4,11 +4,11 @@ use crate::{
     executor::{judge_perm_level, values_validator_path},
     log, p2s,
     types::{
+        context::WorkflowContext,
         interpretable::Interpretable,
         mixed_fs::MixedFS,
         permissions::Generalizable,
         permissions::{Permission, PermissionKey},
-        workflow::WorkflowContext,
     },
     utils::{
         fs::{copy_dir, ensure_dir_exist, try_recycle},

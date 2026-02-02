@@ -6,9 +6,9 @@ use crate::Cfg;
 use crate::{
     log,
     types::{
+        context::WorkflowContext,
         mixed_fs::MixedFS,
         permissions::{Generalizable, PermissionLevel},
-        workflow::WorkflowContext,
     },
 };
 use anyhow::{Ok, Result};
@@ -88,7 +88,7 @@ impl Generalizable for StepKill {
 
 #[test]
 fn test_kill() {
-    use crate::types::workflow::WorkflowContext;
+    use crate::types::context::WorkflowContext;
     let mut cx = WorkflowContext::_demo();
 
     crate::utils::test::_ensure_clear_test_dir();
