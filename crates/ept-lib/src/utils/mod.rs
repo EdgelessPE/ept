@@ -27,6 +27,7 @@ pub mod wild_match;
 
 use anyhow::{anyhow, Result};
 use cache::clean_cache;
+use dirs::home_dir;
 use regex::Regex;
 
 use std::env::var;
@@ -128,6 +129,14 @@ pub fn get_system_drive() -> Result<String> {
     root.get(0..2)
         .map(|s| s.to_string())
         .ok_or_else(|| anyhow!("Error:SystemRoot environment variable is too short"))
+}
+
+pub fn get_cur_dir() -> PathBuf {
+    Path::new("./").to_path_buf()
+}
+
+pub fn get_user_dir() -> PathBuf {
+    home_dir().unwrap().join("ept")
 }
 
 pub fn is_url(text: &str) -> bool {

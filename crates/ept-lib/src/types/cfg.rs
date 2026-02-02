@@ -5,19 +5,14 @@ use std::{
 
 use anyhow::{anyhow, Result};
 use config::Config;
-use dirs::home_dir;
 use humantime::parse_duration;
 use serde::{Deserialize, Deserializer, Serialize};
 use toml::{to_string_pretty, Value};
 
 use super::mixed_fs::MixedFS;
 use crate::types::context::RuntimeContext;
+use crate::utils::{get_cur_dir, get_user_dir};
 use crate::{log, p2s, types::context::VerifiableCtx, types::verifiable::Verifiable};
-
-lazy_static! {
-    static ref CUR_DIR: PathBuf = Path::new("./").to_path_buf();
-    static ref USER_DIR: PathBuf = home_dir().unwrap().join("ept");
-}
 
 pub const FILE_NAME: &str = "eptrc.toml";
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
@@ -112,7 +107,7 @@ impl Default for Cfg {
     fn default() -> Self {
         Self {
             local: Local {
-                base: p2s!(USER_DIR),
+                base: p2s!(get_user_dir()),
                 enable_cache: true,
                 cache_valid_duration: "30d".to_string(),
             },
@@ -141,13 +136,16 @@ impl Default for Cfg {
 
 impl Cfg {
     pub fn use_which(is_initial: bool) -> Result<PathBuf> {
-        let from = if CUR_DIR.join(FILE_NAME).exists() {
-            CUR_DIR.join(FILE_NAME)
+        let cur_dir = get_cur_dir();
+        let user_dir = get_user_dir();
+
+        let from = if cur_dir.join(FILE_NAME).exists() {
+            cur_dir.join(FILE_NAME)
         } else {
-            let from = USER_DIR.join(FILE_NAME);
+            let from = user_dir.join(FILE_NAME);
             if !from.exists() {
-                create_dir_all(USER_DIR.to_str().unwrap()).map_err(|e| {
-                    anyhow!("Error:Can't create '{dir}' : {e}", dir = p2s!(USER_DIR),)
+                create_dir_all(user_dir.to_str().unwrap()).map_err(|e| {
+                    anyhow!("Error:Can't create '{dir}' : {e}", dir = p2s!(user_dir),)
                 })?;
                 let default = Value::try_from(Self::default())?;
                 write(from.clone(), to_string_pretty(&default)?).map_err(|e| {

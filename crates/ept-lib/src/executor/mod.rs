@@ -7,7 +7,7 @@ use evalexpr::*;
 use crate::{
     log,
     types::{context::WorkflowContext, package::GlobalPackage, workflow::WorkflowNode},
-    utils::{arch::is_current_arch_match, get_system_drive},
+    utils::arch::is_current_arch_match,
 };
 
 pub use self::functions::{
@@ -19,11 +19,6 @@ use self::{
     values::{set_context_with_constant_values, set_context_with_mutable_values},
 };
 use crate::types::context::RuntimeContext;
-
-// 配置部分内置变量的值
-lazy_static! {
-    static ref SYSTEM_DRIVE: String = get_system_drive().unwrap();
-}
 
 pub fn get_eval_context(
     ctx: &RuntimeContext,
