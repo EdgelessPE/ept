@@ -7,6 +7,7 @@ use anyhow::Result;
 use evalexpr::{DefaultNumericTypes, Function, Value};
 
 use super::EvalFunction;
+use crate::types::context::RuntimeContext;
 
 pub struct Exist {
     //- 检查某个路径指向的文件或目录是否存在
@@ -15,10 +16,7 @@ pub struct Exist {
 }
 
 impl EvalFunction for Exist {
-    fn get_closure(
-        _ctx: &crate::types::context::RuntimeContext,
-        located: String,
-    ) -> Function<DefaultNumericTypes> {
+    fn get_closure(_ctx: &RuntimeContext, located: String) -> Function<DefaultNumericTypes> {
         Function::new(move |val| {
             let arg = ensure_arg(val)?;
             let p = parse_relative_path_with_located(&arg, &located);

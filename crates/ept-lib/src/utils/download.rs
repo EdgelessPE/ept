@@ -11,11 +11,12 @@ use crate::types::context::CacheCtx;
 use crate::utils::cache::restore_cache;
 
 use super::allocate_path_temp;
+use crate::types::context::RuntimeContext;
 
 // cached 接受参数为 (存放缓存的路径，缓存 key)
 // 函数返回的是缓存上下文，当文件被验证可用后可以使用这个上下文传递给 spawn_cache 函数进行缓存
 pub fn download(
-    ctx: &crate::types::context::RuntimeContext,
+    ctx: &RuntimeContext,
     url: &str,
     to: PathBuf,
     cached: Option<(PathBuf, String)>,
@@ -74,7 +75,7 @@ pub fn download(
 
 // 返回 （文件存放路径，缓存上下文）
 pub fn download_nep(
-    ctx: &crate::types::context::RuntimeContext,
+    ctx: &RuntimeContext,
     url: &str,
     cached: Option<(PathBuf, String)>,
 ) -> Result<(PathBuf, CacheCtx)> {

@@ -29,9 +29,10 @@ use super::{
     meta,
     utils::{package::unpack_nep, validator::installed_validator},
 };
+use crate::types::context::RuntimeContext;
 
 fn consume_info_diff(
-    ctx: &crate::types::context::RuntimeContext,
+    ctx: &RuntimeContext,
     item: &TreeItem,
     semver_matcher: Option<VersionReq>,
 ) -> Result<(InfoDiff, Option<MetaResult>)> {
@@ -57,7 +58,7 @@ fn consume_info_diff(
 }
 
 pub fn info_local(
-    ctx: &crate::types::context::RuntimeContext,
+    ctx: &RuntimeContext,
     scope: &str,
     package_name: &str,
 ) -> Result<(GlobalPackage, InfoDiff)> {
@@ -90,7 +91,7 @@ pub fn info_local(
 
 // 第二个参数为 URL 模板，第三个参数为 mirror
 pub fn info_online(
-    ctx: &crate::types::context::RuntimeContext,
+    ctx: &RuntimeContext,
     scope: &str,
     package_name: &str,
     mirror: Option<String>,
@@ -135,7 +136,7 @@ pub fn info_online(
 type InfoResult = (String, String, InfoDiff, Option<MetaResult>);
 
 fn info_from_matcher(
-    ctx: &crate::types::context::RuntimeContext,
+    ctx: &RuntimeContext,
     matcher: crate::types::matcher::PackageMatcher,
     _verify: bool,
 ) -> Result<InfoResult> {
@@ -164,11 +165,7 @@ fn info_from_matcher(
     ))
 }
 
-fn info_from_local_path(
-    ctx: &crate::types::context::RuntimeContext,
-    path: String,
-    verify: bool,
-) -> Result<InfoResult> {
+fn info_from_local_path(ctx: &RuntimeContext, path: String, verify: bool) -> Result<InfoResult> {
     let meta_res = meta(ctx, PackageInputEnum::LocalPath(path), verify)?;
     let package = &meta_res.package.package;
     Ok((
@@ -182,11 +179,7 @@ fn info_from_local_path(
     ))
 }
 
-fn info_from_url(
-    ctx: &crate::types::context::RuntimeContext,
-    url: String,
-    verify: bool,
-) -> Result<InfoResult> {
+fn info_from_url(ctx: &RuntimeContext, url: String, verify: bool) -> Result<InfoResult> {
     log!("Debug:Fetching info from URL '{url}'");
     let cache_path = get_path_cache(ctx)?;
     let url_hash = compute_hash_blake3_from_string(&url)?;
@@ -218,11 +211,7 @@ fn info_from_url(
 }
 
 // 使用本地和在线数据丰富 info 信息
-fn enrich_info(
-    ctx: &crate::types::context::RuntimeContext,
-    mut info: Info,
-    mirror: Option<String>,
-) -> Result<Info> {
+fn enrich_info(ctx: &RuntimeContext, mut info: Info, mirror: Option<String>) -> Result<Info> {
     log!(
         "Debug:Enriching info for '{scope}/{name}'",
         scope = &info.scope,
@@ -242,7 +231,7 @@ fn enrich_info(
 }
 
 pub fn info(
-    ctx: &crate::types::context::RuntimeContext,
+    ctx: &RuntimeContext,
     target_input: PackageInputEnum,
     verify_signature: bool,
 ) -> Result<(Info, Option<PathBuf>)> {

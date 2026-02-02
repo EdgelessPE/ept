@@ -1,4 +1,5 @@
 use super::{copy::parse_target_for_copy, TStep};
+use crate::types::context::RuntimeContext;
 use crate::types::interpretable::Interpretable;
 use crate::types::permissions::PermissionKey;
 use crate::{
@@ -114,10 +115,7 @@ impl Interpretable for StepMove {
 }
 
 impl Generalizable for StepMove {
-    fn generalize_permissions(
-        &self,
-        _ctx: &crate::types::context::RuntimeContext,
-    ) -> Result<Vec<Permission>> {
+    fn generalize_permissions(&self, _ctx: &RuntimeContext) -> Result<Vec<Permission>> {
         Ok(vec![
             Permission {
                 key: PermissionKey::fs_write,

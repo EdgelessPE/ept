@@ -10,8 +10,9 @@ use crate::{
 };
 
 use super::info::info;
+use crate::types::context::RuntimeContext;
 
-pub fn list(ctx: &crate::types::context::RuntimeContext) -> Result<Vec<Info>> {
+pub fn list(ctx: &RuntimeContext) -> Result<Vec<Info>> {
     let app_dir = get_bare_apps(ctx)?;
     let mut res = vec![];
     // 扫描本地 apps 目录

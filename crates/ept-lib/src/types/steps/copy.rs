@@ -1,4 +1,5 @@
 use super::TStep;
+use crate::types::context::RuntimeContext;
 use crate::{
     executor::{judge_perm_level, values_validator_path},
     log, p2s,
@@ -188,10 +189,7 @@ impl Interpretable for StepCopy {
 }
 
 impl Generalizable for StepCopy {
-    fn generalize_permissions(
-        &self,
-        _ctx: &crate::types::context::RuntimeContext,
-    ) -> Result<Vec<Permission>> {
+    fn generalize_permissions(&self, _ctx: &RuntimeContext) -> Result<Vec<Permission>> {
         Ok(vec![
             Permission {
                 key: PermissionKey::fs_read,

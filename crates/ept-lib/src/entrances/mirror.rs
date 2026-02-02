@@ -8,6 +8,7 @@ use std::{
 use toml::{to_string_pretty, Value};
 use url::Url;
 
+use crate::types::context::RuntimeContext;
 use crate::{
     log, log_ok_last,
     types::{
@@ -26,7 +27,7 @@ use crate::{
 
 // 返回远程镜像源申明的名称
 pub fn mirror_add(
-    ctx: &crate::types::context::RuntimeContext,
+    ctx: &RuntimeContext,
     url: &str,
     should_match_name: Option<String>,
 ) -> Result<String> {
@@ -113,7 +114,7 @@ pub fn mirror_add(
     Ok(mirror_name)
 }
 
-pub fn mirror_update(ctx: &crate::types::context::RuntimeContext, name: &str) -> Result<String> {
+pub fn mirror_update(ctx: &RuntimeContext, name: &str) -> Result<String> {
     // 读取 meta 文件
     let (meta, _) = read_local_mirror_hello(ctx, name)?;
     // 筛选出 hello 服务
@@ -122,7 +123,7 @@ pub fn mirror_update(ctx: &crate::types::context::RuntimeContext, name: &str) ->
     mirror_add(ctx, &hello_path, Some(name.to_string()))
 }
 
-pub fn mirror_list(ctx: &crate::types::context::RuntimeContext) -> Result<Vec<MirrorInfo>> {
+pub fn mirror_list(ctx: &RuntimeContext) -> Result<Vec<MirrorInfo>> {
     let p = get_path_mirror(ctx)?;
     let mut res = Vec::new();
     for name in read_sub_dir(&p)? {
@@ -139,7 +140,7 @@ pub fn mirror_list(ctx: &crate::types::context::RuntimeContext) -> Result<Vec<Mi
     Ok(res)
 }
 
-pub fn mirror_update_all(ctx: &crate::types::context::RuntimeContext) -> Result<Vec<String>> {
+pub fn mirror_update_all(ctx: &RuntimeContext) -> Result<Vec<String>> {
     let p = get_path_mirror(ctx)?;
     let mut names = Vec::new();
     for name in read_sub_dir(p)? {
@@ -150,7 +151,7 @@ pub fn mirror_update_all(ctx: &crate::types::context::RuntimeContext) -> Result<
 }
 
 // 根据 config 中的超时配置自动判断是否需要更新镜像
-pub fn auto_mirror_update_all(ctx: &crate::types::context::RuntimeContext) -> Result<bool> {
+pub fn auto_mirror_update_all(ctx: &RuntimeContext) -> Result<bool> {
     // 读取配置
     let duration_cfg = parse_duration(&ctx.cfg.online.mirror_update_interval).map_err(|e| anyhow!("Error:Failed to parse config field 'online.mirror_update_interval' as valid time span : '{e}', e.g. '5d' '14m54s'"))?;
     let now = SystemTime::now();
@@ -175,7 +176,7 @@ pub fn auto_mirror_update_all(ctx: &crate::types::context::RuntimeContext) -> Re
     }
 }
 
-pub fn mirror_remove(ctx: &crate::types::context::RuntimeContext, name: &str) -> Result<()> {
+pub fn mirror_remove(ctx: &RuntimeContext, name: &str) -> Result<()> {
     // 获取目录路径
     let (_, p) = read_local_mirror_hello(ctx, name)?;
     // 移除目录

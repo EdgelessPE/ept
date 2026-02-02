@@ -1,6 +1,7 @@
 use super::TStep;
 use crate::executor::condition_eval;
 use crate::log;
+use crate::types::context::RuntimeContext;
 use crate::types::interpretable::Interpretable;
 use crate::types::steps::Permission;
 use crate::types::{context::WorkflowContext, mixed_fs::MixedFS, permissions::Generalizable};
@@ -107,10 +108,7 @@ impl Interpretable for StepWait {
 }
 
 impl Generalizable for StepWait {
-    fn generalize_permissions(
-        &self,
-        ctx: &crate::types::context::RuntimeContext,
-    ) -> Result<Vec<Permission>> {
+    fn generalize_permissions(&self, ctx: &RuntimeContext) -> Result<Vec<Permission>> {
         let mut permissions = Vec::new();
 
         if let Some(cond) = &self.break_if {

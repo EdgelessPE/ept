@@ -28,6 +28,7 @@ use super::{
     info_local, info_online,
     utils::{package::unpack_nep, validator::installed_validator},
 };
+use crate::types::context::RuntimeContext;
 
 enum MetaTargetResult {
     Local(PathBuf, PathBuf),
@@ -36,7 +37,7 @@ enum MetaTargetResult {
 
 // 返回 (临时目录，工作流所在目录，全局包)
 fn find_meta_target(
-    ctx: &crate::types::context::RuntimeContext,
+    ctx: &RuntimeContext,
     input: PackageInputEnum,
     verify_signature: bool,
 ) -> Result<MetaTargetResult> {
@@ -104,7 +105,7 @@ fn find_meta_target(
 }
 
 pub fn meta(
-    ctx: &crate::types::context::RuntimeContext,
+    ctx: &RuntimeContext,
     input: PackageInputEnum,
     verify_signature: bool,
 ) -> Result<MetaResult> {

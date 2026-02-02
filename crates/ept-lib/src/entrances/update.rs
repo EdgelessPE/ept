@@ -9,6 +9,7 @@ use crate::types::constants::{
     DIR_NEP_CONTEXT, DIR_WORKFLOWS, WORKFLOW_REMOVE, WORKFLOW_SETUP, WORKFLOW_UPDATE,
 };
 
+use crate::types::context::RuntimeContext;
 use crate::{
     entrances::{expand_workshop, is_workshop_expandable},
     executor::{workflow_executor, workflow_reverse_executor},
@@ -48,7 +49,7 @@ fn validate_version_update(name: &str, local_ver: &str, fresh_ver: &str) -> Resu
 
 // 处理作者不匹配的情况，需要卸载后重新安装
 fn handle_author_mismatch(
-    ctx: &crate::types::context::RuntimeContext,
+    ctx: &RuntimeContext,
     source_file: &str,
     local: &GlobalPackage,
     fresh: &GlobalPackage,
@@ -86,7 +87,7 @@ fn handle_author_mismatch(
 
 // 如有需要，执行旧包的移除工作流
 fn run_old_remove_if_needed(
-    ctx: &crate::types::context::RuntimeContext,
+    ctx: &RuntimeContext,
     located: &Path,
     temp_dir: &Path,
     local_pkg: &GlobalPackage,
@@ -109,7 +110,7 @@ fn run_old_remove_if_needed(
 
 // 逆向执行安装工作流
 fn reverse_setup_workflow(
-    ctx: &crate::types::context::RuntimeContext,
+    ctx: &RuntimeContext,
     located: &Path,
     local_pkg: GlobalPackage,
 ) -> Result<()> {
@@ -146,7 +147,7 @@ fn deploy_update(temp_dir: &Path, located: &Path, name: &str) -> Result<()> {
 
 // 执行新包的 update 或 setup 工作流
 fn run_new_workflow(
-    ctx: &crate::types::context::RuntimeContext,
+    ctx: &RuntimeContext,
     temp_dir: &Path,
     located: &Path,
     fresh_pkg: GlobalPackage,
@@ -170,7 +171,7 @@ fn run_new_workflow(
 }
 
 pub fn update_using_package(
-    ctx: &crate::types::context::RuntimeContext,
+    ctx: &RuntimeContext,
     source_file: &str,
     verify_signature: bool,
 ) -> Result<UpdateInfo> {
@@ -248,7 +249,7 @@ pub fn update_using_package(
 }
 
 pub fn update_using_url(
-    ctx: &crate::types::context::RuntimeContext,
+    ctx: &RuntimeContext,
     url: &str,
     verify_signature: bool,
 ) -> Result<UpdateInfo> {
@@ -267,7 +268,7 @@ pub fn update_using_url(
 }
 
 pub fn update_using_package_matcher(
-    ctx: &crate::types::context::RuntimeContext,
+    ctx: &RuntimeContext,
     matcher: String,
     verify_signature: bool,
 ) -> Result<UpdateInfo> {
@@ -284,7 +285,7 @@ pub fn update_using_package_matcher(
 }
 
 pub fn update_using_parsed(
-    ctx: &crate::types::context::RuntimeContext,
+    ctx: &RuntimeContext,
     parsed: Vec<ParseInputResEnum>,
     verify_signature: bool,
 ) -> Result<Vec<UpdateInfo>> {
@@ -321,10 +322,7 @@ pub fn update_using_parsed(
     Ok(arr)
 }
 
-pub fn update_all(
-    ctx: &crate::types::context::RuntimeContext,
-    verify_signature: bool,
-) -> Result<(i32, i32)> {
+pub fn update_all(ctx: &RuntimeContext, verify_signature: bool) -> Result<(i32, i32)> {
     // 遍历 list 结果，生成更新列表
     let list_res = list(ctx)?;
     let update_list: Vec<UpdateInfo> = list_res

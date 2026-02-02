@@ -3,6 +3,7 @@ use evalexpr::*;
 use regex::Regex;
 use std::sync::{Arc, Mutex};
 
+use crate::types::context::RuntimeContext;
 use crate::{
     executor::{
         condition_eval, get_eval_context, get_eval_function_names, get_eval_function_permission,
@@ -27,7 +28,7 @@ pub fn ensure_arg(val: &Value) -> std::result::Result<String, EvalexprError> {
 
 /// 使用虚拟的函数定义捕获函数运行信息，返回（函数名，参数，所属表达式）
 fn capture_function_info(
-    ctx: &crate::types::context::RuntimeContext,
+    ctx: &RuntimeContext,
     conditions: &Vec<String>,
 ) -> Result<Vec<(String, String, String)>> {
     // 获取已注册的 eval 函数名称
@@ -68,7 +69,7 @@ fn capture_function_info(
 }
 
 pub fn get_permissions_from_conditions(
-    ctx: &crate::types::context::RuntimeContext,
+    ctx: &RuntimeContext,
     conditions: Vec<String>,
 ) -> Result<Vec<Permission>> {
     // 捕获函数执行信息
@@ -84,7 +85,7 @@ pub fn get_permissions_from_conditions(
 }
 
 pub fn verify_conditions(
-    ctx: &crate::types::context::RuntimeContext,
+    ctx: &RuntimeContext,
     conditions: Vec<String>,
     located: &str,
     package_version: &str,

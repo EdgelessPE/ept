@@ -1,6 +1,7 @@
 use std::path::Path;
 
 use super::TStep;
+use crate::types::context::RuntimeContext;
 use crate::{
     executor::values_validator_path,
     p2s,
@@ -139,10 +140,7 @@ impl TStep for StepDownload {
 }
 
 impl Generalizable for StepDownload {
-    fn generalize_permissions(
-        &self,
-        _ctx: &crate::types::context::RuntimeContext,
-    ) -> Result<Vec<Permission>> {
+    fn generalize_permissions(&self, _ctx: &RuntimeContext) -> Result<Vec<Permission>> {
         Ok(vec![Permission {
             key: PermissionKey::download_file,
             level: PermissionLevel::Important,

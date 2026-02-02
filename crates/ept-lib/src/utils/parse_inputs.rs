@@ -18,6 +18,7 @@ use super::{
     mirror::{filter_release, get_url_with_version_req},
     path::find_scope_with_name,
 };
+use crate::types::context::RuntimeContext;
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct ParsePackageInputRes {
@@ -61,7 +62,7 @@ impl ParseInputResEnum {
 }
 
 pub fn parse_install_inputs(
-    ctx: &crate::types::context::RuntimeContext,
+    ctx: &RuntimeContext,
     packages: Vec<String>,
     verify_signature: bool,
 ) -> Result<Vec<ParseReturned>> {
@@ -117,7 +118,7 @@ pub fn parse_install_inputs(
 }
 
 pub fn parse_update_inputs(
-    ctx: &crate::types::context::RuntimeContext,
+    ctx: &RuntimeContext,
     packages: Vec<String>,
     verify_signature: bool,
 ) -> Result<Vec<ParseReturned>> {
@@ -175,10 +176,7 @@ pub fn parse_update_inputs(
     Ok(res)
 }
 
-pub fn parse_uninstall_inputs(
-    ctx: &crate::types::context::RuntimeContext,
-    packages: Vec<String>,
-) -> Result<Vec<Info>> {
+pub fn parse_uninstall_inputs(ctx: &RuntimeContext, packages: Vec<String>) -> Result<Vec<Info>> {
     let mut arr = Vec::new();
     for p in packages {
         // 简单校验是否可以卸载

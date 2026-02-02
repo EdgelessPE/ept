@@ -60,7 +60,7 @@ pub fn is_debug_mode() -> bool {
     get_flag(Flag::Debug, false)
 }
 
-pub fn is_confirm_mode(ctx: &crate::types::context::RuntimeContext) -> bool {
+pub fn is_confirm_mode(ctx: &RuntimeContext) -> bool {
     ctx.cfg.interaction.auto_confirm_all
 }
 
@@ -69,13 +69,13 @@ pub fn format_path(raw: &str) -> String {
     tmp.strip_prefix("./").map(|s| s.to_string()).unwrap_or(tmp)
 }
 
-pub fn get_bare_apps(ctx: &crate::types::context::RuntimeContext) -> Result<PathBuf> {
+pub fn get_bare_apps(ctx: &RuntimeContext) -> Result<PathBuf> {
     ensure_exist(parse_relative_path_with_base("apps", &ctx.cfg.local.base)?)
 }
 
 /// 不确保目录存在，可选确保 scope 目录存在
 pub fn get_path_apps(
-    ctx: &crate::types::context::RuntimeContext,
+    ctx: &RuntimeContext,
     scope: &str,
     name: &str,
     ensure_scope: bool,
@@ -89,15 +89,11 @@ pub fn get_path_apps(
     .join(name))
 }
 
-pub fn parse_bare_temp(ctx: &crate::types::context::RuntimeContext) -> Result<PathBuf> {
+pub fn parse_bare_temp(ctx: &RuntimeContext) -> Result<PathBuf> {
     parse_relative_path_with_base("temp", &ctx.cfg.local.base)
 }
 
-pub fn allocate_path_temp(
-    ctx: &crate::types::context::RuntimeContext,
-    name: &str,
-    sub_dir: bool,
-) -> Result<PathBuf> {
+pub fn allocate_path_temp(ctx: &RuntimeContext, name: &str, sub_dir: bool) -> Result<PathBuf> {
     let random_name = name.to_owned() + "_" + &random_short_string();
     let p = parse_relative_path_with_base("temp", &ctx.cfg.local.base)?.join(random_name);
     if sub_dir {
@@ -107,26 +103,26 @@ pub fn allocate_path_temp(
     ensure_exist(p)
 }
 
-pub fn get_path_bin(ctx: &crate::types::context::RuntimeContext) -> Result<PathBuf> {
+pub fn get_path_bin(ctx: &RuntimeContext) -> Result<PathBuf> {
     ensure_exist(parse_relative_path_with_base("bin", &ctx.cfg.local.base)?)
 }
 
-pub fn get_path_mirror(ctx: &crate::types::context::RuntimeContext) -> Result<PathBuf> {
+pub fn get_path_mirror(ctx: &RuntimeContext) -> Result<PathBuf> {
     ensure_exist(parse_relative_path_with_base(
         "mirror",
         &ctx.cfg.local.base,
     )?)
 }
 
-pub fn get_path_cache(ctx: &crate::types::context::RuntimeContext) -> Result<PathBuf> {
+pub fn get_path_cache(ctx: &RuntimeContext) -> Result<PathBuf> {
     ensure_exist(parse_relative_path_with_base("cache", &ctx.cfg.local.base)?)
 }
 
-pub fn get_path_meta(ctx: &crate::types::context::RuntimeContext) -> Result<PathBuf> {
+pub fn get_path_meta(ctx: &RuntimeContext) -> Result<PathBuf> {
     ensure_exist(parse_relative_path_with_base("meta", &ctx.cfg.local.base)?)
 }
 
-pub fn get_path_toolchain(ctx: &crate::types::context::RuntimeContext) -> Result<PathBuf> {
+pub fn get_path_toolchain(ctx: &RuntimeContext) -> Result<PathBuf> {
     ensure_exist(parse_relative_path_with_base(
         "toolchain",
         &ctx.cfg.local.base,
@@ -148,7 +144,7 @@ pub fn is_starts_with_inner_value(p: &str) -> bool {
     p.starts_with("${") || p.starts_with("\"${")
 }
 
-pub fn launch_clean(ctx: &crate::types::context::RuntimeContext) -> Result<()> {
+pub fn launch_clean(ctx: &RuntimeContext) -> Result<()> {
     // 删除 temp 目录
     let p = parse_bare_temp(ctx)?;
     if p.exists() {
@@ -163,6 +159,7 @@ pub fn launch_clean(ctx: &crate::types::context::RuntimeContext) -> Result<()> {
 }
 
 use crate::types::constants::{DIR_NEP_CONTEXT, DIR_WORKFLOWS, FILE_PACKAGE};
+use crate::types::context::RuntimeContext;
 
 pub fn get_manifest_path(located: &str) -> Result<PathBuf> {
     let possible_path = vec![

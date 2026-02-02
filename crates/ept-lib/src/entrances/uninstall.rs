@@ -27,6 +27,7 @@ use crate::{
 };
 
 use super::utils::validator::installed_validator;
+use crate::types::context::RuntimeContext;
 
 fn get_manifest(flow: Vec<WorkflowNode>) -> Vec<String> {
     let mut manifest = Vec::new();
@@ -38,7 +39,7 @@ fn get_manifest(flow: Vec<WorkflowNode>) -> Vec<String> {
 }
 
 pub fn uninstall(
-    ctx: &crate::types::context::RuntimeContext,
+    ctx: &RuntimeContext,
     scope: Option<String>,
     package_name: &str,
 ) -> Result<(String, String)> {

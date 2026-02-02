@@ -3,8 +3,9 @@ use anyhow::{anyhow, Result};
 use crate::types::cfg::PreferenceEnum;
 
 use super::arch::SysArch;
+use crate::types::context::RuntimeContext;
 
-pub fn get_flags_score(ctx: &crate::types::context::RuntimeContext, flags: &str) -> Result<i32> {
+pub fn get_flags_score(ctx: &RuntimeContext, flags: &str) -> Result<i32> {
     let mut score = 0;
     for c in flags.chars() {
         let e = match c {

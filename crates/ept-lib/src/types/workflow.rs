@@ -1,5 +1,6 @@
 use super::context::{VerifiableCtx, VerifyStepCtx};
 use super::{permissions::Generalizable, steps::Step, verifiable::Verifiable};
+use crate::types::context::RuntimeContext;
 use crate::types::permissions::Permission;
 use crate::utils::conditions::{get_permissions_from_conditions, verify_conditions};
 use anyhow::Result;
@@ -39,10 +40,7 @@ impl WorkflowHeader {
 }
 
 impl Generalizable for WorkflowHeader {
-    fn generalize_permissions(
-        &self,
-        ctx: &crate::types::context::RuntimeContext,
-    ) -> Result<Vec<Permission>> {
+    fn generalize_permissions(&self, ctx: &RuntimeContext) -> Result<Vec<Permission>> {
         // 获取条件语句所需的权限
         get_permissions_from_conditions(ctx, self.get_conditions())
     }
@@ -131,10 +129,7 @@ pub struct WorkflowNode {
 }
 
 impl Generalizable for WorkflowNode {
-    fn generalize_permissions(
-        &self,
-        ctx: &crate::types::context::RuntimeContext,
-    ) -> Result<Vec<Permission>> {
+    fn generalize_permissions(&self, ctx: &RuntimeContext) -> Result<Vec<Permission>> {
         let mut perm = Vec::new();
         perm.append(&mut self.header.generalize_permissions(ctx)?);
         perm.append(&mut self.body.generalize_permissions(ctx)?);

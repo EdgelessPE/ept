@@ -13,6 +13,7 @@ use serde::{Deserialize, Serialize};
 use std::{fs::create_dir_all, fs::File, path::Path};
 
 use super::TStep;
+use crate::types::context::RuntimeContext;
 use crate::types::interpretable::Interpretable;
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
@@ -109,10 +110,7 @@ impl Interpretable for StepNew {
 }
 
 impl Generalizable for StepNew {
-    fn generalize_permissions(
-        &self,
-        _ctx: &crate::types::context::RuntimeContext,
-    ) -> Result<Vec<Permission>> {
+    fn generalize_permissions(&self, _ctx: &RuntimeContext) -> Result<Vec<Permission>> {
         Ok(vec![Permission {
             key: PermissionKey::fs_write,
             level: judge_perm_level(&self.at)?,

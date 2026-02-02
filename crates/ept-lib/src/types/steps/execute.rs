@@ -9,6 +9,7 @@ use crate::utils::{
 use crate::{log, verify_enum};
 
 use super::TStep;
+use crate::types::context::RuntimeContext;
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
 use std::path::Path;
@@ -205,10 +206,7 @@ impl Interpretable for StepExecute {
 }
 
 impl Generalizable for StepExecute {
-    fn generalize_permissions(
-        &self,
-        _ctx: &crate::types::context::RuntimeContext,
-    ) -> Result<Vec<Permission>> {
+    fn generalize_permissions(&self, _ctx: &RuntimeContext) -> Result<Vec<Permission>> {
         let node = if self.call_installer.unwrap_or(false) {
             Permission {
                 key: PermissionKey::execute_installer,

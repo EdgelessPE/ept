@@ -19,6 +19,7 @@ use std::fs::read_dir;
 use std::path::{Path, PathBuf};
 
 use super::utils::validator::{inner_validator, manifest_validator};
+use crate::types::context::RuntimeContext;
 
 fn get_manifest(flow: Vec<WorkflowNode>, fs: &mut MixedFS) -> Vec<String> {
     let mut manifest = Vec::new();
@@ -66,10 +67,7 @@ fn verify_workflow(cx: &VerifyStepCtx, flow: Vec<WorkflowNode>) -> Result<bool> 
     Ok(have_call_installer)
 }
 
-pub fn verify(
-    ctx: &crate::types::context::RuntimeContext,
-    source_dir: &str,
-) -> Result<GlobalPackage> {
+pub fn verify(ctx: &RuntimeContext, source_dir: &str) -> Result<GlobalPackage> {
     log!("Debug:Starting verification for source directory '{source_dir}'");
     // 打包检查
     log!("Info:Validating source directory...");

@@ -4,6 +4,7 @@ use std::{
     path::Path,
 };
 
+use crate::types::context::RuntimeContext;
 use crate::{
     executor::values_validator_path,
     p2s,
@@ -29,7 +30,7 @@ pub fn inner_validator(dir: &str) -> Result<()> {
 }
 
 pub fn manifest_validator(
-    ctx: &crate::types::context::RuntimeContext,
+    ctx: &RuntimeContext,
     base: &str,
     manifest: Vec<String>,
     fs: &mut MixedFS,

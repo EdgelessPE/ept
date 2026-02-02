@@ -1,5 +1,6 @@
 use super::TStep;
 use crate::executor::values_validator_path;
+use crate::types::context::RuntimeContext;
 use crate::types::context::WorkflowContext;
 use crate::types::interpretable::Interpretable;
 use crate::types::mixed_fs::MixedFS;
@@ -244,10 +245,7 @@ impl Interpretable for StepLink {
 }
 
 impl Generalizable for StepLink {
-    fn generalize_permissions(
-        &self,
-        _ctx: &crate::types::context::RuntimeContext,
-    ) -> Result<Vec<Permission>> {
+    fn generalize_permissions(&self, _ctx: &RuntimeContext) -> Result<Vec<Permission>> {
         let mut keys = Vec::new();
         if let Some(ats) = &self.at {
             if ats.contains(&"Desktop".to_string()) {

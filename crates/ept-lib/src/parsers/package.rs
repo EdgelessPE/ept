@@ -18,6 +18,7 @@ use std::{
 };
 
 use super::parse_author;
+use crate::types::context::RuntimeContext;
 
 // 输入读到的版本号，判断是否需要更新 pkg 并自动写文件系统
 fn update_pkg_version(
@@ -91,7 +92,7 @@ fn update_ver_with_reg_entry(
 
 /// p 输入 package.toml 所在位置
 pub fn parse_package(
-    ctx: &crate::types::context::RuntimeContext,
+    ctx: &RuntimeContext,
     p: &str,
     located: &str,
     need_update_main_program: bool,

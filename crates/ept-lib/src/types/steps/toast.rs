@@ -1,5 +1,6 @@
 use super::TStep;
 use crate::log;
+use crate::types::context::RuntimeContext;
 use crate::types::interpretable::Interpretable;
 use crate::types::permissions::PermissionKey;
 use crate::types::steps::Permission;
@@ -70,10 +71,7 @@ impl Interpretable for StepToast {
 }
 
 impl Generalizable for StepToast {
-    fn generalize_permissions(
-        &self,
-        _ctx: &crate::types::context::RuntimeContext,
-    ) -> Result<Vec<Permission>> {
+    fn generalize_permissions(&self, _ctx: &RuntimeContext) -> Result<Vec<Permission>> {
         Ok(vec![Permission {
             key: PermissionKey::notify_toast,
             level: PermissionLevel::Normal,

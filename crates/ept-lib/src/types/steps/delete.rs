@@ -1,6 +1,7 @@
 use std::{ffi::OsString, path::Path};
 
 use super::TStep;
+use crate::types::context::RuntimeContext;
 use crate::types::interpretable::Interpretable;
 use crate::types::permissions::PermissionKey;
 use crate::types::steps::Permission;
@@ -102,10 +103,7 @@ impl Interpretable for StepDelete {
 }
 
 impl Generalizable for StepDelete {
-    fn generalize_permissions(
-        &self,
-        _ctx: &crate::types::context::RuntimeContext,
-    ) -> Result<Vec<Permission>> {
+    fn generalize_permissions(&self, _ctx: &RuntimeContext) -> Result<Vec<Permission>> {
         Ok(vec![Permission {
             key: PermissionKey::fs_write,
             level: judge_perm_level(&self.at)?,

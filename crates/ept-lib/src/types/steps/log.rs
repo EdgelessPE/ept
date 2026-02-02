@@ -8,6 +8,7 @@ use crate::types::permissions::{Generalizable, Permission};
 use crate::{log, verify_enum};
 
 use super::TStep;
+use crate::types::context::RuntimeContext;
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct StepLog {
@@ -59,10 +60,7 @@ impl Interpretable for StepLog {
 }
 
 impl Generalizable for StepLog {
-    fn generalize_permissions(
-        &self,
-        _ctx: &crate::types::context::RuntimeContext,
-    ) -> Result<Vec<Permission>> {
+    fn generalize_permissions(&self, _ctx: &RuntimeContext) -> Result<Vec<Permission>> {
         Ok(vec![])
     }
 }

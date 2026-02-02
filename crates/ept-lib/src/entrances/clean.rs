@@ -19,6 +19,7 @@ use crate::{
 };
 
 use super::info_local;
+use crate::types::context::RuntimeContext;
 
 fn get_valid_entrances(setup: Vec<WorkflowNode>) -> Vec<String> {
     setup
@@ -36,7 +37,7 @@ fn get_valid_entrances(setup: Vec<WorkflowNode>) -> Vec<String> {
         .collect()
 }
 
-pub fn clean(ctx: &crate::types::context::RuntimeContext) -> Result<usize> {
+pub fn clean(ctx: &RuntimeContext) -> Result<usize> {
     log!("Debug:Starting clean operation");
     let mut clean_list = Vec::new();
     let mut valid_entrances = HashSet::new();

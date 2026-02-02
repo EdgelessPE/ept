@@ -1,4 +1,5 @@
 use super::TStep;
+use crate::types::context::RuntimeContext;
 use crate::types::interpretable::Interpretable;
 use crate::types::permissions::PermissionKey;
 use crate::types::steps::Permission;
@@ -76,10 +77,7 @@ impl Interpretable for StepKill {
 }
 
 impl Generalizable for StepKill {
-    fn generalize_permissions(
-        &self,
-        _ctx: &crate::types::context::RuntimeContext,
-    ) -> Result<Vec<Permission>> {
+    fn generalize_permissions(&self, _ctx: &RuntimeContext) -> Result<Vec<Permission>> {
         Ok(vec![Permission {
             key: PermissionKey::process_kill,
             level: PermissionLevel::Sensitive,

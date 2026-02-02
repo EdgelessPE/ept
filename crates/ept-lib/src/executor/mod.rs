@@ -18,6 +18,7 @@ use self::{
     functions::set_context_with_function,
     values::{set_context_with_constant_values, set_context_with_mutable_values},
 };
+use crate::types::context::RuntimeContext;
 
 // 配置部分内置变量的值
 lazy_static! {
@@ -25,7 +26,7 @@ lazy_static! {
 }
 
 pub fn get_eval_context(
-    ctx: &crate::types::context::RuntimeContext,
+    ctx: &RuntimeContext,
     exit_code: i32,
     located: &str,
     package_version: &str,
@@ -39,7 +40,7 @@ pub fn get_eval_context(
 
 // 执行条件以判断是否成立
 pub fn condition_eval(
-    ctx: &crate::types::context::RuntimeContext,
+    ctx: &RuntimeContext,
     condition: &str,
     exit_code: i32,
     located: &str,
@@ -58,7 +59,7 @@ pub fn condition_eval(
 
 // 执行工作流，返回最后一个步骤的退出码
 pub fn workflow_executor(
-    ctx: &crate::types::context::RuntimeContext,
+    ctx: &RuntimeContext,
     flow: Vec<WorkflowNode>,
     located: String,
     pkg: GlobalPackage,
@@ -132,7 +133,7 @@ pub fn workflow_executor(
 
 // 宽容地逆向执行 setup 工作流
 pub fn workflow_reverse_executor(
-    ctx: &crate::types::context::RuntimeContext,
+    ctx: &RuntimeContext,
     flow: Vec<WorkflowNode>,
     located: String,
     pkg: GlobalPackage,

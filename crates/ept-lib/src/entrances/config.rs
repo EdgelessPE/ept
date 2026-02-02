@@ -1,15 +1,12 @@
 use std::path::Path;
 
+use crate::types::context::RuntimeContext;
 use crate::{p2s, types::cfg::Cfg};
 use anyhow::{anyhow, Error, Result};
 use toml::Value;
 
 // 返回（key 指向的 value，整个 Cfg）
-fn get_toml_value(
-    ctx: &crate::types::context::RuntimeContext,
-    table: &str,
-    key: &str,
-) -> Result<(Value, Value)> {
+fn get_toml_value(ctx: &RuntimeContext, table: &str, key: &str) -> Result<(Value, Value)> {
     // 序列化为 toml 对象
     let toml = Value::try_from(ctx.cfg.clone())?;
     // 读 table
@@ -24,12 +21,7 @@ fn get_toml_value(
     Ok((val.to_owned(), toml))
 }
 
-pub fn config_set(
-    ctx: &crate::types::context::RuntimeContext,
-    table: &str,
-    key: &str,
-    value: &str,
-) -> Result<()> {
+pub fn config_set(ctx: &RuntimeContext, table: &str, key: &str, value: &str) -> Result<()> {
     // 错误处理闭包
     let err_wrapper =
         |e: Error| anyhow!("Error:Failed to set value of '${key}' as '${value}' : ${e}");
@@ -77,11 +69,7 @@ pub fn config_set(
     Ok(())
 }
 
-pub fn config_get(
-    ctx: &crate::types::context::RuntimeContext,
-    table: &str,
-    key: &str,
-) -> Result<String> {
+pub fn config_get(ctx: &RuntimeContext, table: &str, key: &str) -> Result<String> {
     let (val, _) = get_toml_value(ctx, table, key)?;
 
     let str = val
@@ -94,12 +82,12 @@ pub fn config_get(
     Ok(str)
 }
 
-pub fn config_list(runtime_ctx: &crate::types::context::RuntimeContext) -> Result<String> {
+pub fn config_list(runtime_ctx: &RuntimeContext) -> Result<String> {
     let cfg = &runtime_ctx.cfg;
     Ok(format!("{cfg:#?}"))
 }
 
-pub fn config_init(ctx: &crate::types::context::RuntimeContext) -> Result<String> {
+pub fn config_init(ctx: &RuntimeContext) -> Result<String> {
     let file_path = config_which()?;
     if Path::new(&file_path).exists()
         && !ctx.interaction().ask_yn(

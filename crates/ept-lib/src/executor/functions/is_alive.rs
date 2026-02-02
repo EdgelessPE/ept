@@ -6,6 +6,7 @@ use anyhow::{anyhow, Result};
 use evalexpr::{DefaultNumericTypes, Function, Value};
 
 use super::EvalFunction;
+use crate::types::context::RuntimeContext;
 
 pub struct IsAlive {
     //- 检查某个进程是否正在运行
@@ -14,10 +15,7 @@ pub struct IsAlive {
 }
 
 impl EvalFunction for IsAlive {
-    fn get_closure(
-        _ctx: &crate::types::context::RuntimeContext,
-        _: String,
-    ) -> Function<DefaultNumericTypes> {
+    fn get_closure(_ctx: &RuntimeContext, _: String) -> Function<DefaultNumericTypes> {
         Function::new(move |val| {
             let arg = ensure_arg(val)?;
             Ok(Value::Boolean(is_alive_with_name(&arg)))

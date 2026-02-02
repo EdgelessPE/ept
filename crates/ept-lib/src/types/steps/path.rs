@@ -1,5 +1,6 @@
 use super::TStep;
 use crate::executor::values_validator_path;
+use crate::types::context::RuntimeContext;
 use crate::types::context::WorkflowContext;
 use crate::types::interpretable::Interpretable;
 use crate::types::mixed_fs::MixedFS;
@@ -37,12 +38,7 @@ pub struct StepPath {
     pub alias: Option<String>,
 }
 
-fn conflict_resolver(
-    bin_abs: &str,
-    stem: &str,
-    scope: &str,
-    ctx: &crate::types::context::RuntimeContext,
-) -> String {
+fn conflict_resolver(bin_abs: &str, stem: &str, scope: &str, ctx: &RuntimeContext) -> String {
     let origin = format!("{bin_abs}/{stem}.cmd");
     let scoped = format!("{bin_abs}/{scope}-{stem}.cmd");
 
@@ -296,10 +292,7 @@ impl Interpretable for StepPath {
 }
 
 impl Generalizable for StepPath {
-    fn generalize_permissions(
-        &self,
-        _ctx: &crate::types::context::RuntimeContext,
-    ) -> Result<Vec<Permission>> {
+    fn generalize_permissions(&self, _ctx: &RuntimeContext) -> Result<Vec<Permission>> {
         // 检查是否有拓展名且不以 / 結尾，以此判断添加的是目录还是单文件
         let p = Path::new(&self.record);
         let node = if p.extension().is_some() && !self.record.ends_with('/') {

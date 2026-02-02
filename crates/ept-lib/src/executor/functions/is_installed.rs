@@ -8,6 +8,7 @@ use evalexpr::{error, DefaultNumericTypes, Function, Value};
 use regex::Regex;
 
 use super::EvalFunction;
+use crate::types::context::RuntimeContext;
 
 lazy_static! {
     static ref RESOURCE_REGEX: Regex = Regex::new(r"^[^/]+/[^/]+$").unwrap();
@@ -20,10 +21,7 @@ pub struct IsInstalled {
 }
 
 impl EvalFunction for IsInstalled {
-    fn get_closure(
-        ctx: &crate::types::context::RuntimeContext,
-        _: String,
-    ) -> Function<DefaultNumericTypes> {
+    fn get_closure(ctx: &RuntimeContext, _: String) -> Function<DefaultNumericTypes> {
         let cfg = ctx.clone();
         Function::new(move |val| {
             let arg = ensure_arg(val)?;

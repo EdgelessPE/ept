@@ -93,7 +93,7 @@ macro_rules! def_enum_step {
         }
 
         impl Generalizable for Step {
-            fn generalize_permissions(&self, ctx: &crate::types::context::RuntimeContext)->Result<Vec<Permission>> {
+            fn generalize_permissions(&self, ctx: &RuntimeContext)->Result<Vec<Permission>> {
                 match self {
                     $( Step::$x(step) => step.generalize_permissions(ctx) ),*
                 }
@@ -135,3 +135,4 @@ pub use self::wait::StepWait;
 
 use super::interpretable::Interpretable;
 use super::mixed_fs::MixedFS;
+use crate::types::context::RuntimeContext;

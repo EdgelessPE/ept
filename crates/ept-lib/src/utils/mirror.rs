@@ -39,12 +39,10 @@ use super::fs::ensure_dir_exist;
 use super::fs::try_recycle;
 use super::path::find_scope_with_name;
 use super::permissions::filter_permissions;
+use crate::types::context::RuntimeContext;
 
 // 读取 meta
-pub fn read_local_mirror_hello(
-    ctx: &crate::types::context::RuntimeContext,
-    name: &str,
-) -> Result<(MirrorHello, PathBuf)> {
+pub fn read_local_mirror_hello(ctx: &RuntimeContext, name: &str) -> Result<(MirrorHello, PathBuf)> {
     let dir_path = get_path_mirror(ctx)?.join(name);
     let p = dir_path.join(MIRROR_FILE_HELLO);
     if !p.exists() {
@@ -144,7 +142,7 @@ fn register_tokenizer(index: &mut Index) {
 
 // 为包构建索引
 pub fn build_index_for_mirror(
-    ctx: &crate::types::context::RuntimeContext,
+    ctx: &RuntimeContext,
     content: MirrorPkgSoftware,
     dir: PathBuf,
 ) -> Result<()> {
@@ -312,10 +310,7 @@ pub fn search_index_for_mirror(
 }
 
 // 读取快查索引
-pub fn read_quick_maps(
-    ctx: &crate::types::context::RuntimeContext,
-    mirror_name: &str,
-) -> Result<QuickMaps> {
+pub fn read_quick_maps(ctx: &RuntimeContext, mirror_name: &str) -> Result<QuickMaps> {
     let quick_path = get_path_mirror(ctx)?
         .join(mirror_name)
         .join("index")
@@ -342,7 +337,7 @@ pub fn read_quick_maps(
 // 匹配 release
 // 如果没有提供 semver matcher 则返回最大版本
 pub fn filter_release(
-    ctx: &crate::types::context::RuntimeContext,
+    ctx: &RuntimeContext,
     releases: Vec<MirrorPkgSoftwareRelease>,
     semver_matcher: Option<VersionReq>,
     enable_flags_score: bool,
@@ -424,7 +419,7 @@ pub fn filter_release(
 
 // 通过匹配 VersionReq 解析出包的 url
 pub fn get_url_with_version_req(
-    ctx: &crate::types::context::RuntimeContext,
+    ctx: &RuntimeContext,
     matcher: PackageMatcher,
 ) -> Result<(String, MirrorPkgSoftwareRelease, String)> {
     // 查找 scope 并使用 scope 更新纠正大小写

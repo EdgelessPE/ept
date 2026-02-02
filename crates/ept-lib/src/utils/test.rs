@@ -2,6 +2,7 @@ use std::path::PathBuf;
 use std::sync::Arc;
 
 use crate::types::constants::FILE_PACKAGE;
+use crate::types::context::RuntimeContext;
 use crate::types::interaction::NoInteraction;
 use crate::{types::matcher::PackageMatcher, utils::get_path_cache};
 use anyhow::anyhow;
@@ -9,8 +10,8 @@ use httpmock::prelude::*;
 use which::which;
 
 // 默认测试配置
-pub fn _default_test_cfg() -> crate::types::context::RuntimeContext {
-    crate::types::context::RuntimeContext {
+pub fn _default_test_cfg() -> RuntimeContext {
+    RuntimeContext {
         cfg: crate::types::cfg::Cfg {
             local: crate::types::cfg::Local {
                 base: "C:/Users/Public/Music".to_string(),

@@ -7,6 +7,7 @@ use crate::p2s;
 use super::{
     format_path, fs::read_sub_dir, get_bare_apps, get_path_mirror, mirror::read_quick_maps,
 };
+use crate::types::context::RuntimeContext;
 
 pub fn split_parent(raw: &str, located: &str) -> (PathBuf, String) {
     // 解析为绝对路径
@@ -60,7 +61,7 @@ pub fn parse_relative_path_with_located(relative: &str, located: &str) -> PathBu
 
 /// name 大小写不敏感
 fn find_scope_with_name_locally(
-    ctx: &crate::types::context::RuntimeContext,
+    ctx: &RuntimeContext,
     name: &str,
     scope: Option<&str>,
 ) -> Result<(String, String)> {
@@ -87,7 +88,7 @@ fn find_scope_with_name_locally(
 }
 
 fn find_scope_with_name_online(
-    ctx: &crate::types::context::RuntimeContext,
+    ctx: &RuntimeContext,
     name: &str,
     scope: Option<&str>,
 ) -> Result<(String, String)> {
@@ -121,7 +122,7 @@ fn find_scope_with_name_online(
 }
 
 pub fn find_scope_with_name(
-    ctx: &crate::types::context::RuntimeContext,
+    ctx: &RuntimeContext,
     name: &str,
     scope: Option<&str>,
 ) -> Result<(String, String)> {

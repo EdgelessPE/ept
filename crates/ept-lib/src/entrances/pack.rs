@@ -3,6 +3,7 @@ use crate::entrances::verify::verify;
 use crate::parsers::parse_author;
 use crate::signature::sign;
 use crate::types::constants::EXT_NEP;
+use crate::types::context::RuntimeContext;
 use crate::types::{
     constants::EXT_TAR_ZST,
     signature::{Signature, SignatureNode},
@@ -14,7 +15,7 @@ use std::fs::{remove_dir_all, write};
 use std::path::Path;
 
 pub fn pack(
-    ctx: &crate::types::context::RuntimeContext,
+    ctx: &RuntimeContext,
     source_dir: &str,
     into_file: Option<String>,
     need_sign: bool,
