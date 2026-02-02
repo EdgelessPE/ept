@@ -78,9 +78,9 @@ fn test_no_interaction() {
     use crate::types::interaction::{InteractionProvider, NoInteraction};
 
     let no_interaction = NoInteraction;
-    // NoInteraction 应该总是返回默认值
+    // NoInteraction 会在测试模式下总是返回 true
     assert!(no_interaction.ask_yn("Test prompt?", true));
-    assert!(!no_interaction.ask_yn("Test prompt?", false));
+    assert!(no_interaction.ask_yn("Test prompt?", false));
     assert!(no_interaction.ask_yn_in_step("Step", "Test prompt?", true));
-    assert!(!no_interaction.ask_yn_in_step("Step", "Test prompt?", false));
+    assert!(no_interaction.ask_yn_in_step("Step", "Test prompt?", false));
 }

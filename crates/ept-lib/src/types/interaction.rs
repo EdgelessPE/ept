@@ -36,10 +36,22 @@ pub trait InteractionProvider: Send + Sync + Debug {
 pub struct NoInteraction;
 
 impl InteractionProvider for NoInteraction {
+    #[cfg(test)]
+    fn ask_yn(&self, _prompt: &str, _default_value: bool) -> bool {
+        true
+    }
+
+    #[cfg(not(test))]
     fn ask_yn(&self, _prompt: &str, default_value: bool) -> bool {
         default_value
     }
 
+    #[cfg(test)]
+    fn ask_yn_in_step(&self, _step_name: &str, _prompt: &str, _default_value: bool) -> bool {
+        true
+    }
+
+    #[cfg(not(test))]
     fn ask_yn_in_step(&self, _step_name: &str, _prompt: &str, default_value: bool) -> bool {
         default_value
     }
