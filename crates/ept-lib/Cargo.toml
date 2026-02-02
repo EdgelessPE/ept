@@ -13,7 +13,6 @@ anyhow.workspace = true
 base64 = "0.22.1"
 blake3 = { version = "1.8.2", features = ["rayon"] }
 chrono = "0.4.42"
-clap = { version = "4.5.56", features = ["derive"] }
 colored = "3.0.0"
 console = "0.16.2"
 dirs = "6.0.0"
@@ -30,7 +29,6 @@ path-clean = "1.0.1"
 rand = "0.9.2"
 regex = "1.12.2"
 reqwest = { version = "0.13.1", features = ["blocking", "json", "zstd"] }
-rustyline = "17.0.2"
 semver = "1.0.27"
 serde.workspace = true
 serde_json.workspace = true

@@ -16,10 +16,7 @@ pub mod types;
 pub mod utils;
 
 // Re-export commonly used types
-pub use types::{
-    cfg::Cfg,
-    cli::{Action, ActionConfig, Args},
-};
+pub use types::cfg::Cfg;
 
 // Import entrance functions
 use entrances::{

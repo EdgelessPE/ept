@@ -1,6 +1,5 @@
 pub mod author;
 pub mod cfg;
-pub mod cli;
 pub mod constants;
 pub mod context;
 pub mod extended_semver;

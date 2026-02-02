@@ -1,15 +1,11 @@
+mod actions;
 mod utils;
 
 use anyhow::{anyhow, Result};
 use clap::Parser;
 use ept_lib::{log, p2s};
 use ept_lib::{
-    types::{
-        cfg::Cfg,
-        cli::{Action, ActionConfig, ActionMirror, Args},
-        context::RuntimeContext,
-        matcher::PackageInputEnum,
-    },
+    types::{cfg::Cfg, context::RuntimeContext, matcher::PackageInputEnum},
     utils::{
         fmt_print::{fmt_print_mirror_line, FmtPrint, FmtPrintCaller, PackageSource},
         get_path_apps, launch_clean,
@@ -23,6 +19,7 @@ use std::fs::write;
 use std::process::exit;
 use std::sync::Arc;
 
+use actions::{Action, ActionConfig, ActionMirror, Args};
 use utils::terminal_interaction::TerminalInteraction;
 
 #[cfg(not(tarpaulin_include))]
