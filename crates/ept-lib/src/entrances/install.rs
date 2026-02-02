@@ -14,7 +14,7 @@ use crate::{entrances::update_using_package, utils::parse_inputs::ParseInputResE
 use crate::{
     entrances::{expand_workshop, is_workshop_expandable},
     signature::blake3::compute_hash_blake3_from_string,
-    types::{cfg::Cfg, package::GlobalPackage},
+    types::package::GlobalPackage,
     utils::{
         cache::spawn_cache, download::download_nep, fs::move_or_copy, get_path_cache,
         path::parse_relative_path_with_located,
@@ -24,7 +24,10 @@ use crate::{executor::workflow_executor, parsers::parse_workflow, utils::get_pat
 use crate::{log, log_ok_last, p2s};
 
 // 检查软件是否已通过绝对路径的 main_program 字段全局安装
-fn check_global_installation(cfg: &crate::types::context::RuntimeContext, package: &GlobalPackage) -> Result<bool> {
+fn check_global_installation(
+    cfg: &crate::types::context::RuntimeContext,
+    package: &GlobalPackage,
+) -> Result<bool> {
     if let Some(ref software) = package.software {
         if let Some(ref installed) = software.main_program {
             let p = Path::new(installed);
@@ -62,7 +65,11 @@ fn check_existing_installation(
 }
 
 // 将应用文件从临时目录部署到 apps 目录
-fn deploy_app_files(cfg: &crate::types::context::RuntimeContext, temp_dir: &Path, package: &GlobalPackage) -> Result<String> {
+fn deploy_app_files(
+    cfg: &crate::types::context::RuntimeContext,
+    temp_dir: &Path,
+    package: &GlobalPackage,
+) -> Result<String> {
     let into_dir = get_path_apps(cfg, &package.package.scope, &package.package.name, true)?;
     if into_dir.exists() {
         remove_dir_all(into_dir.clone()).map_err(|_| {
@@ -86,7 +93,11 @@ fn deploy_app_files(cfg: &crate::types::context::RuntimeContext, temp_dir: &Path
 }
 
 // 验证指定的 main_program 是否存在
-fn validate_main_program(cfg: &crate::types::context::RuntimeContext, into_dir: &str, package: &GlobalPackage) -> Result<()> {
+fn validate_main_program(
+    cfg: &crate::types::context::RuntimeContext,
+    into_dir: &str,
+    package: &GlobalPackage,
+) -> Result<()> {
     if let Some(ref software) = package.software {
         if let Some(ref installed) = software.main_program {
             let p = parse_relative_path_with_located(installed, into_dir);
@@ -104,7 +115,11 @@ fn validate_main_program(cfg: &crate::types::context::RuntimeContext, into_dir: 
 }
 
 // 安装完成后的最终验证
-fn finalize_installation(cfg: &crate::types::context::RuntimeContext, into_dir: &str, package: &GlobalPackage) -> Result<()> {
+fn finalize_installation(
+    cfg: &crate::types::context::RuntimeContext,
+    into_dir: &str,
+    package: &GlobalPackage,
+) -> Result<()> {
     installed_validator(into_dir)?;
     validate_main_program(cfg, into_dir, package)?;
 
@@ -195,7 +210,11 @@ pub fn install_using_package(
     ))
 }
 
-pub fn install_using_url(cfg: &crate::types::context::RuntimeContext, url: &str, verify_signature: bool) -> Result<(String, String)> {
+pub fn install_using_url(
+    cfg: &crate::types::context::RuntimeContext,
+    url: &str,
+    verify_signature: bool,
+) -> Result<(String, String)> {
     // 下载文件到临时目录
     let cache_path = get_path_cache(cfg)?;
     let url_hash = compute_hash_blake3_from_string(url)?;

@@ -1,5 +1,4 @@
 use crate::executor::values_replacer;
-use crate::types::cfg::Cfg;
 use crate::types::constants::FILE_PACKAGE;
 use crate::types::context::VerifiableCtx;
 use crate::types::interpretable::Interpretable;
@@ -144,7 +143,7 @@ pub fn parse_package(
     let mixed_fs = get_expanded_mixed_fs(MixedFS::new(mixed_located), workflows_path)?;
     let ctx = VerifiableCtx {
         mixed_fs: &mixed_fs,
-        runtime_ctx:cfg
+        runtime_ctx: cfg,
     };
     pkg.verify_self(&ctx)?;
 

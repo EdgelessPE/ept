@@ -15,10 +15,7 @@ use crate::{
     p2s,
     parsers::{parse_author, parse_workflow},
     signature::blake3::compute_hash_blake3_from_string,
-    types::{
-        author::Author, cfg::Cfg, extended_semver::ExSemVer, info::UpdateInfo,
-        package::GlobalPackage,
-    },
+    types::{author::Author, extended_semver::ExSemVer, info::UpdateInfo, package::GlobalPackage},
     utils::{
         cache::spawn_cache,
         download::download_nep,
@@ -111,7 +108,11 @@ fn run_old_remove_if_needed(
 }
 
 // 逆向执行安装工作流
-fn reverse_setup_workflow(cfg: &crate::types::context::RuntimeContext, located: &Path, local_pkg: GlobalPackage) -> Result<()> {
+fn reverse_setup_workflow(
+    cfg: &crate::types::context::RuntimeContext,
+    located: &Path,
+    local_pkg: GlobalPackage,
+) -> Result<()> {
     let setup_path = located
         .join(DIR_NEP_CONTEXT)
         .join(DIR_WORKFLOWS)
@@ -246,7 +247,11 @@ pub fn update_using_package(
     })
 }
 
-pub fn update_using_url(cfg: &crate::types::context::RuntimeContext, url: &str, verify_signature: bool) -> Result<UpdateInfo> {
+pub fn update_using_url(
+    cfg: &crate::types::context::RuntimeContext,
+    url: &str,
+    verify_signature: bool,
+) -> Result<UpdateInfo> {
     // 下载文件到临时目录
     let cache_path = get_path_cache(cfg)?;
     let url_hash = compute_hash_blake3_from_string(url)?;
@@ -316,7 +321,10 @@ pub fn update_using_parsed(
     Ok(arr)
 }
 
-pub fn update_all(cfg: &crate::types::context::RuntimeContext, verify_signature: bool) -> Result<(i32, i32)> {
+pub fn update_all(
+    cfg: &crate::types::context::RuntimeContext,
+    verify_signature: bool,
+) -> Result<(i32, i32)> {
     // 遍历 list 结果，生成更新列表
     let list_res = list(cfg)?;
     let update_list: Vec<UpdateInfo> = list_res

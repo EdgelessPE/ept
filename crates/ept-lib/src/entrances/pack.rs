@@ -2,7 +2,6 @@ use crate::compression::{compress, pack_tar};
 use crate::entrances::verify::verify;
 use crate::parsers::parse_author;
 use crate::signature::sign;
-use crate::types::cfg::Cfg;
 use crate::types::constants::EXT_NEP;
 use crate::types::{
     constants::EXT_TAR_ZST,

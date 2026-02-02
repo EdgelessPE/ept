@@ -37,7 +37,6 @@ use std::path::{Path, PathBuf};
 
 use self::path::parse_relative_path_with_base;
 use self::random::random_short_string;
-use crate::types::cfg::Cfg;
 
 lazy_static! {
     static ref URL_RE: Regex = Regex::new(r"^https?://").unwrap();
@@ -75,7 +74,12 @@ pub fn get_bare_apps(cfg: &crate::types::context::RuntimeContext) -> Result<Path
 }
 
 /// 不确保目录存在，可选确保 scope 目录存在
-pub fn get_path_apps(cfg: &crate::types::context::RuntimeContext, scope: &str, name: &str, ensure_scope: bool) -> Result<PathBuf> {
+pub fn get_path_apps(
+    cfg: &crate::types::context::RuntimeContext,
+    scope: &str,
+    name: &str,
+    ensure_scope: bool,
+) -> Result<PathBuf> {
     let scope_p = parse_relative_path_with_base("apps", &cfg.cfg.local.base)?.join(scope);
     Ok(if ensure_scope {
         ensure_exist(scope_p)?
@@ -89,7 +93,11 @@ pub fn parse_bare_temp(cfg: &crate::types::context::RuntimeContext) -> Result<Pa
     parse_relative_path_with_base("temp", &cfg.cfg.local.base)
 }
 
-pub fn allocate_path_temp(cfg: &crate::types::context::RuntimeContext, name: &str, sub_dir: bool) -> Result<PathBuf> {
+pub fn allocate_path_temp(
+    cfg: &crate::types::context::RuntimeContext,
+    name: &str,
+    sub_dir: bool,
+) -> Result<PathBuf> {
     let random_name = name.to_owned() + "_" + &random_short_string();
     let p = parse_relative_path_with_base("temp", &cfg.cfg.local.base)?.join(random_name);
     if sub_dir {
@@ -104,7 +112,10 @@ pub fn get_path_bin(cfg: &crate::types::context::RuntimeContext) -> Result<PathB
 }
 
 pub fn get_path_mirror(cfg: &crate::types::context::RuntimeContext) -> Result<PathBuf> {
-    ensure_exist(parse_relative_path_with_base("mirror", &cfg.cfg.local.base)?)
+    ensure_exist(parse_relative_path_with_base(
+        "mirror",
+        &cfg.cfg.local.base,
+    )?)
 }
 
 pub fn get_path_cache(cfg: &crate::types::context::RuntimeContext) -> Result<PathBuf> {
@@ -116,7 +127,10 @@ pub fn get_path_meta(cfg: &crate::types::context::RuntimeContext) -> Result<Path
 }
 
 pub fn get_path_toolchain(cfg: &crate::types::context::RuntimeContext) -> Result<PathBuf> {
-    ensure_exist(parse_relative_path_with_base("toolchain", &cfg.cfg.local.base)?)
+    ensure_exist(parse_relative_path_with_base(
+        "toolchain",
+        &cfg.cfg.local.base,
+    )?)
 }
 
 pub fn get_system_drive() -> Result<String> {

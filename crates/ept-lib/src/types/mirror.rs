@@ -293,7 +293,7 @@ fn test_mirror_pkg_software() {
     let mixed_fs = MixedFS::new("");
     let ctx = VerifiableCtx {
         mixed_fs: &mixed_fs,
-        runtime_ctx: &_default_test_cfg()
+        runtime_ctx: &_default_test_cfg(),
     };
     MirrorPkgSoftware::_demo().verify_self(&ctx).unwrap()
 }

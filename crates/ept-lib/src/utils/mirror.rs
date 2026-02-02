@@ -39,10 +39,12 @@ use super::fs::ensure_dir_exist;
 use super::fs::try_recycle;
 use super::path::find_scope_with_name;
 use super::permissions::filter_permissions;
-use crate::types::cfg::Cfg;
 
 // 读取 meta
-pub fn read_local_mirror_hello(cfg: &crate::types::context::RuntimeContext, name: &str) -> Result<(MirrorHello, PathBuf)> {
+pub fn read_local_mirror_hello(
+    cfg: &crate::types::context::RuntimeContext,
+    name: &str,
+) -> Result<(MirrorHello, PathBuf)> {
     let dir_path = get_path_mirror(cfg)?.join(name);
     let p = dir_path.join(MIRROR_FILE_HELLO);
     if !p.exists() {
@@ -141,7 +143,11 @@ fn register_tokenizer(index: &mut Index) {
 }
 
 // 为包构建索引
-pub fn build_index_for_mirror(cfg: &crate::types::context::RuntimeContext, content: MirrorPkgSoftware, dir: PathBuf) -> Result<()> {
+pub fn build_index_for_mirror(
+    cfg: &crate::types::context::RuntimeContext,
+    content: MirrorPkgSoftware,
+    dir: PathBuf,
+) -> Result<()> {
     let schema_fields = get_schema()?;
     if dir.exists() {
         try_recycle(&dir)?;
@@ -306,7 +312,10 @@ pub fn search_index_for_mirror(
 }
 
 // 读取快查索引
-pub fn read_quick_maps(cfg: &crate::types::context::RuntimeContext, mirror_name: &str) -> Result<QuickMaps> {
+pub fn read_quick_maps(
+    cfg: &crate::types::context::RuntimeContext,
+    mirror_name: &str,
+) -> Result<QuickMaps> {
     let quick_path = get_path_mirror(cfg)?
         .join(mirror_name)
         .join("index")

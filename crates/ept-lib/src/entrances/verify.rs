@@ -1,7 +1,6 @@
 use crate::parsers::{parse_package, parse_workflow};
 use crate::types::constants::DIR_WORKFLOWS;
 use crate::types::{
-    cfg::Cfg,
     constants::{FILE_PACKAGE, WORKFLOW_EXPAND, WORKFLOW_REMOVE, WORKFLOW_SETUP, WORKFLOW_UPDATE},
     context::VerifyStepCtx,
     extended_semver::ExSemVer,
@@ -67,7 +66,10 @@ fn verify_workflow(flow: Vec<WorkflowNode>, ctx: &VerifyStepCtx) -> Result<bool>
     Ok(have_call_installer)
 }
 
-pub fn verify(cfg: &crate::types::context::RuntimeContext, source_dir: &str) -> Result<GlobalPackage> {
+pub fn verify(
+    cfg: &crate::types::context::RuntimeContext,
+    source_dir: &str,
+) -> Result<GlobalPackage> {
     log!("Debug:Starting verification for source directory '{source_dir}'");
     // 打包检查
     log!("Info:Validating source directory...");

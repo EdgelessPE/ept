@@ -8,7 +8,6 @@ use crate::{
     parsers::parse_workflow,
     signature::blake3::compute_hash_blake3_from_string,
     types::{
-        cfg::Cfg,
         constants::{
             DIR_NEP_CONTEXT, DIR_WORKFLOWS, WORKFLOW_EXPAND, WORKFLOW_REMOVE, WORKFLOW_SETUP,
             WORKFLOW_UPDATE,
@@ -104,7 +103,11 @@ fn find_meta_target(
     ))
 }
 
-pub fn meta(cfg: &crate::types::context::RuntimeContext, input: PackageInputEnum, verify_signature: bool) -> Result<MetaResult> {
+pub fn meta(
+    cfg: &crate::types::context::RuntimeContext,
+    input: PackageInputEnum,
+    verify_signature: bool,
+) -> Result<MetaResult> {
     match find_meta_target(cfg, input, verify_signature)? {
         MetaTargetResult::Local(temp_dir_inner_path, workflow_path) => {
             let temp_dir = p2s!(temp_dir_inner_path);

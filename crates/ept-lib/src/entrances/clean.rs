@@ -9,7 +9,6 @@ use crate::{
     log, log_ok_last, p2s,
     parsers::parse_workflow,
     types::{
-        cfg::Cfg,
         constants::{DIR_NEP_CONTEXT, DIR_WORKFLOWS, WORKFLOW_SETUP},
         steps::Step,
         workflow::WorkflowNode,

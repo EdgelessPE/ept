@@ -2,11 +2,15 @@ use anyhow::{anyhow, Result};
 
 use crate::{
     log,
-    types::{cfg::Cfg, mirror::SearchResult},
+    types::mirror::SearchResult,
     utils::{fs::read_sub_dir, get_path_mirror, mirror::search_index_for_mirror},
 };
 
-pub fn search(cfg: &crate::types::context::RuntimeContext, text: &str, is_regex: bool) -> Result<Vec<SearchResult>> {
+pub fn search(
+    cfg: &crate::types::context::RuntimeContext,
+    text: &str,
+    is_regex: bool,
+) -> Result<Vec<SearchResult>> {
     // 扫描出所有的镜像源目录
     let root = get_path_mirror(cfg)?;
     let mirror_dirs = read_sub_dir(&root)?;

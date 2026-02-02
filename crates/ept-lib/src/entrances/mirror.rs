@@ -11,7 +11,6 @@ use url::Url;
 use crate::{
     log, log_ok_last,
     types::{
-        cfg::Cfg,
         context::VerifiableCtx,
         mirror::{MirrorEptToolchain, MirrorHello, MirrorInfo, MirrorPkgSoftware, ServiceKeys},
         mixed_fs::MixedFS,
@@ -26,7 +25,11 @@ use crate::{
 };
 
 // 返回远程镜像源申明的名称
-pub fn mirror_add(cfg: &crate::types::context::RuntimeContext, url: &str, should_match_name: Option<String>) -> Result<String> {
+pub fn mirror_add(
+    cfg: &crate::types::context::RuntimeContext,
+    url: &str,
+    should_match_name: Option<String>,
+) -> Result<String> {
     // 尝试解析为 URL 对象
     let parsed_url =
         Url::parse(url).map_err(|e| anyhow!("Error:Failed to parse '{url}' as valid URL : {e}"))?;
@@ -59,7 +62,7 @@ pub fn mirror_add(cfg: &crate::types::context::RuntimeContext, url: &str, should
     let mixed_fs = MixedFS::new("");
     let ctx = VerifiableCtx {
         mixed_fs: &mixed_fs,
-        runtime_ctx: &cfg,
+        runtime_ctx: cfg,
     };
     res.verify_self(&ctx)?;
 

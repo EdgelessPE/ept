@@ -2,7 +2,7 @@ use anyhow::{anyhow, Result};
 use path_clean::PathClean;
 use std::path::{Path, PathBuf};
 
-use crate::{p2s, types::cfg::Cfg};
+use crate::p2s;
 
 use super::{
     format_path, fs::read_sub_dir, get_bare_apps, get_path_mirror, mirror::read_quick_maps,
@@ -139,9 +139,18 @@ fn test_parse_relative_path() {
     let p2 = String::from(r"D:\Desktop\Projects\") + "./code.exe";
     let p3 = p2s!(std::env::current_dir().unwrap().join("./code.exe"));
 
-    println!("{:?}", parse_relative_path_with_base(&p1, &cfg.cfg.local.base));
-    println!("{:?}", parse_relative_path_with_base(&p2, &cfg.cfg.local.base));
-    println!("{:?}", parse_relative_path_with_base(&p3, &cfg.cfg.local.base));
+    println!(
+        "{:?}",
+        parse_relative_path_with_base(&p1, &cfg.cfg.local.base)
+    );
+    println!(
+        "{:?}",
+        parse_relative_path_with_base(&p2, &cfg.cfg.local.base)
+    );
+    println!(
+        "{:?}",
+        parse_relative_path_with_base(&p3, &cfg.cfg.local.base)
+    );
 }
 
 #[test]

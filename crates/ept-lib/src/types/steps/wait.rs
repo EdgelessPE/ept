@@ -5,7 +5,6 @@ use crate::types::interpretable::Interpretable;
 use crate::types::steps::Permission;
 use crate::types::{context::WorkflowContext, mixed_fs::MixedFS, permissions::Generalizable};
 use crate::utils::conditions::{get_permissions_from_conditions, verify_conditions};
-use crate::Cfg;
 use anyhow::{anyhow, Ok, Result};
 use serde::{Deserialize, Serialize};
 use std::time::Instant;
@@ -43,7 +42,7 @@ impl TStep for StepWait {
                     sleep(step_d);
                     if start_instant.elapsed() >= d
                         || condition_eval(
-                            &cx.runtime_ctx,
+                            cx.runtime_ctx,
                             &cond,
                             cx.exit_code,
                             &cx.located,
@@ -55,7 +54,7 @@ impl TStep for StepWait {
                 }
                 // 最终检查一次条件并配置 ExitCode
                 return if condition_eval(
-                    &cx.runtime_ctx,
+                    cx.runtime_ctx,
                     &cond,
                     cx.exit_code,
                     &cx.located,
@@ -90,7 +89,7 @@ impl TStep for StepWait {
 
         // 校验跳出条件
         if let Some(cond) = &self.break_if {
-            verify_conditions(&ctx.runtime_ctx, vec![cond.to_owned()], located, "1.0.0.0")
+            verify_conditions(ctx.runtime_ctx, vec![cond.to_owned()], located, "1.0.0.0")
                 .map_err(|e| anyhow!("Error(Wait):Failed to valid field 'break_if' : {e}"))?;
         }
 
@@ -108,7 +107,10 @@ impl Interpretable for StepWait {
 }
 
 impl Generalizable for StepWait {
-    fn generalize_permissions(&self, cfg: &crate::types::context::RuntimeContext) -> Result<Vec<Permission>> {
+    fn generalize_permissions(
+        &self,
+        cfg: &crate::types::context::RuntimeContext,
+    ) -> Result<Vec<Permission>> {
         let mut permissions = Vec::new();
 
         if let Some(cond) = &self.break_if {

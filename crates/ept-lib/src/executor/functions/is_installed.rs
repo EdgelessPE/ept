@@ -1,9 +1,6 @@
 use crate::{
     entrances::info_local,
-    types::{
-        cfg::Cfg,
-        permissions::{Permission, PermissionKey, PermissionLevel},
-    },
+    types::permissions::{Permission, PermissionKey, PermissionLevel},
     utils::conditions::ensure_arg,
 };
 use anyhow::{anyhow, Result};

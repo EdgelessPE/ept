@@ -1,7 +1,6 @@
 use std::{
     fs::{create_dir_all, write},
     path::{Path, PathBuf},
-    sync::Arc,
 };
 
 use anyhow::{anyhow, Result};
@@ -11,9 +10,9 @@ use humantime::parse_duration;
 use serde::{Deserialize, Deserializer, Serialize};
 use toml::{to_string_pretty, Value};
 
-use crate::{log, p2s, types::context::VerifiableCtx, types::verifiable::Verifiable};
-use crate::types::context::RuntimeContext;
 use super::mixed_fs::MixedFS;
+use crate::types::context::RuntimeContext;
+use crate::{log, p2s, types::context::VerifiableCtx, types::verifiable::Verifiable};
 
 lazy_static! {
     static ref CUR_DIR: PathBuf = Path::new("./").to_path_buf();
@@ -99,7 +98,6 @@ pub struct Mode {
     pub debug: bool,
     pub offline: bool,
 }
-
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct Cfg {

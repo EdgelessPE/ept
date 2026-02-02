@@ -1,4 +1,3 @@
-use super::cfg::Cfg;
 use super::context::{VerifiableCtx, VerifyStepCtx};
 use super::{permissions::Generalizable, steps::Step, verifiable::Verifiable};
 use crate::types::permissions::Permission;
@@ -40,7 +39,10 @@ impl WorkflowHeader {
 }
 
 impl Generalizable for WorkflowHeader {
-    fn generalize_permissions(&self, cfg: &crate::types::context::RuntimeContext) -> Result<Vec<Permission>> {
+    fn generalize_permissions(
+        &self,
+        cfg: &crate::types::context::RuntimeContext,
+    ) -> Result<Vec<Permission>> {
         // 获取条件语句所需的权限
         get_permissions_from_conditions(cfg, self.get_conditions())
     }
@@ -129,7 +131,10 @@ pub struct WorkflowNode {
 }
 
 impl Generalizable for WorkflowNode {
-    fn generalize_permissions(&self, cfg: &crate::types::context::RuntimeContext) -> Result<Vec<Permission>> {
+    fn generalize_permissions(
+        &self,
+        cfg: &crate::types::context::RuntimeContext,
+    ) -> Result<Vec<Permission>> {
         let mut perm = Vec::new();
         perm.append(&mut self.header.generalize_permissions(cfg)?);
         perm.append(&mut self.body.generalize_permissions(cfg)?);
@@ -141,8 +146,8 @@ impl Generalizable for WorkflowNode {
 impl WorkflowNode {
     pub fn verify_step(&self, ctx: &VerifyStepCtx) -> Result<()> {
         let verifiable_ctx = VerifiableCtx {
-            mixed_fs: &ctx.mixed_fs,
-            runtime_ctx: &ctx.runtime_ctx,
+            mixed_fs: ctx.mixed_fs,
+            runtime_ctx: ctx.runtime_ctx,
         };
         self.header.verify_self(&verifiable_ctx)?;
         self.body.verify_step(ctx)

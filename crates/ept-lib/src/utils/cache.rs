@@ -7,7 +7,6 @@ use std::{
 
 use crate::{
     p2s,
-    types::cfg::Cfg,
     types::context::CacheCtx,
     utils::{fs::try_recycle, get_path_cache},
 };

@@ -8,7 +8,6 @@ use crate::{
     parsers::parse_package,
     signature::blake3::compute_hash_blake3_from_string,
     types::{
-        cfg::Cfg,
         constants::FILE_PACKAGE,
         info::{Info, InfoDiff},
         matcher::PackageInputEnum,
@@ -57,7 +56,11 @@ fn consume_info_diff(
     })
 }
 
-pub fn info_local(cfg: &crate::types::context::RuntimeContext, scope: &str, package_name: &str) -> Result<(GlobalPackage, InfoDiff)> {
+pub fn info_local(
+    cfg: &crate::types::context::RuntimeContext,
+    scope: &str,
+    package_name: &str,
+) -> Result<(GlobalPackage, InfoDiff)> {
     log!("Debug:Reading local info for '{scope}/{package_name}'");
     let local_path = get_path_apps(cfg, scope, package_name, false)?;
     if !local_path.exists() {
@@ -161,7 +164,11 @@ fn info_from_matcher(
     ))
 }
 
-fn info_from_local_path(cfg: &crate::types::context::RuntimeContext, path: String, verify: bool) -> Result<InfoResult> {
+fn info_from_local_path(
+    cfg: &crate::types::context::RuntimeContext,
+    path: String,
+    verify: bool,
+) -> Result<InfoResult> {
     let meta_res = meta(cfg, PackageInputEnum::LocalPath(path), verify)?;
     let package = &meta_res.package.package;
     Ok((
@@ -175,7 +182,11 @@ fn info_from_local_path(cfg: &crate::types::context::RuntimeContext, path: Strin
     ))
 }
 
-fn info_from_url(cfg: &crate::types::context::RuntimeContext, url: String, verify: bool) -> Result<InfoResult> {
+fn info_from_url(
+    cfg: &crate::types::context::RuntimeContext,
+    url: String,
+    verify: bool,
+) -> Result<InfoResult> {
     log!("Debug:Fetching info from URL '{url}'");
     let cache_path = get_path_cache(cfg)?;
     let url_hash = compute_hash_blake3_from_string(&url)?;
@@ -207,7 +218,11 @@ fn info_from_url(cfg: &crate::types::context::RuntimeContext, url: String, verif
 }
 
 // 使用本地和在线数据丰富 info 信息
-fn enrich_info(cfg: &crate::types::context::RuntimeContext, mut info: Info, mirror: Option<String>) -> Result<Info> {
+fn enrich_info(
+    cfg: &crate::types::context::RuntimeContext,
+    mut info: Info,
+    mirror: Option<String>,
+) -> Result<Info> {
     log!(
         "Debug:Enriching info for '{scope}/{name}'",
         scope = &info.scope,

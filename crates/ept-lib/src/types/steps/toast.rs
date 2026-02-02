@@ -8,7 +8,6 @@ use crate::types::{
     mixed_fs::MixedFS,
     permissions::{Generalizable, PermissionLevel},
 };
-use crate::Cfg;
 use anyhow::{anyhow, Ok, Result};
 use serde::{Deserialize, Serialize};
 use winrt_notification::{Duration, Sound, Toast};
@@ -71,7 +70,10 @@ impl Interpretable for StepToast {
 }
 
 impl Generalizable for StepToast {
-    fn generalize_permissions(&self, _cfg: &crate::types::context::RuntimeContext) -> Result<Vec<Permission>> {
+    fn generalize_permissions(
+        &self,
+        _cfg: &crate::types::context::RuntimeContext,
+    ) -> Result<Vec<Permission>> {
         Ok(vec![Permission {
             key: PermissionKey::notify_toast,
             level: PermissionLevel::Normal,

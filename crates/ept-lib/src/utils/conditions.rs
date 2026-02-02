@@ -8,7 +8,7 @@ use crate::{
         condition_eval, get_eval_context, get_eval_function_names, get_eval_function_permission,
         verify_eval_function_arg,
     },
-    types::{cfg::Cfg, permissions::Permission},
+    types::permissions::Permission,
 };
 
 lazy_static! {
@@ -38,7 +38,7 @@ fn capture_function_info(
 
     for cond in conditions {
         // 初始化上下文
-        let mut context = get_eval_context(cfg,0, "", "0.0.0.0");
+        let mut context = get_eval_context(cfg, 0, "", "0.0.0.0");
 
         // 迭代函数信息，创建收集闭包
         for name in info_arr.clone() {

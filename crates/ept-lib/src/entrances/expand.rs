@@ -2,10 +2,7 @@ use crate::{
     executor::workflow_executor,
     log, log_ok_last, p2s,
     parsers::{parse_package, parse_workflow},
-    types::{
-        cfg::Cfg,
-        constants::{DIR_WORKFLOWS, FILE_PACKAGE, WORKFLOW_EXPAND},
-    },
+    types::constants::{DIR_WORKFLOWS, FILE_PACKAGE, WORKFLOW_EXPAND},
     utils::fs::try_recycle,
 };
 use anyhow::{anyhow, Result};
@@ -18,7 +15,10 @@ pub fn is_workshop_expandable(workshop_path: &str) -> bool {
 }
 
 // 给定一个工作目录，对该目录执行展开
-pub fn expand_workshop(cfg: &crate::types::context::RuntimeContext, workshop_path: &str) -> Result<()> {
+pub fn expand_workshop(
+    cfg: &crate::types::context::RuntimeContext,
+    workshop_path: &str,
+) -> Result<()> {
     log!("Info:Expanding nep package...");
     let base = Path::new(workshop_path);
     // 检查展开工作流是否存在

@@ -1,4 +1,3 @@
-use crate::types::cfg::Cfg;
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use strum_macros::{EnumString, IntoStaticStr};
@@ -79,5 +78,8 @@ pub struct Permission {
 }
 
 pub trait Generalizable {
-    fn generalize_permissions(&self, cfg: &crate::types::context::RuntimeContext) -> Result<Vec<Permission>>;
+    fn generalize_permissions(
+        &self,
+        cfg: &crate::types::context::RuntimeContext,
+    ) -> Result<Vec<Permission>>;
 }

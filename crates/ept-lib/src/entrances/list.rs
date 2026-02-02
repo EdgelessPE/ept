@@ -3,7 +3,6 @@ use anyhow::Result;
 use crate::{
     log,
     types::{
-        cfg::Cfg,
         info::Info,
         matcher::{PackageInputEnum, PackageMatcher},
     },

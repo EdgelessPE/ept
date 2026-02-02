@@ -18,7 +18,6 @@ use crate::{
     parsers::{fast_parse_signature, parse_author, parse_package, parse_signature},
     signature::{fast_verify, verify},
     types::{
-        cfg::Cfg,
         constants::{EXT_TAR_ZST, FILE_PACKAGE},
         package::GlobalPackage,
     },
@@ -27,7 +26,10 @@ use crate::{
 use crate::{log, log_ok_last};
 
 /// 根据源文件路径创建临时目录
-fn get_temp_dir_path(cfg: &crate::types::context::RuntimeContext, source_file: &str) -> Result<PathBuf> {
+fn get_temp_dir_path(
+    cfg: &crate::types::context::RuntimeContext,
+    source_file: &str,
+) -> Result<PathBuf> {
     let file_stem = p2s!(Path::new(source_file).file_stem().unwrap());
     let temp_dir_path = allocate_path_temp(cfg, &file_stem, true)?;
 

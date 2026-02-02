@@ -6,7 +6,7 @@ use evalexpr::*;
 
 use crate::{
     log,
-    types::{cfg::Cfg, context::WorkflowContext, package::GlobalPackage, workflow::WorkflowNode},
+    types::{context::WorkflowContext, package::GlobalPackage, workflow::WorkflowNode},
     utils::{arch::is_current_arch_match, get_system_drive},
 };
 
@@ -74,12 +74,12 @@ pub fn workflow_executor(
 
     // 准备上下文
     let package_version = pkg.package.version.clone();
-    let mut cx = WorkflowContext{
+    let mut cx = WorkflowContext {
         pkg,
-        located:located.clone(),
+        located: located.clone(),
         async_execution_handlers: Vec::new(),
         exit_code: 0,
-        runtime_ctx:cfg,
+        runtime_ctx: cfg,
     };
 
     // 遍历流节点
@@ -138,12 +138,12 @@ pub fn workflow_reverse_executor(
     pkg: GlobalPackage,
 ) -> Result<()> {
     let package_version = pkg.package.version.clone();
-    let mut cx = WorkflowContext{
+    let mut cx = WorkflowContext {
         pkg,
-        located:located.clone(),
+        located: located.clone(),
         async_execution_handlers: Vec::new(),
         exit_code: 0,
-        runtime_ctx:cfg,
+        runtime_ctx: cfg,
     };
 
     // 遍历流节点

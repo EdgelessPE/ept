@@ -1,4 +1,3 @@
-use crate::Cfg;
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
@@ -60,7 +59,10 @@ impl Interpretable for StepLog {
 }
 
 impl Generalizable for StepLog {
-    fn generalize_permissions(&self, _cfg: &crate::types::context::RuntimeContext) -> Result<Vec<Permission>> {
+    fn generalize_permissions(
+        &self,
+        _cfg: &crate::types::context::RuntimeContext,
+    ) -> Result<Vec<Permission>> {
         Ok(vec![])
     }
 }

@@ -1,7 +1,6 @@
 use super::{copy::parse_target_for_copy, TStep};
 use crate::types::interpretable::Interpretable;
 use crate::types::permissions::PermissionKey;
-use crate::Cfg;
 use crate::{
     executor::{judge_perm_level, values_validator_path},
     log, p2s,
@@ -115,7 +114,10 @@ impl Interpretable for StepMove {
 }
 
 impl Generalizable for StepMove {
-    fn generalize_permissions(&self, _cfg: &crate::types::context::RuntimeContext) -> Result<Vec<Permission>> {
+    fn generalize_permissions(
+        &self,
+        _cfg: &crate::types::context::RuntimeContext,
+    ) -> Result<Vec<Permission>> {
         Ok(vec![
             Permission {
                 key: PermissionKey::fs_write,

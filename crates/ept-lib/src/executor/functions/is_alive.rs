@@ -1,8 +1,5 @@
 use crate::{
-    types::{
-        cfg::Cfg,
-        permissions::{Permission, PermissionKey, PermissionLevel},
-    },
+    types::permissions::{Permission, PermissionKey, PermissionLevel},
     utils::{conditions::ensure_arg, process::is_alive_with_name},
 };
 use anyhow::{anyhow, Result};

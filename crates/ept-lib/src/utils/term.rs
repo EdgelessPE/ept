@@ -1,4 +1,3 @@
-use crate::types::cfg::Cfg;
 use crate::utils::fmt_print::{fmt_log, fmt_log_in_step};
 use crate::utils::is_confirm_mode;
 use anyhow::anyhow;
@@ -15,7 +14,11 @@ fn get_question_head(default_value: bool) -> ColoredString {
     }
 }
 
-fn ask_yn_impl(cfg: &crate::types::context::RuntimeContext, prompt: String, default_value: bool) -> bool {
+fn ask_yn_impl(
+    cfg: &crate::types::context::RuntimeContext,
+    prompt: String,
+    default_value: bool,
+) -> bool {
     if is_confirm_mode(cfg) {
         log!("{prompt} (confirmed)");
         true
@@ -32,7 +35,11 @@ fn ask_yn_impl(cfg: &crate::types::context::RuntimeContext, prompt: String, defa
     }
 }
 
-pub fn ask_yn(cfg: &crate::types::context::RuntimeContext, prompt: String, default_value: bool) -> bool {
+pub fn ask_yn(
+    cfg: &crate::types::context::RuntimeContext,
+    prompt: String,
+    default_value: bool,
+) -> bool {
     debug_assert!(prompt.as_bytes().first().unwrap().is_ascii_uppercase() && prompt.ends_with('?'));
     ask_yn_impl(
         cfg,
@@ -41,7 +48,12 @@ pub fn ask_yn(cfg: &crate::types::context::RuntimeContext, prompt: String, defau
     )
 }
 
-pub fn ask_yn_in_step(cfg: &crate::types::context::RuntimeContext, step_name: &str, prompt: String, default_value: bool) -> bool {
+pub fn ask_yn_in_step(
+    cfg: &crate::types::context::RuntimeContext,
+    step_name: &str,
+    prompt: String,
+    default_value: bool,
+) -> bool {
     debug_assert!(prompt.as_bytes().first().unwrap().is_ascii_uppercase() && prompt.ends_with('?'));
     ask_yn_impl(
         cfg,

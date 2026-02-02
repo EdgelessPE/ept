@@ -1,4 +1,3 @@
-use crate::Cfg;
 use crate::{
     executor::{judge_perm_level, values_validator_path},
     log,
@@ -110,7 +109,10 @@ impl Interpretable for StepNew {
 }
 
 impl Generalizable for StepNew {
-    fn generalize_permissions(&self, _cfg: &crate::types::context::RuntimeContext) -> Result<Vec<Permission>> {
+    fn generalize_permissions(
+        &self,
+        _cfg: &crate::types::context::RuntimeContext,
+    ) -> Result<Vec<Permission>> {
         Ok(vec![Permission {
             key: PermissionKey::fs_write,
             level: judge_perm_level(&self.at)?,

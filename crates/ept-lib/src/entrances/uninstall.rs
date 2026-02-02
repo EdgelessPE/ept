@@ -12,7 +12,6 @@ use crate::{
     log, log_ok_last, p2s,
     parsers::{parse_package, parse_workflow},
     types::{
-        cfg::Cfg,
         constants::{
             DIR_NEP_CONTEXT, DIR_WORKFLOWS, FILE_PACKAGE, WORKFLOW_REMOVE, WORKFLOW_SETUP,
         },
@@ -89,12 +88,12 @@ pub fn uninstall(
         let e = get_reg_entry(&entry_id);
         if let Some(uninstall_string) = e.uninstall_string {
             log!("Info:Running uninstaller due to registry entry...");
-            let mut cx = WorkflowContext{
-                pkg:global.clone(),
+            let mut cx = WorkflowContext {
+                pkg: global.clone(),
                 located: app_str.clone(),
                 async_execution_handlers: Vec::new(),
                 exit_code: 0,
-                runtime_ctx:cfg
+                runtime_ctx: cfg,
             };
             StepExecute {
                 command: uninstall_string,

@@ -7,7 +7,6 @@ use std::io::{Read, Write};
 use std::path::PathBuf;
 
 use crate::p2s;
-use crate::types::cfg::Cfg;
 use crate::types::context::CacheCtx;
 use crate::utils::cache::restore_cache;
 

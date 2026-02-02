@@ -1,9 +1,6 @@
 use crate::{
     executor::{judge_perm_level, values_validator_path},
-    types::{
-        cfg::Cfg,
-        permissions::{Permission, PermissionKey},
-    },
+    types::permissions::{Permission, PermissionKey},
     utils::{conditions::ensure_arg, path::parse_relative_path_with_located},
 };
 use anyhow::Result;

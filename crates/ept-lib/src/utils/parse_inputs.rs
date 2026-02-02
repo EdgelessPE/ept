@@ -7,7 +7,6 @@ use serde::{Deserialize, Serialize};
 use crate::{
     entrances::{auto_mirror_update_all, info, info_local, info_online},
     types::{
-        cfg::Cfg,
         extended_semver::ExSemVer,
         info::{Info, InfoDiff},
         matcher::{PackageInputEnum, PackageMatcher},
@@ -176,7 +175,10 @@ pub fn parse_update_inputs(
     Ok(res)
 }
 
-pub fn parse_uninstall_inputs(cfg: &crate::types::context::RuntimeContext, packages: Vec<String>) -> Result<Vec<Info>> {
+pub fn parse_uninstall_inputs(
+    cfg: &crate::types::context::RuntimeContext,
+    packages: Vec<String>,
+) -> Result<Vec<Info>> {
     let mut arr = Vec::new();
     for p in packages {
         // 简单校验是否可以卸载

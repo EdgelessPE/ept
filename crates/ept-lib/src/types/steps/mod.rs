@@ -1,6 +1,5 @@
 use crate::types::context::{VerifyStepCtx, WorkflowContext};
 use crate::types::permissions::{Generalizable, Permission};
-use crate::Cfg;
 use anyhow::{anyhow, Result};
 use serde::de;
 use serde::{Deserialize, Serialize};
