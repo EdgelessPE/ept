@@ -1,13 +1,7 @@
 use anyhow::{anyhow, Result};
 use clap::Parser;
+use ept_lib::{log, p2s};
 use ept_lib::{
-    entrances::{
-        auto_mirror_update_all, clean,
-        config::{config_get, config_init, config_list, config_set, config_which},
-        info, install_using_parsed, list, meta, mirror_add, mirror_list, mirror_remove,
-        mirror_update, mirror_update_all, pack, search, uninstall, update_all, update_using_parsed,
-        upgrade,
-    },
     types::{
         cfg::Cfg,
         cli::{Action, ActionConfig, ActionMirror, Args},
@@ -18,17 +12,17 @@ use ept_lib::{
         fmt_print::{fmt_print_mirror_line, FmtPrint, FmtPrintCaller, PackageSource},
         get_path_apps, launch_clean,
         parse_inputs::{parse_install_inputs, parse_uninstall_inputs, parse_update_inputs},
-        term::ask_yn,
-        term::write_windows_terminal_status,
+        term::{ask_yn, write_windows_terminal_status},
         upgrade::{check_has_upgrade, print_upgradable, print_upgradable_cross_wid_gap},
     },
+    EptInstance,
 };
-use ept_lib::{log, p2s};
 use std::fs::write;
 use std::process::exit;
 
 #[cfg(not(tarpaulin_include))]
-fn router(action: Action, cfg: &Cfg) -> Result<String> {
+fn router(action: Action, instance: &mut EptInstance) -> Result<String> {
+    let cfg = instance.cfg();
     let verify_signature = !cfg.mode.offline;
 
     // 匹配入口
@@ -80,19 +74,16 @@ fn router(action: Action, cfg: &Cfg) -> Result<String> {
                 return Err(anyhow!("Error:Operation canceled by user"));
             }
             // 执行
-            install_using_parsed(
-                cfg,
-                parsed.into_iter().map(|p| p.0).collect(),
-                verify_signature,
-            )
-            .map(|arr| {
-                let length = arr.len();
-                if length == 1 {
-                    String::new()
-                } else {
-                    format!("Success:{length} packages installed successfully")
-                }
-            })
+            instance
+                .install_using_parsed(parsed.into_iter().map(|p| p.0).collect(), verify_signature)
+                .map(|arr| {
+                    let length = arr.len();
+                    if length == 1 {
+                        String::new()
+                    } else {
+                        format!("Success:{length} packages installed successfully")
+                    }
+                })
         }
         Action::Update {
             package_matchers: packages,
@@ -137,31 +128,33 @@ fn router(action: Action, cfg: &Cfg) -> Result<String> {
                     return Err(anyhow!("Error:Operation canceled by user"));
                 }
                 // 执行
-                update_using_parsed(
-                    cfg,
-                    parsed.into_iter().map(|p| p.0).collect(),
-                    verify_signature,
-                )
-                .map(|arr| {
-                    let length = arr.len();
-                    if length == 1 {
-                        String::new()
-                    } else {
-                        format!("Success:{length} packages updated successfully")
-                    }
-                })
-            } else {
-                update_all(&mut cfg.clone(), verify_signature).map(|(success_count, failure_count)| {
-                    if failure_count == 0 {
-                        if success_count == 0 {
-                            "Info:No updatable packages".to_string()
+                instance
+                    .update_using_parsed(
+                        parsed.into_iter().map(|p| p.0).collect(),
+                        verify_signature,
+                    )
+                    .map(|arr| {
+                        let length = arr.len();
+                        if length == 1 {
+                            String::new()
                         } else {
-                            format!("Success:Updated {success_count} packages")
+                            format!("Success:{length} packages updated successfully")
                         }
-                    } else {
-                        format!("Error:{failure_count} packages failed to be updated and {success_count} packages updated successfully")
-                    }
-                })
+                    })
+            } else {
+                instance
+                    .update_all(verify_signature)
+                    .map(|(success_count, failure_count)| {
+                        if failure_count == 0 {
+                            if success_count == 0 {
+                                "Info:No updatable packages".to_string()
+                            } else {
+                                format!("Success:Updated {success_count} packages")
+                            }
+                        } else {
+                            format!("Error:{failure_count} packages failed to be updated and {success_count} packages updated successfully")
+                        }
+                    })
             }
         }
         Action::Uninstall { package_matchers } => {
@@ -189,7 +182,7 @@ fn router(action: Action, cfg: &Cfg) -> Result<String> {
             for info in parsed {
                 let scope = info.scope;
                 let name = info.name;
-                let tip = uninstall(cfg, Some(scope.clone()), &name).map(|(scope, name)| {
+                let tip = instance.uninstall(Some(scope.clone()), &name).map(|(scope, name)| {
                     format!("Success:Package '{scope}/{name}' uninstalled successfully")
                 }).map_err(|e|{
                     // 卸载失败时提示用户如何手动解决坏包
@@ -205,8 +198,8 @@ fn router(action: Action, cfg: &Cfg) -> Result<String> {
             })
         }
         Action::Search { keyword, regex } => {
-            auto_mirror_update_all(cfg)?;
-            search(cfg, &keyword, regex).map(|results| {
+            instance.auto_mirror_update_all()?;
+            instance.search(&keyword, regex).map(|results| {
                 let len = results.len();
                 let res: String = results
                     .into_iter()
@@ -220,9 +213,9 @@ fn router(action: Action, cfg: &Cfg) -> Result<String> {
             package_matcher,
             save_at,
         } => {
-            auto_mirror_update_all(cfg)?;
+            instance.auto_mirror_update_all()?;
             let parse_res = PackageInputEnum::parse(package_matcher, true, true)?;
-            let (info, _) = info(cfg, parse_res, verify_signature)?;
+            let (info, _) = instance.info(parse_res, verify_signature)?;
             if let Some(into) = save_at {
                 let text = toml::to_string_pretty(&info)?;
                 write(&into, text)
@@ -233,7 +226,7 @@ fn router(action: Action, cfg: &Cfg) -> Result<String> {
                 Ok(text)
             }
         }
-        Action::List => list(cfg).map(|list| {
+        Action::List => instance.list().map(|list| {
             if list.is_empty() {
                 return "Info:No installed package".to_string();
             }
@@ -247,7 +240,8 @@ fn router(action: Action, cfg: &Cfg) -> Result<String> {
         Action::Pack {
             source_dir,
             into_file,
-        } => pack(cfg, &source_dir, into_file, verify_signature)
+        } => instance
+            .pack(&source_dir, into_file, verify_signature)
             .map(|location| format!("Success:Package stored at '{location}'")),
         Action::Meta {
             package_matcher: package,
@@ -255,7 +249,7 @@ fn router(action: Action, cfg: &Cfg) -> Result<String> {
         } => {
             // 调用 meta
             let package_input_enum = PackageInputEnum::parse(package, true, true)?;
-            let res = meta(cfg, package_input_enum, verify_signature)?;
+            let res = instance.meta(package_input_enum, verify_signature)?;
 
             // 移除 temp_dir
             let mut res_toml = toml::Value::try_from(res)?;
@@ -273,7 +267,7 @@ fn router(action: Action, cfg: &Cfg) -> Result<String> {
             }
         }
 
-        Action::Clean => clean(cfg).map(|count| {
+        Action::Clean => instance.clean().map(|count| {
             if count == 0 {
                 "Info:No trash found".to_string()
             } else {
@@ -282,24 +276,30 @@ fn router(action: Action, cfg: &Cfg) -> Result<String> {
         }),
 
         Action::Config { operation } => match operation {
-            ActionConfig::Set { table, key, value } => config_set(cfg, &table, &key, &value)
+            ActionConfig::Set { table, key, value } => instance
+                .config_set(&table, &key, &value)
                 .map(|_| format!("Success:Config value of '{key}' set to '{value}'")),
-            ActionConfig::Get { table, key } => config_get(cfg, &table, &key),
-            ActionConfig::List => config_list(cfg),
-            ActionConfig::Init => config_init(cfg)
-                .map(|location| format!("Success:Initial config stored at '{location}'")),
-            ActionConfig::Which => config_which(),
+            ActionConfig::Get { table, key } => instance.config_get(&table, &key),
+            ActionConfig::List => instance.config_list(),
+            ActionConfig::Init => instance.config_init().map(|location| {
+                format!(
+                    "Success:Initial config stored at '{}'",
+                    location
+                )
+            }),
+            ActionConfig::Which => instance.config_which(),
         },
         Action::Mirror { operation } => match operation {
-            ActionMirror::Add { url } => {
-                mirror_add(cfg, &url, None).map(|name| format!("Success:Mirror '{name}' added"))
-            }
+            ActionMirror::Add { url } => instance
+                .mirror_add(&url, None)
+                .map(|name| format!("Success:Mirror '{name}' added")),
             ActionMirror::Update { name } => {
                 if let Some(n) = name {
-                    mirror_update(cfg, &n)
+                    instance
+                        .mirror_update(&n)
                         .map(|name| format!("Success:Index of mirror '{name}' updated"))
                 } else {
-                    mirror_update_all(cfg).map(|names| {
+                    instance.mirror_update_all().map(|names| {
                         if names.is_empty() {
                             "Warning:No mirror has been added".to_string()
                         } else {
@@ -312,7 +312,7 @@ fn router(action: Action, cfg: &Cfg) -> Result<String> {
                 }
             }
             ActionMirror::List => {
-                let res = mirror_list(cfg)?;
+                let res = instance.mirror_list()?;
                 if !res.is_empty() {
                     let str: String = res
                         .into_iter()
@@ -324,11 +324,11 @@ fn router(action: Action, cfg: &Cfg) -> Result<String> {
                     Ok("Info:No mirror added".to_string())
                 }
             }
-            ActionMirror::Remove { name } => {
-                mirror_remove(cfg, &name).map(|_| format!("Success:Mirror '{name}' removed"))
-            }
+            ActionMirror::Remove { name } => instance
+                .mirror_remove(&name)
+                .map(|_| format!("Success:Mirror '{name}' removed")),
         },
-        Action::Upgrade { check } => upgrade(cfg, check, true),
+        Action::Upgrade { check } => instance.upgrade(check, true),
     }
 }
 
@@ -361,18 +361,21 @@ fn main() {
         cfg.interaction.auto_confirm_all = true;
     }
 
+    // 创建 EptInstance 实例
+    let mut instance = EptInstance::new(cfg);
+
     // 清理缓存
-    launch_clean(&cfg).unwrap();
+    launch_clean(instance.cfg()).unwrap();
 
     // 判断是否需要检查更新
-    let need_check_update = cfg.online.auto_check_upgrade
+    let need_check_update = instance.cfg().online.auto_check_upgrade
         && !matches!(&args.action, Action::Upgrade { check: _ })
-        && !mirror_list(&cfg).unwrap_or_default().is_empty();
+        && !instance.mirror_list().unwrap_or_default().is_empty();
 
     // 使用路由器匹配入口
-    write_windows_terminal_status(&cfg, 3);
-    let res = router(args.action, &cfg);
-    write_windows_terminal_status(&cfg, 0);
+    write_windows_terminal_status(instance.cfg(), 3);
+    let res = router(args.action, &mut instance);
+    write_windows_terminal_status(instance.cfg(), 0);
 
     // 判断退出码
     let mut exit_code = 0;
@@ -388,7 +391,7 @@ fn main() {
 
     // 检查程序更新
     if need_check_update {
-        let check_res = check_has_upgrade(&cfg).map_err(|e| anyhow!("Error:Failed to check self upgrade : '{e}'. If this error persists, consider changing 'online.auto_check_upgrade' to 'false' in config"));
+        let check_res = check_has_upgrade(instance.cfg()).map_err(|e| anyhow!("Error:Failed to check self upgrade : '{e}'. If this error persists, consider changing 'online.auto_check_upgrade' to 'false' in config"));
         if let Ok((has_upgrade, is_cross_wid_gap, latest_release)) = check_res {
             if has_upgrade {
                 println!();
