@@ -110,8 +110,8 @@ pub fn installed_validator(dir: &str) -> Result<String> {
     let ctx_path = Path::new(dir).join(DIR_NEP_CONTEXT);
     if !ctx_path.exists() || ctx_path.is_file() {
         return Err(anyhow!(
-            "Error:Invalid nep app folder : missing '{ctx}' folder in '{dir}'",
-            ctx = DIR_NEP_CONTEXT
+            "Error:Invalid nep app folder : missing '{cx}' folder in '{dir}'",
+            cx = DIR_NEP_CONTEXT
         ));
     }
 
