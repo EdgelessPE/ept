@@ -34,7 +34,6 @@ pub fn _default_test_cfg() -> crate::types::cfg::Cfg {
             debug: true,
             offline: false,
         },
-        interaction_provider: Arc::new(crate::types::interaction::NoInteraction),
     }
 }
 

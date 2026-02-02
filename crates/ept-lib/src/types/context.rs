@@ -1,10 +1,53 @@
 use crate::types::cfg::Cfg;
+use crate::types::interaction::{InteractionProvider, NoInteraction};
 use crate::types::mixed_fs::MixedFS;
 use crate::types::package::GlobalPackage;
 use crate::utils::test::_default_test_cfg;
 use crate::{log, p2s};
 use anyhow::{anyhow, Result};
 use std::process::Child;
+use std::sync::Arc;
+
+/// 通用上下文结构体，包含配置和交互提供者
+pub struct RuntimeContext {
+    /// 配置信息
+    pub cfg: Cfg,
+    /// 交互提供者
+    pub interaction_provider: Arc<dyn InteractionProvider>,
+}
+
+impl RuntimeContext {
+    /// 创建新的 RuntimeContext
+    pub fn new(cfg: Cfg, interaction_provider: Arc<dyn InteractionProvider>) -> Self {
+        Self {
+            cfg,
+            interaction_provider,
+        }
+    }
+
+    /// 设置交互提供者（链式调用）
+    pub fn with_interaction_provider<T: InteractionProvider + 'static>(
+        mut self,
+        provider: T,
+    ) -> Self {
+        self.interaction_provider = Arc::new(provider);
+        self
+    }
+
+    /// 获取交互提供者
+    pub fn interaction(&self) -> &dyn InteractionProvider {
+        self.interaction_provider.as_ref()
+    }
+}
+
+impl Default for RuntimeContext {
+    fn default() -> Self {
+        Self {
+            cfg: Cfg::default(),
+            interaction_provider: Arc::new(NoInteraction),
+        }
+    }
+}
 
 /// 工作流执行上下文
 pub struct WorkflowContext {
