@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
 use super::{
-    extended_semver::ExSemVer, interpretable::Interpretable, mixed_fs::MixedFS,
+    context::VerifiableCtx, extended_semver::ExSemVer, interpretable::Interpretable,
     verifiable::Verifiable,
 };
 
@@ -52,7 +52,7 @@ pub struct Package {
 }
 
 impl Verifiable for Package {
-    fn verify_self(&self, _: &MixedFS) -> Result<()> {
+    fn verify_self(&self, _: &VerifiableCtx) -> Result<()> {
         let err_wrapper = |e: anyhow::Error| {
             anyhow!("Error:Failed to verify table 'package' in '{FILE_PACKAGE}' : {e}")
         };
@@ -127,10 +127,10 @@ impl GlobalPackage {
 }
 
 impl Verifiable for GlobalPackage {
-    fn verify_self(&self, mixed_fs: &MixedFS) -> Result<()> {
-        self.package.verify_self(mixed_fs)?;
+    fn verify_self(&self, cx: &VerifiableCtx) -> Result<()> {
+        self.package.verify_self(cx)?;
         if let Some(software) = &self.software {
-            software.verify_self(mixed_fs)?;
+            software.verify_self(cx)?;
 
             // 别名不能和名称重复
             if let Some(alias) = &software.alias {

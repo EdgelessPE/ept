@@ -3,6 +3,7 @@ use evalexpr::*;
 use regex::Regex;
 use std::sync::{Arc, Mutex};
 
+use crate::types::context::RuntimeContext;
 use crate::{
     executor::{
         condition_eval, get_eval_context, get_eval_function_names, get_eval_function_permission,
@@ -26,15 +27,19 @@ pub fn ensure_arg(val: &Value) -> std::result::Result<String, EvalexprError> {
 }
 
 /// 使用虚拟的函数定义捕获函数运行信息，返回（函数名，参数，所属表达式）
-fn capture_function_info(conditions: &Vec<String>) -> Result<Vec<(String, String, String)>> {
+fn capture_function_info(
+    ctx: &RuntimeContext,
+    conditions: &Vec<String>,
+) -> Result<Vec<(String, String, String)>> {
     // 获取已注册的 eval 函数名称
     let info_arr = get_eval_function_names();
 
     // 迭代所有条件语句
     let res = Arc::new(Mutex::new(Vec::new()));
+
     for cond in conditions {
         // 初始化上下文
-        let mut context = get_eval_context(0, "", "0.0.0.0");
+        let mut context = get_eval_context(ctx, 0, "", "0.0.0.0");
 
         // 迭代函数信息，创建收集闭包
         for name in info_arr.clone() {
@@ -63,9 +68,12 @@ fn capture_function_info(conditions: &Vec<String>) -> Result<Vec<(String, String
     Ok(res.clone())
 }
 
-pub fn get_permissions_from_conditions(conditions: Vec<String>) -> Result<Vec<Permission>> {
+pub fn get_permissions_from_conditions(
+    ctx: &RuntimeContext,
+    conditions: Vec<String>,
+) -> Result<Vec<Permission>> {
     // 捕获函数执行信息
-    let func_info = capture_function_info(&conditions)?;
+    let func_info = capture_function_info(ctx, &conditions)?;
 
     // 匹配生成权限信息
     let mut permissions = Vec::new();
@@ -77,6 +85,7 @@ pub fn get_permissions_from_conditions(conditions: Vec<String>) -> Result<Vec<Pe
 }
 
 pub fn verify_conditions(
+    ctx: &RuntimeContext,
     conditions: Vec<String>,
     located: &str,
     package_version: &str,
@@ -84,12 +93,12 @@ pub fn verify_conditions(
     // 检查模板字符串用法
     for cond in &conditions {
         if !check_proper_template_inner_value(cond) {
-            return Err(anyhow!("Error:Failed to validate condition '{cond}' : invalid inner value usage, e.g. 'Arch==\\\"X64\\\" && \\\"${{SystemDrive}}/Windows\\\"==\\\"C:/Windows\\\"'"));
+            return Err(anyhow!("Error:Failed to validate condition '{cond}' : invalid inner value usage, e.g. 'Arch==\"X64\" && \"${{SystemDrive}}/Windows\"==\"C:/Windows\"'"));
         }
     }
 
     // 捕获函数执行信息
-    let func_info = capture_function_info(&conditions)?;
+    let func_info = capture_function_info(ctx, &conditions)?;
 
     // 匹配函数入参进行校验
     for (name, arg, _) in func_info {
@@ -98,7 +107,7 @@ pub fn verify_conditions(
 
     // 对条件进行 eval 校验
     for cond in conditions {
-        condition_eval(&cond, 0, located, package_version)
+        condition_eval(ctx, &cond, 0, located, package_version)
             .map_err(|e| anyhow!("Error:Failed to validate condition '{cond}' : {e}"))?;
     }
 
@@ -107,6 +116,8 @@ pub fn verify_conditions(
 
 #[test]
 fn test_condition() {
+    use crate::utils::test::_default_test_cfg;
+
     let located = "examples/VSCode".to_string();
 
     let conditions: Vec<String> = vec![
@@ -124,10 +135,11 @@ fn test_condition() {
     .collect();
 
     // verify_conditions
-    verify_conditions(conditions.clone(), &located, "1.0.0.0").unwrap();
+    let cfg = _default_test_cfg();
+    verify_conditions(&cfg, conditions.clone(), &located, "1.0.0.0").unwrap();
 
     // capture_function_info
-    let res = capture_function_info(&conditions.clone()).unwrap();
+    let res = capture_function_info(&cfg, &conditions.clone()).unwrap();
     let answer: Vec<(String, String, String)> = vec![
         (
             "Exist",
@@ -173,7 +185,7 @@ fn test_condition() {
 
     // get_permissions_from_conditions
     use crate::types::permissions::{PermissionKey, PermissionLevel};
-    let res = get_permissions_from_conditions(conditions.clone()).unwrap();
+    let res = get_permissions_from_conditions(&cfg, conditions.clone()).unwrap();
     let answer = vec![
         Permission {
             key: PermissionKey::fs_read,

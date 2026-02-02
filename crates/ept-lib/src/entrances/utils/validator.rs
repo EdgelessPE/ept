@@ -4,6 +4,7 @@ use std::{
     path::Path,
 };
 
+use crate::types::context::RuntimeContext;
 use crate::{
     executor::values_validator_path,
     p2s,
@@ -11,7 +12,7 @@ use crate::{
         constants::{DIR_NEP_CONTEXT, DIR_WORKFLOWS, EXT_TAR_ZST, FILE_PACKAGE, WORKFLOW_SETUP},
         mixed_fs::MixedFS,
     },
-    utils::{term::ask_yn, wild_match::contains_wild_match},
+    utils::wild_match::contains_wild_match,
 };
 
 pub fn inner_validator(dir: &str) -> Result<()> {
@@ -28,7 +29,12 @@ pub fn inner_validator(dir: &str) -> Result<()> {
     Ok(())
 }
 
-pub fn manifest_validator(base: &str, manifest: Vec<String>, fs: &mut MixedFS) -> Result<()> {
+pub fn manifest_validator(
+    ctx: &RuntimeContext,
+    base: &str,
+    manifest: Vec<String>,
+    fs: &mut MixedFS,
+) -> Result<()> {
     let mut missing_list = HashSet::new();
     for path in manifest {
         values_validator_path(&path)?;
@@ -44,8 +50,8 @@ pub fn manifest_validator(base: &str, manifest: Vec<String>, fs: &mut MixedFS) -
     if !missing_list.is_empty() {
         let items: Vec<String> = missing_list.into_iter().collect();
         if fs.var_warn_manifest {
-            if !ask_yn(
-                format!("May missing these flow items '{items:?}' in '{base}', continue?"),
+            if !ctx.interaction().ask_yn(
+                &format!("May missing these flow items '{items:?}' in '{base}', continue?"),
                 false,
             ) {
                 return Err(anyhow!("Error:Operation canceled by user"));
@@ -104,8 +110,8 @@ pub fn installed_validator(dir: &str) -> Result<String> {
     let ctx_path = Path::new(dir).join(DIR_NEP_CONTEXT);
     if !ctx_path.exists() || ctx_path.is_file() {
         return Err(anyhow!(
-            "Error:Invalid nep app folder : missing '{ctx}' folder in '{dir}'",
-            ctx = DIR_NEP_CONTEXT
+            "Error:Invalid nep app folder : missing '{cx}' folder in '{dir}'",
+            cx = DIR_NEP_CONTEXT
         ));
     }
 
@@ -116,12 +122,15 @@ pub fn installed_validator(dir: &str) -> Result<String> {
 
 #[test]
 fn test_manifest_validator() {
+    use crate::utils::test::_default_test_cfg;
     let base = "examples/VSCode";
+    let cfg = _default_test_cfg();
     let manifest = vec!["VSCode", "Microsoft", "VScode", FILE_PACKAGE];
     assert!(manifest_validator(
+        &cfg,
         base,
         manifest.into_iter().map(|s| s.to_string()).collect(),
-        &mut MixedFS::new(base)
+        &mut MixedFS::new(base),
     )
     .is_err())
 }

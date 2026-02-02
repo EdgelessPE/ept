@@ -1,9 +1,10 @@
 use super::TStep;
 use crate::executor::condition_eval;
 use crate::log;
+use crate::types::context::RuntimeContext;
 use crate::types::interpretable::Interpretable;
 use crate::types::steps::Permission;
-use crate::types::{mixed_fs::MixedFS, permissions::Generalizable, workflow::WorkflowContext};
+use crate::types::{context::WorkflowContext, mixed_fs::MixedFS, permissions::Generalizable};
 use crate::utils::conditions::{get_permissions_from_conditions, verify_conditions};
 use anyhow::{anyhow, Ok, Result};
 use serde::{Deserialize, Serialize};
@@ -42,6 +43,7 @@ impl TStep for StepWait {
                     sleep(step_d);
                     if start_instant.elapsed() >= d
                         || condition_eval(
+                            cx.runtime_ctx,
                             &cond,
                             cx.exit_code,
                             &cx.located,
@@ -52,8 +54,13 @@ impl TStep for StepWait {
                     }
                 }
                 // 最终检查一次条件并配置 ExitCode
-                return if condition_eval(&cond, cx.exit_code, &cx.located, &cx.pkg.package.version)?
-                {
+                return if condition_eval(
+                    cx.runtime_ctx,
+                    &cond,
+                    cx.exit_code,
+                    &cx.located,
+                    &cx.pkg.package.version,
+                )? {
                     Ok(0)
                 } else {
                     Ok(1)
@@ -71,8 +78,8 @@ impl TStep for StepWait {
     fn get_manifest(&self, _: &mut MixedFS) -> Vec<String> {
         Vec::new()
     }
-    fn verify_step(&self, ctx: &super::VerifyStepCtx) -> Result<()> {
-        let located = &ctx.mixed_fs.located;
+    fn verify_step(&self, cx: &super::VerifyStepCtx) -> Result<()> {
+        let located = &cx.mixed_fs.located;
         // timeout 时间应当小于等于 30min
         if self.timeout > (30 * 60 * 1000) {
             return Err(anyhow!(
@@ -83,7 +90,7 @@ impl TStep for StepWait {
 
         // 校验跳出条件
         if let Some(cond) = &self.break_if {
-            verify_conditions(vec![cond.to_owned()], located, "1.0.0.0")
+            verify_conditions(cx.runtime_ctx, vec![cond.to_owned()], located, "1.0.0.0")
                 .map_err(|e| anyhow!("Error(Wait):Failed to valid field 'break_if' : {e}"))?;
         }
 
@@ -101,11 +108,11 @@ impl Interpretable for StepWait {
 }
 
 impl Generalizable for StepWait {
-    fn generalize_permissions(&self) -> Result<Vec<Permission>> {
+    fn generalize_permissions(&self, ctx: &RuntimeContext) -> Result<Vec<Permission>> {
         let mut permissions = Vec::new();
 
         if let Some(cond) = &self.break_if {
-            let mut cond_permissions = get_permissions_from_conditions(vec![cond.to_owned()])?;
+            let mut cond_permissions = get_permissions_from_conditions(ctx, vec![cond.to_owned()])?;
             permissions.append(&mut cond_permissions);
         }
         //@ key: 由 `break_if` 条件语句产生
@@ -119,9 +126,7 @@ impl Generalizable for StepWait {
 
 #[test]
 fn test_wait() {
-    use crate::types::workflow::WorkflowContext;
-    use crate::utils::flags::{set_flag, Flag};
-    set_flag(Flag::Debug, true);
+    use crate::types::context::WorkflowContext;
     let mut cx = WorkflowContext::_demo();
 
     // 测试普通等待
@@ -223,24 +228,24 @@ fn test_wait_corelation() {
     );
 
     // 校验
-    let ctx = crate::types::steps::VerifyStepCtx::_demo();
+    let cx = crate::types::steps::VerifyStepCtx::_demo();
     assert!(StepWait {
         timeout: 30 * 60 * 1000,
         break_if: Some("ExitCode == 1".to_string())
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_ok());
     assert!(StepWait {
         timeout: 30 * 60 * 1000 + 1,
         break_if: None
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_err());
     assert!(StepWait {
         timeout: 100,
         break_if: Some("Exit == 0".to_string())
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_err());
 
     // 生成权限
@@ -249,7 +254,7 @@ fn test_wait_corelation() {
             timeout: 100,
             break_if: Some("Exist(\"${SystemDrive}:/test\")".to_string())
         }
-        .generalize_permissions()
+        .generalize_permissions(&crate::utils::test::_default_test_cfg())
         .unwrap(),
         vec![Permission {
             key: crate::types::permissions::PermissionKey::fs_read,

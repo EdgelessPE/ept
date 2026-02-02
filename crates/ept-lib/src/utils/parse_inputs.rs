@@ -14,11 +14,11 @@ use crate::{
 };
 
 use super::{
-    cfg::get_config,
     get_path_apps,
     mirror::{filter_release, get_url_with_version_req},
     path::find_scope_with_name,
 };
+use crate::types::context::RuntimeContext;
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct ParsePackageInputRes {
@@ -62,6 +62,7 @@ impl ParseInputResEnum {
 }
 
 pub fn parse_install_inputs(
+    ctx: &RuntimeContext,
     packages: Vec<String>,
     verify_signature: bool,
 ) -> Result<Vec<ParseReturned>> {
@@ -72,12 +73,11 @@ pub fn parse_install_inputs(
 
         // 更新镜像源
         if matches!(input_parsed, PackageInputEnum::PackageMatcher(_)) {
-            let cfg = get_config();
-            auto_mirror_update_all(&cfg)?;
+            auto_mirror_update_all(ctx)?;
         }
 
         // 获取 Info
-        let (info, temp_dir) = info(input_parsed.clone(), verify_signature)?;
+        let (info, temp_dir) = info(ctx, input_parsed.clone(), verify_signature)?;
 
         // 检查对应包名有没有被安装过
         if let Some(local) = info.local {
@@ -99,7 +99,7 @@ pub fn parse_install_inputs(
             // 如果是 PackageMatcher，则解析信息
             PackageInputEnum::PackageMatcher(matcher) => {
                 // 解析 url
-                let (url, target_release, mirror_name) = get_url_with_version_req(matcher)?;
+                let (url, target_release, mirror_name) = get_url_with_version_req(ctx, matcher)?;
                 res.push((
                     ParseInputResEnum::PackageMatcher(ParsePackageInputRes {
                         name: info.name.clone(),
@@ -118,6 +118,7 @@ pub fn parse_install_inputs(
 }
 
 pub fn parse_update_inputs(
+    ctx: &RuntimeContext,
     packages: Vec<String>,
     verify_signature: bool,
 ) -> Result<Vec<ParseReturned>> {
@@ -128,12 +129,11 @@ pub fn parse_update_inputs(
 
         // 更新镜像源
         if matches!(input_parsed, PackageInputEnum::PackageMatcher(_)) {
-            let cfg = get_config();
-            auto_mirror_update_all(&cfg)?;
+            auto_mirror_update_all(ctx)?;
         }
 
         // 获取 Info
-        let (info, temp_dir) = info(input_parsed.clone(), verify_signature)?;
+        let (info, temp_dir) = info(ctx, input_parsed.clone(), verify_signature)?;
 
         // 解析输入类型
         match input_parsed {
@@ -146,19 +146,19 @@ pub fn parse_update_inputs(
                 let scope = info.scope.clone();
                 let package_name = info.name.clone();
                 // 检查对应包名有没有被安装过
-                let (_global, local_diff) = info_local(&scope, &package_name).map_err(|_| {
+                let (_global, local_diff) = info_local(ctx, &scope, &package_name).map_err(|_| {
                     anyhow!("Error:Package '{scope}/{package_name}' hasn't been installed, use 'ept install' instead")
                 })?;
                 // 检查包的版本号是否允许升级
                 let (online_item, _url_template, _) =
-                    info_online(&scope, &package_name, matcher.mirror.clone())?;
+                    info_online(ctx, &scope, &package_name, matcher.mirror.clone())?;
                 let selected_release =
-                    filter_release(online_item.releases, matcher.version_req.clone(), true)?;
+                    filter_release(ctx, online_item.releases, matcher.version_req.clone(), true)?;
                 if selected_release.version <= ExSemVer::parse(&local_diff.version)? {
                     return Err(anyhow!("Error:Package '{name}' has been up to date ({local_version}), can't update to the version of given package ({fresh_version})",name=package_name,local_version=&local_diff.version,fresh_version=&selected_release.version));
                 }
                 // 解析 url
-                let (url, target_release, mirror_name) = get_url_with_version_req(matcher)?;
+                let (url, target_release, mirror_name) = get_url_with_version_req(ctx, matcher)?;
                 res.push((
                     ParseInputResEnum::PackageMatcher(ParsePackageInputRes {
                         name: package_name,
@@ -176,7 +176,7 @@ pub fn parse_update_inputs(
     Ok(res)
 }
 
-pub fn parse_uninstall_inputs(packages: Vec<String>) -> Result<Vec<Info>> {
+pub fn parse_uninstall_inputs(ctx: &RuntimeContext, packages: Vec<String>) -> Result<Vec<Info>> {
     let mut arr = Vec::new();
     for p in packages {
         // 简单校验是否可以卸载
@@ -184,17 +184,17 @@ pub fn parse_uninstall_inputs(packages: Vec<String>) -> Result<Vec<Info>> {
 
         // 查找 scope 并使用 scope 更新纠正大小写
         let (scope, package_name) =
-            find_scope_with_name(&parse_res.name, parse_res.scope.as_deref())
+            find_scope_with_name(ctx, &parse_res.name, parse_res.scope.as_deref())
                 .map_err(|e| anyhow!("Error:Failed to locate target package: {e}",))?;
 
         // 解析安装路径
-        let app_path = get_path_apps(&scope, &package_name, false)?;
+        let app_path = get_path_apps(ctx, &scope, &package_name, false)?;
         if !app_path.exists() {
             return Err(anyhow!("Error:Package '{p}' not installed"));
         }
 
         // 查询 Info
-        let info = if let Ok((_, local_diff)) = info_local(&scope, &package_name) {
+        let info = if let Ok((_, local_diff)) = info_local(ctx, &scope, &package_name) {
             local_diff
         } else {
             InfoDiff {
@@ -218,16 +218,15 @@ pub fn parse_uninstall_inputs(packages: Vec<String>) -> Result<Vec<Info>> {
 
 #[test]
 fn test_parse_inputs() {
-    use crate::utils::flags::{set_flag, Flag};
+    use crate::utils::test::_default_test_cfg;
     use crate::utils::test::_run_static_file_server;
     use crate::utils::Path;
-
-    set_flag(Flag::Debug, true);
-    set_flag(Flag::Confirm, true);
 
     // 使用 mock 的镜像数据
     let mock_ctx = crate::utils::test::_use_mock_mirror_data();
     let (base_url, mut handler) = _run_static_file_server();
+
+    let cfg = _default_test_cfg();
 
     // 准备 vscode 包
     let static_path = Path::new("test");
@@ -235,6 +234,7 @@ fn test_parse_inputs() {
         std::fs::create_dir_all(static_path).unwrap();
     }
     crate::pack(
+        &cfg,
         "./examples/VSCode",
         Some(static_path.join("vscode.nep").to_string_lossy().to_string()),
         true,
@@ -245,6 +245,7 @@ fn test_parse_inputs() {
     crate::utils::test::_ensure_testing_vscode_uninstalled();
     // 测试安装的解析
     let res = parse_install_inputs(
+        &cfg,
         vec![
             "examples/VSCode".to_string(),
             "vscode".to_string(),
@@ -276,11 +277,12 @@ fn test_parse_inputs() {
         ]
     );
     // 测试更新的解析
-    assert!(parse_update_inputs(vec!["vscode".to_string()], false).is_err());
+    assert!(parse_update_inputs(&cfg, vec!["vscode".to_string()], false).is_err());
 
     crate::utils::test::_ensure_testing_vscode_uninstalled();
     // 测试解析
     let res = parse_install_inputs(
+        &cfg,
         vec![
             "examples/VSCode".to_string(),
             "vscode".to_string(),
@@ -314,6 +316,7 @@ fn test_parse_inputs() {
     // 测试更新的解析
     crate::utils::test::_ensure_testing_vscode();
     let res = parse_update_inputs(
+        &cfg,
         vec![
             "examples/VSCode".to_string(),
             "vscode".to_string(),
@@ -346,7 +349,7 @@ fn test_parse_inputs() {
     );
 
     // 测试卸载的解析
-    let res = parse_uninstall_inputs(vec!["vscode".to_string()]).unwrap();
+    let res = parse_uninstall_inputs(&cfg, vec!["vscode".to_string()]).unwrap();
     assert_eq!(
         res,
         vec![Info {
@@ -370,7 +373,7 @@ fn test_parse_inputs() {
             meta: None,
         }]
     );
-    let res = parse_uninstall_inputs(vec!["microSOFT/Vscode".to_string()]).unwrap();
+    let res = parse_uninstall_inputs(&cfg, vec!["microSOFT/Vscode".to_string()]).unwrap();
     assert_eq!(
         res,
         vec![Info {
@@ -402,9 +405,10 @@ fn test_parse_inputs() {
 
 #[test]
 fn test_parse_inputs_offline() {
-    crate::utils::flags::set_flag(crate::utils::flags::Flag::Confirm, true);
+    use crate::utils::test::_default_test_cfg;
+    let cfg = _default_test_cfg();
     crate::utils::test::_ensure_testing_vscode_uninstalled();
-    assert!(parse_install_inputs(vec!["examples/vscode".to_string()], true).is_err());
+    assert!(parse_install_inputs(&cfg, vec!["examples/vscode".to_string()], true).is_err());
     crate::utils::test::_ensure_testing_vscode();
-    assert!(parse_update_inputs(vec!["examples/vscode".to_string()], true).is_err());
+    assert!(parse_update_inputs(&cfg, vec!["examples/vscode".to_string()], true).is_err());
 }

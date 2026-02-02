@@ -17,6 +17,7 @@ use crate::{
 };
 
 use super::TStep;
+use crate::types::context::RuntimeContext;
 
 lazy_static! {
     static ref PURE_NAME_NOT_MATCH_REGEX: Regex = Regex::new(r"[\\\/\*\:\$]").unwrap();
@@ -76,15 +77,15 @@ fn rename(from: &str, to: &str, located: &str) -> Result<()> {
 }
 
 impl TStep for StepRename {
-    fn run(self, cx: &mut crate::types::workflow::WorkflowContext) -> Result<i32> {
+    fn run(self, cx: &mut crate::types::context::WorkflowContext) -> Result<i32> {
         //- 重命名文件/文件夹。
         rename(&self.from, &self.to, &cx.located)?;
         Ok(0)
     }
-    fn reverse_run(self, _: &mut crate::types::workflow::WorkflowContext) -> Result<()> {
+    fn reverse_run(self, _: &mut crate::types::context::WorkflowContext) -> Result<()> {
         Ok(())
     }
-    fn get_manifest(&self, fs: &mut crate::types::mixed_fs::MixedFS) -> Vec<String> {
+    fn get_manifest(&self, fs: &mut super::MixedFS) -> Vec<String> {
         fs.remove(&self.from);
         fs.add(&concat_to(&self.to, &self.from, ""), &self.from);
         Vec::new()
@@ -125,7 +126,7 @@ impl Interpretable for StepRename {
 }
 
 impl Generalizable for StepRename {
-    fn generalize_permissions(&self) -> Result<Vec<Permission>> {
+    fn generalize_permissions(&self, _ctx: &RuntimeContext) -> Result<Vec<Permission>> {
         Ok(vec![Permission {
             key: PermissionKey::fs_write,
             level: judge_perm_level(&self.from)?,
@@ -136,10 +137,8 @@ impl Generalizable for StepRename {
 
 #[test]
 fn test_rename() {
-    use crate::types::workflow::WorkflowContext;
-    use crate::utils::flags::{set_flag, Flag};
+    use crate::types::context::WorkflowContext;
     use std::path::Path;
-    set_flag(Flag::Debug, true);
     let mut cx = WorkflowContext::_demo();
     crate::utils::test::_ensure_clear_test_dir();
 
@@ -206,7 +205,7 @@ fn test_rename() {
 
 #[test]
 fn test_rename_corelation() {
-    let mut cx = crate::types::workflow::WorkflowContext::_demo();
+    let mut cx = crate::types::context::WorkflowContext::_demo();
 
     // 反向工作流
     StepRename {
@@ -232,60 +231,60 @@ fn test_rename_corelation() {
     );
 
     // 校验
-    let ctx = crate::types::steps::VerifyStepCtx::_demo();
+    let cx = crate::types::steps::VerifyStepCtx::_demo();
     assert!(StepRename {
         from: "./bin".to_string(),
         to: "temp".to_string(),
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_ok());
     assert!(StepRename {
         from: "./bin.exe".to_string(),
         to: "temp".to_string(),
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_ok());
     assert!(StepRename {
         from: "./bin.exe".to_string(),
         to: "temp/".to_string(),
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_err());
     assert!(StepRename {
         from: "./bin/*".to_string(),
         to: "temp".to_string(),
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_err());
     assert!(StepRename {
         from: "./bin".to_string(),
         to: "${Desktop}".to_string(),
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_err());
     assert!(StepRename {
         from: "bin".to_string(),
         to: "${OtherDesktop}".to_string(),
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_err());
     assert!(StepRename {
         from: "C:/Users/Desktop".to_string(),
         to: "${Desktop}".to_string(),
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_err());
 
     assert!(StepRename {
         from: "${Home}".to_string(),
         to: "C:/Users/Nep/Desktop".to_string(),
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_err());
     assert!(StepRename {
         from: "${Home}".to_string(),
         to: "${Desktop}/*".to_string(),
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_err());
 }

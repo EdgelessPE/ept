@@ -28,6 +28,7 @@ use super::{
     info_local, info_online,
     utils::{package::unpack_nep, validator::installed_validator},
 };
+use crate::types::context::RuntimeContext;
 
 enum MetaTargetResult {
     Local(PathBuf, PathBuf),
@@ -35,13 +36,17 @@ enum MetaTargetResult {
 }
 
 // 返回 (临时目录，工作流所在目录，全局包)
-fn find_meta_target(input: PackageInputEnum, verify_signature: bool) -> Result<MetaTargetResult> {
+fn find_meta_target(
+    ctx: &RuntimeContext,
+    input: PackageInputEnum,
+    verify_signature: bool,
+) -> Result<MetaTargetResult> {
     match input {
         PackageInputEnum::LocalPath(local_path) => {
             // 作为路径使用，可以是一个包或者已经解包的目录
             let p = Path::new(&local_path);
             if p.exists() {
-                let (path, _) = unpack_nep(&local_path, verify_signature)?;
+                let (path, _) = unpack_nep(ctx, &local_path, verify_signature)?;
                 // verify(&p2s!(path))?;
                 return Ok(MetaTargetResult::Local(
                     path.clone(),
@@ -51,11 +56,11 @@ fn find_meta_target(input: PackageInputEnum, verify_signature: bool) -> Result<M
         }
         PackageInputEnum::PackageMatcher(matcher) => {
             if let Ok((scope, package_name)) =
-                find_scope_with_name(&matcher.name, matcher.scope.as_deref())
+                find_scope_with_name(ctx, &matcher.name, matcher.scope.as_deref())
             {
                 // 先尝试在本地已安装列表中搜索
-                let path = get_path_apps(&scope, &package_name, false)?;
-                if info_local(&scope, &package_name).is_ok() {
+                let path = get_path_apps(ctx, &scope, &package_name, false)?;
+                if info_local(ctx, &scope, &package_name).is_ok() {
                     installed_validator(&p2s!(path))?;
                     return Ok(MetaTargetResult::Local(
                         path.clone(),
@@ -64,8 +69,9 @@ fn find_meta_target(input: PackageInputEnum, verify_signature: bool) -> Result<M
                 }
 
                 // 直接使用在线 Info 的 Meta 信息
-                let (tree_item, _, mirror) = info_online(&scope, &package_name, matcher.mirror)?;
-                let release = filter_release(tree_item.releases, matcher.version_req, true)?;
+                let (tree_item, _, mirror) =
+                    info_online(ctx, &scope, &package_name, matcher.mirror)?;
+                let release = filter_release(ctx, tree_item.releases, matcher.version_req, true)?;
                 if let Some(meta) = release.meta {
                     log!("Debug:Found meta for '{scope}/{package_name}' in mirror '{mirror}'");
                     return Ok(MetaTargetResult::Online(Box::new(meta)));
@@ -78,14 +84,14 @@ fn find_meta_target(input: PackageInputEnum, verify_signature: bool) -> Result<M
         }
         PackageInputEnum::Url(url) => {
             // 下载文件到临时目录
-            let cache_path = get_path_cache()?;
+            let cache_path = get_path_cache(ctx)?;
             let url_hash = compute_hash_blake3_from_string(&url)?;
-            let (p, cache_ctx) = download_nep(&url, Some((cache_path, url_hash)))?;
+            let (p, cache_ctx) = download_nep(ctx, &url, Some((cache_path, url_hash)))?;
 
             // 缓存下载的包
             spawn_cache(cache_ctx)?;
 
-            let (path, _) = unpack_nep(&p2s!(p), verify_signature)?;
+            let (path, _) = unpack_nep(ctx, &p2s!(p), verify_signature)?;
             return Ok(MetaTargetResult::Local(
                 path.clone(),
                 path.join(DIR_WORKFLOWS),
@@ -98,8 +104,12 @@ fn find_meta_target(input: PackageInputEnum, verify_signature: bool) -> Result<M
     ))
 }
 
-pub fn meta(input: PackageInputEnum, verify_signature: bool) -> Result<MetaResult> {
-    match find_meta_target(input, verify_signature)? {
+pub fn meta(
+    ctx: &RuntimeContext,
+    input: PackageInputEnum,
+    verify_signature: bool,
+) -> Result<MetaResult> {
+    match find_meta_target(ctx, input, verify_signature)? {
         MetaTargetResult::Local(temp_dir_inner_path, workflow_path) => {
             let temp_dir = p2s!(temp_dir_inner_path);
 
@@ -136,7 +146,7 @@ pub fn meta(input: PackageInputEnum, verify_signature: bool) -> Result<MetaResul
             let mut map: HashMap<(PermissionLevel, PermissionKey), HashSet<String>> =
                 HashMap::new();
             for node in total_workflow {
-                for perm in node.generalize_permissions()? {
+                for perm in node.generalize_permissions(ctx)? {
                     let entry = map.entry((perm.level, perm.key)).or_default();
                     for target in perm.targets {
                         entry.insert(target);
@@ -178,11 +188,13 @@ pub fn meta(input: PackageInputEnum, verify_signature: bool) -> Result<MetaResul
 #[test]
 fn test_meta() {
     use crate::types::matcher::PackageMatcher;
-    use crate::utils::flags::{set_flag, Flag};
-    set_flag(Flag::Confirm, true);
+    use crate::utils::test::_default_test_cfg;
+
+    let cfg = &_default_test_cfg();
 
     // 从本地路径中生成 meta
     let res = meta(
+        cfg,
         PackageInputEnum::LocalPath("examples/PermissionsTest".to_string()),
         false,
     )
@@ -285,6 +297,7 @@ fn test_meta() {
     );
     // package 不应该被解释
     let res = meta(
+        cfg,
         PackageInputEnum::LocalPath("examples/VSCodeI".to_string()),
         false,
     )
@@ -319,6 +332,7 @@ fn test_meta() {
     crate::utils::test::_ensure_testing_vscode_uninstalled();
     let vscode_path = crate::utils::test::_ensure_testing_vscode();
     let meta_result = meta(
+        cfg,
         PackageInputEnum::PackageMatcher(PackageMatcher {
             name: "VSCode".to_string(),
             scope: None,
@@ -383,12 +397,18 @@ fn test_meta() {
     crate::utils::test::_ensure_testing_uninstalled("Microsoft", "VSCodeE");
     let (url, mut handler) = crate::utils::test::_run_static_file_server();
     crate::entrances::pack(
+        cfg,
         "examples/VSCodeE",
         Some("test/VSCodeE.nep".to_string()),
         false,
     )
     .unwrap();
-    let res = meta(PackageInputEnum::Url(format!("{url}/VSCodeE.nep")), false).unwrap();
+    let res = meta(
+        cfg,
+        PackageInputEnum::Url(format!("{url}/VSCodeE.nep")),
+        false,
+    )
+    .unwrap();
     assert_eq!(
         res.permissions,
         vec![
@@ -420,6 +440,7 @@ fn test_meta() {
     let tup = crate::utils::test::_mount_custom_mirror();
     assert_eq!(
         meta(
+            cfg,
             PackageInputEnum::PackageMatcher(
                 PackageMatcher::parse("notepad", false, false).unwrap()
             ),
@@ -468,6 +489,7 @@ fn test_meta() {
     crate::utils::test::_ensure_testing_uninstalled("Mozilla", "Firefox");
     crate::utils::test::_ensure_testing_uninstalled("PortableApps", "Firefox");
     assert!(meta(
+        cfg,
         PackageInputEnum::PackageMatcher(PackageMatcher::parse("firefox", false, false).unwrap()),
         false
     )

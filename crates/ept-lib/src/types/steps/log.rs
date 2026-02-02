@@ -1,13 +1,14 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
+use crate::types::context::WorkflowContext;
 use crate::types::interpretable::Interpretable;
 use crate::types::mixed_fs::MixedFS;
 use crate::types::permissions::{Generalizable, Permission};
-use crate::types::workflow::WorkflowContext;
 use crate::{log, verify_enum};
 
 use super::TStep;
+use crate::types::context::RuntimeContext;
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct StepLog {
@@ -59,7 +60,7 @@ impl Interpretable for StepLog {
 }
 
 impl Generalizable for StepLog {
-    fn generalize_permissions(&self) -> Result<Vec<Permission>> {
+    fn generalize_permissions(&self, _ctx: &RuntimeContext) -> Result<Vec<Permission>> {
         Ok(vec![])
     }
 }
@@ -71,8 +72,8 @@ fn test_log() {
         level: Some(String::from("Info")),
         msg: String::from("Hello nep!"),
     };
-    let ctx = crate::types::steps::VerifyStepCtx::_demo();
-    step.verify_step(&ctx).unwrap();
+    let verify_step_cx = crate::types::steps::VerifyStepCtx::_demo();
+    step.verify_step(&verify_step_cx).unwrap();
     step.run(&mut cx).unwrap();
 }
 
@@ -101,7 +102,7 @@ fn test_log_corelation() {
         level: Some(String::from("Info")),
         msg: String::from("Hello nep!"),
     }
-    .generalize_permissions()
+    .generalize_permissions(&crate::utils::test::_default_test_cfg())
     .unwrap()
     .is_empty());
 }

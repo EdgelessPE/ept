@@ -7,6 +7,7 @@ use anyhow::Result;
 use evalexpr::{DefaultNumericTypes, Function, Value};
 
 use super::EvalFunction;
+use crate::types::context::RuntimeContext;
 
 pub struct IsDirectory {
     //- 检查某个路径是否指向一个目录
@@ -15,7 +16,7 @@ pub struct IsDirectory {
 }
 
 impl EvalFunction for IsDirectory {
-    fn get_closure(located: String) -> Function<DefaultNumericTypes> {
+    fn get_closure(_ctx: &RuntimeContext, located: String) -> Function<DefaultNumericTypes> {
         Function::new(move |val| {
             let arg = ensure_arg(val)?;
             let p = parse_relative_path_with_located(&arg, &located);

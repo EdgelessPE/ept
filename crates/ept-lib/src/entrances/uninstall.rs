@@ -15,17 +15,19 @@ use crate::{
         constants::{
             DIR_NEP_CONTEXT, DIR_WORKFLOWS, FILE_PACKAGE, WORKFLOW_REMOVE, WORKFLOW_SETUP,
         },
+        context::WorkflowContext,
         mixed_fs::MixedFS,
         steps::{StepExecute, TStep},
-        workflow::{WorkflowContext, WorkflowNode},
+        workflow::WorkflowNode,
     },
     utils::{
         get_bare_apps, get_path_apps, path::find_scope_with_name, process::kill_with_name,
-        reg_entry::get_reg_entry, term::ask_yn,
+        reg_entry::get_reg_entry,
     },
 };
 
 use super::utils::validator::installed_validator;
+use crate::types::context::RuntimeContext;
 
 fn get_manifest(flow: Vec<WorkflowNode>) -> Vec<String> {
     let mut manifest = Vec::new();
@@ -36,15 +38,19 @@ fn get_manifest(flow: Vec<WorkflowNode>) -> Vec<String> {
     manifest
 }
 
-pub fn uninstall(scope: Option<String>, package_name: &str) -> Result<(String, String)> {
+pub fn uninstall(
+    ctx: &RuntimeContext,
+    scope: Option<String>,
+    package_name: &str,
+) -> Result<(String, String)> {
     log!("Info:Preparing to uninstall '{package_name}'");
 
     // 查找 scope 并使用 scope 更新纠正大小写
-    let (scope, package_name) = find_scope_with_name(package_name, scope.as_deref())?;
+    let (scope, package_name) = find_scope_with_name(ctx, package_name, scope.as_deref())?;
     log!("Debug:Resolved scope as '{scope}' for package '{package_name}'");
 
     // 解析安装路径
-    let app_path = get_path_apps(&scope, &package_name, false)?;
+    let app_path = get_path_apps(ctx, &scope, &package_name, false)?;
     if !app_path.exists() {
         return Err(anyhow!("Error:Package '{package_name}' not installed"));
     }
@@ -66,6 +72,7 @@ pub fn uninstall(scope: Option<String>, package_name: &str) -> Result<(String, S
     // 读入 package.toml
     log!("Debug:Reading package.toml from '{app_str}'");
     let global = parse_package(
+        ctx,
         &p2s!(app_path.join(DIR_NEP_CONTEXT).join(FILE_PACKAGE)),
         &app_str,
         false,
@@ -82,7 +89,13 @@ pub fn uninstall(scope: Option<String>, package_name: &str) -> Result<(String, S
         let e = get_reg_entry(&entry_id);
         if let Some(uninstall_string) = e.uninstall_string {
             log!("Info:Running uninstaller due to registry entry...");
-            let mut cx = WorkflowContext::new(&app_str, global.clone());
+            let mut cx = WorkflowContext {
+                pkg: global.clone(),
+                located: app_str.clone(),
+                async_execution_handlers: Vec::new(),
+                exit_code: 0,
+                runtime_ctx: ctx,
+            };
             StepExecute {
                 command: uninstall_string,
                 pwd: None,
@@ -106,7 +119,7 @@ pub fn uninstall(scope: Option<String>, package_name: &str) -> Result<(String, S
 
         // 执行卸载工作流
         log!("Info:Running remove workflow...");
-        workflow_executor(remove_flow, app_str.clone(), global.clone())?;
+        workflow_executor(ctx, remove_flow, app_str.clone(), global.clone())?;
         log_ok_last!("Info:Running remove workflow...");
     }
 
@@ -119,15 +132,15 @@ pub fn uninstall(scope: Option<String>, package_name: &str) -> Result<(String, S
 
     // 逆向执行安装工作流
     log!("Info:Running reverse setup workflow...");
-    workflow_reverse_executor(setup_flow.clone(), app_str.clone(), global.clone())?;
+    workflow_reverse_executor(ctx, setup_flow.clone(), app_str.clone(), global.clone())?;
     log_ok_last!("Info:Running reverse setup workflow...");
 
     // 删除 app 目录
     log!("Info:Cleaning...");
     let try_rm_res = remove_dir_all(&app_str);
     if try_rm_res.is_err()
-        && ask_yn(
-            "Can't clean the directory completely, try killing the related processes?".to_string(),
+        && ctx.interaction().ask_yn(
+            "Can't clean the directory completely, try killing the related processes?",
             true,
         )
     {
@@ -166,7 +179,7 @@ pub fn uninstall(scope: Option<String>, package_name: &str) -> Result<(String, S
     }
 
     // 删除空的 scope
-    let scope_dir = get_bare_apps()?.join(&scope);
+    let scope_dir = get_bare_apps(ctx)?.join(&scope);
     if read_dir(scope_dir.clone())?.next().is_none() {
         log!("Debug:Removing empty scope directory '{scope}'");
         let _ = remove_dir(scope_dir);
@@ -180,12 +193,12 @@ pub fn uninstall(scope: Option<String>, package_name: &str) -> Result<(String, S
 
 #[test]
 fn test_uninstall() {
-    use crate::utils::flags::{set_flag, Flag};
+    use crate::utils::test::_default_test_cfg;
     // 完整的安装和卸载流程案例位于entrances::install::test_install
 
     // 这里测试一下需要杀进程的案例
     use crate::types::steps::TStep;
-    set_flag(Flag::Confirm, true);
+    let cfg = &_default_test_cfg();
     let pwd = crate::utils::test::_ensure_testing("Microsoft", "Notepad");
     let mut cx = WorkflowContext::_demo();
     StepExecute {
@@ -204,6 +217,6 @@ fn test_uninstall() {
     .run(&mut cx)
     .unwrap();
 
-    uninstall(None, "Notepad").unwrap();
+    uninstall(cfg, None, "Notepad").unwrap();
     assert!(!Path::new(&pwd).exists());
 }

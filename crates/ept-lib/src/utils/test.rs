@@ -1,18 +1,56 @@
 use std::path::PathBuf;
+use std::sync::Arc;
 
 use crate::types::constants::FILE_PACKAGE;
+use crate::types::context::RuntimeContext;
+use crate::types::interaction::NoInteraction;
 use crate::{types::matcher::PackageMatcher, utils::get_path_cache};
 use anyhow::anyhow;
 use httpmock::prelude::*;
 use which::which;
 
+// 默认测试配置
+pub fn _default_test_cfg() -> RuntimeContext {
+    RuntimeContext {
+        cfg: crate::types::cfg::Cfg {
+            local: crate::types::cfg::Local {
+                base: "C:/Users/Public/Music".to_string(),
+                enable_cache: true,
+                cache_valid_duration: "30d".to_string(),
+            },
+            online: crate::types::cfg::Online {
+                mirror_update_interval: "1d".to_string(),
+                auto_check_upgrade: true,
+            },
+            preference: crate::types::cfg::Preference {
+                installer: crate::types::cfg::PreferenceEnum::LowPriority,
+                portable: crate::types::cfg::PreferenceEnum::HighPriority,
+                expandable: crate::types::cfg::PreferenceEnum::HighPriority,
+            },
+            interaction: crate::types::cfg::Interaction {
+                enable_windows_terminal_status: false,
+                show_emojis: true,
+                auto_confirm_all: true,
+            },
+            mode: crate::types::cfg::Mode {
+                qa: false,
+                debug: true,
+                offline: false,
+            },
+        },
+        interaction_provider: Arc::new(NoInteraction),
+    }
+}
+
 pub fn _ensure_testing_vscode() -> PathBuf {
-    if crate::entrances::info_local("Microsoft", "VSCode").is_err() {
+    let cfg = _default_test_cfg();
+    if crate::entrances::info_local(&cfg, "Microsoft", "VSCode").is_err() {
         crate::utils::fs::copy_dir("examples/VSCode", "test/VSCode").unwrap();
-        crate::install_using_package("test/VSCode", false).unwrap();
+        crate::install_using_package(&cfg, "test/VSCode", false).unwrap();
     }
 
     crate::meta(
+        &cfg,
         crate::types::matcher::PackageInputEnum::PackageMatcher(PackageMatcher {
             name: "VSCode".to_string(),
             scope: None,
@@ -27,18 +65,21 @@ pub fn _ensure_testing_vscode() -> PathBuf {
 }
 
 pub fn _ensure_testing_vscode_uninstalled() {
-    if crate::entrances::info_local("Microsoft", "VSCode").is_ok() {
-        crate::uninstall(Some("Microsoft".to_string()), "VSCode").unwrap();
+    let cfg = _default_test_cfg();
+    if crate::entrances::info_local(&cfg, "Microsoft", "VSCode").is_ok() {
+        crate::uninstall(&cfg, Some("Microsoft".to_string()), "VSCode").unwrap();
     }
 }
 
 pub fn _ensure_testing(scope: &str, name: &str) -> PathBuf {
-    if crate::entrances::info_local(scope, name).is_err() {
+    let cfg = _default_test_cfg();
+    if crate::entrances::info_local(&cfg, scope, name).is_err() {
         crate::utils::fs::copy_dir(format!("examples/{name}"), format!("test/{name}")).unwrap();
-        crate::install_using_package(&format!("test/{name}"), false).unwrap();
+        crate::install_using_package(&cfg, &format!("test/{name}"), false).unwrap();
     }
 
     crate::meta(
+        &cfg,
         crate::types::matcher::PackageInputEnum::PackageMatcher(PackageMatcher {
             name: name.to_string(),
             scope: Some(scope.to_string()),
@@ -53,21 +94,23 @@ pub fn _ensure_testing(scope: &str, name: &str) -> PathBuf {
 }
 
 pub fn _ensure_testing_uninstalled(scope: &str, name: &str) {
+    let cfg = _default_test_cfg();
     let s = scope.to_string();
-    if crate::entrances::info_local(&s, name).is_ok() {
-        crate::uninstall(Some(s), name).unwrap();
+    if crate::entrances::info_local(&cfg, &s, name).is_ok() {
+        crate::uninstall(&cfg, Some(s), name).unwrap();
     }
 }
 
 pub fn _ensure_clear_test_dir() {
     use std::path::Path;
+    let cfg = _default_test_cfg();
     if Path::new("test").exists() {
         std::fs::remove_dir_all("test").unwrap();
     }
     std::fs::create_dir_all("test").unwrap();
 
     // 清理缓存
-    let cache_path = get_path_cache().unwrap();
+    let cache_path = get_path_cache(&cfg).unwrap();
     if cache_path.exists() {
         std::fs::remove_dir_all(cache_path).unwrap();
     }
@@ -514,7 +557,8 @@ pub fn _mount_custom_mirror() -> (bool, PathBuf, PathBuf) {
     use std::fs::{remove_dir_all, rename};
 
     // 备份原有的镜像文件夹
-    let origin_p = get_path_mirror().unwrap();
+    let cfg = _default_test_cfg();
+    let origin_p = get_path_mirror(&cfg).unwrap();
     let bak_p = origin_p.parent().unwrap().join("mirror_bak");
     let has_origin_mirror = origin_p.exists();
     if has_origin_mirror {
@@ -529,7 +573,7 @@ pub fn _mount_custom_mirror() -> (bool, PathBuf, PathBuf) {
     let mock_url = _run_mirror_mock_server();
 
     // 添加镜像
-    mirror_add(&mock_url, None).unwrap();
+    mirror_add(&cfg, &mock_url, None).unwrap();
     (has_origin_mirror, origin_p, bak_p)
 }
 
@@ -544,16 +588,18 @@ pub fn _unmount_custom_mirror(tup: (bool, PathBuf, PathBuf)) {
 }
 
 pub fn _modify_package_dir_version(dir: &str, to_version: &str) {
+    let cfg = _default_test_cfg();
     let dir = dir.to_string();
     let pkg_path = format!("{dir}/{FILE_PACKAGE}");
     let version = to_version.to_string();
-    let mut pkg = crate::parsers::parse_package(&pkg_path, &dir, false).unwrap();
+    let mut pkg = crate::parsers::parse_package(&cfg, &pkg_path, &dir, false).unwrap();
     pkg.package.version = version;
     let text = toml::to_string_pretty(&pkg).unwrap();
     std::fs::write(pkg_path, text).unwrap();
 }
 
 pub fn _fork_example_with_version(origin_dir: &str, to_version: &str) -> String {
+    let cfg = _default_test_cfg();
     let temp_dir = std::path::Path::new("test").join(super::random::random_short_string());
     std::fs::create_dir_all(&temp_dir).unwrap();
     crate::utils::fs::copy_dir(origin_dir, &temp_dir).unwrap();
@@ -561,7 +607,7 @@ pub fn _fork_example_with_version(origin_dir: &str, to_version: &str) -> String 
     let dir = crate::p2s!(temp_dir);
     let pkg_path = format!("{dir}/{FILE_PACKAGE}");
     let version = to_version.to_string();
-    let mut pkg = crate::parsers::parse_package(&pkg_path, &dir, false).unwrap();
+    let mut pkg = crate::parsers::parse_package(&cfg, &pkg_path, &dir, false).unwrap();
     pkg.package.version = version;
     let text = toml::to_string_pretty(&pkg).unwrap();
     std::fs::write(pkg_path, text).unwrap();
@@ -574,7 +620,8 @@ pub fn _use_mock_mirror_data() -> (bool, PathBuf, PathBuf) {
     use std::fs::{remove_dir_all, rename};
 
     // 备份原有的镜像文件夹
-    let origin_p = crate::utils::get_path_mirror().unwrap();
+    let cfg = _default_test_cfg();
+    let origin_p = crate::utils::get_path_mirror(&cfg).unwrap();
     let bak_p = origin_p.parent().unwrap().join("mirror_bak");
     let has_origin_mirror = origin_p.exists();
     if has_origin_mirror {
@@ -584,11 +631,11 @@ pub fn _use_mock_mirror_data() -> (bool, PathBuf, PathBuf) {
             rename(&origin_p, &bak_p).unwrap();
         }
     }
-    assert!(crate::entrances::mirror_list().unwrap().is_empty());
+    assert!(crate::entrances::mirror_list(&cfg).unwrap().is_empty());
 
     // 使用 mock 的镜像数据
     let mock_url = _run_mirror_mock_server();
-    crate::entrances::mirror_add(&mock_url, None).unwrap();
+    crate::entrances::mirror_add(&cfg, &mock_url, None).unwrap();
 
     (has_origin_mirror, origin_p, bak_p)
 }

@@ -8,7 +8,8 @@ use super::{
 use crate::types::constants::{
     DIR_NEP_CONTEXT, DIR_WORKFLOWS, WORKFLOW_REMOVE, WORKFLOW_SETUP, WORKFLOW_UPDATE,
 };
-use crate::utils::flags::{set_flag, Flag};
+
+use crate::types::context::RuntimeContext;
 use crate::{
     entrances::{expand_workshop, is_workshop_expandable},
     executor::{workflow_executor, workflow_reverse_executor},
@@ -22,7 +23,6 @@ use crate::{
         fs::move_or_copy,
         get_path_apps, get_path_cache,
         parse_inputs::{parse_update_inputs, ParseInputResEnum},
-        term::ask_yn,
     },
 };
 use crate::{log, log_ok_last};
@@ -49,6 +49,7 @@ fn validate_version_update(name: &str, local_ver: &str, fresh_ver: &str) -> Resu
 
 // 处理作者不匹配的情况，需要卸载后重新安装
 fn handle_author_mismatch(
+    ctx: &RuntimeContext,
     source_file: &str,
     local: &GlobalPackage,
     fresh: &GlobalPackage,
@@ -66,12 +67,15 @@ fn handle_author_mismatch(
         fresh = fresh.package.authors
     );
 
-    if !ask_yn(format!("The given package is not the same as the author of the installed package (local:{:?}, given:{:?}), uninstall the installed package first?",local.package.authors,fresh.package.authors),true) {
+    if !ctx.interaction().ask_yn(
+        &format!("The given package is not the same as the author of the installed package (local:{:?}, given:{:?}), uninstall the installed package first?",local.package.authors,fresh.package.authors),
+        true
+    ) {
         return Err(anyhow!("Error:Update canceled by user"));
     }
 
-    uninstall(Some(local.package.scope.clone()), &local.package.name)?;
-    install_using_package(source_file, verify_signature)?;
+    uninstall(ctx, Some(local.package.scope.clone()), &local.package.name)?;
+    install_using_package(ctx, source_file, verify_signature)?;
 
     Ok(Some(UpdateInfo {
         name: fresh.package.name.clone(),
@@ -83,6 +87,7 @@ fn handle_author_mismatch(
 
 // 如有需要，执行旧包的移除工作流
 fn run_old_remove_if_needed(
+    ctx: &RuntimeContext,
     located: &Path,
     temp_dir: &Path,
     local_pkg: &GlobalPackage,
@@ -97,14 +102,18 @@ fn run_old_remove_if_needed(
         log!("Info:Running remove workflow...");
         let remove_workflow = parse_workflow(&p2s!(remove_path))?;
         let located_str = p2s!(located);
-        workflow_executor(remove_workflow, located_str, local_pkg.clone())?;
+        workflow_executor(ctx, remove_workflow, located_str, local_pkg.clone())?;
         log_ok_last!("Info:Running remove workflow...");
     }
     Ok(())
 }
 
 // 逆向执行安装工作流
-fn reverse_setup_workflow(located: &Path, local_pkg: GlobalPackage) -> Result<()> {
+fn reverse_setup_workflow(
+    ctx: &RuntimeContext,
+    located: &Path,
+    local_pkg: GlobalPackage,
+) -> Result<()> {
     let setup_path = located
         .join(DIR_NEP_CONTEXT)
         .join(DIR_WORKFLOWS)
@@ -113,7 +122,7 @@ fn reverse_setup_workflow(located: &Path, local_pkg: GlobalPackage) -> Result<()
     let located_str = p2s!(located);
 
     log!("Info:Running reverse setup workflow...");
-    workflow_reverse_executor(setup_workflow, located_str, local_pkg)?;
+    workflow_reverse_executor(ctx, setup_workflow, located_str, local_pkg)?;
     log_ok_last!("Info:Running reverse setup workflow...");
     Ok(())
 }
@@ -137,30 +146,39 @@ fn deploy_update(temp_dir: &Path, located: &Path, name: &str) -> Result<()> {
 }
 
 // 执行新包的 update 或 setup 工作流
-fn run_new_workflow(temp_dir: &Path, located: &Path, fresh_pkg: GlobalPackage) -> Result<()> {
+fn run_new_workflow(
+    ctx: &RuntimeContext,
+    temp_dir: &Path,
+    located: &Path,
+    fresh_pkg: GlobalPackage,
+) -> Result<()> {
     let update_path = temp_dir.join(DIR_WORKFLOWS).join(WORKFLOW_UPDATE);
     let located_str = p2s!(located);
 
     if update_path.exists() {
         log!("Info:Running update workflow...");
         let update_workflow = parse_workflow(&p2s!(update_path))?;
-        workflow_executor(update_workflow, located_str, fresh_pkg)?;
+        workflow_executor(ctx, update_workflow, located_str, fresh_pkg)?;
         log_ok_last!("Info:Running update workflow...");
     } else {
         log!("Info:Running setup workflow...");
         let setup_path = update_path.with_file_name(WORKFLOW_SETUP);
         let setup_workflow = parse_workflow(&p2s!(setup_path))?;
-        workflow_executor(setup_workflow, located_str, fresh_pkg)?;
+        workflow_executor(ctx, setup_workflow, located_str, fresh_pkg)?;
         log_ok_last!("Info:Running setup workflow...");
     }
     Ok(())
 }
 
-pub fn update_using_package(source_file: &str, verify_signature: bool) -> Result<UpdateInfo> {
+pub fn update_using_package(
+    ctx: &RuntimeContext,
+    source_file: &str,
+    verify_signature: bool,
+) -> Result<UpdateInfo> {
     log!("Info:Preparing to update with package '{source_file}'");
 
     // 解包
-    let (temp_dir_inner_path, fresh_package) = unpack_nep(source_file, verify_signature)?;
+    let (temp_dir_inner_path, fresh_package) = unpack_nep(ctx, source_file, verify_signature)?;
     let name = fresh_package.package.name.clone();
     let fresh_scope = fresh_package.package.scope.clone();
     log!(
@@ -170,7 +188,7 @@ pub fn update_using_package(source_file: &str, verify_signature: bool) -> Result
 
     // 验证包是否已安装
     log!("Info:Resolving package...");
-    let (local_package, local_diff) = info_local(&fresh_scope, &name).map_err(|e| {
+    let (local_package, local_diff) = info_local(ctx, &fresh_scope, &name).map_err(|e| {
         anyhow!("Error:Package '{name}' hasn't been installed or installation broken, use 'ept install' or 'ept uninstall' instead : '{e}'")
     })?;
 
@@ -179,6 +197,7 @@ pub fn update_using_package(source_file: &str, verify_signature: bool) -> Result
 
     // 处理作者不匹配
     if let Some(result) = handle_author_mismatch(
+        ctx,
         source_file,
         &local_package,
         &fresh_package,
@@ -188,7 +207,7 @@ pub fn update_using_package(source_file: &str, verify_signature: bool) -> Result
         return Ok(result);
     }
 
-    let located = get_path_apps(&local_package.package.scope, &name, false)?;
+    let located = get_path_apps(ctx, &local_package.package.scope, &name, false)?;
     log!(
         "Debug:Located installation at '{path}'",
         path = p2s!(&located)
@@ -197,18 +216,18 @@ pub fn update_using_package(source_file: &str, verify_signature: bool) -> Result
 
     // 执行工作流转换
     log!("Debug:Running workflow transitions for update");
-    run_old_remove_if_needed(&located, &temp_dir_inner_path, &local_package)?;
-    reverse_setup_workflow(&located, local_package)?;
+    run_old_remove_if_needed(ctx, &located, &temp_dir_inner_path, &local_package)?;
+    reverse_setup_workflow(ctx, &located, local_package)?;
 
     // 如有展开工作流则执行
     let temp_dir_inner = p2s!(temp_dir_inner_path);
     if is_workshop_expandable(&temp_dir_inner) {
-        expand_workshop(&temp_dir_inner)?;
+        expand_workshop(ctx, &temp_dir_inner)?;
     }
 
     // 部署并运行新工作流
     deploy_update(&temp_dir_inner_path, &located, &name)?;
-    run_new_workflow(&temp_dir_inner_path, &located, fresh_package.clone())?;
+    run_new_workflow(ctx, &temp_dir_inner_path, &located, fresh_package.clone())?;
 
     // 保存上下文并验证
     let ctx_path = located.join(DIR_NEP_CONTEXT);
@@ -219,7 +238,7 @@ pub fn update_using_package(source_file: &str, verify_signature: bool) -> Result
     installed_validator(&located_str)?;
     log_ok_last!("Info:Validating update...");
 
-    clean_temp(source_file)?;
+    clean_temp(ctx, source_file)?;
 
     Ok(UpdateInfo {
         name,
@@ -229,14 +248,18 @@ pub fn update_using_package(source_file: &str, verify_signature: bool) -> Result
     })
 }
 
-pub fn update_using_url(url: &str, verify_signature: bool) -> Result<UpdateInfo> {
+pub fn update_using_url(
+    ctx: &RuntimeContext,
+    url: &str,
+    verify_signature: bool,
+) -> Result<UpdateInfo> {
     // 下载文件到临时目录
-    let cache_path = get_path_cache()?;
+    let cache_path = get_path_cache(ctx)?;
     let url_hash = compute_hash_blake3_from_string(url)?;
-    let (p, cache_ctx) = download_nep(url, Some((cache_path, url_hash)))?;
+    let (p, cache_ctx) = download_nep(ctx, url, Some((cache_path, url_hash)))?;
 
     // 更新
-    let info = update_using_package(&p2s!(p), verify_signature)?;
+    let info = update_using_package(ctx, &p2s!(p), verify_signature)?;
 
     // 缓存下载的包
     spawn_cache(cache_ctx)?;
@@ -244,12 +267,16 @@ pub fn update_using_url(url: &str, verify_signature: bool) -> Result<UpdateInfo>
     Ok(info)
 }
 
-pub fn update_using_package_matcher(matcher: String, verify_signature: bool) -> Result<UpdateInfo> {
+pub fn update_using_package_matcher(
+    ctx: &RuntimeContext,
+    matcher: String,
+    verify_signature: bool,
+) -> Result<UpdateInfo> {
     // 解析
-    let parsed = parse_update_inputs(vec![matcher], verify_signature)?;
+    let parsed = parse_update_inputs(ctx, vec![matcher], verify_signature)?;
     // 执行更新
     if let ParseInputResEnum::PackageMatcher(p) = &parsed.first().unwrap().0 {
-        update_using_url(&p.download_url, verify_signature)
+        update_using_url(ctx, &p.download_url, verify_signature)
     } else {
         Err(anyhow!(
             "Error:Fatal:Input matcher can't be parsed as package matcher"
@@ -258,6 +285,7 @@ pub fn update_using_package_matcher(matcher: String, verify_signature: bool) -> 
 }
 
 pub fn update_using_parsed(
+    ctx: &RuntimeContext,
     parsed: Vec<ParseInputResEnum>,
     verify_signature: bool,
 ) -> Result<Vec<UpdateInfo>> {
@@ -272,20 +300,20 @@ pub fn update_using_parsed(
         let res = match parsed {
             ParseInputResEnum::LocalPath(p, temp_dir) => {
                 if let Some(temp_dir) = temp_dir {
-                    update_using_package(&p2s!(temp_dir), false)?
+                    update_using_package(ctx, &p2s!(temp_dir), false)?
                 } else {
-                    update_using_package(&p, verify_signature)?
+                    update_using_package(ctx, &p, verify_signature)?
                 }
             }
             ParseInputResEnum::Url(u, temp_dir) => {
                 if let Some(temp_dir) = temp_dir {
-                    update_using_package(&p2s!(temp_dir), false)?
+                    update_using_package(ctx, &p2s!(temp_dir), false)?
                 } else {
-                    update_using_url(&u, verify_signature)?
+                    update_using_url(ctx, &u, verify_signature)?
                 }
             }
             ParseInputResEnum::PackageMatcher(p) => {
-                update_using_url(&p.download_url, verify_signature)?
+                update_using_url(ctx, &p.download_url, verify_signature)?
             }
         };
         log!("{}", res.format_success());
@@ -294,9 +322,9 @@ pub fn update_using_parsed(
     Ok(arr)
 }
 
-pub fn update_all(verify_signature: bool) -> Result<(i32, i32)> {
+pub fn update_all(ctx: &RuntimeContext, verify_signature: bool) -> Result<(i32, i32)> {
     // 遍历 list 结果，生成更新列表
-    let list_res = list()?;
+    let list_res = list(ctx)?;
     let update_list: Vec<UpdateInfo> = list_res
         .iter()
         .filter_map(|node| {
@@ -330,8 +358,8 @@ pub fn update_all(verify_signature: bool) -> Result<(i32, i32)> {
                 acc + &node.to_string()
             });
         println!("{tip}");
-        if !ask_yn(
-            format!("Ready to update those {count} packages, continue?"),
+        if !ctx.interaction().ask_yn(
+            &format!("Ready to update those {count} packages, continue?"),
             true,
         ) {
             return Err(anyhow!("Error:Operation canceled by user"));
@@ -341,10 +369,14 @@ pub fn update_all(verify_signature: bool) -> Result<(i32, i32)> {
     // 依次更新
     let mut success_count = 0;
     let mut failure_count = 0;
-    set_flag(Flag::Confirm, true);
+    let mut temp_auto_confirm_cfg = ctx.clone();
+    temp_auto_confirm_cfg.cfg.interaction.auto_confirm_all = true;
     for info in update_list {
-        let res =
-            update_using_package_matcher(format!("{}/{}", info.scope, info.name), verify_signature);
+        let res = update_using_package_matcher(
+            &temp_auto_confirm_cfg,
+            format!("{}/{}", info.scope, info.name),
+            verify_signature,
+        );
         if let Err(e) = res {
             failure_count += 1;
             log!("{}", info.format_failure(e));
@@ -353,7 +385,6 @@ pub fn update_all(verify_signature: bool) -> Result<(i32, i32)> {
             log!("{}", info.format_success());
         }
     }
-    set_flag(Flag::Confirm, false);
 
     Ok((success_count, failure_count))
 }
@@ -375,31 +406,33 @@ fn test_same_author() {
 
 #[test]
 fn test_update_using_package() {
-    set_flag(Flag::Debug, true);
-    set_flag(Flag::Confirm, true);
     crate::utils::test::_ensure_clear_test_dir();
+
+    use crate::utils::test::_default_test_cfg;
+    let cfg = &_default_test_cfg();
 
     // 卸载
     crate::utils::test::_ensure_testing_vscode_uninstalled();
 
     // 安装旧版本
     crate::pack(
+        cfg,
         "./examples/VSCode",
         Some("./test/VSCode_1.75.0.0_Cno.nep".to_string()),
         true,
     )
     .unwrap();
-    install_using_package("./test/VSCode_1.75.0.0_Cno.nep", true).unwrap();
+    install_using_package(cfg, "./test/VSCode_1.75.0.0_Cno.nep", true).unwrap();
 
     // 手动更新版本号
     crate::utils::fs::copy_dir("examples/VSCode", "test/VSCode").unwrap();
     crate::utils::test::_modify_package_dir_version("test/VSCode", "1.75.4.1");
 
     // 更新文件
-    let old_ico = get_path_apps("Microsoft", "VSCode", false)
+    let old_ico = get_path_apps(cfg, "Microsoft", "VSCode", false)
         .unwrap()
         .join("favicon.ico");
-    let new_ico = get_path_apps("Microsoft", "VSCode", false)
+    let new_ico = get_path_apps(cfg, "Microsoft", "VSCode", false)
         .unwrap()
         .join("icon.ico");
     assert!(old_ico.exists());
@@ -410,21 +443,22 @@ fn test_update_using_package() {
     .unwrap();
 
     // 安装新版本
-    update_using_package("test/VSCode", false).unwrap();
+    update_using_package(cfg, "test/VSCode", false).unwrap();
     assert!(!old_ico.exists());
     assert!(new_ico.exists());
 
     // 卸载
-    crate::uninstall(None, "VSCode").unwrap();
+    crate::uninstall(cfg, None, "VSCode").unwrap();
 }
 
 #[test]
 fn test_update_all() {
     let tup = crate::utils::test::_mount_custom_mirror();
     let (_, mut handler) = crate::utils::test::_run_static_file_server();
-    set_flag(Flag::Debug, true);
-    set_flag(Flag::Confirm, true);
     crate::utils::test::_ensure_clear_test_dir();
+
+    use crate::utils::test::_default_test_cfg;
+    let mut cfg = _default_test_cfg();
 
     // 确保已卸载
     crate::utils::test::_ensure_testing_vscode_uninstalled();
@@ -435,19 +469,21 @@ fn test_update_all() {
     crate::utils::test::_modify_package_dir_version("test/Notepad", "22.0.0.0");
 
     // 安装旧版本
-    install_using_package("examples/VSCode", false).unwrap();
-    install_using_package("test/Notepad", false).unwrap();
+    install_using_package(&cfg, "examples/VSCode", false).unwrap();
+    install_using_package(&cfg, "test/Notepad", false).unwrap();
 
     // 生成新包
     let source_dir = crate::utils::test::_fork_example_with_version("examples/VSCode", "1.75.4.2");
     std::fs::create_dir("test/static").unwrap();
     crate::pack(
+        &cfg,
         &source_dir,
         Some("./test/static/VSCode_1.75.4.2_Cno.nep".to_string()),
         false,
     )
     .unwrap();
     crate::pack(
+        &cfg,
         "./examples/Notepad",
         Some("./test/static/Notepad_22.1.0.0_Cno.nep".to_string()),
         false,
@@ -455,10 +491,16 @@ fn test_update_all() {
     .unwrap();
 
     // 更新全部
-    let (_, failure_count) = update_all(false).unwrap();
+    let (_, failure_count) = update_all(&mut cfg, false).unwrap();
     assert_eq!(failure_count, 0);
-    assert!(info_local("Microsoft", "VSCode").unwrap().1.version == *"1.75.4.2");
-    assert!(info_local("Microsoft", "Notepad").unwrap().1.version == *"22.1.0.0");
+    assert_eq!(
+        info_local(&cfg, "Microsoft", "VSCode").unwrap().1.version,
+        *"1.75.4.2"
+    );
+    assert_eq!(
+        info_local(&cfg, "Microsoft", "Notepad").unwrap().1.version,
+        *"22.1.0.0"
+    );
 
     // 卸载
     crate::utils::test::_ensure_testing_vscode_uninstalled();
@@ -471,11 +513,11 @@ fn test_update_all() {
 
 #[test]
 fn test_update_workflow_executions() {
+    use crate::utils::test::_default_test_cfg;
     use std::path::Path;
+
     let desktop = crate::utils::env::env_desktop().unwrap();
     assert!(crate::utils::wild_match::parse_wild_match("vsc*.lnk", &desktop).is_err());
-    set_flag(Flag::Confirm, true);
-
     // (旧包类型，新包类型，更新后断言存在的文件)
     let test_arr = vec![
         (0, 0, vec!["vsc0-setup-1.75.4.1"]),
@@ -496,6 +538,8 @@ fn test_update_workflow_executions() {
         (3, 3, vec!["vsc3-update-1.75.4.1"]),
     ];
 
+    let cfg = &_default_test_cfg();
+
     for (old_type, new_type, assert_files) in test_arr {
         log!("Info:Testing updating {old_type} -> {new_type}");
         // 卸载
@@ -503,6 +547,7 @@ fn test_update_workflow_executions() {
 
         // 安装旧版本
         crate::entrances::install_using_package(
+            cfg,
             &format!("examples/UpdateSuit/VSCode{old_type}"),
             false,
         )
@@ -516,7 +561,7 @@ fn test_update_workflow_executions() {
             &format!("examples/UpdateSuit/VSCode{new_type}"),
             "1.75.4.1",
         );
-        crate::entrances::update_using_package(&source_file, false).unwrap();
+        crate::entrances::update_using_package(cfg, &source_file, false).unwrap();
 
         // 断言仅存在指定文件
         for file in assert_files {
@@ -537,16 +582,19 @@ fn test_update_workflow_executions() {
 
 #[test]
 fn test_update_with_different_author() {
-    set_flag(Flag::Confirm, true);
+    use crate::utils::test::_default_test_cfg;
+
     let desktop = crate::utils::env::env_desktop().unwrap();
     assert!(crate::utils::wild_match::parse_wild_match("vsc*.lnk", &desktop).is_err());
     let desktop_path = std::path::Path::new(&desktop);
+
+    let cfg = &_default_test_cfg();
 
     // 卸载
     crate::utils::test::_ensure_testing_vscode_uninstalled();
 
     // 安装旧版本
-    crate::entrances::install_using_package("examples/UpdateSuit/VSCode3", false).unwrap();
+    crate::entrances::install_using_package(cfg, "examples/UpdateSuit/VSCode3", false).unwrap();
     assert!(desktop_path.join("vsc3-setup-1.75.4.0.lnk").exists());
 
     // 安装新版本
@@ -556,7 +604,7 @@ fn test_update_with_different_author() {
         std::path::Path::new(&source_file).join("workflows/update.toml"),
     )
     .unwrap();
-    update_using_package(&source_file, false).unwrap();
+    update_using_package(cfg, &source_file, false).unwrap();
 
     // 断言是先卸载再安装的
     assert!(!desktop_path.join("vsc3-setup-1.75.4.0.lnk").exists());
@@ -572,11 +620,12 @@ fn test_update_with_different_author() {
 
 #[test]
 fn test_update_expandable() {
+    use crate::utils::test::_default_test_cfg;
     use std::path::Path;
-    set_flag(Flag::Confirm, true);
-    set_flag(Flag::Debug, true);
     crate::utils::test::_ensure_clear_test_dir();
     crate::utils::test::_ensure_testing_uninstalled("Microsoft", "VSCodeE");
+
+    let cfg = &_default_test_cfg();
 
     // 断言原来的包中不包含这个二进制文件
     assert!(!Path::new("examples/VSCodeE/VSCodeE/Code.exe").exists());
@@ -587,17 +636,17 @@ fn test_update_expandable() {
 
     // 安装
     crate::utils::fs::copy_dir("examples/VSCodeE", "test/VSCodeE").unwrap();
-    install_using_package("test/VSCodeE", false).unwrap();
+    install_using_package(cfg, "test/VSCodeE", false).unwrap();
 
     // 断言安装成功
-    assert!(info_local("Microsoft", "VSCodeE").is_ok());
-    let app_exe_path = get_path_apps("Microsoft", "VSCodeE", false)
+    assert!(info_local(cfg, "Microsoft", "VSCodeE").is_ok());
+    let app_exe_path = get_path_apps(cfg, "Microsoft", "VSCodeE", false)
         .unwrap()
         .join("Code.exe");
     assert!(app_exe_path.exists());
 
     // 手动删除一个依赖文件
-    let ico_path = get_path_apps("Microsoft", "VSCodeE", false)
+    let ico_path = get_path_apps(cfg, "Microsoft", "VSCodeE", false)
         .unwrap()
         .join("favicon.ico");
     std::fs::remove_file(&ico_path).unwrap();
@@ -611,10 +660,10 @@ fn test_update_expandable() {
     assert!(!Path::new(&pkg_path).join("VSCodeE/Code.exe").exists());
 
     // 安装更新包
-    update_using_package(&pkg_path, false).unwrap();
+    update_using_package(cfg, &pkg_path, false).unwrap();
 
     // 断言安装成功
-    assert!(info_local("Microsoft", "VSCodeE").unwrap().1.version == "1.75.5.0");
+    assert!(info_local(cfg, "Microsoft", "VSCodeE").unwrap().1.version == "1.75.5.0");
     assert!(app_exe_path.exists());
     assert!(ico_path.exists());
 
@@ -624,7 +673,9 @@ fn test_update_expandable() {
 
 #[test]
 fn test_update_offline() {
-    crate::utils::flags::set_flag(crate::utils::flags::Flag::Confirm, true);
+    use crate::utils::test::_default_test_cfg;
+
+    let cfg = &_default_test_cfg();
     crate::utils::test::_ensure_testing_vscode();
-    assert!(update_using_package("examples/vscode", true).is_err());
+    assert!(update_using_package(cfg, "examples/vscode", true).is_err());
 }

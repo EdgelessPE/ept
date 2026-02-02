@@ -1,3 +1,4 @@
+use crate::types::context::RuntimeContext;
 use crate::{
     executor::workflow_executor,
     log, log_ok_last, p2s,
@@ -15,7 +16,7 @@ pub fn is_workshop_expandable(workshop_path: &str) -> bool {
 }
 
 // 给定一个工作目录，对该目录执行展开
-pub fn expand_workshop(workshop_path: &str) -> Result<()> {
+pub fn expand_workshop(ctx: &RuntimeContext, workshop_path: &str) -> Result<()> {
     log!("Info:Expanding nep package...");
     let base = Path::new(workshop_path);
     // 检查展开工作流是否存在
@@ -27,11 +28,12 @@ pub fn expand_workshop(workshop_path: &str) -> Result<()> {
     }
 
     // 读取包
-    let package_struct = parse_package(&p2s!(base.join(FILE_PACKAGE)), workshop_path, false)?;
+    let package_struct = parse_package(ctx, &p2s!(base.join(FILE_PACKAGE)), workshop_path, false)?;
 
     // 执行展开工作流
     let expand_workflow = parse_workflow(&p2s!(expand_workflow_path))?;
     workflow_executor(
+        ctx,
         expand_workflow,
         p2s!(base.join(&package_struct.package.name)),
         package_struct,
@@ -46,6 +48,7 @@ pub fn expand_workshop(workshop_path: &str) -> Result<()> {
 
 #[test]
 fn test_expand_workshop() {
+    use crate::utils::test::_default_test_cfg;
     use crate::utils::test::{_ensure_clear_test_dir, _run_static_file_server};
     use std::fs::copy;
 
@@ -56,8 +59,10 @@ fn test_expand_workshop() {
     copy("examples/VSCode/VSCode/Code.exe", "test/Code.exe").unwrap();
     crate::utils::fs::copy_dir("examples/VSCodeE", "test/VSCodeE").unwrap();
 
+    let cfg = &_default_test_cfg();
+
     // 对工作目录进行展开
-    expand_workshop("test/VSCodeE").unwrap();
+    expand_workshop(cfg, "test/VSCodeE").unwrap();
 
     // 断言文件是否存在
     assert!(Path::new("test/VSCodeE/VSCodeE/Code.exe").exists());

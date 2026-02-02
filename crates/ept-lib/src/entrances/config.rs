@@ -1,21 +1,14 @@
 use std::path::Path;
 
-use crate::{
-    p2s,
-    types::cfg::Cfg,
-    utils::{
-        cfg::{get_config, set_config},
-        term::ask_yn,
-    },
-};
+use crate::types::context::RuntimeContext;
+use crate::{p2s, types::cfg::Cfg};
 use anyhow::{anyhow, Error, Result};
 use toml::Value;
 
 // 返回（key 指向的 value，整个 Cfg）
-fn get_toml_value(table: &str, key: &str) -> Result<(Value, Value)> {
-    let cfg = get_config();
+fn get_toml_value(ctx: &RuntimeContext, table: &str, key: &str) -> Result<(Value, Value)> {
     // 序列化为 toml 对象
-    let toml = Value::try_from(cfg)?;
+    let toml = Value::try_from(ctx.cfg.clone())?;
     // 读 table
     let tab = toml
         .get(table)
@@ -28,12 +21,12 @@ fn get_toml_value(table: &str, key: &str) -> Result<(Value, Value)> {
     Ok((val.to_owned(), toml))
 }
 
-pub fn config_set(table: &str, key: &str, value: &str) -> Result<()> {
+pub fn config_set(ctx: &RuntimeContext, table: &str, key: &str, value: &str) -> Result<()> {
     // 错误处理闭包
     let err_wrapper =
         |e: Error| anyhow!("Error:Failed to set value of '${key}' as '${value}' : ${e}");
     // 拿到这个值研究一下类型
-    let (val, mut cfg) = get_toml_value(table, key).map_err(err_wrapper)?;
+    let (val, mut cfg) = get_toml_value(ctx, table, key).map_err(err_wrapper)?;
     let table = cfg.get_mut(table).unwrap();
     match val {
         Value::String(_) => {
@@ -66,16 +59,18 @@ pub fn config_set(table: &str, key: &str, value: &str) -> Result<()> {
     }
 
     // 写回
-    let updated_cfg = cfg.try_into().map_err(|e| {
+    // 从 toml Value 反序列化回 Cfg
+    let updated_cfg_ser: Cfg = cfg.try_into().map_err(|e| {
         anyhow!("Error:Failed to convert modified config to valid config struct : {e}")
     })?;
-    set_config(updated_cfg)?;
+    let updated_cfg = updated_cfg_ser;
+    Cfg::overwrite(updated_cfg)?;
 
     Ok(())
 }
 
-pub fn config_get(table: &str, key: &str) -> Result<String> {
-    let (val, _) = get_toml_value(table, key)?;
+pub fn config_get(ctx: &RuntimeContext, table: &str, key: &str) -> Result<String> {
+    let (val, _) = get_toml_value(ctx, table, key)?;
 
     let str = val
         .as_str()
@@ -87,23 +82,22 @@ pub fn config_get(table: &str, key: &str) -> Result<String> {
     Ok(str)
 }
 
-pub fn config_list() -> Result<String> {
-    let cfg = get_config();
+pub fn config_list(runtime_ctx: &RuntimeContext) -> Result<String> {
+    let cfg = &runtime_ctx.cfg;
     Ok(format!("{cfg:#?}"))
 }
 
-pub fn config_init() -> Result<String> {
+pub fn config_init(ctx: &RuntimeContext) -> Result<String> {
     let file_path = config_which()?;
     if Path::new(&file_path).exists()
-        && !ask_yn(
-            format!("Config file already exists at '{file_path}', overwrite it?"),
+        && !ctx.interaction().ask_yn(
+            &format!("Config file already exists at '{file_path}', overwrite it?"),
             false,
         )
     {
         return Err(anyhow!("Error:Operation cancelled by user"));
     }
-    let init_cfg = Cfg::default();
-    set_config(init_cfg)?;
+    Cfg::overwrite(ctx.cfg.clone())?;
     Ok(file_path)
 }
 
@@ -114,58 +108,62 @@ pub fn config_which() -> Result<String> {
 
 #[test]
 fn test_config() {
+    use crate::types::cfg::FILE_NAME;
+    use crate::utils::test::_default_test_cfg;
     use std::{fs, path::Path};
+
+    let config = _default_test_cfg();
+
     // 校对函数，同时检查 API 返回和本地文件
     fn checker(answer: Cfg) {
-        let cfg = get_config();
-        assert_eq!(answer, cfg);
-        let toml = fs::read_to_string("eptrc.toml").unwrap();
-        let file_cfg: Cfg = toml::from_str(&toml).unwrap();
-        assert_eq!(file_cfg, answer);
+        let toml = fs::read_to_string(FILE_NAME).unwrap();
+        let file_cfg_ser: Cfg = toml::from_str(&toml).unwrap();
+        let answer_ser: Cfg = answer.into();
+        assert_eq!(file_cfg_ser, answer_ser);
     }
 
     // 先保存当前目录下 eptrc.toml 的现场
-    let scene_opt = if Path::new("eptrc.toml").exists() {
-        Some(fs::read_to_string("eptrc.toml").unwrap())
+    let scene_opt = if Path::new(FILE_NAME).exists() {
+        Some(fs::read_to_string(FILE_NAME).unwrap())
     } else {
         // 如果没有必须新建一个，不然默认会在用户目录里面新建配置文件
-        let mut default_cfg = Cfg::default();
-        default_cfg.local.base = "C:/Users/Public/Videos".to_string();
-        let text = toml::to_string_pretty(&default_cfg).unwrap();
-        fs::write("eptrc.toml", text).unwrap();
+        let mut default_cfg = _default_test_cfg();
+        default_cfg.cfg.local.base = "C:/Users/Public/Videos".to_string();
+        let text = toml::to_string_pretty(&default_cfg.cfg).unwrap();
+        fs::write(FILE_NAME, text).unwrap();
         None
     };
 
     // 拿到答案
-    let answer_cfg_init = Cfg::default();
+    let answer_cfg_init = _default_test_cfg();
 
     // 测试初始化
-    config_init().unwrap();
-    checker(answer_cfg_init.clone());
+    config_init(&config).unwrap();
+    checker(answer_cfg_init.cfg.clone());
 
     // 测试 set
     let mut new_cfg = answer_cfg_init.clone();
     let new_base = "C:/Users/Public/Music".to_string();
-    new_cfg.local.base.clone_from(&new_base);
-    assert!(config_set("local", "base", "114514").is_err());
-    config_set("local", "base", &new_base).unwrap();
+    new_cfg.cfg.local.base.clone_from(&new_base);
+    assert!(config_set(&config, "local", "base", "114514").is_err());
+    config_set(&config, "local", "base", &new_base).unwrap();
 
     // 测试 get
-    let get_base = config_get("local", "base").unwrap();
+    let get_base = config_get(&config, "local", "base").unwrap();
     assert_eq!(get_base, new_base);
 
     // 测试 list
-    assert_eq!(config_list().unwrap(), format!("{new_cfg:#?}"));
+    assert_eq!(config_list(&config).unwrap(), format!("{:#?}", new_cfg.cfg));
 
     // 测试 which
-    assert_eq!(config_which().unwrap(), "eptrc.toml".to_string());
+    assert_eq!(config_which().unwrap(), FILE_NAME.to_string());
 
     // 还原现场
     if let Some(text) = scene_opt {
         // 需要手动重置一次全局 Cfg，否则之后的测试无法正确进行
         let cfg: Cfg = toml::from_str(&text).unwrap();
-        set_config(cfg).unwrap();
+        Cfg::overwrite(cfg).unwrap();
     } else {
-        fs::remove_file("eptrc.toml").unwrap();
+        fs::remove_file(FILE_NAME).unwrap();
     }
 }

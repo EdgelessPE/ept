@@ -5,21 +5,16 @@ use std::{
 
 use anyhow::{anyhow, Result};
 use config::Config;
-use dirs::home_dir;
 use humantime::parse_duration;
 use serde::{Deserialize, Deserializer, Serialize};
 use toml::{to_string_pretty, Value};
 
-use crate::{log, p2s, types::verifiable::Verifiable};
-
 use super::mixed_fs::MixedFS;
+use crate::types::context::RuntimeContext;
+use crate::utils::{get_cur_dir, get_user_dir};
+use crate::{log, p2s, types::context::VerifiableCtx, types::verifiable::Verifiable};
 
-lazy_static! {
-    static ref CUR_DIR: PathBuf = Path::new("./").to_path_buf();
-    static ref USER_DIR: PathBuf = home_dir().unwrap().join("ept");
-}
-
-const FILE_NAME: &str = "eptrc.toml";
+pub const FILE_NAME: &str = "eptrc.toml";
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct Local {
     pub base: String,
@@ -29,7 +24,6 @@ pub struct Local {
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct Online {
     pub mirror_update_interval: String,
-    pub offline: bool,
     pub auto_check_upgrade: bool,
 }
 #[derive(Clone, Debug, PartialEq)]
@@ -90,6 +84,14 @@ pub struct Preference {
 pub struct Interaction {
     pub enable_windows_terminal_status: bool,
     pub show_emojis: bool,
+    pub auto_confirm_all: bool,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
+pub struct Mode {
+    pub qa: bool,
+    pub debug: bool,
+    pub offline: bool,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
@@ -98,19 +100,19 @@ pub struct Cfg {
     pub online: Online,
     pub preference: Preference,
     pub interaction: Interaction,
+    pub mode: Mode,
 }
 
 impl Default for Cfg {
     fn default() -> Self {
         Self {
             local: Local {
-                base: p2s!(USER_DIR),
+                base: p2s!(get_user_dir()),
                 enable_cache: true,
                 cache_valid_duration: "30d".to_string(),
             },
             online: Online {
                 auto_check_upgrade: true,
-                offline: false,
                 mirror_update_interval: "1d".to_string(),
             },
             preference: Preference {
@@ -121,6 +123,12 @@ impl Default for Cfg {
             interaction: Interaction {
                 enable_windows_terminal_status: false,
                 show_emojis: true,
+                auto_confirm_all: false,
+            },
+            mode: Mode {
+                qa: false,
+                debug: false,
+                offline: false,
             },
         }
     }
@@ -128,13 +136,16 @@ impl Default for Cfg {
 
 impl Cfg {
     pub fn use_which(is_initial: bool) -> Result<PathBuf> {
-        let from = if CUR_DIR.join(FILE_NAME).exists() {
-            CUR_DIR.join(FILE_NAME)
+        let cur_dir = get_cur_dir();
+        let user_dir = get_user_dir();
+
+        let from = if cur_dir.join(FILE_NAME).exists() {
+            cur_dir.join(FILE_NAME)
         } else {
-            let from = USER_DIR.join(FILE_NAME);
+            let from = user_dir.join(FILE_NAME);
             if !from.exists() {
-                create_dir_all(USER_DIR.to_str().unwrap()).map_err(|e| {
-                    anyhow!("Error:Can't create '{dir}' : {e}", dir = p2s!(USER_DIR),)
+                create_dir_all(user_dir.to_str().unwrap()).map_err(|e| {
+                    anyhow!("Error:Can't create '{dir}' : {e}", dir = p2s!(user_dir),)
                 })?;
                 let default = Value::try_from(Self::default())?;
                 write(from.clone(), to_string_pretty(&default)?).map_err(|e| {
@@ -156,7 +167,8 @@ impl Cfg {
     pub fn init() -> Result<Self> {
         let from = Self::use_which(true)?;
         let f = p2s!(from);
-        let default_val = Value::try_from(Self::default()).unwrap();
+        let default_val = Value::try_from(Self::default())
+            .map_err(|e| anyhow!("Error:Failed to convert default config to Value : {e}"))?;
         let settings = Config::builder()
             .add_source(config::File::from_str(
                 &to_string_pretty(&default_val).unwrap(),
@@ -173,8 +185,12 @@ impl Cfg {
             )
         })?;
         let mixed_fs = MixedFS::new("");
+        let verifiable_ctx = VerifiableCtx {
+            mixed_fs: &mixed_fs,
+            runtime_ctx: &RuntimeContext::default(),
+        };
         // 校验
-        cfg.verify_self(&mixed_fs)
+        cfg.verify_self(&verifiable_ctx)
             .map_err(|e| anyhow!("Error:Invalid config '{f}' : {e}", f = p2s!(from)))?;
 
         Ok(cfg)
@@ -182,8 +198,12 @@ impl Cfg {
     pub fn overwrite(other: Self) -> Result<()> {
         // 校验
         let mixed_fs = MixedFS::new("");
+        let verifiable_ctx = VerifiableCtx {
+            mixed_fs: &mixed_fs,
+            runtime_ctx: &RuntimeContext::default(),
+        };
         other
-            .verify_self(&mixed_fs)
+            .verify_self(&verifiable_ctx)
             .map_err(|e| anyhow!("Error:Invalid overwrite config : {e}"))?;
 
         let from = Self::use_which(false)?;
@@ -195,7 +215,7 @@ impl Cfg {
 }
 
 impl Verifiable for Cfg {
-    fn verify_self(&self, _: &MixedFS) -> Result<()> {
+    fn verify_self(&self, _: &VerifiableCtx) -> Result<()> {
         // base 必须为存在的绝对路径
         let base_path = Path::new(&self.local.base);
         if !base_path.is_absolute() {

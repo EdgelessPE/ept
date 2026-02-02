@@ -1,9 +1,7 @@
-use anyhow::Result;
-
-use super::mixed_fs::MixedFS;
+use crate::types::context::VerifiableCtx;
 
 pub trait Verifiable {
-    fn verify_self(&self, mixed_fs: &MixedFS) -> Result<()>;
+    fn verify_self(&self, cx: &VerifiableCtx) -> anyhow::Result<()>;
 }
 
 /// 校验字符串的枚举值是否有效

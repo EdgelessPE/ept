@@ -70,7 +70,7 @@ pub enum FmtPrintCaller {
 }
 
 pub trait FmtPrint {
-    fn fmt_print(&self, fmt_caller: FmtPrintCaller) -> Result<String>;
+    fn fmt_print(&self, fmt_caller: FmtPrintCaller, show_emojis: bool) -> Result<String>;
     fn fmt_brief_print(&self, fmt_caller: FmtPrintCaller) -> Result<String>;
 }
 

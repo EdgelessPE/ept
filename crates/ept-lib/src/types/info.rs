@@ -3,10 +3,7 @@ use colored::Colorize;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
 
-use crate::utils::{
-    cfg::get_config,
-    fmt_print::{FmtPrint, FmtPrintCaller},
-};
+use crate::utils::fmt_print::{FmtPrint, FmtPrintCaller};
 
 use super::extended_semver::ExSemVer;
 use super::meta::MetaResult;
@@ -144,7 +141,7 @@ impl Info {
 }
 
 impl FmtPrint for Info {
-    fn fmt_print(&self, fmt_caller: FmtPrintCaller) -> Result<String> {
+    fn fmt_print(&self, fmt_caller: FmtPrintCaller, show_emojis: bool) -> Result<String> {
         let mut output = String::new();
 
         let (title, source) = self.get_common_tips(&fmt_caller)?;
@@ -158,8 +155,6 @@ impl FmtPrint for Info {
         // 分割线
         output.push_str(&"-".repeat(71));
         output.push('\n');
-
-        let show_emojis = get_config().interaction.show_emojis;
         if let Some(meta) = &self.meta {
             let package = &meta.package.package;
             // Basic 部分
@@ -413,9 +408,12 @@ fn test_info() {
     };
     println!(
         "{}",
-        info.fmt_print(FmtPrintCaller::Install(
-            crate::utils::fmt_print::PackageSource::Mirror("Official".to_string())
-        ))
+        info.fmt_print(
+            FmtPrintCaller::Install(crate::utils::fmt_print::PackageSource::Mirror(
+                "Official".to_string()
+            )),
+            true
+        )
         .unwrap()
     );
     println!(

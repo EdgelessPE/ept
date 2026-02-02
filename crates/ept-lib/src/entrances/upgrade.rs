@@ -3,13 +3,13 @@ use std::{
     process::{self, Command},
 };
 
+use crate::types::context::RuntimeContext;
 use crate::{
     log, p2s,
     utils::{
         allocate_path_temp,
         download::download,
         get_path_toolchain,
-        term::ask_yn,
         upgrade::{check_has_upgrade, print_upgradable, print_upgradable_cross_wid_gap},
     },
 };
@@ -18,10 +18,10 @@ use zip::ZipArchive;
 
 // dry_run: 干运行，仅检查是否有更新
 // need_exit_process: 仅当单测时传入 false，以此防止跑单测时进程退出
-pub fn upgrade(dry_run: bool, need_exit_process: bool) -> Result<String> {
+pub fn upgrade(ctx: &RuntimeContext, dry_run: bool, need_exit_process: bool) -> Result<String> {
     let current_version = env!("CARGO_PKG_VERSION");
     // 检查是否有更新
-    let (has_upgrade, is_cross_wid_gap, latest_release) = check_has_upgrade()?;
+    let (has_upgrade, is_cross_wid_gap, latest_release) = check_has_upgrade(ctx)?;
     log!(
         "Debug:Upgrade check result - has_upgrade: {has_upgrade}, is_cross_wid_gap: {is_cross_wid_gap}, latest_version: '{}'",
         &latest_release.version
@@ -41,8 +41,8 @@ pub fn upgrade(dry_run: bool, need_exit_process: bool) -> Result<String> {
     }
 
     // 确认执行自更新
-    if !ask_yn(
-        format!(
+    if !ctx.interaction().ask_yn(
+        &format!(
             "Ready to upgrade ept toolchain from '{current_version}' to '{}', start now?",
             &latest_release.version
         ),
@@ -57,9 +57,9 @@ pub fn upgrade(dry_run: bool, need_exit_process: bool) -> Result<String> {
         &latest_release.version,
         &latest_release.url
     );
-    let temp_dir = allocate_path_temp("upgrade", false)?;
+    let temp_dir = allocate_path_temp(ctx, "upgrade", false)?;
     let zip_path = temp_dir.join("latest.zip");
-    let _ = download(&latest_release.url, zip_path.clone(), None)?;
+    let _ = download(ctx, &latest_release.url, zip_path.clone(), None)?;
 
     // 解压到临时目录
     let temp_release_dir = temp_dir.join("release");
@@ -90,7 +90,7 @@ pub fn upgrade(dry_run: bool, need_exit_process: bool) -> Result<String> {
     }
 
     // 写 cmd 脚本
-    let toolchain_path = get_path_toolchain()?;
+    let toolchain_path = get_path_toolchain(ctx)?;
     let script_path = temp_dir
         .join("upgrade.cmd")
         .to_string_lossy()
@@ -123,20 +123,20 @@ pub fn upgrade(dry_run: bool, need_exit_process: bool) -> Result<String> {
 #[test]
 fn test_upgrade() {
     use crate::signature::blake3::compute_hash_blake3;
-    use crate::utils::flags::{set_flag, Flag};
+    use crate::utils::test::_default_test_cfg;
     use crate::utils::test::_run_mirror_mock_server;
     use std::fs::{copy, remove_dir_all, rename};
     use std::{thread::sleep, time::Duration};
 
-    set_flag(Flag::Confirm, true);
-    set_flag(Flag::Debug, true);
     crate::utils::test::_ensure_clear_test_dir();
+
+    let test_cfg = _default_test_cfg();
 
     // 使用 mock 的镜像数据
     let mock_ctx = crate::utils::test::_use_mock_mirror_data();
 
     // 备份原工具链
-    let toolchain_path = get_path_toolchain().unwrap();
+    let toolchain_path = get_path_toolchain(&test_cfg).unwrap();
     let bak_toolchain_path = toolchain_path.parent().unwrap().join("toolchain_bak");
     let has_origin_toolchain = toolchain_path.exists();
     if has_origin_toolchain {
@@ -160,8 +160,8 @@ fn test_upgrade() {
     let (_, mut handler) = crate::utils::test::_run_static_file_server();
 
     // 运行 upgrade
-    upgrade(true, false).unwrap();
-    upgrade(false, false).unwrap();
+    upgrade(&test_cfg, true, false).unwrap();
+    upgrade(&test_cfg, false, false).unwrap();
 
     // 等待 3s 后断言程序被更新
     sleep(Duration::from_secs(10));

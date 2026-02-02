@@ -1,17 +1,9 @@
-use std::{env::current_dir, process::Child};
-
-use super::mixed_fs::MixedFS;
-use super::steps::VerifyStepCtx;
-use super::{
-    package::GlobalPackage, permissions::Generalizable, steps::Step, verifiable::Verifiable,
-};
-use crate::log;
-use crate::utils::{
-    conditions::{get_permissions_from_conditions, verify_conditions},
-    term::read_console,
-};
-use crate::{p2s, types::permissions::Permission};
-use anyhow::{anyhow, Result};
+use super::context::{VerifiableCtx, VerifyStepCtx};
+use super::{permissions::Generalizable, steps::Step, verifiable::Verifiable};
+use crate::types::context::RuntimeContext;
+use crate::types::permissions::Permission;
+use crate::utils::conditions::{get_permissions_from_conditions, verify_conditions};
+use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
@@ -48,16 +40,21 @@ impl WorkflowHeader {
 }
 
 impl Generalizable for WorkflowHeader {
-    fn generalize_permissions(&self) -> Result<Vec<Permission>> {
+    fn generalize_permissions(&self, ctx: &RuntimeContext) -> Result<Vec<Permission>> {
         // 获取条件语句所需的权限
-        get_permissions_from_conditions(self.get_conditions())
+        get_permissions_from_conditions(ctx, self.get_conditions())
     }
 }
 
 impl Verifiable for WorkflowHeader {
-    fn verify_self(&self, mixed_fs: &MixedFS) -> Result<()> {
-        // 校验条件
-        verify_conditions(self.get_conditions(), &mixed_fs.located, "1.0.0.0")
+    fn verify_self(&self, cx: &VerifiableCtx) -> Result<()> {
+        // 校验条件，使用上下文中的配置
+        verify_conditions(
+            cx.runtime_ctx,
+            self.get_conditions(),
+            &cx.mixed_fs.located,
+            "1.0.0.0",
+        )
     }
 }
 
@@ -69,7 +66,9 @@ fn test_header_perm() {
         step: "Step".to_string(),
         c_if: Some("Exist(\"./mc/vsc.exe\") && IsDirectory(\"${SystemDrive}/Windows\") || Exist(\"${AppData}/Roaming/Edgeless/ept\")".to_string()),
     };
-    let res = flow.generalize_permissions().unwrap();
+    let res = flow
+        .generalize_permissions(&crate::utils::test::_default_test_cfg())
+        .unwrap();
     assert_eq!(
         res,
         vec![
@@ -94,14 +93,21 @@ fn test_header_perm() {
 
 #[test]
 fn test_header_valid() {
+    use crate::utils::test::_default_test_cfg;
+
     let flow=WorkflowHeader{
         name: Some("Name".to_string()),
         step: "Step".to_string(),
         c_if: Some("Exist(\"./mc/vsc.exe\") && IsDirectory(\"${SystemDrive}/Windows\") || Exist(\"${AppData}/Roaming/Edgeless/ept\")".to_string()),
     };
+    use crate::types::mixed_fs::MixedFS;
     let mixed_fs = MixedFS::new("./examples/VSCode");
+    let cx = VerifiableCtx {
+        mixed_fs: &mixed_fs,
+        runtime_ctx: &_default_test_cfg(),
+    };
 
-    flow.verify_self(&mixed_fs).unwrap();
+    flow.verify_self(&cx).unwrap();
 
     let flow = WorkflowHeader {
         name: Some("Name".to_string()),
@@ -109,7 +115,11 @@ fn test_header_valid() {
         c_if: Some("${Arch}==\"X64\"".to_string()),
     };
 
-    assert!(flow.verify_self(&mixed_fs).is_err());
+    let ctx2 = VerifiableCtx {
+        mixed_fs: &mixed_fs,
+        runtime_ctx: &_default_test_cfg(),
+    };
+    assert!(flow.verify_self(&ctx2).is_err());
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
@@ -119,76 +129,22 @@ pub struct WorkflowNode {
 }
 
 impl Generalizable for WorkflowNode {
-    fn generalize_permissions(&self) -> Result<Vec<Permission>> {
+    fn generalize_permissions(&self, ctx: &RuntimeContext) -> Result<Vec<Permission>> {
         let mut perm = Vec::new();
-        perm.append(&mut self.header.generalize_permissions()?);
-        perm.append(&mut self.body.generalize_permissions()?);
+        perm.append(&mut self.header.generalize_permissions(ctx)?);
+        perm.append(&mut self.body.generalize_permissions(ctx)?);
 
         Ok(perm)
     }
 }
 
 impl WorkflowNode {
-    pub fn verify_step(&self, ctx: &VerifyStepCtx) -> Result<()> {
-        self.header.verify_self(&ctx.mixed_fs)?;
-        self.body.verify_step(ctx)
-    }
-}
-
-pub struct WorkflowContext {
-    pub located: String,
-    pub pkg: GlobalPackage,
-    pub async_execution_handlers: Vec<(String, Child, bool)>, // 命令，handler，是否被抛弃
-    pub exit_code: i32,
-}
-
-impl WorkflowContext {
-    pub fn _demo() -> Self {
-        Self::new(&p2s!(current_dir().unwrap()), GlobalPackage::_demo())
-    }
-
-    pub fn new(located: &str, pkg: GlobalPackage) -> Self {
-        Self {
-            pkg,
-            located: located.to_owned(),
-            async_execution_handlers: Vec::new(),
-            exit_code: 0,
-        }
-    }
-
-    pub fn finish(self) -> Result<i32> {
-        log!("Debug:Finish context");
-
-        // 等待异步 handlers
-        for (cmd, mut handler, abandon) in self.async_execution_handlers {
-            if abandon {
-                if let Err(e) = handler.kill() {
-                    log!("Warning(Execute):Failed to kill async abandoned command '{cmd}' : {e}");
-                } else {
-                    log!("Info(Execute):Killed async abandoned command '{cmd}'");
-                }
-            } else {
-                let output = handler.wait_with_output().map_err(|e| {
-                    anyhow!("Error(Execute):Failed to wait on async command '{cmd}' : {e}")
-                })?;
-                // 处理退出码
-                match output.status.code() {
-                    Some(val) => {
-                        if val == 0 {
-                            log!("Info(Execute):Async command '{cmd}' output :");
-                            println!("{output}", output = read_console(output.stdout));
-                        } else {
-                            log!("Error(Execute):Async command '{cmd}' failed, output :");
-                            println!("{output}", output = read_console(output.stdout));
-                        }
-                    }
-                    None => {
-                        log!("Error(Execute):Async command '{cmd}' terminated by signal");
-                    }
-                }
-            }
-        }
-
-        Ok(self.exit_code)
+    pub fn verify_step(&self, cx: &VerifyStepCtx) -> Result<()> {
+        let verifiable_ctx = VerifiableCtx {
+            mixed_fs: cx.mixed_fs,
+            runtime_ctx: cx.runtime_ctx,
+        };
+        self.header.verify_self(&verifiable_ctx)?;
+        self.body.verify_step(cx)
     }
 }

@@ -10,7 +10,6 @@ pub mod constants;
 pub mod download;
 pub mod env;
 pub mod expand;
-pub mod flags;
 pub mod fmt_print;
 pub mod fs;
 pub mod mirror;
@@ -28,7 +27,7 @@ pub mod wild_match;
 
 use anyhow::{anyhow, Result};
 use cache::clean_cache;
-use flags::{get_flag, Flag};
+use dirs::home_dir;
 use regex::Regex;
 
 use std::env::var;
@@ -56,16 +55,8 @@ fn ensure_exist(p: PathBuf) -> Result<PathBuf> {
     Ok(p)
 }
 
-pub fn is_debug_mode() -> bool {
-    get_flag(Flag::Debug, false)
-}
-
-pub fn is_qa_mode() -> bool {
-    get_flag(Flag::QA, false)
-}
-
-pub fn is_confirm_mode() -> bool {
-    get_flag(Flag::Confirm, false)
+pub fn is_confirm_mode(ctx: &RuntimeContext) -> bool {
+    ctx.cfg.interaction.auto_confirm_all
 }
 
 pub fn format_path(raw: &str) -> String {
@@ -73,13 +64,18 @@ pub fn format_path(raw: &str) -> String {
     tmp.strip_prefix("./").map(|s| s.to_string()).unwrap_or(tmp)
 }
 
-pub fn get_bare_apps() -> Result<PathBuf> {
-    ensure_exist(parse_relative_path_with_base("apps")?)
+pub fn get_bare_apps(ctx: &RuntimeContext) -> Result<PathBuf> {
+    ensure_exist(parse_relative_path_with_base("apps", &ctx.cfg.local.base)?)
 }
 
 /// 不确保目录存在，可选确保 scope 目录存在
-pub fn get_path_apps(scope: &str, name: &str, ensure_scope: bool) -> Result<PathBuf> {
-    let scope_p = parse_relative_path_with_base("apps")?.join(scope);
+pub fn get_path_apps(
+    ctx: &RuntimeContext,
+    scope: &str,
+    name: &str,
+    ensure_scope: bool,
+) -> Result<PathBuf> {
+    let scope_p = parse_relative_path_with_base("apps", &ctx.cfg.local.base)?.join(scope);
     Ok(if ensure_scope {
         ensure_exist(scope_p)?
     } else {
@@ -88,13 +84,13 @@ pub fn get_path_apps(scope: &str, name: &str, ensure_scope: bool) -> Result<Path
     .join(name))
 }
 
-pub fn parse_bare_temp() -> Result<PathBuf> {
-    parse_relative_path_with_base("temp")
+pub fn parse_bare_temp(ctx: &RuntimeContext) -> Result<PathBuf> {
+    parse_relative_path_with_base("temp", &ctx.cfg.local.base)
 }
 
-pub fn allocate_path_temp(name: &str, sub_dir: bool) -> Result<PathBuf> {
+pub fn allocate_path_temp(ctx: &RuntimeContext, name: &str, sub_dir: bool) -> Result<PathBuf> {
     let random_name = name.to_owned() + "_" + &random_short_string();
-    let p = parse_relative_path_with_base("temp")?.join(random_name);
+    let p = parse_relative_path_with_base("temp", &ctx.cfg.local.base)?.join(random_name);
     if sub_dir {
         ensure_exist(p.join("Outer"))?;
         ensure_exist(p.join("Inner"))?;
@@ -102,24 +98,30 @@ pub fn allocate_path_temp(name: &str, sub_dir: bool) -> Result<PathBuf> {
     ensure_exist(p)
 }
 
-pub fn get_path_bin() -> Result<PathBuf> {
-    ensure_exist(parse_relative_path_with_base("bin")?)
+pub fn get_path_bin(ctx: &RuntimeContext) -> Result<PathBuf> {
+    ensure_exist(parse_relative_path_with_base("bin", &ctx.cfg.local.base)?)
 }
 
-pub fn get_path_mirror() -> Result<PathBuf> {
-    ensure_exist(parse_relative_path_with_base("mirror")?)
+pub fn get_path_mirror(ctx: &RuntimeContext) -> Result<PathBuf> {
+    ensure_exist(parse_relative_path_with_base(
+        "mirror",
+        &ctx.cfg.local.base,
+    )?)
 }
 
-pub fn get_path_cache() -> Result<PathBuf> {
-    ensure_exist(parse_relative_path_with_base("cache")?)
+pub fn get_path_cache(ctx: &RuntimeContext) -> Result<PathBuf> {
+    ensure_exist(parse_relative_path_with_base("cache", &ctx.cfg.local.base)?)
 }
 
-pub fn get_path_meta() -> Result<PathBuf> {
-    ensure_exist(parse_relative_path_with_base("meta")?)
+pub fn get_path_meta(ctx: &RuntimeContext) -> Result<PathBuf> {
+    ensure_exist(parse_relative_path_with_base("meta", &ctx.cfg.local.base)?)
 }
 
-pub fn get_path_toolchain() -> Result<PathBuf> {
-    ensure_exist(parse_relative_path_with_base("toolchain")?)
+pub fn get_path_toolchain(ctx: &RuntimeContext) -> Result<PathBuf> {
+    ensure_exist(parse_relative_path_with_base(
+        "toolchain",
+        &ctx.cfg.local.base,
+    )?)
 }
 
 pub fn get_system_drive() -> Result<String> {
@@ -127,6 +129,14 @@ pub fn get_system_drive() -> Result<String> {
     root.get(0..2)
         .map(|s| s.to_string())
         .ok_or_else(|| anyhow!("Error:SystemRoot environment variable is too short"))
+}
+
+pub fn get_cur_dir() -> PathBuf {
+    Path::new("./").to_path_buf()
+}
+
+pub fn get_user_dir() -> PathBuf {
+    home_dir().unwrap().join("ept")
 }
 
 pub fn is_url(text: &str) -> bool {
@@ -137,21 +147,22 @@ pub fn is_starts_with_inner_value(p: &str) -> bool {
     p.starts_with("${") || p.starts_with("\"${")
 }
 
-pub fn launch_clean() -> Result<()> {
+pub fn launch_clean(ctx: &RuntimeContext) -> Result<()> {
     // 删除 temp 目录
-    let p = parse_bare_temp()?;
+    let p = parse_bare_temp(ctx)?;
     if p.exists() {
         std::fs::remove_dir_all(p)
             .map_err(|e| anyhow!("Error:Failed to remove temp directory : {e}"))?;
     }
 
     // 清理过期缓存
-    clean_cache()?;
+    clean_cache(ctx)?;
 
     Ok(())
 }
 
 use crate::types::constants::{DIR_NEP_CONTEXT, DIR_WORKFLOWS, FILE_PACKAGE};
+use crate::types::context::RuntimeContext;
 
 pub fn get_manifest_path(located: &str) -> Result<PathBuf> {
     let possible_path = vec![

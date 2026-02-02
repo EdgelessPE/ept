@@ -1,3 +1,4 @@
+use crate::types::context::{VerifyStepCtx, WorkflowContext};
 use crate::types::permissions::{Generalizable, Permission};
 use anyhow::{anyhow, Result};
 use serde::de;
@@ -18,20 +19,6 @@ mod rename;
 mod toast;
 mod wait;
 
-pub struct VerifyStepCtx {
-    pub mixed_fs: MixedFS,
-    pub is_expand_flow: bool,
-}
-
-impl VerifyStepCtx {
-    pub fn _demo() -> Self {
-        Self {
-            mixed_fs: MixedFS::new(""),
-            is_expand_flow: false,
-        }
-    }
-}
-
 pub trait TStep: Generalizable + Interpretable {
     /// Run this step, return 0 by default
     fn run(self, cx: &mut WorkflowContext) -> Result<i32>;
@@ -40,7 +27,7 @@ pub trait TStep: Generalizable + Interpretable {
     /// Get manifest
     fn get_manifest(&self, fs: &mut MixedFS) -> Vec<String>;
     /// Verify step
-    fn verify_step(&self, ctx: &VerifyStepCtx) -> Result<()>;
+    fn verify_step(&self, cx: &VerifyStepCtx) -> Result<()>;
 }
 
 fn toml_try_into<'de, T>(key: String, val: Value) -> Result<T>
@@ -98,17 +85,17 @@ macro_rules! def_enum_step {
                     $( Step::$x(step) => step.get_manifest(fs) ),*
                 }
             }
-            pub fn verify_step(&self,ctx:&VerifyStepCtx) -> Result<()> {
+            pub fn verify_step(&self,cx:&VerifyStepCtx) -> Result<()> {
                 match self {
-                    $( Step::$x(step) => step.verify_step(ctx) ),*
+                    $( Step::$x(step) => step.verify_step(cx) ),*
                 }
             }
         }
 
         impl Generalizable for Step {
-            fn generalize_permissions(&self)->Result<Vec<Permission>> {
+            fn generalize_permissions(&self, ctx: &RuntimeContext)->Result<Vec<Permission>> {
                 match self {
-                    $( Step::$x(step) => step.generalize_permissions() ),*
+                    $( Step::$x(step) => step.generalize_permissions(ctx) ),*
                 }
             }
         }
@@ -148,4 +135,4 @@ pub use self::wait::StepWait;
 
 use super::interpretable::Interpretable;
 use super::mixed_fs::MixedFS;
-use super::workflow::WorkflowContext;
+use crate::types::context::RuntimeContext;

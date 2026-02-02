@@ -2,11 +2,12 @@ use anyhow::{anyhow, Result};
 use path_clean::PathClean;
 use std::path::{Path, PathBuf};
 
-use crate::{p2s, utils::cfg::get_config};
+use crate::p2s;
 
 use super::{
     format_path, fs::read_sub_dir, get_bare_apps, get_path_mirror, mirror::read_quick_maps,
 };
+use crate::types::context::RuntimeContext;
 
 pub fn split_parent(raw: &str, located: &str) -> (PathBuf, String) {
     // 解析为绝对路径
@@ -24,16 +25,15 @@ pub fn split_parent(raw: &str, located: &str) -> (PathBuf, String) {
     (parent, base)
 }
 
-/// 使用配置文件中指定的 base 解析相对路径
-pub fn parse_relative_path_with_base(relative: &str) -> Result<PathBuf> {
+/// 使用给定的 base 解析相对路径
+pub fn parse_relative_path_with_base(relative: &str, base: &str) -> Result<PathBuf> {
     let relative = format_path(relative);
     let path = Path::new(&relative);
 
     let absolute_path = if path.is_absolute() {
         path.to_path_buf()
     } else {
-        let cfg = get_config();
-        Path::new(&cfg.local.base).join(&relative)
+        Path::new(base).join(&relative)
     }
     .clean();
 
@@ -60,8 +60,12 @@ pub fn parse_relative_path_with_located(relative: &str, located: &str) -> PathBu
 }
 
 /// name 大小写不敏感
-fn find_scope_with_name_locally(name: &str, scope: Option<&str>) -> Result<(String, String)> {
-    let app_dir = get_bare_apps()?;
+fn find_scope_with_name_locally(
+    ctx: &RuntimeContext,
+    name: &str,
+    scope: Option<&str>,
+) -> Result<(String, String)> {
+    let app_dir = get_bare_apps(ctx)?;
 
     for scope_dir_name in read_sub_dir(app_dir.clone())? {
         if let Some(s) = scope {
@@ -83,15 +87,19 @@ fn find_scope_with_name_locally(name: &str, scope: Option<&str>) -> Result<(Stri
     })
 }
 
-fn find_scope_with_name_online(name: &str, scope: Option<&str>) -> Result<(String, String)> {
+fn find_scope_with_name_online(
+    ctx: &RuntimeContext,
+    name: &str,
+    scope: Option<&str>,
+) -> Result<(String, String)> {
     // 遍历 mirrors
-    let p = get_path_mirror()?;
+    let p = get_path_mirror(ctx)?;
     let mirror_names = read_sub_dir(p)?;
     if mirror_names.is_empty() {
         return Err(anyhow!("Error:No mirror added yet"));
     }
     for mirror_name in mirror_names {
-        let quick_maps = read_quick_maps(&mirror_name)?;
+        let quick_maps = read_quick_maps(ctx, &mirror_name)?;
         if let Some((possible_scopes, true_name)) = quick_maps.scope_map.get(&name.to_lowercase()) {
             if let Some(dirty_scope) = scope {
                 for s in possible_scopes {
@@ -113,60 +121,75 @@ fn find_scope_with_name_online(name: &str, scope: Option<&str>) -> Result<(Strin
     })
 }
 
-pub fn find_scope_with_name(name: &str, scope: Option<&str>) -> Result<(String, String)> {
-    if let Ok(res) = find_scope_with_name_locally(name, scope) {
+pub fn find_scope_with_name(
+    ctx: &RuntimeContext,
+    name: &str,
+    scope: Option<&str>,
+) -> Result<(String, String)> {
+    if let Ok(res) = find_scope_with_name_locally(ctx, name, scope) {
         return Ok(res);
     }
-    find_scope_with_name_online(name, scope)
+    find_scope_with_name_online(ctx, name, scope)
 }
 
 #[test]
 fn test_parse_relative_path() {
+    use crate::utils::test::_default_test_cfg;
+    let cfg = _default_test_cfg();
     let p1 = String::from("./VSCode/VSCode.exe");
     let p2 = String::from(r"D:\Desktop\Projects\") + "./code.exe";
     let p3 = p2s!(std::env::current_dir().unwrap().join("./code.exe"));
 
-    println!("{:?}", parse_relative_path_with_base(&p1));
-    println!("{:?}", parse_relative_path_with_base(&p2));
-    println!("{:?}", parse_relative_path_with_base(&p3));
+    println!(
+        "{:?}",
+        parse_relative_path_with_base(&p1, &cfg.cfg.local.base)
+    );
+    println!(
+        "{:?}",
+        parse_relative_path_with_base(&p2, &cfg.cfg.local.base)
+    );
+    println!(
+        "{:?}",
+        parse_relative_path_with_base(&p3, &cfg.cfg.local.base)
+    );
 }
 
 #[test]
 fn test_find_scope_with_name() {
-    use crate::utils::flags::{set_flag, Flag};
+    use crate::utils::test::_default_test_cfg;
     use crate::utils::test::{
         _ensure_testing_vscode, _mount_custom_mirror, _unmount_custom_mirror,
     };
 
-    set_flag(Flag::Debug, true);
-    set_flag(Flag::Confirm, true);
     _ensure_testing_vscode();
     let tup = _mount_custom_mirror();
 
+    let cfg = _default_test_cfg();
+
     // 本地信息
     let name = String::from("vscode");
-    let res = find_scope_with_name(&name, None).unwrap();
+    let res = find_scope_with_name(&cfg, &name, None).unwrap();
     assert_eq!(res, ("Microsoft".to_string(), "VSCode".to_string()));
 
     // 在线信息
     let name = String::from("Notepad");
-    let res = find_scope_with_name(&name, None).unwrap();
+    let res = find_scope_with_name(&cfg, &name, None).unwrap();
     assert_eq!(res, ("Microsoft".to_string(), "Notepad".to_string()));
 
     // 别名
     let name = String::from("code");
-    let res = find_scope_with_name(&name, None).unwrap();
+    let res = find_scope_with_name(&cfg, &name, None).unwrap();
     assert_eq!(res, ("Microsoft".to_string(), "VSCode".to_string()));
 
     // 命名冲突
-    assert!(find_scope_with_name("NameA", None).is_err());
-    assert!(find_scope_with_name("NameA", Some("ScopeA")).is_ok());
-    assert!(find_scope_with_name("NameA", Some("ScopeB")).is_ok());
+    assert!(find_scope_with_name(&cfg, "NameA", None).is_err());
+    assert!(find_scope_with_name(&cfg, "NameA", Some("ScopeA")).is_ok());
+    assert!(find_scope_with_name(&cfg, "NameA", Some("ScopeB")).is_ok());
 
     // 命名和别名冲突
-    assert!(find_scope_with_name("NameB", None).is_err());
-    assert!(find_scope_with_name("NameB", Some("ScopeA")).is_ok());
-    assert!(find_scope_with_name("NameB", Some("ScopeB")).is_ok());
+    assert!(find_scope_with_name(&cfg, "NameB", None).is_err());
+    assert!(find_scope_with_name(&cfg, "NameB", Some("ScopeA")).is_ok());
+    assert!(find_scope_with_name(&cfg, "NameB", Some("ScopeB")).is_ok());
 
     _unmount_custom_mirror(tup);
 }

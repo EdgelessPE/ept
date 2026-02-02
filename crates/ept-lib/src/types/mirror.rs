@@ -10,7 +10,7 @@ use regex::Regex;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 use super::{
-    extended_semver::ExSemVer, meta::MetaResult, mixed_fs::MixedFS, verifiable::Verifiable,
+    context::VerifiableCtx, extended_semver::ExSemVer, meta::MetaResult, verifiable::Verifiable,
 };
 
 lazy_static! {
@@ -126,7 +126,7 @@ impl<'de> Deserialize<'de> for ServiceKeys {
 }
 
 impl Verifiable for MirrorHello {
-    fn verify_self(&self, _located: &MixedFS) -> Result<()> {
+    fn verify_self(&self, _ctx: &VerifiableCtx) -> Result<()> {
         // 必须有 hello 服务
         filter_service_from_meta(self, ServiceKeys::Hello)?;
 
@@ -150,7 +150,7 @@ pub struct MirrorPkgSoftware {
 }
 
 impl Verifiable for MirrorPkgSoftware {
-    fn verify_self(&self, _located: &MixedFS) -> Result<()> {
+    fn verify_self(&self, _ctx: &VerifiableCtx) -> Result<()> {
         // 检查 url 模板
         let str = String::new();
         fill_url_template(&self.url_template, &str, &str, &str)?;
@@ -287,8 +287,15 @@ pub struct MirrorInfo {
 
 #[test]
 fn test_mirror_pkg_software() {
+    use crate::types::{context::VerifiableCtx, mixed_fs::MixedFS};
+    use crate::utils::test::_default_test_cfg;
+
     let mixed_fs = MixedFS::new("");
-    MirrorPkgSoftware::_demo().verify_self(&mixed_fs).unwrap()
+    let cx = VerifiableCtx {
+        mixed_fs: &mixed_fs,
+        runtime_ctx: &_default_test_cfg(),
+    };
+    MirrorPkgSoftware::_demo().verify_self(&cx).unwrap()
 }
 
 #[test]

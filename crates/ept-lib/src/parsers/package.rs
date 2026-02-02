@@ -1,5 +1,6 @@
 use crate::executor::values_replacer;
 use crate::types::constants::FILE_PACKAGE;
+use crate::types::context::VerifiableCtx;
 use crate::types::interpretable::Interpretable;
 use crate::types::mixed_fs::MixedFS;
 use crate::types::verifiable::Verifiable;
@@ -17,6 +18,7 @@ use std::{
 };
 
 use super::parse_author;
+use crate::types::context::RuntimeContext;
 
 // 输入读到的版本号，判断是否需要更新 pkg 并自动写文件系统
 fn update_pkg_version(
@@ -90,6 +92,7 @@ fn update_ver_with_reg_entry(
 
 /// p 输入 package.toml 所在位置
 pub fn parse_package(
+    ctx: &RuntimeContext,
     p: &str,
     located: &str,
     need_update_main_program: bool,
@@ -139,7 +142,11 @@ pub fn parse_package(
     // 校验
     let workflows_path = get_workflows_path(located)?;
     let mixed_fs = get_expanded_mixed_fs(MixedFS::new(mixed_located), workflows_path)?;
-    pkg.verify_self(&mixed_fs)?;
+    let cx = VerifiableCtx {
+        mixed_fs: &mixed_fs,
+        runtime_ctx: ctx,
+    };
+    pkg.verify_self(&cx)?;
 
     // 解释
     let package_version = pkg.package.version.clone();
@@ -192,8 +199,10 @@ fn is_nep_version_compatible(pkg_str: &str, ept_str: &str) -> Result<()> {
 
 #[test]
 fn test_update_main_program() {
+    use crate::utils::test::_default_test_cfg;
+    let cfg = _default_test_cfg();
     let located = "examples/Dism++";
-    let mut pkg = parse_package("examples/Dism++/package.toml", located, true).unwrap();
+    let mut pkg = parse_package(&cfg, "examples/Dism++/package.toml", located, true).unwrap();
     pkg.package.version = "10.1.112.1".to_string();
     let software = pkg.clone().software.unwrap();
 
@@ -226,10 +235,11 @@ fn test_is_nep_version_compatible() {
 
 #[test]
 fn test_parse_package() {
-    use crate::utils::flags::{set_flag, Flag};
-    set_flag(Flag::Debug, true);
+    use crate::utils::test::_default_test_cfg;
+
+    let cfg = _default_test_cfg();
     let located = "examples/VSCode";
-    let pkg = parse_package("examples/VSCode/package.toml", located, false).unwrap();
+    let pkg = parse_package(&cfg, "examples/VSCode/package.toml", located, false).unwrap();
     let answer = GlobalPackage {
         nep: "0".to_string(),
         package: crate::types::package::Package {

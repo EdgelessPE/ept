@@ -5,6 +5,10 @@
 ## 构建/检查/测试命令
 
 ```bash
+# 构建测试目标
+# 每次修改代码后，除非用户明确要求运行单测，否则仅运行该命令以检查并修复问题
+cargo build --tests
+
 # 构建项目
 cargo build
 cargo build --release
@@ -41,6 +45,33 @@ cargo check
 - **常量**: UPPER_SNAKE_CASE（如 `FILE_NAME`）
 - **模块**: snake_case（如 `package.rs`, `extended_semver.rs`）
 - **泛型参数**: 单个大写字母（如 `T`, `F`）
+- **上下文变量**: `ctx` 专门用于指代 `RuntimeContext` 类型的变量；其他类似的上下文使用 `cx` 作为变量名。如果遇到上下文变量重名的情况，可以使用 `xxx_cx` 的形式（如 `workflow_cx`、`verify_cx`），但**不允许**对 `ctx` 添加此类前缀（即禁止使用 `xxx_ctx`）
+
+### 函数参数规范
+- **上下文参数位置**: 如果函数需要 `ctx: &RuntimeContext` 入参，则该入参始终位于**第一位**（类似 `self` 的约定）
+  ```rust
+  // ✅ 正确
+  pub fn install(ctx: &RuntimeContext, source: &str, verify: bool) -> Result<()>
+  pub fn workflow_executor(ctx: &RuntimeContext, flow: Vec<WorkflowNode>, located: String, pkg: GlobalPackage)
+
+  // ❌ 错误
+  pub fn install(source: &str, verify: bool, ctx: &RuntimeContext) -> Result<()>
+  ```
+- **上下文来源**: 如果函数中需要使用 `ctx`，则必须从祖先处获取（通过参数传递），而不是调用 `RuntimeContext::default()`
+  ```rust
+  // ✅ 正确 - 从祖先处获取
+  pub fn some_function(ctx: &RuntimeContext, ...) -> Result<()> {
+      let path = get_path_mirror(ctx)?;
+      ...
+  }
+
+  // ❌ 错误 - 在函数内部创建默认上下文
+  pub fn some_function(...) -> Result<()> {
+      let ctx = RuntimeContext::default();
+      let path = get_path_mirror(&ctx)?;
+      ...
+  }
+  ```
 
 ### 类型与 Trait
 - 拥有的字符串使用 `String`，函数参数中的字符串切片使用 `&str`
@@ -67,10 +98,18 @@ cargo check
 - 集成风格测试使用 `test_<module>_corelation` 命名
 - 通过 `pub fn _demo()` 方法提供演示/测试数据
 - 测试工具函数放在 `src/utils/test.rs`
+- **在单测函数中创建 `Cfg` 结构体时，必须使用 `crate::utils::test::_default_test_cfg()`，而不是 `Cfg::default()`**
+  ```rust
+  // ✅ 正确
+  let cfg = crate::utils::test::_default_test_cfg();
+  
+  // ❌ 错误
+  let cfg = Cfg::default();
+  ```
 
 ### 宏
 - 使用 `p2s!()` 宏进行路径到字符串的转换
-- 使用 `log!()` 宏进行格式化日志输出
+- 使用 `log!()` 宏进行格式化日志输出（如果需要打印日志，请使用 `log!` 宏而不是 `println!` 或其他宏）
 - 使用 `verify_enum!()` 进行枚举值验证
 
 ### Windows 特定代码

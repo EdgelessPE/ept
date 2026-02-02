@@ -2,9 +2,9 @@ use crate::{
     executor::{judge_perm_level, values_validator_path},
     log,
     types::{
+        context::WorkflowContext,
         mixed_fs::MixedFS,
         permissions::{Generalizable, Permission, PermissionKey},
-        workflow::WorkflowContext,
     },
     utils::wild_match::contains_wild_match,
 };
@@ -13,6 +13,7 @@ use serde::{Deserialize, Serialize};
 use std::{fs::create_dir_all, fs::File, path::Path};
 
 use super::TStep;
+use crate::types::context::RuntimeContext;
 use crate::types::interpretable::Interpretable;
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
@@ -109,7 +110,7 @@ impl Interpretable for StepNew {
 }
 
 impl Generalizable for StepNew {
-    fn generalize_permissions(&self) -> Result<Vec<Permission>> {
+    fn generalize_permissions(&self, _ctx: &RuntimeContext) -> Result<Vec<Permission>> {
         Ok(vec![Permission {
             key: PermissionKey::fs_write,
             level: judge_perm_level(&self.at)?,
@@ -120,11 +121,9 @@ impl Generalizable for StepNew {
 
 #[test]
 fn test_new() {
-    use crate::types::workflow::WorkflowContext;
-    use crate::utils::flags::{set_flag, Flag};
+    use crate::types::context::WorkflowContext;
     use std::fs::metadata;
     use std::path::Path;
-    set_flag(Flag::Debug, true);
     let mut cx = WorkflowContext::_demo();
     if Path::new("test").exists() {
         std::fs::remove_dir_all("test").unwrap();
@@ -201,24 +200,24 @@ fn test_new_corelation() {
     );
 
     // 校验
-    let ctx = crate::types::steps::VerifyStepCtx::_demo();
+    let cx = crate::types::steps::VerifyStepCtx::_demo();
     assert!(StepNew {
         at: "C:/Users/Desktop".to_string(),
         overwrite: None,
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_err());
     assert!(StepNew {
         at: "C:/Users/Desktop/*".to_string(),
         overwrite: None,
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_err());
 
     assert!(StepNew {
         at: "${OtherDesktop}".to_string(),
         overwrite: None,
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_err());
 }

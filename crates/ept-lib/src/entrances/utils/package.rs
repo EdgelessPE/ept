@@ -10,6 +10,7 @@ use anyhow::{anyhow, Result};
 use sysinfo::System;
 use tar::Archive;
 
+use crate::types::context::RuntimeContext;
 use crate::{
     compression::{decompress, fast_decompress_zstd, release_tar},
     entrances,
@@ -21,22 +22,22 @@ use crate::{
         constants::{EXT_TAR_ZST, FILE_PACKAGE},
         package::GlobalPackage,
     },
-    utils::{allocate_path_temp, fs::copy_dir, is_debug_mode},
+    utils::{allocate_path_temp, fs::copy_dir},
 };
 use crate::{log, log_ok_last};
 
 /// 根据源文件路径创建临时目录
-fn get_temp_dir_path(source_file: &str) -> Result<PathBuf> {
+fn get_temp_dir_path(ctx: &RuntimeContext, source_file: &str) -> Result<PathBuf> {
     let file_stem = p2s!(Path::new(source_file).file_stem().unwrap());
-    let temp_dir_path = allocate_path_temp(&file_stem, true)?;
+    let temp_dir_path = allocate_path_temp(ctx, &file_stem, true)?;
 
     Ok(temp_dir_path)
 }
 
 /// 清理临时目录(会判断 debug)
-pub fn clean_temp(source_file: &str) -> Result<()> {
-    let temp_dir_path = get_temp_dir_path(source_file)?;
-    if !is_debug_mode() {
+pub fn clean_temp(ctx: &RuntimeContext, source_file: &str) -> Result<()> {
+    let temp_dir_path = get_temp_dir_path(ctx, source_file)?;
+    if !ctx.cfg.mode.debug {
         log!("Info:Cleaning...");
         let clean_res = remove_dir_all(&temp_dir_path);
         if clean_res.is_ok() {
@@ -58,7 +59,11 @@ pub fn clean_temp(source_file: &str) -> Result<()> {
 }
 
 /// 返回 (Inner 临时目录,package 结构体)
-pub fn unpack_nep(source: &str, verify_signature: bool) -> Result<(PathBuf, GlobalPackage)> {
+pub fn unpack_nep(
+    ctx: &RuntimeContext,
+    source: &str,
+    verify_signature: bool,
+) -> Result<(PathBuf, GlobalPackage)> {
     // 处理输入目录的情况
     let source_path = Path::new(source);
     if source_path.is_dir() {
@@ -67,14 +72,14 @@ pub fn unpack_nep(source: &str, verify_signature: bool) -> Result<(PathBuf, Glob
         } else {
             // 检查是否为合法的输入目录
             inner_validator(source)?;
-            entrances::verify::verify(source)?;
+            entrances::verify::verify(ctx, source)?;
 
             // 读取 package.toml
             let package_path = Path::new(source).join(FILE_PACKAGE);
-            let global = parse_package(&p2s!(package_path), source, false)?;
+            let global = parse_package(ctx, &p2s!(package_path), source, false)?;
 
             // 复制到临时目录
-            let temp_path = allocate_path_temp(&global.package.name, false)?;
+            let temp_path = allocate_path_temp(ctx, &global.package.name, false)?;
             copy_dir(source_path, &temp_path)?;
 
             Ok((temp_path, global))
@@ -91,10 +96,10 @@ pub fn unpack_nep(source: &str, verify_signature: bool) -> Result<(PathBuf, Glob
 
     let res = if size <= size_limit {
         log!("Debug:Use fast unpack method ({size}/{size_limit})");
-        fast_unpack_nep(source, verify_signature)?
+        fast_unpack_nep(ctx, source, verify_signature)?
     } else {
         log!("Debug:Use normal unpack method ({size}/{size_limit})");
-        normal_unpack_nep(source, verify_signature)?
+        normal_unpack_nep(ctx, source, verify_signature)?
     };
 
     // 离线模式下强制执行一次检查
@@ -106,11 +111,12 @@ pub fn unpack_nep(source: &str, verify_signature: bool) -> Result<(PathBuf, Glob
 }
 
 fn normal_unpack_nep(
+    ctx: &RuntimeContext,
     source_file: &str,
     verify_signature: bool,
 ) -> Result<(PathBuf, GlobalPackage)> {
     // 创建临时目录
-    let temp_dir_path = get_temp_dir_path(source_file)?;
+    let temp_dir_path = get_temp_dir_path(ctx, source_file)?;
     let temp_dir_outer_path = temp_dir_path.join("Outer");
     let temp_dir_inner_path = temp_dir_path.join("Inner");
 
@@ -154,6 +160,7 @@ fn normal_unpack_nep(
 
     // 读取 package.toml
     let package_struct = parse_package(
+        ctx,
         &p2s!(temp_dir_inner_path.join(FILE_PACKAGE)),
         &temp_dir_inner_str,
         false,
@@ -175,9 +182,13 @@ fn normal_unpack_nep(
 
     Ok((temp_dir_inner_path, package_struct))
 }
-fn fast_unpack_nep(source_file: &str, verify_signature: bool) -> Result<(PathBuf, GlobalPackage)> {
+fn fast_unpack_nep(
+    ctx: &RuntimeContext,
+    source_file: &str,
+    verify_signature: bool,
+) -> Result<(PathBuf, GlobalPackage)> {
     // 创建临时目录
-    let temp_dir_path = get_temp_dir_path(source_file)?;
+    let temp_dir_path = get_temp_dir_path(ctx, source_file)?;
     let temp_dir_inner_path = temp_dir_path.join("Inner");
 
     // 读取外包，生成 hashmap
@@ -246,6 +257,7 @@ fn fast_unpack_nep(source_file: &str, verify_signature: bool) -> Result<(PathBuf
 
     // 读取 package.toml
     let package_struct = parse_package(
+        ctx,
         &p2s!(temp_dir_inner_path.join(FILE_PACKAGE)),
         &temp_dir_inner_str,
         false,
@@ -270,61 +282,58 @@ fn fast_unpack_nep(source_file: &str, verify_signature: bool) -> Result<(PathBuf
 
 #[test]
 fn test_unpack_nep() {
-    use crate::utils::flags::{set_flag, Flag};
-    if cfg!(debug_assertions) {
-        log!("Warning:Debug mode enabled");
-        set_flag(Flag::Debug, true);
-    }
+    use crate::utils::test::_default_test_cfg;
+
     crate::utils::test::_ensure_clear_test_dir();
+    let cfg = _default_test_cfg();
 
     crate::pack(
+        &cfg,
         "./examples/VSCode",
         Some("./test/VSCode_1.75.0.0_Cno.nep".to_string()),
         true,
     )
     .unwrap();
 
-    let res = unpack_nep("./test/VSCode_1.75.0.0_Cno.nep", true).unwrap();
+    let res = unpack_nep(&cfg, "./test/VSCode_1.75.0.0_Cno.nep", true).unwrap();
     println!("{res:#?}");
 }
 
 #[test]
 fn test_normal_unpack_nep() {
-    use crate::utils::flags::{set_flag, Flag};
-    if cfg!(debug_assertions) {
-        log!("Warning:Debug mode enabled");
-        set_flag(Flag::Debug, true);
-    }
+    use crate::utils::test::_default_test_cfg;
+
     crate::utils::test::_ensure_clear_test_dir();
+    let cfg = _default_test_cfg();
 
     crate::pack(
+        &cfg,
         "./examples/VSCode",
         Some("./test/VSCode_1.75.0.0_Cno.nep".to_string()),
         true,
     )
     .unwrap();
 
-    let res = normal_unpack_nep("./test/VSCode_1.75.0.0_Cno.nep", true).unwrap();
+    let res = normal_unpack_nep(&cfg, "./test/VSCode_1.75.0.0_Cno.nep", true).unwrap();
     println!("{res:#?}");
 }
 
 #[test]
 fn test_fast_unpack_nep() {
-    use crate::utils::flags::{set_flag, Flag};
-    if cfg!(debug_assertions) {
-        log!("Warning:Debug mode enabled");
-        set_flag(Flag::Debug, true);
-    }
+    use crate::utils::test::_default_test_cfg;
+
     crate::utils::test::_ensure_clear_test_dir();
+    let cfg = _default_test_cfg();
 
     crate::pack(
+        &cfg,
         "./examples/VSCode",
         Some("./test/VSCode_1.75.0.0_Cno.nep".to_string()),
         true,
     )
     .unwrap();
 
-    let res = fast_unpack_nep("./test/VSCode_1.75.0.0_Cno.nep", true).unwrap();
+    let res = fast_unpack_nep(&cfg, "./test/VSCode_1.75.0.0_Cno.nep", true).unwrap();
     println!("{res:#?}");
 }
 
@@ -360,10 +369,13 @@ fn test_fast_unpack_nep() {
 
 #[test]
 fn test_bad_package() {
+    use crate::utils::test::_default_test_cfg;
     crate::utils::test::_ensure_clear_test_dir();
+    let test_cfg = _default_test_cfg();
 
     // 生成基础目录
     crate::pack(
+        &test_cfg,
         "./examples/Dism++",
         Some("./test/Normal.nep".to_string()),
         true,
@@ -373,13 +385,14 @@ fn test_bad_package() {
 
     // 未签名
     crate::pack(
+        &test_cfg,
         "./examples/Dism++",
         Some("./test/UnSig++_10.1.1002.1_Cno.nep".to_string()),
         false,
     )
     .unwrap();
-    assert!(normal_unpack_nep("./test/UnSig++_10.1.1002.1_Cno.nep", true).is_err());
-    assert!(fast_unpack_nep("./test/UnSig++_10.1.1002.1_Cno.nep", true).is_err());
+    assert!(normal_unpack_nep(&test_cfg, "./test/UnSig++_10.1.1002.1_Cno.nep", true).is_err());
+    assert!(fast_unpack_nep(&test_cfg, "./test/UnSig++_10.1.1002.1_Cno.nep", true).is_err());
 
     // 被篡改的签名
     copy_dir("test/Normal", "test/BadSig").unwrap();
@@ -391,15 +404,15 @@ fn test_bad_package() {
     let text = toml::to_string_pretty(&signature_struct).unwrap();
     std::fs::write("test/BadSig/signature.toml", text).unwrap();
     crate::compression::pack_tar("test/BadSig", "test/BadSig++_10.1.1002.1_Cno.nep").unwrap();
-    assert!(normal_unpack_nep("test/BadSig++_10.1.1002.1_Cno.nep", true).is_err());
-    assert!(fast_unpack_nep("test/BadSig++_10.1.1002.1_Cno.nep", true).is_err());
+    assert!(normal_unpack_nep(&test_cfg, "test/BadSig++_10.1.1002.1_Cno.nep", true).is_err());
+    assert!(fast_unpack_nep(&test_cfg, "test/BadSig++_10.1.1002.1_Cno.nep", true).is_err());
 
     // 缺失签名文件
     copy_dir("test/Normal", "test/NoSig").unwrap();
     std::fs::remove_file("test/NoSig/signature.toml").unwrap();
     crate::compression::pack_tar("test/NoSig", "test/NoSig++_10.1.1002.1_Cno.nep").unwrap();
-    assert!(normal_unpack_nep("test/NoSig++_10.1.1002.1_Cno.nep", true).is_err());
-    assert!(fast_unpack_nep("test/NoSig++_10.1.1002.1_Cno.nep", true).is_err());
+    assert!(normal_unpack_nep(&test_cfg, "test/NoSig++_10.1.1002.1_Cno.nep", true).is_err());
+    assert!(fast_unpack_nep(&test_cfg, "test/NoSig++_10.1.1002.1_Cno.nep", true).is_err());
 
     // 错误的打包者
     copy_dir("test/Normal", "test/BadAuth").unwrap();
@@ -408,6 +421,6 @@ fn test_bad_package() {
     let text = toml::to_string_pretty(&signature_struct).unwrap();
     std::fs::write("test/BadAuth/signature.toml", text).unwrap();
     crate::compression::pack_tar("test/BadAuth", "test/BadAuth++_10.1.1002.1_Cno.nep").unwrap();
-    assert!(normal_unpack_nep("test/BadAuth++_10.1.1002.1_Cno.nep", true).is_err());
-    assert!(fast_unpack_nep("test/BadAuth++_10.1.1002.1_Cno.nep", true).is_err());
+    assert!(normal_unpack_nep(&test_cfg, "test/BadAuth++_10.1.1002.1_Cno.nep", true).is_err());
+    assert!(fast_unpack_nep(&test_cfg, "test/BadAuth++_10.1.1002.1_Cno.nep", true).is_err());
 }

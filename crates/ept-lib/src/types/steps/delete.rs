@@ -1,13 +1,14 @@
 use std::{ffi::OsString, path::Path};
 
 use super::TStep;
+use crate::types::context::RuntimeContext;
 use crate::types::interpretable::Interpretable;
 use crate::types::permissions::PermissionKey;
 use crate::types::steps::Permission;
 use crate::{
     executor::{judge_perm_level, values_validator_path},
     log, p2s,
-    types::{mixed_fs::MixedFS, permissions::Generalizable, workflow::WorkflowContext},
+    types::{context::WorkflowContext, mixed_fs::MixedFS, permissions::Generalizable},
     utils::{
         fs::try_recycle,
         wild_match::{contains_wild_match, parse_wild_match},
@@ -102,7 +103,7 @@ impl Interpretable for StepDelete {
 }
 
 impl Generalizable for StepDelete {
-    fn generalize_permissions(&self) -> Result<Vec<Permission>> {
+    fn generalize_permissions(&self, _ctx: &RuntimeContext) -> Result<Vec<Permission>> {
         Ok(vec![Permission {
             key: PermissionKey::fs_write,
             level: judge_perm_level(&self.at)?,
@@ -113,8 +114,6 @@ impl Generalizable for StepDelete {
 
 #[test]
 fn test_delete() {
-    use crate::utils::flags::{set_flag, Flag};
-    set_flag(Flag::Debug, true);
     let mut cx = WorkflowContext::_demo();
     crate::utils::test::_ensure_clear_test_dir();
 
@@ -205,18 +204,18 @@ fn test_delete_corelation() {
     );
 
     // 校验
-    let ctx = crate::types::steps::VerifyStepCtx::_demo();
+    let cx = crate::types::steps::VerifyStepCtx::_demo();
     assert!(StepDelete {
         at: "C:/Users/Desktop".to_string(),
         force: None,
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_err());
 
     assert!(StepDelete {
         at: "${OtherDesktop}".to_string(),
         force: None,
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_err());
 }

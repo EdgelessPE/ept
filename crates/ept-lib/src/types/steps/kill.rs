@@ -1,13 +1,14 @@
 use super::TStep;
+use crate::types::context::RuntimeContext;
 use crate::types::interpretable::Interpretable;
 use crate::types::permissions::PermissionKey;
 use crate::types::steps::Permission;
 use crate::{
     log,
     types::{
+        context::WorkflowContext,
         mixed_fs::MixedFS,
         permissions::{Generalizable, PermissionLevel},
-        workflow::WorkflowContext,
     },
 };
 use anyhow::{Ok, Result};
@@ -76,7 +77,7 @@ impl Interpretable for StepKill {
 }
 
 impl Generalizable for StepKill {
-    fn generalize_permissions(&self) -> Result<Vec<Permission>> {
+    fn generalize_permissions(&self, _ctx: &RuntimeContext) -> Result<Vec<Permission>> {
         Ok(vec![Permission {
             key: PermissionKey::process_kill,
             level: PermissionLevel::Sensitive,
@@ -87,10 +88,7 @@ impl Generalizable for StepKill {
 
 #[test]
 fn test_kill() {
-    use crate::types::workflow::WorkflowContext;
-    use crate::utils::flags::{set_flag, Flag};
-    set_flag(Flag::Debug, true);
-    set_flag(Flag::Confirm, true);
+    use crate::types::context::WorkflowContext;
     let mut cx = WorkflowContext::_demo();
 
     crate::utils::test::_ensure_clear_test_dir();
@@ -150,15 +148,15 @@ fn test_kill_corelation() {
     );
 
     // 校验
-    let ctx = crate::types::steps::VerifyStepCtx::_demo();
+    let cx = crate::types::steps::VerifyStepCtx::_demo();
     assert!(StepKill {
         target: "code.exe".to_string(),
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_ok());
     assert!(StepKill {
         target: "code".to_string(),
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_ok());
 }

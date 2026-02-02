@@ -7,16 +7,22 @@ use std::io::{Read, Write};
 use std::path::PathBuf;
 
 use crate::p2s;
-use crate::utils::cache::{restore_cache, CacheCtx};
-use crate::utils::flags::{get_flag, Flag};
+use crate::types::context::CacheCtx;
+use crate::utils::cache::restore_cache;
 
 use super::allocate_path_temp;
+use crate::types::context::RuntimeContext;
 
 // cached 接受参数为 (存放缓存的路径，缓存 key)
 // 函数返回的是缓存上下文，当文件被验证可用后可以使用这个上下文传递给 spawn_cache 函数进行缓存
-pub fn download(url: &str, to: PathBuf, cached: Option<(PathBuf, String)>) -> Result<CacheCtx> {
+pub fn download(
+    ctx: &RuntimeContext,
+    url: &str,
+    to: PathBuf,
+    cached: Option<(PathBuf, String)>,
+) -> Result<CacheCtx> {
     // 检查缓存
-    let enabled_cache = get_flag(Flag::Cache, true) && cached.is_some();
+    let enabled_cache = ctx.cfg.local.enable_cache && cached.is_some();
     if restore_cache(CacheCtx(enabled_cache, to.clone(), cached.clone()), url)? {
         return Ok(CacheCtx(false, to, None));
     }
@@ -68,11 +74,15 @@ pub fn download(url: &str, to: PathBuf, cached: Option<(PathBuf, String)>) -> Re
 }
 
 // 返回 （文件存放路径，缓存上下文）
-pub fn download_nep(url: &str, cached: Option<(PathBuf, String)>) -> Result<(PathBuf, CacheCtx)> {
+pub fn download_nep(
+    ctx: &RuntimeContext,
+    url: &str,
+    cached: Option<(PathBuf, String)>,
+) -> Result<(PathBuf, CacheCtx)> {
     // 下载文件到临时目录
-    let temp_dir = allocate_path_temp("download", false)?;
+    let temp_dir = allocate_path_temp(ctx, "download", false)?;
     let p = temp_dir.join("downloaded.nep");
-    let cache_ctx = download(url, p.clone(), cached)?;
+    let cache_ctx = download(ctx, url, p.clone(), cached)?;
 
     Ok((p, cache_ctx))
 }
@@ -110,10 +120,10 @@ pub fn fill_url_template(
 
 #[test]
 fn test_download() {
-    use crate::set_flag;
-    set_flag(Flag::Cache, true);
+    use crate::utils::test::_default_test_cfg;
+    let cfg = _default_test_cfg();
     // 删除下载缓存
-    let cache_dir = crate::utils::get_path_cache().unwrap();
+    let cache_dir = crate::utils::get_path_cache(&cfg).unwrap();
     if cache_dir.exists() {
         std::fs::remove_dir_all(&cache_dir).unwrap();
     }
@@ -129,7 +139,7 @@ fn test_download() {
 
     // 首次下载
     let cached = Some((cache_dir.clone(), hash.clone()));
-    let cache_ctx = download(&url, at.to_path_buf(), cached.clone()).unwrap();
+    let cache_ctx = download(&cfg, &url, at.to_path_buf(), cached.clone()).unwrap();
 
     // 断言下载成功
     assert!(at.exists());
@@ -142,13 +152,16 @@ fn test_download() {
     // 关闭服务器后仍能正常下载
     handler.kill().unwrap();
     std::fs::remove_file(at).unwrap();
-    download(&url, at.to_path_buf(), cached).unwrap();
+    download(&cfg, &url, at.to_path_buf(), cached).unwrap();
     assert!(at.exists());
 }
 
 #[test]
 fn test_download_nep() {
+    use crate::utils::test::_default_test_cfg;
+
     let url = crate::utils::test::_run_mirror_mock_server();
-    let (path, _cache_ctx) = download_nep(&format!("{url}/api/hello"), None).unwrap();
+    let cfg = _default_test_cfg();
+    let (path, _cache_ctx) = download_nep(&cfg, &format!("{url}/api/hello"), None).unwrap();
     assert!(path.exists() && path.metadata().unwrap().len() > 300);
 }

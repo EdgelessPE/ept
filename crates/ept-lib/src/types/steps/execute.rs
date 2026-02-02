@@ -1,14 +1,15 @@
 use crate::executor::values_validator_path;
+use crate::types::context::WorkflowContext;
 use crate::types::interpretable::Interpretable;
 use crate::types::mixed_fs::MixedFS;
 use crate::types::permissions::{Generalizable, Permission, PermissionKey, PermissionLevel};
-use crate::types::workflow::WorkflowContext;
 use crate::utils::{
     command::split_command, format_path, is_starts_with_inner_value, term::read_console,
 };
 use crate::{log, verify_enum};
 
 use super::TStep;
+use crate::types::context::RuntimeContext;
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
 use std::path::Path;
@@ -205,7 +206,7 @@ impl Interpretable for StepExecute {
 }
 
 impl Generalizable for StepExecute {
-    fn generalize_permissions(&self) -> Result<Vec<Permission>> {
+    fn generalize_permissions(&self, _ctx: &RuntimeContext) -> Result<Vec<Permission>> {
         let node = if self.call_installer.unwrap_or(false) {
             Permission {
                 key: PermissionKey::execute_installer,
@@ -227,7 +228,7 @@ impl Generalizable for StepExecute {
 
 #[test]
 fn test_execute_validate() {
-    let ctx = crate::types::steps::VerifyStepCtx::_demo();
+    let cx = crate::types::steps::VerifyStepCtx::_demo();
     assert!(StepExecute {
         command: "${AppData}/Installer.exe /S".to_string(),
         pwd: None,
@@ -235,7 +236,7 @@ fn test_execute_validate() {
         wait: None,
         ignore_exit_code: None,
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_ok());
 
     assert!(StepExecute {
@@ -245,7 +246,7 @@ fn test_execute_validate() {
         wait: None,
         ignore_exit_code: None,
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_err());
 }
 

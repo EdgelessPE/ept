@@ -1,12 +1,13 @@
 use super::{copy::parse_target_for_copy, TStep};
+use crate::types::context::RuntimeContext;
 use crate::types::interpretable::Interpretable;
 use crate::types::permissions::PermissionKey;
 use crate::{
     executor::{judge_perm_level, values_validator_path},
     log, p2s,
     types::{
-        mixed_fs::MixedFS, permissions::Generalizable, permissions::Permission,
-        workflow::WorkflowContext,
+        context::WorkflowContext, mixed_fs::MixedFS, permissions::Generalizable,
+        permissions::Permission,
     },
     utils::{
         fs::try_recycle,
@@ -84,8 +85,8 @@ impl TStep for StepMove {
         fs.add(&self.to, &self.from);
         Vec::new()
     }
-    fn verify_step(&self, ctx: &super::VerifyStepCtx) -> Result<()> {
-        let located = &ctx.mixed_fs.located;
+    fn verify_step(&self, cx: &super::VerifyStepCtx) -> Result<()> {
+        let located = &cx.mixed_fs.located;
         values_validator_path(&self.from).map_err(|e| {
             anyhow!("Error(Move):Failed to validate field 'from' as valid path : {e}")
         })?;
@@ -114,7 +115,7 @@ impl Interpretable for StepMove {
 }
 
 impl Generalizable for StepMove {
-    fn generalize_permissions(&self) -> Result<Vec<Permission>> {
+    fn generalize_permissions(&self, _ctx: &RuntimeContext) -> Result<Vec<Permission>> {
         Ok(vec![
             Permission {
                 key: PermissionKey::fs_write,
@@ -132,10 +133,8 @@ impl Generalizable for StepMove {
 
 #[test]
 fn test_move() {
-    use crate::utils::flags::{set_flag, Flag};
     use crate::utils::fs::copy_dir;
     use std::path::Path;
-    set_flag(Flag::Debug, true);
     let mut cx = WorkflowContext::_demo();
     crate::utils::test::_ensure_clear_test_dir();
 
@@ -319,27 +318,27 @@ fn test_move_corelation() {
     );
 
     // 校验
-    let ctx = crate::types::steps::VerifyStepCtx::_demo();
+    let cx = crate::types::steps::VerifyStepCtx::_demo();
     assert!(StepMove {
         from: "./bin".to_string(),
         to: "${Desktop}".to_string(),
         overwrite: None
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_ok());
     assert!(StepMove {
         from: "bin".to_string(),
         to: "${OtherDesktop}".to_string(),
         overwrite: None
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_err());
     assert!(StepMove {
         from: "C:/Users/Desktop".to_string(),
         to: "${Desktop}".to_string(),
         overwrite: None
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_err());
 
     assert!(StepMove {
@@ -347,13 +346,13 @@ fn test_move_corelation() {
         to: "C:/Users/Nep/Desktop".to_string(),
         overwrite: None
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_err());
     assert!(StepMove {
         from: "${Home}".to_string(),
         to: "${Desktop}/*".to_string(),
         overwrite: None
     }
-    .verify_step(&ctx)
+    .verify_step(&cx)
     .is_err());
 }

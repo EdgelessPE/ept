@@ -3,21 +3,27 @@ use crate::entrances::verify::verify;
 use crate::parsers::parse_author;
 use crate::signature::sign;
 use crate::types::constants::EXT_NEP;
+use crate::types::context::RuntimeContext;
 use crate::types::{
     constants::EXT_TAR_ZST,
     signature::{Signature, SignatureNode},
 };
-use crate::utils::{allocate_path_temp, is_debug_mode, term::ask_yn};
+use crate::utils::allocate_path_temp;
 use crate::{log, log_ok_last, p2s};
 use anyhow::{anyhow, Result};
 use std::fs::{remove_dir_all, write};
 use std::path::Path;
 
-pub fn pack(source_dir: &str, into_file: Option<String>, need_sign: bool) -> Result<String> {
+pub fn pack(
+    ctx: &RuntimeContext,
+    source_dir: &str,
+    into_file: Option<String>,
+    need_sign: bool,
+) -> Result<String> {
     log!("Info:Preparing to pack '{source_dir}'");
 
     // 通用校验
-    let global = verify(source_dir)?;
+    let global = verify(ctx, source_dir)?;
     let first_author = parse_author(&global.package.authors[0])?;
     let file_stem = format!(
         "{pn}_{pv}_{fa}",
@@ -34,13 +40,16 @@ pub fn pack(source_dir: &str, into_file: Option<String>, need_sign: bool) -> Res
             return Err(anyhow!(
                 "Error:Target '{into_file}' is a existing directory"
             ));
-        } else if !ask_yn(format!("Overwrite the existing file '{into_file}'?"), false) {
+        } else if !ctx.interaction().ask_yn(
+            &format!("Overwrite the existing file '{into_file}'?"),
+            false,
+        ) {
             return Err(anyhow!("Error:Pack canceled by user"));
         }
     }
 
     // 创建临时目录
-    let temp_dir_path = allocate_path_temp(&file_stem, false)?;
+    let temp_dir_path = allocate_path_temp(ctx, &file_stem, false)?;
 
     // 生成内包
     log!("Info:Compressing inner package...");
@@ -78,7 +87,7 @@ pub fn pack(source_dir: &str, into_file: Option<String>, need_sign: bool) -> Res
     log_ok_last!("Info:Packing outer package...");
 
     // 清理临时文件夹
-    if !is_debug_mode() {
+    if !ctx.cfg.mode.debug {
         log!("Info:Cleaning...");
         let clean_res = remove_dir_all(&temp_dir_path);
         if clean_res.is_ok() {
@@ -101,17 +110,17 @@ pub fn pack(source_dir: &str, into_file: Option<String>, need_sign: bool) -> Res
 
 #[test]
 fn test_pack() {
-    use crate::utils::flags::{set_flag, Flag};
-    set_flag(Flag::Debug, false);
-    set_flag(Flag::Confirm, true);
+    use crate::utils::test::_default_test_cfg;
+    let cfg = _default_test_cfg();
     pack(
+        &cfg,
         "./examples/ComplexFS",
         Some("./test/ComplexFS_1.75.0.0_Cno.nep".to_string()),
         true,
     )
     .unwrap();
-    set_flag(Flag::Debug, true);
     pack(
+        &cfg,
         "./examples/ComplexFS",
         Some("./test/ComplexFS_1.75.0.0_Cno.nep".to_string()),
         false,

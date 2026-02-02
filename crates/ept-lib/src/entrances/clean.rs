@@ -15,11 +15,11 @@ use crate::{
     },
     utils::{
         get_bare_apps, get_path_apps, get_path_bin, get_path_cache, get_path_meta, parse_bare_temp,
-        term::ask_yn,
     },
 };
 
 use super::info_local;
+use crate::types::context::RuntimeContext;
 
 fn get_valid_entrances(setup: Vec<WorkflowNode>) -> Vec<String> {
     setup
@@ -37,13 +37,17 @@ fn get_valid_entrances(setup: Vec<WorkflowNode>) -> Vec<String> {
         .collect()
 }
 
-pub fn clean() -> Result<usize> {
+pub fn clean(ctx: &RuntimeContext) -> Result<usize> {
     log!("Debug:Starting clean operation");
     let mut clean_list = Vec::new();
     let mut valid_entrances = HashSet::new();
 
     // 处理直接删除的目录
-    let dirs_to_clean = vec![parse_bare_temp()?, get_path_cache()?, get_path_meta()?];
+    let dirs_to_clean = vec![
+        parse_bare_temp(ctx)?,
+        get_path_cache(ctx)?,
+        get_path_meta(ctx)?,
+    ];
     for p in dirs_to_clean {
         if p.exists() {
             log!(
@@ -55,7 +59,7 @@ pub fn clean() -> Result<usize> {
     }
 
     // apps 目录，查找未安装成功的目录
-    for scope_entry in read_dir(get_bare_apps()?)? {
+    for scope_entry in read_dir(get_bare_apps(ctx)?)? {
         let scope_entry = scope_entry?;
         let scope_path = scope_entry.path();
         let scope_name = p2s!(scope_entry.file_name());
@@ -71,14 +75,14 @@ pub fn clean() -> Result<usize> {
                 if app_path.is_dir() {
                     // 尝试读取 info
                     log!("Debug:Checking application '{scope_name}/{app_name}'");
-                    let info_res = info_local(&scope_name, &app_name);
+                    let info_res = info_local(ctx, &scope_name, &app_name);
                     if let Ok((global, _)) = info_res {
                         // 有效应用计数
                         valid_apps_count += 1;
                         log!("Debug:Valid application found: '{scope_name}/{app_name}'");
 
                         // 读取工作流
-                        let setup_path = p2s!(get_path_apps(&scope_name, &app_name, false)?
+                        let setup_path = p2s!(get_path_apps(ctx, &scope_name, &app_name, false)?
                             .join(DIR_NEP_CONTEXT)
                             .join(DIR_WORKFLOWS)
                             .join(WORKFLOW_SETUP));
@@ -127,7 +131,7 @@ pub fn clean() -> Result<usize> {
 
     // bin 目录，删除名称非法的文件
     // TODO:考虑检查指向的绝对路径是否存在
-    let bin_path = get_path_bin()?;
+    let bin_path = get_path_bin(ctx)?;
     log!(
         "Debug:Scanning bin directory '{path}' for invalid entrances",
         path = p2s!(&bin_path)
@@ -152,7 +156,10 @@ pub fn clean() -> Result<usize> {
     if !clean_list.is_empty() {
         log!("Info:Trash list :");
         println!("{clean_list:#?}");
-        if !ask_yn(format!("Clean those {clean_list_len} trashes?"), true) {
+        if !ctx
+            .interaction()
+            .ask_yn(&format!("Clean those {clean_list_len} trashes?"), true)
+        {
             return Err(anyhow!("Error:Operation cancelled by user"));
         }
         let tip = format!(
@@ -161,8 +168,8 @@ pub fn clean() -> Result<usize> {
         );
         log!("{tip}");
         if let Err(e) = trash::delete_all(clean_list.clone()) {
-            if ask_yn(
-                format!("Failed to move some files to recycle bin : {e}, force delete all?"),
+            if ctx.interaction().ask_yn(
+                &format!("Failed to move some files to recycle bin : {e}, force delete all?"),
                 true,
             ) {
                 clean_list.into_iter().for_each(|p| {
@@ -187,15 +194,16 @@ pub fn clean() -> Result<usize> {
 
 #[test]
 fn test_clean() {
-    use crate::utils::flags::{set_flag, Flag};
     use crate::utils::fs::copy_dir;
+    use crate::utils::test::_default_test_cfg;
     use std::fs::{copy, create_dir_all, write};
-    set_flag(Flag::Confirm, true);
+
+    let cfg = &_default_test_cfg();
 
     // 安装 vscode
     crate::utils::test::_ensure_testing_vscode_uninstalled();
     crate::utils::test::_ensure_testing_vscode();
-    let bin_path = get_path_bin().unwrap();
+    let bin_path = get_path_bin(cfg).unwrap();
     let (vscode_entrance_name, another_entrance_name) =
         if bin_path.join("Microsoft-Code.cmd").exists() {
             ("Microsoft-Code.cmd", "Code.cmd")
@@ -216,7 +224,7 @@ fn test_clean() {
     copy(&vscode_entrance_path, bin_path.join(another_entrance_name)).unwrap();
 
     // 在 apps 目录中添加无效文件
-    let apps_path = get_bare_apps().unwrap();
+    let apps_path = get_bare_apps(cfg).unwrap();
     let fake_scope_foo = apps_path.join("FakeScopeFoo");
     let fake_scope_bar = apps_path.join("FakeScopeBar");
     let fake_scope_foz = apps_path.join("FakeScopeFoz");
@@ -229,7 +237,7 @@ fn test_clean() {
     write(fake_scope_foz.join("README.md"), "# Man!").unwrap();
 
     // 执行清理
-    clean().unwrap();
+    clean(cfg).unwrap();
 
     // 断言清理结果
     assert!(!bin_path.join("invalid.cmd").exists());

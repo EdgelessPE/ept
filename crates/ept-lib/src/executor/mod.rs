@@ -5,12 +5,9 @@ use anyhow::{anyhow, Result};
 use evalexpr::*;
 
 use crate::{
-    log, p2s,
-    types::{
-        package::GlobalPackage,
-        workflow::{WorkflowContext, WorkflowNode},
-    },
-    utils::{arch::is_current_arch_match, get_bare_apps, get_system_drive},
+    log,
+    types::{context::WorkflowContext, package::GlobalPackage, workflow::WorkflowNode},
+    utils::arch::is_current_arch_match,
 };
 
 pub use self::functions::{
@@ -21,23 +18,24 @@ use self::{
     functions::set_context_with_function,
     values::{set_context_with_constant_values, set_context_with_mutable_values},
 };
+use crate::types::context::RuntimeContext;
 
-// 配置部分内置变量的值
-lazy_static! {
-    static ref SYSTEM_DRIVE: String = get_system_drive().unwrap();
-    static ref DEFAULT_LOCATION: String = p2s!(get_bare_apps().unwrap());
-}
-
-pub fn get_eval_context(exit_code: i32, located: &str, package_version: &str) -> HashMapContext {
+pub fn get_eval_context(
+    ctx: &RuntimeContext,
+    exit_code: i32,
+    located: &str,
+    package_version: &str,
+) -> HashMapContext {
     let mut context = HashMapContext::new();
     set_context_with_constant_values(&mut context);
     set_context_with_mutable_values(&mut context, exit_code, located, package_version);
-    set_context_with_function(&mut context, located);
+    set_context_with_function(ctx, &mut context, located);
     context
 }
 
 // 执行条件以判断是否成立
 pub fn condition_eval(
+    ctx: &RuntimeContext,
     condition: &str,
     exit_code: i32,
     located: &str,
@@ -46,7 +44,7 @@ pub fn condition_eval(
     // 装饰变量与函数
     let condition_with_values_interpreted =
         values_replacer(condition.to_owned(), exit_code, located, package_version);
-    let context = get_eval_context(exit_code, located, package_version);
+    let context = get_eval_context(ctx, exit_code, located, package_version);
 
     // 执行 eval
     eval_boolean_with_context(&condition_with_values_interpreted, &context).map_err(|res| {
@@ -56,6 +54,7 @@ pub fn condition_eval(
 
 // 执行工作流，返回最后一个步骤的退出码
 pub fn workflow_executor(
+    ctx: &RuntimeContext,
     flow: Vec<WorkflowNode>,
     located: String,
     pkg: GlobalPackage,
@@ -71,7 +70,13 @@ pub fn workflow_executor(
 
     // 准备上下文
     let package_version = pkg.package.version.clone();
-    let mut cx = WorkflowContext::new(&located, pkg);
+    let mut cx = WorkflowContext {
+        pkg,
+        located: located.clone(),
+        async_execution_handlers: Vec::new(),
+        exit_code: 0,
+        runtime_ctx: ctx,
+    };
 
     // 遍历流节点
     for flow_node in flow {
@@ -79,7 +84,7 @@ pub fn workflow_executor(
         log!("Debug:Start step '{name}'");
         // 解释节点条件，判断是否需要跳过执行
         if let Some(c_if) = flow_node.header.c_if {
-            if !condition_eval(&c_if, cx.exit_code, &located, &package_version)? {
+            if !condition_eval(ctx, &c_if, cx.exit_code, &located, &package_version)? {
                 continue;
             }
         }
@@ -123,12 +128,19 @@ pub fn workflow_executor(
 
 // 宽容地逆向执行 setup 工作流
 pub fn workflow_reverse_executor(
+    ctx: &RuntimeContext,
     flow: Vec<WorkflowNode>,
     located: String,
     pkg: GlobalPackage,
 ) -> Result<()> {
     let package_version = pkg.package.version.clone();
-    let mut cx = WorkflowContext::new(&located, pkg);
+    let mut cx = WorkflowContext {
+        pkg,
+        located: located.clone(),
+        async_execution_handlers: Vec::new(),
+        exit_code: 0,
+        runtime_ctx: ctx,
+    };
 
     // 遍历流节点
     for flow_node in flow {
@@ -154,8 +166,12 @@ pub fn workflow_reverse_executor(
 
 #[test]
 fn test_condition_eval() {
+    use crate::utils::test::_default_test_cfg;
+
     let located = "./examples/VSCode";
+    let cfg = _default_test_cfg();
     let r1 = condition_eval(
+        &cfg,
         "\"${ExitCode}\"==\"114\" && ExitCode==114 && \"${PackageVersion}\"==\"1.0.0.0\" && PackageVersion==\"1.0.0.0\"",
         114,
         located,
@@ -165,6 +181,7 @@ fn test_condition_eval() {
     assert!(r1);
 
     let r2 = condition_eval(
+        &cfg,
         "\"${ExitCode}\"!=\"114\" || ExitCode==514",
         114,
         located,
@@ -174,6 +191,7 @@ fn test_condition_eval() {
     assert!(!r2);
 
     let r3 = condition_eval(
+        &cfg,
         "\"${SystemDrive}\"==\"C:\" && SystemDrive==\"C:\"",
         0,
         located,
@@ -183,6 +201,7 @@ fn test_condition_eval() {
     assert!(r3);
 
     let r4 = condition_eval(
+        &cfg,
         "\"${DefaultLocation}\"==\"./unknown/VSCode\"",
         0,
         located,
@@ -192,6 +211,7 @@ fn test_condition_eval() {
     assert!(!r4);
 
     let r5 = condition_eval(
+        &cfg,
         "Exist(\"src/lib.rs\") && IsDirectory(\"src\")",
         0,
         "./",
@@ -200,10 +220,11 @@ fn test_condition_eval() {
     .unwrap();
     assert!(r5);
 
-    let r6 = condition_eval("Exist(\"./src/main.ts\")", 0, located, "1.0.0.0").unwrap();
+    let r6 = condition_eval(&cfg, "Exist(\"./src/main.ts\")", 0, located, "1.0.0.0").unwrap();
     assert!(!r6);
 
     let r7 = condition_eval(
+        &cfg,
         "Exist(\"${AppData}\") && IsDirectory(\"${SystemDrive}/Windows\")",
         0,
         located,
@@ -215,10 +236,9 @@ fn test_condition_eval() {
 
 #[test]
 fn test_workflow_executor() {
-    use crate::utils::flags::{set_flag, Flag};
-    set_flag(Flag::Debug, true);
     use crate::types::steps::{Step, StepExecute, StepLog};
     use crate::types::workflow::{WorkflowHeader, WorkflowNode};
+
     let cx = WorkflowContext::_demo();
     let wf1 = vec![
         WorkflowNode {
@@ -260,7 +280,7 @@ fn test_workflow_executor() {
             }),
         },
     ];
-    assert!(workflow_executor(wf1, cx.located, cx.pkg).is_err());
+    assert!(workflow_executor(cx.runtime_ctx, wf1, cx.located, cx.pkg).is_err());
 }
 
 #[test]
@@ -299,7 +319,7 @@ fn test_workflow_executor_interpreter() {
     ];
     let mut cx = WorkflowContext::_demo();
     cx.pkg.package.strict = Some(false);
-    let code = workflow_executor(flow, cx.located, cx.pkg).unwrap();
+    let code = workflow_executor(cx.runtime_ctx, flow, cx.located, cx.pkg).unwrap();
     assert_eq!(code, 0);
 }
 
@@ -327,11 +347,11 @@ fn test_workflow_with_strict_mode() {
 
     // 默认情况下是严格模式
     let cx = WorkflowContext::_demo();
-    assert!(workflow_executor(flow.clone(), cx.located, cx.pkg).is_err());
+    assert!(workflow_executor(cx.runtime_ctx, flow.clone(), cx.located, cx.pkg).is_err());
 
     // 显式申明禁用严格模式
     let mut cx = WorkflowContext::_demo();
     cx.pkg.package.strict = Some(false);
-    let code = workflow_executor(flow.clone(), cx.located, cx.pkg).unwrap();
+    let code = workflow_executor(cx.runtime_ctx, flow.clone(), cx.located, cx.pkg).unwrap();
     assert_eq!(code, 3);
 }

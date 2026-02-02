@@ -2,10 +2,11 @@ use crate::parsers::{parse_package, parse_workflow};
 use crate::types::constants::DIR_WORKFLOWS;
 use crate::types::{
     constants::{FILE_PACKAGE, WORKFLOW_EXPAND, WORKFLOW_REMOVE, WORKFLOW_SETUP, WORKFLOW_UPDATE},
+    context::VerifyStepCtx,
     extended_semver::ExSemVer,
     mixed_fs::MixedFS,
     package::GlobalPackage,
-    steps::{Step, VerifyStepCtx},
+    steps::Step,
     workflow::WorkflowNode,
 };
 use crate::utils::exe_version::get_exe_version;
@@ -18,6 +19,7 @@ use std::fs::read_dir;
 use std::path::{Path, PathBuf};
 
 use super::utils::validator::{inner_validator, manifest_validator};
+use crate::types::context::RuntimeContext;
 
 fn get_manifest(flow: Vec<WorkflowNode>, fs: &mut MixedFS) -> Vec<String> {
     let mut manifest = Vec::new();
@@ -52,10 +54,10 @@ fn get_workflow_path(source_dir: &str, file_name: &str) -> PathBuf {
 }
 
 // 返回是否调用了 call_installer
-fn verify_workflow(flow: Vec<WorkflowNode>, ctx: &VerifyStepCtx) -> Result<bool> {
+fn verify_workflow(cx: &VerifyStepCtx, flow: Vec<WorkflowNode>) -> Result<bool> {
     let mut have_call_installer = false;
     for node in flow {
-        node.verify_step(ctx)?;
+        node.verify_step(cx)?;
         if let Step::StepExecute(step) = node.body {
             if !have_call_installer {
                 have_call_installer = step.call_installer.unwrap_or(false);
@@ -65,7 +67,7 @@ fn verify_workflow(flow: Vec<WorkflowNode>, ctx: &VerifyStepCtx) -> Result<bool>
     Ok(have_call_installer)
 }
 
-pub fn verify(source_dir: &str) -> Result<GlobalPackage> {
+pub fn verify(ctx: &RuntimeContext, source_dir: &str) -> Result<GlobalPackage> {
     log!("Debug:Starting verification for source directory '{source_dir}'");
     // 打包检查
     log!("Info:Validating source directory...");
@@ -85,7 +87,7 @@ pub fn verify(source_dir: &str) -> Result<GlobalPackage> {
     // 读取包信息
     log!("Info:Resolving data...");
     let pkg_path = Path::new(source_dir).join(FILE_PACKAGE);
-    let global = parse_package(&p2s!(pkg_path), source_dir, false)?;
+    let global = parse_package(ctx, &p2s!(pkg_path), source_dir, false)?;
     let software = global.software.clone().unwrap();
     let pkg_content_path = p2s!(Path::new(source_dir).join(&global.package.name));
     log!(
@@ -106,11 +108,12 @@ pub fn verify(source_dir: &str) -> Result<GlobalPackage> {
 
     // 记录 setup 中是否用到 call_installer
     let check_call_installer = verify_workflow(
-        setup_flow.clone(),
         &VerifyStepCtx {
-            mixed_fs: MixedFS::new(&pkg_content_path),
+            mixed_fs: &MixedFS::new(&pkg_content_path),
+            runtime_ctx: ctx,
             is_expand_flow: false,
         },
+        setup_flow.clone(),
     )?;
 
     // 如果用到了 call_installer 则有一些特殊逻辑，除非提供了 registry_entry：
@@ -132,15 +135,16 @@ pub fn verify(source_dir: &str) -> Result<GlobalPackage> {
 
     // 检查更新、卸载工作流
     let optional_workflows = vec![WORKFLOW_UPDATE, WORKFLOW_REMOVE];
-    let ctx = VerifyStepCtx {
-        mixed_fs: MixedFS::new(source_dir),
+    let cx = VerifyStepCtx {
+        mixed_fs: &MixedFS::new(source_dir),
+        runtime_ctx: ctx,
         is_expand_flow: false,
     };
     for opt_workflow in optional_workflows {
         let opt_path = get_workflow_path(source_dir, opt_workflow);
         if opt_path.exists() {
             let flow = parse_workflow(&p2s!(opt_path))?;
-            let call_installer = verify_workflow(flow, &ctx)?;
+            let call_installer = verify_workflow(&cx, flow)?;
             if check_call_installer && !call_installer {
                 return Err(anyhow!("Error:Workflow '{opt_workflow}' should include 'Execute' step with 'call_installer' field enabled when workflow '{WORKFLOW_SETUP}' includes such step"));
             }
@@ -148,14 +152,15 @@ pub fn verify(source_dir: &str) -> Result<GlobalPackage> {
     }
 
     // 检查展开工作流
-    let ctx = VerifyStepCtx {
-        mixed_fs: MixedFS::new(source_dir),
+    let cx = VerifyStepCtx {
+        mixed_fs: &MixedFS::new(source_dir),
+        runtime_ctx: ctx,
         is_expand_flow: true,
     };
     let expand_path = get_workflow_path(source_dir, WORKFLOW_EXPAND);
     if expand_path.exists() {
         let flow = parse_workflow(&p2s!(expand_path))?;
-        verify_workflow(flow, &ctx)?;
+        verify_workflow(&cx, flow)?;
     }
 
     log_ok_last!("Info:Verifying workflows...");
@@ -177,7 +182,7 @@ pub fn verify(source_dir: &str) -> Result<GlobalPackage> {
         let mut update_manifest = get_manifest(update_flow, &mut fs);
         setup_manifest.append(&mut update_manifest);
     }
-    manifest_validator(&pkg_content_path, setup_manifest, &mut fs)?;
+    manifest_validator(ctx, &pkg_content_path, setup_manifest, &mut fs)?;
     log_ok_last!("Info:Checking manifest...");
     log!("Debug:Manifest validation completed for '{pkg_content_path}'");
 
@@ -238,13 +243,13 @@ fn test_get_manifest() {
 
 #[test]
 fn test_verify() {
-    use crate::utils::flags::{set_flag, Flag};
-    set_flag(Flag::Debug, true);
+    use crate::utils::test::_default_test_cfg;
+    let cfg = _default_test_cfg();
     use std::fs::write;
-    verify("./examples/VSCode").unwrap();
-    verify("./examples/VSCodeE").unwrap();
-    verify("./examples/CallInstaller").unwrap();
-    verify("./examples/PermissionsTest").unwrap();
+    verify(&cfg, "./examples/VSCode").unwrap();
+    verify(&cfg, "./examples/VSCodeE").unwrap();
+    verify(&cfg, "./examples/CallInstaller").unwrap();
+    verify(&cfg, "./examples/PermissionsTest").unwrap();
 
     // 手动添加没有 call_installer 的 update.toml
     std::fs::copy(
@@ -252,7 +257,7 @@ fn test_verify() {
         "./examples/CallInstaller/workflows/update.toml",
     )
     .unwrap();
-    assert!(verify("./examples/CallInstaller").is_err());
+    assert!(verify(&cfg, "./examples/CallInstaller").is_err());
     std::fs::remove_file("./examples/CallInstaller/workflows/update.toml").unwrap();
 
     // 调用了 call_installer 但是不提供 remove.toml
@@ -261,7 +266,7 @@ fn test_verify() {
         "examples/CallInstaller/workflows/_remove.toml",
     )
     .unwrap();
-    assert!(verify("./examples/CallInstaller").is_err());
+    assert!(verify(&cfg, "./examples/CallInstaller").is_err());
     std::fs::rename(
         "examples/CallInstaller/workflows/_remove.toml",
         "examples/CallInstaller/workflows/remove.toml",
@@ -272,7 +277,7 @@ fn test_verify() {
     let package_scene = std::fs::read_to_string("examples/CallInstaller/package.toml").unwrap();
     // 读取 package
     let pkg_path = "examples/CallInstaller/package.toml";
-    let mut raw_pkg = parse_package(pkg_path, "examples/CallInstaller", false).unwrap();
+    let mut raw_pkg = parse_package(&cfg, pkg_path, "examples/CallInstaller", false).unwrap();
 
     // 删除 CallInstaller 的 main_program
     raw_pkg.software = raw_pkg.software.map(|mut soft| {
@@ -280,7 +285,7 @@ fn test_verify() {
         soft
     });
     write(pkg_path, toml::to_string_pretty(&raw_pkg).unwrap()).unwrap();
-    assert!(verify("./examples/CallInstaller").is_err());
+    assert!(verify(&cfg, "./examples/CallInstaller").is_err());
 
     // 令 CallInstaller 的 main_program 为相对路径
     raw_pkg.software = raw_pkg.software.map(|mut soft| {
@@ -288,7 +293,7 @@ fn test_verify() {
         soft
     });
     write(pkg_path, toml::to_string_pretty(&raw_pkg).unwrap()).unwrap();
-    assert!(verify("./examples/CallInstaller").is_err());
+    assert!(verify(&cfg, "./examples/CallInstaller").is_err());
 
     // 还原现场
     write(pkg_path, package_scene).unwrap();

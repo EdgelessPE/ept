@@ -2,24 +2,19 @@ use anyhow::{anyhow, Result};
 use humantime::parse_duration;
 use std::{
     fs::{copy, create_dir_all, read_dir},
-    path::PathBuf,
     time::SystemTime,
 };
 
+use crate::types::context::RuntimeContext;
 use crate::{
     p2s,
+    types::context::CacheCtx,
     utils::{fs::try_recycle, get_path_cache},
 };
 
-use super::cfg::get_config;
-
-// （是否启用缓存，源文件，Option<(缓存目录, 缓存 key)>）
-#[derive(Debug)]
-pub struct CacheCtx(pub bool, pub PathBuf, pub Option<(PathBuf, String)>);
-
-pub fn spawn_cache(ctx: CacheCtx) -> Result<()> {
-    log!("Debug:Spawning cache with ctx: {ctx:?}");
-    let CacheCtx(enabled_cache, at, cached) = ctx;
+pub fn spawn_cache(cx: CacheCtx) -> Result<()> {
+    log!("Debug:Spawning cache with cx: {cx:?}");
+    let CacheCtx(enabled_cache, at, cached) = cx;
     if enabled_cache {
         if let Some((cache_path, cache_key)) = cached {
             if !cache_path.exists() {
@@ -46,9 +41,9 @@ pub fn spawn_cache(ctx: CacheCtx) -> Result<()> {
     Ok(())
 }
 
-pub fn restore_cache(ctx: CacheCtx, source: &str) -> Result<bool> {
-    log!("Debug:Restoring cache with ctx: {ctx:?}");
-    let CacheCtx(enabled_cache, to, cached) = ctx;
+pub fn restore_cache(cx: CacheCtx, source: &str) -> Result<bool> {
+    log!("Debug:Restoring cache with cx: {cx:?}");
+    let CacheCtx(enabled_cache, to, cached) = cx;
     if enabled_cache {
         if let Some((cache_path, cache_key)) = cached.clone() {
             let cache_file_path = cache_path.join(&cache_key);
@@ -80,16 +75,15 @@ pub fn restore_cache(ctx: CacheCtx, source: &str) -> Result<bool> {
     Ok(false)
 }
 
-pub fn clean_cache() -> Result<()> {
-    let cfg = get_config();
-    let duration_cfg = parse_duration(&cfg.local.cache_valid_duration).map_err(|e| anyhow!("Error:Failed to parse config field 'local.cache_valid_duration' as valid time span : '{e}', e.g. '5d' '14m54s'"))?;
+pub fn clean_cache(ctx: &RuntimeContext) -> Result<()> {
+    let duration_cfg = parse_duration(&ctx.cfg.local.cache_valid_duration).map_err(|e| anyhow!("Error:Failed to parse config field 'local.cache_valid_duration' as valid time span : '{e}', e.g. '5d' '14m54s'"))?;
     let now = SystemTime::now();
     log!(
         "Debug:Cache valid duration : '{i}'",
-        i = &cfg.local.cache_valid_duration
+        i = &ctx.cfg.local.cache_valid_duration
     );
 
-    let cache_dir = get_path_cache()?;
+    let cache_dir = get_path_cache(ctx)?;
     let mut cache_files = Vec::new();
     for entry in read_dir(cache_dir)? {
         let entry = entry?;
