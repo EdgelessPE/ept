@@ -46,7 +46,7 @@
     "lint-staged": "^16.2.7",
     "simple-git-hooks": "^2.11.1",
     "ts-results": "^3.3.0",
-    "tsx": "^4.19.2"
+    "tsx": "^4.21.0"
   },
   "optionalDependencies": {
     "git-cliff-darwin-arm64": "^2.7.0",
