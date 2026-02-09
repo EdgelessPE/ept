@@ -42,7 +42,7 @@
     "@modern-js/tsconfig": "2.67.0",
     "@rspress/plugin-shiki": "^1.43.3",
     "@types/node": "^25.1.0",
-    "chatgpt-md-translator": "^1.7.1",
+    "chatgpt-md-translator": "^1.9.1",
     "lint-staged": "^16.2.7",
     "simple-git-hooks": "^2.11.1",
     "ts-results": "^3.3.0",
