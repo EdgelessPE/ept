@@ -41,7 +41,7 @@
     "@commitlint/types": "^20.4.0",
     "@modern-js/tsconfig": "2.67.0",
     "@rspress/plugin-shiki": "^1.43.3",
-    "@types/node": "^25.1.0",
+    "@types/node": "^25.2.3",
     "chatgpt-md-translator": "^1.9.1",
     "lint-staged": "^16.2.7",
     "simple-git-hooks": "^2.11.1",
