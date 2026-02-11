@@ -95,8 +95,8 @@ importers:
         specifier: ^2.7.0
         version: 2.8.0
       git-cliff-windows-x64:
-        specifier: ^2.7.0
-        version: 2.8.0
+        specifier: ^2.12.0
+        version: 2.12.0
 
 packages:
 
@@ -1511,11 +1511,6 @@ packages:
 
   git-cliff-windows-x64@2.12.0:
     resolution: {integrity: sha512-jskb3nyVGr4dekHSCDM/J6iho45t37wnmMGkPNq42kOoUp04JS96yMBrNRdXfXV9ViZsaZq3NaNu1e3QkhFlyA==}
-    cpu: [x64]
-    os: [win32]
-
-  git-cliff-windows-x64@2.8.0:
-    resolution: {integrity: sha512-8jl0YMXPYjUmVygUEeQ4wf1zte3Rv8LPq1sIklUKl80XE4g2Gm/8EIWbKpUPLQH6IncRwepY6VuMgpVpPXbwNw==}
     cpu: [x64]
     os: [win32]
 
@@ -4220,9 +4215,6 @@ snapshots:
     optional: true
 
   git-cliff-windows-x64@2.12.0:
-    optional: true
-
-  git-cliff-windows-x64@2.8.0:
     optional: true
 
   git-cliff@2.12.0:
