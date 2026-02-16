@@ -20,7 +20,7 @@ ept-lib = { path = "crates/ept-lib" }
 anyhow = "1.0.100"
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.148"
-toml = { version = "0.9.11", features = ["preserve_order"] }
+toml = { version = "1.0.1", features = ["preserve_order"] }
 
 [profile.release]
 lto = true
