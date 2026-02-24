@@ -37,3 +37,18 @@ impl EvalFunction for IsAlive {
         Ok(())
     }
 }
+
+#[test]
+fn test_is_alive_verify_arg() {
+    assert!(IsAlive::verify_arg("code.exe").is_ok());
+    assert!(IsAlive::verify_arg("CODE.EXE").is_ok());
+    assert!(IsAlive::verify_arg("code").is_err());
+    assert!(IsAlive::verify_arg("code.txt").is_err());
+    assert!(IsAlive::verify_arg("").is_err());
+}
+
+#[test]
+fn test_is_alive_get_permission() {
+    let perm = IsAlive::get_permission("code.exe").unwrap();
+    assert_eq!(perm.key, PermissionKey::process_query);
+}

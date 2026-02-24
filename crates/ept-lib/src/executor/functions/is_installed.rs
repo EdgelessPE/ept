@@ -50,3 +50,19 @@ impl EvalFunction for IsInstalled {
         Ok(())
     }
 }
+
+#[test]
+fn test_is_installed_verify_arg() {
+    assert!(IsInstalled::verify_arg("Microsoft/VSCode").is_ok());
+    assert!(IsInstalled::verify_arg("github/VSCode").is_ok());
+    assert!(IsInstalled::verify_arg("Microsoft").is_err());
+    assert!(IsInstalled::verify_arg("a/b/c").is_err());
+    assert!(IsInstalled::verify_arg("").is_err());
+}
+
+#[test]
+fn test_is_installed_get_permission() {
+    let perm = IsInstalled::get_permission("Microsoft/VSCode").unwrap();
+    assert_eq!(perm.key, PermissionKey::nep_installed);
+    assert_eq!(perm.targets, vec!["Microsoft/VSCode"]);
+}

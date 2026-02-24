@@ -159,3 +159,145 @@ impl Interpretable for GlobalPackage {
         }
     }
 }
+
+#[test]
+fn test_package_verify_name_with_underscore() {
+    use crate::types::mixed_fs::MixedFS;
+    use crate::utils::test::_default_test_cfg;
+    let pkg = Package {
+        name: "VS_Code".to_string(),
+        scope: "Microsoft".to_string(),
+        description: "test".to_string(),
+        template: "Software".to_string(),
+        version: "1.0.0.0".to_string(),
+        authors: vec!["test".to_string()],
+        license: None,
+        icon: None,
+        strict: None,
+    };
+    let mixed_fs = MixedFS::new("");
+    let cfg = _default_test_cfg();
+    let cx = VerifiableCtx {
+        mixed_fs: &mixed_fs,
+        runtime_ctx: &cfg,
+    };
+    let result = pkg.verify_self(&cx);
+    assert!(result.is_err());
+    assert!(result.unwrap_err().to_string().contains("underline"));
+}
+
+#[test]
+fn test_package_verify_invalid_template() {
+    use crate::types::mixed_fs::MixedFS;
+    use crate::utils::test::_default_test_cfg;
+    let pkg = Package {
+        name: "VSCode".to_string(),
+        scope: "Microsoft".to_string(),
+        description: "test".to_string(),
+        template: "InvalidTemplate".to_string(),
+        version: "1.0.0.0".to_string(),
+        authors: vec!["test".to_string()],
+        license: None,
+        icon: None,
+        strict: None,
+    };
+    let mixed_fs = MixedFS::new("");
+    let cfg = _default_test_cfg();
+    let cx = VerifiableCtx {
+        mixed_fs: &mixed_fs,
+        runtime_ctx: &cfg,
+    };
+    let result = pkg.verify_self(&cx);
+    assert!(result.is_err());
+}
+
+#[test]
+fn test_package_verify_invalid_version() {
+    use crate::types::mixed_fs::MixedFS;
+    use crate::utils::test::_default_test_cfg;
+    let pkg = Package {
+        name: "VSCode".to_string(),
+        scope: "Microsoft".to_string(),
+        description: "test".to_string(),
+        template: "Software".to_string(),
+        version: "invalid.version".to_string(),
+        authors: vec!["test".to_string()],
+        license: None,
+        icon: None,
+        strict: None,
+    };
+    let mixed_fs = MixedFS::new("");
+    let cfg = _default_test_cfg();
+    let cx = VerifiableCtx {
+        mixed_fs: &mixed_fs,
+        runtime_ctx: &cfg,
+    };
+    let result = pkg.verify_self(&cx);
+    assert!(result.is_err());
+}
+
+#[test]
+fn test_package_verify_empty_scope() {
+    use crate::types::mixed_fs::MixedFS;
+    use crate::utils::test::_default_test_cfg;
+    let pkg = Package {
+        name: "VSCode".to_string(),
+        scope: "".to_string(),
+        description: "test".to_string(),
+        template: "Software".to_string(),
+        version: "1.0.0.0".to_string(),
+        authors: vec!["test".to_string()],
+        license: None,
+        icon: None,
+        strict: None,
+    };
+    let mixed_fs = MixedFS::new("");
+    let cfg = _default_test_cfg();
+    let cx = VerifiableCtx {
+        mixed_fs: &mixed_fs,
+        runtime_ctx: &cfg,
+    };
+    let result = pkg.verify_self(&cx);
+    assert!(result.is_err());
+    assert!(result.unwrap_err().to_string().contains("scope"));
+}
+
+#[test]
+fn test_global_package_alias_equals_name() {
+    use super::software::Software;
+    use crate::types::mixed_fs::MixedFS;
+    use crate::utils::test::_default_test_cfg;
+    let global_pkg = GlobalPackage {
+        nep: "1.0".to_string(),
+        package: Package {
+            name: "VSCode".to_string(),
+            scope: "Microsoft".to_string(),
+            description: "test".to_string(),
+            template: "Software".to_string(),
+            version: "1.0.0.0".to_string(),
+            authors: vec!["test".to_string()],
+            license: None,
+            icon: None,
+            strict: None,
+        },
+        software: Some(Software {
+            upstream: "https://code.visualstudio.com".to_string(),
+            category: "Development".to_string(),
+            arch: None,
+            language: "en-US".to_string(),
+            main_program: None,
+            alias: Some("VSCode".to_string()),
+            tags: None,
+            registry_entry: None,
+        }),
+    };
+    let mixed_fs = MixedFS::new("");
+    let cfg = _default_test_cfg();
+    let cx = VerifiableCtx {
+        mixed_fs: &mixed_fs,
+        runtime_ctx: &cfg,
+    };
+    let result = global_pkg.verify_self(&cx);
+    assert!(result.is_err());
+    assert!(result.unwrap_err().to_string().contains("alias"));
+}

@@ -148,3 +148,18 @@ fn test_count_sub_files() {
     );
     assert_eq!(count_sub_files("examples/VSCode", |_| false).unwrap(), 0);
 }
+
+#[test]
+fn test_ensure_dir_exist() {
+    let test_dir = "test_output/ensure_dir_test";
+    let result = ensure_dir_exist(test_dir);
+    assert!(result.is_ok());
+    assert!(Path::new(test_dir).exists());
+    let _ = try_recycle(test_dir);
+}
+
+#[test]
+fn test_try_recycle_non_existent() {
+    let result = try_recycle("non_existent_file_12345");
+    assert!(result.is_ok());
+}

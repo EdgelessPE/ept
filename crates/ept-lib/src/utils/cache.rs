@@ -114,3 +114,32 @@ pub fn clean_cache(ctx: &RuntimeContext) -> Result<()> {
 
     Ok(())
 }
+
+#[test]
+fn test_spawn_cache_disabled() {
+    let cx = CacheCtx(false, std::path::PathBuf::from("source"), None);
+    let result = spawn_cache(cx);
+    assert!(result.is_ok());
+}
+
+#[test]
+fn test_restore_cache_disabled() {
+    let cx = CacheCtx(false, std::path::PathBuf::from("to"), None);
+    let result = restore_cache(cx, "source");
+    assert!(result.is_ok());
+    assert!(!result.unwrap());
+}
+
+#[test]
+fn test_restore_cache_not_found() {
+    let temp_dir = std::env::temp_dir();
+    let cache_path = temp_dir.join("test_cache_nonexistent");
+    let cx = CacheCtx(
+        true,
+        std::path::PathBuf::from("to"),
+        Some((cache_path, "nonexistent_key".to_string())),
+    );
+    let result = restore_cache(cx, "nonexistent");
+    assert!(result.is_ok());
+    assert!(!result.unwrap());
+}

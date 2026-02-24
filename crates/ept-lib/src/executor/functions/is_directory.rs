@@ -35,3 +35,12 @@ impl EvalFunction for IsDirectory {
         values_validator_path(arg)
     }
 }
+
+#[test]
+fn test_is_directory_verify_arg() {
+    assert!(IsDirectory::verify_arg("./test").is_ok());
+    assert!(IsDirectory::verify_arg("${AppData}/test").is_ok());
+    assert!(IsDirectory::verify_arg("C:\\Windows").is_err());
+    assert!(IsDirectory::verify_arg("../test").is_err());
+    assert!(IsDirectory::verify_arg("${DefaultLocation}/test").is_err());
+}

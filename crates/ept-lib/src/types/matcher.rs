@@ -260,3 +260,20 @@ fn test_parse_package_input_enum() {
         })
     );
 }
+
+#[test]
+fn test_package_matcher_errors() {
+    assert!(PackageMatcher::parse("", false, false).is_err());
+    assert!(PackageMatcher::parse("a/b/c/d", false, false).is_err());
+    assert!(PackageMatcher::parse("VSCode@invalid@version", false, false).is_err());
+    assert!(PackageMatcher::parse("VSCode@", false, false).is_err());
+    assert!(PackageMatcher::parse("VSCode@1.0.0@2.0.0", false, false).is_err());
+}
+
+#[test]
+fn test_package_input_enum_relative_path() {
+    assert_eq!(
+        PackageInputEnum::parse("./test.nep".to_string(), false, false).unwrap(),
+        PackageInputEnum::LocalPath("test.nep".to_string())
+    );
+}

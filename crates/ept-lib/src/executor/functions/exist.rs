@@ -35,3 +35,12 @@ impl EvalFunction for Exist {
         values_validator_path(arg)
     }
 }
+
+#[test]
+fn test_exist_verify_arg() {
+    assert!(Exist::verify_arg("./test").is_ok());
+    assert!(Exist::verify_arg("${AppData}/test").is_ok());
+    assert!(Exist::verify_arg("C:\\Windows").is_err());
+    assert!(Exist::verify_arg("../test").is_err());
+    assert!(Exist::verify_arg("${DefaultLocation}/test").is_err());
+}

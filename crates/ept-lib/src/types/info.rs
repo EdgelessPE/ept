@@ -424,3 +424,39 @@ fn test_info() {
         .unwrap()
     );
 }
+
+#[test]
+fn test_info_diff_default() {
+    let diff = InfoDiff::default();
+    assert_eq!(diff.version, "0.0.0.0");
+    assert!(diff.authors.is_empty());
+}
+
+#[test]
+fn test_update_info_display() {
+    let info = UpdateInfo {
+        name: "VSCode".to_string(),
+        scope: "Microsoft".to_string(),
+        from_version: "1.0.0".to_string(),
+        to_version: "1.1.0".to_string(),
+    };
+    let output = info.to_string();
+    assert!(output.contains("Microsoft"));
+    assert!(output.contains("VSCode"));
+    assert!(output.contains("1.0.0"));
+    assert!(output.contains("1.1.0"));
+}
+
+#[test]
+fn test_update_info_format_success() {
+    let info = UpdateInfo {
+        name: "VSCode".to_string(),
+        scope: "Microsoft".to_string(),
+        from_version: "1.0.0".to_string(),
+        to_version: "1.1.0".to_string(),
+    };
+    let output = info.format_success();
+    assert!(output.contains("updated successfully"));
+    assert!(output.contains("1.0.0"));
+    assert!(output.contains("1.1.0"));
+}

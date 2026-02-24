@@ -237,3 +237,62 @@ impl Verifiable for Cfg {
         Ok(())
     }
 }
+
+#[test]
+fn test_preference_enum_deserialization() {
+    let cfg_str = r#"
+installer = "high-priority"
+portable = "low-priority"
+expandable = "forbidden"
+"#;
+    let cfg: Preference = toml::from_str(cfg_str).unwrap();
+    assert_eq!(cfg.installer, PreferenceEnum::HighPriority);
+    assert_eq!(cfg.portable, PreferenceEnum::LowPriority);
+    assert_eq!(cfg.expandable, PreferenceEnum::Forbidden);
+}
+
+#[test]
+fn test_preference_enum_from_i32() {
+    assert_eq!(i32::from(PreferenceEnum::Forbidden), -1024);
+    assert_eq!(i32::from(PreferenceEnum::HighPriority), 16);
+    assert_eq!(i32::from(PreferenceEnum::LowPriority), 2);
+}
+
+#[test]
+fn test_cfg_verify_invalid_base_not_absolute() {
+    let cfg = Cfg {
+        local: Local {
+            base: "not/absolute".to_string(),
+            enable_cache: true,
+            cache_valid_duration: "30d".to_string(),
+        },
+        online: Online {
+            mirror_update_interval: "1d".to_string(),
+            auto_check_upgrade: true,
+        },
+        preference: Preference {
+            installer: PreferenceEnum::LowPriority,
+            portable: PreferenceEnum::HighPriority,
+            expandable: PreferenceEnum::HighPriority,
+        },
+        interaction: Interaction {
+            enable_windows_terminal_status: false,
+            show_emojis: true,
+            auto_confirm_all: false,
+        },
+        mode: Mode {
+            qa: false,
+            debug: false,
+            offline: false,
+        },
+    };
+    let mixed_fs = MixedFS::new("");
+    let runtime_ctx = RuntimeContext::default();
+    let cx = VerifiableCtx {
+        mixed_fs: &mixed_fs,
+        runtime_ctx: &runtime_ctx,
+    };
+    let result = cfg.verify_self(&cx);
+    assert!(result.is_err());
+    assert!(result.unwrap_err().to_string().contains("absolute"));
+}
