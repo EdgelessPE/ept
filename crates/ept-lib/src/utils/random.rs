@@ -1,4 +1,4 @@
-use rand::{distr::Alphanumeric, Rng};
+use rand::{distr::Alphanumeric, RngExt};
 
 pub fn random_short_string() -> String {
     let s: String = rand::rng()
