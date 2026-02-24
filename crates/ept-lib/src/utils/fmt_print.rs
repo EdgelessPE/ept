@@ -86,3 +86,34 @@ pub fn fmt_print_mirror_line(mirror_info: MirrorInfo) -> String {
         update_str.as_str().truecolor(100, 100, 100)
     )
 }
+
+#[test]
+fn test_fmt_log() {
+    use colored::Colorize;
+    let result = fmt_log("Info".blue(), "test message");
+    assert!(result.contains("test message"));
+}
+
+#[test]
+fn test_fmt_log_in_step() {
+    use colored::Colorize;
+    let result = fmt_log_in_step("Copy", "Info".blue(), "test message");
+    assert!(result.contains("test message"));
+    assert!(result.contains("Copy"));
+}
+
+#[test]
+fn test_package_source_display() {
+    assert_eq!(
+        PackageSource::Mirror("test".to_string()).to_string(),
+        "Mirror 'test'"
+    );
+    assert_eq!(
+        PackageSource::LocalPath("path".to_string()).to_string(),
+        "Path 'path'"
+    );
+    assert_eq!(
+        PackageSource::Url("http://test.com".to_string()).to_string(),
+        "URL 'http://test.com'"
+    );
+}
