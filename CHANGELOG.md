@@ -2,6 +2,21 @@
 
 <!-- INSERT_HERE -->
 
+## [0.4.1] - 2026-03-24
+
+### 🚀 Features
+
+- 支持crates.io发版
+
+### 🐛 Bug Fixes
+
+- Ut
+
+### 📚 Documentation
+
+- 添加 README.md 跳转链接
+
+
 ## [0.4.0] - 2026-03-24
 
 ### 🚀 Features

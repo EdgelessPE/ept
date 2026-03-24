@@ -1093,7 +1093,7 @@ checksum = "c7f84e12ccf0a7ddc17a6c41c93326024c42920d7ee630d04950e6926645c0fe"
 
 [[package]]
 name = "ept-cli"
-version = "0.4.0"
+version = "0.4.1"
 dependencies = [
  "anyhow",
  "clap",
@@ -1110,7 +1110,7 @@ dependencies = [
 
 [[package]]
 name = "ept-lib"
-version = "0.4.0"
+version = "0.4.1"
 dependencies = [
  "Inflector",
  "anyhow",
