@@ -2,6 +2,45 @@
 
 <!-- INSERT_HERE -->
 
+## [0.4.0] - 2026-03-24
+
+### 🚀 Features
+
+- Info 支持以 toml 格式保存
+- 初步支持传递解析临时目录
+- 使用支持 zstd 的 Get 函数封装
+- 直接删除 temp 目录，避免回收站过度膨胀
+- 优化utils
+- 全局变量解耦，支持实例化调用 (#455)
+
+### 🐛 Bug Fixes
+
+- 修复使用 url 更新时提示需要 offline
+- 修复列出多个镜像时未换行
+- *(doc)* 修复 Wait 步骤示例错误
+- 修复 GitHub Actions 单测失败 (#415)
+- Test imports
+- Lint err
+- Lib compile
+- Tsc
+- Ts
+
+### 🚜 Refactor
+
+- *(entrances)* Optimize code structure and centralize constants
+- 简化测试代码中的字符串参数传递
+- Rust Monorepo (#446)
+
+### 📚 Documentation
+
+- Update readme
+- 增加中英文切换
+- 使用 main 分支
+- 使用 develop 分支
+- 跟进英文文档
+- 润色英文 README
+
+
 ## [0.3.1] - 2025-03-11
 
 ### 🚀 Features
