@@ -6,8 +6,6 @@ on:
     paths:
       - "doc/**"
       - ".github/workflows/deploy-wiki.yml"
-      - "package.json"
-      - "pnpm-lock.yaml"
       - "rspress.config.ts"
   workflow_dispatch:
 
