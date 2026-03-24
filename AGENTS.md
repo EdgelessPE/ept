@@ -2,6 +2,8 @@
 
 这是 Edgeless Package Tool (ept) 的 Rust CLI 项目编码指南。
 
+[📖 项目 README](./README.md)
+
 ## 构建/检查/测试命令
 
 ```bash
