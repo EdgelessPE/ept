@@ -5,16 +5,13 @@ on:
     paths:
       - "crates/**"
       - "examples/**"
-      - "Cargo.toml"
-      - "Cargo.lock"
+      - "crates/**/Cargo.toml"
       - ".github/workflows/run-unit-test.yml"
   pull_request:
     paths:
       - "crates/**"
       - "examples/**"
-      - "Cargo.toml"
       - "crates/**/Cargo.toml"
-      - "Cargo.lock"
   workflow_dispatch:
 
 env:
