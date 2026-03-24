@@ -1,4 +1,4 @@
-# AGENTS_zh.md - EdgelessPE/ept 项目编码规范
+# EdgelessPE/ept 项目编码规范
 
 这是 Edgeless Package Tool (ept) 的 Rust CLI 项目编码指南。
 

@@ -1,15 +1,26 @@
 use anyhow::{anyhow, Ok, Result};
 use serde::{Deserialize, Serialize};
 use std::fmt;
-use strum_macros::{EnumString, IntoStaticStr};
+use std::str::FromStr;
+use strum_macros::IntoStaticStr;
 
-#[derive(
-    Serialize, Deserialize, Clone, Debug, PartialEq, PartialOrd, Eq, Hash, EnumString, IntoStaticStr,
-)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, PartialOrd, Eq, Hash, IntoStaticStr)]
 pub enum SysArch {
     X64,
     X86,
     ARM64,
+}
+
+impl FromStr for SysArch {
+    type Err = anyhow::Error;
+    fn from_str(s: &str) -> Result<Self> {
+        match s.to_uppercase().as_str() {
+            "X64" => Ok(Self::X64),
+            "X86" => Ok(Self::X86),
+            "ARM64" => Ok(Self::ARM64),
+            _ => Err(anyhow!("Error:Failed to parse '{s}' as valid system arch")),
+        }
+    }
 }
 impl fmt::Display for SysArch {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -33,14 +44,7 @@ impl SysArch {
     }
 
     fn parse(text: &str) -> Result<Self> {
-        match text.to_uppercase().as_str() {
-            "X64" => Ok(Self::X64),
-            "X86" => Ok(Self::X86),
-            "ARM64" => Ok(Self::ARM64),
-            _ => Err(anyhow!(
-                "Error:Failed to parse '{text}' as valid system arch"
-            )),
-        }
+        text.parse()
     }
 }
 
