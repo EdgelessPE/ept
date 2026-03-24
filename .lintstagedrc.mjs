@@ -4,5 +4,5 @@ export default {
     "cargo fmt",
     "cargo clippy --fix --allow-dirty --allow-staged",
   ],
-  "*.{md,mdx}": () => ["pnpm doc:translate --check"],
+  "doc/**/*.{md,mdx}": () => ["pnpm doc:translate --check"],
 };
