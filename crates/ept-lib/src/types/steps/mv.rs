@@ -140,7 +140,7 @@ fn test_move() {
 
     // 准备源
     copy_dir("src", "test/src").unwrap();
-    copy_dir("../../keys", "test/src/keys").unwrap();
+    copy_dir("keys", "test/src/keys").unwrap();
 
     // 文件-文件
     StepMove {

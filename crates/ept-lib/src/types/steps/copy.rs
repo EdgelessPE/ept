@@ -210,7 +210,9 @@ fn test_copy() {
     use std::fs::remove_dir_all;
     use std::path::Path;
     let mut cx = WorkflowContext::_demo();
-    remove_dir_all("test").unwrap();
+    if Path::new("test").exists() {
+        remove_dir_all("test").unwrap();
+    }
 
     // 文件-文件
     StepCopy {
@@ -284,7 +286,7 @@ fn test_copy() {
 
     // 通配符目录-目录
     StepCopy {
-        from: "../../key?".to_string(),
+        from: "key?".to_string(),
         to: "test/keys".to_string(),
         overwrite: None,
     }
