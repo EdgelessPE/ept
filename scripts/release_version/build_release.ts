@@ -1,7 +1,7 @@
 import cp from "node:child_process";
 import { existsSync } from "node:fs";
-import core from "@actions/core";
-import rcedit from "rcedit";
+import { setOutput } from "@actions/core";
+import { rcedit } from "rcedit";
 import { getCurrentVersion, sleep } from "./utils";
 
 const IS_USE_CERT = false;
@@ -15,7 +15,7 @@ async function main() {
 	}
 
 	const targetVersion = await getCurrentVersion();
-	core.setOutput("version", targetVersion);
+	setOutput("version", targetVersion);
 
 	console.log(`Info: Target version : ${targetVersion}`);
 	const binPath = "target/release/ept.exe";

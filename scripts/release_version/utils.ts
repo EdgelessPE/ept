@@ -42,7 +42,7 @@ export async function getTargetVersion(curVersion: string): Promise<string> {
 		},
 		{ stdio: undefined },
 	);
-	const raw = res.stdout.trim();
+	const raw = (res.stdout as string).trim();
 	if (raw.startsWith("v")) {
 		return raw.slice(1);
 	}
@@ -90,7 +90,7 @@ export async function genChangeLog(targetVersion: string, isDev: boolean) {
 	console.log(stdout);
 
 	// 将其插入到 CHANGELOG 的对应位置
-	if (stdout.trim()) {
+	if ((stdout as string).trim()) {
 		const text = (await readFile("CHANGELOG.md")).toString();
 		const nextText = text.replace(INSERT_TAG, `${INSERT_TAG}\n\n${stdout}`);
 		if (!isDev) await writeFile("CHANGELOG.md", nextText);
