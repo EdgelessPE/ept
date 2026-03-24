@@ -5,7 +5,9 @@ edition.workspace = true
 authors.workspace = true
 license.workspace = true
 repository.workspace = true
-description = "Edgeless Package Tool - Core Library"
+description = "Edgeless Package Tools"
+keywords = ["edgeless", "package", "windows"]
+homepage = "https://github.com/EdgelessPE/ept"
 
 [dependencies]
 Inflector = "0.11.4"
