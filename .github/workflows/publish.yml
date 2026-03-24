@@ -1,4 +1,4 @@
-name: Build release
+name: Publish
 
 on:
   push:
@@ -9,7 +9,7 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build:
+  release:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
