@@ -47,7 +47,6 @@ jobs:
           files: ept-${{ steps.build.outputs.version }}-windows-x64.zip
 
   publish:
-    needs: build
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
