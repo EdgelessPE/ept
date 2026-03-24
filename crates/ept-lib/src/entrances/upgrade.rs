@@ -96,7 +96,7 @@ pub fn upgrade(ctx: &RuntimeContext, dry_run: bool, need_exit_process: bool) -> 
         .to_string_lossy()
         .replace("/", "\\");
     log!("Info:Writing upgrade script to '{}'", &script_path);
-    let script_content = include_str!("../../../../scripts/toolchain_utils/upgrade.cmd")
+    let script_content = include_str!("../../scripts/toolchain_utils/upgrade.cmd")
         .to_string()
         .replace("{target}", toolchain_path.to_string_lossy().as_ref());
     write(&script_path, script_content)
