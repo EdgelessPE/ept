@@ -1,10 +1,10 @@
 {
-  "compilerOptions": {
-    "module": "ESNext",
-    "moduleResolution": "Node",
-    "jsx": "react-jsx",
-    "esModuleInterop": true,
-    "strictNullChecks": true
-  },
-  "exclude": ["node_modules"]
+	"compilerOptions": {
+		"module": "ESNext",
+		"moduleResolution": "bundler",
+		"jsx": "react-jsx",
+		"esModuleInterop": true,
+		"strictNullChecks": true
+	},
+	"exclude": ["node_modules"]
 }

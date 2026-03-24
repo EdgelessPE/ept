@@ -1,71 +1,72 @@
 {
-  "name": "ept",
-  "version": "0.3.1",
-  "license": "MIT",
-  "type": "module",
-  "scripts": {
-    "doc:dev": "rspress dev",
-    "doc:build": "pnpm doc:gen && pnpm doc:translate --check && rspress build",
-    "doc:preview": "rspress preview",
-    "doc:gen": "tsx scripts/gen_wiki/index.ts",
-    "doc:translate": "cd ./scripts/translate_wiki && tsx index.ts",
-    "chatgpt-md-translator": "cd ./scripts/translate_wiki && chatgpt-md-translator",
-    "lint": "biome check --write scripts/",
-    "prepare": "npx simple-git-hooks && rustup component add clippy",
-    "rs:lint": "cargo fmt && cargo clippy --fix --allow-dirty --allow-staged",
-    "rs:ut": "cargo test -- --test-threads 1",
-    "rs:ut:html": "cargo tarpaulin -o html --exclude-files test/** --exclude-files node_modules/** && start tarpaulin-report.html",
-    "rs:ut:xml": "cargo tarpaulin -o xml --exclude-files test/** --exclude-files node_modules/**",
-    "bump": "tsx scripts/release_version/bump_version.ts",
-    "rs:build": "cmd /c scripts\\vc_ltl\\build.bat",
-    "rs:release": "tsx scripts/release_version/build_release.ts"
-  },
-  "dependencies": {
-    "@types/minimist": "^1.2.5",
-    "@types/semver": "^7.7.1",
-    "git-cliff": "^2.12.0",
-    "minimist": "^1.2.8",
-    "rcedit": "^5.0.2",
-    "react": "^19.2.4",
-    "react-dom": "^19.0.0",
-    "rspress": "^1.43.10",
-    "semver": "^7.7.4",
-    "smol-toml": "^1.6.0",
-    "typescript": "^5.9.3"
-  },
-  "devDependencies": {
-    "@actions/core": "^3.0.0",
-    "@biomejs/biome": "^2.3.13",
-    "@commitlint/cli": "^20.5.0",
-    "@commitlint/config-conventional": "^20.3.1",
-    "@commitlint/types": "^20.4.0",
-    "@modern-js/tsconfig": "3.0.3",
-    "@rspress/plugin-shiki": "^1.47.1",
-    "@types/node": "^25.5.0",
-    "chatgpt-md-translator": "^1.9.1",
-    "lint-staged": "^16.3.1",
-    "simple-git-hooks": "^2.11.1",
-    "ts-results": "^3.3.0",
-    "tsx": "^4.21.0"
-  },
-  "optionalDependencies": {
-    "git-cliff-darwin-arm64": "^2.7.0",
-    "git-cliff-darwin-x64": "^2.7.0",
-    "git-cliff-linux-x64": "^2.7.0",
-    "git-cliff-windows-arm64": "^2.7.0",
-    "git-cliff-windows-x64": "^2.12.0"
-  },
-  "simple-git-hooks": {
-    "pre-commit": "npx lint-staged",
-    "commit-msg": "npx --no -- commitlint --edit $1"
-  },
-  "packageManager": "pnpm@10.32.1",
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "@biomejs/biome",
-      "core-js",
-      "esbuild",
-      "simple-git-hooks"
-    ]
-  }
+	"name": "ept",
+	"version": "0.3.1",
+	"license": "MIT",
+	"type": "module",
+	"scripts": {
+		"doc:dev": "rspress dev",
+		"doc:build": "pnpm doc:gen && pnpm doc:translate --check && rspress build",
+		"doc:preview": "rspress preview",
+		"doc:gen": "tsx scripts/gen_wiki/index.ts",
+		"doc:translate": "cd ./scripts/translate_wiki && tsx index.ts",
+		"chatgpt-md-translator": "cd ./scripts/translate_wiki && chatgpt-md-translator",
+		"ts:check": "tsc --noEmit -p tsconfig.json --skipLibCheck",
+		"lint": "biome check --write scripts/",
+		"prepare": "npx simple-git-hooks && rustup component add clippy",
+		"rs:lint": "cargo fmt && cargo clippy --fix --allow-dirty --allow-staged",
+		"rs:ut": "cargo test -- --test-threads 1",
+		"rs:ut:html": "cargo tarpaulin -o html --exclude-files test/** --exclude-files node_modules/** && start tarpaulin-report.html",
+		"rs:ut:xml": "cargo tarpaulin -o xml --exclude-files test/** --exclude-files node_modules/**",
+		"bump": "tsx scripts/release_version/bump_version.ts",
+		"rs:build": "cmd /c scripts\\vc_ltl\\build.bat",
+		"rs:release": "tsx scripts/release_version/build_release.ts"
+	},
+	"dependencies": {
+		"@types/minimist": "^1.2.5",
+		"@types/semver": "^7.7.1",
+		"git-cliff": "^2.12.0",
+		"minimist": "^1.2.8",
+		"rcedit": "^5.0.2",
+		"react": "^19.2.4",
+		"react-dom": "^19.0.0",
+		"rspress": "^1.47.1",
+		"semver": "^7.7.4",
+		"smol-toml": "^1.6.0",
+		"typescript": "^5.9.3"
+	},
+	"devDependencies": {
+		"@actions/core": "^3.0.0",
+		"@biomejs/biome": "^2.3.13",
+		"@commitlint/cli": "^20.5.0",
+		"@commitlint/config-conventional": "^20.3.1",
+		"@commitlint/types": "^20.4.0",
+		"@modern-js/tsconfig": "3.0.3",
+		"@rspress/plugin-shiki": "^1.47.1",
+		"@types/node": "^25.5.0",
+		"chatgpt-md-translator": "^1.9.1",
+		"lint-staged": "^16.3.1",
+		"simple-git-hooks": "^2.11.1",
+		"ts-results": "^3.3.0",
+		"tsx": "^4.21.0"
+	},
+	"optionalDependencies": {
+		"git-cliff-darwin-arm64": "^2.7.0",
+		"git-cliff-darwin-x64": "^2.7.0",
+		"git-cliff-linux-x64": "^2.7.0",
+		"git-cliff-windows-arm64": "^2.7.0",
+		"git-cliff-windows-x64": "^2.12.0"
+	},
+	"simple-git-hooks": {
+		"pre-commit": "npx lint-staged",
+		"commit-msg": "npx --no -- commitlint --edit $1"
+	},
+	"packageManager": "pnpm@10.32.1",
+	"pnpm": {
+		"onlyBuiltDependencies": [
+			"@biomejs/biome",
+			"core-js",
+			"esbuild",
+			"simple-git-hooks"
+		]
+	}
 }
