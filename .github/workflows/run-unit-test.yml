@@ -2,6 +2,10 @@ name: Run unit test
 
 on:
   push:
+    branches:
+      - develop
+    tags-ignore:
+      - "**"
     paths:
       - "crates/**"
       - "examples/**"
