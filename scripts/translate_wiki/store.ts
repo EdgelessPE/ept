@@ -11,7 +11,7 @@ interface StoreNode {
 	zh: string | undefined;
 	en: string | undefined;
 }
-let cachedJson: Record<string, StoreNode> | undefined = undefined;
+let cachedJson: Record<string, StoreNode> | undefined;
 async function getCachedJson(): Promise<Record<string, StoreNode>> {
 	if (!cachedJson) {
 		const filePath = path.join(__dirname, "./store.json");

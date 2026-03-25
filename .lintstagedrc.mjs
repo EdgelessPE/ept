@@ -1,5 +1,5 @@
 export default {
-  "*.ts": "biome check --write",
+  "*.{ts,md,mdx}": "biome check --write",
   "*.rs": () => [
     "cargo fmt",
     "cargo clippy --fix --allow-dirty --allow-staged",

@@ -25,7 +25,7 @@ export async function translate(zh: string, en: string): Promise<boolean> {
 	return await new Promise((resolve) => {
 		cp.exec(
 			`pnpm chatgpt-md-translator "${zh}" -o "${en}"`,
-			(error, stdout, stderr) => {
+			(error, _stdout, stderr) => {
 				const err = stderr || error;
 				if (err) {
 					console.error(err);

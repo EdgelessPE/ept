@@ -1,29 +1,29 @@
 [
-  "index",
-  {
-    "type": "dir",
-    "name": "introduction",
-    "label": "introduction"
-  },
-  {
-    "type": "dir",
-    "name": "struct",
-    "label": "package-struct"
-  },
-  {
-    "type": "dir",
-    "name": "workflow",
-    "label": "workflow"
-  },
-  {
-    "type": "dir",
-    "name": "ability",
-    "label": "ability"
-  },
-  {
-    "type": "dir",
-    "name": "definition",
-    "label": "definition-and-api",
-    "collapsed": true
-  }
+	"index",
+	{
+		"type": "dir",
+		"name": "introduction",
+		"label": "introduction"
+	},
+	{
+		"type": "dir",
+		"name": "struct",
+		"label": "package-struct"
+	},
+	{
+		"type": "dir",
+		"name": "workflow",
+		"label": "workflow"
+	},
+	{
+		"type": "dir",
+		"name": "ability",
+		"label": "ability"
+	},
+	{
+		"type": "dir",
+		"name": "definition",
+		"label": "definition-and-api",
+		"collapsed": true
+	}
 ]
