@@ -1,13 +1,10 @@
 [workspace]
 resolver = "2"
-members = [
-    "crates/ept-lib",
-    "crates/ept-cli",
-]
+members = ["crates/ept-lib", "crates/ept-cli"]
 
 [workspace.package]
 version = "0.4.7"
-edition = "2021"
+edition = "2024"
 authors = ["Cno"]
 license = "MIT"
 repository = "https://github.com/EdgelessPE/ept"
