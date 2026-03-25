@@ -2,6 +2,13 @@
 
 <!-- INSERT_HERE -->
 
+## [0.4.6] - 2026-03-25
+
+### 🐛 Bug Fixes
+
+- Package failed
+
+
 ## [0.4.5] - 2026-03-25
 
 ### 🐛 Bug Fixes
