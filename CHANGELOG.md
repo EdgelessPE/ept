@@ -2,6 +2,13 @@
 
 <!-- INSERT_HERE -->
 
+## [0.4.7] - 2026-03-25
+
+### 🐛 Bug Fixes
+
+- Spec target pkg
+
+
 ## [0.4.6] - 2026-03-25
 
 ### 🐛 Bug Fixes
