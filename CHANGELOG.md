@@ -2,6 +2,14 @@
 
 <!-- INSERT_HERE -->
 
+## [0.4.9] - 2026-03-25
+
+### 🐛 Bug Fixes
+
+- Args parse
+- 跳过prehook
+
+
 
 ## [0.4.8] - 2026-03-25
 
