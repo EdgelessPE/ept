@@ -40,7 +40,7 @@ async function bump_version() {
 	if (!isDev) {
 		console.log("Info: Committing and tagging...");
 		cp.execSync("git add --all");
-		cp.execSync(`git commit -m "release: ${targetVersion}"`);
+		cp.execSync(`git commit -m "release: ${targetVersion}" -n`);
 		cp.execSync(`git tag v${targetVersion}`);
 	}
 
