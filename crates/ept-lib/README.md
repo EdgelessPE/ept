@@ -64,15 +64,31 @@ ept.install_using_package("path/to/package.nep", true)?;
 | 方法 | 描述 |
 |------|------|
 | `new(runtime_ctx)` | 创建新实例 |
-| `search(text, is_regex)` | 搜索包 |
-| `list()` | 列出已安装的包 |
+| `runtime_ctx()` | 获取内部 RuntimeContext 的引用 |
+| `runtime_ctx_mut()` | 获取内部 RuntimeContext 的可变引用 |
+| `auto_mirror_update_all()` | 自动镜像更新 |
+| `clean()` | 清理临时文件 |
+| `config_get(table, key)` | 获取配置值 |
+| `config_init()` | 初始化配置文件 |
+| `config_list()` | 列出所有配置 |
+| `config_set(table, key, value)` | 设置配置值 |
+| `config_which()` | 配置所在位置 |
 | `info(target, verify)` | 获取包信息 |
 | `install_using_package(source, verify)` | 使用包文件安装 |
+| `install_using_parsed(parsed, verify)` | 使用解析后的输入安装 |
+| `list()` | 列出已安装的包 |
+| `meta(input, verify)` | 获取包的元数据 |
+| `mirror_add(url, name)` | 添加镜像源 |
+| `mirror_list()` | 列出镜像源 |
+| `mirror_remove(name)` | 移除镜像源 |
+| `mirror_update(name)` | 更新指定镜像源 |
+| `mirror_update_all()` | 更新所有镜像源 |
+| `pack(source_dir, into_file, need_sign)` | 打包目录为 nep 文件 |
+| `search(text, is_regex)` | 搜索包 |
 | `uninstall(scope, name)` | 卸载包 |
 | `update_all(verify)` | 更新所有包 |
-| `mirror_list()` | 列出镜像源 |
-| `mirror_add(url, name)` | 添加镜像源 |
-| `clean()` | 清理临时文件 |
+| `update_using_parsed(parsed, verify)` | 使用解析后的输入更新 |
+| `upgrade(dry_run, need_exit_process)` | 升级 ept 工具链 |
 
 ### 配置类型
 
@@ -80,6 +96,9 @@ ept.install_using_package("path/to/package.nep", true)?;
 - `RuntimeContext` - 运行时上下文
 - `Info` - 包信息
 - `MirrorInfo` - 镜像源信息
+- `SearchResult` - 搜索结果
+- `UpdateInfo` - 更新信息
+- `MetaResult` - 元数据结果
 
 ## 许可
 
