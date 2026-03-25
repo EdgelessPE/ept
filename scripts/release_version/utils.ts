@@ -6,7 +6,10 @@ import { SemVer } from "semver";
 import TOML from "smol-toml";
 
 const BUMP_TYPE = ["major", "minor", "patch"] as const;
-const args = minimist(process.argv.slice(2));
+const args = minimist(process.argv.slice(2), {
+	string: ["type"],
+	boolean: ["confirm", "dev"],
+});
 
 const rl = readline.createInterface({
 	input: process.stdin,
