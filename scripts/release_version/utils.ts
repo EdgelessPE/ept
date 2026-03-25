@@ -66,7 +66,7 @@ export async function modifyVersion(
 	if (!text.includes(fromLine)) {
 		throw new Error(`Fatal: Version line '${fromLine}' not found in ${file}`);
 	}
-	const nextText = text.replace(fromLine, toLine);
+	const nextText = text.replace(new RegExp(fromLine, "g"), toLine);
 	await writeFile(file, nextText);
 }
 
