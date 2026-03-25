@@ -60,4 +60,4 @@ jobs:
       - name: "Package for crates.io"
         run: cargo package
       - name: "Publish to crates.io"
-        run: cargo publish
+        run: cargo publish --package ept-lib
