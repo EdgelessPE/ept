@@ -271,7 +271,7 @@ pub fn search_index_for_mirror(
     let top_docs = if is_regex {
         let query = RegexQuery::from_pattern(text, schema_fields.name)
             .map_err(|e| anyhow!("Error:Invalid regex : {e}"))?;
-        searcher.search(&query, &TopDocs::with_limit(10))?
+        searcher.search(&query, &TopDocs::with_limit(10).order_by_score())?
     } else {
         let query_parser = QueryParser::for_index(
             &index,
@@ -283,7 +283,7 @@ pub fn search_index_for_mirror(
             ],
         );
         let query = query_parser.parse_query(text)?;
-        searcher.search(&query, &TopDocs::with_limit(10))?
+        searcher.search(&query, &TopDocs::with_limit(10).order_by_score())?
     };
 
     let mut arr = Vec::new();
