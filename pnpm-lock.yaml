@@ -58,8 +58,8 @@ importers:
         specifier: ^20.4.0
         version: 20.4.0
       '@modern-js/tsconfig':
-        specifier: 3.1.1
-        version: 3.1.1
+        specifier: 3.1.5
+        version: 3.1.5
       '@rspress/plugin-shiki':
         specifier: ^1.47.1
         version: 1.47.1(rspress@1.47.1(tslib@2.8.1)(webpack@5.98.0))
@@ -578,8 +578,8 @@ packages:
     peerDependencies:
       react: '>=16'
 
-  '@modern-js/tsconfig@3.1.1':
-    resolution: {integrity: sha512-xGrUHE14IPcxwWVNwuI3xEXmaVjgsKmshL2MzdtyXom1HE+IDTrEWAl0Q1BOdAcPQ+zcmOALVDR8OizwZN8YGw==}
+  '@modern-js/tsconfig@3.1.5':
+    resolution: {integrity: sha512-9fEMN6CDgo6H28GP3QlP52YVLrtvVvHmn20DOHiPFEAPZxo8AtUuy6h6hhlcF23JPj74ZbAqxCe6eaVE77rZ6w==}
 
   '@module-federation/error-codes@0.14.0':
     resolution: {integrity: sha512-GGk+EoeSACJikZZyShnLshtq9E2eCrDWbRiB4QAFXCX4oYmGgFfzXlx59vMNwqTKPJWxkEGnPYacJMcr2YYjag==}
@@ -1088,8 +1088,8 @@ packages:
   bail@2.0.2:
     resolution: {integrity: sha512-0xO6mYd7JB2YesxDKplafRpsiOzPt9V02ddPCLbY1xYGPOX24NTyN50qnUxgCPcSoYMhKpAuBTjQoRZCAkUDRw==}
 
-  baseline-browser-mapping@2.10.21:
-    resolution: {integrity: sha512-Q+rUQ7Uz8AHM7DEaNdwvfFCTq7a43lNTzuS94eiWqwyxfV/wJv+oUivef51T91mmRY4d4A1u9rcSvkeufCVXlA==}
+  baseline-browser-mapping@2.10.23:
+    resolution: {integrity: sha512-xwVXGqevyKPsiuQdLj+dZMVjidjJV508TBqexND5HrF89cGdCYCJFB3qhcxRHSeMctdCfbR1jrxBajhDy7o29g==}
     engines: {node: '>=6.0.0'}
     hasBin: true
 
@@ -1126,8 +1126,8 @@ packages:
   caniuse-lite@1.0.30001781:
     resolution: {integrity: sha512-RdwNCyMsNBftLjW6w01z8bKEvT6e/5tpPVEgtn22TiLGlstHOVecsX2KHFkD5e/vRnIE4EGzpuIODb3mtswtkw==}
 
-  caniuse-lite@1.0.30001790:
-    resolution: {integrity: sha512-bOoxfJPyYo+ds6W0YfptaCWbFnJYjh2Y1Eow5lRv+vI2u8ganPZqNm1JwNh0t2ELQCqIWg4B3dWEusgAmsoyOw==}
+  caniuse-lite@1.0.30001791:
+    resolution: {integrity: sha512-yk0l/YSrOnFZk3UROpDLQD9+kC1l4meK/wed583AXrzoarMGJcbRi2Q4RaUYbKxYAsZ8sWmaSa/DsLmdBeI1vQ==}
 
   ccount@2.0.1:
     resolution: {integrity: sha512-eyrF0jiFpY+3drT6383f1qhkbGsLSifNAjA61IUjZjmLCWjItY6LB9ft9YhoDgwfmclB2zhu51Lc7+95b8NRAg==}
@@ -3304,7 +3304,7 @@ snapshots:
       '@types/react': 19.2.14
       react: 18.3.1
 
-  '@modern-js/tsconfig@3.1.1': {}
+  '@modern-js/tsconfig@3.1.5': {}
 
   '@module-federation/error-codes@0.14.0': {}
 
@@ -3847,7 +3847,7 @@ snapshots:
 
   bail@2.0.2: {}
 
-  baseline-browser-mapping@2.10.21: {}
+  baseline-browser-mapping@2.10.23: {}
 
   big.js@5.2.2: {}
 
@@ -3861,8 +3861,8 @@ snapshots:
 
   browserslist@4.28.2:
     dependencies:
-      baseline-browser-mapping: 2.10.21
-      caniuse-lite: 1.0.30001790
+      baseline-browser-mapping: 2.10.23
+      caniuse-lite: 1.0.30001791
       electron-to-chromium: 1.5.344
       node-releases: 2.0.38
       update-browserslist-db: 1.2.3(browserslist@4.28.2)
@@ -3875,7 +3875,7 @@ snapshots:
 
   caniuse-lite@1.0.30001781: {}
 
-  caniuse-lite@1.0.30001790: {}
+  caniuse-lite@1.0.30001791: {}
 
   ccount@2.0.1: {}
 
