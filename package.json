@@ -28,7 +28,7 @@
 		"minimist": "^1.2.8",
 		"rcedit": "^5.0.2",
 		"react": "^19.2.5",
-		"react-dom": "^19.0.0",
+		"react-dom": "^19.2.5",
 		"rspress": "^1.47.1",
 		"semver": "^7.7.4",
 		"smol-toml": "^1.6.1",
