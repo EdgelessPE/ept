@@ -32,7 +32,7 @@
 		"rspress": "^1.47.1",
 		"semver": "^7.7.4",
 		"smol-toml": "^1.6.1",
-		"typescript": "^6.0.2"
+		"typescript": "^6.0.3"
 	},
 	"devDependencies": {
 		"@actions/core": "^3.0.1",
