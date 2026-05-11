@@ -89,8 +89,8 @@ importers:
         specifier: ^2.13.1
         version: 2.13.1
       git-cliff-linux-x64:
-        specifier: ^2.7.0
-        version: 2.12.0
+        specifier: ^2.13.1
+        version: 2.13.1
       git-cliff-windows-arm64:
         specifier: ^2.7.0
         version: 2.12.0
@@ -1085,8 +1085,8 @@ packages:
   bail@2.0.2:
     resolution: {integrity: sha512-0xO6mYd7JB2YesxDKplafRpsiOzPt9V02ddPCLbY1xYGPOX24NTyN50qnUxgCPcSoYMhKpAuBTjQoRZCAkUDRw==}
 
-  baseline-browser-mapping@2.10.28:
-    resolution: {integrity: sha512-Ic44hnOtFIgravCunj1ifSoQPSUrkNiJuH9Mf6jr2jjoA74icqV8wU0KuadXeOR8zuIJMOoTv0GuQjZ9ZYNMeA==}
+  baseline-browser-mapping@2.10.29:
+    resolution: {integrity: sha512-Asa2krT+XTPZINCS+2QcyS8WTkObE77RwkydwF7h6DmnKqbvlalz93m/dnphUyCa6SWSP51VgtEUf2FN+gelFQ==}
     engines: {node: '>=6.0.0'}
     hasBin: true
 
@@ -1533,11 +1533,6 @@ packages:
   git-cliff-linux-arm64@2.13.1:
     resolution: {integrity: sha512-clNRcNzdvk4GKyTt3ZhhWqcrjVRghcUcGNSV/Y87YJf3Mc/zl9ajUAhnXPOBSX/KWBr2od5SmkCt0qGYagY07g==}
     cpu: [arm64]
-    os: [linux]
-
-  git-cliff-linux-x64@2.12.0:
-    resolution: {integrity: sha512-abidFG6dH2N5hPUF245/kRYdwViP11Pz7ZwIW/a86CJLZ/WSE7dJt0f2cUIkxTcFSsp11OwuLc5k1hAbwmiIRw==}
-    cpu: [x64]
     os: [linux]
 
   git-cliff-linux-x64@2.13.1:
@@ -3854,7 +3849,7 @@ snapshots:
 
   bail@2.0.2: {}
 
-  baseline-browser-mapping@2.10.28: {}
+  baseline-browser-mapping@2.10.29: {}
 
   big.js@5.2.2: {}
 
@@ -3868,7 +3863,7 @@ snapshots:
 
   browserslist@4.28.2:
     dependencies:
-      baseline-browser-mapping: 2.10.28
+      baseline-browser-mapping: 2.10.29
       caniuse-lite: 1.0.30001792
       electron-to-chromium: 1.5.353
       node-releases: 2.0.38
@@ -4291,9 +4286,6 @@ snapshots:
     optional: true
 
   git-cliff-linux-arm64@2.13.1:
-    optional: true
-
-  git-cliff-linux-x64@2.12.0:
     optional: true
 
   git-cliff-linux-x64@2.13.1:
