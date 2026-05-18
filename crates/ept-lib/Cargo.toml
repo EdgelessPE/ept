@@ -49,7 +49,7 @@ wildmatch = "2.6.1"
 zstd = "0.13.3"
 httpmock = "0.8.3"
 tantivy-jieba = "0.19.0"
-config = "0.15.19"
+config = "0.15.23"
 zip = "8.6.0"
 postcard = { version = "1.1", features = ["use-std"] }
 
