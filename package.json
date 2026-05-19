@@ -37,7 +37,7 @@
 	"devDependencies": {
 		"@actions/core": "^3.0.1",
 		"@biomejs/biome": "^2.4.15",
-		"@commitlint/cli": "^20.5.3",
+		"@commitlint/cli": "^21.0.1",
 		"@commitlint/config-conventional": "^21.0.1",
 		"@commitlint/types": "^21.0.0",
 		"@modern-js/tsconfig": "3.1.5",
