@@ -95,8 +95,8 @@ importers:
         specifier: ^2.13.1
         version: 2.13.1
       git-cliff-windows-x64:
-        specifier: ^2.12.0
-        version: 2.12.0
+        specifier: ^2.13.1
+        version: 2.13.1
 
 packages:
 
@@ -938,6 +938,9 @@ packages:
   '@types/node@25.9.1':
     resolution: {integrity: sha512-xfrlY7UD5rMJk3ZVJP8BNzS28J36YJg+xp+LPXV1TdWxr8uMH5A860QNxYDGQe/ylDSgjxE52Q9VnO7p75tJxg==}
 
+  '@types/node@25.9.1':
+    resolution: {integrity: sha512-xfrlY7UD5rMJk3ZVJP8BNzS28J36YJg+xp+LPXV1TdWxr8uMH5A860QNxYDGQe/ylDSgjxE52Q9VnO7p75tJxg==}
+
   '@types/react@19.2.14':
     resolution: {integrity: sha512-ilcTH/UniCkMdtexkoCN0bI7pMcJDvmQFPvuPvmEaYA/NSfFTAgdUSLAoVjaRJm7+6PvcM+q1zYOwS4wTYMF9w==}
 
@@ -1512,11 +1515,6 @@ packages:
   git-cliff-windows-arm64@2.13.1:
     resolution: {integrity: sha512-+XubuQv68DuDwF0u6Af5d889MEf/RD48VBQS7ZmPi4sUSCXAZqRm1/ApCsStLqxMDCf1+7s05B/kNbm9wjV80A==}
     cpu: [arm64]
-    os: [win32]
-
-  git-cliff-windows-x64@2.12.0:
-    resolution: {integrity: sha512-jskb3nyVGr4dekHSCDM/J6iho45t37wnmMGkPNq42kOoUp04JS96yMBrNRdXfXV9ViZsaZq3NaNu1e3QkhFlyA==}
-    cpu: [x64]
     os: [win32]
 
   git-cliff-windows-x64@2.13.1:
@@ -3635,6 +3633,10 @@ snapshots:
     dependencies:
       undici-types: 7.24.6
 
+  '@types/node@25.9.1':
+    dependencies:
+      undici-types: 7.24.6
+
   '@types/react@19.2.14':
     dependencies:
       csstype: 3.2.3
@@ -4207,9 +4209,6 @@ snapshots:
     optional: true
 
   git-cliff-windows-arm64@2.13.1:
-    optional: true
-
-  git-cliff-windows-x64@2.12.0:
     optional: true
 
   git-cliff-windows-x64@2.13.1:
