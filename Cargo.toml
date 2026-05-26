@@ -16,7 +16,7 @@ ept-lib = { path = "crates/ept-lib", version = "0.4.9" }
 # 基础依赖
 anyhow = "1.0.100"
 serde = { version = "1.0.228", features = ["derive"] }
-serde_json = "1.0.148"
+serde_json = "1.0.150"
 toml = { version = "1.1.2", features = ["preserve_order"] }
 
 [profile.release]
