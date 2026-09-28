@@ -1031,9 +1031,9 @@ checksum = "92773504d58c093f6de2459af4af33faa518c13451eb8f2b5698ed3d36e7c813"
 
 [[package]]
 name = "ed25519-compact"
-version = "2.4.2"
+version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f05391a505666bdf2b5d2626f41b7f0f49052b1e33cceac960eaa818008141da"
+checksum = "086093164ea28ab25efd642c239a36c07441541a1e07636365bbd2e8d0141b40"
 dependencies = [
  "ct-codecs",
  "getrandom 0.4.2",
