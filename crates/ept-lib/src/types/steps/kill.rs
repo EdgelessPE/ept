@@ -11,7 +11,7 @@ use crate::{
         permissions::{Generalizable, PermissionLevel},
     },
 };
-use anyhow::{Ok, Result};
+use anyhow::{anyhow, Ok, Result};
 use serde::{Deserialize, Serialize};
 use sysinfo::System;
 
@@ -24,7 +24,8 @@ pub struct StepKill {
 }
 
 fn kill(target: &str) -> Result<()> {
-    let s = System::new_all();
+    let s = System::new_all()
+        .map_err(|e| anyhow!("Error(Kill):Failed to initialize system information : {e}"))?;
     let processes: Vec<_> = s.processes_by_exact_name(target.as_ref()).collect();
 
     if processes.is_empty() {

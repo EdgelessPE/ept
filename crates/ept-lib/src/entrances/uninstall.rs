@@ -158,10 +158,10 @@ pub fn uninstall(
         // 杀死其中列出的 exe 程序
         for name in hit_list {
             if name.ends_with(".exe") {
-                if kill_with_name(&name) {
-                    log!("Warning:Killed process '{name}'");
-                } else {
-                    log!("Warning:Failed to kill process '{name}'");
+                match kill_with_name(&name) {
+                    Ok(true) => log!("Warning:Killed process '{name}'"),
+                    Ok(false) => log!("Warning:Failed to kill process '{name}'"),
+                    Err(e) => log!("Warning:Failed to kill process '{name}' : {e}"),
                 }
             }
         }

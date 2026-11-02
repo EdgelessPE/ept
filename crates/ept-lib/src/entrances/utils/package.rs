@@ -91,7 +91,8 @@ pub fn unpack_nep(
     let meta = file.metadata()?;
     let size = meta.len();
     // 获取 fast 处理方法的文件大小上限，确保最大占用内存不超过 4GB
-    let s = System::new_all();
+    let s = System::new_all()
+        .map_err(|e| anyhow!("Error(Unpack):Failed to initialize system information : {e}"))?;
     let size_limit = min(s.available_memory() / 3, 4 * 1024 * 1024 * 1024);
 
     let res = if size <= size_limit {
